@@ -452,21 +452,63 @@ describe("epub", function () {
     it("does not report 100% until the last of multiple documents is paginated", function (done) {
       var view = createFakeView([100, 100, 100]);
 
-      spyOn(view, "renderPagesUpto").and.callFake(function () {
-        // Each spine item is loaded and fully paginated in order
-        for (var i = 0; i < 3; i++) {
-          var viewItem = createFakeViewItem(view, i, 100);
-          view.spineItems[i] = viewItem;
-          view.reportPaginationProgress(viewItem, null);
-        }
-        return adapt_task.newResult(null);
-      });
-
       adapt_task.start(function () {
-        view.renderAllPages().then(function () {
+        view.collectTotalOffsets().then(function () {
+          // Each spine item is loaded and fully paginated in order
+          for (var i = 0; i < 3; i++) {
+            var viewItem = createFakeViewItem(view, i, 100);
+            view.spineItems[i] = viewItem;
+            view.reportPaginationProgress(viewItem, null);
+          }
           expect(payloads[0].fraction).toBeCloseTo(1 / 3, 5);
           expect(payloads[1].fraction).toBeCloseTo(2 / 3, 5);
           expect(payloads[2].fraction).toBe(1);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("reports the initial render fraction against the whole publication, not just the first document", function (done) {
+      var view = createFakeView([100, 100, 100]);
+      // renderSinglePage() dependencies, stubbed to isolate the collect + report
+      view.counterStore = { finishPage: function () {} };
+      view.isInCounterResolveScope = function () {
+        return false;
+      };
+      view.preparePageCountersForRender = function () {
+        return null;
+      };
+      view.makePage = function () {
+        return { spineIndex: 0, offset: 0, fetchers: [] };
+      };
+      view.resolvePageTypeForRenderSlot = function () {};
+      view.finishPageContainer = function () {};
+      view.maybeRelayoutFollowingPage = function () {
+        return adapt_task.newResult(true);
+      };
+      view.resolveUnresolvedReferencesForPage = function (viewItem, page) {
+        return adapt_task.newResult(page);
+      };
+
+      var viewItem = createFakeViewItem(view, 0, 100);
+      view.spineItems[0] = viewItem;
+      viewItem.instance.getPageNumberContextDepth = function () {
+        return 0;
+      };
+      viewItem.instance.pushPageNumberContext = function () {};
+      viewItem.instance.restorePageNumberContextDepth = function () {};
+      // A page finished at the half of the first document
+      viewItem.instance.getPosition = function () {
+        return 50;
+      };
+      viewItem.instance.layoutNextPage = function () {
+        return adapt_task.newResult({ page: 1 });
+      };
+
+      adapt_task.start(function () {
+        view.renderSinglePage(viewItem, { page: 0 }).then(function () {
+          expect(payloads[0].fraction).toBeCloseTo(1 / 6, 5);
           done();
         });
         return adapt_task.newResult(true);

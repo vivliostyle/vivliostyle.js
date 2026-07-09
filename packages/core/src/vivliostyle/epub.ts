@@ -2412,26 +2412,34 @@ export class OPFView implements Vgen.CustomRendererFactory {
         : viewItem.layoutPositions.length - 1;
       this.finishPageContainer(viewItem, page, pageIndex);
       this.counterStore.finishPage(page.spineIndex, pageIndex);
-      this.reportPaginationProgress(viewItem, pos);
 
-      // If the position of the page break changed, re-layout the following
-      // page when needed.
-      this.maybeRelayoutFollowingPage(viewItem, pos, oldPage, page)
-        .thenAsync(() =>
-          this.resolveUnresolvedReferencesForPage(
-            viewItem,
-            page,
-            pageIndex,
-            pos,
-          ),
-        )
-        .then((resolvedPage) => {
-          restorePageNumberContext();
-          frame.finish({
-            pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
-            nextLayoutPosition: pos,
+      const collectResult = Plugin.getHooksForName(
+        Plugin.HOOKS.PAGINATION_PROGRESS,
+      ).length
+        ? this.collectTotalOffsets()
+        : Task.newResult(true);
+      collectResult.then(() => {
+        this.reportPaginationProgress(viewItem, pos);
+
+        // If the position of the page break changed, re-layout the following
+        // page when needed.
+        this.maybeRelayoutFollowingPage(viewItem, pos, oldPage, page)
+          .thenAsync(() =>
+            this.resolveUnresolvedReferencesForPage(
+              viewItem,
+              page,
+              pageIndex,
+              pos,
+            ),
+          )
+          .then((resolvedPage) => {
+            restorePageNumberContext();
+            frame.finish({
+              pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
+              nextLayoutPosition: pos,
+            });
           });
-        });
+      });
     });
     return frame.result();
   }
@@ -2637,44 +2645,35 @@ export class OPFView implements Vgen.CustomRendererFactory {
   renderAllPages(): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> =
       Task.newFrame("renderAllPages");
-    const collectResult = Plugin.getHooksForName(
-      Plugin.HOOKS.PAGINATION_PROGRESS,
-    ).length
-      ? this.collectTotalOffsets()
-      : Task.newResult(true);
-    collectResult
-      .thenAsync(() =>
-        this.renderPagesUpto(
-          {
-            spineIndex: this.opf.spine.length - 1,
-            pageIndex: Number.POSITIVE_INFINITY,
-            offsetInItem: -1,
-          },
-          false,
-        ),
-      )
-      .then((result) => {
-        // Wait until all images are loaded (Issue #1321)
-        frame
-          .loopWithFrame((loopFrame) => {
-            if (
-              this.spineItems.some((viewItem) =>
-                viewItem?.pages.some((page) =>
-                  page?.fetchers.some((fetcher) => !fetcher.arrived),
-                ),
-              )
-            ) {
-              frame.sleep(100).then(() => {
-                loopFrame.continueLoop();
-              });
-            } else {
-              loopFrame.breakLoop();
-            }
-          })
-          .then(() => {
-            frame.finish(result);
-          });
-      });
+    this.renderPagesUpto(
+      {
+        spineIndex: this.opf.spine.length - 1,
+        pageIndex: Number.POSITIVE_INFINITY,
+        offsetInItem: -1,
+      },
+      false,
+    ).then((result) => {
+      // Wait until all images are loaded (Issue #1321)
+      frame
+        .loopWithFrame((loopFrame) => {
+          if (
+            this.spineItems.some((viewItem) =>
+              viewItem?.pages.some((page) =>
+                page?.fetchers.some((fetcher) => !fetcher.arrived),
+              ),
+            )
+          ) {
+            frame.sleep(100).then(() => {
+              loopFrame.continueLoop();
+            });
+          } else {
+            loopFrame.breakLoop();
+          }
+        })
+        .then(() => {
+          frame.finish(result);
+        });
+    });
     return frame.result();
   }
 
