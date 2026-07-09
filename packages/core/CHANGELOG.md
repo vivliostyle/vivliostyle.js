@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.44.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.44.0...v2.44.1) (2026-07-09)
+
+### Bug Fixes
+
+- Collect spine total offsets before reporting pagination progress ([a50fc26](https://github.com/vivliostyle/vivliostyle.js/commit/a50fc260ffa13cf4006be1a3f706d7c8911434fd))
+- Keep the pagination progress href monotonic ([99109df](https://github.com/vivliostyle/vivliostyle.js/commit/99109dfe6a73eb47b3553a9bfb780448585c1af9))
+- Restore Theme Base TOC styling with `target-counter()` ([4310b96](https://github.com/vivliostyle/vivliostyle.js/commit/4310b96ac731f5e90224cce6ac8951179cf85218)), closes [#2043](https://github.com/vivliostyle/vivliostyle.js/issues/2043)
+
 # [2.44.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.43.3...v2.44.0) (2026-07-04)
 
 ### Features
