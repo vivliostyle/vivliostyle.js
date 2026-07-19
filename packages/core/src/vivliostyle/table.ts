@@ -1040,8 +1040,8 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   currentRowIndex: number = -1;
   currentColumnIndex: number = 0;
   originalStopAtOverflow: boolean;
-  inHeader: boolean;
-  inFooter: boolean;
+  inHeader: boolean = false;
+  inFooter: boolean = false;
   private didExtractRowSpanningCellBreakPositions: boolean = false;
 
   constructor(

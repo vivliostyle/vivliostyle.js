@@ -34,7 +34,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   head: Element;
   last: Element;
   lastOffset: number = 1;
-  idMap: { [key: string]: Element };
+  idMap: { [key: string]: Element } | null = null;
 
   constructor(
     public readonly store: XMLDocStore,
