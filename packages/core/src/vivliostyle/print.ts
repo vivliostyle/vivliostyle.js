@@ -23,7 +23,7 @@ class VivliostylePrint {
   hideIframe: boolean;
   removeIframe: boolean;
   iframe: HTMLIFrameElement;
-  iframeWin: Window;
+  iframeWin: Window | null = null;
   window: Window & typeof globalThis & IFrameWindowForPrint;
 
   constructor(
@@ -42,9 +42,7 @@ class VivliostylePrint {
     this.errorCallback = errorCallback;
     this.hideIframe = hideIframe;
     this.removeIframe = removeIframe;
-  }
 
-  init() {
     this.iframe = document.createElement("iframe");
 
     if (this.hideIframe) {
@@ -142,6 +140,7 @@ class VivliostylePrint {
 }
 
 export function printHTML(htmlDoc: string, config: PrintConfig) {
-  const instance = new VivliostylePrint(htmlDoc, config);
-  instance.init();
+  // the instance registers itself as window.printInstance and starts printing
+  // eslint-disable-next-line no-new
+  new VivliostylePrint(htmlDoc, config);
 }
