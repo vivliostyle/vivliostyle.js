@@ -858,11 +858,14 @@ export class ViewFactory
     return vertical;
   }
 
-  private inheritFromSourceParent(elementStyle: CssCascade.ElementStyle): {
+  private inheritFromSourceParent(
+    nodeContext: Vtree.NodeContext,
+    elementStyle: CssCascade.ElementStyle,
+  ): {
     lang: string | null;
     elementStyle: CssCascade.ElementStyle;
   } {
-    let node = this.nodeContext.sourceNode;
+    let node = nodeContext.sourceNode;
     const styles = [];
     let lang: string | null = null;
     const isFootnoteContentInclude =
@@ -871,14 +874,13 @@ export class ViewFactory
       node.localName === "include" &&
       node.classList.contains("-vivliostyle-footnote-content");
     const shouldSkipAncestorMarkerProps =
-      this.isFootnote &&
-      (!this.nodeContext?.parent || isFootnoteContentInclude);
+      this.isFootnote && (!nodeContext?.parent || isFootnoteContentInclude);
 
     // TODO: this is hacky. We need to recover the path through the shadow
     // trees, but we do not have the full shadow tree structure at this point.
     // This code handles coming out of the shadow trees, but does not go back in
     // (through shadow:content element).
-    let shadowContext = this.nodeContext.shadowContext;
+    let shadowContext = nodeContext.shadowContext;
 
     // For semantic footnotes, the wrapper generated from
     // <s:include class="-vivliostyle-footnote-content"> should inherit from
@@ -953,7 +955,7 @@ export class ViewFactory
         this.context,
         this.regionIds,
         this.isFootnote,
-        this.nodeContext,
+        nodeContext,
       );
       for (const name in flattenedCurrentStyle) {
         if (!CssCascade.isInherited(name)) {
@@ -1089,24 +1091,27 @@ export class ViewFactory
     return this.fallbackMap[url] || url;
   }
 
-  inheritLangAttribute() {
-    this.nodeContext.lang =
-      Base.getLangAttribute(this.nodeContext.sourceNode as Element) ||
-      (this.nodeContext.parent && this.nodeContext.parent.lang) ||
-      this.nodeContext.lang;
+  inheritLangAttribute(nodeContext: Vtree.NodeContext) {
+    nodeContext.lang =
+      Base.getLangAttribute(nodeContext.sourceNode as Element) ||
+      (nodeContext.parent && nodeContext.parent.lang) ||
+      nodeContext.lang;
   }
 
-  transferPolyfilledInheritedProps(computedStyle: { [key: string]: Css.Val }) {
+  transferPolyfilledInheritedProps(
+    nodeContext: Vtree.NodeContext,
+    computedStyle: { [key: string]: Css.Val },
+  ) {
     const polyfilledInheritedProps =
       CssCascade.getPolyfilledInheritedProps().filter(
         (name) => computedStyle[name],
       );
     if (polyfilledInheritedProps.length) {
-      let props = this.nodeContext.inheritedProps;
-      if (this.nodeContext.parent) {
-        props = this.nodeContext.inheritedProps = {};
-        for (const n in this.nodeContext.parent.inheritedProps) {
-          props[n] = this.nodeContext.parent.inheritedProps[n];
+      let props = nodeContext.inheritedProps;
+      if (nodeContext.parent) {
+        props = nodeContext.inheritedProps = {};
+        for (const n in nodeContext.parent.inheritedProps) {
+          props[n] = nodeContext.parent.inheritedProps[n];
         }
       }
       polyfilledInheritedProps.forEach((name) => {
@@ -1177,6 +1182,7 @@ export class ViewFactory
    * @return holding true if children should be processed
    */
   private createElementView(
+    nodeContext: Vtree.NodeContext,
     firstTime: boolean,
     atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
@@ -1185,16 +1191,16 @@ export class ViewFactory
 
     // Figure out element's styles
     let element = this.sourceNode as Element;
-    const styler = this.nodeContext.shadowContext
-      ? this.nodeContext.shadowContext.styler
+    const styler = nodeContext.shadowContext
+      ? nodeContext.shadowContext.styler
       : this.styler;
     let elementStyle = styler.getStyle(element, false);
     this.syncSemanticFootnoteCounterToTarget(element);
-    if (!this.nodeContext.shadowContext) {
+    if (!nodeContext.shadowContext) {
       const offset = this.xmldoc.getElementOffset(element);
       Matchers.NthFragmentMatcher.registerFragmentIndex(
         offset,
-        this.nodeContext.fragmentIndex,
+        nodeContext.fragmentIndex,
         0,
       );
     }
@@ -1219,10 +1225,13 @@ export class ViewFactory
             ),
           ).value,
       };
-    if (!this.nodeContext.parent) {
-      const inheritedValues = this.inheritFromSourceParent(elementStyle);
+    if (!nodeContext.parent) {
+      const inheritedValues = this.inheritFromSourceParent(
+        nodeContext,
+        elementStyle,
+      );
       elementStyle = inheritedValues.elementStyle;
-      this.nodeContext.lang = inheritedValues.lang;
+      nodeContext.lang = inheritedValues.lang;
     }
     const positionCV: CssCascade.CascadeValue = elementStyle["position"];
     const floatCV: CssCascade.CascadeValue = elementStyle["float"];
@@ -1237,25 +1246,28 @@ export class ViewFactory
         ? PageFloats.floatReferenceOf(floatReferenceCV.value.toString())
         : null;
     const isSemanticFootnoteInRootedShadow =
-      !!this.nodeContext.shadowContext &&
-      this.nodeContext.shadowContext.type === Vtree.ShadowType.ROOTED &&
+      !!nodeContext.shadowContext &&
+      nodeContext.shadowContext.type === Vtree.ShadowType.ROOTED &&
       SemanticFootnote.isSemanticFootnoteElement(element);
     if (
-      this.nodeContext.parent &&
+      nodeContext.parent &&
       (Display.isRunning(positionCV?.value) ||
         (floatReference && PageFloats.isPageFloat(floatReference)) ||
         isSemanticFootnoteInRootedShadow)
     ) {
       // Detached or transcluded content should inherit from the source tree,
       // not from the synthetic view parent.
-      const inheritedValues = this.inheritFromSourceParent(elementStyle);
+      const inheritedValues = this.inheritFromSourceParent(
+        nodeContext,
+        elementStyle,
+      );
       elementStyle = inheritedValues.elementStyle;
-      this.nodeContext.lang = inheritedValues.lang;
+      nodeContext.lang = inheritedValues.lang;
     }
     elementStyle = SemanticFootnote.mergeSemanticFootnoteIncludeStyle(
       element,
       elementStyle,
-      this.nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext as Vtree.ShadowContext,
       this.xmldoc.url,
       (reference) => this.xmldoc.getElement(reference),
       CssCascade.FOOTNOTE_COUNTER_ATTR,
@@ -1264,13 +1276,13 @@ export class ViewFactory
     elementStyle = SemanticFootnote.mergeSemanticFootnoteRootStyle(
       element,
       elementStyle,
-      this.nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext as Vtree.ShadowContext,
       this.context,
       semanticFootnoteStyleAccess,
     );
-    this.nodeContext.vertical = this.computeStyle(
-      this.nodeContext.vertical,
-      this.nodeContext.direction === "rtl",
+    nodeContext.vertical = this.computeStyle(
+      nodeContext.vertical,
+      nodeContext.direction === "rtl",
       elementStyle,
       computedStyle,
     );
@@ -1282,11 +1294,11 @@ export class ViewFactory
       // Fix page float margin collapsing issue (Issue #1282)
       computedStyle["display"] = Css.ident.flow_root;
     }
-    styler.processContent(element, computedStyle, this.nodeContext);
-    this.transferPolyfilledInheritedProps(computedStyle);
-    this.inheritLangAttribute();
+    styler.processContent(element, computedStyle, nodeContext);
+    this.transferPolyfilledInheritedProps(nodeContext, computedStyle);
+    this.inheritLangAttribute(nodeContext);
     if (computedStyle["direction"]) {
-      this.nodeContext.direction = computedStyle["direction"].toString();
+      nodeContext.direction = computedStyle["direction"].toString();
     }
 
     // Sort out the properties
@@ -1323,8 +1335,8 @@ export class ViewFactory
         display = Css.ident.inline;
       } else if (display === Css.ident.inherit) {
         display =
-          this.nodeContext.parent?.display &&
-          Css.getName(this.nodeContext.parent?.display);
+          nodeContext.parent?.display &&
+          Css.getName(nodeContext.parent?.display);
       } else {
         display = null;
       }
@@ -1334,9 +1346,8 @@ export class ViewFactory
       frame.finish(false);
       return frame.result();
     }
-    const isRoot = this.nodeContext.parent == null;
-    const blockSize =
-      computedStyle[this.nodeContext.vertical ? "width" : "height"];
+    const isRoot = nodeContext.parent == null;
+    const blockSize = computedStyle[nodeContext.vertical ? "width" : "height"];
     // Issue #1999: fixed-size grid boxes used as synthetic page references
     // must stay whole. Once fragmented, continuation fragments lose the block
     // size and later reference pages collapse.
@@ -1344,7 +1355,7 @@ export class ViewFactory
       (display === Css.ident.grid || display === Css.ident.inline_grid) &&
       !!blockSize &&
       !(blockSize === Css.ident.auto || Css.isDefaultingValue(blockSize));
-    this.nodeContext.flexContainer =
+    nodeContext.flexContainer =
       display === Css.ident.flex || isFixedSizeGridContainer;
     this.createShadows(
       element,
@@ -1353,17 +1364,17 @@ export class ViewFactory
       computedStyle,
       styler,
       this.context,
-      this.nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext as Vtree.ShadowContext,
     ).then((shadowParam) => {
-      this.nodeContext.nodeShadow = shadowParam;
+      nodeContext.nodeShadow = shadowParam;
       const position = computedStyle["position"] as Css.Ident;
       let floatSide = computedStyle["float"];
       let clearSide = computedStyle["clear"] as Css.Ident;
-      const writingMode = this.nodeContext.vertical
+      const writingMode = nodeContext.vertical
         ? Css.ident.vertical_rl
         : Css.ident.horizontal_tb;
-      const parentWritingMode = this.nodeContext.parent
-        ? this.nodeContext.parent.vertical
+      const parentWritingMode = nodeContext.parent
+        ? nodeContext.parent.vertical
           ? Css.ident.vertical_rl
           : Css.ident.horizontal_tb
         : writingMode;
@@ -1377,7 +1388,7 @@ export class ViewFactory
         (columnWidth &&
           columnWidth !== Css.ident.auto &&
           !Css.isDefaultingValue(columnWidth));
-      this.nodeContext.establishesBFC = Display.establishesBFC(
+      nodeContext.establishesBFC = Display.establishesBFC(
         display,
         position,
         floatSide,
@@ -1386,10 +1397,10 @@ export class ViewFactory
         parentWritingMode,
         isMultiColumn || isFlowRoot,
       );
-      this.nodeContext.containingBlockForAbsolute =
+      nodeContext.containingBlockForAbsolute =
         Display.establishesCBForAbsolute(position);
       if (
-        this.nodeContext.isInsideBFC() &&
+        nodeContext.isInsideBFC() &&
         floatSide !== Css.ident.footnote &&
         !(floatReference && PageFloats.isPageFloat(floatReference))
       ) {
@@ -1403,13 +1414,13 @@ export class ViewFactory
       let usesOutsideFootnoteMarker = false;
       const isFootnoteBodyInFootnoteArea =
         this.isFootnote &&
-        (!this.nodeContext?.parent ||
-          this.nodeContext.pluginProps["nestedFootnoteDetached"] ||
+        (!nodeContext?.parent ||
+          nodeContext.pluginProps["nestedFootnoteDetached"] ||
           isSemanticFootnoteInRootedShadow);
       const semanticFootnoteStyle =
         SemanticFootnote.getSemanticFootnoteStyleState(
           element,
-          this.nodeContext.shadowContext as Vtree.ShadowContext,
+          nodeContext.shadowContext as Vtree.ShadowContext,
           semanticFootnoteStyleAccess,
         );
       SemanticFootnote.refreshSemanticFootnoteMarkerContent(
@@ -1491,8 +1502,8 @@ export class ViewFactory
       }
       if (clearSide) {
         if (clearSide === Css.ident.inherit) {
-          if (this.nodeContext.parent && this.nodeContext.parent.clearSide) {
-            clearSide = Css.getName(this.nodeContext.parent.clearSide);
+          if (nodeContext.parent && nodeContext.parent.clearSide) {
+            clearSide = Css.getName(nodeContext.parent.clearSide);
           }
         }
         if (
@@ -1519,7 +1530,7 @@ export class ViewFactory
             (computedStyle["display"] &&
               computedStyle["display"] != Css.ident.inline)
           ) {
-            this.nodeContext.clearSide = clearSide.toString();
+            nodeContext.clearSide = clearSide.toString();
           }
         }
       }
@@ -1536,7 +1547,7 @@ export class ViewFactory
           !Css.isDefaultingValue(breakInside) &&
           breakInside !== Css.ident.auto)
       ) {
-        this.nodeContext.breakPenalty++;
+        nodeContext.breakPenalty++;
       }
       if (
         display &&
@@ -1544,41 +1555,42 @@ export class ViewFactory
         Display.isInlineLevel(display)
       ) {
         // Don't break inside ruby, inline-block, etc.
-        this.nodeContext.breakPenalty++;
+        nodeContext.breakPenalty++;
       }
-      this.nodeContext.inline =
+      nodeContext.inline =
         (!floating && !display) ||
         Display.isInlineLevel(display) ||
         Display.isRubyInternalDisplay(display);
-      this.nodeContext.display = display ? display.toString() : "inline";
-      this.nodeContext.floatSide = floating ? floatSide.toString() : null;
-      this.nodeContext.floatReference =
+      nodeContext.display = display ? display.toString() : "inline";
+      nodeContext.floatSide = floating ? floatSide.toString() : null;
+      nodeContext.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
       const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
-      this.nodeContext.floatMinWrapBlock =
+      nodeContext.floatMinWrapBlock =
         floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
           ? (floatMinWrapBlock as Css.Numeric)
           : null;
 
       // Leaves handling of multicol specified on non-root/body elements to the browser
-      const insideNonRootMultiColumn = this.isInsideNonRootMultiColumn();
+      const insideNonRootMultiColumn =
+        this.isInsideNonRootMultiColumn(nodeContext);
 
       const columnSpan = computedStyle["column-span"];
-      this.nodeContext.columnSpan =
+      nodeContext.columnSpan =
         !insideNonRootMultiColumn &&
         columnSpan &&
         !Css.isDefaultingValue(columnSpan)
           ? columnSpan
           : null;
-      if (!this.nodeContext.inline) {
+      if (!nodeContext.inline) {
         const breakAfter = computedStyle["break-after"];
         if (
           breakAfter &&
           !Css.isDefaultingValue(breakAfter) &&
           !(insideNonRootMultiColumn && breakAfter === Css.ident.column)
         ) {
-          this.nodeContext.breakAfter = breakAfter.toString();
-          if (Break.forcedBreakValues[this.nodeContext.breakAfter]) {
+          nodeContext.breakAfter = breakAfter.toString();
+          if (Break.forcedBreakValues[nodeContext.breakAfter]) {
             // delete computedStyle["break-after"];
 
             // Instead of deleting, set to "column" so that the browser can handle it.
@@ -1591,8 +1603,8 @@ export class ViewFactory
           !Css.isDefaultingValue(breakBefore) &&
           !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
         ) {
-          this.nodeContext.breakBefore = breakBefore.toString();
-          if (Break.forcedBreakValues[this.nodeContext.breakBefore]) {
+          nodeContext.breakBefore = breakBefore.toString();
+          if (Break.forcedBreakValues[nodeContext.breakBefore]) {
             if (this.isAtStartOfPage()) {
               delete computedStyle["break-before"];
             } else {
@@ -1600,8 +1612,8 @@ export class ViewFactory
               computedStyle["break-before"] = Css.ident.column;
             }
           }
-          if (this.nodeContext.fragmentIndex !== 1) {
-            this.nodeContext.breakBefore = null;
+          if (nodeContext.fragmentIndex !== 1) {
+            nodeContext.breakBefore = null;
           }
         }
         // Named page type
@@ -1613,8 +1625,8 @@ export class ViewFactory
         let pageType = specifiedPageType;
         if (
           !pageType &&
-          !this.nodeContext.parent &&
-          (this.nodeContext.shadowContext ||
+          !nodeContext.parent &&
+          (nodeContext.shadowContext ||
             display === Css.ident.table_header_group ||
             display === Css.ident.table_footer_group)
         ) {
@@ -1622,15 +1634,15 @@ export class ViewFactory
           pageType = this.styler.cascade.currentPageType;
         }
         if (!pageType || pageType.toLowerCase() === "auto") {
-          pageType = this.nodeContext.pageType;
+          pageType = nodeContext.pageType;
         } else {
-          this.nodeContext.pageType = pageType;
+          nodeContext.pageType = pageType;
         }
         const hasExplicitPageType =
           specifiedPageType != null &&
           specifiedPageType.toLowerCase() !== "auto";
         const effectivePageType = hasExplicitPageType
-          ? this.nodeContext.fragmentIndex === 1
+          ? nodeContext.fragmentIndex === 1
             ? this.getEffectiveStartPageType(element, pageType)
             : (this.styler.cascade.currentPageType ?? pageType)
           : pageType;
@@ -1644,10 +1656,10 @@ export class ViewFactory
           )
         ) {
           if (
-            this.nodeContext.fragmentIndex === 1 &&
-            !Break.isSpreadBreakValue(this.nodeContext.breakBefore)
+            nodeContext.fragmentIndex === 1 &&
+            !Break.isSpreadBreakValue(nodeContext.breakBefore)
           ) {
-            this.nodeContext.breakBefore = "page";
+            nodeContext.breakBefore = "page";
           }
           // Fix for issue #1309
           if (effectivePageType !== this.styler.cascade.previousPageType) {
@@ -1657,7 +1669,7 @@ export class ViewFactory
           this.styler.cascade.currentPageType = effectivePageType;
         }
       }
-      this.nodeContext.captionSide =
+      nodeContext.captionSide =
         (computedStyle["caption-side"] &&
           computedStyle["caption-side"].toString()) ||
         "top";
@@ -1674,13 +1686,13 @@ export class ViewFactory
             inlineBorderSpacing = blockBorderSpacing = borderSpacing;
           }
           if (inlineBorderSpacing.isNumeric()) {
-            this.nodeContext.inlineBorderSpacing = Css.toNumber(
+            nodeContext.inlineBorderSpacing = Css.toNumber(
               inlineBorderSpacing,
               this.context,
             );
           }
           if (blockBorderSpacing.isNumeric()) {
-            this.nodeContext.blockBorderSpacing = Css.toNumber(
+            nodeContext.blockBorderSpacing = Css.toNumber(
               blockBorderSpacing,
               this.context,
             );
@@ -1693,23 +1705,24 @@ export class ViewFactory
       if (footnotePolicy && !Css.isDefaultingValue(footnotePolicy)) {
         computedStyle["--viv-footnote-policy"] = footnotePolicy;
       }
-      this.nodeContext.footnotePolicy =
+      nodeContext.footnotePolicy =
         footnotePolicy && !Css.isDefaultingValue(footnotePolicy)
           ? footnotePolicy
           : null;
       const firstPseudo = computedStyle["x-first-pseudo"] as Css.Int;
       if (firstPseudo) {
-        const outerPseudo = this.nodeContext.parent
-          ? this.nodeContext.parent.firstPseudo
+        const outerPseudo = nodeContext.parent
+          ? nodeContext.parent.firstPseudo
           : null;
-        this.nodeContext.firstPseudo = new Vtree.FirstPseudo(
+        nodeContext.firstPseudo = new Vtree.FirstPseudo(
           outerPseudo,
           /** Css.Int */
           firstPseudo.num,
         );
       }
-      if (!this.nodeContext.inline) {
+      if (!nodeContext.inline) {
         this.processAfterIfcontinues(
+          nodeContext,
           element,
           elementStyle,
           styler,
@@ -1722,12 +1735,12 @@ export class ViewFactory
           whitespace.toString(),
         );
         if (whitespaceValue !== null) {
-          this.nodeContext.whitespace = whitespaceValue;
+          nodeContext.whitespace = whitespaceValue;
         }
       }
       const hyphenateCharacter = computedStyle["hyphenate-character"];
       if (hyphenateCharacter && hyphenateCharacter instanceof Css.Str) {
-        this.nodeContext.hyphenateCharacter = hyphenateCharacter.str;
+        nodeContext.hyphenateCharacter = hyphenateCharacter.str;
       }
       const wordBreak = computedStyle["word-break"];
       const lineBreak = computedStyle["line-break"];
@@ -1738,31 +1751,27 @@ export class ViewFactory
         overflowWrap === Css.ident.break_word ||
         overflowWrap === Css.ident.anywhere
       ) {
-        this.nodeContext.breakWord = true;
+        nodeContext.breakWord = true;
       }
 
       // Resolve formatting context
       this.resolveFormattingContext(
-        this.nodeContext,
+        nodeContext,
         firstTime,
         display,
         position,
         floatSide,
         isRoot,
       );
-      if (
-        this.nodeContext.parent &&
-        this.nodeContext.parent.formattingContext
-      ) {
-        firstTime = this.nodeContext.parent.formattingContext.isFirstTime(
-          this.nodeContext,
+      if (nodeContext.parent && nodeContext.parent.formattingContext) {
+        firstTime = nodeContext.parent.formattingContext.isFirstTime(
+          nodeContext,
           firstTime,
         );
       }
-      if (!this.nodeContext.inline) {
-        this.nodeContext.repeatOnBreak =
-          this.processRepeatOnBreak(computedStyle);
-        this.findAndProcessRepeatingElements(element, styler);
+      if (!nodeContext.inline) {
+        nodeContext.repeatOnBreak = this.processRepeatOnBreak(computedStyle);
+        this.findAndProcessRepeatingElements(nodeContext, element, styler);
       }
 
       // Create the view element
@@ -1794,7 +1803,7 @@ export class ViewFactory
         ns = Base.NS.XHTML;
       } else if (ns == Base.NS.SHADOW) {
         ns = Base.NS.XHTML;
-        tag = this.nodeContext.inline ? "span" : "div";
+        tag = nodeContext.inline ? "span" : "div";
       } else {
         custom = !!this.customRenderer;
       }
@@ -1839,8 +1848,8 @@ export class ViewFactory
       }
       let elemResult: Task.Result<Element>;
       if (custom) {
-        const parentNode = this.nodeContext.parent
-          ? this.nodeContext.parent.viewNode
+        const parentNode = nodeContext.parent
+          ? nodeContext.parent.viewNode
           : null;
         elemResult = this.customRenderer(
           element,
@@ -1870,7 +1879,7 @@ export class ViewFactory
           isMultiColumn &&
           computedStyle["column-fill"] === Css.ident.auto
         ) {
-          const blockSize = this.nodeContext.vertical
+          const blockSize = nodeContext.vertical
             ? computedStyle["width"]
             : computedStyle["height"];
           if (
@@ -1896,7 +1905,7 @@ export class ViewFactory
           result.addEventListener("click", this.page.hrefHandler, false);
         }
         if (inner) {
-          this.applyPseudoelementStyle(this.nodeContext, "inner", inner);
+          this.applyPseudoelementStyle(nodeContext, "inner", inner);
           result.appendChild(inner);
         }
         if (
@@ -1905,7 +1914,7 @@ export class ViewFactory
         ) {
           initIFrame(result as HTMLIFrameElement);
         }
-        const imageResolution = this.nodeContext.inheritedProps[
+        const imageResolution = nodeContext.inheritedProps[
           "image-resolution"
         ] as number | undefined;
         const images: {
@@ -1931,11 +1940,11 @@ export class ViewFactory
         // `<tr><td><a id="…"></a>…`
         if (
           display === Css.ident.table_cell &&
-          (this.nodeContext.parent?.viewNode as Element)?.lastElementChild
+          (nodeContext.parent?.viewNode as Element)?.lastElementChild
             ?.localName === "a"
         ) {
           result.appendChild(
-            (this.nodeContext.parent.viewNode as Element).lastElementChild,
+            (nodeContext.parent.viewNode as Element).lastElementChild,
           );
         }
 
@@ -2166,7 +2175,7 @@ export class ViewFactory
               return true;
             }
             for (
-              let p = this.nodeContext.parent?.viewNode as HTMLElement;
+              let p = nodeContext.parent?.viewNode as HTMLElement;
               p && p !== this.viewRoot;
               p = p.parentElement
             ) {
@@ -2179,7 +2188,7 @@ export class ViewFactory
           const hasPercentBlockSize = (): boolean => {
             // Check if the image has percentage block size, which is usually same as auto,
             // which means the size is not determined until the image is loaded.
-            const blockSize = this.nodeContext.vertical ? cssWidth : cssHeight;
+            const blockSize = nodeContext.vertical ? cssWidth : cssHeight;
             return blockSize instanceof Css.Numeric && blockSize.unit === "%";
           };
           if (
@@ -2276,7 +2285,7 @@ export class ViewFactory
         this.preprocessElementStyle(computedStyle);
         this.applyComputedStyles(result, computedStyle);
 
-        if (this.nodeContext.inline) {
+        if (nodeContext.inline) {
           if (!firstTime) {
             Break.setBoxBreakFlag(result, "inline-start");
             if (Break.isCloneBoxDecorationBreak(result)) {
@@ -2285,7 +2294,7 @@ export class ViewFactory
           }
         } else {
           if (!firstTime) {
-            const blockSizeP = this.nodeContext.vertical ? "width" : "height";
+            const blockSizeP = nodeContext.vertical ? "width" : "height";
             if (Base.getCSSProperty(result, blockSizeP)) {
               // When a box with a specified block size is fragmented,
               // the fragmented box should not have the block size.
@@ -2296,7 +2305,7 @@ export class ViewFactory
               Base.setCSSProperty(
                 result,
                 blockSizeP,
-                this.nodeContext.display === "table-row" ? "0.01px" : "",
+                nodeContext.display === "table-row" ? "0.01px" : "",
               );
             }
             Break.setBoxBreakFlag(result, "block-start");
@@ -2312,14 +2321,14 @@ export class ViewFactory
             // Detect forced or unforced break at this point
             // to handle margin-break properly.
             // Note: Do not use `atUnforcedBreak` which may be inaccurate.
-            const breakType = this.getBreakTypeAt(this.nodeContext);
+            const breakType = this.getBreakTypeAt(nodeContext);
             const anyBreak = breakType !== null;
             const unforcedBreak = breakType === "auto";
             if (
               (marginBreak === Css.ident.discard && anyBreak) ||
               (marginBreak !== Css.ident.keep &&
                 unforcedBreak &&
-                !this.nodeContext.floatSide)
+                !nodeContext.floatSide)
             ) {
               Break.setMarginDiscardFlag(result, "block-start");
             }
@@ -2342,7 +2351,7 @@ export class ViewFactory
                 images,
                 imageResolution,
                 computedStyle,
-                this.nodeContext.vertical,
+                nodeContext.vertical,
               );
             }
             frame.finish(needToProcessChildren);
@@ -2390,8 +2399,8 @@ export class ViewFactory
    * but leaves it to the browser to handle other multi-column.
    * This check is for such non-root/body multi-column.
    */
-  private isInsideNonRootMultiColumn(): boolean {
-    const element = this.nodeContext.parent?.viewNode as Element;
+  private isInsideNonRootMultiColumn(nodeContext: Vtree.NodeContext): boolean {
+    const element = nodeContext.parent?.viewNode as Element;
     return !!(element && LayoutHelper.findAncestorNonRootMultiColumn(element));
   }
 
@@ -2471,6 +2480,7 @@ export class ViewFactory
   }
 
   private processAfterIfcontinues(
+    nodeContext: Vtree.NodeContext,
     element: Element,
     cascStyle: CssCascade.ElementStyle,
     styler: CssStyler.AbstractStyler,
@@ -2480,7 +2490,7 @@ export class ViewFactory
       cascStyle,
       this.regionIds,
       this.isFootnote,
-      this.nodeContext,
+      nodeContext,
       context,
     );
     if (!pseudoMap) {
@@ -2497,7 +2507,7 @@ export class ViewFactory
         context,
         this.exprContentListener,
       );
-      this.nodeContext.afterIfContinues = new Layout.AfterIfContinues(
+      nodeContext.afterIfContinues = new Layout.AfterIfContinues(
         element,
         shadowStyler,
       );
@@ -2661,6 +2671,7 @@ export class ViewFactory
   }
 
   private findAndProcessRepeatingElements(
+    nodeContext: Vtree.NodeContext,
     element: Element,
     styler: CssStyler.AbstractStyler,
   ) {
@@ -2675,8 +2686,8 @@ export class ViewFactory
       const computedStyle: { [key: string]: Css.Val } = {};
       const elementStyle = styler.getStyle(child as Element, false);
       this.computeStyle(
-        this.nodeContext.vertical,
-        this.nodeContext.direction === "rtl",
+        nodeContext.vertical,
+        nodeContext.direction === "rtl",
         elementStyle,
         computedStyle,
       );
@@ -2685,23 +2696,22 @@ export class ViewFactory
         continue;
       }
       if (
-        this.nodeContext.formattingContext instanceof
+        nodeContext.formattingContext instanceof
           RepetitiveElement.RepetitiveElementsOwnerFormattingContext &&
-        !this.nodeContext.belongsTo(this.nodeContext.formattingContext)
+        !nodeContext.belongsTo(nodeContext.formattingContext)
       ) {
         return;
       }
-      const parent = this.nodeContext.parent;
+      const parent = nodeContext.parent;
       const parentFormattingContext = parent && parent.formattingContext;
-      this.nodeContext.formattingContext =
+      nodeContext.formattingContext =
         new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
           parentFormattingContext,
-          this.nodeContext.sourceNode as Element,
+          nodeContext.sourceNode as Element,
         );
       (
-        this.nodeContext
-          .formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext
-      ).initializeRepetitiveElements(this.nodeContext.vertical);
+        nodeContext.formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext
+      ).initializeRepetitiveElements(nodeContext.vertical);
       return;
     }
   }
@@ -2728,12 +2738,14 @@ export class ViewFactory
     return null;
   }
 
-  private createTextNodeView(): Task.Result<boolean> {
+  private createTextNodeView(
+    nodeContext: Vtree.NodeContext,
+  ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
-    this.preprocessTextContent().then(() => {
+    this.preprocessTextContent(nodeContext).then(() => {
       const offsetInNode = this.offsetInNode || 0;
       const textContent = Diff.restoreNewText(
-        this.nodeContext.preprocessedTextContent,
+        nodeContext.preprocessedTextContent,
       ).substr(offsetInNode);
       this.viewNode = document.createTextNode(textContent);
       frame.finish(true);
@@ -2741,8 +2753,10 @@ export class ViewFactory
     return frame.result();
   }
 
-  private preprocessTextContent(): Task.Result<boolean> {
-    if (this.nodeContext.preprocessedTextContent != null) {
+  private preprocessTextContent(
+    nodeContext: Vtree.NodeContext,
+  ): Task.Result<boolean> {
+    if (nodeContext.preprocessedTextContent != null) {
       return Task.newResult(true);
     }
     let originl: string;
@@ -2757,7 +2771,7 @@ export class ViewFactory
         if (index >= hooks.length) {
           return Task.newResult(false);
         }
-        return hooks[index++](this.nodeContext, textContent).thenAsync(
+        return hooks[index++](nodeContext, textContent).thenAsync(
           (processedText) => {
             textContent = processedText;
             return Task.newResult(true);
@@ -2765,7 +2779,7 @@ export class ViewFactory
         );
       })
       .then(() => {
-        this.nodeContext.preprocessedTextContent = Diff.diffChars(
+        nodeContext.preprocessedTextContent = Diff.diffChars(
           originl,
           textContent,
         );
@@ -2778,6 +2792,7 @@ export class ViewFactory
    * @return holding true if children should be processed
    */
   createNodeView(
+    nodeContext: Vtree.NodeContext,
     firstTime: boolean,
     atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
@@ -2785,23 +2800,23 @@ export class ViewFactory
     let result: Task.Result<boolean>;
     let needToProcessChildren = true;
     if (this.sourceNode.nodeType == 1) {
-      result = this.createElementView(firstTime, atUnforcedBreak);
+      result = this.createElementView(nodeContext, firstTime, atUnforcedBreak);
     } else {
       if (this.sourceNode.nodeType == 8) {
         this.viewNode = null; // comment node
         result = Task.newResult(true);
       } else {
-        result = this.createTextNodeView();
+        result = this.createTextNodeView(nodeContext);
       }
     }
     result.then((processChildren) => {
       needToProcessChildren = processChildren;
-      this.nodeContext.viewNode = this.viewNode;
+      nodeContext.viewNode = this.viewNode;
       if (this.viewNode) {
         const isPseudo = (node: Node, name: string): boolean =>
           node?.nodeType === 1 &&
           PseudoElement.getPseudoName(node as Element) === name;
-        const p = this.nodeContext.parent;
+        const p = nodeContext.parent;
         let parent = p
           ? isPseudo(this.viewNode, "after") &&
             isPseudo(p.viewNode, "first-letter") &&
@@ -2809,13 +2824,13 @@ export class ViewFactory
             ? (p.parent.viewNode as Element) // Fix for issue #1175
             : (p.viewNode as Element)
           : this.viewRoot;
-        if (this.nodeContext.pluginProps["nestedFootnoteDetached"]) {
+        if (nodeContext.pluginProps["nestedFootnoteDetached"]) {
           // Nested footnote, attach to the root (Issue #1352)
           parent = this.viewRoot;
         }
         if (parent) {
           if (
-            this.nodeContext.inline &&
+            nodeContext.inline &&
             // ignore whitespace text node
             !(this.viewNode.nodeType === 3 && Vtree.canIgnore(this.viewNode)) &&
             !parent.hasChildNodes() &&
@@ -2850,7 +2865,7 @@ export class ViewFactory
     }
     this.viewNode = null;
     if (this.nodeContext) {
-      return this.createNodeView(firstTime, !!atUnforcedBreak);
+      return this.createNodeView(nodeContext, firstTime, !!atUnforcedBreak);
     }
     return Task.newResult(true);
   }
@@ -3833,7 +3848,7 @@ export class ViewFactory
           }
         }
       } else {
-        const blockSizeP = this.nodeContext.vertical ? "width" : "height";
+        const blockSizeP = nodeContext.vertical ? "width" : "height";
         if (Base.getCSSProperty(elem, blockSizeP)) {
           // When a box with a specified block size is fragmented,
           // the fragmented box should not have the block size.
