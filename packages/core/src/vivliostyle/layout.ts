@@ -2277,7 +2277,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   resolveFloatReferenceFromColumnSpan(
     floatReference: PageFloats.FloatReference,
-    columnSpan: Css.Val,
+    columnSpan: Css.Val | null,
     nodeContext: Vtree.NodeContext,
   ): Task.Result<PageFloats.FloatReference> {
     const frame = Task.newFrame(

@@ -1155,8 +1155,8 @@ export abstract class ParentPageFloatLayoutContext
   }
 
   getFloatsDeferredToNextInChildContexts(): PageFloat[] {
-    let result = [];
-    const done = [];
+    let result: PageFloat[] = [];
+    const done: (string | null)[] = [];
     for (let i = this.state.children.length - 1; i >= 0; i--) {
       const child = this.state.children[i];
       if (done.includes(child.flowName)) {
@@ -1213,7 +1213,8 @@ export abstract class ParentPageFloatLayoutContext
       index = this.state.children.length;
     }
     for (let i = index - 1; i >= 0; i--) {
-      let result = this.state.children[i];
+      let result: AttachedPageFloatLayoutContext | null =
+        this.state.children[i];
       if (
         result.floatReference === floatReference &&
         result.flowName === flowName &&
@@ -1503,7 +1504,7 @@ export class AttachedPageFloatLayoutContext
     const deferredFloats = this.getFloatsDeferredToNextInChildContexts();
     const floatsInFragments = this.floatFragments.reduce(
       (r, fr) => r.concat(fr.continuations.map((c) => c.float)),
-      [],
+      [] as PageFloat[],
     );
     floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
     for (const float of floatsInFragments) {
@@ -1771,7 +1772,7 @@ export class AttachedPageFloatLayoutContext
 
   private getLimitValueInner(
     logicalSide: string,
-    logicalSide2: string | null,
+    logicalSide2: string | null | undefined,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (
@@ -2357,7 +2358,7 @@ export class AttachedPageFloatLayoutContext
     this.floatFragments
       .filter((fragment) => fragment.floatSide.includes("block-start"))
       .filter((fragment) => {
-        if (!isFinite(inlinePos)) {
+        if (inlinePos === undefined || !isFinite(inlinePos)) {
           return true;
         }
         const rect = fragment.getOuterRect();
@@ -2395,7 +2396,7 @@ export class AttachedPageFloatLayoutContext
     this.floatFragments
       .filter((fragment) => fragment.floatSide.includes("block-end"))
       .filter((fragment) => {
-        if (!isFinite(inlinePos)) {
+        if (inlinePos === undefined || !isFinite(inlinePos)) {
           return true;
         }
         const rect = fragment.getOuterRect();
@@ -2652,41 +2653,32 @@ export class AttachedPageFloatLayoutContext
   isColumnFullWithPageFloats(column: LayoutType.Column): boolean {
     const layoutContext = column.layoutContext;
     const clientLayout = column.clientLayout;
-    let context: AttachedPageFloatLayoutContext | null = this;
-    let limits: {
-      top: number;
-      left: number;
-      bottom: number;
-      right: number;
-      floatMinWrapBlockStart: number;
-      floatMinWrapBlockEnd: number;
-    } = null;
-    while (context) {
+    const limits = this.getLimitValuesInner(layoutContext, clientLayout);
+    for (
+      let context = this.attachedParent;
+      context;
+      context = context.attachedParent
+    ) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);
-      if (limits) {
-        if (column.vertical) {
-          if (l.right < limits.right) {
-            limits.right = l.right;
-            limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
-          }
-          if (l.left > limits.left) {
-            limits.left = l.left;
-            limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
-          }
-        } else {
-          if (l.top > limits.top) {
-            limits.top = l.top;
-            limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
-          }
-          if (l.bottom < limits.bottom) {
-            limits.bottom = l.bottom;
-            limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
-          }
+      if (column.vertical) {
+        if (l.right < limits.right) {
+          limits.right = l.right;
+          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+        }
+        if (l.left > limits.left) {
+          limits.left = l.left;
+          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
         }
       } else {
-        limits = l;
+        if (l.top > limits.top) {
+          limits.top = l.top;
+          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+        }
+        if (l.bottom < limits.bottom) {
+          limits.bottom = l.bottom;
+          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+        }
       }
-      context = context.attachedParent;
     }
     const floatMinWrapBlock = Math.max(
       limits.floatMinWrapBlockStart,

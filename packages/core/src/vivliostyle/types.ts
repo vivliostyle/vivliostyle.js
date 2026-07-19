@@ -344,7 +344,7 @@ export namespace Layout {
     ): Vtree.RenderedNodeContext;
     resolveFloatReferenceFromColumnSpan(
       floatReference: PageFloats.FloatReference,
-      columnSpan: Css.Val,
+      columnSpan: Css.Val | null,
       nodeContext: Vtree.NodeContext,
     ): Task.Result<PageFloats.FloatReference>;
     layoutPageFloat(
@@ -1260,8 +1260,8 @@ export namespace Vtree {
     getInnerRect(): GeometryUtil.Rect;
     getPaddingRect(): GeometryUtil.Rect;
     getOuterShape(
-      outerShapeProp: Css.Val,
-      context: Exprs.Context,
+      outerShapeProp: Css.Val | null,
+      context: Exprs.Context | null,
     ): GeometryUtil.Shape;
     getOuterRect(): GeometryUtil.Rect;
   }
