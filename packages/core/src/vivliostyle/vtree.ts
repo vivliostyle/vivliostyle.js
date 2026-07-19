@@ -281,7 +281,7 @@ export function whitespaceFromPropertyValue(
   }
 }
 
-export function canIgnore(node: Node, whitespace?: Whitespace): boolean {
+export function canIgnore(node: Node | null, whitespace?: Whitespace): boolean {
   if (!node) {
     return true;
   }
@@ -511,9 +511,9 @@ export class ShadowContext implements Vtree.ShadowContext {
   constructor(
     public readonly owner: Element,
     public readonly root: Element,
-    public readonly xmldoc: XmlDoc.XMLDocHolder,
-    public readonly parentShadow: ShadowContext,
-    superShadow: ShadowContext,
+    public readonly xmldoc: XmlDoc.XMLDocHolder | null,
+    public readonly parentShadow: ShadowContext | null,
+    superShadow: ShadowContext | null,
     public readonly type: ShadowType,
     public readonly styler: CssStyler.AbstractStyler,
   ) {
@@ -548,7 +548,7 @@ export function isSameShadowContext(
  */
 export class FirstPseudo implements Vtree.FirstPseudo {
   constructor(
-    public readonly outer: FirstPseudo,
+    public readonly outer: FirstPseudo | null,
     public readonly count: number,
   ) {}
 }
@@ -568,7 +568,7 @@ export class NodeContext implements Vtree.NodeContext {
   shadowType: ShadowType;
 
   // parent's shadow type
-  shadowContext: Vtree.ShadowContext;
+  shadowContext: Vtree.ShadowContext | null;
   nodeShadow: Vtree.ShadowContext | null = null;
   shadowSibling: NodeContext | null = null;
 
@@ -597,7 +597,7 @@ export class NodeContext implements Vtree.NodeContext {
   breakAfter: string | null = null;
   viewNode: Node | null = null;
   clearSpacer: Node | null = null;
-  inheritedProps: { [key: string]: number | string | Css.Val };
+  inheritedProps: { [key: string]: number | string | Css.Val | undefined };
   vertical: boolean;
   direction: string;
   firstPseudo: FirstPseudo;

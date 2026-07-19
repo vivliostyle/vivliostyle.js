@@ -146,7 +146,8 @@ export function initIFrame(iframe: HTMLIFrameElement): void {
   iframe.addEventListener(
     "load",
     () => {
-      iframe.contentWindow.navigator["epubReadingSystem"] = {
+      // the load event fires only when the iframe has a browsing context
+      iframe.contentWindow!.navigator["epubReadingSystem"] = {
         name: "adapt",
         version: "0.1",
         layoutStyle: "paginated",
@@ -219,7 +220,7 @@ export class ViewFactory
     public readonly cascadedPageStyle?: CssCascade.ElementStyle,
     private readonly semanticFootnoteFirstRefOffsets: Map<
       string,
-      number | null
+      number
     > = new Map(),
     private readonly semanticFootnoteFirstRefOffsetsInitialized: {
       value: boolean;
@@ -412,20 +413,21 @@ export class ViewFactory
   }
 
   createPseudoelementShadow(
+    nodeContext: Vtree.NodeContext,
     element: Element,
     isRoot: boolean,
     cascStyle: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
-    parentShadow: Vtree.ShadowContext,
-    subShadow: Vtree.ShadowContext,
-  ): Vtree.ShadowContext {
+    parentShadow: Vtree.ShadowContext | null,
+    subShadow: Vtree.ShadowContext | null,
+  ): Vtree.ShadowContext | null {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
       this.regionIds,
       this.isFootnote,
-      this.nodeContext,
+      nodeContext,
       context,
     );
     if (!pseudoMap) {
@@ -555,7 +557,7 @@ export class ViewFactory
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
     context: Exprs.Context,
-  ): CssCascade.ElementStyleMap {
+  ): CssCascade.ElementStyleMap | null {
     const pseudoMap = CssCascade.getStyleMap(cascStyle, "_pseudos");
     if (!pseudoMap) {
       return null;
@@ -596,10 +598,10 @@ export class ViewFactory
     href: string,
     type: Vtree.ShadowType,
     element: Element,
-    parentShadow: Vtree.ShadowContext,
-    subShadow: Vtree.ShadowContext,
-  ): Task.Result<Vtree.ShadowContext> {
-    const frame: Task.Frame<Vtree.ShadowContext> =
+    parentShadow: Vtree.ShadowContext | null,
+    subShadow: Vtree.ShadowContext | null,
+  ): Task.Result<Vtree.ShadowContext | null> {
+    const frame: Task.Frame<Vtree.ShadowContext | null> =
       Task.newFrame("createRefShadow");
     this.xmldoc.store.load(href).then((refDocParam) => {
       const refDoc = refDocParam;
@@ -624,19 +626,20 @@ export class ViewFactory
   }
 
   createShadows(
+    nodeContext: Vtree.NodeContext,
     element: Element,
     isRoot,
     cascStyle: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
-    shadowContext: Vtree.ShadowContext,
-  ): Task.Result<Vtree.ShadowContext> {
-    const frame: Task.Frame<Vtree.ShadowContext> =
+    shadowContext: Vtree.ShadowContext | null,
+  ): Task.Result<Vtree.ShadowContext | null> {
+    const frame: Task.Frame<Vtree.ShadowContext | null> =
       Task.newFrame("createShadows");
-    const shadow: Vtree.ShadowContext = null;
+    const shadow: Vtree.ShadowContext | null = null;
     const templateURLVal = computedStyle["template"];
-    let cont: Task.Result<Vtree.ShadowContext>;
+    let cont: Task.Result<Vtree.ShadowContext | null>;
     if (
       templateURLVal instanceof Css.URL ||
       templateURLVal === Css.ident.footnote
@@ -669,22 +672,20 @@ export class ViewFactory
       cont = Task.newResult(shadow);
     }
     cont.then((shadow) => {
-      let cont1: Task.Result<Vtree.ShadowContext> = null;
+      let cont1: Task.Result<Vtree.ShadowContext | null> | null = null;
       if (element.namespaceURI == Base.NS.SHADOW) {
         if (element.localName == "include") {
           let href = element.getAttribute("href");
-          let xmldoc: XmlDoc.XMLDocHolder = null;
+          let xmldoc: XmlDoc.XMLDocHolder = this.xmldoc;
           if (href) {
-            xmldoc = shadowContext ? shadowContext.xmldoc : this.xmldoc;
+            xmldoc = shadowContext?.xmldoc ?? this.xmldoc;
           } else if (shadowContext) {
             if (shadowContext.owner.namespaceURI == Base.NS.XHTML) {
               href = shadowContext.owner.getAttribute("href");
             } else {
               href = shadowContext.owner.getAttributeNS(Base.NS.XLINK, "href");
             }
-            xmldoc = shadowContext.parentShadow
-              ? shadowContext.parentShadow.xmldoc
-              : this.xmldoc;
+            xmldoc = shadowContext.parentShadow?.xmldoc ?? this.xmldoc;
           }
           if (href) {
             href = Base.resolveReferenceURL(href, xmldoc.url);
@@ -701,7 +702,7 @@ export class ViewFactory
       if (cont1 == null) {
         cont1 = Task.newResult(shadow);
       }
-      let cont2: Task.Result<Vtree.ShadowContext> = null;
+      let cont2: Task.Result<Vtree.ShadowContext | null> | null = null;
       cont1.then((shadow) => {
         if (computedStyle["display"] === Css.ident.table_cell) {
           const url = Base.resolveURL(
@@ -720,6 +721,7 @@ export class ViewFactory
         }
         cont2.then((shadow) => {
           shadow = this.createPseudoelementShadow(
+            nodeContext,
             element,
             isRoot,
             cascStyle,
@@ -789,11 +791,11 @@ export class ViewFactory
       if (verticalChanged) {
         if (vertical) {
           if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
-            percentRef = context.pageAreaHeight;
+            percentRef = context.pageAreaHeight ?? undefined;
           }
         } else {
           if (/^(min-|max-)?(width|inline-size)$/.test(name)) {
-            percentRef = context.pageAreaWidth;
+            percentRef = context.pageAreaWidth ?? undefined;
           }
         }
       }
@@ -865,8 +867,8 @@ export class ViewFactory
     lang: string | null;
     elementStyle: CssCascade.ElementStyle;
   } {
-    let node = nodeContext.sourceNode;
-    const styles = [];
+    let node: Node | null = nodeContext.sourceNode;
+    const styles: CssCascade.ElementStyle[] = [];
     let lang: string | null = null;
     const isFootnoteContentInclude =
       node instanceof Element &&
@@ -994,7 +996,7 @@ export class ViewFactory
     );
     for (let i = styles.length - 1; i >= 0; --i) {
       const style = styles[i];
-      const propList = [];
+      const propList: string[] = [];
       for (const propName in style) {
         if (CssCascade.isInherited(propName)) {
           propList.push(propName);
@@ -1320,7 +1322,7 @@ export class ViewFactory
       return frame.result();
     }
 
-    let display = computedStyle["display"];
+    let display: Css.Val | null | undefined = computedStyle["display"];
 
     if (
       SemanticFootnote.isSemanticFootnoteElement(element) &&
@@ -1334,9 +1336,9 @@ export class ViewFactory
       if (display === Css.ident.initial || display === Css.ident.unset) {
         display = Css.ident.inline;
       } else if (display === Css.ident.inherit) {
-        display =
-          nodeContext.parent?.display &&
-          Css.getName(nodeContext.parent?.display);
+        display = nodeContext.parent?.display
+          ? Css.getName(nodeContext.parent.display)
+          : null;
       } else {
         display = null;
       }
@@ -1358,18 +1360,19 @@ export class ViewFactory
     nodeContext.flexContainer =
       display === Css.ident.flex || isFixedSizeGridContainer;
     this.createShadows(
+      nodeContext,
       element,
       isRoot,
       elementStyle,
       computedStyle,
       styler,
       this.context,
-      nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext,
     ).then((shadowParam) => {
       nodeContext.nodeShadow = shadowParam;
       const position = computedStyle["position"] as Css.Ident;
-      let floatSide = computedStyle["float"];
-      let clearSide = computedStyle["clear"] as Css.Ident;
+      let floatSide: Css.Val | null = computedStyle["float"];
+      let clearSide: Css.Ident | null = computedStyle["clear"] as Css.Ident;
       const writingMode = nodeContext.vertical
         ? Css.ident.vertical_rl
         : Css.ident.horizontal_tb;
@@ -1776,8 +1779,8 @@ export class ViewFactory
 
       // Create the view element
       let custom = false;
-      let inner: Element = null;
-      const fetchers = [];
+      let inner: Element | null = null;
+      const fetchers: TaskUtil.Fetcher<string>[] = [];
       let ns = element.namespaceURI;
       let tag = element.localName;
       let originalTag = tag;
@@ -1836,7 +1839,7 @@ export class ViewFactory
       }
       if (computedStyle["behavior"]) {
         const behavior = computedStyle["behavior"].toString();
-        if (behavior != "none" && this.customRenderer) {
+        if (behavior != "none") {
           custom = true;
         }
       }
@@ -1846,7 +1849,7 @@ export class ViewFactory
       ) {
         custom = true;
       }
-      let elemResult: Task.Result<Element>;
+      let elemResult: Task.Result<Element | null>;
       if (custom) {
         const parentNode = nodeContext.parent
           ? nodeContext.parent.viewNode
@@ -1938,21 +1941,21 @@ export class ViewFactory
         // Workaround for issue #1439
         // `<tr><a id="…"></a><td>…` causes table layout issue, so change to
         // `<tr><td><a id="…"></a>…`
+        const parentLastElementChild = (
+          nodeContext.parent?.viewNode as Element | null
+        )?.lastElementChild;
         if (
           display === Css.ident.table_cell &&
-          (nodeContext.parent?.viewNode as Element)?.lastElementChild
-            ?.localName === "a"
+          parentLastElementChild?.localName === "a"
         ) {
-          result.appendChild(
-            (nodeContext.parent.viewNode as Element).lastElementChild,
-          );
+          result.appendChild(parentLastElementChild);
         }
 
         for (let i = 0; i < attributeCount; i++) {
           const attribute = attributes[i];
           const attributeNS = attribute.namespaceURI;
           let attributeName = attribute.localName;
-          let attributeValue = attribute.nodeValue;
+          let attributeValue = attribute.value;
           if (!attributeNS) {
             if (!Scripts.allowScripts && attributeName.match(/^on/)) {
               continue; // don't propagate JavaScript code
@@ -2175,7 +2178,7 @@ export class ViewFactory
               return true;
             }
             for (
-              let p = nodeContext.parent?.viewNode as HTMLElement;
+              let p = nodeContext.parent?.viewNode as HTMLElement | null;
               p && p !== this.viewRoot;
               p = p.parentElement
             ) {
@@ -2282,7 +2285,7 @@ export class ViewFactory
           this.page.fetchers.push(Net.loadElement(result));
         }
 
-        this.preprocessElementStyle(computedStyle);
+        this.preprocessElementStyle(nodeContext, computedStyle);
         this.applyComputedStyles(result, computedStyle);
 
         if (nodeContext.inline) {
@@ -2346,7 +2349,7 @@ export class ViewFactory
         this.viewNode = result;
         if (fetchers.length) {
           TaskUtil.waitForFetchers(fetchers).then(() => {
-            if (imageResolution > 0) {
+            if (imageResolution !== undefined && imageResolution > 0) {
               this.modifyElemDimensionWithImageResolution(
                 images,
                 imageResolution,
@@ -2421,7 +2424,7 @@ export class ViewFactory
         return nc.breakBefore; // forced break
       }
       if (nc.fragmentIndex === 1 && !nc.parent) {
-        if (nc.sourceNode === nc.sourceNode.ownerDocument.documentElement) {
+        if (nc.sourceNode === nc.sourceNode.ownerDocument?.documentElement) {
           // beginning of document
           return "page";
         } else {
@@ -2661,12 +2664,15 @@ export class ViewFactory
     });
   }
 
-  private preprocessElementStyle(computedStyle: { [key: string]: Css.Val }) {
+  private preprocessElementStyle(
+    nodeContext: Vtree.NodeContext,
+    computedStyle: { [key: string]: Css.Val },
+  ) {
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
     hooks.forEach((hook) => {
-      hook(this.nodeContext, computedStyle);
+      hook(nodeContext, computedStyle);
     });
   }
 
@@ -2676,7 +2682,7 @@ export class ViewFactory
     styler: CssStyler.AbstractStyler,
   ) {
     for (
-      let child: Node = element.firstChild;
+      let child: Node | null = element.firstChild;
       child;
       child = child.nextSibling
     ) {
@@ -2760,7 +2766,7 @@ export class ViewFactory
       return Task.newResult(true);
     }
     let originl: string;
-    let textContent = (originl = this.sourceNode.textContent);
+    let textContent = (originl = nodeContext.sourceNode.textContent ?? "");
     const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
@@ -2799,10 +2805,10 @@ export class ViewFactory
     const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
     let result: Task.Result<boolean>;
     let needToProcessChildren = true;
-    if (this.sourceNode.nodeType == 1) {
+    if (nodeContext.sourceNode.nodeType == 1) {
       result = this.createElementView(nodeContext, firstTime, atUnforcedBreak);
     } else {
-      if (this.sourceNode.nodeType == 8) {
+      if (nodeContext.sourceNode.nodeType == 8) {
         this.viewNode = null; // comment node
         result = Task.newResult(true);
       } else {
@@ -2813,7 +2819,7 @@ export class ViewFactory
       needToProcessChildren = processChildren;
       nodeContext.viewNode = this.viewNode;
       if (this.viewNode) {
-        const isPseudo = (node: Node, name: string): boolean =>
+        const isPseudo = (node: Node | null, name: string): boolean =>
           node?.nodeType === 1 &&
           PseudoElement.getPseudoName(node as Element) === name;
         const p = nodeContext.parent;
@@ -3666,7 +3672,7 @@ export class ViewFactory
     return frame.result();
   }
 
-  createElement(ns: string, tag: string): Element {
+  createElement(ns: string | null, tag: string): Element {
     if (ns == Base.NS.XHTML) {
       return this.document.createElement(tag);
     }

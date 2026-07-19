@@ -1241,8 +1241,8 @@ export namespace Vtree {
   export interface ShadowContext {
     readonly owner: Element;
     readonly root: Element;
-    readonly xmldoc: XmlDoc.XMLDocHolder;
-    readonly parentShadow: ShadowContext;
+    readonly xmldoc: XmlDoc.XMLDocHolder | null;
+    readonly parentShadow: ShadowContext | null;
     subShadow: ShadowContext | null;
     readonly type: Vtree.ShadowType;
     readonly styler: CssStyler.AbstractStyler;
@@ -1255,7 +1255,7 @@ export namespace Vtree {
    * @param count 0 - first-letter, 1 or more - first line(s)
    */
   export interface FirstPseudo {
-    readonly outer: FirstPseudo;
+    readonly outer: FirstPseudo | null;
     readonly count: number;
   }
 
@@ -1299,7 +1299,7 @@ export namespace Vtree {
     breakAfter: string | null;
     viewNode: Node | null;
     clearSpacer: Node | null;
-    inheritedProps: { [key: string]: number | string | Css.Val };
+    inheritedProps: { [key: string]: number | string | Css.Val | undefined };
     vertical: boolean;
     direction: string;
     firstPseudo: FirstPseudo;

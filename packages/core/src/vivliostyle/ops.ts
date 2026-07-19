@@ -318,8 +318,7 @@ export class StyleInstance
   private invalidPageAreaOnCurrentPage: boolean = false;
   private repeatedInvalidPageAreaLayoutPosition: Vtree.LayoutPosition | null =
     null;
-  private semanticFootnoteFirstRefOffsets: Map<string, number | null> =
-    new Map();
+  private semanticFootnoteFirstRefOffsets: Map<string, number> = new Map();
   private semanticFootnoteFirstRefOffsetsInitialized = { value: false };
   pageGroupPageCounts: {
     [pageType: string]: Map<Element, number>;

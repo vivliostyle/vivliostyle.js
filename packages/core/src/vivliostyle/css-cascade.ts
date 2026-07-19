@@ -5826,7 +5826,7 @@ export function flattenCascadedStyle(
   context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
-  nodeContext: Vtree.NodeContext,
+  nodeContext: Vtree.NodeContext | null,
 ): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
   for (const n in style) {

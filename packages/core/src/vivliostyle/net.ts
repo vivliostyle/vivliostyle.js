@@ -304,7 +304,7 @@ export function newJSONStore(): JSONStore {
 export function loadElement(
   elem: Element,
   src?: string,
-  alt?: string,
+  alt?: string | null,
 ): TaskUtil.Fetcher<string> {
   const fetcher = new TaskUtil.Fetcher(
     () => {
