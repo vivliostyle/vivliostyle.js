@@ -946,7 +946,7 @@ export abstract class PageFloatLayoutContext
 
   getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null {
     const order = float.getOrder();
-    let lastFollowing: PageFloat = null;
+    let lastFollowing: PageFloat | null = null;
     this.floatFragments.forEach((fragment) => {
       fragment.continuations.forEach((c) => {
         const f = c.float;
@@ -1720,7 +1720,7 @@ export class AttachedPageFloatLayoutContext
 
   private getLimitValue(
     side: string,
-    side2: string | null,
+    side2: string | null | undefined,
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     condition?: (
