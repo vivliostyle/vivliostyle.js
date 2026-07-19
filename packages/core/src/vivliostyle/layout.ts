@@ -966,7 +966,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Remove all the exclusion floats.
    */
   killFloats(): void {
-    let c: Node = this.element.firstChild;
+    let c: Node | null = this.element.firstChild;
     while (c) {
       const nc = c.nextSibling;
       if (c.nodeType == 1) {
@@ -992,7 +992,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
     const y1 = this.vertical ? -this.getRightEdge() : this.getTopEdge();
     const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
-    let foundNonZeroWidthBand: GeometryUtil.Band = null;
+    let foundNonZeroWidthBand: GeometryUtil.Band | null = null;
 
     // First pass: adjust band edges to column edges if they are almost equal
     // to avoid creating unnecessary floats that may cause layout issues.
@@ -2892,13 +2892,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const range = start.ownerDocument.createRange();
     let wentUp = false;
     let node: Node = start;
-    let lastGood: Node = null;
+    let lastGood: Node | null = null;
     let haveStart = false;
     let endNotReached = true;
     while (endNotReached) {
       let seekRange = true;
       do {
-        let next: Node = null;
+        let next: Node | null = null;
         if (node == end) {
           if (end.nodeType === 1) {
             // If end is an element, continue traversing its children to find
@@ -3745,10 +3745,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * break-after properties from all elements that meet at the edge.
    */
   skipEdges(
-    nodeContext: Vtree.NodeContext,
+    initialNodeContext: Vtree.NodeContext,
     leadingEdge: boolean,
     forcedBreakValue: string | null,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
+    let nodeContext: Vtree.NodeContext | null = initialNodeContext;
     const fc = nodeContext.after
       ? nodeContext.parent?.formattingContext
       : nodeContext.formattingContext;
@@ -4381,10 +4382,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * content remains and null if all content could be skipped.
    */
   skipTailEdges(
-    nodeContext: Vtree.NodeContext,
-  ): Task.Result<Vtree.NodeContext> {
-    let resultNodeContext = nodeContext.copy();
-    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("skipEdges");
+    initialNodeContext: Vtree.NodeContext,
+  ): Task.Result<Vtree.NodeContext | null> {
+    let nodeContext: Vtree.NodeContext | null = initialNodeContext;
+    let resultNodeContext: Vtree.NodeContext | null = nodeContext.copy();
+    const frame: Task.Frame<Vtree.NodeContext | null> =
+      Task.newFrame("skipEdges");
     let breakAtTheEdge: string | null = null;
     let onStartEdges = false;
     frame
@@ -4583,7 +4586,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return;
     }
     for (
-      let parent = nodeContext.parent;
+      let parent: Vtree.NodeContext | null = nodeContext.parent;
       nodeContext;
       nodeContext = parent, parent = parent ? parent.parent : null
     ) {
@@ -4742,7 +4745,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     chunkPosition: Vtree.ChunkPosition,
     leadingEdge: boolean,
     breakAfter?: string | null,
-  ): Task.Result<Vtree.ChunkPosition> {
+  ): Task.Result<Vtree.ChunkPosition | null> {
     this.chunkPositions.push(chunkPosition); // So we can re-layout this column later
     if (chunkPosition.primary.after) {
       this.lastAfterPosition = chunkPosition.primary;
@@ -4756,7 +4759,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         chunkPosition.primary.steps.length === 1
       ) {
         // End of contents
-        return Task.newResult(null as Vtree.ChunkPosition);
+        return Task.newResult<Vtree.ChunkPosition | null>(null);
       } else {
         return Task.newResult(chunkPosition as Vtree.ChunkPosition);
       }
@@ -4792,11 +4795,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           initialNodeContext,
           retryer.initialComputedBlockSize,
         ).then((positionAfter) => {
-          let cont: Task.Result<boolean> = null;
+          let cont: Task.Result<boolean>;
           if (!this.pseudoParent) {
             cont = this.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
           } else {
-            cont = Task.newResult(null);
+            // The value is never read. This result only sequences the steps.
+            cont = Task.newResult(true);
           }
           cont.then(() => {
             if (LayoutHelper.isUsingBrowserColumnBreaking(this)) {
@@ -4891,14 +4895,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     leadingEdge: boolean,
     breakAfter?: string | null,
   ): Task.Result<{
-    nodeContext: Vtree.NodeContext;
-    overflownNodeContext: Vtree.NodeContext;
+    nodeContext: Vtree.NodeContext | null;
+    overflownNodeContext: Vtree.NodeContext | null;
   }> {
     const frame: Task.Frame<{
       nodeContext: Vtree.NodeContext;
       overflownNodeContext: Vtree.NodeContext;
     }> = Task.newFrame("doLayout");
-    let overflownNodeContext: Vtree.NodeContext = null;
+    let overflownNodeContext: Vtree.NodeContext | null = null;
 
     // ------ init backtracking list -----
     this.breakPositions = [];
@@ -5287,7 +5291,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
   initialComputedBlockSize: number = 0;
   private initialOverflown: boolean = false;
   private initialLastLineStride: number = 0;
-  context: { overflownNodeContext: Vtree.NodeContext } = {
+  context: { overflownNodeContext: Vtree.NodeContext | null } = {
     overflownNodeContext: null,
   };
 
