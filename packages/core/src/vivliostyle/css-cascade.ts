@@ -153,7 +153,7 @@ export function getPolyfilledInheritedProps(): string[] {
   );
   return hooks.reduce(
     (props, f) => props.concat(f()),
-    [].concat(polyfilledInheritedProps),
+    ([] as string[]).concat(polyfilledInheritedProps),
   );
 }
 
@@ -835,7 +835,7 @@ export class CompoundAction extends CascadeAction {
   }
 
   override clone(): CascadeAction {
-    return new CompoundAction([].concat(this.list));
+    return new CompoundAction(([] as CascadeAction[]).concat(this.list));
   }
 }
 
@@ -1772,7 +1772,7 @@ export class AbstractConditionItem {
   constructor(
     public readonly condition: string,
     public readonly viewConditionId: string | null,
-    public readonly viewCondition: Matchers.Matcher,
+    public readonly viewCondition: Matchers.Matcher | null,
   ) {}
 
   increment(cascadeInstance: CascadeInstance) {
@@ -1785,7 +1785,7 @@ export class AbstractConditionItem {
 
   buildViewConditionMatcher(
     cascadeInstance: CascadeInstance,
-  ): Matchers.Matcher {
+  ): Matchers.Matcher | null {
     return cascadeInstance.buildViewConditionMatcher(this.viewConditionId);
   }
 }
@@ -1797,7 +1797,7 @@ export class DescendantConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher,
+    viewCondition: Matchers.Matcher | null,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1836,7 +1836,7 @@ export class ChildConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher,
+    viewCondition: Matchers.Matcher | null,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1881,7 +1881,7 @@ export class AdjacentSiblingConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher,
+    viewCondition: Matchers.Matcher | null,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -1928,7 +1928,7 @@ export class FollowingSiblingConditionItem
   constructor(
     condition: string,
     viewConditionId: string | null,
-    viewCondition: Matchers.Matcher,
+    viewCondition: Matchers.Matcher | null,
   ) {
     super(condition, viewConditionId, viewCondition);
   }
@@ -3018,7 +3018,8 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const container = c.blockContainer;
     const leaderElem = c.viewNode as HTMLElement;
     const pseudoName = pseudoElem.getAttribute("data-adapt-pseudo");
-    const leader = leaderElem.getAttribute("data-viv-leader-value");
+    // written together with data-viv-leader by the leader content listener
+    const leader = leaderElem.getAttribute("data-viv-leader-value")!;
     const { writingMode, direction, marginInlineEnd } =
       column.clientLayout.getElementComputedStyle(pseudoElem);
 
@@ -3233,7 +3234,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // When content comes back to the normal text flow, then inset effects again.
     function getInset(side: string): number {
       let inset = 0;
-      let p = pseudoElem.parentElement;
+      let p: Element | null = pseudoElem.parentElement;
       while (p && p !== container.viewNode) {
         inset += column.getComputedInsets(p)[side];
         p = p.parentElement;
@@ -3413,7 +3414,7 @@ export class CascadeInstance {
   lastCounterChangeTypes: {
     [key: string]: "reset" | "set" | "increment";
   } = Object.create(null);
-  counterScoping: { [key: string]: boolean }[] = [Object.create(null)];
+  counterScoping: ({ [key: string]: boolean } | null)[] = [Object.create(null)];
   quotes: Css.Str[];
   quoteDepth: number = 0;
   lang: string = "";
@@ -3461,7 +3462,7 @@ export class CascadeInstance {
     this.stack[this.stack.length - 1].push(item);
   }
 
-  increment(condition: string, viewCondition: Matchers.Matcher): void {
+  increment(condition: string, viewCondition: Matchers.Matcher | null): void {
     this.conditions[condition] = (this.conditions[condition] || 0) + 1;
     if (!viewCondition) {
       return;
@@ -3473,7 +3474,7 @@ export class CascadeInstance {
     }
   }
 
-  decrement(condition: string, viewCondition: Matchers.Matcher): void {
+  decrement(condition: string, viewCondition: Matchers.Matcher | null): void {
     this.conditions[condition]--;
     if (!this.viewConditions[condition]) {
       return;
@@ -3486,8 +3487,10 @@ export class CascadeInstance {
     }
   }
 
-  buildViewConditionMatcher(viewConditionId: string | null): Matchers.Matcher {
-    let matcher: Matchers.Matcher = null;
+  buildViewConditionMatcher(
+    viewConditionId: string | null,
+  ): Matchers.Matcher | null {
+    let matcher: Matchers.Matcher | null = null;
     if (viewConditionId) {
       Asserts.assert(this.currentElementOffset);
       matcher = Matchers.MatcherBuilder.buildViewConditionMatcher(
@@ -3501,12 +3504,14 @@ export class CascadeInstance {
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
             ? conditions[0]
-            : Matchers.MatcherBuilder.buildAnyMatcher([].concat(conditions));
+            : Matchers.MatcherBuilder.buildAnyMatcher(
+                ([] as Matchers.Matcher[]).concat(conditions),
+              );
         } else {
           return null;
         }
       })
-      .filter((item) => item);
+      .filter((item): item is Matchers.Matcher => item !== null);
     if (dependentConditionMatchers.length <= 0) {
       return matcher;
     }
@@ -3552,7 +3557,7 @@ export class CascadeInstance {
   defineCounter(counterName: string, value: number) {
     let scoping = this.counterScoping[this.counterScoping.length - 1];
     if (!scoping) {
-      scoping = Object.create(null);
+      scoping = Object.create(null) as { [key: string]: boolean };
       this.counterScoping[this.counterScoping.length - 1] = scoping;
     }
     if (this.counters[counterName]) {
@@ -3594,9 +3599,9 @@ export class CascadeInstance {
     if (float) {
       floatVal = float.evaluate(this.context);
     }
-    let resetMap: { [key: string]: number } = null;
-    let incrementMap: { [key: string]: number } = null;
-    let setMap: { [key: string]: number } = null;
+    let resetMap: { [key: string]: number } | null = null;
+    let incrementMap: { [key: string]: number } | null = null;
+    let setMap: { [key: string]: number } | null = null;
     const reset = props["counter-reset"] as CascadeValue;
     if (reset) {
       const resetVal = reset.evaluate(this.context);
@@ -3623,27 +3628,27 @@ export class CascadeInstance {
       this.currentNamespace == Base.NS.XHTML
     ) {
       if (!resetMap) {
-        resetMap = Object.create(null);
+        resetMap = Object.create(null) as { [key: string]: number };
       }
       resetMap["list-item"] = ((this.currentElement as any)?.start ?? 1) - 1;
     }
     if (Display.isListItem(displayVal)) {
       if (!incrementMap) {
-        incrementMap = Object.create(null);
+        incrementMap = Object.create(null) as { [key: string]: number };
       }
       incrementMap["list-item"] = incrementMap["list-item"] ?? 1;
       if (
         /^\s*[-+]?\d/.test(this.currentElement?.getAttribute("value") ?? "")
       ) {
         if (!setMap) {
-          setMap = Object.create(null);
+          setMap = Object.create(null) as { [key: string]: number };
         }
         setMap["list-item"] = (this.currentElement as any).value;
       }
     }
     if (this.currentElement?.parentNode?.nodeType === Node.DOCUMENT_NODE) {
       if (!resetMap) {
-        resetMap = Object.create(null);
+        resetMap = Object.create(null) as { [key: string]: number };
       }
       // `counter-reset: footnote 0` is implicitly applied on the root element
       if (resetMap["footnote"] === undefined) {
@@ -3655,7 +3660,7 @@ export class CascadeInstance {
       !elementStyle["--viv-semantic-footnote-content"]
     ) {
       if (!incrementMap) {
-        incrementMap = Object.create(null);
+        incrementMap = Object.create(null) as { [key: string]: number };
       }
       // `counter-increment: footnote 1` is implicitly applied on the
       // element (or pseudo element) with `float: footnote`,
@@ -3898,12 +3903,12 @@ export class CascadeInstance {
       (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
     siblingTypeCountsStack.push(emptySiblingTypeCounts());
     const followingSiblingOrderStack = this.followingSiblingOrderStack;
-    if (
-      followingSiblingOrderStack[followingSiblingOrderStack.length - 1] !== null
-    ) {
-      this.currentFollowingSiblingOrder = --followingSiblingOrderStack[
+    const lastOrder =
+      followingSiblingOrderStack[followingSiblingOrderStack.length - 1];
+    if (lastOrder !== null) {
+      this.currentFollowingSiblingOrder = followingSiblingOrderStack[
         followingSiblingOrderStack.length - 1
-      ];
+      ] = lastOrder - 1;
     } else {
       this.currentFollowingSiblingOrder = null;
     }
@@ -4345,7 +4350,7 @@ export class CascadeInstance {
     element: Element,
     elementStyle: ElementStyle,
   ): Css.Val | null {
-    for (let e = element; e; e = e.parentElement) {
+    for (let e: Element | null = element; e; e = e.parentElement) {
       const style = e === element ? elementStyle : this.styles.styleOf(e);
       const prop = style[propName] as CascadeValue;
       if (prop) {
@@ -6136,7 +6141,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     elementStyles: ElementStyle[];
     element: Element | null;
   } {
-    let elem = element ?? this.root;
+    let elem: Element | null = element ?? this.root;
     if (elementStyles?.length) {
       for (let index = 0; index < elementStyles.length; index++) {
         const style = elementStyles[index];
@@ -6273,7 +6278,8 @@ export class VarFilterVisitor extends Css.FilterVisitor {
             );
             if (referencedCycleStart) {
               cycleStartName = referencedCycleStart;
-              return null;
+              // detection-only visitor: the returned value is discarded
+              return func;
             }
           }
         }
@@ -6358,7 +6364,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     nestedVisitor.resolvingCustomProperties.push(name);
     nestedVisitor.varResolutionState = this.varResolutionState;
 
-    let resolvedValue = value;
+    let resolvedValue: Css.Val | null = value;
     const LIMIT_LOOP = 32;
     for (let i = 0; ; i++) {
       if (i >= LIMIT_LOOP) {
@@ -6385,8 +6391,8 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     return hadCycleMembers.has(name) ? null : resolvedValue;
   }
 
-  private getVarValue(name: string): Css.Val {
-    let elem = this.element ?? this.root;
+  private getVarValue(name: string): Css.Val | null {
+    let elem: Element | null = this.element ?? this.root;
     if (this.elementStyles?.length) {
       for (let index = 0; index < this.elementStyles.length; index++) {
         const style = this.elementStyles[index];
