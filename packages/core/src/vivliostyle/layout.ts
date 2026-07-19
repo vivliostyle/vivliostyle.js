@@ -423,7 +423,7 @@ export function validateCheckPoints(
 }
 
 export class Column extends VtreeImpl.Container implements Layout.Column {
-  last: Node;
+  last: Node | null;
   viewDocument: Document;
   // Issue #1842: true only for columns reached after automatic column overflow.
   isNonFirstColumn: boolean = false;
@@ -596,7 +596,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const steps = position.steps;
     this.layoutContext.setViewRoot(this.element, this.isFootnote);
     let stepIndex = steps.length - 1;
-    let nodeContext: Vtree.NodeContext = null;
+    let nodeContext: Vtree.NodeContext | null = null;
     frame
       .loop(() => {
         while (stepIndex >= 0) {
@@ -2150,8 +2150,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const context = this.pageFloatLayoutContext;
     const stashedFloatFragments =
       context.getStashedFloatFragments(floatReference);
-    const newFloatAreas = [];
-    const newFragments = [];
+    const newFloatAreas: Layout.PageFloatArea[] = [];
+    const newFragments: PageFloats.PageFloatFragment[] = [];
     let failed = false;
     const frame = Task.newFrame<boolean>("layoutStashedPageFloats");
     let i = 0;
@@ -2888,7 +2888,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     start: Element | Text,
     end: Element | Text,
   ): Vtree.ClientRect[] {
-    const arr = [];
+    const arr: Vtree.ClientRect[] = [];
     const range = start.ownerDocument.createRange();
     let wentUp = false;
     let node: Node = start;
@@ -2986,7 +2986,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   findLinePositions(checkPoints: Vtree.RenderedNodeContext[]): number[] {
     const LOW_OVERLAP = 0.2;
     const MID_OVERLAP = 0.6;
-    const positions = [];
+    const positions: number[] = [];
     const boxes = this.getRangeBoxes(
       checkPoints[0].viewNode,
       checkPoints[checkPoints.length - 1].viewNode,
@@ -3479,8 +3479,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return true if overflows
    */
   checkOverflowAndSaveEdge(
-    nodeContext: Vtree.NodeContext,
-    trailingEdgeContexts: Vtree.NodeContext[],
+    nodeContext: Vtree.NodeContext | null,
+    trailingEdgeContexts: Vtree.NodeContext[] | null,
   ): boolean {
     if (!nodeContext) {
       return false;
@@ -3534,8 +3534,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return true if overflows
    */
   checkOverflowAndSaveEdgeAndBreakPosition(
-    nodeContext: Vtree.NodeContext,
-    trailingEdgeContexts: Vtree.NodeContext[],
+    nodeContext: Vtree.NodeContext | null,
+    trailingEdgeContexts: Vtree.NodeContext[] | null,
     saveEvenOverflown: boolean,
     breakAtTheEdge: string | null,
   ): boolean {
@@ -4769,7 +4769,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // ------ start the column -----------
     this.openAllViews(chunkPosition.primary).then((nodeContext) => {
-      let initialNodeContext: Vtree.NodeContext = null;
+      let initialNodeContext: Vtree.NodeContext | null = null;
       if (nodeContext.viewNode) {
         initialNodeContext = nodeContext.copy();
       } else {
@@ -4858,9 +4858,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const frame: Task.Frame<boolean> = Task.newFrame(
       "doFinishBreakOfFragmentLayoutConstraints",
     );
-    const sortedFragmentLayoutConstraints = [].concat(
-      this.fragmentLayoutConstraints,
-    );
+    const sortedFragmentLayoutConstraints =
+      this.fragmentLayoutConstraints.slice();
     sortedFragmentLayoutConstraints.sort(
       (a, b) => a.getPriorityOfFinishBreak() - b.getPriorityOfFinishBreak(),
     );

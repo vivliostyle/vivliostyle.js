@@ -103,7 +103,10 @@ export namespace Layout {
     /**
      * @return break position, if found
      */
-    findAcceptableBreak(column: Column, penalty: number): Vtree.NodeContext;
+    findAcceptableBreak(
+      column: Column,
+      penalty: number,
+    ): Vtree.NodeContext | null;
     /**
      * @return penalty for this break position
      */
@@ -113,7 +116,7 @@ export namespace Layout {
   }
 
   export interface AbstractBreakPosition extends BreakPosition {
-    getNodeContext(): Vtree.NodeContext;
+    getNodeContext(): Vtree.NodeContext | null;
   }
 
   export type BreakPositionAndNodeContext = {
@@ -431,8 +434,8 @@ export namespace Layout {
      * @return true if overflows
      */
     checkOverflowAndSaveEdge(
-      nodeContext: Vtree.NodeContext,
-      trailingEdgeContexts: Vtree.NodeContext[],
+      nodeContext: Vtree.NodeContext | null,
+      trailingEdgeContexts: Vtree.NodeContext[] | null,
     ): boolean;
     /**
      * Save a possible page break position on a CSS block edge. Check if it
@@ -440,8 +443,8 @@ export namespace Layout {
      * @return true if overflows
      */
     checkOverflowAndSaveEdgeAndBreakPosition(
-      nodeContext: Vtree.NodeContext,
-      trailingEdgeContexts: Vtree.NodeContext[],
+      nodeContext: Vtree.NodeContext | null,
+      trailingEdgeContexts: Vtree.NodeContext[] | null,
       saveEvenOverflown: boolean,
       breakAtTheEdge: string | null,
     ): boolean;
