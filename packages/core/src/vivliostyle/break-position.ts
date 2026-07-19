@@ -31,7 +31,7 @@ export abstract class AbstractBreakPosition
   abstract findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
-  ): Vtree.NodeContext;
+  ): Vtree.NodeContext | null;
 
   abstract getMinBreakPenalty(): number;
 
@@ -45,7 +45,7 @@ export abstract class AbstractBreakPosition
   /** @override */
   breakPositionChosen(column: Layout.Column): void {}
 
-  getNodeContext(): Vtree.NodeContext {
+  getNodeContext(): Vtree.NodeContext | null {
     return null;
   }
 }
@@ -92,7 +92,7 @@ export class EdgeBreakPosition
   override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
-  ): Vtree.NodeContext {
+  ): Vtree.NodeContext | null {
     this.updateOverflows(column);
     if (penalty < this.getMinBreakPenalty()) {
       return null;

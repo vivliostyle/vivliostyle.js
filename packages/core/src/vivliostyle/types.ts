@@ -509,7 +509,9 @@ export namespace Layout {
     ): Task.Result<Vtree.ChunkPosition>;
     isFullWithPageFloats(): boolean;
     getMaxBlockSizeOfPageFloats(): number;
-    doFinishBreakOfFragmentLayoutConstraints(nodeContext): void;
+    doFinishBreakOfFragmentLayoutConstraints(
+      nodeContext: Vtree.NodeContext,
+    ): Task.Result<boolean>;
     /**
      * @param nodeContext starting position.
      * @return holding end position.
@@ -583,6 +585,7 @@ export namespace Layout {
     readonly parentContainer: Vtree.Container;
     readonly parentElement: Element | null;
 
+    applyCompactFootnoteDisplay(): void;
     convertPercentageSizesToPx(target: Element): void;
     fixFloatSizeAndPosition(nodeContext: Vtree.NodeContext): void;
     getRootViewNodeCount(): number;

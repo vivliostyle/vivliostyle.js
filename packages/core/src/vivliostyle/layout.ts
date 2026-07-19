@@ -1350,7 +1350,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * Set element's computed CSS insets to Column Container
    */
-  setComputedInsets(element: Element, container: Column) {
+  setComputedInsets(element: Element, container: Layout.Column) {
     const style = this.clientLayout.getElementComputedStyle(element);
     if (style) {
       container.marginLeft = this.parseComputedLength(style.marginLeft);
@@ -1373,7 +1373,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * Set element's computed width and height to Column Container
    */
-  setComputedWidthAndHeight(element: Element, container: Column) {
+  setComputedWidthAndHeight(element: Element, container: Layout.Column) {
     const style = this.clientLayout.getElementComputedStyle(element);
     if (style) {
       container.width = this.parseComputedLength(style.width);
@@ -1719,7 +1719,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
     condition: PageFloats.PageFloatPlacementCondition,
-  ): Task.Result<PageFloatArea | null> {
+  ): Task.Result<Layout.PageFloatArea | null> {
     const floatAreaElement = this.element.ownerDocument.createElement("div");
     Base.setCSSProperty(floatAreaElement, "position", "absolute");
     const parentPageFloatLayoutContext =
