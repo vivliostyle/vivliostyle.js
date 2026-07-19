@@ -1010,7 +1010,7 @@ export namespace Table {
 
     removeDummyRowNodes(nodeContext: Vtree.NodeContext): void;
     getElementsOffsetsForTableCell(
-      column: Layout.Column,
+      column: Layout.Column | null,
     ): RepetitiveElement.ElementsOffset[];
   }
 

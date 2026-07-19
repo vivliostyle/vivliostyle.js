@@ -49,7 +49,7 @@ export class TableRow {
 
   constructor(
     public readonly rowIndex: number,
-    public readonly sourceNode: Node,
+    public readonly sourceNode: Node | null,
   ) {}
 
   addCell(cell: TableCell) {
@@ -160,7 +160,7 @@ export class BetweenTableRowBreakPosition
   override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
-  ): Vtree.NodeContext {
+  ): Vtree.NodeContext | null {
     const breakNodeContext = super.findAcceptableBreak(column, penalty);
     if (penalty < this.getMinBreakPenalty()) {
       return null;
@@ -260,7 +260,7 @@ export class InsideTableRowBreakPosition
   override findAcceptableBreak(
     column: Layout.Column,
     penalty: number,
-  ): Vtree.NodeContext {
+  ): Vtree.NodeContext | null {
     if (
       this !== column.breakPositions[0] && // Fix for issue #1458, case 2
       penalty < this.getMinBreakPenalty()
@@ -531,7 +531,7 @@ export class TableFormattingContext
       } else {
         return uniqueCells;
       }
-    }, []);
+    }, [] as TableCell[]);
   }
 
   getRowSpanningCellsOverflowingTheRow(rowIndex: number): TableCell[] {
@@ -577,12 +577,12 @@ export class TableFormattingContext
    * @return position
    */
   findCellFromColumn(
-    column: Layout.Column,
+    column: Layout.Column | null,
   ): { rowIndex: number; columnIndex: number } | null {
     if (!column) {
       return null;
     }
-    let tableCell: TableCell = null;
+    let tableCell: TableCell | null = null;
     let row = 0;
     let col = 0;
     loop: for (row = 0; row < this.cellFragments.length; row++) {
@@ -613,10 +613,11 @@ export class TableFormattingContext
     return null;
   }
 
-  collectElementsOffsetOfUpperCells(
-    position: { rowIndex: number; columnIndex: number } | null,
-  ): RepetitiveElement.ElementsOffset[] {
-    const collected = [];
+  collectElementsOffsetOfUpperCells(position: {
+    rowIndex: number;
+    columnIndex: number;
+  }): RepetitiveElement.ElementsOffset[] {
+    const collected: TableCellFragment[] = [];
     return this.slots.reduce((repetitiveElements, row, index) => {
       if (index >= position.rowIndex) {
         return repetitiveElements;
@@ -637,7 +638,10 @@ export class TableFormattingContext
   }
 
   collectElementsOffsetOfHighestColumn(): RepetitiveElement.ElementsOffset[] {
-    const elementsInColumn = [];
+    const elementsInColumn: {
+      collected: TableCellFragment[];
+      elements: RepetitiveElement.ElementsOffset[];
+    }[] = [];
     this.rows.forEach((row) => {
       row.cells.forEach((cell, index) => {
         if (!elementsInColumn[index]) {
@@ -686,13 +690,15 @@ export class TableFormattingContext
   }
 
   override saveState(): any {
-    return [].concat(this.cellBreakPositions);
+    return ([] as BrokenTableCellPosition[]).concat(this.cellBreakPositions);
   }
 
   override restoreState(state: any) {
     // Create a fresh copy to prevent the saved state from being mutated
     // during subsequent layout attempts (issue #1667).
-    this.cellBreakPositions = [].concat(state as BrokenTableCellPosition[]);
+    this.cellBreakPositions = ([] as BrokenTableCellPosition[]).concat(
+      state as BrokenTableCellPosition[],
+    );
   }
 }
 
@@ -1135,7 +1141,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (cellBreakPositions.length === 0) {
       return [];
     }
-    const rowSpanningCellBreakPositions = [];
+    const rowSpanningCellBreakPositions: BrokenTableCellPosition[][] = [];
     cellBreakPositions.forEach((p) => {
       const cell = p.cell;
       const rowIndex = cell.rowIndex;
@@ -2699,7 +2705,7 @@ export class TableRowLayoutConstraint
   }
 
   getElementsOffsetsForTableCell(
-    column: Layout.Column,
+    column: Layout.Column | null,
   ): RepetitiveElement.ElementsOffset[] {
     const formattingContext = getTableFormattingContext(
       this.nodeContext.formattingContext,
