@@ -4896,7 +4896,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return holding end position.
    */
   doLayout(
-    nodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.NodeContext | null,
     leadingEdge: boolean,
     breakAfter?: string | null,
   ): Task.Result<{
@@ -4904,8 +4904,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     overflownNodeContext: Vtree.NodeContext | null;
   }> {
     const frame: Task.Frame<{
-      nodeContext: Vtree.NodeContext;
-      overflownNodeContext: Vtree.NodeContext;
+      nodeContext: Vtree.NodeContext | null;
+      overflownNodeContext: Vtree.NodeContext | null;
     }> = Task.newFrame("doLayout");
     let overflownNodeContext: Vtree.NodeContext | null = null;
 

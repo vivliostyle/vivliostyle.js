@@ -77,19 +77,19 @@ export namespace Layout {
   export interface FragmentLayoutConstraint {
     flagmentLayoutConstraintType: FragmentLayoutConstraintType;
     allowLayout(
-      nodeContext: Vtree.NodeContext,
-      overflownNodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
+      overflownNodeContext: Vtree.NodeContext | null,
       column: Column,
     ): boolean;
-    nextCandidate(nodeContext: Vtree.NodeContext): boolean;
+    nextCandidate(nodeContext: Vtree.NodeContext | null): boolean;
     postLayout(
       allowed: boolean,
-      positionAfter: Vtree.NodeContext,
-      initialPosition: Vtree.NodeContext,
+      positionAfter: Vtree.NodeContext | null,
+      initialPosition: Vtree.NodeContext | null,
       column: Column,
     );
     finishBreak(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       column: Column,
     ): Task.Result<boolean>;
     equalsTo(constraint: FragmentLayoutConstraint): boolean;
