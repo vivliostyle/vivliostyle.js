@@ -274,9 +274,9 @@ function processAfterIfContinuesOfNodeContext(
 }
 
 export function processAfterIfContinues(
-  result: Task.Result<Vtree.NodeContext>,
+  result: Task.Result<Vtree.NodeContext | null>,
   column: Layout.Column,
-): Task.Result<Vtree.NodeContext> {
+): Task.Result<Vtree.NodeContext | null> {
   return result.thenAsync((nodeContext) =>
     processAfterIfContinuesOfNodeContext(nodeContext, column),
   );
@@ -368,7 +368,7 @@ export class BoxBreakPosition
   override findAcceptableBreak(
     column: Column,
     penalty: number,
-  ): Vtree.NodeContext {
+  ): Vtree.NodeContext | null {
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
@@ -384,7 +384,7 @@ export class BoxBreakPosition
     return this.penalty;
   }
 
-  override getNodeContext(): Vtree.NodeContext {
+  override getNodeContext(): Vtree.NodeContext | null {
     return this.alreadyEvaluated
       ? this.breakNodeContext
       : this.checkPoints[this.checkPoints.length - 1];
@@ -932,7 +932,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @param height float box progression dimension.
    * @return newly created float element.
    */
-  createFloat(ref: Node, side: string, width: number, height: number): Element {
+  createFloat(
+    ref: Node | null,
+    side: string,
+    width: number,
+    height: number,
+  ): Element {
     const div = this.viewDocument.createElement("div");
     if (this.vertical) {
       if (height >= this.height) {
@@ -1213,7 +1218,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return edge position
    */
   calculateEdge(
-    nodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.NodeContext | null,
     checkPoints: Vtree.RenderedNodeContext[],
     index: number,
     boxOffset: number,

@@ -147,7 +147,7 @@ export namespace Layout {
   }
 
   export interface Column extends Vtree.Container {
-    last: Node;
+    last: Node | null;
     viewDocument: Document;
     flowRootFormattingContext: Vtree.FormattingContext;
     // Issue #1842: distinguishes auto-advanced follow-up columns from the first
@@ -243,7 +243,7 @@ export namespace Layout {
      * @return newly created float element.
      */
     createFloat(
-      ref: Node,
+      ref: Node | null,
       side: string,
       width: number,
       height: number,
@@ -264,7 +264,7 @@ export namespace Layout {
      * @return edge position
      */
     calculateEdge(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
       index: number,
       boxOffset: number,
