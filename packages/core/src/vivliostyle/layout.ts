@@ -796,7 +796,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   nextInTree(
     position: Vtree.NodeContext,
     atUnforcedBreak?: boolean,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const cont = this.layoutContext.nextInTree(position, atUnforcedBreak);
     return processAfterIfContinues(cont, this);
   }

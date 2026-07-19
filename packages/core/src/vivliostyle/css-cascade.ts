@@ -763,7 +763,7 @@ export function convertFontRelativeLengthToPx(
 
 export function convertFontSizeToPx(
   numeric: Css.Numeric,
-  parentFontSize: number,
+  parentFontSize: number | null,
   context: Exprs.Context,
 ): Css.Numeric {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);

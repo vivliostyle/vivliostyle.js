@@ -204,7 +204,7 @@ export namespace Layout {
     nextInTree(
       position: Vtree.NodeContext,
       atUnforcedBreak?: boolean,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Builds the view for a single unbreakable element.
      * @param position start source position.
@@ -1054,7 +1054,7 @@ export namespace Vtree {
     nextInTree(
       nodeContext: NodeContext,
       atUnforcedBreak?: boolean,
-    ): Task.Result<NodeContext>;
+    ): Task.Result<NodeContext | null>;
     /**
      * Apply pseudo-element styles (if any).
      * @param target element to apply styles to
@@ -1272,7 +1272,7 @@ export namespace Vtree {
     offsetInNode: number;
     after: boolean;
     shadowType: ShadowType; // parent's shadow type
-    shadowContext: Vtree.ShadowContext;
+    shadowContext: Vtree.ShadowContext | null;
     nodeShadow: Vtree.ShadowContext | null;
     shadowSibling: NodeContext | null; // next "sibling" in the shadow tree
     // other stuff

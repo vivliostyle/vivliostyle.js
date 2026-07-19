@@ -919,26 +919,27 @@ export class ViewFactory
 
     let steps = -1;
     while (node && node.nodeType == 1) {
-      const shadowRoot = shadowContext && shadowContext.root == node;
+      const shadow = shadowContext;
+      const shadowRoot = shadow !== null && shadow.root == node;
       const semanticFootnoteRootInRootedShadow =
-        !!shadowRoot &&
-        shadowContext.type == Vtree.ShadowType.ROOTED &&
+        shadowRoot &&
+        shadow.type == Vtree.ShadowType.ROOTED &&
         SemanticFootnote.isSemanticFootnoteElement(node as Element);
       if (
         !shadowRoot ||
-        shadowContext.type == Vtree.ShadowType.ROOTLESS ||
+        shadow.type == Vtree.ShadowType.ROOTLESS ||
         semanticFootnoteRootInRootedShadow
       ) {
-        const styler = shadowContext
-          ? (shadowContext.styler as CssStyler.AbstractStyler)
+        const styler = shadow
+          ? (shadow.styler as CssStyler.AbstractStyler)
           : this.styler;
         const nodeStyle = styler.getStyle(node as Element, false);
         styles.push(nodeStyle);
         lang = lang || Base.getLangAttribute(node as Element);
       }
       if (shadowRoot && !semanticFootnoteRootInRootedShadow) {
-        node = shadowContext.owner;
-        shadowContext = shadowContext.parentShadow;
+        node = shadow.owner;
+        shadowContext = shadow.parentShadow;
       } else {
         node = node.parentNode;
         steps++;
@@ -1156,9 +1157,9 @@ export class ViewFactory
   resolveFormattingContext(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    display: Css.Val,
-    position: Css.Ident,
-    float: Css.Val,
+    display: Css.Val | null | undefined,
+    position: Css.Ident | null | undefined,
+    float: Css.Val | null | undefined,
     isRoot: boolean,
   ) {
     const hooks: Plugin.ResolveFormattingContextHook[] = Plugin.getHooksForName(
@@ -1433,7 +1434,7 @@ export class ViewFactory
       );
       footnoteDisplay = semanticFootnoteStyle.footnoteDisplay;
 
-      let floating =
+      const floatSideName =
         floatSide instanceof Css.SpaceList ||
         floatSide === Css.ident.left ||
         floatSide === Css.ident.right ||
@@ -1447,7 +1448,10 @@ export class ViewFactory
         floatSide === Css.ident.snap_inline ||
         floatSide === Css.ident.inside ||
         floatSide === Css.ident.outside ||
-        floatSide === Css.ident.footnote;
+        floatSide === Css.ident.footnote
+          ? floatSide.toString()
+          : null;
+      let floating = floatSideName !== null;
       if (floatSide) {
         // Don't want to set it in view DOM CSS.
         delete computedStyle["float"];
@@ -1565,7 +1569,7 @@ export class ViewFactory
         Display.isInlineLevel(display) ||
         Display.isRubyInternalDisplay(display);
       nodeContext.display = display ? display.toString() : "inline";
-      nodeContext.floatSide = floating ? floatSide.toString() : null;
+      nodeContext.floatSide = floating ? floatSideName : null;
       nodeContext.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
       const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
@@ -2889,7 +2893,7 @@ export class ViewFactory
     const parent = pos.parent;
 
     // content that will be inserted
-    let contentNode: Node;
+    let contentNode: Node | null;
     let contentShadowType: Vtree.ShadowType;
     const contentShadow = shadow.subShadow || shadow.parentShadow;
     if (shadow.subShadow) {
@@ -2905,29 +2909,32 @@ export class ViewFactory
       contentShadowType = Vtree.ShadowType.ROOTLESS;
     }
     const nextSibling = pos.sourceNode.nextSibling;
+    let nextPos: Vtree.NodeContext | null;
     if (nextSibling) {
       pos.sourceNode = nextSibling;
       pos.resetView();
+      nextPos = pos;
     } else if (pos.shadowSibling) {
-      pos = pos.shadowSibling;
-    } else if (contentNode) {
-      pos = null;
+      nextPos = pos.shadowSibling;
     } else {
-      pos = pos.parent.modify();
-      pos.after = true;
+      nextPos = null;
     }
     if (contentNode) {
       const r = new Vtree.NodeContext(contentNode, parent, boxOffset);
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
-      r.shadowSibling = pos;
+      r.shadowSibling = nextPos;
       return this.processShadowContent(r);
     }
-    pos.boxOffset = boxOffset;
-    return pos;
+    if (nextPos === null) {
+      nextPos = pos.parent.modify();
+      nextPos.after = true;
+    }
+    nextPos.boxOffset = boxOffset;
+    return nextPos;
   }
 
-  private nextPositionInTree(pos: Vtree.NodeContext): Vtree.NodeContext {
+  private nextPositionInTree(pos: Vtree.NodeContext): Vtree.NodeContext | null {
     let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
       // root, that was the last possible position
@@ -3015,7 +3022,7 @@ export class ViewFactory
     let prev: Node | null = viewNode.previousSibling;
     while (prev) {
       if (prev.nodeType === Node.TEXT_NODE) {
-        if (prev.textContent.trim().length === 0) {
+        if ((prev.textContent ?? "").trim().length === 0) {
           prev = prev.previousSibling;
           continue;
         }
@@ -3144,13 +3151,15 @@ export class ViewFactory
   nextInTree(
     position: Vtree.NodeContext,
     atUnforcedBreak?: boolean,
-  ): Task.Result<Vtree.NodeContext> {
-    let nodeContext = this.nextPositionInTree(position);
-    if (!nodeContext || nodeContext.after) {
-      return Task.newResult(nodeContext);
+  ): Task.Result<Vtree.NodeContext | null> {
+    const nextPosition = this.nextPositionInTree(position);
+    if (!nextPosition || nextPosition.after) {
+      return Task.newResult<Vtree.NodeContext | null>(nextPosition);
     }
-    this.syncTextNodePageTypeBoundary(nodeContext);
-    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("nextInTree");
+    this.syncTextNodePageTypeBoundary(nextPosition);
+    let nodeContext = nextPosition;
+    const frame: Task.Frame<Vtree.NodeContext | null> =
+      Task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
       (processChildren) => {
         if (!nodeContext.viewNode || !processChildren) {
@@ -3339,7 +3348,8 @@ export class ViewFactory
       ) {
         // Fix for Issue #568
         Base.setCSSProperty(
-          this.page.pageAreaElement.parentElement.parentElement,
+          // the page area element is always nested in bleed box and container
+          this.page.pageAreaElement.parentElement!.parentElement!,
           propName,
           value.toString(),
         );
@@ -3622,8 +3632,9 @@ export class ViewFactory
     let offsetInNode = nodeContext.offsetInNode;
     const after = nodeContext.after;
     if (nodeOffset > 0) {
-      const text = nodeContext.viewNode.textContent;
-      nodeContext.viewNode.textContent = text.substr(0, nodeOffset);
+      const viewNode = nodeContext.viewNode;
+      const text = viewNode.textContent ?? "";
+      viewNode.textContent = text.substr(0, nodeOffset);
       offsetInNode += nodeOffset;
     } else if (!after && nodeContext.viewNode && offsetInNode == 0) {
       const parent = nodeContext.viewNode.parentNode;
@@ -3632,17 +3643,18 @@ export class ViewFactory
       }
     }
     const boxOffset = nodeContext.boxOffset + nodeOffset;
-    const arr = [];
+    const arr: Vtree.NodeContext[] = [];
     while (nodeContext && nodeContext.firstPseudo === firstPseudo) {
       arr.push(nodeContext);
       nodeContext = nodeContext.parent;
     }
-    let pn = arr.pop(); // container for that pseudoelement
+    // the loop above runs at least once (nodeContext.firstPseudo === firstPseudo)
+    let pn = arr.pop()!; // container for that pseudoelement
     let shadowSibling = pn.shadowSibling;
     frame
       .loop(() => {
         while (arr.length > 0) {
-          pn = arr.pop();
+          pn = arr.pop()!;
           nodeContext = new Vtree.NodeContext(
             pn.sourceNode,
             nodeContext,
@@ -4013,7 +4025,8 @@ export class ViewFactory
     anonymousBlock.className = "viv-anonymous-block";
 
     for (
-      let node = forcedBreakElem.nextSibling, nextNode = null;
+      let node: Node | null = forcedBreakElem.nextSibling,
+        nextNode: Node | null = null;
       node;
       node = nextNode
     ) {
@@ -4033,7 +4046,7 @@ export class ViewFactory
     const num = numeric.num;
     const unit = numeric.unit;
     if (Exprs.isFontRelativeLengthUnit(unit)) {
-      let elem = viewNode;
+      let elem: Node | null = viewNode;
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;
       }
