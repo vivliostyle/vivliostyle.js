@@ -517,12 +517,12 @@ export namespace Layout {
      * @return holding end position.
      */
     doLayout(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       leadingEdge: boolean,
       breakAfter?: string | null,
     ): Task.Result<{
-      nodeContext: Vtree.NodeContext;
-      overflownNodeContext: Vtree.NodeContext;
+      nodeContext: Vtree.NodeContext | null;
+      overflownNodeContext: Vtree.NodeContext | null;
     }>;
     saveDistanceToBlockEndFloats(): void;
     collectElementsOffset(): RepetitiveElement.ElementsOffset[];
