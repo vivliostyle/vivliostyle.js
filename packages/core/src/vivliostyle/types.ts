@@ -318,7 +318,7 @@ export namespace Layout {
       condition: PageFloats.PageFloatPlacementCondition,
     ): Task.Result<boolean>;
     createPageFloatArea(
-      float: PageFloats.PageFloat | null,
+      float: PageFloats.PageFloat,
       floatSide: string,
       anchorEdge: number | null,
       strategy: PageFloats.PageFloatLayoutStrategy,

@@ -1714,7 +1714,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   createPageFloatArea(
-    float: PageFloats.PageFloat | null,
+    float: PageFloats.PageFloat,
     floatSide: string,
     anchorEdge: number | null,
     strategy: PageFloats.PageFloatLayoutStrategy,
@@ -1745,7 +1745,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         float.floatReference,
       ).container;
     // The constructor measures through a DOM probe, so attach the element first.
-    floatContainer.element.parentNode.appendChild(floatAreaElement);
+    floatContainer.element.parentNode!.appendChild(floatAreaElement);
     const containingBlockRect = floatContainer.getPaddingRect();
     const floatLeft = containingBlockRect.x1 - floatContainer.originX;
     const floatTop = containingBlockRect.y1 - floatContainer.originY;
@@ -1992,7 +1992,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // area) need to be cleaned up from ancestor contexts. (Issue #1675)
     const savedInsideFragments = new Set<PageFloats.PageFloatFragment>();
     for (
-      let ctx = context as PageFloats.PageFloatLayoutContext;
+      let ctx: PageFloats.PageFloatLayoutContext | null =
+        context as PageFloats.PageFloatLayoutContext;
       ctx;
       ctx = ctx.effectiveParent
     ) {
@@ -2320,7 +2321,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   layoutPageFloat(
     nodeContext: Vtree.FloatNodeContext,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const context = this.pageFloatLayoutContext;
     const strategy =
       new PageFloats.PageFloatLayoutStrategyResolver().findByNodeContext(
@@ -2443,7 +2444,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 context.hasInvalidatedForLineFootnote(float)
               ) {
                 if (context.isInvalidated()) {
-                  return Task.newResult(null as Vtree.NodeContext);
+                  return Task.newResult<Vtree.NodeContext | null>(null);
                 }
                 const continuingFragment = strategy.findPageFloatFragment(
                   float,
@@ -2470,7 +2471,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             if (context.generatingNodePosition) {
               return Task.newResult(nodeContextAfter);
             }
-            return Task.newResult(null as Vtree.NodeContext);
+            return Task.newResult<Vtree.NodeContext | null>(null);
           });
         }
       }
@@ -4516,7 +4517,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   layoutFloatOrFootnote(
     nodeContext: Vtree.FloatNodeContext,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     if (
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"
