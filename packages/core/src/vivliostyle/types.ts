@@ -349,7 +349,7 @@ export namespace Layout {
     ): Task.Result<PageFloats.FloatReference>;
     layoutPageFloat(
       nodeContext: Vtree.FloatNodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
       resNodeContext: Vtree.NodeContext,
@@ -401,7 +401,7 @@ export namespace Layout {
     findBoxBreakPosition(
       bp: BoxBreakPosition,
       force: boolean,
-    ): Vtree.NodeContext;
+    ): Vtree.NodeContext | null;
     getAfterEdgeOfBlockContainer(nodeContext: Vtree.NodeContext): number;
     findFirstOverflowingEdgeAndCheckPoint(
       checkPoints: Vtree.RenderedNodeContext[],
@@ -459,7 +459,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
       leadingEdge: boolean,
       forcedBreakValue: string | null,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Skips non-renderable positions until it hits the end of the flow or some
      * renderable content. Returns the nodeContext that was passed in if some
@@ -467,10 +467,10 @@ export namespace Layout {
      */
     skipTailEdges(
       nodeContext: Vtree.NodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     layoutFloatOrFootnote(
       nodeContext: Vtree.FloatNodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Layout next portion of the source.
      */
@@ -506,7 +506,7 @@ export namespace Layout {
       chunkPosition: Vtree.ChunkPosition,
       leadingEdge: boolean,
       breakAfter?: string | null,
-    ): Task.Result<Vtree.ChunkPosition>;
+    ): Task.Result<Vtree.ChunkPosition | null>;
     isFullWithPageFloats(): boolean;
     getMaxBlockSizeOfPageFloats(): number;
     doFinishBreakOfFragmentLayoutConstraints(

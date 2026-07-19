@@ -366,7 +366,7 @@ export class BoxBreakPosition
   }
 
   override findAcceptableBreak(
-    column: Column,
+    column: Layout.Column,
     penalty: number,
   ): Vtree.NodeContext | null {
     if (penalty < this.getMinBreakPenalty()) {
@@ -3100,7 +3100,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   findBoxBreakPosition(
     bp: BoxBreakPosition,
     force: boolean,
-  ): Vtree.NodeContext {
+  ): Vtree.NodeContext | null {
     // Workaround for issue #816 (Text with ruby overflowed at column/page break)
     const parentNode = this.element.parentNode;
     const nextSibling = this.element.nextSibling;
