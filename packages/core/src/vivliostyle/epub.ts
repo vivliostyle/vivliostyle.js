@@ -131,10 +131,11 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         frame.finish(null);
         return;
       }
-      const opf = new OPFDoc(this, url);
-      opf.initWithWebPubManifest(manifestObj, undefined, url).then(() => {
-        frame.finish(opf);
-      });
+      OPFDoc.fromWebPubManifest(this, url, manifestObj, undefined, url).then(
+        (opf) => {
+          frame.finish(opf);
+        },
+      );
     });
   }
 
@@ -260,7 +261,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
 
   loadOPF(pubURL: string, root: string): Task.Result<OPFDoc> {
     const url = pubURL + root;
-    let opf = this.opfByURL[url];
+    const opf = this.opfByURL[url];
     if (opf) {
       return Task.newResult(opf);
     }
@@ -270,23 +271,21 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         if (!opfXML) {
           this.reportLoadError(url);
         } else {
-          opf = new OPFDoc(this, pubURL);
-          this.opfByURL[url] = opf;
-          this.primaryOPFByEPubURL[pubURL] = opf;
+          const registerOPF = (opf: OPFDoc) => {
+            this.opfByURL[url] = opf;
+            this.primaryOPFByEPubURL[pubURL] = opf;
+            frame.finish(opf);
+          };
           if (this.plainXMLStore.resources[pubURL + "META-INF/container.xml"]) {
             this.loadAsPlainXML(pubURL + "META-INF/encryption.xml").then(
               (encXML) => {
-                opf.initWithXMLDoc(opfXML, encXML).then(() => {
-                  frame.finish(opf);
-                });
+                registerOPF(OPFDoc.fromXMLDoc(this, pubURL, opfXML, encXML));
               },
             );
           } else {
             // OPF file is directly specified, not via container.xml.
             // In this case, encryption.xml is not available.
-            opf.initWithXMLDoc(opfXML, null).then(() => {
-              frame.finish(opf);
-            });
+            registerOPF(OPFDoc.fromXMLDoc(this, pubURL, opfXML, null));
           }
         }
       },
@@ -311,7 +310,6 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         frame.finish(null);
       } else {
         const doc = xmldoc.document;
-        const opf = new OPFDoc(this, url);
 
         // Find manifest, W3C WebPublication or Readium Web Publication Manifest
         const manifestLink = doc.querySelector(
@@ -323,9 +321,11 @@ export class EPUBDocStore extends OPS.OPSDocStore {
             const manifestObj = Base.stringToJSON(
               doc.getElementById(href.substr(1)).textContent,
             );
-            opf.initWithWebPubManifest(manifestObj, doc).then(() => {
-              frame.finish(opf);
-            });
+            OPFDoc.fromWebPubManifest(this, url, manifestObj, doc).then(
+              (opf) => {
+                frame.finish(opf);
+              },
+            );
           } else {
             const manifestUrl = Base.resolveURL(
               manifestLink.getAttribute("href"),
@@ -336,16 +336,20 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               true,
               `Failed to fetch Publication Manifest ${manifestUrl}`,
             ).then((manifestObj) => {
-              opf
-                .initWithWebPubManifest(manifestObj, doc, manifestUrl)
-                .then(() => {
-                  frame.finish(opf);
-                });
+              OPFDoc.fromWebPubManifest(
+                this,
+                url,
+                manifestObj,
+                doc,
+                manifestUrl,
+              ).then((opf) => {
+                frame.finish(opf);
+              });
             });
           }
         } else {
           // No manifest
-          opf.initWithWebPubManifest({}, doc).then(() => {
+          OPFDoc.fromWebPubManifest(this, url, {}, doc).then((opf) => {
             if (opf.toc && opf.toc.src === xmldoc.url) {
               // toc is the primary entry (X)HTML
               if (Toc.findTocElements(doc).length === 0) {
@@ -822,13 +826,33 @@ export const supportedMediaTypes = {
 
 export const transformedIdPrefix = "viv-id-";
 
+function getPathFromURL(url: string, pubURL: string): string | null {
+  if (url.startsWith("data:")) {
+    return url === pubURL ? "" : url;
+  }
+  if (pubURL) {
+    let epubBaseURL = Base.resolveURL("", pubURL);
+    if (url === epubBaseURL || url + "/" === epubBaseURL) {
+      return "";
+    }
+    if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
+      epubBaseURL += "/";
+    }
+    return url.substr(0, epubBaseURL.length) == epubBaseURL
+      ? decodeURIComponent(url.substr(epubBaseURL.length))
+      : null;
+  } else {
+    return url;
+  }
+}
+
 export class OPFDoc {
-  opfXML: XmlDoc.XMLDocHolder = null;
-  encXML: XmlDoc.XMLDocHolder = null;
-  items: OPFItem[] = null;
-  spine: OPFItem[] = null;
-  itemMap: { [key: string]: OPFItem } = null;
-  itemMapByPath: { [key: string]: OPFItem } = null;
+  opfXML: XmlDoc.XMLDocHolder;
+  encXML: XmlDoc.XMLDocHolder | null = null;
+  items: OPFItem[];
+  spine: OPFItem[];
+  itemMap: { [key: string]: OPFItem };
+  itemMapByPath: { [key: string]: OPFItem };
   uid: string | null = null;
   bindings: { [key: string]: string } = {};
   lang: string | null = null;
@@ -843,10 +867,22 @@ export class OPFDoc {
   pageProgression: Constants.PageProgression | null = null;
   documentURLTransformer: Base.DocumentURLTransformer;
 
-  constructor(
+  private constructor(
     public readonly store: EPUBDocStore,
     public readonly pubURL: string,
+    content: {
+      opfXML: XmlDoc.XMLDocHolder;
+      items: OPFItem[];
+      spine: OPFItem[];
+      itemMap: { [key: string]: OPFItem };
+      itemMapByPath: { [key: string]: OPFItem };
+    },
   ) {
+    this.opfXML = content.opfXML;
+    this.items = content.items;
+    this.spine = content.spine;
+    this.itemMap = content.itemMap;
+    this.itemMapByPath = content.itemMapByPath;
     this.documentURLTransformer = this.createDocumentURLTransformer();
   }
 
@@ -946,41 +982,28 @@ export class OPFDoc {
   }
 
   getPathFromURL(url: string): string | null {
-    if (url.startsWith("data:")) {
-      return url === this.pubURL ? "" : url;
-    }
-    if (this.pubURL) {
-      let epubBaseURL = Base.resolveURL("", this.pubURL);
-      if (url === epubBaseURL || url + "/" === epubBaseURL) {
-        return "";
-      }
-      if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
-        epubBaseURL += "/";
-      }
-      return url.substr(0, epubBaseURL.length) == epubBaseURL
-        ? decodeURIComponent(url.substr(epubBaseURL.length))
-        : null;
-    } else {
-      return url;
-    }
+    return getPathFromURL(url, this.pubURL);
   }
 
-  initWithXMLDoc(
+  static fromXMLDoc(
+    store: EPUBDocStore,
+    pubURL: string,
     opfXML: XmlDoc.XMLDocHolder,
-    encXML: XmlDoc.XMLDocHolder,
-  ): Task.Result<any> {
-    this.opfXML = opfXML;
-    this.encXML = encXML;
+    encXML: XmlDoc.XMLDocHolder | null,
+  ): OPFDoc {
     const pkg = opfXML.doc().child("package");
+    let uid: string | null = null;
     const uidref = pkg.attribute("unique-identifier")[0];
     if (uidref) {
       const uidElem = opfXML.getElement(`${opfXML.url}#${uidref}`);
       if (uidElem) {
-        this.uid = uidElem.textContent.replace(/[ \n\r\t]/g, "");
+        uid = uidElem.textContent.replace(/[ \n\r\t]/g, "");
       }
     }
     const srcToFallbackId = {};
-    this.items = pkg
+    let toc: OPFItem | null = null;
+    let cover: OPFItem | null = null;
+    const items = pkg
       .child("manifest")
       .child("item")
       .asArray()
@@ -992,54 +1015,67 @@ export class OPFDoc {
         if (fallback && !supportedMediaTypes[item.mediaType]) {
           srcToFallbackId[item.src] = fallback;
         }
-        if (!this.toc && item.itemProperties["nav"]) {
-          this.toc = item;
+        if (!toc && item.itemProperties["nav"]) {
+          toc = item;
         }
-        if (!this.cover && item.itemProperties["cover-image"]) {
-          this.cover = item;
+        if (!cover && item.itemProperties["cover-image"]) {
+          cover = item;
         }
         return item;
       });
-    this.itemMap = Base.indexArray(
-      this.items,
+    const itemMap = Base.indexArray(
+      items,
       getOPFItemId as (p1: OPFItem) => string | null,
     );
-    this.itemMapByPath = Base.indexArray(this.items, (item) =>
-      this.getPathFromURL(item.src),
+    const itemMapByPath = Base.indexArray(items, (item) =>
+      getPathFromURL(item.src, pubURL),
     );
+    const fallbackMap: { [key: string]: string } = {};
     for (const src in srcToFallbackId) {
       let fallbackSrc = src;
       while (true) {
-        const item = this.itemMap[srcToFallbackId[fallbackSrc]];
+        const item = itemMap[srcToFallbackId[fallbackSrc]];
         if (!item) {
           break;
         }
         if (supportedMediaTypes[item.mediaType]) {
-          this.fallbackMap[src] = item.src;
+          fallbackMap[src] = item.src;
           break;
         }
         fallbackSrc = item.src;
       }
     }
-    this.spine = pkg
+    const spine = pkg
       .child("spine")
       .child("itemref")
       .asArray()
       .map((node, index) => {
         const elem = node as Element;
         const id = elem.getAttribute("idref");
-        const item = this.itemMap[id as string];
+        const item = itemMap[id as string];
         if (item) {
           item.itemRefElement = elem;
           item.spineIndex = index;
         }
         return item;
       });
+    const opf = new OPFDoc(store, pubURL, {
+      opfXML,
+      items,
+      spine,
+      itemMap,
+      itemMapByPath,
+    });
+    opf.encXML = encXML;
+    opf.uid = uid;
+    opf.toc = toc;
+    opf.cover = cover;
+    opf.fallbackMap = fallbackMap;
     const pageProgressionAttr = pkg
       .child("spine")
       .attribute("page-progression-direction")[0];
     if (pageProgressionAttr) {
-      this.pageProgression = Constants.pageProgressionOf(pageProgressionAttr);
+      opf.pageProgression = Constants.pageProgressionOf(pageProgressionAttr);
     }
     const idpfObfURLs = !encXML
       ? []
@@ -1066,33 +1102,33 @@ export class OPFDoc {
     for (let i = 0; i < mediaTypeElems.length; i++) {
       const handlerId = mediaTypeElems[i].getAttribute("handler");
       const mediaType = mediaTypeElems[i].getAttribute("media-type");
-      if (mediaType && handlerId && this.itemMap[handlerId]) {
-        this.bindings[mediaType] = this.itemMap[handlerId].src;
+      if (mediaType && handlerId && itemMap[handlerId]) {
+        opf.bindings[mediaType] = itemMap[handlerId].src;
       }
     }
-    this.metadata = readMetadata(
+    opf.metadata = readMetadata(
       pkg.child("metadata"),
       pkg.attribute("prefix")[0],
     );
-    if (this.metadata[metaTerms.language]) {
-      this.lang = this.metadata[metaTerms.language][0]["v"];
+    if (opf.metadata[metaTerms.language]) {
+      opf.lang = opf.metadata[metaTerms.language][0]["v"];
     }
-    if (this.metadata[metaTerms.layout]) {
-      this.prePaginated =
-        this.metadata[metaTerms.layout][0]["v"] === "pre-paginated";
+    if (opf.metadata[metaTerms.layout]) {
+      opf.prePaginated =
+        opf.metadata[metaTerms.layout][0]["v"] === "pre-paginated";
     }
 
-    if (idpfObfURLs.length > 0 && this.uid) {
+    if (idpfObfURLs.length > 0 && uid) {
       // Have to deobfuscate in JavaScript
-      const deobfuscator = makeDeobfuscator(this.uid);
+      const deobfuscator = makeDeobfuscator(uid);
       for (let i = 0; i < idpfObfURLs.length; i++) {
-        this.store.deobfuscators[this.pubURL + idpfObfURLs[i]] = deobfuscator;
+        store.deobfuscators[pubURL + idpfObfURLs[i]] = deobfuscator;
       }
     }
-    if (this.prePaginated) {
-      this.assignAutoPages();
+    if (opf.prePaginated) {
+      opf.assignAutoPages();
     }
-    return Task.newResult(true);
+    return opf;
   }
 
   assignAutoPages(): void {
@@ -1168,21 +1204,27 @@ export class OPFDoc {
     return frame.result();
   }
 
-  /**
-   * Creates a fake OPF "document" that contains OPS chapters.
-   */
-  initWithChapters(params: OPFItemParam[], doc?: Document | null) {
-    this.itemMap = {};
-    this.itemMapByPath = {};
-    this.items = [];
-    this.spine = this.items;
+  private static buildChapters(
+    pubURL: string,
+    params: OPFItemParam[],
+  ): {
+    opfXML: XmlDoc.XMLDocHolder;
+    items: OPFItem[];
+    spine: OPFItem[];
+    itemMap: { [key: string]: OPFItem };
+    itemMapByPath: { [key: string]: OPFItem };
+  } {
+    const itemMap: { [key: string]: OPFItem } = {};
+    const itemMapByPath: { [key: string]: OPFItem } = {};
+    const items: OPFItem[] = [];
+    const spine = items;
 
     // create a minimum fake OPF XML for navigation with EPUB CFI
-    const opfXML = (this.opfXML = new XmlDoc.XMLDocHolder(
+    const opfXML = new XmlDoc.XMLDocHolder(
       null,
       "",
       new DOMParser().parseFromString("<spine></spine>", "text/xml"),
-    ));
+    );
     params.forEach((param) => {
       const item = new OPFItem();
       item.initWithParam(param);
@@ -1191,38 +1233,52 @@ export class OPFDoc {
       itemref.setAttribute("idref", item.id);
       opfXML.root.appendChild(itemref);
       item.itemRefElement = itemref;
-      this.itemMap[item.id] = item;
-      let path = this.getPathFromURL(param.url);
+      itemMap[item.id] = item;
+      let path = getPathFromURL(param.url, pubURL);
       if (path == null) {
         path = param.url;
       }
-      this.itemMapByPath[path] = item;
-      this.items.push(item);
+      itemMapByPath[path] = item;
+      items.push(item);
     });
+    return { opfXML, items, spine, itemMap, itemMapByPath };
+  }
+
+  /**
+   * Creates a fake OPF "document" that contains OPS chapters.
+   */
+  static fromChapters(
+    store: EPUBDocStore,
+    pubURL: string,
+    params: OPFItemParam[],
+    doc?: Document | null,
+  ): Task.Result<OPFDoc> {
+    const opf = new OPFDoc(store, pubURL, OPFDoc.buildChapters(pubURL, params));
     if (doc) {
-      return this.store.addDocument(params[0].url, doc);
+      return store.addDocument(params[0].url, doc).thenReturn(opf);
     } else {
-      return Task.newResult(null);
+      return Task.newResult(opf);
     }
   }
 
-  initWithWebPubManifest(
+  static fromWebPubManifest(
+    store: EPUBDocStore,
+    pubURL: string,
     manifestObj: Base.JSON,
     doc?: Document,
     manifestUrl?: string,
-  ): Task.Result<boolean> {
+  ): Task.Result<OPFDoc> {
+    let pageProgression: Constants.PageProgression | null = null;
     if (manifestObj["readingProgression"]) {
-      this.pageProgression = manifestObj["readingProgression"];
+      pageProgression = manifestObj["readingProgression"];
     }
-    if (this.metadata === undefined) {
-      this.metadata = {};
-    }
+    const metadata: Meta = {};
     const title =
       manifestObj["name"] || manifestObj["metadata"]?.["title"] || doc?.title;
     if (title) {
-      this.metadata[metaTerms.title] = (
-        Array.isArray(title) ? title : [title]
-      ).map((item) => ({ v: item.value ?? item }));
+      metadata[metaTerms.title] = (Array.isArray(title) ? title : [title]).map(
+        (item) => ({ v: item.value ?? item }),
+      );
     }
     const author =
       manifestObj["author"] ||
@@ -1233,7 +1289,7 @@ export class OPFDoc {
           [],
       ).map((meta: HTMLMetaElement) => meta.content);
     if (author && author.length !== 0) {
-      this.metadata[metaTerms.creator] = (
+      metadata[metaTerms.creator] = (
         Array.isArray(author) ? author : [author]
       ).map((item) => ({ v: item.name ?? item }));
     }
@@ -1243,14 +1299,14 @@ export class OPFDoc {
       doc?.documentElement.lang ||
       doc?.documentElement.getAttribute("xml:lang");
     if (language) {
-      this.metadata[metaTerms.language] = (
+      metadata[metaTerms.language] = (
         Array.isArray(language) ? language : [language]
       ).map((item) => ({ v: item }));
     }
     // TODO: other metadata...
 
-    const primaryEntryURL = Base.stripFragment(this.pubURL);
-    const primaryEntryPath = this.getPathFromURL(primaryEntryURL);
+    const primaryEntryURL = Base.stripFragment(pubURL);
+    const primaryEntryPath = getPathFromURL(primaryEntryURL, pubURL);
     const primaryEntryReadingOrderURL =
       primaryEntryPath !== null
         ? encodeURI(primaryEntryPath)
@@ -1276,9 +1332,9 @@ export class OPFDoc {
           continue;
         }
         const hrefNoFragment = Base.stripFragment(
-          Base.resolveURL(href, this.pubURL),
+          Base.resolveURL(href, pubURL),
         );
-        const path = this.getPathFromURL(hrefNoFragment);
+        const path = getPathFromURL(hrefNoFragment, pubURL);
         const url = path !== null ? encodeURI(path) : hrefNoFragment;
         if (manifestObj["readingOrder"].indexOf(url) == -1) {
           manifestObj["readingOrder"].push(url);
@@ -1315,7 +1371,7 @@ export class OPFDoc {
             ) {
               const baseUrl = manifestUrl
                 ? manifestUrl.replace(/\/[^/]+$/, "/")
-                : this.pubURL;
+                : pubURL;
               const param = {
                 url: Base.resolveURL(Base.convertSpecialURL(url), baseUrl),
                 index: itemCount++,
@@ -1331,25 +1387,27 @@ export class OPFDoc {
         }
       },
     );
-    const frame: Task.Frame<boolean> = Task.newFrame("initWithWebPubManifest");
-    this.initWithChapters(params).then(() => {
+    const frame: Task.Frame<OPFDoc> = Task.newFrame("fromWebPubManifest");
+    OPFDoc.fromChapters(store, pubURL, params).then((opf) => {
+      opf.pageProgression = pageProgression;
+      opf.metadata = metadata;
       if (tocFound !== -1) {
-        this.toc = this.items[tocFound];
+        opf.toc = opf.items[tocFound];
       }
 
-      if (!this.toc) {
-        this.toc = manifestUrl
-          ? (this.items?.[0] ?? null)
-          : this.itemMapByPath[primaryEntryPath];
+      if (!opf.toc) {
+        opf.toc = manifestUrl
+          ? (opf.items[0] ?? null)
+          : opf.itemMapByPath[primaryEntryPath];
       }
 
       // remove items not in readingOrder (Issue #1257)
       const readingOrderCount = manifestObj["readingOrder"]?.length;
-      if (readingOrderCount && readingOrderCount < this.items.length) {
-        this.items.splice(readingOrderCount);
+      if (readingOrderCount && readingOrderCount < opf.items.length) {
+        opf.items.splice(readingOrderCount);
       }
 
-      frame.finish(true);
+      frame.finish(opf);
     });
     return frame.result();
   }

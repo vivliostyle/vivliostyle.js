@@ -82,17 +82,21 @@ describe("epub", function () {
   });
 
   describe("OPFDoc", function () {
-    describe("initWithWebPubManifest", function () {
+    describe("fromWebPubManifest", function () {
       it("creates a primary entry for data: URL documents", function (done) {
         var store = new adapt_epub.EPUBDocStore();
-        var opf = new adapt_epub.OPFDoc(store, "data:text/html,");
         var doc = new DOMParser().parseFromString(
           "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Blank</title></head><body></body></html>",
           "text/html",
         );
 
         adapt_task.start(function () {
-          opf.initWithWebPubManifest({}, doc).then(function () {
+          adapt_epub.OPFDoc.fromWebPubManifest(
+            store,
+            "data:text/html,",
+            {},
+            doc,
+          ).then(function (opf) {
             expect(opf.items.length).toBe(1);
             expect(opf.spine.length).toBe(1);
             expect(opf.items[0].src).toBe("data:text/html,");
@@ -104,14 +108,18 @@ describe("epub", function () {
 
       it("creates a primary entry when the publication URL is the root document", function (done) {
         var store = new adapt_epub.EPUBDocStore();
-        var opf = new adapt_epub.OPFDoc(store, "https://example.com/webpub/");
         var doc = new DOMParser().parseFromString(
           "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Root</title></head><body></body></html>",
           "text/html",
         );
 
         adapt_task.start(function () {
-          opf.initWithWebPubManifest({}, doc).then(function () {
+          adapt_epub.OPFDoc.fromWebPubManifest(
+            store,
+            "https://example.com/webpub/",
+            {},
+            doc,
+          ).then(function (opf) {
             expect(opf.items.length).toBe(1);
             expect(opf.spine.length).toBe(1);
             expect(opf.items[0].src).toBe("https://example.com/webpub/");
@@ -123,11 +131,10 @@ describe("epub", function () {
     });
 
     describe("OPFDocumentURLTransformer", function () {
-      var opfDoc = new adapt_epub.OPFDoc(null, null);
-      opfDoc.spine = opfDoc.items = [
-        { src: "http://example.com:8000/foo/bar1.html" },
-        { src: "http://example.com:8000/foo/bar2.html" },
-      ];
+      var opfDoc = adapt_epub.OPFDoc.fromChapters(null, null, [
+        { url: "http://example.com:8000/foo/bar1.html", index: 0 },
+        { url: "http://example.com:8000/foo/bar2.html", index: 1 },
+      ]).get();
       var transformer = opfDoc.createDocumentURLTransformer();
 
       var illegalCharRegexp = /[^-a-zA-Z0-9_:]/;
@@ -158,10 +165,9 @@ describe("epub", function () {
                 : null;
             },
           };
-          var redirectedOpfDoc = new adapt_epub.OPFDoc(store, null);
-          redirectedOpfDoc.spine = redirectedOpfDoc.items = [
-            { src: "http://example.com:8000/foo/bar1.html" },
-          ];
+          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, null, [
+            { url: "http://example.com:8000/foo/bar1.html", index: 0 },
+          ]).get();
           var redirectedTransformer =
             redirectedOpfDoc.createDocumentURLTransformer();
 
@@ -213,10 +219,9 @@ describe("epub", function () {
                 : null;
             },
           };
-          var redirectedOpfDoc = new adapt_epub.OPFDoc(store, null);
-          redirectedOpfDoc.spine = redirectedOpfDoc.items = [
-            { src: "http://example.com:8000/foo/bar1.html" },
-          ];
+          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, null, [
+            { url: "http://example.com:8000/foo/bar1.html", index: 0 },
+          ]).get();
           var redirectedTransformer =
             redirectedOpfDoc.createDocumentURLTransformer();
           var redirectedBaseURL = "http://example.com:8000/foo/bar1";

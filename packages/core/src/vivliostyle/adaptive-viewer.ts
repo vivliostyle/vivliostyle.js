@@ -320,8 +320,8 @@ export class AdaptiveViewer {
           skipPagesBefore: p.skipPagesBefore,
         }));
         this.packageURL = resolvedParams.map((p) => p.url);
-        this.opf = new Epub.OPFDoc(store, "");
-        this.opf.initWithChapters(resolvedParams, doc).then(() => {
+        Epub.OPFDoc.fromChapters(store, "", resolvedParams, doc).then((opf) => {
+          this.opf = opf;
           this.loadCmykReserveMap(store).then(() => {
             this.render(fragment).then(() => {
               frame.finish(true);
