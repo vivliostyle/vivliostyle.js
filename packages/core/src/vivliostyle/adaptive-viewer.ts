@@ -79,33 +79,41 @@ export class AdaptiveViewer {
   pageSheetSizeAlreadySet: boolean = false;
   renderTask: Task.Task | null = null;
   actions: { [key: string]: Action };
-  readyState: Constants.ReadyState;
-  packageURL: string[];
-  opf: Epub.OPFDoc;
-  touchActive: boolean;
-  touchX: number;
-  touchY: number;
-  needResize: boolean;
-  resized: boolean;
-  needRefresh: boolean;
-  viewportSize: ViewportSize | null;
-  currentPage: Vtree.Page;
-  currentSpread: Vtree.Spread | null;
-  pagePosition: Epub.Position | null;
-  fontSize: number;
-  zoom: number;
-  fitToScreen: boolean;
-  pageViewMode: PageViewMode;
-  waitForLoading: boolean;
-  renderAllPages: boolean;
-  pref: Exprs.Preferences;
-  pageSizes: { width: number; height: number }[];
-  pixelRatio: number;
-  pixelRatioLimit: number;
+  readyState: Constants.ReadyState = Constants.ReadyState.LOADING;
+  packageURL: string[] = [];
+  opf: Epub.OPFDoc | null = null;
+  touchActive: boolean = false;
+  touchX: number = 0;
+  touchY: number = 0;
+  needResize: boolean = false;
+  resized: boolean = false;
+  needRefresh: boolean = false;
+  viewportSize: ViewportSize | null = null;
+  currentPage: Vtree.Page | null = null;
+  currentSpread: Vtree.Spread | null = null;
+  pagePosition: Epub.Position | null = null;
+  fontSize: number = 16;
+  zoom: number = 1;
+  fitToScreen: boolean = false;
+  pageViewMode: PageViewMode = PageViewMode.SINGLE_PAGE;
+  waitForLoading: boolean = false;
+  renderAllPages: boolean = true;
+  pref: Exprs.Preferences = Exprs.defaultPreferences();
+  pageSizes: { width: number; height: number }[] = [];
+
+  // Pixel ratio emulation on PDF output (PR #1079) does not work with
+  // non-Chromium browsers.
+  pixelRatioLimit: number =
+    Base.browserType === "chromium" &&
+    // Check non-legacy CSS zoom support (Chromium>=128)
+    "currentCSSZoom" in Element.prototype
+      ? 16 // max pixelRatio value on Chromium browsers
+      : 0; // disable pixelRatio emulation on non-Chromium browsers
+  pixelRatio: number = Math.min(8, this.pixelRatioLimit);
 
   // force relayout
-  viewport: Vgen.Viewport | null;
-  opfView: Epub.OPFView;
+  viewport: Vgen.Viewport | null = null;
+  opfView: Epub.OPFView | null = null;
   cmykReserveMap: CmykStore.CmykReserveMapEntry[] | undefined;
   cmykReserveMapUrl: string | undefined;
   private paginationProgressHook: Plugin.PaginationProgressHook | null = null;
@@ -151,7 +159,6 @@ export class AdaptiveViewer {
     }
     viewportElement.setAttribute(VIEWPORT_STATUS_ATTRIBUTE, "loading");
     this.fontMapper = new Font.Mapper(document.head, viewportElement);
-    this.init();
     this.kick = () => {};
     this.sendCommand = () => {};
     this.resizeListener = () => {
@@ -172,40 +179,6 @@ export class AdaptiveViewer {
       toc: this.showTOC,
     };
     this.addLogListeners();
-  }
-
-  private init(): void {
-    this.readyState = Constants.ReadyState.LOADING;
-    this.packageURL = [];
-    this.opf = null;
-    this.touchActive = false;
-    this.touchX = 0;
-    this.touchY = 0;
-    this.needResize = false;
-    this.resized = false;
-    this.needRefresh = false;
-    this.viewportSize = null;
-    this.currentPage = null;
-    this.currentSpread = null;
-    this.pagePosition = null;
-    this.fontSize = 16;
-    this.zoom = 1;
-    this.fitToScreen = false;
-    this.pageViewMode = PageViewMode.SINGLE_PAGE;
-    this.waitForLoading = false;
-    this.renderAllPages = true;
-    this.pref = Exprs.defaultPreferences();
-    this.pageSizes = [];
-
-    // Pixel ratio emulation on PDF output (PR #1079) does not work with
-    // non-Chromium browsers.
-    this.pixelRatioLimit =
-      Base.browserType === "chromium" &&
-      // Check non-legacy CSS zoom support (Chromium>=128)
-      "currentCSSZoom" in Element.prototype
-        ? 16 // max pixelRatio value on Chromium browsers
-        : 0; // disable pixelRatio emulation on non-Chromium browsers
-    this.pixelRatio = Math.min(8, this.pixelRatioLimit);
   }
 
   addLogListeners() {

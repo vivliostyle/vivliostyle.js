@@ -3392,7 +3392,7 @@ export class CascadeInstance {
   };
   viewConditions: { [key: string]: Matchers.Matcher[] } = Object.create(null);
   dependentConditions: string[] = [];
-  elementStack: Element[];
+  elementStack: Element[] = [];
 
   constructor(
     cascade: Cascade,
@@ -3413,9 +3413,6 @@ export class CascadeInstance {
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
     this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
-    if (VIVLIOSTYLE_DEBUG) {
-      this.elementStack = [];
-    }
   }
 
   pushConditionItem(item: ConditionItem): void {
@@ -4748,7 +4745,7 @@ export class CascadeParserHandler
   cascade: Cascade;
   state: ParseState;
   viewConditionId: string | null = null;
-  insideSelectorRule: ParseState;
+  insideSelectorRule: ParseState | undefined;
   invalid: boolean = false; // for `@supports selector()` check
 
   constructor(

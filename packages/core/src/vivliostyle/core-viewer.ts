@@ -172,7 +172,8 @@ export class CoreViewer {
   private adaptViewer_: AdaptiveViewer.AdaptiveViewer;
   private options: CoreViewerOptions;
   private eventTarget: Base.SimpleEventTarget;
-  readyState: Constants.ReadyState;
+  // installed via Object.defineProperty in the constructor
+  declare readyState: Constants.ReadyState;
 
   constructor(
     private readonly settings: CoreViewerSettings,

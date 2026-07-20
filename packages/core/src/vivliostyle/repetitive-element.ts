@@ -144,7 +144,7 @@ export class RepetitiveElements
     result: boolean;
   }[] = [];
   allowInsert: boolean = false;
-  allowInsertRepeatitiveElements: boolean;
+  allowInsertRepeatitiveElements: boolean = false;
 
   constructor(
     private readonly vertical: boolean,
