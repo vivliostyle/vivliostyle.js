@@ -21,8 +21,6 @@ Cista Murasame🌹
 
 ### Fan Sponsors
 
-<p><a href="https://github.com/skoji"><img src="https://github.com/skoji.png" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
-Satoshi KOJIMA🌟
 <p><a href="https://github.com/74th"><img src="https://github.com/74th.png" title="Atsushi Morimoto" width="60" height="60" style="max-width:100%;"></a>
 Atsushi Morimoto🌟
 <p><a href="https://github.com/NoBooking"><img src="https://github.com/NoBooking.png" title="NoBooking" width="60" height="60" style="max-width:100%;"></a>
@@ -50,6 +48,8 @@ youchan🌹
 azettl🌹
 <p><a href="https://github.com/udon-a"><img src="https://github.com/udon-a.png" title="udon-a" width="60" height="60" style="max-width:100%;"></a>
 udon-a🌹
+<p><a href="https://github.com/skoji"><img src="https://github.com/skoji.png" title="Satoshi KOJIMA" width="60" height="60" style="max-width:100%;"></a>
+Satoshi KOJIMA🌟
 <p><a href="https://github.com/sarashino"><img src="https://github.com/sarashino.png" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
 sarashino🌟
 <p><a href="https://github.com/monaka"><img src="https://github.com/monaka.png" title="monaka" width="60" height="60" style="max-width:100%;"></a>
