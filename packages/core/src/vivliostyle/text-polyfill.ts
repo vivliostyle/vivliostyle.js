@@ -487,7 +487,7 @@ class TextSpacingPolyfill {
 
     function checkIfAfterForcedLineBreak(): boolean {
       let p = checkPoints[0];
-      let prevNode: Node;
+      let prevNode: Node | null | undefined;
       while (p && p.inline) {
         prevNode = p.viewNode?.previousSibling;
         if (prevNode) {
@@ -851,12 +851,11 @@ class TextSpacingPolyfill {
             rect.top > nextRect.top + nextRect.height - rect.height / 10;
     }
 
-    let punctProcessing = false;
     let chromiumVoTrFallbackOnly = false;
     let hangingFirst = false;
     let hangingLast = false;
     let hangingEnd = false;
-    let tagName: "viv-ts-open" | "viv-ts-close";
+    let tagName: "viv-ts-open" | "viv-ts-close" | undefined;
     const needsChromiumVoTrFallback = isChromiumVoTrFallback(text, vertical);
 
     if (
@@ -866,7 +865,6 @@ class TextSpacingPolyfill {
     ) {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
-      punctProcessing = true;
       hangingFirst = true;
     } else if (
       isLastInBlock &&
@@ -875,7 +873,6 @@ class TextSpacingPolyfill {
     ) {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
-      punctProcessing = true;
       hangingLast = true;
     } else if (
       (hangingPunctuation.forceEnd || hangingPunctuation.allowEnd) &&
@@ -883,7 +880,6 @@ class TextSpacingPolyfill {
     ) {
       // hanging-punctuation: force-end | allow-end
       tagName = "viv-ts-close";
-      punctProcessing = true;
       hangingEnd = true;
     } else if (
       (spacingTrim.trimStart ||
@@ -893,7 +889,6 @@ class TextSpacingPolyfill {
     ) {
       // fullwidth opening punctuation
       tagName = "viv-ts-open";
-      punctProcessing = true;
     } else if (
       (spacingTrim.trimEnd ||
         spacingTrim.allowEnd ||
@@ -904,14 +899,12 @@ class TextSpacingPolyfill {
     ) {
       // fullwidth closing punctuation
       tagName = "viv-ts-close";
-      punctProcessing = true;
     } else if (needsChromiumVoTrFallback) {
       tagName = getChromiumVoTrFallbackTagName(text);
-      punctProcessing = true;
       chromiumVoTrFallbackOnly = true;
     }
 
-    if (punctProcessing) {
+    if (tagName !== undefined) {
       if (textNode.parentElement.localName === "viv-ts-inner") {
         // Already processed
         return 0;

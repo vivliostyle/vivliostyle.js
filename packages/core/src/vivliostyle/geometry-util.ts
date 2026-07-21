@@ -545,7 +545,8 @@ export function findBottommostFullyOpenRect(
     return rect;
   }
   let bottomEdge = rect.y2;
-  let band: Band;
+  // the loop runs at least once
+  let band!: Band;
   let i: number;
   for (i = bands.length - 1; i >= 0; i--) {
     band = bands[i];

@@ -267,7 +267,7 @@ function setViewportSize(
   orientation: string | null,
   config: { [key: string]: any },
 ): void {
-  let pageSpec: string;
+  let pageSpec: string | null | undefined;
   if (!width || !height) {
     switch (size) {
       case "A5":
