@@ -33,8 +33,8 @@ import * as Task from "./task";
 export class Fetcher<T> {
   name: string;
   arrived: boolean = false;
-  resource: T = null;
-  task: Task.Task = null;
+  resource: T | null = null;
+  task: Task.Task | null = null;
   piggybacks: ((p1: any) => void)[] | null = [];
 
   constructor(

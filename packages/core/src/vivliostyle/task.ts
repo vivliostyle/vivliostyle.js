@@ -339,7 +339,7 @@ export class Scheduler {
 export class Continuation<T> implements Base.Comparable {
   scheduledTime: number = 0;
   order: number = 0;
-  result: T = null;
+  result: T | null = null;
   canceled: boolean = false;
 
   constructor(public task: Task) {}
@@ -635,7 +635,7 @@ export class ResultImpl<T> implements Result<T> {
  * @template T
  */
 export class Frame<T> {
-  res: T = null;
+  res: T | null = null;
   state: FrameState;
   callback: ((p1: any) => void) | null = null;
   handler: ((p1: Frame<any>, p2: Error) => void) | null = null;
@@ -836,7 +836,7 @@ export class LoopBodyFrame extends Frame<boolean> {
 }
 
 export class EventItem {
-  next: EventItem = null;
+  next: EventItem | null = null;
 
   constructor(public event: Base.Event) {}
 }
@@ -846,7 +846,7 @@ export class EventItem {
  * stream to tasks.
  */
 export class EventSource {
-  continuation: Continuation<boolean> = null;
+  continuation: Continuation<boolean> | null = null;
   listeners: {
     target: Base.EventTarget;
     type: string;

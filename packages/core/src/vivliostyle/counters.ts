@@ -116,7 +116,7 @@ function extractPseudoElementText(
  * @param resolved If the reference is already resolved or not
  */
 export class TargetCounterReference {
-  pageCounters: CssCascade.CounterValues = null;
+  pageCounters: CssCascade.CounterValues | null = null;
   spineIndex: number = -1;
   pageIndex: number = -1;
 
@@ -936,7 +936,7 @@ export class CounterStore {
   pageIndicesById: {
     [key: string]: { spineIndex: number; pageIndex: number };
   } = Object.create(null);
-  currentPage: Vtree.Page = null;
+  currentPage: Vtree.Page | null = null;
   newReferencesOfCurrentPage: TargetCounterReference[] = [];
   referencesToSolve: TargetCounterReference[] = [];
   referencesToSolveStack: TargetCounterReference[][] = [];
