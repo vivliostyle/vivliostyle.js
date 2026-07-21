@@ -967,7 +967,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
     nodeContext: Vtree.NodeContext,
     forceRemoveSelf: boolean,
     endOfColumn: boolean,
-  ): Task.Result<boolean> | null {
+  ): Task.Result<boolean> {
     return LayoutProcessor.BlockLayoutProcessor.prototype.finishBreak.call(
       this,
       column,
