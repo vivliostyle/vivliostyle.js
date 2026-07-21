@@ -35,6 +35,8 @@ y-mikou🌟
 u1f992🌟
 <p><a href="https://github.com/yamahige"><img src="https://github.com/yamahige.png" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
 yamahige🌟
+<p><a href="https://github.com/Motoki-N"><img src="https://github.com/Motoki-N.png" title="Motoki-N" width="60" height="60" style="max-width:100%;"></a>
+Motoki-N🌟
 <p><a href="https://github.com/munepi"><img src="https://github.com/munepi.png" title="Munehiro Yamamoto" width="60" height="60" style="max-width:100%;"></a>
 Munehiro Yamamoto⭐️
 <p><a href="https://github.com/zonuexe"><img src="https://github.com/zonuexe.png" title="USAMI Kenta" width="60" height="60" style="max-width:100%;"></a>
