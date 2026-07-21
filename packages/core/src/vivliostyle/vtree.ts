@@ -1027,6 +1027,35 @@ export class LayoutPosition {
   }
 }
 
+export function copyGeometry(
+  from: Vtree.ContainerGeometry,
+  to: Vtree.ContainerGeometry,
+): void {
+  to.left = from.left;
+  to.top = from.top;
+  to.marginLeft = from.marginLeft;
+  to.marginRight = from.marginRight;
+  to.marginTop = from.marginTop;
+  to.marginBottom = from.marginBottom;
+  to.borderLeft = from.borderLeft;
+  to.borderRight = from.borderRight;
+  to.borderTop = from.borderTop;
+  to.borderBottom = from.borderBottom;
+  to.paddingLeft = from.paddingLeft;
+  to.paddingRight = from.paddingRight;
+  to.paddingTop = from.paddingTop;
+  to.paddingBottom = from.paddingBottom;
+  to.width = from.width;
+  to.height = from.height;
+  to.originX = from.originX;
+  to.originY = from.originY;
+  to.snapWidth = from.snapWidth;
+  to.snapHeight = from.snapHeight;
+  to.vertical = from.vertical;
+  to.rtl = from.rtl;
+  to.borderBoxSizing = from.borderBoxSizing;
+}
+
 export class Container implements Vtree.Container {
   left: number = 0;
   top: number = 0;
@@ -1165,32 +1194,10 @@ export class Container implements Vtree.Container {
 
   copyFrom(other: Container): void {
     this.element = other.element;
-    this.left = other.left;
-    this.top = other.top;
-    this.marginLeft = other.marginLeft;
-    this.marginRight = other.marginRight;
-    this.marginTop = other.marginTop;
-    this.marginBottom = other.marginBottom;
-    this.borderLeft = other.borderLeft;
-    this.borderRight = other.borderRight;
-    this.borderTop = other.borderTop;
-    this.borderBottom = other.borderBottom;
-    this.paddingLeft = other.paddingLeft;
-    this.paddingRight = other.paddingRight;
-    this.paddingTop = other.paddingTop;
-    this.paddingBottom = other.paddingBottom;
-    this.width = other.width;
-    this.height = other.height;
-    this.originX = other.originX;
-    this.originY = other.originY;
+    copyGeometry(other, this);
     this.innerShape = other.innerShape;
     this.exclusions = other.exclusions;
     this.computedBlockSize = other.computedBlockSize;
-    this.snapWidth = other.snapWidth;
-    this.snapHeight = other.snapHeight;
-    this.vertical = other.vertical;
-    this.rtl = other.rtl;
-    this.borderBoxSizing = other.borderBoxSizing;
   }
 
   setVerticalPosition(top: number, height: number): void {

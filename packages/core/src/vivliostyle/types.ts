@@ -142,7 +142,6 @@ export namespace Layout {
     beforeEdge: number;
     afterEdge: number;
     footnoteEdge: number;
-    box: GeometryUtil.Rect;
     chunkPositions: Vtree.ChunkPosition[];
     bands: GeometryUtil.Band[];
     overflown: boolean;
@@ -455,8 +454,6 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
       removeSelf: boolean,
     ): void;
-    initGeom(): void;
-    init(): void;
     /**
      * Save the potential breaking position at the edge. Should, in general, save
      * "after" position but only after skipping all of the "before" ones and
@@ -496,13 +493,6 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext;
       overflownNodeContext: Vtree.NodeContext;
     }>;
-    /**
-     * Re-layout already laid-out chunks. Return the position of the last flow if
-     * there is an overflow.
-     * TODO: deal with chunks that did not fit at all.
-     * @return holding end position.
-     */
-    redoLayout(): Task.Result<Vtree.ChunkPosition>;
     saveDistanceToBlockEndFloats(): void;
     collectElementsOffset(): RepetitiveElement.ElementsOffset[];
   }
@@ -1169,7 +1159,7 @@ export namespace Vtree {
     PRESERVE,
   }
 
-  export interface Container {
+  export interface ContainerGeometry {
     left: number;
     top: number;
     marginLeft: number;
@@ -1188,17 +1178,20 @@ export namespace Vtree {
     height: number;
     originX: number;
     originY: number;
+    snapWidth: number;
+    snapHeight: number;
+    vertical: boolean; // vertical writing
+    rtl: boolean;
+    borderBoxSizing: boolean;
+  }
+
+  export interface Container extends ContainerGeometry {
     exclusions: GeometryUtil.Shape[] | null;
     innerShape: GeometryUtil.Shape | null;
     computedBlockSize: number;
-    snapWidth: number;
-    snapHeight: number;
     snapOffsetX: number;
     snapOffsetY: number;
-    vertical: boolean; // vertical writing
-    rtl: boolean;
     element: HTMLElement;
-    borderBoxSizing: boolean;
 
     getInsetTop(): number;
     getInsetBottom(): number;
