@@ -131,7 +131,7 @@ describe("epub", function () {
     });
 
     describe("OPFDocumentURLTransformer", function () {
-      var opfDoc = adapt_epub.OPFDoc.fromChapters(null, null, [
+      var opfDoc = adapt_epub.OPFDoc.fromChapters(null, "", [
         { url: "http://example.com:8000/foo/bar1.html", index: 0 },
         { url: "http://example.com:8000/foo/bar2.html", index: 1 },
       ]).get();
@@ -165,7 +165,7 @@ describe("epub", function () {
                 : null;
             },
           };
-          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, null, [
+          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, "", [
             { url: "http://example.com:8000/foo/bar1.html", index: 0 },
           ]).get();
           var redirectedTransformer =
@@ -219,7 +219,7 @@ describe("epub", function () {
                 : null;
             },
           };
-          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, null, [
+          var redirectedOpfDoc = adapt_epub.OPFDoc.fromChapters(store, "", [
             { url: "http://example.com:8000/foo/bar1.html", index: 0 },
           ]).get();
           var redirectedTransformer =
