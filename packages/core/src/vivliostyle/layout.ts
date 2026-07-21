@@ -436,11 +436,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   beforeEdge: number = 0;
   afterEdge: number = 0;
   footnoteEdge: number = 0;
-  box: GeometryUtil.Rect = null;
-  chunkPositions: Vtree.ChunkPosition[] = null;
-  bands: GeometryUtil.Band[] = null;
+  chunkPositions: Vtree.ChunkPosition[] = [];
+  bands: GeometryUtil.Band[];
   overflown: boolean = false;
-  breakPositions: BreakPosition.BreakPosition[] = null;
+  breakPositions: BreakPosition.BreakPosition[] = [];
   pageBreakType: string | null = null;
   forceNonfitting: boolean = true;
   leftFloatEdge: number = 0; // bottom of the bottommost left float
@@ -463,6 +462,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     public clientLayout: Vtree.ClientLayout,
     public readonly layoutConstraint: LayoutConstraint,
     public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    geometry: Vtree.ContainerGeometry,
+    innerShape: GeometryUtil.Shape | null,
+    exclusions: GeometryUtil.Shape[],
   ) {
     super(element);
 
@@ -472,6 +474,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
     pageFloatLayoutContext.setContainer(this);
+
+    VtreeImpl.copyGeometry(geometry, this);
+    this.innerShape = innerShape;
+    this.exclusions = exclusions;
+    // measure() writes the width/height CSS; a freshly created element's left/top
+    // CSS is written by the caller before construction. An adopted container's
+    // element keeps its existing position.
+    this.bands = this.measure();
+    this.createFloats();
   }
 
   getTopEdge(): number {
@@ -1618,36 +1629,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const floatLayoutContext = this.pageFloatLayoutContext;
     const floatContainer = floatLayoutContext.getContainer(floatReference);
     const element = area.element;
-    floatContainer.element.parentNode.appendChild(element);
-    area.isFloat = true;
-    area.originX = floatContainer.originX;
-    area.originY = floatContainer.originY;
-    area.vertical = floatContainer.vertical;
-    area.rtl = floatContainer.rtl;
-    area.marginLeft = area.marginRight = area.marginTop = area.marginBottom = 0;
-    area.borderLeft = area.borderRight = area.borderTop = area.borderBottom = 0;
-    area.paddingLeft =
-      area.paddingRight =
-      area.paddingTop =
-      area.paddingBottom =
-        0;
-    area.exclusions = (floatContainer.exclusions || []).concat();
-    area.forceNonfitting = !floatLayoutContext.hasFloatFragments();
-    area.innerShape = null;
-    const containingBlockRect = floatContainer.getPaddingRect();
-    area.setHorizontalPosition(
-      containingBlockRect.x1 - floatContainer.originX,
-      containingBlockRect.x2 - containingBlockRect.x1,
-    );
-    area.setVerticalPosition(
-      containingBlockRect.y1 - floatContainer.originY,
-      containingBlockRect.y2 - containingBlockRect.y1,
-    );
     return strategy
       .adjustPageFloatArea(area, floatContainer, this)
       .thenAsync(() => {
-        // Calculate bands from the exclusions before setting float area dimensions
-        area.init();
+        // adjustPageFloatArea may have changed the geometry, so re-measure; the
+        // exclusion floats created at construction must be dropped first.
+        area.killFloats();
+        area.remeasure();
         const fitWithinContainer = !!floatLayoutContext.setFloatAreaDimensions(
           area,
           floatReference,
@@ -1663,7 +1651,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // (because positioning uses page-level limits, not area bounds).
           // Clamp to max-block-size so the JS dimension matches the browser-
           // rendered dimension, preventing coordinate mismatches in
-          // initGeom()/computedBlockSize calculations. (Issue #1878)
+          // measure()/computedBlockSize calculations. (Issue #1878)
           if (area.isFootnote) {
             const cs = getComputedStyle(area.element);
             if (area.vertical) {
@@ -1680,9 +1668,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             }
           }
-          // New dimensions have been set, remove exclusion floats and re-init
+          // New dimensions have been set, remove exclusion floats and re-measure
           area.killFloats();
-          area.init();
+          area.remeasure();
         } else {
           floatContainer.element.parentNode.removeChild(element);
         }
@@ -1720,6 +1708,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
     pageFloatLayoutContext.setOuterContext(this.pageFloatLayoutContext);
     const parentContainer = parentPageFloatLayoutContext.getContainer();
+    const floatContainer = this.pageFloatLayoutContext.getContainer(
+      float.floatReference,
+    );
+    // The constructor measures through a DOM probe, so attach the element first.
+    floatContainer.element.parentNode.appendChild(floatAreaElement);
+    const containingBlockRect = floatContainer.getPaddingRect();
+    const floatLeft = containingBlockRect.x1 - floatContainer.originX;
+    const floatTop = containingBlockRect.y1 - floatContainer.originY;
+    // Position the freshly created element before it is measured.
+    Base.setCSSProperty(floatAreaElement, "left", `${floatLeft}px`);
+    Base.setCSSProperty(floatAreaElement, "top", `${floatTop}px`);
     const floatArea = new PageFloatArea(
       floatSide,
       floatAreaElement,
@@ -1728,8 +1727,37 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.layoutConstraint,
       pageFloatLayoutContext,
       parentContainer,
+      {
+        vertical: floatContainer.vertical,
+        rtl: floatContainer.rtl,
+        snapWidth: 0,
+        snapHeight: 0,
+        originX: floatContainer.originX,
+        originY: floatContainer.originY,
+        left: floatLeft,
+        top: floatTop,
+        width: containingBlockRect.x2 - containingBlockRect.x1,
+        height: containingBlockRect.y2 - containingBlockRect.y1,
+        marginLeft: 0,
+        marginRight: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        borderLeft: 0,
+        borderRight: 0,
+        borderTop: 0,
+        borderBottom: 0,
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        borderBoxSizing: false,
+      },
+      null,
+      (floatContainer.exclusions || []).concat(),
     );
-    pageFloatLayoutContext.setContainer(floatArea);
+    floatArea.isFloat = true;
+    floatArea.forceNonfitting =
+      !this.pageFloatLayoutContext.hasFloatFragments();
     return this.setupFloatArea(
       floatArea,
       float.floatReference,
@@ -3590,7 +3618,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // Only apply rounding when actual inline floats have been laid out
     // (leftFloatEdge or rightFloatEdge moved past beforeEdge). Without this
     // guard, clearEdge equals beforeEdge (since leftFloatEdge/rightFloatEdge
-    // are initialized to beforeEdge in initGeom()), and Math.ceil rounding
+    // are initialized to beforeEdge in measure()), and Math.ceil rounding
     // can push clearEdge past edge + tolerance, creating unnecessary
     // clearance that causes infinite page generation. (Issue #1959)
     const floatUnit = this.getFloatLayoutUnit();
@@ -4521,7 +4549,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
   }
 
-  initGeom(): void {
+  private measure(): GeometryUtil.Band[] {
+    Base.setCSSProperty(this.element, "width", `${this.width}px`);
+    Base.setCSSProperty(this.element, "height", `${this.height}px`);
     // Use a probe element to measure the content area via
     // getBoundingClientRect(). We cannot query the container element directly
     // because that would include padding (border-box), and we need content-box
@@ -4542,7 +4572,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.element.removeChild(probe);
     const offsetX = this.originX + this.left + this.getInsetLeft();
     const offsetY = this.originY + this.top + this.getInsetTop();
-    this.box = new GeometryUtil.Rect(
+    const box = new GeometryUtil.Rect(
       offsetX,
       offsetY,
       offsetX + this.width,
@@ -4580,22 +4610,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.rightFloatEdge = this.beforeEdge;
     this.bottommostFloatTop = this.beforeEdge;
     this.footnoteEdge = this.afterEdge;
-    this.bands = GeometryUtil.shapesToBands(
-      this.box,
+    return GeometryUtil.shapesToBands(
+      box,
       [this.getInnerShape()],
       this.getExclusions(),
       8,
       this.snapHeight,
       this.vertical,
     );
-    this.createFloats();
   }
 
-  init(): void {
+  /**
+   * Re-measure a column whose geometry changed after construction, refreshing
+   * bands and exclusion floats and resetting the layout-pass state.
+   */
+  private remeasure(): void {
     this.chunkPositions = [];
-    Base.setCSSProperty(this.element, "width", `${this.width}px`);
-    Base.setCSSProperty(this.element, "height", `${this.height}px`);
-    this.initGeom();
+    this.bands = this.measure();
+    this.createFloats();
     this.computedBlockSize = 0;
     this.overflown = false;
     this.pageBreakType = null;
@@ -4883,54 +4915,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       })
       .then(() => {
         frame.finish({ nodeContext, overflownNodeContext });
-      });
-    return frame.result();
-  }
-
-  /**
-   * Re-layout already laid-out chunks. Return the position of the last flow if
-   * there is an overflow.
-   * TODO: deal with chunks that did not fit at all.
-   * @return holding end position.
-   */
-  redoLayout(): Task.Result<Vtree.ChunkPosition> {
-    const chunkPositions = this.chunkPositions;
-    let last: Node = this.element.lastChild;
-    while (last != this.last) {
-      const prev = last.previousSibling;
-      if (!(
-        this.element === last.parentNode &&
-        (this.layoutContext as Vgen.ViewFactory).isPseudoelement(last)
-      )) {
-        this.element.removeChild(last);
-      }
-      last = prev;
-    }
-    this.killFloats();
-    this.init();
-    const frame: Task.Frame<Vtree.ChunkPosition> = Task.newFrame("redoLayout");
-    let i = 0;
-    let res: Vtree.ChunkPosition = null;
-    let leadingEdge = true;
-    frame
-      .loopWithFrame((loopFrame) => {
-        if (i < chunkPositions.length) {
-          const chunkPosition = chunkPositions[i++];
-          this.layout(chunkPosition, leadingEdge).then((pos) => {
-            leadingEdge = false;
-            if (pos) {
-              res = pos;
-              loopFrame.breakLoop();
-            } else {
-              loopFrame.continueLoop();
-            }
-          });
-          return;
-        }
-        loopFrame.breakLoop();
-      })
-      .then(() => {
-        frame.finish(res);
       });
     return frame.result();
   }
@@ -5402,6 +5386,9 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     layoutConstraint: LayoutConstraint,
     pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
     public readonly parentContainer: Vtree.Container,
+    geometry: Vtree.ContainerGeometry,
+    innerShape: GeometryUtil.Shape | null,
+    exclusions: GeometryUtil.Shape[],
   ) {
     super(
       element,
@@ -5409,6 +5396,9 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       clientLayout,
       layoutConstraint,
       pageFloatLayoutContext,
+      geometry,
+      innerShape,
+      exclusions,
     );
     this.parentElement = parentContainer.element;
   }

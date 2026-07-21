@@ -1746,14 +1746,12 @@ export class StyleInstance
       // deferred from the previous page. (Issue #1880)
       if (flowPosition) {
         this.setFormattingContextToColumn(column, flowName);
-        column.init();
         return this.layoutDeferredPageFloats(column);
       }
       return Task.newResult(true);
     }
 
     this.setFormattingContextToColumn(column, flowName);
-    column.init();
     if (this.primaryFlows[flowName] && column.bands.length > 0) {
       // In general, we force non-fitting content. Exception is only for primary
       // flow columns that have exclusions.
@@ -2042,21 +2040,10 @@ export class StyleInstance
           const columnContainer = this.viewport.document.createElement("div");
           Base.setCSSProperty(columnContainer, "position", "absolute");
           boxContainer.appendChild(columnContainer);
-          column = new Layout.Column(
-            columnContainer,
-            layoutContext,
-            this.clientLayout,
-            layoutConstraint,
-            columnPageFloatLayoutContext,
-          );
-          // Issue #1842: mark columns created after the first one so layout can
-          // treat already-satisfied leading column breaks differently.
-          column.isNonFirstColumn = currentColumnIndex > 0;
-          column.forceNonfitting = forceNonFitting;
-          column.vertical = layoutContainer.vertical;
-          column.rtl = layoutContainer.rtl;
-          column.snapHeight = layoutContainer.snapHeight;
-          column.snapWidth = layoutContainer.snapWidth;
+          let columnLeft: number;
+          let columnTop: number;
+          let columnBoxWidth: number;
+          let columnBoxHeight: number;
           if (layoutContainer.vertical) {
             const columnY =
               (layoutContainer.rtl
@@ -2065,11 +2052,11 @@ export class StyleInstance
                 (columnWidth + columnGap) +
               layoutContainer.paddingTop;
             const outerWidth = parseFloat(boxContainer.style.width);
-            column.setHorizontalPosition(
-              layoutContainer.paddingLeft + outerWidth - layoutContainer.width,
-              layoutContainer.width,
-            );
-            column.setVerticalPosition(columnY, columnWidth);
+            columnLeft =
+              layoutContainer.paddingLeft + outerWidth - layoutContainer.width;
+            columnBoxWidth = layoutContainer.width;
+            columnTop = columnY;
+            columnBoxHeight = columnWidth;
           } else {
             const columnX =
               (layoutContainer.rtl
@@ -2077,14 +2064,52 @@ export class StyleInstance
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
               layoutContainer.paddingLeft;
-            column.setVerticalPosition(
-              layoutContainer.paddingTop,
-              layoutContainer.height,
-            );
-            column.setHorizontalPosition(columnX, columnWidth);
+            columnLeft = columnX;
+            columnBoxWidth = columnWidth;
+            columnTop = layoutContainer.paddingTop;
+            columnBoxHeight = layoutContainer.height;
           }
-          column.originX = offsetX;
-          column.originY = offsetY;
+          // Position the freshly created element before it is measured.
+          Base.setCSSProperty(columnContainer, "left", `${columnLeft}px`);
+          Base.setCSSProperty(columnContainer, "top", `${columnTop}px`);
+          column = new Layout.Column(
+            columnContainer,
+            layoutContext,
+            this.clientLayout,
+            layoutConstraint,
+            columnPageFloatLayoutContext,
+            {
+              vertical: layoutContainer.vertical,
+              rtl: layoutContainer.rtl,
+              snapWidth: layoutContainer.snapWidth,
+              snapHeight: layoutContainer.snapHeight,
+              originX: offsetX,
+              originY: offsetY,
+              left: columnLeft,
+              top: columnTop,
+              width: columnBoxWidth,
+              height: columnBoxHeight,
+              marginLeft: 0,
+              marginRight: 0,
+              marginTop: 0,
+              marginBottom: 0,
+              borderLeft: 0,
+              borderRight: 0,
+              borderTop: 0,
+              borderBottom: 0,
+              paddingLeft: 0,
+              paddingRight: 0,
+              paddingTop: 0,
+              paddingBottom: 0,
+              borderBoxSizing: false,
+            },
+            innerShape,
+            dontApplyExclusions ? [] : exclusions.concat(),
+          );
+          // Issue #1842: columns after the first treat already-satisfied leading
+          // column breaks differently.
+          column.isNonFirstColumn = currentColumnIndex > 0;
+          column.forceNonfitting = forceNonFitting;
         } else {
           column = new Layout.Column(
             boxContainer,
@@ -2092,14 +2117,13 @@ export class StyleInstance
             this.clientLayout,
             layoutConstraint,
             columnPageFloatLayoutContext,
+            layoutContainer,
+            innerShape,
+            dontApplyExclusions ? [] : exclusions.concat(),
           );
           // Single-column layout always behaves like the first column on a page.
           column.isNonFirstColumn = false;
-          column.copyFrom(layoutContainer);
         }
-        column.exclusions = dontApplyExclusions ? [] : exclusions.concat();
-        column.innerShape = innerShape;
-        columnPageFloatLayoutContext.setContainer(column);
         if ((column.vertical ? column.height : column.width) >= 0) {
           // column.element.style.outline = "1px dotted green";
           this.layoutColumn(column, flowNameStr).then(() => {
