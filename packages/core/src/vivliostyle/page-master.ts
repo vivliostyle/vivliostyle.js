@@ -43,7 +43,7 @@ export abstract class PageBox<
   // styles specified in the at-rule
   specified: CssCascade.ElementStyle = {};
   children: PageBox[] = [];
-  pageMaster: PageMaster = null;
+  pageMaster: PageMaster | null = null;
   index: number = 0;
   key: string;
 
@@ -417,7 +417,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   isRightDependentOnAutoWidth: boolean = false;
   private calculatedWidth: number = 0;
   private calculatedHeight: number = 0;
-  pageMasterInstance: PageMasterInstance = null;
+  pageMasterInstance: PageMasterInstance | null = null;
   namedValues: { [key: string]: Exprs.Val } = {};
   namedFuncs: { [key: string]: Exprs.Val } = {};
   vertical: boolean = false;

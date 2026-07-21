@@ -69,7 +69,7 @@ export class TableCell {
   colSpan: number;
   rowSpan: number;
   height: number = 0;
-  anchorSlot: TableSlot = null;
+  anchorSlot: TableSlot | null = null;
 
   constructor(
     public readonly rowIndex: number,
@@ -144,7 +144,8 @@ export class BetweenTableRowBreakPosition
 {
   private formattingContext: TableFormattingContext;
 
-  acceptableCellBreakPositions: Layout.BreakPositionAndNodeContext[] = null;
+  acceptableCellBreakPositions: Layout.BreakPositionAndNodeContext[] | null =
+    null;
   private rowIndex: number | null = null;
 
   constructor(
@@ -258,7 +259,8 @@ export class BetweenTableRowBreakPosition
 export class InsideTableRowBreakPosition
   extends BreakPosition.AbstractBreakPosition
 {
-  acceptableCellBreakPositions: Layout.BreakPositionAndNodeContext[] = null;
+  acceptableCellBreakPositions: Layout.BreakPositionAndNodeContext[] | null =
+    null;
 
   constructor(
     public readonly rowIndex: number,

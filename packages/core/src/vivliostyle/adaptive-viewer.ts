@@ -1210,10 +1210,8 @@ export class AdaptiveViewer {
         default:
           return Task.newResult(true);
       }
-      if (m) {
-        method = () =>
-          m.call(this.opfView, this.pagePosition, !this.renderAllPages);
-      }
+      method = () =>
+        m.call(this.opfView, this.pagePosition, !this.renderAllPages);
     } else if (typeof command["epage"] == "number") {
       const epage = command["epage"] as number;
       method = () =>

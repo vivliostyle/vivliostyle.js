@@ -130,7 +130,7 @@ export class Page extends Base.SimpleEventTarget {
   isAutoPageWidth: boolean = true;
   isAutoPageHeight: boolean = true;
   spineIndex: number = 0;
-  position: LayoutPosition = null;
+  position: LayoutPosition | null = null;
   offset: number = -1;
   side: Constants.PageSide | null = null;
   fetchers: TaskUtil.Fetcher<{}>[] = [];
@@ -506,7 +506,7 @@ export type ShadowType = Vtree.ShadowType; // eslint-disable-line no-redeclare
  * Data about shadow tree instance.
  */
 export class ShadowContext implements Vtree.ShadowContext {
-  subShadow: ShadowContext = null;
+  subShadow: ShadowContext | null = null;
 
   constructor(
     public readonly owner: Element,
@@ -569,8 +569,8 @@ export class NodeContext implements Vtree.NodeContext {
 
   // parent's shadow type
   shadowContext: Vtree.ShadowContext;
-  nodeShadow: Vtree.ShadowContext = null;
-  shadowSibling: NodeContext = null;
+  nodeShadow: Vtree.ShadowContext | null = null;
+  shadowSibling: NodeContext | null = null;
 
   // next "sibling" in the shadow tree
   // other stuff
@@ -595,8 +595,8 @@ export class NodeContext implements Vtree.NodeContext {
   containingBlockForAbsolute: boolean = false;
   breakBefore: string | null = null;
   breakAfter: string | null = null;
-  viewNode: Node = null;
-  clearSpacer: Node = null;
+  viewNode: Node | null = null;
+  clearSpacer: Node | null = null;
   inheritedProps: { [key: string]: number | string | Css.Val };
   vertical: boolean;
   direction: string;
@@ -609,7 +609,7 @@ export class NodeContext implements Vtree.NodeContext {
     [key: string]: string | number | undefined | null | (number | null)[];
   } = {};
   fragmentIndex: number = 1;
-  afterIfContinues: Selectors.AfterIfContinues = null;
+  afterIfContinues: Selectors.AfterIfContinues | null = null;
   footnotePolicy: Css.Ident | null = null;
   pageType: string | null;
 
@@ -835,7 +835,7 @@ export class NodeContext implements Vtree.NodeContext {
 }
 
 export class ChunkPosition implements Vtree.ChunkPosition {
-  floats: NodePosition[] = null;
+  floats: NodePosition[] | null = null;
 
   constructor(public primary: NodePosition) {}
 
@@ -949,8 +949,8 @@ export class LayoutPosition {
   highestSeenOffset: number = 0;
 
   // FIXME: This properties seem to be not used
-  highestSeenNode: Node;
-  lookupPositionOffset: number;
+  highestSeenNode: Node | null = null;
+  lookupPositionOffset: number | null = null;
 
   clone(): LayoutPosition {
     const newcp = new LayoutPosition();
@@ -1046,8 +1046,8 @@ export class Container implements Vtree.Container {
   height: number = 0;
   originX: number = 0;
   originY: number = 0;
-  exclusions: GeometryUtil.Shape[] = null;
-  innerShape: GeometryUtil.Shape = null;
+  exclusions: GeometryUtil.Shape[] | null = null;
+  innerShape: GeometryUtil.Shape | null = null;
   computedBlockSize: number = 0;
   snapWidth: number = 0;
   snapHeight: number = 0;

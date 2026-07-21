@@ -96,8 +96,8 @@ export function findTocAnchorElements(doc: Document): Array<Element> {
 
 export class TOCView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
-  page: Vtree.Page = null;
-  instance: OPS.StyleInstance = null;
+  page: Vtree.Page | null = null;
+  instance: OPS.StyleInstance | null = null;
 
   constructor(
     public readonly store: OPS.OPSDocStore,

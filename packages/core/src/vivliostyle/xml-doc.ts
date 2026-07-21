@@ -296,7 +296,7 @@ export function parseAndReturnNullIfError(
   opt_parser?: DOMParser,
 ): Document | null {
   const parser = opt_parser || new DOMParser();
-  let doc: Document;
+  let doc: Document | undefined;
   try {
     doc = parser.parseFromString(str, type as DOMParserSupportedType);
   } catch (e) {}

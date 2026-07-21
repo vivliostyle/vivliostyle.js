@@ -299,9 +299,9 @@ export class StyleInstance
   rootPageBoxInstance: PageMaster.RootPageBoxInstance = null;
   styler: CssStyler.Styler = null;
   stylerMap: { [key: string]: CssStyler.Styler } = null;
-  currentLayoutPosition: Vtree.LayoutPosition = null;
-  layoutPositionAtPageStart: Vtree.LayoutPosition = null;
-  currentCascadedPageStyle: CssCascade.ElementStyle = null;
+  currentLayoutPosition: Vtree.LayoutPosition | null = null;
+  layoutPositionAtPageStart: Vtree.LayoutPosition | null = null;
+  currentCascadedPageStyle: CssCascade.ElementStyle | null = null;
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};

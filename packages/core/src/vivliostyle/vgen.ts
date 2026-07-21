@@ -785,7 +785,7 @@ export class ViewFactory
       // The percent value of inline-size on vertical-in-horizontal or
       // horizontal-in-vertical block needs to be resolved against the
       // page area height or width. (Fix for issue #1264)
-      let percentRef: number;
+      let percentRef: number | undefined;
       if (verticalChanged) {
         if (vertical) {
           if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
@@ -999,8 +999,8 @@ export class ViewFactory
         }
       }
       propList.sort(Css.processingOrderFn);
-      let fontSize: Css.Val;
-      let lineHeight: Css.Val;
+      let fontSize: Css.Val | undefined;
+      let lineHeight: Css.Val | undefined;
 
       for (const name of propList) {
         if (
@@ -3233,8 +3233,8 @@ export class ViewFactory
 
     const propList = Object.keys(computedStyle);
     propList.sort(Css.processingOrderFn);
-    let fontSize: Css.Val;
-    let lineHeight: Css.Val;
+    let fontSize: Css.Val | undefined;
+    let lineHeight: Css.Val | undefined;
 
     for (const propName of propList) {
       if (propertiesNotPassedToDOM[propName]) {
@@ -3431,8 +3431,8 @@ export class ViewFactory
    */
   private getLineHeightUnitSize(
     propName: string,
-    fontSize: Css.Val,
-    lineHeight: Css.Val,
+    fontSize: Css.Val | undefined,
+    lineHeight: Css.Val | undefined,
   ): number | null {
     const parentStyle = this.getParentViewStyle();
     const parentMetrics = this.getParentComputedMetrics(parentStyle);
@@ -3521,7 +3521,10 @@ export class ViewFactory
    * Get "em" unit size in px
    * @return font-size in px, or null if cannot be determined
    */
-  private getEmUnitSize(propName: string, fontSize: Css.Val): number | null {
+  private getEmUnitSize(
+    propName: string,
+    fontSize: Css.Val | undefined,
+  ): number | null {
     const parentStyle = this.getParentViewStyle();
     const parentFontSize = this.getParentComputedMetrics(parentStyle).fontSize;
 

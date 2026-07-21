@@ -112,7 +112,7 @@ export namespace Layout {
    *    breakable block
    */
   export interface BoxBreakPosition extends AbstractBreakPosition {
-    breakNodeContext: Vtree.NodeContext;
+    breakNodeContext: Vtree.NodeContext | null;
     readonly checkPoints: Vtree.NodeContext[];
     readonly penalty: number;
   }
@@ -131,7 +131,7 @@ export namespace Layout {
   export interface Column extends Vtree.Container {
     last: Node;
     viewDocument: Document;
-    flowRootFormattingContext: Vtree.FormattingContext;
+    flowRootFormattingContext: Vtree.FormattingContext | null;
     // Issue #1842: distinguishes auto-advanced follow-up columns from the first
     // column on a page so leading-edge forced breaks can be handled differently.
     isNonFirstColumn: boolean;
@@ -164,7 +164,7 @@ export namespace Layout {
     stopAtOverflow: boolean;
     lastAfterPosition: Vtree.NodePosition | null;
     fragmentLayoutConstraints: FragmentLayoutConstraint[];
-    pseudoParent: Column;
+    pseudoParent: Column | null;
     nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null;
     blockDistanceToBlockEndFloats: number;
     lastLineStride: number;
@@ -872,7 +872,7 @@ export namespace RepetitiveElement {
   export interface RepetitiveElementsOwnerFormattingContext
     extends Vtree.FormattingContext {
     isRoot: boolean;
-    repetitiveElements: RepetitiveElements;
+    repetitiveElements: RepetitiveElements | null;
     readonly parent: Vtree.FormattingContext;
     readonly rootSourceNode: Element;
     getRepetitiveElements(): RepetitiveElements;
@@ -1188,8 +1188,8 @@ export namespace Vtree {
     height: number;
     originX: number;
     originY: number;
-    exclusions: GeometryUtil.Shape[];
-    innerShape: GeometryUtil.Shape;
+    exclusions: GeometryUtil.Shape[] | null;
+    innerShape: GeometryUtil.Shape | null;
     computedBlockSize: number;
     snapWidth: number;
     snapHeight: number;
@@ -1250,7 +1250,7 @@ export namespace Vtree {
     readonly root: Element;
     readonly xmldoc: XmlDoc.XMLDocHolder;
     readonly parentShadow: ShadowContext;
-    subShadow: ShadowContext;
+    subShadow: ShadowContext | null;
     readonly type: Vtree.ShadowType;
     readonly styler: CssStyler.AbstractStyler;
 
@@ -1280,8 +1280,8 @@ export namespace Vtree {
     after: boolean;
     shadowType: ShadowType; // parent's shadow type
     shadowContext: Vtree.ShadowContext;
-    nodeShadow: Vtree.ShadowContext;
-    shadowSibling: NodeContext; // next "sibling" in the shadow tree
+    nodeShadow: Vtree.ShadowContext | null;
+    shadowSibling: NodeContext | null; // next "sibling" in the shadow tree
     // other stuff
     shared: boolean;
     inline: boolean;
@@ -1304,8 +1304,8 @@ export namespace Vtree {
     containingBlockForAbsolute: boolean;
     breakBefore: string | null;
     breakAfter: string | null;
-    viewNode: Node;
-    clearSpacer: Node;
+    viewNode: Node | null;
+    clearSpacer: Node | null;
     inheritedProps: { [key: string]: number | string | Css.Val };
     vertical: boolean;
     direction: string;
@@ -1318,7 +1318,7 @@ export namespace Vtree {
       [key: string]: string | number | undefined | null | (number | null)[];
     };
     fragmentIndex: number;
-    afterIfContinues: Selectors.AfterIfContinues;
+    afterIfContinues: Selectors.AfterIfContinues | null;
     footnotePolicy: Css.Ident | null;
     pageType: string | null;
 
@@ -1338,7 +1338,7 @@ export namespace Vtree {
   }
 
   export interface ChunkPosition {
-    floats: NodePosition[];
+    floats: NodePosition[] | null;
     primary: NodePosition;
 
     clone(): ChunkPosition;
@@ -1361,7 +1361,7 @@ export namespace XmlDoc {
     head: Element;
     last: Element;
     lastOffset: number;
-    idMap: { [key: string]: Element };
+    idMap: { [key: string]: Element } | null;
     readonly store: XMLDocStore;
     readonly url: string;
     readonly document: Document;

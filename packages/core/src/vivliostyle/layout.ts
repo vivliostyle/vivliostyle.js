@@ -359,7 +359,7 @@ export class BoxBreakPosition
   implements Layout.BoxBreakPosition
 {
   private alreadyEvaluated: boolean = false;
-  breakNodeContext: Vtree.NodeContext = null;
+  breakNodeContext: Vtree.NodeContext | null = null;
 
   constructor(
     public readonly checkPoints: Vtree.NodeContext[],
@@ -426,7 +426,7 @@ export function validateCheckPoints(checkPoints: Vtree.NodeContext[]): void {
 export class Column extends VtreeImpl.Container implements Layout.Column {
   last: Node;
   viewDocument: Document;
-  flowRootFormattingContext: Vtree.FormattingContext = null;
+  flowRootFormattingContext: Vtree.FormattingContext | null = null;
   // Issue #1842: true only for columns reached after automatic column overflow.
   isNonFirstColumn: boolean = false;
   isFloat: boolean = false;
@@ -449,7 +449,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   stopAtOverflow: boolean = true;
   lastAfterPosition: Vtree.NodePosition | null = null;
   fragmentLayoutConstraints: FragmentLayoutConstraint[] = [];
-  pseudoParent: Column = null;
+  pseudoParent: Column | null = null;
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null =
     null;
   blockDistanceToBlockEndFloats: number = NaN;

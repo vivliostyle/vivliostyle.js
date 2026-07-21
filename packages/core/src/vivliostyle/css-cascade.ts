@@ -853,7 +853,7 @@ export class ApplyRuleAction extends CascadeAction {
 }
 
 export class ChainedAction extends CascadeAction {
-  chained: CascadeAction = null;
+  chained: CascadeAction | null = null;
 
   constructor() {
     super();
@@ -4735,9 +4735,9 @@ export class CascadeParserHandler
   extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver
 {
-  chain: ChainedAction[] = null;
+  chain: ChainedAction[] | null = null;
   specificity: number = 0;
-  elementStyle: ElementStyle = null;
+  elementStyle: ElementStyle | null = null;
   conditionCount: number = 0;
   pseudoelement: string | null = null;
   selectorFunctionContainsPseudoelement: boolean = false;
@@ -5344,7 +5344,7 @@ export class CascadeParserHandler
     funcName: string,
     params?: (number | string)[],
   ): void {
-    let parameterParserHandler: MatchesParameterParserHandler;
+    let parameterParserHandler: MatchesParameterParserHandler | undefined;
     switch (funcName) {
       case "is":
         parameterParserHandler = new MatchesParameterParserHandler(this);
