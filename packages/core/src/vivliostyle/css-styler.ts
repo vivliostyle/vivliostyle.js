@@ -160,8 +160,8 @@ export class Box {
   isBlockValue: boolean | null = null;
   hasBoxValue: boolean | null = null;
   styleValues = {} as { [key: string]: Css.Val };
-  beforeBox: Box = null;
-  afterBox: Box = null;
+  beforeBox: Box | null = null;
+  afterBox: Box | null = null;
   breakBefore: string | null = null;
 
   constructor(
@@ -474,7 +474,7 @@ export class Styler implements AbstractStyler {
   counterSnapshots: CounterSnapshot[] = [];
   flows = {} as { [key: string]: Vtree.Flow };
   flowChunks = [] as Vtree.FlowChunk[];
-  flowListener: FlowListener = null;
+  flowListener: FlowListener | null = null;
   flowToReach: string | null = null;
   idToReach: string | null = null;
   cascade: CssCascade.CascadeInstance;

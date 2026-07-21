@@ -213,8 +213,8 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
 
 export class DispatchParserHandler extends ParserHandler {
   stack: ParserHandler[] = [];
-  tokenizer: CssTokenizer.Tokenizer = null;
-  slave: ParserHandler = null;
+  tokenizer: CssTokenizer.Tokenizer | null = null;
+  slave: ParserHandler | null = null;
 
   constructor() {
     super(null);
@@ -815,10 +815,10 @@ export class Parser {
   propName: string | null = null;
   propImportant: boolean = false;
   exprContext: ExprContext;
-  result: Css.Val = null;
+  result: Css.Val | null = null;
   importReady: boolean = false;
   importURL: string | null = null;
-  importCondition: Css.Expr = null;
+  importCondition: Css.Expr | null = null;
   errorBrackets: number[] = [];
   ruleStack: string[] = [];
   regionRule: boolean = false;

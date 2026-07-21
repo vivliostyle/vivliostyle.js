@@ -38,8 +38,8 @@ export interface PropertyReceiver {
 }
 
 export class Node {
-  success: Node = null;
-  failure: Node = null;
+  success: Node | null = null;
+  failure: Node | null = null;
   code: number = 0;
 
   constructor(public validator: PropertyValidator) {}

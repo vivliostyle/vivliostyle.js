@@ -231,7 +231,7 @@ export class OffsetStep implements Step {
 }
 
 export class Fragment {
-  steps: Step[] = null;
+  steps: Step[] | null = null;
 
   fromString(fragstr: string): void {
     let r = fragstr.match(/^#?epubcfi\((.*)\)$/);
