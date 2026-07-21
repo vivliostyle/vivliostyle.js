@@ -1121,7 +1121,7 @@ export class Parser {
     const isFunc = token.type === TokenType.FUNC;
     const tokenizer = this.tokenizer;
     let startPosition: number;
-    let name: string;
+    let name: string | undefined;
     if (isFunc) {
       name = token.text;
       startPosition = token.position + name.length + 1;
@@ -1149,7 +1149,8 @@ export class Parser {
       return null;
     }
     let parLevel = 0;
-    let tokenN: CssTokenizer.Token;
+    // the loop runs at least once
+    let tokenN!: CssTokenizer.Token;
     let commaCount = 0;
     while (parLevel >= 0) {
       tokenizer.consume();
@@ -1447,7 +1448,7 @@ export class Parser {
     let ns: string | null;
     let text: string | null;
     let num: number;
-    let val: Css.Val;
+    let val: Css.Val | null = null;
     let params: (number | string)[];
     let selectorStartPosition: number | null = null;
 

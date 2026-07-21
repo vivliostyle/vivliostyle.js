@@ -5344,7 +5344,7 @@ export class CascadeParserHandler
     funcName: string,
     params?: (number | string)[],
   ): void {
-    let parameterParserHandler: MatchesParameterParserHandler;
+    let parameterParserHandler: MatchesParameterParserHandler | undefined;
     switch (funcName) {
       case "is":
         parameterParserHandler = new MatchesParameterParserHandler(this);
