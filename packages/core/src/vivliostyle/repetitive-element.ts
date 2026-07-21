@@ -42,7 +42,7 @@ export class RepetitiveElementsOwnerFormattingContext
 {
   formattingContextType: FormattingContextType = "RepetitiveElementsOwner";
   isRoot: boolean = false;
-  repetitiveElements: RepetitiveElement.RepetitiveElements = null;
+  repetitiveElements: RepetitiveElement.RepetitiveElements | null = null;
 
   constructor(
     public readonly parent: Vtree.FormattingContext,

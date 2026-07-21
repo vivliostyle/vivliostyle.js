@@ -837,8 +837,8 @@ export class OPFDoc {
   epageIsRenderedPage: boolean = true;
   epageCountCallback: (p1: number) => void | null = null;
   metadata: Meta = {};
-  toc: OPFItem = null;
-  cover: OPFItem = null;
+  toc: OPFItem | null = null;
+  cover: OPFItem | null = null;
   fallbackMap: { [key: string]: string } = {};
   pageProgression: Constants.PageProgression | null = null;
   documentURLTransformer: Base.DocumentURLTransformer;
@@ -1339,7 +1339,7 @@ export class OPFDoc {
 
       if (!this.toc) {
         this.toc = manifestUrl
-          ? this.items?.[0]
+          ? (this.items?.[0] ?? null)
           : this.itemMapByPath[primaryEntryPath];
       }
 
