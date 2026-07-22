@@ -1328,31 +1328,31 @@ export class ShorthandSyntaxCompound extends ShorthandSyntaxNode {
 }
 
 export class ShorthandValidator extends Css.Visitor {
-  syntax: ShorthandSyntaxNode[] = null;
-  propList: string[] = null;
   error: boolean = false;
   values: ValueMap = {};
-  validatorSet: ValidatorSet = null;
 
-  setOwner(validatorSet: ValidatorSet) {
-    this.validatorSet = validatorSet;
+  protected constructor(
+    public validatorSet: ValidatorSet,
+    public syntax: ShorthandSyntaxNode[],
+    public propList: string[],
+  ) {
+    super();
   }
 
-  syntaxNodeForProperty(name: string): ShorthandSyntaxNode {
-    return new ShorthandSyntaxProperty(this.validatorSet, name);
+  static create(
+    validatorSet: ValidatorSet,
+    syntax: ShorthandSyntaxNode[],
+    propList: string[],
+  ): ShorthandValidator {
+    return new this(validatorSet, syntax, propList);
   }
 
   clone(): this {
-    const other = new (this.constructor as any)();
-    other.syntax = this.syntax;
-    other.propList = this.propList;
-    other.validatorSet = this.validatorSet;
-    return other;
-  }
-
-  init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
-    this.syntax = syntax;
-    this.propList = propList;
+    return new (this.constructor as any)(
+      this.validatorSet,
+      this.syntax,
+      this.propList,
+    );
   }
 
   finish(important: boolean, receiver: PropertyReceiver): boolean {
@@ -1443,10 +1443,6 @@ export class ShorthandValidator extends Css.Visitor {
 }
 
 export class SimpleShorthandValidator extends ShorthandValidator {
-  constructor() {
-    super();
-  }
-
   override validateList(list: Css.Val[]): number {
     let index = 0;
     let i = 0;
@@ -1467,10 +1463,6 @@ export class SimpleShorthandValidator extends ShorthandValidator {
 }
 
 export class InsetsShorthandValidator extends ShorthandValidator {
-  constructor() {
-    super();
-  }
-
   override validateList(list: Css.Val[]): number {
     if (list.length > this.syntax.length || list.length == 0) {
       this.error = true;
@@ -1495,10 +1487,6 @@ export class InsetsShorthandValidator extends ShorthandValidator {
 }
 
 export class InsetsSlashShorthandValidator extends ShorthandValidator {
-  constructor() {
-    super();
-  }
-
   override validateList(list: Css.Val[]): number {
     let slashIndex = list.length;
     for (let i = 0; i < list.length; i++) {
@@ -1536,10 +1524,6 @@ export class InsetsSlashShorthandValidator extends ShorthandValidator {
 }
 
 export class CommaShorthandValidator extends SimpleShorthandValidator {
-  constructor() {
-    super();
-  }
-
   mergeIn(acc: { [key: string]: Css.Val[] }, values: ValueMap) {
     for (const name of this.propList) {
       const val =
@@ -1585,13 +1569,13 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
 }
 
 export class FontShorthandValidator extends SimpleShorthandValidator {
-  constructor() {
-    super();
-  }
-
-  override init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
-    super.init(syntax, propList);
-    this.propList.push(
+  static override create(
+    validatorSet: ValidatorSet,
+    syntax: ShorthandSyntaxNode[],
+    propList: string[],
+  ): FontShorthandValidator {
+    return new FontShorthandValidator(validatorSet, syntax, [
+      ...propList,
       "font-family",
       "line-height",
       "font-size",
@@ -1600,7 +1584,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
       "font-variant-caps",
       "font-variant-numeric",
       "font-variant-east-asian",
-    );
+    ]);
   }
 
   override validateList(list: Css.Val[]): number {
@@ -1728,17 +1712,17 @@ export class BrowserShorthandValidator extends ShorthandValidator {
   // This validator reuses the browser's own shorthand expansion instead of
   // requiring one dedicated validator class per shorthand.
   constructor(
+    validatorSet: ValidatorSet,
     public readonly name: string,
     propList: string[] = [],
   ) {
-    super();
-    this.propList = propList;
+    super(validatorSet, [], propList);
   }
 
   override clone(): this {
-    const other = new (this.constructor as any)(this.name, [...this.propList]);
-    other.validatorSet = this.validatorSet;
-    return other;
+    return new (this.constructor as any)(this.validatorSet, this.name, [
+      ...this.propList,
+    ]);
   }
 
   private validateValueText(valueText: string): boolean {
@@ -1869,16 +1853,8 @@ const propsExcludedFromAll = [
 ];
 
 export class AllShorthandValidator extends SimpleShorthandValidator {
-  constructor() {
-    super();
-  }
-
   refreshPropList(): void {
     this.propList = this.validatorSet.getPropertiesForAll();
-  }
-
-  override init(syntax: ShorthandSyntaxNode[], propList: string[]): void {
-    super.init(syntax, propList);
   }
 
   override validateList(list: Css.Val[]): number {
@@ -2061,10 +2037,10 @@ export class ValidatorSet {
       return null;
     }
     const browserShorthand = new BrowserShorthandValidator(
+      this,
       name,
       expanded.propList,
     );
-    browserShorthand.setOwner(this);
     this.shorthands[name] = browserShorthand;
     this.invalidateAllPropertyNames();
     return browserShorthand;
@@ -2526,14 +2502,13 @@ export class ValidatorSet {
         return;
       }
       let token = tok.nthToken(1);
-      let shorthandValidator: ShorthandValidator;
+      let validatorClass: typeof ShorthandValidator;
       if (token.type == TokenType.IDENT && shorthandValidators[token.text]) {
-        shorthandValidator = new shorthandValidators[token.text]();
+        validatorClass = shorthandValidators[token.text];
         tok.consume();
       } else {
-        shorthandValidator = new SimpleShorthandValidator();
+        validatorClass = SimpleShorthandValidator;
       }
-      shorthandValidator.setOwner(this);
       let result = false;
       let syntax: ShorthandSyntaxNode[] = [];
       let slash = false;
@@ -2545,7 +2520,7 @@ export class ValidatorSet {
         switch (token.type) {
           case TokenType.IDENT:
             if (this.validators[token.text]) {
-              syntax.push(shorthandValidator.syntaxNodeForProperty(token.text));
+              syntax.push(new ShorthandSyntaxProperty(this, token.text));
               // `font-variant_css2` and `font-stretch_css3` are not real properties
               if (!token.text.includes("_")) {
                 propList.push(token.text);
@@ -2591,7 +2566,7 @@ export class ValidatorSet {
             throw new Error("unexpected token");
         }
       }
-      shorthandValidator.init(syntax, propList);
+      const shorthandValidator = validatorClass.create(this, syntax, propList);
       this.shorthands[ruleName] = shorthandValidator;
       this.invalidateAllPropertyNames();
     }
