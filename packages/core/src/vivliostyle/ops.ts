@@ -3304,6 +3304,8 @@ export type StyleSource = {
   media: string | null;
 };
 
+export type StyleSheetParam = { url: string | null; text: string | null };
+
 export function parseOPSResource(
   response: Net.FetchResponse,
   store: XmlDoc.XMLDocStore,
@@ -3316,29 +3318,18 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   styleFetcherByKey: { [key: string]: TaskUtil.Fetcher<Style> } = {};
   styleByDocURL: { [key: string]: Style } = {};
   triggersByDocURL: { [key: string]: Vtree.Trigger[] } = {};
-  validatorSet: CssValidator.ValidatorSet = null;
+  validatorSet: CssValidator.ValidatorSet = CssValidator.baseValidatorSet();
   private styleSheets: StyleSource[] = [];
-  private triggerSingleDocumentPreprocessing: boolean = false;
+  protected triggerSingleDocumentPreprocessing: boolean = false;
 
-  constructor(
+  protected constructor(
     public fontDeobfuscator:
       ((p1: string) => ((p1: Blob) => Task.Result<Blob>) | null) | null,
+    authorStyleSheets: StyleSheetParam[] | null = null,
+    userStyleSheets: StyleSheetParam[] | null = null,
   ) {
     super(parseOPSResource, Net.FetchResponseType.DOCUMENT);
-  }
-
-  init(
-    authorStyleSheets: { url: string | null; text: string | null }[] | null,
-    userStyleSheets: { url: string | null; text: string | null }[] | null,
-  ): Task.Result<boolean> {
     this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
-    const frame = Task.newFrame<boolean>("OPSDocStore.init");
-    this.validatorSet = CssValidator.baseValidatorSet();
-    loadUABase().then(() => {
-      this.triggerSingleDocumentPreprocessing = true;
-      frame.finish(true);
-    });
-    return frame.result();
   }
 
   getStyleForDoc(xmldoc: XmlDoc.XMLDocHolder): Style {

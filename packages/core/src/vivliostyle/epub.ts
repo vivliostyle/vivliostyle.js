@@ -86,11 +86,27 @@ export class EPUBDocStore extends OPS.OPSDocStore {
   deobfuscators: { [key: string]: (p1: Blob) => Task.Result<Blob> } = {};
   documents: { [key: string]: Task.Result<XmlDoc.XMLDocHolder> } = {};
 
-  constructor() {
-    super(null);
+  private constructor(
+    authorStyleSheets: OPS.StyleSheetParam[] | null = null,
+    userStyleSheets: OPS.StyleSheetParam[] | null = null,
+  ) {
+    super(null, authorStyleSheets, userStyleSheets);
     this.fontDeobfuscator = this.makeDeobfuscatorFactory();
     this.plainXMLStore = XmlDoc.newXMLDocStore();
     this.jsonStore = Net.newJSONStore();
+  }
+
+  static create(
+    authorStyleSheets: OPS.StyleSheetParam[] | null,
+    userStyleSheets: OPS.StyleSheetParam[] | null,
+  ): Task.Result<EPUBDocStore> {
+    const frame = Task.newFrame<EPUBDocStore>("EPUBDocStore.create");
+    OPS.loadUABase().then(() => {
+      const store = new EPUBDocStore(authorStyleSheets, userStyleSheets);
+      store.triggerSingleDocumentPreprocessing = true;
+      frame.finish(store);
+    });
+    return frame.result();
   }
 
   makeDeobfuscatorFactory():
