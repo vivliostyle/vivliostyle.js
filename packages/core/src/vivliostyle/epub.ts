@@ -3501,7 +3501,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
         }
       }
       this.counterStore.forceSetPageCounter(pageCounterOffset);
-      const instance = new OPS.StyleInstance(
+      // For env(pub-title) and env(doc-title)
+      const pubTitles = this.opf.metadata && this.opf.metadata[metaTerms.title];
+      const pubTitle = (pubTitles && pubTitles[0] && pubTitles[0]["v"]) || "";
+      const docTitle = item.title || "";
+
+      OPS.StyleInstance.create(
         style,
         xmldoc,
         this.opf.lang,
@@ -3514,18 +3519,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
         this.opf.documentURLTransformer,
         this.counterStore,
         this.cmykStore,
+        this.pref,
+        pubTitle,
+        docTitle,
         this.opf.pageProgression,
         isVersoFirstPage,
-      );
-      instance.pref = this.pref;
-
-      // For env(pub-title) and env(doc-title)
-      const pubTitles = this.opf.metadata && this.opf.metadata[metaTerms.title];
-      instance.pubTitle =
-        (pubTitles && pubTitles[0] && pubTitles[0]["v"]) || "";
-      instance.docTitle = item.title || "";
-
-      instance.init().then(() => {
+      ).then((instance) => {
         if (!this.opf.pageProgression && instance.pageProgression) {
           // Use the first instance's page progression as the global page progression.
           // (Fix for issue #1260)

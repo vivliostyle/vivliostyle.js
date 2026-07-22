@@ -287,7 +287,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
         viewportSize.height,
       );
       const customRenderer = this.makeCustomRenderer(xmldoc);
-      const instance = new OPS.StyleInstance(
+      OPS.StyleInstance.create(
         style,
         xmldoc,
         this.lang,
@@ -300,10 +300,11 @@ export class TOCView implements Vgen.CustomRendererFactory {
         this.documentURLTransformer,
         this.counterStore,
         this.cmykStore,
-      );
-      this.instance = instance;
-      instance.pref = this.pref;
-      instance.init().then(() => {
+        this.pref,
+        null,
+        null,
+      ).then((instance) => {
+        this.instance = instance;
         instance.layoutNextPage(page, null).then(() => {
           this.setAutoHeight(elem, 2);
           frame.finish(page);

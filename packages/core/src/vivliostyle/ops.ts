@@ -296,16 +296,16 @@ export class StyleInstance
 {
   lang: string | null;
   primaryFlows = { body: true } as { [key: string]: boolean };
-  rootPageBoxInstance: PageMaster.RootPageBoxInstance = null;
-  styler: CssStyler.Styler = null;
-  stylerMap: { [key: string]: CssStyler.Styler } = null;
+  rootPageBoxInstance: PageMaster.RootPageBoxInstance;
+  styler: CssStyler.Styler;
+  stylerMap: { [key: string]: CssStyler.Styler };
   currentLayoutPosition: Vtree.LayoutPosition | null = null;
   layoutPositionAtPageStart: Vtree.LayoutPosition | null = null;
   currentCascadedPageStyle: CssCascade.ElementStyle | null = null;
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
   pageBoxInstances: { [key: string]: PageMaster.PageBoxInstance } = {};
-  pageManager: CssPage.PageManager = null;
+  pageManager: CssPage.PageManager;
   private pageNumberContextStack: number[] = [];
   private rootPageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
   pageBreaks: { [key: string]: boolean } = {};
@@ -326,7 +326,7 @@ export class StyleInstance
   } = Object.create(null);
   currentPageGroupDocument: Document | null = null;
 
-  constructor(
+  private constructor(
     public readonly style: Style,
     public readonly xmldoc: XmlDoc.XMLDocHolder,
     defaultLang: string | null,
@@ -339,6 +339,9 @@ export class StyleInstance
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly counterStore: Counters.CounterStore,
     public readonly cmykStore: CmykStore.CmykStore,
+    pref: Exprs.Preferences,
+    pubTitle: string | null,
+    docTitle: string | null,
     pageProgression?: Constants.PageProgression,
     isVersoFirstPage?: boolean,
   ) {
@@ -368,10 +371,14 @@ export class StyleInstance
         }
       }
     }
-  }
 
-  init(): Task.Result<boolean> {
-    const frame: Task.Frame<boolean> = Task.newFrame("StyleInstance.init");
+    // The flow-consume loop above must evaluate under the default pref. Only
+    // the document subtree resolved below reads the real pref. Do not hoist
+    // this assignment above the loop, or primaryFlows would change.
+    this.pref = pref;
+    this.pubTitle = pubTitle;
+    this.docTitle = docTitle;
+
     const counterListener = this.counterStore.createCounterListener(
       this.xmldoc.url,
     );
@@ -437,23 +444,6 @@ export class StyleInstance
       this,
       docElementStyle,
     );
-    const srcFaces = [] as Font.Face[];
-    for (const fontFace of this.style.fontFaces) {
-      if (fontFace.condition && !fontFace.condition.evaluate(this)) {
-        continue;
-      }
-      const properties = Font.prepareProperties(fontFace.properties, this);
-      const srcFace = new Font.Face(properties);
-      srcFaces.push(srcFace);
-    }
-    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).then(() => {
-      // JavaScript in HTML documents support
-      Scripts.loadScriptsInHead(
-        this.xmldoc.document,
-        this.viewport.window,
-        this.styler,
-      ).thenFinish(frame);
-    });
 
     // Determine page sheet sizes corresponding to page selectors
     const pageProps = this.style.pageProps;
@@ -482,6 +472,76 @@ export class StyleInstance
         width: pageSizeAndBleed.pageWidth + pageSizeAndBleed.cropOffset * 2,
         height: pageSizeAndBleed.pageHeight + pageSizeAndBleed.cropOffset * 2,
       };
+    });
+  }
+
+  static create(
+    style: Style,
+    xmldoc: XmlDoc.XMLDocHolder,
+    defaultLang: string | null,
+    viewport: Vgen.Viewport,
+    clientLayout: Vtree.ClientLayout,
+    fontMapper: Font.Mapper,
+    customRenderer: Vgen.CustomRenderer,
+    fallbackMap: { [key: string]: string },
+    pageNumberOffset: number,
+    documentURLTransformer: Base.DocumentURLTransformer,
+    counterStore: Counters.CounterStore,
+    cmykStore: CmykStore.CmykStore,
+    pref: Exprs.Preferences,
+    pubTitle: string | null,
+    docTitle: string | null,
+    pageProgression?: Constants.PageProgression,
+    isVersoFirstPage?: boolean,
+  ): Task.Result<StyleInstance> {
+    const instance = new StyleInstance(
+      style,
+      xmldoc,
+      defaultLang,
+      viewport,
+      clientLayout,
+      fontMapper,
+      customRenderer,
+      fallbackMap,
+      pageNumberOffset,
+      documentURLTransformer,
+      counterStore,
+      cmykStore,
+      pref,
+      pubTitle,
+      docTitle,
+      pageProgression,
+      isVersoFirstPage,
+    );
+    const frame: Task.Frame<StyleInstance> = Task.newFrame(
+      "StyleInstance.create",
+    );
+    instance.loadFontsAndScripts().then(() => {
+      frame.finish(instance);
+    });
+    return frame.result();
+  }
+
+  private loadFontsAndScripts(): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame(
+      "StyleInstance.loadFontsAndScripts",
+    );
+    const srcFaces = [] as Font.Face[];
+    for (const fontFace of this.style.fontFaces) {
+      if (fontFace.condition && !fontFace.condition.evaluate(this)) {
+        continue;
+      }
+      const properties = Font.prepareProperties(fontFace.properties, this);
+      const srcFace = new Font.Face(properties);
+      srcFaces.push(srcFace);
+    }
+    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).then(() => {
+      // JavaScript in HTML documents support
+      Scripts.loadScriptsInHead(
+        this.xmldoc.document,
+        this.viewport.window,
+        this.styler,
+      ).thenFinish(frame);
     });
     return frame.result();
   }
