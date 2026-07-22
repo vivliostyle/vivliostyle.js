@@ -68,7 +68,11 @@ export abstract class PageBox<
     }
   }
 
-  createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  createInstance(
+    parentInstance: PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
+  ): PageBoxInstance {
     throw new Error("E_UNEXPECTED_CALL");
   }
 
@@ -184,7 +188,11 @@ export class PageMaster<
     );
   }
 
-  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  override createInstance(
+    parentInstance: PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
+  ): PageBoxInstance {
     return new PageMasterInstance(parentInstance, this);
   }
 
@@ -240,7 +248,11 @@ export class PartitionGroup extends PageBox<PartitionGroupInstance> {
     );
   }
 
-  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  override createInstance(
+    parentInstance: PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
+  ): PageBoxInstance {
     return new PartitionGroupInstance(parentInstance, this);
   }
 
@@ -278,7 +290,11 @@ export class Partition<
     }
   }
 
-  override createInstance(parentInstance: PageBoxInstance): PageBoxInstance {
+  override createInstance(
+    parentInstance: PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
+  ): PageBoxInstance {
     return new PartitionInstance(parentInstance, this);
   }
 
@@ -569,7 +585,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     return expr;
   }
 
-  private initEnabled(): void {
+  protected initEnabled(): void {
     const scope = this.pageBox.scope;
     const style = this.style;
     let enabled = toExprBool(scope, style["enabled"], scope._true);
@@ -879,7 +895,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     style["snap-height"] = new Css.Expr(snapHeight);
   }
 
-  private initColumns(): void {
+  protected initColumns(): void {
     const scope = this.pageBox.scope;
     const style = this.style;
     const width = toExprAuto(
@@ -926,11 +942,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       .depend(val, context);
   }
 
-  private init(context: Exprs.Context): void {
-    // If context does not implement InstanceHolder we would not be able to
-    // resolve "partition.property" names later.
-    const holder = context as InstanceHolder;
-    holder.registerInstance(this.pageBox.key, this);
+  protected resolveStyle(context: Exprs.Context): void {
     const scope = this.pageBox.scope;
     const style = this.style;
     const regionIds = this.parentInstance
@@ -978,10 +990,20 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       () => this.calculatedHeight,
       "autoHeight",
     );
+  }
+
+  protected init(context: Exprs.Context): void {
+    this.resolveStyle(context);
     this.initHorizontal();
     this.initVertical();
     this.initColumns();
     this.initEnabled();
+  }
+
+  protected register(context: Exprs.Context): void {
+    // If context does not implement InstanceHolder we would not be able to
+    // resolve "partition.property" names later.
+    (context as InstanceHolder).registerInstance(this.pageBox.key, this);
   }
 
   getProp(context: Exprs.Context, name: string): Css.Val {
@@ -1640,10 +1662,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
   }
 
-  applyCascadeAndInit(
-    cascade: CssCascade.CascadeInstance,
-    docElementStyle: CssCascade.ElementStyle,
-  ): void {
+  protected buildCascadedStyle(docElementStyle: CssCascade.ElementStyle): void {
     const style = this.cascaded;
     const specified = this.pageBox.specified;
     for (const name in specified) {
@@ -1674,7 +1693,26 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         }
       }
     }
-    cascade.pushRule(this.pageBox.classes, null, style);
+  }
+
+  protected initChildren(
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
+  ): void {
+    cascade.pushRule(this.pageBox.classes, null, this.cascaded);
+    for (const child of this.pageBox.children) {
+      const childInstance = child.createInstance(
+        this,
+        cascade.context,
+        docElementStyle,
+      );
+      childInstance.applyCascadeAndInit(cascade, docElementStyle);
+    }
+    cascade.popRule();
+  }
+
+  protected resolveContent(cascade: CssCascade.CascadeInstance): void {
+    const style = this.cascaded;
     const content = style["content"] as CssCascade.CascadeValue;
     if (content) {
       const savedLastCounterChanges = Array.from(cascade.lastCounterChanges);
@@ -1698,9 +1736,23 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       cascade.lastCounterChanges = savedLastCounterChanges;
       cascade.lastCounterChangeTypes = savedLastCounterChangeTypes;
     }
+  }
+
+  applyCascadeAndInit(
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
+  ): void {
+    this.buildCascadedStyle(docElementStyle);
+    cascade.pushRule(this.pageBox.classes, null, this.cascaded);
+    this.resolveContent(cascade);
     this.init(cascade.context);
+    this.register(cascade.context);
     for (const child of this.pageBox.children) {
-      const childInstance = child.createInstance(this);
+      const childInstance = child.createInstance(
+        this,
+        cascade.context,
+        docElementStyle,
+      );
       childInstance.applyCascadeAndInit(cascade, docElementStyle);
     }
     cascade.popRule();

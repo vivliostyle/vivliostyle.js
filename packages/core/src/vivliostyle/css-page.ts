@@ -880,6 +880,7 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
   private pageMarginBoxes = {} as {
     [key: string]: PageMarginBoxPartition;
   };
+  readonly pageRulePartition: PageRulePartition;
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -888,7 +889,12 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
   ) {
     super(scope, null, pageRuleMasterPseudoName, [], parent, null, 0);
     const pageSize = resolvePageSizeAndBleed(style as any);
-    const partition = new PageRulePartition(this.scope, this, style, pageSize);
+    this.pageRulePartition = new PageRulePartition(
+      this.scope,
+      this,
+      style,
+      pageSize,
+    );
     this.createPageMarginBoxes(style);
     this.applySpecified(style, pageSize);
   }
@@ -932,8 +938,15 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
 
   override createInstance(
     parentInstance: PageMaster.PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ): PageRuleMasterInstance {
-    return new PageRuleMasterInstance(parentInstance, this);
+    return new PageRuleMasterInstance(
+      parentInstance,
+      this,
+      context,
+      docElementStyle,
+    );
   }
 }
 
@@ -980,8 +993,15 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
 
   override createInstance(
     parentInstance: PageMaster.PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ): PageRulePartitionInstance {
-    return new PageRulePartitionInstance(parentInstance, this);
+    return new PageRulePartitionInstance(
+      parentInstance,
+      this,
+      context,
+      docElementStyle,
+    );
   }
 }
 
@@ -996,6 +1016,8 @@ export class PageAreaPartition extends PageMaster.Partition<PageAreaPartitionIns
 
   override createInstance(
     parentInstance: PageMaster.PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ): PageMaster.PageBoxInstance {
     return new PageAreaPartitionInstance(parentInstance, this);
   }
@@ -1053,6 +1075,8 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
 
   override createInstance(
     parentInstance: PageMaster.PageBoxInstance,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ): PageMaster.PageBoxInstance {
     return new PageMarginBoxPartitionInstance(parentInstance, this);
   }
@@ -1069,7 +1093,8 @@ export type PageAreaDimension = {
 };
 
 export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRuleMaster> {
-  pageAreaDimension: PageAreaDimension | null = null;
+  readonly pageAreaDimension: PageAreaDimension;
+  readonly pageAreaPartitionInstance: PageRulePartitionInstance;
   pageMarginBoxInstances: {
     [key: string]: PageMarginBoxPartitionInstance;
   } = {};
@@ -1077,25 +1102,67 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
   constructor(
     parentInstance: PageMaster.PageBoxInstance,
     pageRuleMaster: PageRuleMaster,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ) {
     super(parentInstance, pageRuleMaster);
+    for (const name in docElementStyle) {
+      if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
+        switch (name) {
+          case "writing-mode":
+          case "direction":
+            this.cascaded[name] = docElementStyle[name];
+        }
+      }
+    }
+    this.buildCascadedStyle(docElementStyle);
+    this.init(context);
+
+    // Construct the page-area partition and read back its resolved dimension as
+    // this master's page area size. initColumns (via init above) consumed the
+    // specified page width; the lines below overwrite width/height/padding with
+    // the resolved border box.
+    this.pageAreaPartitionInstance =
+      this.pageBox.pageRulePartition.createInstance(
+        this,
+        context,
+        docElementStyle,
+      );
+    const dim = this.pageAreaPartitionInstance.pageAreaDimension;
+    this.pageAreaDimension = dim;
+    const style = this.style;
+    style["width"] = new Css.Expr(dim.borderBoxWidth);
+    style["height"] = new Css.Expr(dim.borderBoxHeight);
+    style["padding-left"] = new Css.Expr(dim.marginLeft);
+    style["padding-right"] = new Css.Expr(dim.marginRight);
+    style["padding-top"] = new Css.Expr(dim.marginTop);
+    style["padding-bottom"] = new Css.Expr(dim.marginBottom);
+    this.register(context);
   }
 
   override applyCascadeAndInit(
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
-    const style = this.cascaded;
-    for (const name in docElementStyle) {
-      if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
-        switch (name) {
-          case "writing-mode":
-          case "direction":
-            style[name] = docElementStyle[name];
-        }
-      }
+    // Geometry and cascaded style were resolved in the constructor. The child
+    // loop reuses the page-area partition built there (pageAreaPartitionInstance).
+    cascade.pushRule(this.pageBox.classes, null, this.cascaded);
+    // The constructor's init() copied the unresolved `content` into `style`
+    // before the cascade rule was available. Resolve the generated content now
+    // (it needs the cascade) and refresh the physical style with the result.
+    this.resolveContent(cascade);
+    const content = this.cascaded["content"] as CssCascade.CascadeValue;
+    if (content) {
+      this.style["content"] = content.value;
     }
-    super.applyCascadeAndInit(cascade, docElementStyle);
+    for (const child of this.pageBox.children) {
+      const childInstance =
+        child === this.pageBox.pageRulePartition
+          ? this.pageAreaPartitionInstance
+          : child.createInstance(this, cascade.context, docElementStyle);
+      childInstance.applyCascadeAndInit(cascade, docElementStyle);
+    }
+    cascade.popRule();
   }
 
   override initHorizontal(): void {
@@ -1121,17 +1188,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     style["border-bottom-width"] = Css.numericZero;
     style["margin-bottom"] = Css.numericZero;
     style["bottom"] = Css.numericZero;
-  }
-
-  setPageAreaDimension(dim: PageAreaDimension) {
-    this.pageAreaDimension = dim;
-    const style = this.style;
-    style["width"] = new Css.Expr(dim.borderBoxWidth);
-    style["height"] = new Css.Expr(dim.borderBoxHeight);
-    style["padding-left"] = new Css.Expr(dim.marginLeft);
-    style["padding-right"] = new Css.Expr(dim.marginRight);
-    style["padding-top"] = new Css.Expr(dim.marginTop);
-    style["padding-bottom"] = new Css.Expr(dim.marginBottom);
   }
 
   override adjustPageLayout(
@@ -1745,66 +1801,61 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
 }
 
 export class PageRulePartitionInstance extends PageMaster.PartitionInstance<PageRulePartition> {
-  borderBoxWidth: Exprs.Val = null;
-  borderBoxHeight: Exprs.Val = null;
-  contentBoxWidth: Exprs.Val = null;
-  contentBoxHeight: Exprs.Val = null;
-  marginTop: Exprs.Val = null;
-  marginRight: Exprs.Val = null;
-  marginBottom: Exprs.Val = null;
-  marginLeft: Exprs.Val = null;
+  readonly contentBoxWidth: Css.Val;
+  readonly contentBoxHeight: Css.Val;
+  readonly pageAreaDimension: PageAreaDimension;
 
   constructor(
     parentInstance: PageMaster.PageBoxInstance,
     pageRulePartition: PageRulePartition,
+    context: Exprs.Context,
+    docElementStyle: CssCascade.ElementStyle,
   ) {
     super(parentInstance, pageRulePartition);
+    for (const name in docElementStyle) {
+      if (name.match(/^background-/)) {
+        this.cascaded[name] = docElementStyle[name];
+      }
+    }
+    this.buildCascadedStyle(docElementStyle);
+    this.resolveStyle(context);
+
+    // resolvePageBoxDimensions writes this partition's own box style for one
+    // axis and returns the border box, content box, and margins. The content
+    // box is what the page-area child fills; the border box and margins form
+    // the master's page area dimension.
+    const horizontal = this.resolvePageBoxDimensions({
+      start: "left",
+      end: "right",
+      extent: "width",
+    });
+    const vertical = this.resolvePageBoxDimensions({
+      start: "top",
+      end: "bottom",
+      extent: "height",
+    });
+    this.contentBoxWidth = new Css.Expr(horizontal.contentBoxExtent);
+    this.contentBoxHeight = new Css.Expr(vertical.contentBoxExtent);
+    this.pageAreaDimension = {
+      borderBoxWidth: horizontal.borderBoxExtent,
+      borderBoxHeight: vertical.borderBoxExtent,
+      marginLeft: horizontal.marginStart,
+      marginRight: horizontal.marginEnd,
+      marginTop: vertical.marginStart,
+      marginBottom: vertical.marginEnd,
+    };
+    this.initColumns();
+    this.initEnabled();
+    this.register(context);
   }
 
   override applyCascadeAndInit(
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
-    for (const name in docElementStyle) {
-      if (name.match(/^background-/)) {
-        this.cascaded[name] = docElementStyle[name];
-      }
-    }
-    super.applyCascadeAndInit(cascade, docElementStyle);
-    const pageRuleMasterInstance = this
-      .parentInstance as PageRuleMasterInstance;
-    pageRuleMasterInstance.setPageAreaDimension({
-      borderBoxWidth: this.borderBoxWidth,
-      borderBoxHeight: this.borderBoxHeight,
-      marginTop: this.marginTop,
-      marginRight: this.marginRight,
-      marginBottom: this.marginBottom,
-      marginLeft: this.marginLeft,
-    });
-  }
-
-  override initHorizontal(): void {
-    const dim = this.resolvePageBoxDimensions({
-      start: "left",
-      end: "right",
-      extent: "width",
-    });
-    this.borderBoxWidth = dim.borderBoxExtent;
-    this.contentBoxWidth = dim.contentBoxExtent;
-    this.marginLeft = dim.marginStart;
-    this.marginRight = dim.marginEnd;
-  }
-
-  override initVertical(): void {
-    const dim = this.resolvePageBoxDimensions({
-      start: "top",
-      end: "bottom",
-      extent: "height",
-    });
-    this.borderBoxHeight = dim.borderBoxExtent;
-    this.contentBoxHeight = dim.contentBoxExtent;
-    this.marginTop = dim.marginStart;
-    this.marginBottom = dim.marginEnd;
+    // Geometry and cascaded style were resolved in the constructor; here only
+    // the page-area child is initialized.
+    this.initChildren(cascade, docElementStyle);
   }
 
   /**
@@ -1968,9 +2019,9 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     const parentStyle = this.parentInstance.style;
     const scope = this.pageBox.scope;
     style["left"] = parentStyle["padding-left"];
-    style["width"] = new Css.Expr(
-      (this.parentInstance as PageRulePartitionInstance).contentBoxWidth,
-    );
+    style["width"] = (
+      this.parentInstance as PageRulePartitionInstance
+    ).contentBoxWidth;
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-left"] = new Css.Expr(
@@ -1992,9 +2043,9 @@ export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<Page
     const parentStyle = this.parentInstance.style;
     const scope = this.pageBox.scope;
     style["top"] = parentStyle["padding-top"];
-    style["height"] = new Css.Expr(
-      (this.parentInstance as PageRulePartitionInstance).contentBoxHeight,
-    );
+    style["height"] = (
+      this.parentInstance as PageRulePartitionInstance
+    ).contentBoxHeight;
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-top"] = new Css.Expr(
@@ -2733,6 +2784,8 @@ export class PageManager {
     );
     const pageMasterInstance = pageMaster.createInstance(
       this.rootPageBoxInstance,
+      this.context,
+      this.docElementStyle,
     );
 
     // Do the same initialization as in Ops.StyleInstance.prototype.init
@@ -2786,6 +2839,8 @@ export class PageManager {
     });
     const pageMasterInstance = newPageMaster.createInstance(
       this.rootPageBoxInstance,
+      this.context,
+      this.docElementStyle,
     ) as PageMaster.PageMasterInstance;
 
     // Do the same initialization as in Ops.StyleInstance.prototype.init
