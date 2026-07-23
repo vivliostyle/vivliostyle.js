@@ -35,7 +35,7 @@ import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Vtree from "./vtree";
-import { CssStyler, Layout } from "./types";
+import { CssCascade, CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
 import { AbstractStyler } from "./css-styler";
 
@@ -269,7 +269,7 @@ const couplingMapRightPage = buildCouplingMap(
   {},
 );
 
-export class CascadeValue {
+export class CascadeValue implements CssCascade.CascadeValue {
   constructor(
     public readonly value: Css.Val,
     public readonly priority: number,

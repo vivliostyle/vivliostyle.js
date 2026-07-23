@@ -39,13 +39,6 @@ export const SEMANTIC_FOOTNOTE_FIRST_REF_ATTR =
 export const SEMANTIC_FOOTNOTE_REFERENCED_ATTR =
   "data-vivliostyle-footnote-referenced";
 
-type CascadeValueLike = {
-  value: Css.Val;
-  priority: number;
-  evaluate?: (context: Exprs.Context, propName: string) => Css.Val;
-  filterValue?: (visitor: unknown) => CascadeValueLike;
-};
-
 type ElementStyleMap = {
   [key: string]: CssCascade.ElementStyle;
 };
@@ -55,7 +48,7 @@ export type SemanticFootnoteStyleAccess = {
   getProp: (
     style: CssCascade.ElementStyle | null | undefined,
     propName: string,
-  ) => CascadeValueLike | null | undefined;
+  ) => CssCascade.CascadeValue | null | undefined;
   getStyleMap: (
     style: CssCascade.ElementStyle,
     mapName: string,
@@ -64,9 +57,12 @@ export type SemanticFootnoteStyleAccess = {
     style: CssCascade.ElementStyle,
     mapName: string,
   ) => ElementStyleMap;
-  createCascadeValue: (value: Css.Val, priority: number) => CascadeValueLike;
+  createCascadeValue: (
+    value: Css.Val,
+    priority: number,
+  ) => CssCascade.CascadeValue;
   filterFootnoteMarkerContent: (
-    content: CascadeValueLike,
+    content: CssCascade.CascadeValue,
     element: Element,
   ) => Css.Val;
 };
@@ -187,7 +183,7 @@ export function shouldGenerateSemanticFootnote(
 function getFootnoteDisplayOverride(
   style: CssCascade.ElementStyle | null,
   styleAccess: SemanticFootnoteStyleAccess,
-): CascadeValueLike | null {
+): CssCascade.CascadeValue | null {
   const footnoteDisplay = styleAccess.getProp(style, "footnote-display");
   if (footnoteDisplay) {
     return footnoteDisplay;
@@ -301,7 +297,7 @@ export function mergeSemanticFootnoteRootStyle(
   }
   if (
     footnoteMarkerContent &&
-    footnoteMarkerListStylePosition?.evaluate?.(
+    footnoteMarkerListStylePosition?.evaluate(
       context,
       "list-style-position",
     ) === Css.ident.outside
@@ -384,7 +380,7 @@ export function refreshSemanticFootnoteMarkerContent(
 ): void {
   const rawMarkerContent = sourceStyle?.[
     "_footnote-marker-content"
-  ] as CascadeValueLike;
+  ] as CssCascade.CascadeValue;
   if (rawMarkerContent) {
     computedStyle["--viv-marker-content"] = resolveMarkerContentValue(
       rawMarkerContent.value,

@@ -32,6 +32,21 @@ export type FragmentLayoutConstraintType =
 
 export namespace CssCascade {
   export type ElementStyle = { [key: string]: any };
+
+  export interface CascadeValue {
+    readonly value: Css.Val;
+    readonly priority: number;
+    getBaseValue(): CascadeValue;
+    filterValue(visitor: Css.Visitor): CascadeValue;
+    increaseSpecificity(specificity: number): CascadeValue;
+    evaluate(
+      context: Exprs.Context,
+      propName?: string,
+      percentRef?: number,
+      vertical?: boolean,
+    ): Css.Val;
+    isEnabled(context: Exprs.Context): boolean;
+  }
 }
 
 export namespace CssStyler {
