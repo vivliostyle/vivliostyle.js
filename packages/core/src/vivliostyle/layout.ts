@@ -292,7 +292,7 @@ export function processAfterIfContinuesOfAncestors(
   const frame: Task.Frame<boolean> = Task.newFrame(
     "processAfterIfContinuesOfAncestors",
   );
-  let current: Vtree.NodeContext = nodeContext;
+  let current: Vtree.NodeContext | null = nodeContext;
   frame
     .loop(() => {
       if (current !== null) {
@@ -593,11 +593,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       .loop(() => {
         while (stepIndex >= 0) {
           const prevContext = nodeContext;
-          const step = steps[stepIndex];
-          nodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
-            step,
-            prevContext,
-          );
+          nodeContext = prevContext
+            ? VtreeImpl.makeNodeContextFromNodePositionStep(
+                steps[stepIndex],
+                prevContext,
+              )
+            : VtreeImpl.makeRootNodeContextFromNodePositionStep(
+                VtreeImpl.rootStepOfNodePosition(position),
+              );
           if (
             stepIndex === steps.length - 1 &&
             !nodeContext.formattingContext
@@ -836,7 +839,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.maybePeelOff(position, 0).then((position1Param) => {
           const position1 = position1Param as Vtree.NodeContext;
           if (position1 !== position) {
-            let p = position1;
+            let p: Vtree.NodeContext | null = position1;
             while (p && p.sourceNode != sourceNode) {
               p = p.parent;
             }
@@ -3019,7 +3022,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   calculateClonedPaddingBorder(nodeContext: Vtree.NodeContext): number {
     let clonedPaddingBorder = 0;
-    for (let nc = nodeContext; nc; nc = nc.parent) {
+    for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
       if (
         !nc.inline &&
         Break.isCloneBoxDecorationBreak(nc.viewNode as Element)
@@ -3186,7 +3189,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   getAfterEdgeOfBlockContainer(nodeContext: Vtree.NodeContext): number {
-    let blockParent = nodeContext;
+    let blockParent: Vtree.NodeContext | null = nodeContext;
     do {
       blockParent = blockParent.parent;
     } while (blockParent && blockParent.inline);
@@ -3334,7 +3337,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Determines if a page break is acceptable at this position
    */
   isBreakable(flowPosition: Vtree.NodeContext): boolean {
-    for (let nc = flowPosition; nc; nc = nc.parent) {
+    for (let nc: Vtree.NodeContext | null = flowPosition; nc; nc = nc.parent) {
       if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
         return false;
       }
@@ -3450,7 +3453,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (!nodeContext) {
       return false;
     }
-    for (let nc = nodeContext; nc; nc = nc.parent) {
+    for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
       if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
         return false;
       }
@@ -3696,7 +3699,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * as position:fixed). (Issue #1833)
    */
   hasFixedPositionAncestor(nodeContext: Vtree.NodeContext): boolean {
-    for (let nc = nodeContext; nc; nc = nc.parent) {
+    for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
       if (LayoutHelper.isFixedPositioned(nc.viewNode)) {
         return true;
       }
@@ -3747,7 +3750,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       ) {
         return;
       }
-      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+      for (
+        let nc: Vtree.NodeContext | null = currentNodeContext;
+        nc;
+        nc = nc.parent
+      ) {
         if (nc.breakBefore === "column") {
           nc.breakBefore = null;
         }
@@ -3773,7 +3780,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       ) {
         return;
       }
-      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+      for (
+        let nc: Vtree.NodeContext | null = currentNodeContext;
+        nc;
+        nc = nc.parent
+      ) {
         if (nc.breakBefore === "column") {
           nc.breakBefore = null;
         }
@@ -3793,7 +3804,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (forcedBreakValue || !Break.isPageLevelForcedBreak(breakAtTheEdge)) {
         return;
       }
-      for (let nc = currentNodeContext; nc; nc = nc.parent) {
+      for (
+        let nc: Vtree.NodeContext | null = currentNodeContext;
+        nc;
+        nc = nc.parent
+      ) {
         if (nc.breakAfter === "column") {
           nc.breakAfter = null;
         }
@@ -5277,7 +5292,7 @@ export class ColumnLayoutRetryer extends LayoutRetryers.AbstractLayoutRetryer {
 
   override clearNodes(initialPosition: Vtree.NodeContext) {
     super.clearNodes(initialPosition);
-    let nodeContext = initialPosition;
+    let nodeContext: Vtree.NodeContext | null = initialPosition;
     while (nodeContext) {
       const viewNode = nodeContext.viewNode;
       if (viewNode) {

@@ -1196,9 +1196,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     rowSpanningCellBreakPositions.forEach((rowCellBreakPositions) => {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
+        // A table row under layout always sits below its table element context.
         const rowNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
           rowCellBreakPositions[0].cellNodePosition.steps[1],
-          currentRow.parent,
+          (currentRow as Vtree.ChildNodeContext).parent,
         );
         return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
           let cont1 = Task.newResult(true);

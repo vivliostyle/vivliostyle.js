@@ -76,7 +76,10 @@ export abstract class AbstractLayoutRetryer {
 
   clearNodes(initialPosition: Vtree.NodeContext) {
     const viewNode =
-      initialPosition.viewNode || initialPosition.parent.viewNode;
+      initialPosition.viewNode ?? initialPosition.parent?.viewNode;
+    if (!viewNode) {
+      return;
+    }
     let child: Node;
     while ((child = viewNode.lastChild)) {
       viewNode.removeChild(child);
