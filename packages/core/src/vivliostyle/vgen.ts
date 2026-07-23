@@ -628,7 +628,7 @@ export class ViewFactory
   createShadows(
     nodeContext: Vtree.NodeContext,
     element: Element,
-    isRoot,
+    isRoot: boolean,
     cascStyle: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     styler: CssStyler.AbstractStyler,
@@ -875,7 +875,7 @@ export class ViewFactory
       node.localName === "include" &&
       node.classList.contains("-vivliostyle-footnote-content");
     const shouldSkipAncestorMarkerProps =
-      this.isFootnote && (!nodeContext?.parent || isFootnoteContentInclude);
+      this.isFootnote && (!nodeContext.parent || isFootnoteContentInclude);
 
     // TODO: this is hacky. We need to recover the path through the shadow
     // trees, but we do not have the full shadow tree structure at this point.
@@ -1416,7 +1416,7 @@ export class ViewFactory
       let usesOutsideFootnoteMarker = false;
       const isFootnoteBodyInFootnoteArea =
         this.isFootnote &&
-        (!nodeContext?.parent ||
+        (!nodeContext.parent ||
           nodeContext.pluginProps["nestedFootnoteDetached"] ||
           isSemanticFootnoteInRootedShadow);
       const semanticFootnoteStyle =
@@ -1794,7 +1794,7 @@ export class ViewFactory
         } else if (tag == "audi_") {
           tag = "audio";
         } else if (tag == "object") {
-          custom = !!this.customRenderer;
+          custom = true;
         }
         if (
           element.hasAttribute(PseudoElement.PSEUDO_ATTR) &&
@@ -1810,7 +1810,7 @@ export class ViewFactory
         ns = Base.NS.XHTML;
         tag = nodeContext.inline ? "span" : "div";
       } else {
-        custom = !!this.customRenderer;
+        custom = true;
       }
       if (isListItem) {
         // Keep display: list-item so the browser's native ::marker is used.
@@ -2864,18 +2864,10 @@ export class ViewFactory
     atUnforcedBreak?: boolean,
   ): Task.Result<boolean> {
     this.nodeContext = nodeContext;
-    if (nodeContext) {
-      this.sourceNode = nodeContext.sourceNode;
-      this.offsetInNode = nodeContext.offsetInNode;
-    } else {
-      this.sourceNode = null;
-      this.offsetInNode = -1;
-    }
+    this.sourceNode = nodeContext.sourceNode;
+    this.offsetInNode = nodeContext.offsetInNode;
     this.viewNode = null;
-    if (this.nodeContext) {
-      return this.createNodeView(nodeContext, firstTime, !!atUnforcedBreak);
-    }
-    return Task.newResult(true);
+    return this.createNodeView(nodeContext, firstTime, !!atUnforcedBreak);
   }
 
   processShadowContent(pos: Vtree.NodeContext): Vtree.NodeContext {
