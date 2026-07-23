@@ -618,7 +618,7 @@ export class NodeContext implements Vtree.NodeContext {
   containingBlockForAbsolute: boolean = false;
   breakBefore: string | null = null;
   breakAfter: string | null = null;
-  viewNode: Node | null = null;
+  viewNode: Element | Text | null = null;
   clearSpacer: Node | null = null;
   inheritedProps: { [key: string]: number | string | Css.Val | undefined };
   vertical: boolean;

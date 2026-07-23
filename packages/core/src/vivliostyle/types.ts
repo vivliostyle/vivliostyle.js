@@ -1316,7 +1316,7 @@ export namespace Vtree {
     containingBlockForAbsolute: boolean;
     breakBefore: string | null;
     breakAfter: string | null;
-    viewNode: Node | null;
+    viewNode: Element | Text | null;
     clearSpacer: Node | null;
     inheritedProps: { [key: string]: number | string | Css.Val | undefined };
     vertical: boolean;
