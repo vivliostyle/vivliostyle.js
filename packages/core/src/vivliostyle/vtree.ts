@@ -906,6 +906,23 @@ export function asTextNodeContext(
     : null;
 }
 
+export type RenderedNodeContext = NodeContext & Vtree.RenderedNodeContext;
+export type ElementNodeContext = NodeContext & Vtree.ElementNodeContext;
+
+export function asElementNodeContext(
+  nc: Vtree.NodeContext,
+): ElementNodeContext | null {
+  return nc.viewNode !== null && nc.viewNode.nodeType === 1
+    ? (nc as ElementNodeContext)
+    : null;
+}
+
+export function asRenderedNodeContext(
+  nc: Vtree.NodeContext,
+): RenderedNodeContext | null {
+  return asElementNodeContext(nc) ?? asTextNodeContext(nc);
+}
+
 export class ChunkPosition implements Vtree.ChunkPosition {
   floats: NodePosition[] | null = null;
 

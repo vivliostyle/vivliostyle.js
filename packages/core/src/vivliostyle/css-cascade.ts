@@ -2970,7 +2970,7 @@ function getContentWidth(
  */
 const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
   nodeContext: Vtree.NodeContext,
-  checkPoints: Vtree.NodeContext[],
+  checkPoints: Vtree.RenderedNodeContext[],
   column: Layout.Column,
 ) => {
   const leaders = checkPoints.flatMap((c) => {

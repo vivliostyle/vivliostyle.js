@@ -128,7 +128,7 @@ export namespace Layout {
    */
   export interface BoxBreakPosition extends AbstractBreakPosition {
     breakNodeContext: Vtree.NodeContext | null;
-    readonly checkPoints: Vtree.NodeContext[];
+    readonly checkPoints: Vtree.RenderedNodeContext[];
     readonly penalty: number;
   }
 
@@ -214,7 +214,7 @@ export namespace Layout {
      */
     buildViewToNextBlockEdge(
       position: Vtree.NodeContext,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
     ): Task.Result<Vtree.NodeContext>;
     nextInTree(
       position: Vtree.NodeContext,
@@ -260,7 +260,7 @@ export namespace Layout {
      */
     calculateEdge(
       nodeContext: Vtree.NodeContext,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
       index: number,
       boxOffset: number,
     ): number;
@@ -344,9 +344,9 @@ export namespace Layout {
     processLineStyling(
       nodeContext: Vtree.NodeContext,
       resNodeContext: Vtree.NodeContext,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
     ): Task.Result<Vtree.NodeContext>;
-    isLoneImage(checkPoints: Vtree.NodeContext[]): boolean;
+    isLoneImage(checkPoints: Vtree.RenderedNodeContext[]): boolean;
     getTrailingMarginEdgeAdjustment(
       trailingEdgeContexts: Vtree.NodeContext[],
     ): number;
@@ -358,19 +358,19 @@ export namespace Layout {
     ): Task.Result<Vtree.NodeContext>;
     postLayoutBlock(
       nodeContext: Vtree.NodeContext,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
     ): void;
     findEndOfLine(
       linePosition: number,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
       isUpdateMaxReachedAfterEdge: boolean,
     ): {
-      nodeContext: Vtree.NodeContext;
+      nodeContext: Vtree.RenderedNodeContext;
       index: number;
       checkPointIndex: number;
     };
     findAcceptableBreakInside(
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
       edgePosition: number,
       force: boolean,
     ): Vtree.NodeContext;
@@ -387,16 +387,18 @@ export namespace Layout {
      * This is, of course, somewhat hacky implementation.
      * @return position of line breaks
      */
-    findLinePositions(checkPoints: Vtree.NodeContext[]): number[];
+    findLinePositions(checkPoints: Vtree.RenderedNodeContext[]): number[];
     calculateClonedPaddingBorder(nodeContext: Vtree.NodeContext): number;
     findBoxBreakPosition(
       bp: BoxBreakPosition,
       force: boolean,
     ): Vtree.NodeContext;
     getAfterEdgeOfBlockContainer(nodeContext: Vtree.NodeContext): number;
-    findFirstOverflowingEdgeAndCheckPoint(checkPoints: Vtree.NodeContext[]): {
+    findFirstOverflowingEdgeAndCheckPoint(
+      checkPoints: Vtree.RenderedNodeContext[],
+    ): {
       edge: number;
-      checkPoint: Vtree.NodeContext | null;
+      checkPoint: Vtree.RenderedNodeContext | null;
     };
     findEdgeBreakPosition(bp: EdgeBreakPosition): Vtree.NodeContext;
     /**
@@ -485,7 +487,7 @@ export namespace Layout {
     /**
      * @param checkPoints array of breaking points for breakable block
      */
-    saveBoxBreakPosition(checkPoints: Vtree.NodeContext[]): void;
+    saveBoxBreakPosition(checkPoints: Vtree.RenderedNodeContext[]): void;
     updateMaxReachedAfterEdge(afterEdge: number): void;
     /**
      * @param chunkPosition starting position.
@@ -529,7 +531,7 @@ export namespace Layout {
       textNode: Text,
       nodeContext: Vtree.NodeContext,
       low: number,
-      checkPoints: Vtree.NodeContext[],
+      checkPoints: Vtree.RenderedNodeContext[],
       checkpointIndex: number,
       force: boolean,
     ): Vtree.NodeContext;
@@ -1361,10 +1363,15 @@ export namespace Vtree {
     shadowSibling: null;
   }
 
-  export interface TextNodeContext extends NodeContext {
-    parent: NodeContext;
+  export interface TextNodeContext extends ChildNodeContext {
     viewNode: Text;
   }
+
+  export interface ElementNodeContext extends NodeContext {
+    viewNode: Element;
+  }
+
+  export type RenderedNodeContext = ElementNodeContext | TextNodeContext;
 
   export interface ChunkPosition {
     floats: NodePosition[] | null;

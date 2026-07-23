@@ -362,7 +362,7 @@ export class BoxBreakPosition
   breakNodeContext: Vtree.NodeContext | null = null;
 
   constructor(
-    public readonly checkPoints: Vtree.NodeContext[],
+    public readonly checkPoints: Vtree.RenderedNodeContext[],
     public readonly penalty: number,
   ) {
     super();
@@ -394,7 +394,9 @@ export class BoxBreakPosition
   }
 }
 
-export function validateCheckPoints(checkPoints: Vtree.NodeContext[]): void {
+export function validateCheckPoints(
+  checkPoints: Vtree.RenderedNodeContext[],
+): void {
   for (let i = 1; i < checkPoints.length; i++) {
     const cp0 = checkPoints[i - 1];
     const cp1 = checkPoints[i];
@@ -700,7 +702,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   buildViewToNextBlockEdge(
     position: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ): Task.Result<Vtree.NodeContext> {
     let violateConstraint = false;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
@@ -708,22 +710,23 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
     frame
       .loopWithFrame((bodyFrame) => {
+        const renderedPos = VtreeImpl.asRenderedNodeContext(position);
         if (
-          position.viewNode &&
-          !LayoutHelper.isSpecialNodeContext(position) &&
+          renderedPos &&
+          !LayoutHelper.isSpecialNodeContext(renderedPos) &&
           // Prevent breaking inside SVG etc. (Issue #1406)
-          position.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
+          renderedPos.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
         ) {
-          checkPoints.push(position.copy());
+          checkPoints.push(renderedPos.copy());
 
           // Prevent performance degradation when the text block is very large.
           // (Issue #1256)
           const CHECKPOINTS_THRESHOLD = 1000;
           if (checkPoints.length > CHECKPOINTS_THRESHOLD) {
             const element =
-              position.viewNode.nodeType === 1
-                ? (position.viewNode as Element)
-                : position.viewNode.parentElement;
+              renderedPos.viewNode.nodeType === 1
+                ? (renderedPos.viewNode as Element)
+                : renderedPos.viewNode.parentElement;
             const rect = this.clientLayout.getElementClientRect(element);
 
             // Check if the box position is beyond column breaks with
@@ -746,8 +749,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const position1 = position1Param as Vtree.NodeContext;
           if (position1 !== position) {
             position = position1;
-            if (!LayoutHelper.isSpecialNodeContext(position)) {
-              checkPoints.push(position.copy());
+            const renderedPeeled = VtreeImpl.asRenderedNodeContext(position1);
+            if (
+              renderedPeeled &&
+              !LayoutHelper.isSpecialNodeContext(renderedPeeled)
+            ) {
+              checkPoints.push(renderedPeeled.copy());
             }
           }
           this.nextInTree(position).then((positionParam) => {
@@ -821,7 +828,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (!position.viewNode) {
       return Task.newResult(position);
     }
-    let checkPoints: Vtree.NodeContext[] = [];
+    let checkPoints: Vtree.RenderedNodeContext[] = [];
     const sourceNode = position.sourceNode;
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
       "buildDeepElementView",
@@ -830,12 +837,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // TODO: end the loop based on depth, not sourceNode comparison
     frame
       .loopWithFrame((bodyFrame) => {
+        const renderedPos = VtreeImpl.asRenderedNodeContext(position);
         if (
-          position.viewNode &&
-          position.inline &&
-          !LayoutHelper.isSpecialNodeContext(position)
+          renderedPos &&
+          renderedPos.inline &&
+          !LayoutHelper.isSpecialNodeContext(renderedPos)
         ) {
-          checkPoints.push(position.copy());
+          checkPoints.push(renderedPos.copy());
         } else {
           if (checkPoints.length > 0) {
             this.postLayoutBlock(position, checkPoints);
@@ -855,8 +863,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               bodyFrame.breakLoop();
               return;
             }
-            if (!LayoutHelper.isSpecialNodeContext(position1)) {
-              checkPoints.push(position1.copy());
+            const renderedPeeled = VtreeImpl.asRenderedNodeContext(position1);
+            if (
+              renderedPeeled &&
+              !LayoutHelper.isSpecialNodeContext(renderedPeeled)
+            ) {
+              checkPoints.push(renderedPeeled.copy());
             }
           }
           this.nextInTree(position1).then((positionParam) => {
@@ -1195,7 +1207,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   calculateEdge(
     nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
     index: number,
     boxOffset: number,
   ): number {
@@ -1233,9 +1245,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (index < 0) {
         return this.beforeEdge;
       }
-      nodeContext = checkPoints[index];
-      if (nodeContext.viewNode.nodeType != 1) {
-        offset = nodeContext.viewNode.textContent.length;
+      const cp = checkPoints[index];
+      nodeContext = cp;
+      if (cp.viewNode.nodeType != 1) {
+        offset = cp.viewNode.textContent.length;
       }
     }
   }
@@ -2453,7 +2466,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   processLineStyling(
     nodeContext: Vtree.NodeContext,
     resNodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> =
       Task.newFrame("processLineStyling");
@@ -2531,7 +2544,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   private findLineFootnoteOverflowBreak(
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ): Vtree.NodeContext | null {
     if (this.lineFootnoteOverflowEdge == null || checkPoints.length === 0) {
       return null;
@@ -2552,7 +2565,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return this.findAcceptableBreakInside(checkPoints, linePosition, true);
   }
 
-  isLoneImage(checkPoints: Vtree.NodeContext[]): boolean {
+  isLoneImage(checkPoints: Vtree.RenderedNodeContext[]): boolean {
     if (checkPoints.length != 2 && this.breakPositions.length > 0) {
       return false;
     }
@@ -2601,7 +2614,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame(
       "layoutBreakableBlock",
     );
-    const checkPoints: Vtree.NodeContext[] = [];
+    const checkPoints: Vtree.RenderedNodeContext[] = [];
     this.lineFootnoteOverflowEdge = null;
     this.buildViewToNextBlockEdge(nodeContext, checkPoints).then(
       (resNodeContext) => {
@@ -2705,7 +2718,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   postLayoutBlock(
     nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ) {
     const hooks: Plugin.PostLayoutBlockHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
@@ -2717,10 +2730,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   findEndOfLine(
     linePosition: number,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
     isUpdateMaxReachedAfterEdge: boolean,
   ): {
-    nodeContext: Vtree.NodeContext;
+    nodeContext: Vtree.RenderedNodeContext;
     index: number;
     checkPointIndex: number;
   } {
@@ -2783,12 +2796,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   findAcceptableBreakInside(
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
     edgePosition: number,
     force: boolean,
   ): Vtree.NodeContext {
     const position = this.findEndOfLine(edgePosition, checkPoints, true);
-    let nodeContext = position.nodeContext;
+    const cpNodeContext = position.nodeContext;
+    let nodeContext: Vtree.NodeContext = cpNodeContext;
 
     if (
       position.checkPointIndex === 0 &&
@@ -2798,7 +2812,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return null;
     }
 
-    const viewNode = nodeContext.viewNode;
+    const viewNode = cpNodeContext.viewNode;
     if (
       viewNode.nodeType != 1 &&
       viewNode.parentElement?.localName !== "viv-ts-inner"
@@ -2807,7 +2821,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const textNodeBreaker = this.resolveTextNodeBreaker(nodeContext);
       nodeContext = textNodeBreaker.breakTextNode(
         textNode,
-        nodeContext,
+        cpNodeContext,
         position.index,
         checkPoints,
         position.checkPointIndex,
@@ -2960,7 +2974,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * This is, of course, somewhat hacky implementation.
    * @return position of line breaks
    */
-  findLinePositions(checkPoints: Vtree.NodeContext[]): number[] {
+  findLinePositions(checkPoints: Vtree.RenderedNodeContext[]): number[] {
     const LOW_OVERLAP = 0.2;
     const MID_OVERLAP = 0.6;
     const positions = [];
@@ -3079,7 +3093,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     parentNode.insertBefore(this.element, nextSibling);
 
     const checkPoints = bp.checkPoints;
-    let block = checkPoints[0];
+    let block: Vtree.NodeContext = checkPoints[0];
     while (block.parent && block.inline) {
       block = block.parent;
     }
@@ -3217,9 +3231,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
   }
 
-  findFirstOverflowingEdgeAndCheckPoint(checkPoints: Vtree.NodeContext[]): {
+  findFirstOverflowingEdgeAndCheckPoint(
+    checkPoints: Vtree.RenderedNodeContext[],
+  ): {
     edge: number;
-    checkPoint: Vtree.NodeContext | null;
+    checkPoint: Vtree.RenderedNodeContext | null;
   } {
     const index = checkPoints.findIndex((cp) => cp.overflow);
     if (index < 0) {
@@ -4688,11 +4704,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * @param checkPoints array of breaking points for breakable block
    */
-  saveBoxBreakPosition(checkPoints: Vtree.NodeContext[]): void {
+  saveBoxBreakPosition(checkPoints: Vtree.RenderedNodeContext[]): void {
     let penalty = checkPoints[0].breakPenalty;
     if (penalty) {
       // Fix for issue #546
-      let block = checkPoints[0];
+      let block: Vtree.NodeContext = checkPoints[0];
       while (block.parent && block.inline) {
         block = block.parent;
       }
@@ -5156,7 +5172,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     textNode: Text,
     nodeContext: Vtree.NodeContext,
     low: number,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
     checkpointIndex: number,
     force: boolean,
   ): Vtree.NodeContext {

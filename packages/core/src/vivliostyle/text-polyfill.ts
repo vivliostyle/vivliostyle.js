@@ -434,7 +434,7 @@ class TextSpacingPolyfill {
 
   postLayoutBlock(
     nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ): void {
     const isFirstFragment =
       !nodeContext ||

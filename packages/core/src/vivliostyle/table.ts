@@ -835,7 +835,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   rowIndex: number = -1;
   columnIndex: number = 0;
   inRow: boolean = false;
-  checkPoints: Vtree.NodeContext[] = [];
+  checkPoints: Vtree.RenderedNodeContext[] = [];
   inHeaderOrFooter: boolean = false;
 
   constructor(
@@ -1015,12 +1015,10 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
 
   registerCheckPoint(state: LayoutUtil.LayoutIteratorState) {
     const nodeContext = state.nodeContext;
-    if (
-      nodeContext &&
-      nodeContext.viewNode &&
-      !LayoutHelper.isSpecialNodeContext(nodeContext)
-    ) {
-      this.checkPoints.push(nodeContext.clone());
+    const rendered =
+      nodeContext && VtreeImpl.asRenderedNodeContext(nodeContext);
+    if (rendered && !LayoutHelper.isSpecialNodeContext(rendered)) {
+      this.checkPoints.push(rendered.clone());
     }
   }
 
