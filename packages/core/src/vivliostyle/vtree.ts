@@ -901,7 +901,7 @@ export type TextNodeContext = NodeContext & Vtree.TextNodeContext;
 export function asTextNodeContext(
   nc: Vtree.NodeContext,
 ): TextNodeContext | null {
-  return nc.viewNode !== null && nc.viewNode.nodeType !== 1
+  return nc.parent !== null && nc.viewNode?.nodeType === 3
     ? (nc as TextNodeContext)
     : null;
 }
