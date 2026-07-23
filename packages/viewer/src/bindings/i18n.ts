@@ -81,6 +81,7 @@ const translations = {
       Auto: "Auto",
       Single_page: "Single page",
       Spread: "Spread",
+      Continuous_scroll: "Continuous scroll",
       TIP_Book_Mode:
         "On: for Book-like publications, with Table of Contents\nOff: for single HTML documents",
       TIP_Render_All_Pages:
@@ -218,6 +219,7 @@ const translations = {
       Auto: "自動",
       Single_page: "単ページ",
       Spread: "見開き",
+      Continuous_scroll: "連続スクロール",
       TIP_Book_Mode:
         "ON: 本のような出版物（目次付き）用\nOFF: 単体のHTML文書用",
       TIP_Render_All_Pages:
