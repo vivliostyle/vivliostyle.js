@@ -370,6 +370,78 @@ describe("epub", function () {
       ]);
     });
   });
+  describe("OPFView page rendering", function () {
+    it("stops tracking a render task after a synchronous error", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        view.renderingPageTasks = new Map();
+        var error = new Error("render failed");
+        spyOn(view, "renderPageTracked").and.throwError(error);
+
+        return adapt_task.handle(
+          "testRenderErrorCleanup",
+          function () {
+            view.renderPage({
+              spineIndex: 0,
+              pageIndex: 0,
+              offsetInItem: -1,
+            });
+          },
+          function (frame, caughtError) {
+            expect(caughtError).toBe(error);
+            expect(view.renderingPageTasks.size).toBe(0);
+            frame.finish(true);
+            done();
+          },
+        );
+      });
+    });
+
+    it("waits for a pending page being rendered by another task", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        view.renderingPageTasks = new Map();
+        var page = {};
+        var viewItem = {
+          complete: false,
+          layoutPositions: [{ page: 0 }, { page: 1 }],
+          pages: [{}],
+        };
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "getPageViewItem").and.returnValue(
+          adapt_task.newResult(viewItem),
+        );
+        spyOn(view, "renderPage").and.callThrough();
+        var scheduler = adapt_task.currentTask().getScheduler();
+        var backgroundTask = scheduler.run(function () {
+          var frame = adapt_task.newFrame("backgroundRender");
+          view.beginRenderingPage(adapt_task.currentTask());
+          frame.sleep(50).then(function () {
+            viewItem.pages[1] = page;
+            view.endRenderingPage(adapt_task.currentTask());
+            frame.finish(true);
+          });
+          return frame.result();
+        });
+        var testFrame = adapt_task.newFrame("testPendingPageWait");
+        testFrame.sleep(10).then(function () {
+          view
+            .findPage({ spineIndex: 0, pageIndex: 1, offsetInItem: -1 }, false)
+            .then(function (result) {
+              expect(result.page).toBe(page);
+              expect(view.renderPage).not.toHaveBeenCalled();
+              backgroundTask.join().then(function () {
+                testFrame.finish(true);
+                done();
+              });
+            });
+        });
+        return testFrame.result();
+      });
+    });
+  });
   describe("OPFView pagination progress", function () {
     function createFakeView(totalOffsets) {
       var view = Object.create(adapt_epub.OPFView.prototype);
