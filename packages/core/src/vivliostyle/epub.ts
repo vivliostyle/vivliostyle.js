@@ -2606,6 +2606,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
                 }
                 loopFrame.breakLoop();
               });
+            } else if (this.isRenderingPageInAnotherTask()) {
+              // A background task is already materializing pages. Wait for
+              // the requested page to appear instead of rendering the same
+              // shared StyleInstance and CounterStore concurrently (Issue #2047).
+              frame.sleep(100).then(() => {
+                loopFrame.continueLoop();
+              });
             } else if (
               pageIndex < viewItem.layoutPositions.length &&
               !viewItem.pages[pageIndex]
@@ -2642,8 +2649,62 @@ export class OPFView implements Vgen.CustomRendererFactory {
    * Renders a page at the specified position.
    */
   renderPage(position: Position): Task.Result<PageAndPosition | null> {
+    const currentTask = Task.currentTask();
+    this.beginRenderingPage(currentTask);
+    let renderingEnded = false;
+    const endRendering = (): void => {
+      if (!renderingEnded) {
+        renderingEnded = true;
+        this.endRenderingPage(currentTask);
+      }
+    };
+    return Task.handle(
+      "renderPage",
+      (frame) => {
+        this.renderPageTracked(position).then((result) => {
+          endRendering();
+          frame.finish(result);
+        });
+      },
+      (frame, err) => {
+        endRendering();
+        frame.task.raise(err, frame.parent);
+      },
+    );
+  }
+
+  // Track renderPage tasks so navigation can wait only until its requested
+  // page is available, without canceling background pagination (Issue #2047).
+  private renderingPageTasks = new Map<Task.Task, number>();
+
+  private beginRenderingPage(task: Task.Task): void {
+    this.renderingPageTasks.set(
+      task,
+      (this.renderingPageTasks.get(task) || 0) + 1,
+    );
+  }
+
+  private endRenderingPage(task: Task.Task): void {
+    const depth = this.renderingPageTasks.get(task);
+    if (depth === 1) {
+      this.renderingPageTasks.delete(task);
+    } else if (depth) {
+      this.renderingPageTasks.set(task, depth - 1);
+    }
+  }
+
+  private isRenderingPageInAnotherTask(): boolean {
+    const currentTask = Task.currentTask();
+    return Array.from(this.renderingPageTasks.keys()).some(
+      (task) => task !== currentTask,
+    );
+  }
+
+  private renderPageTracked(
+    position: Position,
+  ): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> =
-      Task.newFrame("renderPage");
+      Task.newFrame("renderPageTracked");
     this.getPageViewItem(position.spineIndex).then((viewItem) => {
       if (!viewItem) {
         frame.finish(null);
