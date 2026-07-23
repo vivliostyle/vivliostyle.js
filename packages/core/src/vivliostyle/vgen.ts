@@ -2750,11 +2750,11 @@ export class ViewFactory
     nodeContext: Vtree.NodeContext,
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
-    this.preprocessTextContent(nodeContext).then(() => {
+    this.preprocessTextContent(nodeContext).then((preprocessedTextContent) => {
       const offsetInNode = this.offsetInNode || 0;
-      const textContent = Diff.restoreNewText(
-        nodeContext.preprocessedTextContent,
-      ).substr(offsetInNode);
+      const textContent = Diff.restoreNewText(preprocessedTextContent).substr(
+        offsetInNode,
+      );
       this.viewNode = document.createTextNode(textContent);
       frame.finish(true);
     });
@@ -2763,13 +2763,15 @@ export class ViewFactory
 
   private preprocessTextContent(
     nodeContext: Vtree.NodeContext,
-  ): Task.Result<boolean> {
+  ): Task.Result<Diff.Change[]> {
     if (nodeContext.preprocessedTextContent != null) {
-      return Task.newResult(true);
+      return Task.newResult(nodeContext.preprocessedTextContent);
     }
     let originl: string;
     let textContent = (originl = nodeContext.sourceNode.textContent ?? "");
-    const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
+    const frame: Task.Frame<Diff.Change[]> = Task.newFrame(
+      "preprocessTextContent",
+    );
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
     );
@@ -2787,11 +2789,9 @@ export class ViewFactory
         );
       })
       .then(() => {
-        nodeContext.preprocessedTextContent = Diff.diffChars(
-          originl,
-          textContent,
-        );
-        frame.finish(true);
+        const preprocessedTextContent = Diff.diffChars(originl, textContent);
+        nodeContext.preprocessedTextContent = preprocessedTextContent;
+        frame.finish(preprocessedTextContent);
       });
     return frame.result();
   }
