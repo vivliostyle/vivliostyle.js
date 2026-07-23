@@ -519,8 +519,6 @@ function applyNodePositionStep(
 export function rootStepOfNodePosition(
   position: Vtree.NodePosition,
 ): RootNodePositionStep {
-  // steps is [...NodePositionStep[], RootNodePositionStep]; TypeScript cannot
-  // index the trailing element of a variadic tuple, so restate its type.
   return position.steps[position.steps.length - 1] as RootNodePositionStep;
 }
 
@@ -878,8 +876,6 @@ export function asChildNodeContext(
 
 export type RootNodeContext = NodeContext & Vtree.RootNodeContext;
 
-// Total classification by parent presence; the root refinement carries the
-// shadow-sibling correlation declared on Vtree.RootNodeContext.
 export function classifyNodeContext(
   nc: Vtree.NodeContext,
 ): ChildNodeContext | RootNodeContext {
@@ -898,6 +894,16 @@ export function toRootNodePositionStep(
   root: RootNodeContext,
 ): RootNodePositionStep {
   return { ...root.toNodePositionStep(), shadowSibling: root.shadowSibling };
+}
+
+export type TextNodeContext = NodeContext & Vtree.TextNodeContext;
+
+export function asTextNodeContext(
+  nc: Vtree.NodeContext,
+): TextNodeContext | null {
+  return nc.viewNode !== null && nc.viewNode.nodeType !== 1
+    ? (nc as TextNodeContext)
+    : null;
 }
 
 export class ChunkPosition implements Vtree.ChunkPosition {

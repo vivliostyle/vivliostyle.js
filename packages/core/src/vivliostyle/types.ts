@@ -1358,6 +1358,11 @@ export namespace Vtree {
     shadowSibling: null;
   }
 
+  export interface TextNodeContext extends NodeContext {
+    parent: NodeContext;
+    viewNode: Text;
+  }
+
   export interface ChunkPosition {
     floats: NodePosition[] | null;
     primary: NodePosition;

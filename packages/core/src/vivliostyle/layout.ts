@@ -658,8 +658,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       position.firstPseudo.count == 0
     ) {
       // first char
-      if (position.viewNode.nodeType != 1) {
-        const text = position.viewNode.textContent;
+      const textPosition = VtreeImpl.asTextNodeContext(position);
+      if (textPosition) {
+        const viewNode = textPosition.viewNode;
+        const text = viewNode.textContent;
         const r = text.match(Base.firstLetterPattern);
         let firstLetterLength = r ? r[0].length : 0;
         if (
@@ -675,12 +677,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const firstLetterText = r2[0];
             firstLetterLength = firstLetterText.length;
             position.sourceNode.textContent = firstLetterText;
-            position.viewNode.textContent = firstLetterText;
+            viewNode.textContent = firstLetterText;
             position.sourceNode.nextSibling.textContent =
               text2.substr(firstLetterLength);
           }
         }
-        return this.layoutContext.peelOff(position, firstLetterLength);
+        if (firstLetterLength > 0) {
+          const viewText = viewNode.textContent ?? "";
+          viewNode.textContent = viewText.substr(0, firstLetterLength);
+        }
+        return this.layoutContext.peelOff(textPosition, firstLetterLength);
       }
     }
     return Task.newResult(position) as Task.Result<Vtree.NodeContext>;

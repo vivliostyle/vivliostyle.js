@@ -3665,9 +3665,6 @@ export class ViewFactory
     let offsetInNode = nodeContext.offsetInNode;
     const after = nodeContext.after;
     if (nodeOffset > 0) {
-      const viewNode = nodeContext.viewNode;
-      const text = viewNode.textContent ?? "";
-      viewNode.textContent = text.substr(0, nodeOffset);
       offsetInNode += nodeOffset;
     } else if (!after && nodeContext.viewNode && offsetInNode == 0) {
       const parent = nodeContext.viewNode.parentNode;
