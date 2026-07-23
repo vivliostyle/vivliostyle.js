@@ -2750,11 +2750,11 @@ export class ViewFactory
     nodeContext: Vtree.NodeContext,
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
-    this.preprocessTextContent(nodeContext).then(() => {
+    this.preprocessTextContent(nodeContext).then((preprocessedTextContent) => {
       const offsetInNode = this.offsetInNode || 0;
-      const textContent = Diff.restoreNewText(
-        nodeContext.preprocessedTextContent,
-      ).substr(offsetInNode);
+      const textContent = Diff.restoreNewText(preprocessedTextContent).substr(
+        offsetInNode,
+      );
       this.viewNode = document.createTextNode(textContent);
       frame.finish(true);
     });
@@ -2763,13 +2763,15 @@ export class ViewFactory
 
   private preprocessTextContent(
     nodeContext: Vtree.NodeContext,
-  ): Task.Result<boolean> {
+  ): Task.Result<Diff.Change[]> {
     if (nodeContext.preprocessedTextContent != null) {
-      return Task.newResult(true);
+      return Task.newResult(nodeContext.preprocessedTextContent);
     }
     let originl: string;
     let textContent = (originl = nodeContext.sourceNode.textContent ?? "");
-    const frame: Task.Frame<boolean> = Task.newFrame("preprocessTextContent");
+    const frame: Task.Frame<Diff.Change[]> = Task.newFrame(
+      "preprocessTextContent",
+    );
     const hooks: Plugin.PreProcessTextContentHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
     );
@@ -2787,11 +2789,9 @@ export class ViewFactory
         );
       })
       .then(() => {
-        nodeContext.preprocessedTextContent = Diff.diffChars(
-          originl,
-          textContent,
-        );
-        frame.finish(true);
+        const preprocessedTextContent = Diff.diffChars(originl, textContent);
+        nodeContext.preprocessedTextContent = preprocessedTextContent;
+        frame.finish(preprocessedTextContent);
       });
     return frame.result();
   }
@@ -2924,7 +2924,10 @@ export class ViewFactory
     return nextPos;
   }
 
-  private nextPositionInTree(pos: Vtree.NodeContext): Vtree.NodeContext | null {
+  private nextPositionInTree(
+    pos: Vtree.NodeContext,
+    preprocessedTextContent: Diff.Change[] | null,
+  ): Vtree.NodeContext | null {
     let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
       // root, that was the last possible position
@@ -2985,8 +2988,8 @@ export class ViewFactory
       }
 
       // no children - was there text content?
-      if (pos.sourceNode.nodeType != 1) {
-        const content = Diff.restoreNewText(pos.preprocessedTextContent);
+      if (preprocessedTextContent) {
+        const content = Diff.restoreNewText(preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
       pos = pos.modify();
@@ -3142,7 +3145,28 @@ export class ViewFactory
     position: Vtree.NodeContext,
     atUnforcedBreak?: boolean,
   ): Task.Result<Vtree.NodeContext | null> {
-    const nextPosition = this.nextPositionInTree(position);
+    const preprocessResult: Task.Result<Diff.Change[] | null> =
+      !position.after && position.sourceNode.nodeType != 1
+        ? this.preprocessTextContent(position)
+        : Task.newResult<Diff.Change[] | null>(null);
+    return preprocessResult.thenAsync((preprocessedTextContent) =>
+      this.nextInTreeWithPreprocessedText(
+        position,
+        preprocessedTextContent,
+        atUnforcedBreak,
+      ),
+    );
+  }
+
+  private nextInTreeWithPreprocessedText(
+    position: Vtree.NodeContext,
+    preprocessedTextContent: Diff.Change[] | null,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<Vtree.NodeContext | null> {
+    const nextPosition = this.nextPositionInTree(
+      position,
+      preprocessedTextContent,
+    );
     if (!nextPosition || nextPosition.after) {
       return Task.newResult<Vtree.NodeContext | null>(nextPosition);
     }
