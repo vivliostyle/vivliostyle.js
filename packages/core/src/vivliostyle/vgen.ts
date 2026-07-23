@@ -1270,7 +1270,7 @@ export class ViewFactory
     elementStyle = SemanticFootnote.mergeSemanticFootnoteIncludeStyle(
       element,
       elementStyle,
-      nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext,
       this.xmldoc.url,
       (reference) => this.xmldoc.getElement(reference),
       CssCascade.FOOTNOTE_COUNTER_ATTR,
@@ -1279,7 +1279,7 @@ export class ViewFactory
     elementStyle = SemanticFootnote.mergeSemanticFootnoteRootStyle(
       element,
       elementStyle,
-      nodeContext.shadowContext as Vtree.ShadowContext,
+      nodeContext.shadowContext,
       this.context,
       semanticFootnoteStyleAccess,
     );
@@ -1424,7 +1424,7 @@ export class ViewFactory
       const semanticFootnoteStyle =
         SemanticFootnote.getSemanticFootnoteStyleState(
           element,
-          nodeContext.shadowContext as Vtree.ShadowContext,
+          nodeContext.shadowContext,
           semanticFootnoteStyleAccess,
         );
       SemanticFootnote.refreshSemanticFootnoteMarkerContent(
