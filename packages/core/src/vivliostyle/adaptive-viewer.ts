@@ -264,26 +264,27 @@ export class AdaptiveViewer {
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
     this.configure(command).then(() => {
-      const store = new Epub.EPUBDocStore();
-      store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const pubURL = Base.resolveURL(
-          Base.convertSpecialURL(url),
-          this.window.location.href,
-        );
-        this.packageURL = [pubURL];
-        store.loadPubDoc(pubURL).then((opf) => {
-          if (opf) {
-            this.opf = opf;
-            this.loadCmykReserveMap(store).then(() => {
-              this.render(fragment).then(() => {
-                frame.finish(true);
+      Epub.EPUBDocStore.create(authorStyleSheet, userStyleSheet).then(
+        (store) => {
+          const pubURL = Base.resolveURL(
+            Base.convertSpecialURL(url),
+            this.window.location.href,
+          );
+          this.packageURL = [pubURL];
+          store.loadPubDoc(pubURL).then((opf) => {
+            if (opf) {
+              this.opf = opf;
+              this.loadCmykReserveMap(store).then(() => {
+                this.render(fragment).then(() => {
+                  frame.finish(true);
+                });
               });
-            });
-          } else {
-            frame.finish(false);
-          }
-        });
-      });
+            } else {
+              frame.finish(false);
+            }
+          });
+        },
+      );
     });
     return frame.result();
   }
@@ -308,27 +309,32 @@ export class AdaptiveViewer {
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadXML");
     this.configure(command).then(() => {
-      const store = new Epub.EPUBDocStore();
-      store.init(authorStyleSheet, userStyleSheet).then(() => {
-        const resolvedParams: Epub.OPFItemParam[] = params.map((p, index) => ({
-          url: Base.resolveURL(
-            Base.convertSpecialURL(p.url),
-            this.window.location.href,
-          ),
-          index,
-          startPage: p.startPage,
-          skipPagesBefore: p.skipPagesBefore,
-        }));
-        this.packageURL = resolvedParams.map((p) => p.url);
-        Epub.OPFDoc.fromChapters(store, "", resolvedParams, doc).then((opf) => {
-          this.opf = opf;
-          this.loadCmykReserveMap(store).then(() => {
-            this.render(fragment).then(() => {
-              frame.finish(true);
-            });
-          });
-        });
-      });
+      Epub.EPUBDocStore.create(authorStyleSheet, userStyleSheet).then(
+        (store) => {
+          const resolvedParams: Epub.OPFItemParam[] = params.map(
+            (p, index) => ({
+              url: Base.resolveURL(
+                Base.convertSpecialURL(p.url),
+                this.window.location.href,
+              ),
+              index,
+              startPage: p.startPage,
+              skipPagesBefore: p.skipPagesBefore,
+            }),
+          );
+          this.packageURL = resolvedParams.map((p) => p.url);
+          Epub.OPFDoc.fromChapters(store, "", resolvedParams, doc).then(
+            (opf) => {
+              this.opf = opf;
+              this.loadCmykReserveMap(store).then(() => {
+                this.render(fragment).then(() => {
+                  frame.finish(true);
+                });
+              });
+            },
+          );
+        },
+      );
     });
     return frame.result();
   }
