@@ -424,8 +424,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
    */
   protected cascaded: CssCascade.ElementStyle = {};
   style: { [key: string]: Css.Val } = {};
-  private autoWidth: Exprs.Native = null;
-  private autoHeight: Exprs.Native = null;
+  private autoWidth: Exprs.Native;
+  private autoHeight: Exprs.Native;
   children: PageBoxInstance[] = [];
   isAutoWidth: boolean = false;
   isAutoHeight: boolean = false;
@@ -448,6 +448,17 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     if (parentInstance) {
       parentInstance.children.push(this);
     }
+    const scope = this.pageBox.scope;
+    this.autoWidth = new Exprs.Native(
+      scope,
+      () => this.calculatedWidth,
+      "autoWidth",
+    );
+    this.autoHeight = new Exprs.Native(
+      scope,
+      () => this.calculatedHeight,
+      "autoHeight",
+    );
   }
 
   /**
@@ -979,16 +990,6 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       this.rtl,
       isLeftPage,
       (name, cascVal) => cascVal.value,
-    );
-    this.autoWidth = new Exprs.Native(
-      scope,
-      () => this.calculatedWidth,
-      "autoWidth",
-    );
-    this.autoHeight = new Exprs.Native(
-      scope,
-      () => this.calculatedHeight,
-      "autoHeight",
     );
   }
 
