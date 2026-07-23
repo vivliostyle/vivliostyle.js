@@ -759,7 +759,6 @@ export class ViewFactory
       context,
       this.regionIds,
       this.isFootnote,
-      this.nodeContext,
     );
     const isRoot = !this.nodeContext?.parent;
     if (isRoot) {
@@ -958,7 +957,6 @@ export class ViewFactory
         this.context,
         this.regionIds,
         this.isFootnote,
-        nodeContext,
       );
       for (const name in flattenedCurrentStyle) {
         if (!CssCascade.isInherited(name)) {
