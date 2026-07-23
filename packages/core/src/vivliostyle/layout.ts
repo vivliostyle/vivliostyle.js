@@ -2483,14 +2483,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           linePositions[count - 1],
           true,
         );
-        if (lineBreak == null) {
+        const childLineBreak =
+          lineBreak && VtreeImpl.asChildNodeContext(lineBreak);
+        if (!childLineBreak) {
           loopFrame.breakLoop();
           return;
         }
-        this.finishBreak(lineBreak, false, false).then(() => {
+        this.finishBreak(childLineBreak, false, false).then(() => {
           totalLineCount += count;
           this.layoutContext
-            .peelOff(lineBreak, 0)
+            .peelOff(childLineBreak, 0)
             .then((resNodeContextParam) => {
               nodeContext = resNodeContextParam;
               firstPseudo = nodeContext.firstPseudo;
