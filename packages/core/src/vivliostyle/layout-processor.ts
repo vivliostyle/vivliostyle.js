@@ -21,6 +21,7 @@ import * as Display from "./display";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
 import * as Task from "./task";
+import * as VtreeImpl from "./vtree";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 
 /**
@@ -110,8 +111,9 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     column: Layout.Column,
     leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
-    if (column.isFloatNodeContext(nodeContext)) {
-      return column.layoutFloatOrFootnote(nodeContext);
+    const floatNodeContext = column.asFloatNodeContext(nodeContext);
+    if (floatNodeContext) {
+      return column.layoutFloatOrFootnote(floatNodeContext);
     } else if (column.isBreakable(nodeContext)) {
       return column.layoutBreakableBlock(nodeContext);
     } else {

@@ -16,6 +16,7 @@
  *
  * @fileoverview TextPolyfill - CSS text-spacing and hanging-punctuation support.
  */
+import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
@@ -735,8 +736,12 @@ class TextSpacingPolyfill {
           }
         }
         if (textP.parent.display === "inline-block") {
+          // an inline-block box enclosing rendered checkpoints has its
+          // element view
+          const inlineBlock = Vtree.asElementNodeContext(textP.parent);
+          Asserts.assert(inlineBlock);
           if (!isFirstInBlock) {
-            let firstInInlineBlock = textP.parent.viewNode.firstChild;
+            let firstInInlineBlock = inlineBlock.viewNode.firstChild;
             while (Vtree.canIgnore(firstInInlineBlock, textP.whitespace)) {
               firstInInlineBlock = firstInInlineBlock.nextSibling;
             }
@@ -745,7 +750,7 @@ class TextSpacingPolyfill {
             }
           }
           if (!isLastInBlock) {
-            let lastInInlineBlock = textP.parent.viewNode.lastChild;
+            let lastInInlineBlock = inlineBlock.viewNode.lastChild;
             while (Vtree.canIgnore(lastInInlineBlock, textP.whitespace)) {
               lastInInlineBlock = lastInInlineBlock.previousSibling;
             }

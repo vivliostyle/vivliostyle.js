@@ -812,23 +812,22 @@ function layoutFloatOrFootnoteIfNeeded(
   state: LayoutUtil.LayoutIteratorState,
 ): Task.Result<boolean> | null {
   const nodeContext = state.nodeContext;
+  const rendered = nodeContext && VtreeImpl.asRenderedNodeContext(nodeContext);
   if (
-    !nodeContext?.floatSide ||
+    !rendered?.floatSide ||
     !(
-      PageFloats.isPageFloat(nodeContext.floatReference) ||
-      nodeContext.floatSide === "footnote"
+      PageFloats.isPageFloat(rendered.floatReference) ||
+      rendered.floatSide === "footnote"
     )
   ) {
     return null;
   }
-  return column
-    .layoutFloatOrFootnote(nodeContext)
-    .thenAsync((nextNodeContext) => {
-      if (nextNodeContext) {
-        state.nodeContext = nextNodeContext;
-      }
-      return Task.newResult(true);
-    });
+  return column.layoutFloatOrFootnote(rendered).thenAsync((nextNodeContext) => {
+    if (nextNodeContext) {
+      state.nodeContext = nextNodeContext;
+    }
+    return Task.newResult(true);
+  });
 }
 
 export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
@@ -1200,16 +1199,20 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           (currentRow as Vtree.ChildNodeContext).parent,
         );
         return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
+          // the row was rendered in the previous fragment and re-renders here
+          const rowElementContext =
+            VtreeImpl.asElementNodeContext(rowNodeContext);
+          Asserts.assert(rowElementContext);
+          const rowViewNode = rowElementContext.viewNode;
           let cont1 = Task.newResult(true);
           let columnIndex = 0;
 
           function addDummyCellUntil(upperColumnIndex) {
             while (columnIndex < upperColumnIndex) {
               if (!occupiedSlotIndices.includes(columnIndex)) {
-                const dummy =
-                  rowNodeContext.viewNode.ownerDocument.createElement("td");
+                const dummy = rowViewNode.ownerDocument.createElement("td");
                 Base.setCSSProperty(dummy, "padding", "0");
-                rowNodeContext.viewNode.appendChild(dummy);
+                rowViewNode.appendChild(dummy);
               }
               columnIndex++;
             }
@@ -1318,9 +1321,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             true,
             breakAtEdge,
           );
-          if (nodeContext.viewNode?.parentNode) {
-            nodeContext.viewNode.remove();
-          }
+          nodeContext.viewNode?.remove();
           // Set block-end box-break flags on the table and its ancestors
           // since doFinishBreak skips finishBreak when pageBreakType is set
           if (state.lastAfterNodeContext) {
@@ -1420,8 +1421,9 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       cont = this.column
         .nextInTree(nodeContext, state.atUnforcedBreak)
         .thenAsync((nextNodeContext) => {
-          if (nextNodeContext.viewNode) {
-            nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
+          const nextViewNode = nextNodeContext.viewNode;
+          if (nextViewNode) {
+            nodeContext.viewNode.removeChild(nextViewNode);
           }
           const startNodePosition = VtreeImpl.newNodePositionFromNodeContext(
             nextNodeContext,
@@ -2256,12 +2258,16 @@ function fixTableCellWrapperForBaseline(cellViewNode: Element): void {
  * @param nodeContext - node context of table or table-row
  */
 function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
+  const display = nodeContext.display;
+  if (display !== "table-row" && display !== "table") {
+    return;
+  }
+  const elementContext = VtreeImpl.asElementNodeContext(nodeContext);
+  Asserts.assert(elementContext);
   const tbodyElement =
-    nodeContext.display === "table-row"
-      ? nodeContext.viewNode.parentElement
-      : nodeContext.display === "table"
-        ? (nodeContext.viewNode as Element).querySelector("tbody")
-        : null;
+    display === "table-row"
+      ? elementContext.viewNode.parentElement
+      : elementContext.viewNode.querySelector("tbody");
   if (!tbodyElement) {
     return;
   }

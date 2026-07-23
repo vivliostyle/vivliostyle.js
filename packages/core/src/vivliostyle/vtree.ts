@@ -846,11 +846,11 @@ export class NodeContext implements Vtree.NodeContext {
     return false;
   }
 
-  getContainingBlockForAbsolute(): NodeContext {
+  getContainingBlockForAbsolute(): Vtree.ElementNodeContext | null {
     let parent = this.parent;
     while (parent) {
       if (parent.containingBlockForAbsolute) {
-        return parent;
+        return asElementNodeContext(parent);
       }
       parent = parent.parent;
     }
@@ -908,12 +908,31 @@ export function asTextNodeContext(
 
 export type RenderedNodeContext = NodeContext & Vtree.RenderedNodeContext;
 export type ElementNodeContext = NodeContext & Vtree.ElementNodeContext;
+export type ClearNodeContext = NodeContext & Vtree.ClearNodeContext;
+export type AfterIfContinuesNodeContext = NodeContext &
+  Vtree.AfterIfContinuesNodeContext;
 
 export function asElementNodeContext(
   nc: Vtree.NodeContext,
 ): ElementNodeContext | null {
   return nc.viewNode !== null && nc.viewNode.nodeType === 1
     ? (nc as ElementNodeContext)
+    : null;
+}
+
+export function asClearNodeContext(
+  nc: Vtree.NodeContext,
+): ClearNodeContext | null {
+  return nc.clearSide !== null && nc.viewNode?.nodeType === 1
+    ? (nc as ClearNodeContext)
+    : null;
+}
+
+export function asAfterIfContinuesNodeContext(
+  nc: Vtree.NodeContext,
+): AfterIfContinuesNodeContext | null {
+  return nc.afterIfContinues !== null && nc.viewNode?.nodeType === 1
+    ? (nc as AfterIfContinuesNodeContext)
     : null;
 }
 

@@ -193,7 +193,9 @@ export namespace Layout {
     getBottomEdge(): number;
     getLeftEdge(): number;
     getRightEdge(): number;
-    isFloatNodeContext(nodeContext: Vtree.NodeContext): boolean;
+    asFloatNodeContext(
+      nodeContext: Vtree.NodeContext,
+    ): Vtree.FloatNodeContext | null;
     stopByOverflow(nodeContext: Vtree.NodeContext): boolean;
     isOverflown(edge: number): boolean;
     getExclusions(): GeometryUtil.Shape[];
@@ -300,7 +302,9 @@ export namespace Layout {
     /**
      * Layout a single float element.
      */
-    layoutFloat(nodeContext: Vtree.NodeContext): Task.Result<Vtree.NodeContext>;
+    layoutFloat(
+      nodeContext: Vtree.RenderedNodeContext,
+    ): Task.Result<Vtree.NodeContext>;
 
     setupFloatArea(
       area: PageFloatArea,
@@ -332,14 +336,16 @@ export namespace Layout {
       anchorEdge: number | null,
       pageFloatFragment?: PageFloats.PageFloatFragment,
     ): Task.Result<boolean>;
-    setFloatAnchorViewNode(nodeContext: Vtree.NodeContext): Vtree.NodeContext;
+    setFloatAnchorViewNode(
+      nodeContext: Vtree.RenderedNodeContext,
+    ): Vtree.RenderedNodeContext;
     resolveFloatReferenceFromColumnSpan(
       floatReference: PageFloats.FloatReference,
       columnSpan: Css.Val,
       nodeContext: Vtree.NodeContext,
     ): Task.Result<PageFloats.FloatReference>;
     layoutPageFloat(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.RenderedNodeContext,
     ): Task.Result<Vtree.NodeContext>;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
@@ -439,7 +445,7 @@ export namespace Layout {
       saveEvenOverflown: boolean,
       breakAtTheEdge: string | null,
     ): boolean;
-    applyClearance(nodeContext: Vtree.NodeContext): boolean;
+    applyClearance(nodeContext: Vtree.RenderedNodeContext): boolean;
     isBFC(formattingContext: Vtree.FormattingContext): boolean;
     /**
      * Skips positions until either the start of unbreakable block or inline
@@ -460,7 +466,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
     ): Task.Result<Vtree.NodeContext>;
     layoutFloatOrFootnote(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.RenderedNodeContext,
     ): Task.Result<Vtree.NodeContext>;
     /**
      * Layout next portion of the source.
@@ -839,13 +845,13 @@ export namespace Selectors {
 
     createElement(
       column: Layout.Column,
-      parentNodeContext: Vtree.NodeContext,
+      parentNodeContext: Vtree.RenderedNodeContext,
     ): Task.Result<Element>;
   }
 
   export interface AfterIfContinuesLayoutConstraint
     extends Layout.FragmentLayoutConstraint {
-    nodeContext: Vtree.NodeContext;
+    nodeContext: Vtree.RenderedNodeContext;
     afterIfContinues: AfterIfContinues;
     pseudoElementHeight: number;
 
@@ -928,18 +934,18 @@ export namespace RepetitiveElement {
     updateHeight(column: Layout.Column): void;
     prepareLayoutFragment(): void;
     appendHeaderToFragment(
-      rootNodeContext: Vtree.NodeContext,
+      rootNodeContext: Vtree.ElementNodeContext,
       firstChild: Node | null,
       column: Layout.Column,
     ): Task.Result<boolean>;
     appendFooterToFragment(
-      rootNodeContext: Vtree.NodeContext,
+      rootNodeContext: Vtree.ElementNodeContext,
       firstChild: Node | null,
       column: Layout.Column,
     ): Task.Result<boolean>;
     appendElementToFragment(
       nodePosition: Vtree.NodePosition,
-      rootNodeContext: Vtree.NodeContext,
+      rootNodeContext: Vtree.ElementNodeContext,
       firstChild: Node | null,
       column: Layout.Column,
     ): Task.Result<boolean>;
@@ -1350,7 +1356,7 @@ export namespace Vtree {
     toNodePositionStep(): NodePositionStep;
     toNodePosition(): NodePosition;
     isInsideBFC(): boolean;
-    getContainingBlockForAbsolute(): NodeContext;
+    getContainingBlockForAbsolute(): ElementNodeContext | null;
     belongsTo(formattingContext: FormattingContext): boolean;
   }
 
@@ -1372,6 +1378,18 @@ export namespace Vtree {
   }
 
   export type RenderedNodeContext = ElementNodeContext | TextNodeContext;
+
+  export interface FloatNodeContext extends ElementNodeContext {
+    floatSide: string;
+  }
+
+  export interface ClearNodeContext extends ElementNodeContext {
+    clearSide: string;
+  }
+
+  export interface AfterIfContinuesNodeContext extends ElementNodeContext {
+    afterIfContinues: Selectors.AfterIfContinues;
+  }
 
   export interface ChunkPosition {
     floats: NodePosition[] | null;

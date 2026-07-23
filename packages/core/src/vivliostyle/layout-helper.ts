@@ -18,6 +18,7 @@
  */
 import * as Base from "./base";
 import * as Display from "./display";
+import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
 /**
@@ -673,7 +674,7 @@ export function isSpecial(e: Element): boolean {
   return !!e.getAttribute(SPECIAL_ATTR);
 }
 
-export function isOutOfFlow(node: Node): boolean {
+export function isOutOfFlow(node: Node | null): boolean {
   if (!(node?.nodeType === 1)) return false;
   const e = node as HTMLElement;
   if (isSpecial(e)) return true;
@@ -705,7 +706,7 @@ export function isCssOutOfFlow(node: Node): boolean {
  * (position:running() rendered as position:fixed) without matching
  * position:absolute elements. (Issue #1833, #1869, #1870)
  */
-export function isFixedPositioned(node: Node): boolean {
+export function isFixedPositioned(node: Node | null): boolean {
   if (!(node?.nodeType === 1)) return false;
   return (node as HTMLElement).style?.position === "fixed";
 }
@@ -724,13 +725,13 @@ export function isSpecialInlineDisplay(display: string): boolean {
 
 export function findAncestorSpecialInlineNodeContext(
   nodeContext: Vtree.NodeContext,
-): Vtree.NodeContext | null {
+): Vtree.ElementNodeContext | null {
   for (let p = nodeContext.parent; p; p = p.parent) {
     if (
       (p.display !== "inline" || p.vertical !== p.parent?.vertical) &&
       Display.isInlineLevel(p.display)
     ) {
-      return p;
+      return VtreeImpl.asElementNodeContext(p);
     }
   }
   return null;
