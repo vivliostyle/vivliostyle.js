@@ -964,7 +964,6 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       context,
       regionIds,
       false,
-      null,
     );
     this.vertical = CssCascade.isVertical(
       cascMap,

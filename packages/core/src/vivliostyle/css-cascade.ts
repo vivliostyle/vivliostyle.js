@@ -763,7 +763,7 @@ export function convertFontRelativeLengthToPx(
 
 export function convertFontSizeToPx(
   numeric: Css.Numeric,
-  parentFontSize: number,
+  parentFontSize: number | null,
   context: Exprs.Context,
 ): Css.Numeric {
   numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
@@ -5826,7 +5826,6 @@ export function flattenCascadedStyle(
   context: Exprs.Context,
   regionIds: string[],
   isFootnote: boolean,
-  nodeContext: Vtree.NodeContext,
 ): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
   for (const n in style) {

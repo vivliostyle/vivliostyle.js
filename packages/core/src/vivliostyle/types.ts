@@ -204,7 +204,7 @@ export namespace Layout {
     nextInTree(
       position: Vtree.NodeContext,
       atUnforcedBreak?: boolean,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Builds the view for a single unbreakable element.
      * @param position start source position.
@@ -1054,7 +1054,7 @@ export namespace Vtree {
     nextInTree(
       nodeContext: NodeContext,
       atUnforcedBreak?: boolean,
-    ): Task.Result<NodeContext>;
+    ): Task.Result<NodeContext | null>;
     /**
      * Apply pseudo-element styles (if any).
      * @param target element to apply styles to
@@ -1241,8 +1241,8 @@ export namespace Vtree {
   export interface ShadowContext {
     readonly owner: Element;
     readonly root: Element;
-    readonly xmldoc: XmlDoc.XMLDocHolder;
-    readonly parentShadow: ShadowContext;
+    readonly xmldoc: XmlDoc.XMLDocHolder | null;
+    readonly parentShadow: ShadowContext | null;
     subShadow: ShadowContext | null;
     readonly type: Vtree.ShadowType;
     readonly styler: CssStyler.AbstractStyler;
@@ -1255,7 +1255,7 @@ export namespace Vtree {
    * @param count 0 - first-letter, 1 or more - first line(s)
    */
   export interface FirstPseudo {
-    readonly outer: FirstPseudo;
+    readonly outer: FirstPseudo | null;
     readonly count: number;
   }
 
@@ -1272,7 +1272,7 @@ export namespace Vtree {
     offsetInNode: number;
     after: boolean;
     shadowType: ShadowType; // parent's shadow type
-    shadowContext: Vtree.ShadowContext;
+    shadowContext: Vtree.ShadowContext | null;
     nodeShadow: Vtree.ShadowContext | null;
     shadowSibling: NodeContext | null; // next "sibling" in the shadow tree
     // other stuff
@@ -1299,7 +1299,7 @@ export namespace Vtree {
     breakAfter: string | null;
     viewNode: Node | null;
     clearSpacer: Node | null;
-    inheritedProps: { [key: string]: number | string | Css.Val };
+    inheritedProps: { [key: string]: number | string | Css.Val | undefined };
     vertical: boolean;
     direction: string;
     firstPseudo: FirstPseudo;
