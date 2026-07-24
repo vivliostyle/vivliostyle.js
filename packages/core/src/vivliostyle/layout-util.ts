@@ -217,7 +217,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     if (needForcedBreak) {
       const nodeContext = (state.nodeContext =
         state.leadingEdgeContexts[0] || state.nodeContext);
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      nodeContext.viewNode.remove();
       column.pageBreakType = state.breakAtTheEdge;
     }
     return needForcedBreak;

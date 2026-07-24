@@ -865,7 +865,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
       (repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode) ||
         repetitiveElements.isFooterSourceNode(nodeContext.sourceNode))
     ) {
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      nodeContext.viewNode.remove();
     }
     return false;
   }

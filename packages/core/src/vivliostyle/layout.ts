@@ -1583,7 +1583,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const topValue = Math.max(0, floatBox.y1 - offsets.top);
       Base.setCSSProperty(element, "top", `${topValue}px`);
       if (nodeContext.clearSpacer) {
-        nodeContext.clearSpacer.parentNode.removeChild(nodeContext.clearSpacer);
+        nodeContext.clearSpacer.remove();
         nodeContext.clearSpacer = null;
       }
       const floatBoxEdge = this.vertical ? floatBox.x1 : floatBox.y2;
@@ -1681,7 +1681,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           area.killFloats();
           area.remeasure();
         } else {
-          floatContainer.element.parentNode.removeChild(element);
+          element.remove();
         }
         return Task.newResult(fitWithinContainer);
       });
@@ -2219,8 +2219,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   setFloatAnchorViewNode(nodeContext: Vtree.NodeContext): Vtree.NodeContext {
-    const parent = nodeContext.viewNode.parentNode;
-    let anchor: Element = parent.ownerDocument.createElement("span");
+    let anchor: Element =
+      nodeContext.viewNode.ownerDocument.createElement("span");
     anchor.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
     if (nodeContext.floatSide === "footnote") {
       // Issue #868: Find footnote-call already generated as a sibling
@@ -2228,13 +2228,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (footnoteCall) {
         anchor = footnoteCall;
       } else {
-        parent.insertBefore(anchor, nodeContext.viewNode);
+        nodeContext.viewNode.before(anchor);
       }
     } else {
-      parent.appendChild(anchor);
+      // the anchored view node is attached
+      nodeContext.viewNode.parentNode!.appendChild(anchor);
     }
 
-    parent.removeChild(nodeContext.viewNode);
+    nodeContext.viewNode.remove();
     const nodeContextAfter = nodeContext.modify();
     nodeContextAfter.after = true;
     nodeContextAfter.viewNode = anchor;
@@ -2860,11 +2861,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   /**
    * Read ranges skipping special elements
    */
-  getRangeBoxes(start: Node, end: Node): Vtree.ClientRect[] {
+  getRangeBoxes(
+    start: Element | Text,
+    end: Element | Text,
+  ): Vtree.ClientRect[] {
     const arr = [];
     const range = start.ownerDocument.createRange();
     let wentUp = false;
-    let node = start;
+    let node: Node = start;
     let lastGood: Node = null;
     let haveStart = false;
     let endNotReached = true;
@@ -3936,7 +3940,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     const processForcedBreak = () => {
       nodeContext = leadingEdgeContexts[0] || nodeContext;
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      nodeContext.viewNode.remove();
       this.pageBreakType = breakAtTheEdge;
     };
 

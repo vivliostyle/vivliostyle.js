@@ -1186,7 +1186,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
     const layoutContext = this.column.layoutContext;
     const currentRow = state.nodeContext;
-    currentRow.viewNode.parentNode.removeChild(currentRow.viewNode);
+    currentRow.viewNode.remove();
     const frame = Task.newFrame<boolean>(
       "layoutRowSpanningCellsFromPreviousFragment",
     );
@@ -1321,7 +1321,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             breakAtEdge,
           );
           if (nodeContext.viewNode?.parentNode) {
-            nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+            nodeContext.viewNode.remove();
           }
           // Set block-end box-break flags on the table and its ancestors
           // since doFinishBreak skips finishBreak when pageBreakType is set
@@ -1512,7 +1512,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)
       ) {
         this.inHeader = false;
-        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        nodeContext.viewNode.remove();
       } else {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
@@ -1527,7 +1527,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)
       ) {
         this.inFooter = false;
-        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        nodeContext.viewNode.remove();
       } else {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
@@ -1537,7 +1537,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       }
     }
     if (display && TableLayoutStrategy.ignoreList[display]) {
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      nodeContext.viewNode.remove();
     } else if (
       nodeContext.sourceNode === this.formattingContext.tableSourceNode
     ) {
@@ -1651,7 +1651,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       dummyRow.appendChild(cell);
       dummyCells.push(cell);
     }
-    lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
+    lastRow.after(dummyRow);
     const colWidths = dummyCells.map((cell) => {
       const rect = LayoutHelper.getElementClientRectAdjusted(
         clientLayout,
@@ -1663,7 +1663,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       // Non-integer width causes problem, so return rounded-up value.
       return Math.ceil(width);
     });
-    lastRow.parentNode.removeChild(dummyRow);
+    dummyRow.remove();
     return colWidths;
   }
 

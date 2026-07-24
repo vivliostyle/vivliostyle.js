@@ -175,7 +175,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     const parentNode = node.parentNode;
     LayoutHelper.removeFollowingSiblings(parentNode, node);
     if (removeSelf) {
-      parentNode.removeChild(node);
+      node.remove();
     }
   }
 

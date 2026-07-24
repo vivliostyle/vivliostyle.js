@@ -378,7 +378,10 @@ export namespace Layout {
     /**
      * Read ranges skipping special elments
      */
-    getRangeBoxes(start: Node, end: Node): Vtree.ClientRect[];
+    getRangeBoxes(
+      start: Element | Text,
+      end: Element | Text,
+    ): Vtree.ClientRect[];
     /**
      * Give block's initial and final nodes, find positions of the line bottoms.
      * This is, of course, somewhat hacky implementation.
@@ -1317,7 +1320,7 @@ export namespace Vtree {
     breakBefore: string | null;
     breakAfter: string | null;
     viewNode: Element | Text | null;
-    clearSpacer: Node | null;
+    clearSpacer: Element | null;
     inheritedProps: { [key: string]: number | string | Css.Val | undefined };
     vertical: boolean;
     direction: string;

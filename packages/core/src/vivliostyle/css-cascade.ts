@@ -2936,7 +2936,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
  * @returns The total width (or height for vertical writing modes)
  */
 function getContentWidth(
-  node: Node,
+  node: Element | Text,
   clientLayout: Vtree.ClientLayout,
   writingMode: string,
 ): number {
@@ -3038,7 +3038,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
     // Calculate width of following inline siblings (Issue #1563)
-    const inlineNodes: Node[] = [];
+    const inlineNodes: (Element | Text)[] = [];
 
     // Find the topmost inline ancestor (child of block ancestor) that contains pseudoElement
     let topmostInlineAncestor: Element = pseudoElem.parentElement;

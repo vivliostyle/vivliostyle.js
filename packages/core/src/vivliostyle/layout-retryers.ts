@@ -84,9 +84,9 @@ export abstract class AbstractLayoutRetryer {
     while ((child = viewNode.lastChild)) {
       viewNode.removeChild(child);
     }
-    let sibling: Node;
+    let sibling: ChildNode;
     while ((sibling = viewNode.nextSibling)) {
-      sibling.parentNode.removeChild(sibling);
+      sibling.remove();
     }
   }
 

@@ -134,7 +134,7 @@ class VivliostylePrint {
   cleanUp() {
     delete this.window.printInstance;
     if (this.removeIframe) {
-      this.iframe.parentElement.removeChild(this.iframe);
+      this.iframe.remove();
     }
   }
 }

@@ -499,7 +499,7 @@ export function calculateEdge(
     if (element.localName === "br") {
       const doc = element.ownerDocument;
       const marker = doc.createElement("span");
-      element.parentNode.insertBefore(marker, element);
+      element.before(marker);
       const markerRect = clientLayout.getElementClientRect(marker);
       marker.remove();
       if (markerRect) {

@@ -166,7 +166,7 @@ function getFirstBlockEndEdgeFromRects(
 }
 
 function getBlockEndEdgeFromViewNode(
-  viewNode: Node | null,
+  viewNode: Element | Text | null,
   vertical: boolean,
 ): number {
   if (!viewNode) {
@@ -261,7 +261,7 @@ export class LineFootnotePolicyLayoutConstraint
 
   constructor(
     public readonly footnote: Footnote,
-    anchorViewNode: Node | null,
+    anchorViewNode: Element | Text | null,
     private readonly vertical: boolean,
   ) {
     // Capture the rendered anchor line when the footnote becomes constrained.
