@@ -2858,21 +2858,18 @@ export class CheckPageTypeAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
-    if (cascadeInstance.currentPageType === this.pageType) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+    return cascadeInstance.currentPageType === this.pageType;
   }
 
   override getPriority(): number {
     return 3;
   }
 
-  override makePrimary(cascade: CssCascade.Cascade): boolean {
-    if (this.chained) {
-      cascade.insertInTable(cascade.pagetypes, this.pageType, this.chained);
-    }
-    return true;
+  override primarySlot(
+    cascade: CssCascade.Cascade,
+  ): CssCascade.PrimarySlot | null {
+    return { table: cascade.pagetypes, key: this.pageType };
   }
 }
 
@@ -2881,11 +2878,9 @@ export class IsFirstPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const pageNumber = new Exprs.Named(this.scope, "page-number");
-    if (pageNumber.evaluate(cascadeInstance.context) === 1) {
-      this.chained.apply(cascadeInstance);
-    }
+    return pageNumber.evaluate(cascadeInstance.context) === 1;
   }
 
   override getPriority(): number {
@@ -2898,11 +2893,9 @@ export class IsBlankPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const blankPage = new Exprs.Named(this.scope, "blank-page");
-    if (blankPage.evaluate(cascadeInstance.context)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!blankPage.evaluate(cascadeInstance.context);
   }
 
   override getPriority(): number {
@@ -2915,11 +2908,9 @@ export class IsLeftPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const leftPage = new Exprs.Named(this.scope, "left-page");
-    if (leftPage.evaluate(cascadeInstance.context)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!leftPage.evaluate(cascadeInstance.context);
   }
 
   override getPriority(): number {
@@ -2932,11 +2923,9 @@ export class IsRightPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const rightPage = new Exprs.Named(this.scope, "right-page");
-    if (rightPage.evaluate(cascadeInstance.context)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!rightPage.evaluate(cascadeInstance.context);
   }
 
   override getPriority(): number {
@@ -2949,11 +2938,9 @@ export class IsRectoPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const rectoPage = new Exprs.Named(this.scope, "recto-page");
-    if (rectoPage.evaluate(cascadeInstance.context)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!rectoPage.evaluate(cascadeInstance.context);
   }
 
   override getPriority(): number {
@@ -2966,11 +2953,9 @@ export class IsVersoPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const versoPage = new Exprs.Named(this.scope, "verso-page");
-    if (versoPage.evaluate(cascadeInstance.context)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!versoPage.evaluate(cascadeInstance.context);
   }
 
   override getPriority(): number {
@@ -2987,15 +2972,13 @@ export class IsNthPageAction extends CssCascade.IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const styleInstance: any /* Ops.StyleInstance */ = cascadeInstance.context;
     let pageNumber = styleInstance.layoutPositionAtPageStart.page;
     if (styleInstance.blankPageAtStart) {
       pageNumber--;
     }
-    if (pageNumber && this.matchANPlusB(pageNumber)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return !!pageNumber && this.matchANPlusB(pageNumber);
   }
 
   override getPriority(): number {
@@ -3013,17 +2996,17 @@ export class IsNthOfPageTypeAction extends CssCascade.IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
     const pageTypeIndices = cascadeInstance.pageTypePageIndices[this.pageType];
     if (!pageTypeIndices) {
-      return;
+      return false;
     }
     for (const pageTypeIndex of pageTypeIndices) {
       if (this.matchANPlusB(pageTypeIndex)) {
-        this.chained.apply(cascadeInstance);
-        return;
+        return true;
       }
     }
+    return false;
   }
 
   override getPriority(): number {

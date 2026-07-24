@@ -677,13 +677,9 @@ export function chainActions(
 ): CascadeAction {
   if (chain.length > 0) {
     chain.sort((a, b) => b.getPriority() - a.getPriority());
-    let chained: ChainedAction | null = null;
     for (let i = chain.length - 1; i >= 0; i--) {
-      chained = chain[i];
-      chained.chained = action;
-      action = chained;
+      action = chain[i].wire(action);
     }
-    return chained;
   }
   return action;
 }
@@ -852,24 +848,68 @@ export class ApplyRuleAction extends CascadeAction {
   }
 }
 
-export class ChainedAction extends CascadeAction {
-  chained: CascadeAction | null = null;
+export type PrimarySlot = {
+  table: ActionTable;
+  key: string;
+};
 
-  constructor() {
-    super();
-  }
-
-  override apply(cascadeInstance: CascadeInstance): void {
-    this.chained.apply(cascadeInstance);
-  }
+export abstract class ChainedAction {
+  abstract matches(cascadeInstance: CascadeInstance): boolean;
 
   getPriority(): number {
     return 0;
   }
 
-  makePrimary(cascade: Cascade): boolean {
+  primarySlot(cascade: Cascade): PrimarySlot | null {
     // cannot be made primary
+    return null;
+  }
+
+  wire(chained: CascadeAction): WiredAction {
+    return new WiredGuard(this, chained);
+  }
+}
+
+export abstract class WiredAction<
+  T extends ChainedAction = ChainedAction,
+> extends CascadeAction {
+  constructor(
+    protected readonly condition: T,
+    protected readonly chained: CascadeAction,
+  ) {
+    super();
+  }
+
+  abstract override apply(cascadeInstance: CascadeInstance): void;
+
+  makePrimary(cascade: Cascade): boolean {
+    const slot = this.condition.primarySlot(cascade);
+    if (slot) {
+      cascade.insertInTable(slot.table, slot.key, this.chained);
+      return true;
+    }
     return false;
+  }
+}
+
+export class WiredGuard extends WiredAction {
+  override apply(cascadeInstance: CascadeInstance): void {
+    if (this.condition.matches(cascadeInstance)) {
+      this.chained.apply(cascadeInstance);
+    }
+  }
+}
+
+export class WiredConditionScope extends WiredAction<CheckConditionAction> {
+  override apply(cascadeInstance: CascadeInstance): void {
+    if (this.condition.matches(cascadeInstance)) {
+      cascadeInstance.dependentConditions.push(this.condition.condition);
+      try {
+        this.chained.apply(cascadeInstance);
+      } finally {
+        cascadeInstance.dependentConditions.pop();
+      }
+    }
   }
 }
 
@@ -878,10 +918,8 @@ export class CheckClassAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.currentClassNames.includes(this.className)) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return cascadeInstance.currentClassNames.includes(this.className);
   }
 
   override getPriority(): number {
@@ -889,11 +927,8 @@ export class CheckClassAction extends ChainedAction {
   }
   // class should be checked after id
 
-  override makePrimary(cascade: Cascade): boolean {
-    if (this.chained) {
-      cascade.insertInTable(cascade.classes, this.className, this.chained);
-    }
-    return true;
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
+    return { table: cascade.classes, key: this.className };
   }
 }
 
@@ -902,13 +937,11 @@ export class CheckIdAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return (
       cascadeInstance.currentId == this.id ||
       cascadeInstance.currentXmlId == this.id
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+    );
   }
 
   override getPriority(): number {
@@ -916,11 +949,8 @@ export class CheckIdAction extends ChainedAction {
   }
   // id should be checked after :root
 
-  override makePrimary(cascade: Cascade): boolean {
-    if (this.chained) {
-      cascade.insertInTable(cascade.ids, this.id, this.chained);
-    }
-    return true;
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
+    return { table: cascade.ids, key: this.id };
   }
 }
 
@@ -929,10 +959,8 @@ export class CheckLocalNameAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.currentLocalName == this.localName) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return cascadeInstance.currentLocalName == this.localName;
   }
 
   override getPriority(): number {
@@ -940,11 +968,8 @@ export class CheckLocalNameAction extends ChainedAction {
   }
   // tag is a pretty good thing to check, after epub:type
 
-  override makePrimary(cascade: Cascade): boolean {
-    if (this.chained) {
-      cascade.insertInTable(cascade.tags, this.localName, this.chained);
-    }
-    return true;
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
+    return { table: cascade.tags, key: this.localName };
   }
 }
 
@@ -956,13 +981,11 @@ export class CheckNSTagAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return (
       cascadeInstance.currentLocalName == this.localName &&
       cascadeInstance.currentNamespace == this.ns
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+    );
   }
 
   override getPriority(): number {
@@ -970,17 +993,13 @@ export class CheckNSTagAction extends ChainedAction {
   }
   // tag is a pretty good thing to check, after epub:type
 
-  override makePrimary(cascade: Cascade): boolean {
-    if (this.chained) {
-      let prefix = cascade.nsPrefix[this.ns];
-      if (!prefix) {
-        prefix = `ns${cascade.nsCount++}:`;
-        cascade.nsPrefix[this.ns] = prefix;
-      }
-      const nsTag = prefix + this.localName;
-      cascade.insertInTable(cascade.nstags, nsTag, this.chained);
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
+    let prefix = cascade.nsPrefix[this.ns];
+    if (!prefix) {
+      prefix = `ns${cascade.nsCount++}:`;
+      cascade.nsPrefix[this.ns] = prefix;
     }
-    return true;
+    return { table: cascade.nstags, key: prefix + this.localName };
   }
 }
 
@@ -993,7 +1012,7 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const elem = cascadeInstance.currentElement;
     if (elem instanceof HTMLAnchorElement) {
       if (
@@ -1011,11 +1030,12 @@ export class CheckTargetEpubTypeAction extends ChainedAction {
             : target.getAttributeNS(Base.NS.epub, "type") ||
               target.getAttribute("epub:type");
           if (epubType && epubType.match(this.epubTypePatt)) {
-            this.chained.apply(cascadeInstance);
+            return true;
           }
         }
       }
     }
+    return false;
   }
 }
 
@@ -1024,10 +1044,8 @@ export class CheckNamespaceAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.currentNamespace == this.ns) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return cascadeInstance.currentNamespace == this.ns;
   }
 }
 
@@ -1111,17 +1129,13 @@ export class CheckAttributePresentAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
-      checkAttribute(
-        cascadeInstance.currentElement,
-        this.ns,
-        this.name,
-        () => true,
-      )
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return checkAttribute(
+      cascadeInstance.currentElement,
+      this.ns,
+      this.name,
+      () => true,
+    );
   }
 }
 
@@ -1135,22 +1149,14 @@ export class CheckAttributeEqAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
-      checkAttribute(
-        cascadeInstance.currentElement,
-        this.ns,
-        this.name,
-        (attribute) =>
-          attributeValueEquals(
-            attribute.value,
-            this.value,
-            this.caseSensitivity,
-          ),
-      )
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return checkAttribute(
+      cascadeInstance.currentElement,
+      this.ns,
+      this.name,
+      (attribute) =>
+        attributeValueEquals(attribute.value, this.value, this.caseSensitivity),
+    );
   }
 
   override getPriority(): number {
@@ -1160,14 +1166,11 @@ export class CheckAttributeEqAction extends ChainedAction {
     return 0;
   }
 
-  override makePrimary(cascade: Cascade): boolean {
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
     if (this.name == "type" && this.ns == Base.NS.epub) {
-      if (this.chained) {
-        cascade.insertInTable(cascade.epubtypes, this.value, this.chained);
-      }
-      return true;
+      return { table: cascade.epubtypes, key: this.value };
     }
-    return false;
+    return null;
   }
 }
 
@@ -1179,25 +1182,21 @@ export class CheckNamespaceSupportedAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
-      checkAttribute(
-        cascadeInstance.currentElement,
-        this.ns,
-        this.name,
-        (attribute) => !!supportedNamespaces[attribute.value],
-      )
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return checkAttribute(
+      cascadeInstance.currentElement,
+      this.ns,
+      this.name,
+      (attribute) => !!supportedNamespaces[attribute.value],
+    );
   }
 
   override getPriority(): number {
     return 0;
   }
 
-  override makePrimary(cascade: Cascade): boolean {
-    return false;
+  override primarySlot(cascade: Cascade): PrimarySlot | null {
+    return null;
   }
 }
 
@@ -1211,17 +1210,13 @@ export class CheckAttributeRegExpAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (
-      checkAttribute(
-        cascadeInstance.currentElement,
-        this.ns,
-        this.name,
-        (attribute) => !!attribute.value.match(this.regexp),
-      )
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return checkAttribute(
+      cascadeInstance.currentElement,
+      this.ns,
+      this.name,
+      (attribute) => !!attribute.value.match(this.regexp),
+    );
   }
 }
 
@@ -1230,10 +1225,8 @@ export class CheckLangAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.lang.match(this.langRegExp)) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return !!cascadeInstance.lang.match(this.langRegExp);
   }
 }
 
@@ -1242,10 +1235,8 @@ export class IsFirstAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.isFirst) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return cascadeInstance.isFirst;
   }
 
   override getPriority(): number {
@@ -1258,10 +1249,8 @@ export class IsRootAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.isRoot) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return cascadeInstance.isRoot;
   }
 
   override getPriority(): number {
@@ -1269,7 +1258,7 @@ export class IsRootAction extends ChainedAction {
   }
 }
 
-export class IsNthAction extends ChainedAction {
+export abstract class IsNthAction extends ChainedAction {
   constructor(
     public readonly a: number,
     public readonly b: number,
@@ -1291,10 +1280,8 @@ export class IsNthSiblingAction extends IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (this.matchANPlusB(cascadeInstance.currentSiblingOrder)) {
-      this.chained.apply(cascadeInstance);
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return this.matchANPlusB(cascadeInstance.currentSiblingOrder);
   }
 
   override getPriority(): number {
@@ -1307,14 +1294,12 @@ export class IsNthSiblingOfTypeAction extends IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const order =
       cascadeInstance.currentSiblingTypeCounts[
         cascadeInstance.currentNamespace
       ][cascadeInstance.currentLocalName];
-    if (this.matchANPlusB(order)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return this.matchANPlusB(order);
   }
 
   override getPriority(): number {
@@ -1327,7 +1312,7 @@ export class IsNthLastSiblingAction extends IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     let order = cascadeInstance.currentFollowingSiblingOrder;
     if (order === null) {
       order = cascadeInstance.currentFollowingSiblingOrder =
@@ -1335,9 +1320,7 @@ export class IsNthLastSiblingAction extends IsNthAction {
         cascadeInstance.currentSiblingOrder +
         1;
     }
-    if (this.matchANPlusB(order)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return this.matchANPlusB(order);
   }
 
   override getPriority(): number {
@@ -1350,7 +1333,7 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
     super(a, b);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const counts = cascadeInstance.currentFollowingSiblingTypeCounts;
     if (!counts[cascadeInstance.currentNamespace]) {
       let elem = cascadeInstance.currentElement;
@@ -1364,15 +1347,11 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
         nsCounts[localName] = (nsCounts[localName] || 0) + 1;
       } while ((elem = elem.nextElementSibling));
     }
-    if (
-      this.matchANPlusB(
-        counts[cascadeInstance.currentNamespace][
-          cascadeInstance.currentLocalName
-        ],
-      )
-    ) {
-      this.chained.apply(cascadeInstance);
-    }
+    return this.matchANPlusB(
+      counts[cascadeInstance.currentNamespace][
+        cascadeInstance.currentLocalName
+      ],
+    );
   }
 
   override getPriority(): number {
@@ -1385,20 +1364,20 @@ export class IsEmptyAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     let node: Node | null = cascadeInstance.currentElement.firstChild;
     while (node) {
       switch (node.nodeType) {
         case Node.ELEMENT_NODE:
-          return;
+          return false;
         case Node.TEXT_NODE:
           if ((node as Text).length > 0) {
-            return;
+            return false;
           }
       }
       node = node.nextSibling;
     }
-    this.chained.apply(cascadeInstance);
+    return true;
   }
 
   override getPriority(): number {
@@ -1411,11 +1390,9 @@ export class IsEnabledAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const elem = cascadeInstance.currentElement;
-    if ((elem as any).disabled === false) {
-      this.chained.apply(cascadeInstance);
-    }
+    return (elem as any).disabled === false;
   }
 
   override getPriority(): number {
@@ -1428,11 +1405,9 @@ export class IsDisabledAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const elem = cascadeInstance.currentElement;
-    if ((elem as any).disabled === true) {
-      this.chained.apply(cascadeInstance);
-    }
+    return (elem as any).disabled === true;
   }
 
   override getPriority(): number {
@@ -1445,11 +1420,9 @@ export class IsCheckedAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     const elem = cascadeInstance.currentElement;
-    if ((elem as any).selected === true || (elem as any).checked === true) {
-      this.chained.apply(cascadeInstance);
-    }
+    return (elem as any).selected === true || (elem as any).checked === true;
   }
 
   override getPriority(): number {
@@ -1462,15 +1435,12 @@ export class CheckConditionAction extends ChainedAction {
     super();
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
-    if (cascadeInstance.conditions[this.condition]) {
-      try {
-        cascadeInstance.dependentConditions.push(this.condition);
-        this.chained.apply(cascadeInstance);
-      } finally {
-        cascadeInstance.dependentConditions.pop();
-      }
-    }
+  override matches(cascadeInstance: CascadeInstance): boolean {
+    return !!cascadeInstance.conditions[this.condition];
+  }
+
+  override wire(chained: CascadeAction): WiredAction {
+    return new WiredConditionScope(this, chained);
   }
 
   override getPriority(): number {
@@ -1502,34 +1472,37 @@ export class CheckAppliedAction extends CascadeAction {
 export class MatchesAction extends ChainedAction {
   checkAppliedAction: CheckAppliedAction;
   firstActions: CascadeAction[] = [];
+  readonly priority: number;
 
   constructor(chains: ChainedAction[][]) {
     super();
     this.checkAppliedAction = new CheckAppliedAction();
+    this.priority = Math.max(
+      ...chains.map((chain) =>
+        chain.length > 0
+          ? Math.max(...chain.map((action) => action.getPriority()))
+          : 0,
+      ),
+    );
     for (const chain of chains) {
       this.firstActions.push(chainActions(chain, this.checkAppliedAction));
     }
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     for (const firstAction of this.firstActions) {
       firstAction.apply(cascadeInstance);
       if (this.checkAppliedAction.applied) {
         break;
       }
     }
-    if (this.checkAppliedAction.applied === this.positive()) {
-      this.chained.apply(cascadeInstance);
-    }
+    const applied = this.checkAppliedAction.applied;
     this.checkAppliedAction.applied = false;
+    return applied === this.positive();
   }
 
   override getPriority(): number {
-    return Math.max(
-      ...this.firstActions.map((firstAction) =>
-        firstAction instanceof ChainedAction ? firstAction.getPriority() : 0,
-      ),
-    );
+    return this.priority;
   }
 
   positive(): boolean {
@@ -1558,7 +1531,7 @@ export class MatchesRelationalAction extends MatchesAction {
     super([]);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     for (const selectorText of this.selectorTexts) {
       let selectorWithScope: string;
       let scopingRoot: ParentNode;
@@ -1581,10 +1554,9 @@ export class MatchesRelationalAction extends MatchesAction {
         }
       } catch (e) {}
     }
-    if (this.checkAppliedAction.applied) {
-      this.chained.apply(cascadeInstance);
-    }
+    const applied = this.checkAppliedAction.applied;
     this.checkAppliedAction.applied = false;
+    return applied;
   }
 
   override relational(): boolean {
@@ -1607,7 +1579,7 @@ export class IsNthSiblingOfSelectorAction extends IsNthAction {
     }
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     // Check if current element matches the selector
     for (const firstAction of this.firstActions) {
       firstAction.apply(cascadeInstance);
@@ -1616,7 +1588,7 @@ export class IsNthSiblingOfSelectorAction extends IsNthAction {
       }
     }
     if (!this.checkAppliedAction.applied) {
-      return; // Element doesn't match selector, so :nth-child(of S) doesn't match
+      return false; // Element doesn't match selector, so :nth-child(of S) doesn't match
     }
     this.checkAppliedAction.applied = false;
 
@@ -1631,9 +1603,7 @@ export class IsNthSiblingOfSelectorAction extends IsNthAction {
       sibling = sibling.previousElementSibling;
     }
 
-    if (this.matchANPlusB(order)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return this.matchANPlusB(order);
   }
 
   protected matchesSelector(
@@ -1698,7 +1668,7 @@ export class IsNthLastSiblingOfSelectorAction extends IsNthSiblingOfSelectorActi
     super(a, b, chains);
   }
 
-  override apply(cascadeInstance: CascadeInstance): void {
+  override matches(cascadeInstance: CascadeInstance): boolean {
     // Check if current element matches the selector
     for (const firstAction of this.firstActions) {
       firstAction.apply(cascadeInstance);
@@ -1707,7 +1677,7 @@ export class IsNthLastSiblingOfSelectorAction extends IsNthSiblingOfSelectorActi
       }
     }
     if (!this.checkAppliedAction.applied) {
-      return; // Element doesn't match selector, so :nth-last-child(of S) doesn't match
+      return false; // Element doesn't match selector, so :nth-last-child(of S) doesn't match
     }
     this.checkAppliedAction.applied = false;
 
@@ -1722,9 +1692,7 @@ export class IsNthLastSiblingOfSelectorAction extends IsNthSiblingOfSelectorActi
       sibling = sibling.nextElementSibling;
     }
 
-    if (this.matchANPlusB(order)) {
-      this.chained.apply(cascadeInstance);
-    }
+    return this.matchANPlusB(order);
   }
 
   override getPriority(): number {
@@ -4781,10 +4749,7 @@ export class CascadeParserHandler
 
   processChain(action: CascadeAction): void {
     const chained = chainActions(this.chain, action);
-    if (
-      chained !== action &&
-      (chained as ChainedAction).makePrimary(this.cascade)
-    ) {
+    if (chained instanceof WiredAction && chained.makePrimary(this.cascade)) {
       return;
     }
     this.insertNonPrimary(chained);
@@ -5394,7 +5359,9 @@ export class CascadeParserHandler
   }
 }
 
-export const nthSelectorActionClasses: { [key: string]: typeof IsNthAction } = {
+export const nthSelectorActionClasses: {
+  [key: string]: new (a: number, b: number) => IsNthAction;
+} = {
   "nth-child": IsNthSiblingAction,
   "nth-of-type": IsNthSiblingOfTypeAction,
   "nth-last-child": IsNthLastSiblingAction,
