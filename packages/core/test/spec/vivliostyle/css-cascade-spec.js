@@ -22,6 +22,7 @@ import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
+import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
@@ -1005,6 +1006,263 @@ describe("css-cascade", function () {
     });
   });
 
+  describe("the selector under parse", function () {
+    describe("a syntax error inside the argument", function () {
+      function parseCascade(cssText, done, callback) {
+        var handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
+        handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
+        adapt_task.start(function () {
+          adapt_cssparse
+            .parseStylesheetFromText(cssText, handler.owner, null, null, null)
+            .then(function (parsed) {
+              expect(parsed).toBe(true);
+              callback(handler.finish());
+              done();
+            });
+          return adapt_task.newResult(true);
+        });
+      }
+
+      it("fails a list whose only alternative was voided", function (done) {
+        parseCascade("div:is(!!!) { color: red }", done, function (cascade) {
+          var action = cascade.tags["div"];
+          expect(action).toEqual(
+            jasmine.any(adapt_csscasc.WiredConditionScope),
+          );
+          expect(action.condition.condition).toBe("");
+        });
+      });
+
+      it("drops the voided alternative and keeps the rest", function (done) {
+        parseCascade(
+          "div:is(!!!, .x) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["div"]).toBeUndefined();
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+          },
+        );
+      });
+
+      it("drops a voided alternative of :nth-child(An+B of S)", function (done) {
+        parseCascade(
+          "div:nth-child(2n of !!!, .x) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.IsNthSiblingOfSelectorAction),
+            );
+            expect(action.firstActions.length).toBe(1);
+          },
+        );
+      });
+
+      it("takes the alternative the parser rebuilds after recovering", function (done) {
+        parseCascade(
+          "div:is(!!!}p, .x) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(2);
+          },
+        );
+      });
+
+      it("keeps building the enclosing selector after a voided list", function (done) {
+        // `:not()` is not forgiving, so the error hands the parse back to the
+        // selector that contains it.
+        parseCascade(
+          "x:not(u|y, .c d, z) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["x"]).toEqual(
+              jasmine.any(adapt_csscasc.ApplyRuleAction),
+            );
+            expect(cascade.classes["c"]).toEqual(
+              jasmine.any(adapt_csscasc.ConditionItemAction),
+            );
+            expect(cascade.tags["d"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+          },
+        );
+      });
+
+      it("emits nothing for a combinator in a voided alternative", function (done) {
+        // The condition a combinator registers is read by the rest of that
+        // alternative, which is dropped.
+        parseCascade(
+          "div:is(# p q, .x) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+          },
+        );
+      });
+
+      it("leaves the specificity of a voided alternative out of the list", function (done) {
+        // Selectors 4 computes the specificity of a forgiving list from the
+        // alternatives it keeps.
+        parseCascade(
+          "div:is(# #i, .x) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].chained.chained.specificity).toBe(257);
+          },
+        );
+      });
+
+      it("keeps a pseudo-element of a voided alternative out of the enclosing selector", function (done) {
+        // Recording a pseudo-element does not touch the selector under parse,
+        // so the parser reaches `::before` with the alternative already voided.
+        parseCascade(
+          "div:is(.x, # ::before) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["span"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+            expect(cascade.tags["span"].chained).toEqual(
+              jasmine.any(adapt_csscasc.ApplyRuleAction),
+            );
+          },
+        );
+      });
+
+      it("leaves the specificity of a pseudo-element in a voided alternative out of the list", function (done) {
+        parseCascade(
+          "div:is(*, # ::before) { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["div"].chained.specificity).toBe(1);
+          },
+        );
+      });
+
+      it("keeps the source text of the alternatives :has() kept", function (done) {
+        parseCascade(
+          "div:has(# p, q) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual([" q"]);
+          },
+        );
+      });
+
+      it("drops a rule whose selector never finished", function (done) {
+        parseCascade(
+          "div:is(!!!}p>{}) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["div"]).toBeUndefined();
+            expect(cascade.tags["span"]).toBeUndefined();
+            expect(cascade.tags["p"]).toEqual(
+              jasmine.any(adapt_csscasc.ConditionItemAction),
+            );
+          },
+        );
+      });
+    });
+
+    describe("without a syntax error", function () {
+      function parseCascade(cssText, done, callback) {
+        var handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
+        handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
+        adapt_task.start(function () {
+          adapt_cssparse
+            .parseStylesheetFromText(cssText, handler.owner, null, null, null)
+            .then(function (parsed) {
+              expect(parsed).toBe(true);
+              callback(handler.finish());
+              done();
+            });
+          return adapt_task.newResult(true);
+        });
+      }
+
+      it("registers a sibling condition before the chain restarts", function (done) {
+        // The condition item is read by the rest of the selector, so it must
+        // not be guarded by the condition it sets.
+        parseCascade("div + p { color: red }", done, function (cascade) {
+          expect(cascade.tags["div"]).toEqual(
+            jasmine.any(adapt_csscasc.ConditionItemAction),
+          );
+        });
+      });
+
+      it("registers a following sibling condition before the chain restarts", function (done) {
+        parseCascade("div ~ p { color: red }", done, function (cascade) {
+          expect(cascade.tags["div"]).toEqual(
+            jasmine.any(adapt_csscasc.ConditionItemAction),
+          );
+        });
+      });
+
+      it("takes the alternatives of :nth-last-child(An+B of S)", function (done) {
+        parseCascade(
+          "div:nth-last-child(2n of .x) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.IsNthLastSiblingOfSelectorAction),
+            );
+            expect(action.firstActions.length).toBe(1);
+          },
+        );
+      });
+
+      it("takes the selector in the order the parser reports it", function (done) {
+        // The first action decides which table the rule is indexed under, and
+        // the id table is looked up by `currentId` while CheckIdAction also
+        // accepts `currentXmlId`.
+        parseCascade("#a#b { color: red }", done, function (cascade) {
+          expect(Object.keys(cascade.ids)).toEqual(["a"]);
+        });
+      });
+
+      it("leaves no selector behind once the rule is applied", function () {
+        // A handler that answers an at-rule itself, as ops does for
+        // `@-epubx-page-template`, receives a second rule body with no
+        // selector rule in between.
+        var handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
+        handler.startSelectorRule();
+        handler.tagSelector(null, "div");
+        handler.startRuleBody();
+        handler.startRuleBody();
+
+        var cascade = handler.finish();
+        expect(Object.keys(cascade.tags)).toEqual(["div"]);
+        expect(cascade.tags["div"]).toEqual(
+          jasmine.any(adapt_csscasc.ApplyRuleAction),
+        );
+      });
+
+      it("keeps the view condition of a selector out of the next rule", function (done) {
+        parseCascade(
+          "p::nth-fragment(2n+1) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["q"].viewConditionId).toBeNull();
+          },
+        );
+      });
+    });
+  });
+
   describe("CascadeParserHandler", function () {
     describe("simpleProperty", function () {
       vivliostyle_test_util_mock_plugin.setup();
@@ -1072,8 +1330,8 @@ describe("css-cascade", function () {
             null,
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributePresentAction),
           );
@@ -1091,8 +1349,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeEqAction),
           );
@@ -1111,8 +1369,8 @@ describe("css-cascade", function () {
             "i",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeEqAction),
           );
@@ -1129,8 +1387,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1150,8 +1408,8 @@ describe("css-cascade", function () {
             "b c",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckConditionAction),
           );
@@ -1166,8 +1424,8 @@ describe("css-cascade", function () {
             "",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckConditionAction),
           );
@@ -1184,8 +1442,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1206,8 +1464,8 @@ describe("css-cascade", function () {
             "",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1229,8 +1487,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1252,8 +1510,8 @@ describe("css-cascade", function () {
             "i",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1270,8 +1528,8 @@ describe("css-cascade", function () {
             "i",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1287,8 +1545,8 @@ describe("css-cascade", function () {
             "",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckConditionAction),
           );
@@ -1305,8 +1563,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1327,8 +1585,8 @@ describe("css-cascade", function () {
             "",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckConditionAction),
           );
@@ -1345,8 +1603,8 @@ describe("css-cascade", function () {
             "bar",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributeRegExpAction),
           );
@@ -1367,8 +1625,8 @@ describe("css-cascade", function () {
             "",
           );
 
-          expect(handler.chain.length).toBe(1);
-          var action = handler.chain[0];
+          expect(handler.chain.actions.length).toBe(1);
+          var action = handler.chain.actions[0];
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.CheckConditionAction),
           );
@@ -1379,8 +1637,8 @@ describe("css-cascade", function () {
       it("represents nothing when an unsupported operator is passed", function () {
         handler.attributeSelector("ns", "foo", null, "bar");
 
-        expect(handler.chain.length).toBe(1);
-        var action = handler.chain[0];
+        expect(handler.chain.actions.length).toBe(1);
+        var action = handler.chain.actions[0];
         expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
         expect(action.condition).toBe("");
       });

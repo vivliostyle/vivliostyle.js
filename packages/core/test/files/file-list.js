@@ -41,6 +41,14 @@ module.exports = [
         file: "css-parse-error/gradient-background-image.html",
         title: "Gradient background-image",
       },
+      {
+        file: "css-parse-error/forgiving-selector-list.html",
+        title: "Syntax error in a forgiving selector list",
+      },
+      {
+        file: "css-parse-error/voided-alternative-pseudo-element.html",
+        title: "Pseudo-element in a voided alternative",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",

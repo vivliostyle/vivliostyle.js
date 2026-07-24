@@ -4729,11 +4729,66 @@ export enum ParseState {
 }
 
 //------------- parsing ------------
+export interface SelectorChain {
+  push(action: ChainedAction): void;
+  restartWith(action: ChainedAction): SelectorChain;
+  emit(action: CascadeAction, handler: CascadeParserHandler): void;
+  contributeTo(list: MatchesParameterParserHandler): void;
+  recordTextIn(texts: string[], text: string): void;
+  finishIn(handler: CascadeParserHandler): void;
+}
+
+class AccumulatedSelectorChain implements SelectorChain {
+  readonly actions: ChainedAction[] = [];
+
+  push(action: ChainedAction): void {
+    this.actions.push(action);
+  }
+
+  restartWith(action: ChainedAction): SelectorChain {
+    const restarted = new AccumulatedSelectorChain();
+    restarted.push(action);
+    return restarted;
+  }
+
+  emit(action: CascadeAction, handler: CascadeParserHandler): void {
+    handler.insertChained(chainActions(this.actions, action));
+  }
+
+  contributeTo(list: MatchesParameterParserHandler): void {
+    list.takeAlternative(this.actions);
+  }
+
+  recordTextIn(texts: string[], text: string): void {
+    texts.push(text);
+  }
+
+  finishIn(handler: CascadeParserHandler): void {
+    handler.applyRuleForSelector();
+  }
+}
+
+class NoSelectorChain implements SelectorChain {
+  push(): void {}
+
+  restartWith(): SelectorChain {
+    return this;
+  }
+
+  emit(): void {}
+
+  contributeTo(): void {}
+
+  recordTextIn(): void {}
+
+  finishIn(): void {}
+}
+
 export class CascadeParserHandler
   extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver
 {
-  chain: ChainedAction[] | null = null;
+  chain: SelectorChain = new NoSelectorChain();
   specificity: number = 0;
   elementStyle: ElementStyle | null = null;
   conditionCount: number = 0;
@@ -4765,7 +4820,10 @@ export class CascadeParserHandler
   }
 
   processChain(action: CascadeAction): void {
-    const chained = chainActions(this.chain, action);
+    this.chain.emit(action, this);
+  }
+
+  insertChained(chained: CascadeAction): void {
     if (chained instanceof WiredAction && chained.makePrimary(this.cascade)) {
       return;
     }
@@ -5132,7 +5190,7 @@ export class CascadeParserHandler
         new DescendantConditionItem(condition, this.viewConditionId, null),
       ),
     );
-    this.chain = [new CheckConditionAction(condition)];
+    this.chain = this.chain.restartWith(new CheckConditionAction(condition));
     this.viewConditionId = null;
   }
 
@@ -5146,7 +5204,7 @@ export class CascadeParserHandler
         new ChildConditionItem(condition, this.viewConditionId, null),
       ),
     );
-    this.chain = [new CheckConditionAction(condition)];
+    this.chain = this.chain.restartWith(new CheckConditionAction(condition));
     this.viewConditionId = null;
   }
 
@@ -5162,7 +5220,7 @@ export class CascadeParserHandler
         new AdjacentSiblingConditionItem(condition, this.viewConditionId, null),
       ),
     );
-    this.chain = [new CheckConditionAction(condition)];
+    this.chain = this.chain.restartWith(new CheckConditionAction(condition));
     this.viewConditionId = null;
   }
 
@@ -5182,7 +5240,7 @@ export class CascadeParserHandler
         ),
       ),
     );
-    this.chain = [new CheckConditionAction(condition)];
+    this.chain = this.chain.restartWith(new CheckConditionAction(condition));
     this.viewConditionId = null;
   }
 
@@ -5192,7 +5250,7 @@ export class CascadeParserHandler
     this.selectorFunctionContainsPseudoelement = false;
     this.footnoteContent = false;
     this.specificity = 0;
-    this.chain = [];
+    this.chain = new AccumulatedSelectorChain();
   }
 
   override startSelectorRule(): void {
@@ -5205,7 +5263,7 @@ export class CascadeParserHandler
     this.selectorFunctionContainsPseudoelement = false;
     this.specificity = 0;
     this.footnoteContent = false;
-    this.chain = [];
+    this.chain = new AccumulatedSelectorChain();
     this.invalid = false;
   }
 
@@ -5236,15 +5294,17 @@ export class CascadeParserHandler
   }
 
   finishChain(): void {
-    if (this.chain) {
-      this.processChain(this.makeApplyRuleAction(this.specificity));
-      this.chain = null;
-      this.pseudoelement = null;
-      this.selectorFunctionContainsPseudoelement = false;
-      this.viewConditionId = null;
-      this.footnoteContent = false;
-      this.specificity = 0;
-    }
+    this.chain.finishIn(this);
+  }
+
+  applyRuleForSelector(): void {
+    this.processChain(this.makeApplyRuleAction(this.specificity));
+    this.chain = new NoSelectorChain();
+    this.pseudoelement = null;
+    this.selectorFunctionContainsPseudoelement = false;
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
   }
 
   protected makeApplyRuleAction(specificity: number): ApplyRuleAction {
@@ -5404,7 +5464,7 @@ export let conditionCount: number = 0;
  * Cascade Parser Handler for :is() and similar pseudo-classes parameter
  */
 export class MatchesParameterParserHandler extends CascadeParserHandler {
-  parentChain: ChainedAction[];
+  parentChain: SelectorChain;
   chains: ChainedAction[][] = [];
   maxSpecificity: number = 0;
   selectorTexts: string[] = [];
@@ -5426,13 +5486,15 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     this.parentChain = parent.chain;
   }
 
-  override nextSelector(): void {
+  takeAlternative(actions: ChainedAction[]): void {
     this.containsPseudoelementSelector ||= !!this.pseudoelement;
-    if (this.chain) {
-      this.chains.push(this.chain);
-    }
+    this.chains.push(actions);
     this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
-    this.chain = [];
+  }
+
+  override nextSelector(): void {
+    this.chain.contributeTo(this);
+    this.chain = new AccumulatedSelectorChain();
     this.pseudoelement = null;
     this.viewConditionId = null;
     this.footnoteContent = false;
@@ -5440,12 +5502,8 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   }
 
   override endFuncWithSelector(): void {
-    this.containsPseudoelementSelector ||= !!this.pseudoelement;
-    if (this.chain) {
-      this.chains.push(this.chain);
-    }
+    this.chain.contributeTo(this);
     if (this.chains.length > 0) {
-      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
       this.parentChain.push(
         this.relational()
           ? new MatchesRelationalAction(this.selectorTexts)
@@ -5472,7 +5530,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
-    this.chain = null;
+    this.chain = new NoSelectorChain();
     this.pseudoelement = null;
     this.viewConditionId = null;
     this.footnoteContent = false;
@@ -5496,8 +5554,8 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
 
   override pushSelectorText(selectorText: string): void {
     // selectorText is used only for relational pseudo-class `:has()`
-    if (this.chain && this.relational()) {
-      this.selectorTexts.push(selectorText);
+    if (this.relational()) {
+      this.chain.recordTextIn(this.selectorTexts, selectorText);
     }
   }
 
@@ -5575,11 +5633,8 @@ export class NthChildOfSelectorParameterParserHandler extends MatchesParameterPa
   }
 
   override endFuncWithSelector(): void {
-    if (this.chain) {
-      this.chains.push(this.chain);
-    }
+    this.chain.contributeTo(this);
     if (this.chains.length > 0) {
-      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
       this.parentChain.push(
         new IsNthSiblingOfSelectorAction(this.a, this.b, this.chains),
       );
@@ -5603,11 +5658,8 @@ export class NthChildOfSelectorParameterParserHandler extends MatchesParameterPa
  */
 export class NthLastChildOfSelectorParameterParserHandler extends NthChildOfSelectorParameterParserHandler {
   override endFuncWithSelector(): void {
-    if (this.chain) {
-      this.chains.push(this.chain);
-    }
+    this.chain.contributeTo(this);
     if (this.chains.length > 0) {
-      this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
       this.parentChain.push(
         new IsNthLastSiblingOfSelectorAction(this.a, this.b, this.chains),
       );

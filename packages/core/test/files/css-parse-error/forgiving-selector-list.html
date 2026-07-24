@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Syntax error in a forgiving selector list</title>
+    <style>
+      div:is(# p) {
+        color: red;
+      }
+      p {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph should be green.</p>
+  </body>
+</html>
