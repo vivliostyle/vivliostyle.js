@@ -68,7 +68,7 @@ export class AfterIfContinues implements Selectors.AfterIfContinues {
 
   createElement(
     column: Layout.Column,
-    parentNodeContext: Vtree.RenderedNodeContext,
+    parentNodeContext: Vtree.ElementNodeContext,
   ): Task.Result<Element> {
     const doc = parentNodeContext.viewNode.ownerDocument;
     const viewRoot = doc.createElement("div");
@@ -129,7 +129,7 @@ export class AfterIfContinuesLayoutConstraint
     "AfterIfContinue";
 
   constructor(
-    public nodeContext: Vtree.RenderedNodeContext,
+    public nodeContext: Vtree.ElementNodeContext,
     public afterIfContinues: Selectors.AfterIfContinues,
     public pseudoElementHeight: number,
   ) {}

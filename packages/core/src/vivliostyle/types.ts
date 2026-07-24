@@ -845,13 +845,13 @@ export namespace Selectors {
 
     createElement(
       column: Layout.Column,
-      parentNodeContext: Vtree.RenderedNodeContext,
+      parentNodeContext: Vtree.ElementNodeContext,
     ): Task.Result<Element>;
   }
 
   export interface AfterIfContinuesLayoutConstraint
     extends Layout.FragmentLayoutConstraint {
-    nodeContext: Vtree.RenderedNodeContext;
+    nodeContext: Vtree.ElementNodeContext;
     afterIfContinues: AfterIfContinues;
     pseudoElementHeight: number;
 
