@@ -3657,7 +3657,7 @@ export class ViewFactory
 
   /** @override */
   peelOff(
-    nodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.ChildNodeContext,
     nodeOffset: number,
   ): Task.Result<Vtree.NodeContext> {
     const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("peelOff");
@@ -3665,9 +3665,6 @@ export class ViewFactory
     let offsetInNode = nodeContext.offsetInNode;
     const after = nodeContext.after;
     if (nodeOffset > 0) {
-      const viewNode = nodeContext.viewNode;
-      const text = viewNode.textContent ?? "";
-      viewNode.textContent = text.substr(0, nodeOffset);
       offsetInNode += nodeOffset;
     } else if (!after && nodeContext.viewNode && offsetInNode == 0) {
       const parent = nodeContext.viewNode.parentNode;
@@ -3676,32 +3673,44 @@ export class ViewFactory
       }
     }
     const boxOffset = nodeContext.boxOffset + nodeOffset;
+
+    // arr collects the chain strictly below its container, innermost first
     const arr: Vtree.NodeContext[] = [];
-    let nc: Vtree.NodeContext | null = nodeContext;
-    while (nc && nc.firstPseudo === firstPseudo) {
-      arr.push(nc);
-      nc = nc.parent;
+    let container: Vtree.NodeContext = nodeContext;
+    for (
+      let parent: Vtree.NodeContext | null = nodeContext.parent;
+      parent && parent.firstPseudo === firstPseudo;
+      parent = container.parent
+    ) {
+      arr.push(container);
+      container = parent;
     }
-    // the loop above runs at least once (nodeContext.firstPseudo === firstPseudo)
-    let pn = arr.pop()!; // container for that pseudoelement
-    let shadowSibling = pn.shadowSibling;
+    let shadowSibling = container.shadowSibling;
+    let i = arr.length - 1;
+    let rebuilt: Vtree.NodeContext | null = null;
     frame
       .loop(() => {
-        while (arr.length > 0) {
-          pn = arr.pop()!;
-          nc = new Vtree.NodeContext(pn.sourceNode, nc, boxOffset);
-          if (arr.length == 0) {
-            nc.offsetInNode = offsetInNode;
-            nc.after = after;
+        while (i >= 0) {
+          const pn = arr[i];
+          const child = new Vtree.NodeContext(
+            pn.sourceNode,
+            rebuilt ?? container.parent,
+            boxOffset,
+          );
+          if (i == 0) {
+            child.offsetInNode = offsetInNode;
+            child.after = after;
           }
-          nc.shadowType = pn.shadowType;
-          nc.shadowContext = pn.shadowContext;
-          nc.nodeShadow = pn.nodeShadow;
-          nc.shadowSibling = pn.shadowSibling
+          child.shadowType = pn.shadowType;
+          child.shadowContext = pn.shadowContext;
+          child.nodeShadow = pn.nodeShadow;
+          child.shadowSibling = pn.shadowSibling
             ? pn.shadowSibling
             : shadowSibling;
           shadowSibling = null;
-          const result = this.setCurrent(nc, false);
+          rebuilt = child;
+          i--;
+          const result = this.setCurrent(child, false);
           if (result.isPending()) {
             return result;
           }
@@ -3709,7 +3718,7 @@ export class ViewFactory
         return Task.newResult(false);
       })
       .then(() => {
-        frame.finish(nc);
+        frame.finish(rebuilt ?? nodeContext.parent);
       });
     return frame.result();
   }

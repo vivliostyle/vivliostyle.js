@@ -1094,7 +1094,7 @@ export namespace Vtree {
      * after the end of that pseudoelement.
      */
     peelOff(
-      nodeContext: NodeContext,
+      nodeContext: ChildNodeContext,
       nodeOffset: number,
     ): Task.Result<NodeContext>;
     /**
@@ -1356,6 +1356,11 @@ export namespace Vtree {
   export interface RootNodeContext extends NodeContext {
     parent: null;
     shadowSibling: null;
+  }
+
+  export interface TextNodeContext extends NodeContext {
+    parent: NodeContext;
+    viewNode: Text;
   }
 
   export interface ChunkPosition {
