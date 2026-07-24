@@ -2882,8 +2882,8 @@ export class CheckPageTypeAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
-    return cascadeInstance.currentPageType === this.pageType;
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
+    return cascadeInstance.instance.currentPageType === this.pageType;
   }
 
   override getPriority(): number {
@@ -2902,9 +2902,9 @@ export class IsFirstPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const pageNumber = new Exprs.Named(this.scope, "page-number");
-    return pageNumber.evaluate(cascadeInstance.context) === 1;
+    return pageNumber.evaluate(cascadeInstance.instance.context) === 1;
   }
 
   override getPriority(): number {
@@ -2917,9 +2917,9 @@ export class IsBlankPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const blankPage = new Exprs.Named(this.scope, "blank-page");
-    return !!blankPage.evaluate(cascadeInstance.context);
+    return !!blankPage.evaluate(cascadeInstance.instance.context);
   }
 
   override getPriority(): number {
@@ -2932,9 +2932,9 @@ export class IsLeftPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const leftPage = new Exprs.Named(this.scope, "left-page");
-    return !!leftPage.evaluate(cascadeInstance.context);
+    return !!leftPage.evaluate(cascadeInstance.instance.context);
   }
 
   override getPriority(): number {
@@ -2947,9 +2947,9 @@ export class IsRightPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const rightPage = new Exprs.Named(this.scope, "right-page");
-    return !!rightPage.evaluate(cascadeInstance.context);
+    return !!rightPage.evaluate(cascadeInstance.instance.context);
   }
 
   override getPriority(): number {
@@ -2962,9 +2962,9 @@ export class IsRectoPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const rectoPage = new Exprs.Named(this.scope, "recto-page");
-    return !!rectoPage.evaluate(cascadeInstance.context);
+    return !!rectoPage.evaluate(cascadeInstance.instance.context);
   }
 
   override getPriority(): number {
@@ -2977,9 +2977,9 @@ export class IsVersoPageAction extends CssCascade.ChainedAction {
     super();
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
     const versoPage = new Exprs.Named(this.scope, "verso-page");
-    return !!versoPage.evaluate(cascadeInstance.context);
+    return !!versoPage.evaluate(cascadeInstance.instance.context);
   }
 
   override getPriority(): number {
@@ -2996,8 +2996,9 @@ export class IsNthPageAction extends CssCascade.IsNthAction {
     super(a, b);
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
-    const styleInstance: any /* Ops.StyleInstance */ = cascadeInstance.context;
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
+    const styleInstance: any /* Ops.StyleInstance */ =
+      cascadeInstance.instance.context;
     let pageNumber = styleInstance.layoutPositionAtPageStart.page;
     if (styleInstance.blankPageAtStart) {
       pageNumber--;
@@ -3020,8 +3021,9 @@ export class IsNthOfPageTypeAction extends CssCascade.IsNthAction {
     super(a, b);
   }
 
-  override matches(cascadeInstance: CssCascade.CascadeInstance): boolean {
-    const pageTypeIndices = cascadeInstance.pageTypePageIndices[this.pageType];
+  override matches(cascadeInstance: CssCascade.StyledCascadeInstance): boolean {
+    const pageTypeIndices =
+      cascadeInstance.instance.pageTypePageIndices[this.pageType];
     if (!pageTypeIndices) {
       return false;
     }
@@ -3048,9 +3050,9 @@ export class ApplyPageRuleAction extends CssCascade.ApplyRuleAction {
     super(style, specificity, null, null, null);
   }
 
-  override apply(cascadeInstance: CssCascade.CascadeInstance): void {
+  override apply(cascadeInstance: CssCascade.StyledCascadeInstance): void {
     mergeInPageRule(
-      cascadeInstance.context,
+      cascadeInstance.instance.context,
       cascadeInstance.currentStyle,
       this.style,
       this.specificity,
@@ -3069,7 +3071,7 @@ export function mergeInPageRule(
   target: CssCascade.ElementStyle,
   style: CssCascade.ElementStyle,
   specificity: number,
-  cascadeInstance: CssCascade.CascadeInstance,
+  cascadeInstance: CssCascade.StyledCascadeInstance,
 ): void {
   CssCascade.mergeIn(context, target, style, specificity, null, null, null);
   const marginBoxes = style[marginBoxesKey];
