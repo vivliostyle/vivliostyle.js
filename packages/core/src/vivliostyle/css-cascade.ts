@@ -2931,6 +2931,20 @@ function getContentWidth(
   return totalWidth;
 }
 
+function asLeaderNodeContext(
+  c: Vtree.RenderedNodeContext,
+): Vtree.ContainedElementNodeContext | null {
+  const element = Vtree.asElementNodeContext(c);
+  return element !== null &&
+    element.after &&
+    element.viewNode.hasAttribute("data-viv-leader") &&
+    // a leader is generated as the content of a pseudo element, so it is
+    // always built under a parent
+    element.blockContainer !== null
+    ? (element as Vtree.ContainedElementNodeContext)
+    : null;
+}
+
 /**
  * POST_LAYOUT_BLOCK hook function for CSS leader()
  * @param nodeContext
@@ -2942,28 +2956,17 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
   checkPoints: Vtree.RenderedNodeContext[],
   column: Layout.Column,
 ) => {
-  const leaders: {
-    leaderContext: Vtree.RenderedNodeContext;
-    pseudoElem: HTMLElement;
-    pseudoParent: HTMLElement;
-  }[] = [];
-  for (const c of checkPoints) {
-    const leaderElem =
-      c.after && c.viewNode.nodeType === 1 ? (c.viewNode as Element) : null;
-    const pseudoElem = leaderElem?.getAttribute("data-viv-leader")
-      ? leaderElem.parentElement
-      : null;
+  const leaders = checkPoints.flatMap((c) => {
+    const leaderContext = asLeaderNodeContext(c);
+    const pseudoElem = leaderContext?.viewNode.parentElement;
     const pseudoParent = pseudoElem?.parentElement;
-    if (leaderElem && pseudoElem && pseudoParent) {
-      leaders.push({ leaderContext: c, pseudoElem, pseudoParent });
-    }
-  }
+    return leaderContext && pseudoElem && pseudoParent
+      ? [{ leaderContext, pseudoElem, pseudoParent }]
+      : [];
+  });
   for (const { leaderContext: c, pseudoElem, pseudoParent } of leaders) {
-    // we want to access the bottom block element, which contains single leader().
-    let container = c.parent;
-    while (container && container.inline) {
-      container = container.parent;
-    }
+    // the bottom block element, which contains single leader()
+    const container = c.blockContainer;
     const leaderElem = c.viewNode as HTMLElement;
     const pseudoName = pseudoElem.getAttribute("data-adapt-pseudo");
     const leader = leaderElem.getAttribute("data-viv-leader-value");
@@ -3009,9 +3012,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       columnContainer.style.columnFill = "auto";
     }
 
-    const box = column.clientLayout.getElementClientRect(
-      container.viewNode as Element,
-    );
+    const box = column.clientLayout.getElementClientRect(container.viewNode);
     const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
@@ -3022,7 +3023,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     let topmostInlineAncestor: Element = pseudoParent;
     while (
       topmostInlineAncestor.parentElement &&
-      topmostInlineAncestor.parentElement !== (container.viewNode as Element)
+      topmostInlineAncestor.parentElement !== container.viewNode
     ) {
       topmostInlineAncestor = topmostInlineAncestor.parentElement;
     }

@@ -1347,6 +1347,7 @@ export namespace Vtree {
 
     sourceNode: Node;
     parent: NodeContext | null;
+    blockContainer: ElementNodeContext | null;
     boxOffset: number;
 
     resetView(): void;
@@ -1378,6 +1379,10 @@ export namespace Vtree {
   }
 
   export type RenderedNodeContext = ElementNodeContext | TextNodeContext;
+
+  export interface ContainedElementNodeContext extends ElementNodeContext {
+    blockContainer: ElementNodeContext;
+  }
 
   export interface FloatNodeContext extends ElementNodeContext {
     floatSide: string;
