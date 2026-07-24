@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>rlh with numeric root line-height</title>
+    <style>
+      html {
+        line-height: 2;
+      }
+      .rlh-box {
+        width: 100px;
+        height: 3rlh;
+        background: teal;
+      }
+      .marker {
+        background: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The root element declares <code>line-height: 2</code>, so
+      <code>rlh</code> resolves to twice the root font size.
+    </p>
+    <div class="rlh-box"></div>
+    <p class="marker">This paragraph must be pushed down by the box above.</p>
+  </body>
+</html>

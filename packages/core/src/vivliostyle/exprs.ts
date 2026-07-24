@@ -327,7 +327,7 @@ export class Context {
   rootFontSize: number | null = null;
   isRelativeRootFontSize: boolean | null = null;
   fontSize: () => number;
-  rootLineHeight: number | null = null;
+  rootLineHeight: number;
   pref: Preferences;
   scopes: { [key: string]: ScopeContext } = {};
   pageAreaWidth: number | null = null;
@@ -341,6 +341,7 @@ export class Context {
     public readonly viewportWidth: number,
     public readonly viewportHeight: number,
     fontSize: number,
+    rootLineHeight: number,
   ) {
     this.pageWidth = function () {
       if (this.actualPageWidth) {
@@ -359,6 +360,7 @@ export class Context {
       }
     };
     this.initialFontSize = fontSize;
+    this.rootLineHeight = rootLineHeight;
     this.fontSize = function () {
       if (this.rootFontSize) {
         return this.rootFontSize;

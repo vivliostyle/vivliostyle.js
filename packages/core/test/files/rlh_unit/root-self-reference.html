@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>lh/rlh on the root element itself</title>
+    <style>
+      html {
+        font-size: 2rlh;
+        line-height: 2lh;
+      }
+      .rem-box {
+        width: 100px;
+        height: 1rem;
+        background: teal;
+      }
+      .rlh-box {
+        width: 100px;
+        height: 1rlh;
+        background: purple;
+      }
+      .ref-box {
+        width: 100px;
+        height: 40px;
+        background: green;
+      }
+      .marker {
+        background: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The root element sizes itself with <code>font-size: 2rlh</code> and
+      <code>line-height: 2lh</code>. Per CSS Values, lh and rlh used on the root
+      element's own font and line-height properties resolve against the initial
+      font and line-height values, so neither depends on the other and both give
+      twice the initial line height.
+    </p>
+    <div class="rem-box"></div>
+    <div class="rlh-box"></div>
+    <div class="ref-box"></div>
+    <p class="marker">
+      The teal (1rem), purple (1rlh) and green (40px) boxes above must all be
+      the same height.
+    </p>
+  </body>
+</html>
