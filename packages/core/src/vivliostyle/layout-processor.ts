@@ -110,8 +110,9 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     column: Layout.Column,
     leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
-    if (column.isFloatNodeContext(nodeContext)) {
-      return column.layoutFloatOrFootnote(nodeContext);
+    const floatNodeContext = column.asFloatNodeContext(nodeContext);
+    if (floatNodeContext) {
+      return column.layoutFloatOrFootnote(floatNodeContext);
     } else if (column.isBreakable(nodeContext)) {
       return column.layoutBreakableBlock(nodeContext);
     } else {
@@ -168,14 +169,11 @@ export class BlockLayoutProcessor implements LayoutProcessor {
       return;
     }
     let node = nodeContext.viewNode;
-    if (node.parentElement?.localName === "viv-ts-inner") {
-      // special element for text-spacing
-      node = node.parentElement.parentElement;
-    }
+    node = LayoutHelper.textSpacingWrapperOf(node) ?? node;
     const parentNode = node.parentNode;
     LayoutHelper.removeFollowingSiblings(parentNode, node);
     if (removeSelf) {
-      parentNode.removeChild(node);
+      node.remove();
     }
   }
 

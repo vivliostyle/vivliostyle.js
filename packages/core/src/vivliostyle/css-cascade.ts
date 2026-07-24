@@ -2936,7 +2936,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
  * @returns The total width (or height for vertical writing modes)
  */
 function getContentWidth(
-  node: Node,
+  node: Element | Text,
   clientLayout: Vtree.ClientLayout,
   writingMode: string,
 ): number {
@@ -2970,23 +2970,32 @@ function getContentWidth(
  */
 const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
   nodeContext: Vtree.NodeContext,
-  checkPoints: Vtree.NodeContext[],
+  checkPoints: Vtree.RenderedNodeContext[],
   column: Layout.Column,
 ) => {
-  const leaders: Vtree.NodeContext[] = checkPoints.filter(
-    (c) =>
-      c.after &&
-      c.viewNode.nodeType === 1 &&
-      (c.viewNode as Element).getAttribute("data-viv-leader"),
-  );
-  for (const c of leaders) {
+  const leaders: {
+    leaderContext: Vtree.RenderedNodeContext;
+    pseudoElem: HTMLElement;
+    pseudoParent: HTMLElement;
+  }[] = [];
+  for (const c of checkPoints) {
+    const leaderElem =
+      c.after && c.viewNode.nodeType === 1 ? (c.viewNode as Element) : null;
+    const pseudoElem = leaderElem?.getAttribute("data-viv-leader")
+      ? leaderElem.parentElement
+      : null;
+    const pseudoParent = pseudoElem?.parentElement;
+    if (leaderElem && pseudoElem && pseudoParent) {
+      leaders.push({ leaderContext: c, pseudoElem, pseudoParent });
+    }
+  }
+  for (const { leaderContext: c, pseudoElem, pseudoParent } of leaders) {
     // we want to access the bottom block element, which contains single leader().
     let container = c.parent;
     while (container && container.inline) {
       container = container.parent;
     }
     const leaderElem = c.viewNode as HTMLElement;
-    const pseudoElem = leaderElem.parentElement;
     const pseudoName = pseudoElem.getAttribute("data-adapt-pseudo");
     const leader = leaderElem.getAttribute("data-viv-leader-value");
     const { writingMode, direction, marginInlineEnd } =
@@ -3038,10 +3047,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
     // Calculate width of following inline siblings (Issue #1563)
-    const inlineNodes: Node[] = [];
+    const inlineNodes: (Element | Text)[] = [];
 
     // Find the topmost inline ancestor (child of block ancestor) that contains pseudoElement
-    let topmostInlineAncestor: Element = pseudoElem.parentElement;
+    let topmostInlineAncestor: Element = pseudoParent;
     while (
       topmostInlineAncestor.parentElement &&
       topmostInlineAncestor.parentElement !== (container.viewNode as Element)

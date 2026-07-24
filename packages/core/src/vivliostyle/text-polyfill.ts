@@ -16,6 +16,7 @@
  *
  * @fileoverview TextPolyfill - CSS text-spacing and hanging-punctuation support.
  */
+import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
@@ -337,10 +338,16 @@ class TextSpacingPolyfill {
       element,
       NodeFilter.SHOW_TEXT,
     );
-    for (let node = nodeIter.nextNode(); node; node = nodeIter.nextNode()) {
+    for (
+      let node = nodeIter.nextNode() as Text | null;
+      node;
+      node = nodeIter.nextNode() as Text | null
+    ) {
+      const parentElem = node.parentElement;
       if (
-        node.parentElement.namespaceURI !== Base.NS.XHTML ||
-        node.parentElement.dataset?.["mathTypeset"] === "true"
+        !parentElem ||
+        parentElem.namespaceURI !== Base.NS.XHTML ||
+        parentElem.dataset?.["mathTypeset"] === "true"
       ) {
         continue;
       }
@@ -354,10 +361,7 @@ class TextSpacingPolyfill {
       if (textArr.length > 1) {
         const lastIndex = textArr.length - 1;
         for (let i = 0; i < lastIndex; i++) {
-          node.parentNode.insertBefore(
-            document.createTextNode(textArr[i]),
-            node,
-          );
+          node.before(document.createTextNode(textArr[i]));
         }
         node.textContent = textArr[lastIndex];
       }
@@ -398,10 +402,10 @@ class TextSpacingPolyfill {
       element,
       NodeFilter.SHOW_TEXT,
     );
-    let prevNode: Node = null;
-    let nextNode: Node = null;
-    for (let node = nodeIter.nextNode(); node; node = nextNode) {
-      nextNode = nodeIter.nextNode();
+    let prevNode: Text | null = null;
+    let nextNode: Text | null = null;
+    for (let node = nodeIter.nextNode() as Text | null; node; node = nextNode) {
+      nextNode = nodeIter.nextNode() as Text | null;
       const isFirstInBlock = !prevNode;
       const isFirstAfterForcedLineBreak =
         !prevNode || /\n$/.test(prevNode.textContent);
@@ -431,7 +435,7 @@ class TextSpacingPolyfill {
 
   postLayoutBlock(
     nodeContext: Vtree.NodeContext,
-    checkPoints: Vtree.NodeContext[],
+    checkPoints: Vtree.RenderedNodeContext[],
   ): void {
     const isFirstFragment =
       !nodeContext ||
@@ -546,32 +550,30 @@ class TextSpacingPolyfill {
     let iFirst = -1;
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
+      const textP =
+        !p.after && p.inline && !p.display ? Vtree.asTextNodeContext(p) : null;
       if (
-        !p.after &&
-        p.inline &&
-        !p.display &&
-        p.parent &&
-        p.viewNode.parentNode &&
-        p.viewNode.nodeType === Node.TEXT_NODE &&
-        !Vtree.canIgnore(p.viewNode, p.whitespace)
+        textP &&
+        textP.viewNode.parentNode &&
+        !Vtree.canIgnore(textP.viewNode, textP.whitespace)
       ) {
         if (iFirst < 0) {
           iFirst = i;
         }
         const lang = normalizeLang(
-          p.lang ??
-            p.parent.lang ??
+          textP.lang ??
+            textP.parent.lang ??
             nodeContext?.lang ??
             nodeContext?.parent?.lang,
         );
         const autospace = autospaceFromPropertyValue(
-          p.inheritedProps["text-autospace"],
+          textP.inheritedProps["text-autospace"],
         );
         const spacingTrim = spacingTrimFromPropertyValue(
-          p.inheritedProps["text-spacing-trim"],
+          textP.inheritedProps["text-spacing-trim"],
         );
         const hangingPunctuation = hangingPunctuationFromPropertyValue(
-          p.inheritedProps["hanging-punctuation"],
+          textP.inheritedProps["hanging-punctuation"],
         );
 
         if (
@@ -580,7 +582,7 @@ class TextSpacingPolyfill {
         ) {
           continue;
         }
-        if (/\b(flex|grid)\b/.test(p.parent.display)) {
+        if (/\b(flex|grid)\b/.test(textP.parent.display)) {
           // Cannot process if parent is flex or grid. (Issue #926)
           continue;
         }
@@ -662,7 +664,7 @@ class TextSpacingPolyfill {
             PseudoElement.getPseudoName(prevP.viewNode as Element) ===
               "footnote-call"
           ) {
-            if (prevP.viewNode.contains(p.viewNode)) {
+            if (prevP.viewNode.contains(textP.viewNode)) {
               continue;
             }
             const lastText = LayoutHelper.findLastTextNodeInElement(
@@ -696,7 +698,7 @@ class TextSpacingPolyfill {
             break;
           }
           if (
-            nextP.viewNode !== p.viewNode &&
+            nextP.viewNode !== textP.viewNode &&
             !nextP.display &&
             nextP.viewNode.nodeType === Node.TEXT_NODE &&
             nextP.viewNode.textContent.length > 0
@@ -733,28 +735,32 @@ class TextSpacingPolyfill {
             }
           }
         }
-        if (p.parent?.display === "inline-block") {
+        if (textP.parent.display === "inline-block") {
+          // an inline-block box enclosing rendered checkpoints has its
+          // element view
+          const inlineBlock = Vtree.asElementNodeContext(textP.parent);
+          Asserts.assert(inlineBlock);
           if (!isFirstInBlock) {
-            let firstInInlineBlock = p.parent.viewNode.firstChild;
-            while (Vtree.canIgnore(firstInInlineBlock, p.whitespace)) {
+            let firstInInlineBlock = inlineBlock.viewNode.firstChild;
+            while (Vtree.canIgnore(firstInInlineBlock, textP.whitespace)) {
               firstInInlineBlock = firstInInlineBlock.nextSibling;
             }
-            if (p.viewNode === firstInInlineBlock) {
+            if (textP.viewNode === firstInInlineBlock) {
               isFirstInBlock = true;
             }
           }
           if (!isLastInBlock) {
-            let lastInInlineBlock = p.parent.viewNode.lastChild;
-            while (Vtree.canIgnore(lastInInlineBlock, p.whitespace)) {
+            let lastInInlineBlock = inlineBlock.viewNode.lastChild;
+            while (Vtree.canIgnore(lastInInlineBlock, textP.whitespace)) {
               lastInInlineBlock = lastInInlineBlock.previousSibling;
             }
-            if (p.viewNode === lastInInlineBlock) {
+            if (textP.viewNode === lastInInlineBlock) {
               isLastInBlock = true;
             }
           }
         }
         const columnOver = this.processTextSpacing(
-          p.viewNode,
+          textP.viewNode,
           isFirstAfterBreak,
           isFirstInBlock,
           isFirstAfterForcedLineBreak,
@@ -766,7 +772,7 @@ class TextSpacingPolyfill {
           spacingTrim,
           hangingPunctuation,
           lang,
-          p.vertical,
+          textP.vertical,
         );
         if (columnOver > 0) {
           // Stop processing if the node is moved to next column
@@ -779,7 +785,7 @@ class TextSpacingPolyfill {
   }
 
   private processTextSpacing(
-    textNode: Node,
+    textNode: Text,
     isFirstAfterBreak: boolean,
     isFirstInBlock: boolean,
     isFirstAfterForcedLineBreak: boolean,
@@ -918,7 +924,7 @@ class TextSpacingPolyfill {
     }
 
     if (tagName !== undefined) {
-      if (textNode.parentElement.localName === "viv-ts-inner") {
+      if (textNode.parentElement?.localName === "viv-ts-inner") {
         // Already processed
         return 0;
       }
@@ -926,13 +932,12 @@ class TextSpacingPolyfill {
       const outerElem = document.createElement(tagName);
       const innerElem = document.createElement("viv-ts-inner");
       outerElem.appendChild(innerElem);
-      textNode.parentNode.insertBefore(outerElem, textNode);
+      textNode.before(outerElem);
       innerElem.appendChild(textNode);
 
       if (needsChromiumVoTrFallback) {
-        const textOrientation = document.defaultView.getComputedStyle(
-          innerElem.parentElement,
-        ).textOrientation;
+        const textOrientation =
+          document.defaultView.getComputedStyle(outerElem).textOrientation;
         if (textOrientation === "mixed") {
           innerElem.style.textOrientation = "sideways";
         }
@@ -981,7 +986,7 @@ class TextSpacingPolyfill {
             ) &&
             // exclude non-fullwidth closing punctuations (Issue #1003)
             (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
-              (prevNode.parentElement.localName === "viv-ts-inner" &&
+              (prevNode.parentElement?.localName === "viv-ts-inner" &&
                 checkFullWidth(prevNode.parentElement)))
           ) {
             outerElem.className = "viv-ts-trim";
@@ -1152,13 +1157,14 @@ class TextSpacingPolyfill {
           )) ||
           (autospace.ideographNumeric &&
             /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u.test(prevNode.textContent))) &&
-        !(vertical && checkUpright(prevNode.parentElement)) &&
+        !(
+          vertical &&
+          prevNode.parentElement !== null &&
+          checkUpright(prevNode.parentElement)
+        ) &&
         !checkNonZeroMarginBorderPadding(prevNode, textNode)
       ) {
-        textNode.parentNode.insertBefore(
-          document.createElement("viv-ts-thin-sp"),
-          textNode,
-        );
+        textNode.before(document.createElement("viv-ts-thin-sp"));
         spaceIdeoAlnumProcessing = true;
       }
       if (
@@ -1170,13 +1176,14 @@ class TextSpacingPolyfill {
           )) ||
           (autospace.ideographNumeric &&
             /^(?![\uFF01-\uFF60])\p{Nd}/u.test(nextNode.textContent))) &&
-        !(vertical && checkUpright(nextNode.parentElement)) &&
+        !(
+          vertical &&
+          nextNode.parentElement !== null &&
+          checkUpright(nextNode.parentElement)
+        ) &&
         !checkNonZeroMarginBorderPadding(textNode, nextNode)
       ) {
-        textNode.parentNode.insertBefore(
-          document.createElement("viv-ts-thin-sp"),
-          textNode.nextSibling,
-        );
+        textNode.after(document.createElement("viv-ts-thin-sp"));
         spaceIdeoAlnumProcessing = true;
       }
     }

@@ -200,7 +200,7 @@ export class ViewFactory
 
   // computed
   // TODO: only set it on NodeContext
-  viewNode: Node | null = null;
+  viewNode: Element | Text | null = null;
 
   constructor(
     public readonly flowName: string,
@@ -3537,7 +3537,8 @@ export class ViewFactory
     if (lineHeightNum == null) {
       // Try to get font-size relative line-height value from ancestor elements
       for (
-        let viewNode = this.nodeContext?.parent?.viewNode;
+        let viewNode: Node | null | undefined =
+          this.nodeContext?.parent?.viewNode;
         viewNode && viewNode.nodeType === 1;
         viewNode = viewNode.parentNode
       ) {

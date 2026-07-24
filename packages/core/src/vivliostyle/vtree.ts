@@ -618,8 +618,8 @@ export class NodeContext implements Vtree.NodeContext {
   containingBlockForAbsolute: boolean = false;
   breakBefore: string | null = null;
   breakAfter: string | null = null;
-  viewNode: Node | null = null;
-  clearSpacer: Node | null = null;
+  viewNode: Element | Text | null = null;
+  clearSpacer: Element | null = null;
   inheritedProps: { [key: string]: number | string | Css.Val | undefined };
   vertical: boolean;
   direction: string;
@@ -846,11 +846,11 @@ export class NodeContext implements Vtree.NodeContext {
     return false;
   }
 
-  getContainingBlockForAbsolute(): NodeContext {
+  getContainingBlockForAbsolute(): Vtree.ElementNodeContext | null {
     let parent = this.parent;
     while (parent) {
       if (parent.containingBlockForAbsolute) {
-        return parent;
+        return asElementNodeContext(parent);
       }
       parent = parent.parent;
     }
@@ -904,6 +904,42 @@ export function asTextNodeContext(
   return nc.parent !== null && nc.viewNode?.nodeType === 3
     ? (nc as TextNodeContext)
     : null;
+}
+
+export type RenderedNodeContext = NodeContext & Vtree.RenderedNodeContext;
+export type ElementNodeContext = NodeContext & Vtree.ElementNodeContext;
+export type ClearNodeContext = NodeContext & Vtree.ClearNodeContext;
+export type AfterIfContinuesNodeContext = NodeContext &
+  Vtree.AfterIfContinuesNodeContext;
+
+export function asElementNodeContext(
+  nc: Vtree.NodeContext,
+): ElementNodeContext | null {
+  return nc.viewNode !== null && nc.viewNode.nodeType === 1
+    ? (nc as ElementNodeContext)
+    : null;
+}
+
+export function asClearNodeContext(
+  nc: Vtree.NodeContext,
+): ClearNodeContext | null {
+  return nc.clearSide !== null && nc.viewNode?.nodeType === 1
+    ? (nc as ClearNodeContext)
+    : null;
+}
+
+export function asAfterIfContinuesNodeContext(
+  nc: Vtree.NodeContext,
+): AfterIfContinuesNodeContext | null {
+  return nc.afterIfContinues !== null && nc.viewNode?.nodeType === 1
+    ? (nc as AfterIfContinuesNodeContext)
+    : null;
+}
+
+export function asRenderedNodeContext(
+  nc: Vtree.NodeContext,
+): RenderedNodeContext | null {
+  return asElementNodeContext(nc) ?? asTextNodeContext(nc);
 }
 
 export class ChunkPosition implements Vtree.ChunkPosition {

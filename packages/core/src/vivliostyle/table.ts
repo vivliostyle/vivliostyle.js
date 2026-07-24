@@ -766,7 +766,7 @@ function isValidParentOfTableRow(display: string | null): boolean {
 }
 
 function skipNestedTable(
-  state: LayoutUtil.LayoutIteratorState,
+  state: LayoutUtil.RenderedActiveLayoutIteratorState,
   formattingContext: TableFormattingContext,
   column: Layout.Column,
 ): Task.Result<boolean> | null {
@@ -809,11 +809,11 @@ function skipNestedTable(
 
 function layoutFloatOrFootnoteIfNeeded(
   column: Layout.Column,
-  state: LayoutUtil.LayoutIteratorState,
+  state: LayoutUtil.RenderedActiveLayoutIteratorState,
 ): Task.Result<boolean> | null {
   const nodeContext = state.nodeContext;
   if (
-    !nodeContext?.floatSide ||
+    !nodeContext.floatSide ||
     !(
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"
@@ -835,7 +835,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   rowIndex: number = -1;
   columnIndex: number = 0;
   inRow: boolean = false;
-  checkPoints: Vtree.NodeContext[] = [];
+  checkPoints: Vtree.RenderedNodeContext[] = [];
   inHeaderOrFooter: boolean = false;
 
   constructor(
@@ -846,7 +846,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override startNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const r = skipNestedTable(state, formattingContext, this.column);
@@ -911,7 +911,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override afterNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
@@ -990,41 +990,37 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override startNonElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   override afterNonElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   override startInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
   override afterInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     this.registerCheckPoint(state);
   }
 
-  registerCheckPoint(state: LayoutUtil.LayoutIteratorState) {
+  registerCheckPoint(state: LayoutUtil.RenderedActiveLayoutIteratorState) {
     const nodeContext = state.nodeContext;
-    if (
-      nodeContext &&
-      nodeContext.viewNode &&
-      !LayoutHelper.isSpecialNodeContext(nodeContext)
-    ) {
+    if (!LayoutHelper.isSpecialNodeContext(nodeContext)) {
       this.checkPoints.push(nodeContext.clone());
     }
   }
 
-  postLayoutBlockContents(state: LayoutUtil.LayoutIteratorState) {
+  postLayoutBlockContents(state: LayoutUtil.RenderedActiveLayoutIteratorState) {
     if (this.checkPoints.length > 0) {
       this.column.postLayoutBlock(state.nodeContext, this.checkPoints);
     }
@@ -1056,7 +1052,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override startNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const floatResult = layoutFloatOrFootnoteIfNeeded(this.column, state);
     if (floatResult) {
@@ -1175,7 +1171,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   layoutRowSpanningCellsFromPreviousFragment(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const rowSpanningCellBreakPositions =
@@ -1186,7 +1182,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
     const layoutContext = this.column.layoutContext;
     const currentRow = state.nodeContext;
-    currentRow.viewNode.parentNode.removeChild(currentRow.viewNode);
+    currentRow.viewNode.remove();
     const frame = Task.newFrame<boolean>(
       "layoutRowSpanningCellsFromPreviousFragment",
     );
@@ -1202,16 +1198,20 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           (currentRow as Vtree.ChildNodeContext).parent,
         );
         return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
+          // the row was rendered in the previous fragment and re-renders here
+          const rowElementContext =
+            VtreeImpl.asElementNodeContext(rowNodeContext);
+          Asserts.assert(rowElementContext);
+          const rowViewNode = rowElementContext.viewNode;
           let cont1 = Task.newResult(true);
           let columnIndex = 0;
 
           function addDummyCellUntil(upperColumnIndex) {
             while (columnIndex < upperColumnIndex) {
               if (!occupiedSlotIndices.includes(columnIndex)) {
-                const dummy =
-                  rowNodeContext.viewNode.ownerDocument.createElement("td");
+                const dummy = rowViewNode.ownerDocument.createElement("td");
                 Base.setCSSProperty(dummy, "padding", "0");
-                rowNodeContext.viewNode.appendChild(dummy);
+                rowViewNode.appendChild(dummy);
               }
               columnIndex++;
             }
@@ -1273,7 +1273,9 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     return frame.result();
   }
 
-  startTableRow(state: LayoutUtil.LayoutIteratorState): Task.Result<boolean> {
+  startTableRow(
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
+  ): Task.Result<boolean> {
     if (this.inHeader || this.inFooter) {
       return Task.newResult(true);
     }
@@ -1320,9 +1322,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             true,
             breakAtEdge,
           );
-          if (nodeContext.viewNode?.parentNode) {
-            nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
-          }
+          nodeContext.viewNode?.remove();
           // Set block-end box-break flags on the table and its ancestors
           // since doFinishBreak skips finishBreak when pageBreakType is set
           if (state.lastAfterNodeContext) {
@@ -1378,7 +1378,9 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     });
   }
 
-  startTableCell(state: LayoutUtil.LayoutIteratorState): Task.Result<boolean> {
+  startTableCell(
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
+  ): Task.Result<boolean> {
     if (this.inHeader || this.inFooter) {
       return Task.newResult(true);
     }
@@ -1422,8 +1424,9 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       cont = this.column
         .nextInTree(nodeContext, state.atUnforcedBreak)
         .thenAsync((nextNodeContext) => {
-          if (nextNodeContext.viewNode) {
-            nodeContext.viewNode.removeChild(nextNodeContext.viewNode);
+          const nextViewNode = nextNodeContext.viewNode;
+          if (nextViewNode) {
+            nodeContext.viewNode.removeChild(nextViewNode);
           }
           const startNodePosition = VtreeImpl.newNodePositionFromNodeContext(
             nextNodeContext,
@@ -1444,7 +1447,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   startNonInlineBox(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): Task.Result<boolean> {
     const r = skipNestedTable(
       state,
@@ -1480,7 +1483,9 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     }
   }
 
-  endNonInlineBox(state: LayoutUtil.LayoutIteratorState): Task.Result<boolean> {
+  endNonInlineBox(
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
+  ): Task.Result<boolean> {
     const nodeContext = state.nodeContext;
     const display = nodeContext.display;
     if (display === "table-row") {
@@ -1500,7 +1505,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   afterNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const nodeContext = state.nodeContext;
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
@@ -1512,7 +1517,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode)
       ) {
         this.inHeader = false;
-        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        nodeContext.viewNode.remove();
       } else {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
@@ -1527,7 +1532,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         repetitiveElements.isFooterSourceNode(nodeContext.sourceNode)
       ) {
         this.inFooter = false;
-        nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+        nodeContext.viewNode.remove();
       } else {
         Base.setCSSProperty(
           nodeContext.viewNode as Element,
@@ -1537,7 +1542,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       }
     }
     if (display && TableLayoutStrategy.ignoreList[display]) {
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      nodeContext.viewNode.remove();
     } else if (
       nodeContext.sourceNode === this.formattingContext.tableSourceNode
     ) {
@@ -1651,7 +1656,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       dummyRow.appendChild(cell);
       dummyCells.push(cell);
     }
-    lastRow.parentNode.insertBefore(dummyRow, lastRow.nextSibling);
+    lastRow.after(dummyRow);
     const colWidths = dummyCells.map((cell) => {
       const rect = LayoutHelper.getElementClientRectAdjusted(
         clientLayout,
@@ -1663,7 +1668,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       // Non-integer width causes problem, so return rounded-up value.
       return Math.ceil(width);
     });
-    lastRow.parentNode.removeChild(dummyRow);
+    dummyRow.remove();
     return colWidths;
   }
 
@@ -2258,12 +2263,16 @@ function fixTableCellWrapperForBaseline(cellViewNode: Element): void {
  * @param nodeContext - node context of table or table-row
  */
 function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
+  const display = nodeContext.display;
+  if (display !== "table-row" && display !== "table") {
+    return;
+  }
+  const elementContext = VtreeImpl.asElementNodeContext(nodeContext);
+  Asserts.assert(elementContext);
   const tbodyElement =
-    nodeContext.display === "table-row"
-      ? nodeContext.viewNode.parentElement
-      : nodeContext.display === "table"
-        ? (nodeContext.viewNode as Element).querySelector("tbody")
-        : null;
+    display === "table-row"
+      ? elementContext.viewNode.parentElement
+      : elementContext.viewNode.querySelector("tbody");
   if (!tbodyElement) {
     return;
   }

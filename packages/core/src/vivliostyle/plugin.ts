@@ -187,7 +187,7 @@ export type ResolveLayoutProcessorHook = (
 
 export type PostLayoutBlockHook = (
   p1: Vtree.NodeContext,
-  p2: Vtree.NodeContext[],
+  p2: Vtree.RenderedNodeContext[],
   p3: Layout.Column,
 ) => void;
 

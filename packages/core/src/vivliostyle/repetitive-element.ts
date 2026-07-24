@@ -199,7 +199,7 @@ export class RepetitiveElements
   }
 
   appendHeaderToFragment(
-    rootNodeContext: Vtree.NodeContext,
+    rootNodeContext: Vtree.ElementNodeContext,
     firstChild: Node | null,
     column: LayoutType.Column,
   ): Task.Result<boolean> {
@@ -215,7 +215,7 @@ export class RepetitiveElements
   }
 
   appendFooterToFragment(
-    rootNodeContext: Vtree.NodeContext,
+    rootNodeContext: Vtree.ElementNodeContext,
     firstChild: Node | null,
     column: LayoutType.Column,
   ): Task.Result<boolean> {
@@ -232,12 +232,12 @@ export class RepetitiveElements
 
   appendElementToFragment(
     nodePosition: Vtree.NodePosition,
-    rootNodeContext: Vtree.NodeContext,
+    rootNodeContext: Vtree.ElementNodeContext,
     firstChild: Node | null,
     column: LayoutType.Column,
   ): Task.Result<boolean> {
-    const doc = rootNodeContext.viewNode.ownerDocument;
-    const rootViewNode = rootNodeContext.viewNode as Element;
+    const rootViewNode = rootNodeContext.viewNode;
+    const doc = rootViewNode.ownerDocument;
     const viewRoot = doc.createElement("div");
     rootViewNode.appendChild(viewRoot);
     const pseudoColumn = new Layout.PseudoColumn(
@@ -743,7 +743,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override startNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
@@ -782,7 +782,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override afterNonInlineElementNode(
-    state: LayoutUtil.LayoutIteratorState,
+    state: LayoutUtil.RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
@@ -824,8 +824,9 @@ export class RepetitiveElementsOwnerLayoutProcessor
     column: LayoutType.Column,
     leadingEdge: boolean,
   ): Task.Result<Vtree.NodeContext> {
-    if (column.isFloatNodeContext(nodeContext)) {
-      return column.layoutFloatOrFootnote(nodeContext);
+    const floatNodeContext = column.asFloatNodeContext(nodeContext);
+    if (floatNodeContext) {
+      return column.layoutFloatOrFootnote(floatNodeContext);
     }
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
@@ -865,7 +866,10 @@ export class RepetitiveElementsOwnerLayoutProcessor
       (repetitiveElements.isHeaderSourceNode(nodeContext.sourceNode) ||
         repetitiveElements.isFooterSourceNode(nodeContext.sourceNode))
     ) {
-      nodeContext.viewNode.parentNode.removeChild(nodeContext.viewNode);
+      // the repeated header/footer element was just rendered at this edge
+      const elementContext = VtreeImpl.asElementNodeContext(nodeContext);
+      Asserts.assert(elementContext);
+      elementContext.viewNode.remove();
     }
     return false;
   }
@@ -1037,10 +1041,12 @@ export function appendHeader(
   const repetitiveElements = formattingContext.getRepetitiveElements();
   if (repetitiveElements) {
     const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
-    if (rootNodeContext.viewNode) {
-      const firstChild = rootNodeContext.viewNode.firstChild;
+    const rootElementContext =
+      rootNodeContext && VtreeImpl.asElementNodeContext(rootNodeContext);
+    if (rootElementContext) {
+      const firstChild = rootElementContext.viewNode.firstChild;
       return repetitiveElements.appendHeaderToFragment(
-        rootNodeContext,
+        rootElementContext,
         firstChild,
         column,
       );
@@ -1058,9 +1064,11 @@ export function appendFooter(
   if (repetitiveElements) {
     if (!repetitiveElements.isSkipFooter) {
       const rootNodeContext = formattingContext.getRootNodeContext(nodeContext);
-      if (rootNodeContext.viewNode) {
+      const rootElementContext =
+        rootNodeContext && VtreeImpl.asElementNodeContext(rootNodeContext);
+      if (rootElementContext) {
         return repetitiveElements.appendFooterToFragment(
-          rootNodeContext,
+          rootElementContext,
           null,
           column,
         );
