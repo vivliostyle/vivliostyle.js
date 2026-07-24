@@ -21,7 +21,6 @@ import * as Display from "./display";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
 import * as Task from "./task";
-import * as VtreeImpl from "./vtree";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 
 /**
