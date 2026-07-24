@@ -402,8 +402,8 @@ class TextSpacingPolyfill {
       element,
       NodeFilter.SHOW_TEXT,
     );
-    let prevNode: Text = null;
-    let nextNode: Text = null;
+    let prevNode: Text | null = null;
+    let nextNode: Text | null = null;
     for (let node = nodeIter.nextNode() as Text | null; node; node = nextNode) {
       nextNode = nodeIter.nextNode() as Text | null;
       const isFirstInBlock = !prevNode;
