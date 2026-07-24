@@ -736,6 +736,11 @@ export function findAncestorSpecialInlineNodeContext(
   return null;
 }
 
+export function textSpacingWrapperOf(node: Element | Text): Element | null {
+  const inner = node.parentElement;
+  return inner?.localName === "viv-ts-inner" ? inner.parentElement : null;
+}
+
 export function findLastTextNodeInElement(element: Node): Node | null {
   let node: Node | null = element;
   while (node) {

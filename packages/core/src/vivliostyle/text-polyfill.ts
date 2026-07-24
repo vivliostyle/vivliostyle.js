@@ -342,9 +342,11 @@ class TextSpacingPolyfill {
       node;
       node = nodeIter.nextNode() as Text | null
     ) {
+      const parentElem = node.parentElement;
       if (
-        node.parentElement.namespaceURI !== Base.NS.XHTML ||
-        node.parentElement.dataset?.["mathTypeset"] === "true"
+        !parentElem ||
+        parentElem.namespaceURI !== Base.NS.XHTML ||
+        parentElem.dataset?.["mathTypeset"] === "true"
       ) {
         continue;
       }
@@ -917,7 +919,7 @@ class TextSpacingPolyfill {
     }
 
     if (tagName !== undefined) {
-      if (textNode.parentElement.localName === "viv-ts-inner") {
+      if (textNode.parentElement?.localName === "viv-ts-inner") {
         // Already processed
         return 0;
       }
@@ -979,7 +981,7 @@ class TextSpacingPolyfill {
             ) &&
             // exclude non-fullwidth closing punctuations (Issue #1003)
             (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
-              (prevNode.parentElement.localName === "viv-ts-inner" &&
+              (prevNode.parentElement?.localName === "viv-ts-inner" &&
                 checkFullWidth(prevNode.parentElement)))
           ) {
             outerElem.className = "viv-ts-trim";
@@ -1150,7 +1152,11 @@ class TextSpacingPolyfill {
           )) ||
           (autospace.ideographNumeric &&
             /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u.test(prevNode.textContent))) &&
-        !(vertical && checkUpright(prevNode.parentElement)) &&
+        !(
+          vertical &&
+          prevNode.parentElement !== null &&
+          checkUpright(prevNode.parentElement)
+        ) &&
         !checkNonZeroMarginBorderPadding(prevNode, textNode)
       ) {
         textNode.before(document.createElement("viv-ts-thin-sp"));
@@ -1165,7 +1171,11 @@ class TextSpacingPolyfill {
           )) ||
           (autospace.ideographNumeric &&
             /^(?![\uFF01-\uFF60])\p{Nd}/u.test(nextNode.textContent))) &&
-        !(vertical && checkUpright(nextNode.parentElement)) &&
+        !(
+          vertical &&
+          nextNode.parentElement !== null &&
+          checkUpright(nextNode.parentElement)
+        ) &&
         !checkNonZeroMarginBorderPadding(textNode, nextNode)
       ) {
         textNode.after(document.createElement("viv-ts-thin-sp"));

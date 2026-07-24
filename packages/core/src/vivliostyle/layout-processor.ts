@@ -168,10 +168,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
       return;
     }
     let node = nodeContext.viewNode;
-    if (node.parentElement?.localName === "viv-ts-inner") {
-      // special element for text-spacing
-      node = node.parentElement.parentElement;
-    }
+    node = LayoutHelper.textSpacingWrapperOf(node) ?? node;
     const parentNode = node.parentNode;
     LayoutHelper.removeFollowingSiblings(parentNode, node);
     if (removeSelf) {
