@@ -519,8 +519,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   asFloatNodeContext(
     nodeContext: Vtree.NodeContext,
   ): Vtree.FloatNodeContext | null {
-    return !!nodeContext.floatSide && (!this.isFloat || !!nodeContext.parent)
-      ? (nodeContext as Vtree.FloatNodeContext)
+    const elementContext = VtreeImpl.asElementNodeContext(nodeContext);
+    return elementContext &&
+      !!elementContext.floatSide &&
+      (!this.isFloat || !!elementContext.parent)
+      ? (elementContext as Vtree.FloatNodeContext)
       : null;
   }
 
