@@ -29,7 +29,7 @@ describe("css-cascade", function () {
   describe("IsNthSiblingAction", function () {
     it("when a=0, matches if currentSiblingOrder=b", function () {
       var action = new adapt_csscasc.IsNthSiblingAction(0, 3);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 1 });
@@ -41,7 +41,7 @@ describe("css-cascade", function () {
 
     it("when a is non-zero, matches if non-negative n which satisfies currentSiblingOrder=an+b exists", function () {
       var action = new adapt_csscasc.IsNthSiblingAction(3, 0);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 1 });
@@ -53,7 +53,7 @@ describe("css-cascade", function () {
       wired.apply({ currentSiblingOrder: 3 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 4 });
@@ -66,7 +66,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingAction(2, 3);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 1 });
@@ -78,7 +78,7 @@ describe("css-cascade", function () {
       wired.apply({ currentSiblingOrder: 3 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 4 });
@@ -87,7 +87,7 @@ describe("css-cascade", function () {
       wired.apply({ currentSiblingOrder: 5 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 6 });
@@ -97,7 +97,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingAction(-3, 0);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 1 });
@@ -110,13 +110,13 @@ describe("css-cascade", function () {
       expect(chained.apply).not.toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingAction(-2, 5);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 1 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 2 });
@@ -125,7 +125,7 @@ describe("css-cascade", function () {
       wired.apply({ currentSiblingOrder: 3 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 4 });
@@ -134,7 +134,7 @@ describe("css-cascade", function () {
       wired.apply({ currentSiblingOrder: 5 });
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply({ currentSiblingOrder: 6 });
@@ -159,7 +159,7 @@ describe("css-cascade", function () {
 
     it("when a=0, matches if currentSiblingTypeCounts[namespace][locaName]=b", function () {
       var action = new adapt_csscasc.IsNthSiblingOfTypeAction(0, 3);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 1, baz: 3 }));
@@ -171,7 +171,7 @@ describe("css-cascade", function () {
 
     it("when a is non-zero, matches if non-negative n which satisfies currentSiblingTypeCounts[namespace][locaName]=an+b exists", function () {
       var action = new adapt_csscasc.IsNthSiblingOfTypeAction(3, 0);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 1, baz: 3 }));
@@ -183,7 +183,7 @@ describe("css-cascade", function () {
       wired.apply(dummyCascadeInstance({ bar: 3, baz: 1 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 4, baz: 3 }));
@@ -196,7 +196,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingOfTypeAction(2, 3);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 1, baz: 3 }));
@@ -208,7 +208,7 @@ describe("css-cascade", function () {
       wired.apply(dummyCascadeInstance({ bar: 3, baz: 1 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 4, baz: 3 }));
@@ -217,7 +217,7 @@ describe("css-cascade", function () {
       wired.apply(dummyCascadeInstance({ bar: 5, baz: 1 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 6, baz: 3 }));
@@ -227,7 +227,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingOfTypeAction(-3, 0);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 1, baz: 3 }));
@@ -240,13 +240,13 @@ describe("css-cascade", function () {
       expect(chained.apply).not.toHaveBeenCalled();
 
       action = new adapt_csscasc.IsNthSiblingOfTypeAction(-2, 5);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 1, baz: 2 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 2, baz: 1 }));
@@ -255,7 +255,7 @@ describe("css-cascade", function () {
       wired.apply(dummyCascadeInstance({ bar: 3, baz: 2 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 4, baz: 1 }));
@@ -264,7 +264,7 @@ describe("css-cascade", function () {
       wired.apply(dummyCascadeInstance({ bar: 5, baz: 2 }));
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       wired.apply(dummyCascadeInstance({ bar: 6, baz: 1 }));
@@ -286,7 +286,7 @@ describe("css-cascade", function () {
 
     it("when a=0, matches if currentFollowingSiblingOrder=b", function () {
       var action = new adapt_csscasc.IsNthLastSiblingAction(0, 3);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       var cascadeInstance = dummyCascadeInstance(4);
@@ -302,7 +302,7 @@ describe("css-cascade", function () {
 
     it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingOrder=an+b exists", function () {
       var action = new adapt_csscasc.IsNthLastSiblingAction(3, 0);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       var cascadeInstance = dummyCascadeInstance(3);
@@ -320,7 +320,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(6);
@@ -339,7 +339,7 @@ describe("css-cascade", function () {
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(6);
 
       action = new adapt_csscasc.IsNthLastSiblingAction(2, 3);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(3);
@@ -357,7 +357,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(6);
@@ -370,7 +370,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(5);
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(8);
@@ -384,7 +384,7 @@ describe("css-cascade", function () {
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(7);
 
       action = new adapt_csscasc.IsNthLastSiblingAction(-3, 0);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(3);
@@ -403,7 +403,7 @@ describe("css-cascade", function () {
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
 
       action = new adapt_csscasc.IsNthLastSiblingAction(-2, 5);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(3);
@@ -411,7 +411,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(1);
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(4);
@@ -423,7 +423,7 @@ describe("css-cascade", function () {
       wired.apply(cascadeInstance);
       expect(chained.apply).toHaveBeenCalled();
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(3);
 
@@ -437,7 +437,7 @@ describe("css-cascade", function () {
       expect(chained.apply).toHaveBeenCalled();
       expect(cascadeInstance.currentFollowingSiblingOrder).toBe(5);
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance(8);
@@ -474,7 +474,7 @@ describe("css-cascade", function () {
 
     it("when a=0, matches if currentFollowingSiblingTypeCounts[namespace][locaName]=b", function () {
       var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(0, 3);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       var cascadeInstance = dummyCascadeInstance({ bar: 1, baz: 2 });
@@ -494,7 +494,7 @@ describe("css-cascade", function () {
 
     it("when a is non-zero, matches if non-negative n which satisfies currentFollowingSiblingTypeCounts[namespace][locaName]=an+b exists", function () {
       var action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(3, 0);
-      var chained = jasmine.createSpyObj("chianed", ["apply"]);
+      var chained = jasmine.createSpyObj("chained", ["apply"]);
       var wired = action.wire(chained);
 
       var cascadeInstance = dummyCascadeInstance({ bar: 0, baz: 2 });
@@ -518,7 +518,7 @@ describe("css-cascade", function () {
         foo: { bar: 3, baz: 1 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 3, baz: 3 });
@@ -543,7 +543,7 @@ describe("css-cascade", function () {
       });
 
       action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(2, 3);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 0, baz: 3 });
@@ -567,7 +567,7 @@ describe("css-cascade", function () {
         foo: { bar: 3, baz: 1 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 3, baz: 3 });
@@ -584,7 +584,7 @@ describe("css-cascade", function () {
         foo: { bar: 5, baz: 1 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 5, baz: 3 });
@@ -602,7 +602,7 @@ describe("css-cascade", function () {
       });
 
       action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(-3, 0);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 0, baz: 3 });
@@ -627,7 +627,7 @@ describe("css-cascade", function () {
       });
 
       action = new adapt_csscasc.IsNthLastSiblingOfTypeAction(-2, 5);
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 0, baz: 2 });
@@ -637,7 +637,7 @@ describe("css-cascade", function () {
         foo: { bar: 1, baz: 2 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 1, baz: 1 });
@@ -654,7 +654,7 @@ describe("css-cascade", function () {
         foo: { bar: 3, baz: 2 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 3, baz: 1 });
@@ -671,7 +671,7 @@ describe("css-cascade", function () {
         foo: { bar: 5, baz: 2 },
       });
 
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
 
       cascadeInstance = dummyCascadeInstance({ bar: 5, baz: 1 });
@@ -706,7 +706,7 @@ describe("css-cascade", function () {
     var wired;
 
     beforeEach(function () {
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
     });
 
@@ -744,7 +744,7 @@ describe("css-cascade", function () {
     var wired;
 
     beforeEach(function () {
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
     });
 
@@ -758,7 +758,7 @@ describe("css-cascade", function () {
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'disabled' property", function () {
+    it("not applies if the element does not have 'disabled' property", function () {
       wired.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
@@ -770,7 +770,7 @@ describe("css-cascade", function () {
     var wired;
 
     beforeEach(function () {
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
     });
 
@@ -784,7 +784,7 @@ describe("css-cascade", function () {
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'disabled' property", function () {
+    it("not applies if the element does not have 'disabled' property", function () {
       wired.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
@@ -796,7 +796,7 @@ describe("css-cascade", function () {
     var wired;
 
     beforeEach(function () {
-      chained = jasmine.createSpyObj("chianed", ["apply"]);
+      chained = jasmine.createSpyObj("chained", ["apply"]);
       wired = action.wire(chained);
     });
 
@@ -820,7 +820,7 @@ describe("css-cascade", function () {
       expect(chained.apply).not.toHaveBeenCalled();
     });
 
-    it("applies if the element does not have 'selected' nor 'checked' property", function () {
+    it("not applies if the element does not have 'selected' nor 'checked' property", function () {
       wired.apply({ currentElement: {} });
       expect(chained.apply).not.toHaveBeenCalled();
     });
