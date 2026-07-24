@@ -1533,6 +1533,7 @@ span.viv-anonymous-block {
 [data-vivliostyle-page-container] {
   text-spacing-trim: space-all;
   text-autospace: no-autospace;
+  text-rendering: geometricPrecision;
 }
 /* see #2034 */
 @font-face {
