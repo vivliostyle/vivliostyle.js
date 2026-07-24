@@ -2973,17 +2973,22 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
   checkPoints: Vtree.RenderedNodeContext[],
   column: Layout.Column,
 ) => {
-  const leaders = checkPoints.flatMap((c) => {
+  const leaders: {
+    leaderContext: Vtree.RenderedNodeContext;
+    pseudoElem: HTMLElement;
+    pseudoParent: HTMLElement;
+  }[] = [];
+  for (const c of checkPoints) {
     const leaderElem =
       c.after && c.viewNode.nodeType === 1 ? (c.viewNode as Element) : null;
     const pseudoElem = leaderElem?.getAttribute("data-viv-leader")
       ? leaderElem.parentElement
       : null;
     const pseudoParent = pseudoElem?.parentElement;
-    return leaderElem && pseudoElem && pseudoParent
-      ? [{ leaderContext: c, pseudoElem, pseudoParent }]
-      : [];
-  });
+    if (leaderElem && pseudoElem && pseudoParent) {
+      leaders.push({ leaderContext: c, pseudoElem, pseudoParent });
+    }
+  }
   for (const { leaderContext: c, pseudoElem, pseudoParent } of leaders) {
     // we want to access the bottom block element, which contains single leader().
     let container = c.parent;
