@@ -457,7 +457,7 @@ class TextSpacingPolyfill {
 
     function checkIfFirstInBlock(): boolean {
       const p = checkPoints[0];
-      for (let pp = p; ; pp = pp.parent) {
+      for (let pp: Vtree.NodeContext | null = p; ; pp = pp.parent) {
         if (!pp || !pp.inline) {
           if (pp?.fragmentIndex !== 1) {
             // This block is not the first fragment
@@ -485,27 +485,41 @@ class TextSpacingPolyfill {
       return true;
     }
 
-    function checkIfAfterForcedLineBreak(): boolean {
-      let p = checkPoints[0];
-      let prevNode: Node | null | undefined;
-      while (p && p.inline) {
-        prevNode = p.viewNode?.previousSibling;
+    function findPrevNodeAtFragmentStart(): {
+      nodeContext: Vtree.NodeContext;
+      prevNode: Node;
+    } | null {
+      for (
+        let p: Vtree.NodeContext | null = checkPoints[0];
+        p && p.inline;
+        p = p.parent
+      ) {
+        const sibling = p.viewNode?.previousSibling;
+        const prevNode =
+          sibling &&
+          sibling.nodeType === Node.TEXT_NODE &&
+          /^[ \t\r\n\f]*$/.test(sibling.textContent) &&
+          p.whitespace !== Vtree.Whitespace.PRESERVE
+            ? sibling.previousSibling
+            : sibling;
         if (prevNode) {
-          if (
-            prevNode.nodeType === Node.TEXT_NODE &&
-            /^[ \t\r\n\f]*$/.test(prevNode.textContent) &&
-            p.whitespace !== Vtree.Whitespace.PRESERVE
-          ) {
-            prevNode = prevNode.previousSibling;
-          }
-          if (prevNode) {
-            break;
-          }
+          return { nodeContext: p, prevNode };
         }
-        p = p.parent;
       }
+      return null;
+    }
 
-      while (prevNode) {
+    function checkIfAfterForcedLineBreak(): boolean {
+      const found = findPrevNodeAtFragmentStart();
+      if (!found) {
+        return false;
+      }
+      const p = found.nodeContext;
+      for (
+        let prevNode: Node | null = found.prevNode;
+        prevNode;
+        prevNode = prevNode.lastChild
+      ) {
         if (prevNode.nodeType === Node.ELEMENT_NODE) {
           if ((prevNode as Element).localName === "br") {
             return true;
@@ -525,7 +539,6 @@ class TextSpacingPolyfill {
             }
           }
         }
-        prevNode = prevNode.lastChild;
       }
       return false;
     }

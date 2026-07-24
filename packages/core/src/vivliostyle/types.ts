@@ -1148,8 +1148,12 @@ export namespace Vtree {
     fragmentIndex: number;
   };
 
+  export type RootNodePositionStep = NodePositionStep & {
+    shadowSibling: null;
+  };
+
   export type NodePosition = {
-    steps: NodePositionStep[];
+    steps: [...NodePositionStep[], RootNodePositionStep];
     offsetInNode: number;
     after: boolean;
     preprocessedTextContent: Diff.Change[] | null;
@@ -1331,18 +1335,27 @@ export namespace Vtree {
     pageType: string | null;
 
     sourceNode: Node;
-    parent: NodeContext;
+    parent: NodeContext | null;
     boxOffset: number;
 
     resetView(): void;
-    modify(): NodeContext;
-    copy(): NodeContext;
-    clone(): NodeContext;
+    modify(): this;
+    copy(): this;
+    clone(): this;
     toNodePositionStep(): NodePositionStep;
     toNodePosition(): NodePosition;
     isInsideBFC(): boolean;
     getContainingBlockForAbsolute(): NodeContext;
     belongsTo(formattingContext: FormattingContext): boolean;
+  }
+
+  export interface ChildNodeContext extends NodeContext {
+    parent: NodeContext;
+  }
+
+  export interface RootNodeContext extends NodeContext {
+    parent: null;
+    shadowSibling: null;
   }
 
   export interface ChunkPosition {

@@ -2421,11 +2421,16 @@ export class ViewFactory
     if (this.isInsideTable(nodeContext)) {
       return null;
     }
-    for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
+    for (
+      let nc: Vtree.NodeContext | null = nodeContext;
+      nc && !nc.after;
+      nc = nc.parent
+    ) {
       if (Break.isForcedBreakValue(nc.breakBefore)) {
         return nc.breakBefore; // forced break
       }
-      if (nc.fragmentIndex === 1 && !nc.parent) {
+      const parent = nc.parent;
+      if (nc.fragmentIndex === 1 && !parent) {
         if (nc.sourceNode === nc.sourceNode.ownerDocument?.documentElement) {
           // beginning of document
           return "page";
@@ -2434,11 +2439,14 @@ export class ViewFactory
           return null;
         }
       }
-      if (nc.parent?.floatSide) {
+      if (!parent) {
+        continue;
+      }
+      if (parent.floatSide) {
         // inside float, not break (Issue #1282)
         return null;
       }
-      const parentViewNode = nc.parent?.viewNode as Element;
+      const parentViewNode = parent.viewNode as Element;
       if (parentViewNode) {
         const style = this.viewport.window.getComputedStyle(parentViewNode);
         const paddingBlockStart = parseFloat(style.paddingBlockStart);
@@ -2450,7 +2458,7 @@ export class ViewFactory
         let node = parentViewNode?.firstChild;
         while (
           node &&
-          (Vtree.canIgnore(node, nc.parent.whitespace) ||
+          (Vtree.canIgnore(node, parent.whitespace) ||
             (!nc.floatSide && LayoutHelper.isOutOfFlow(node)))
         ) {
           node = node.nextSibling;
@@ -2476,7 +2484,11 @@ export class ViewFactory
   }
 
   private isInsideTable(nodeContext: Vtree.NodeContext): boolean {
-    for (let nc = nodeContext; nc && !nc.after; nc = nc.parent) {
+    for (
+      let nc: Vtree.NodeContext | null = nodeContext;
+      nc && !nc.after;
+      nc = nc.parent
+    ) {
       if (nc.display && nc.display.startsWith("table")) {
         return true;
       }
@@ -2825,11 +2837,17 @@ export class ViewFactory
           node?.nodeType === 1 &&
           PseudoElement.getPseudoName(node as Element) === name;
         const p = nodeContext.parent;
+        // A first-letter pseudo-element view is only generated below its
+        // originating element's context, so a context bearing one has a parent.
+        const pFirstLetter =
+          p &&
+          isPseudo(this.viewNode, "after") &&
+          isPseudo(p.viewNode, "first-letter")
+            ? (p as Vtree.ChildNodeContext)
+            : null;
         let parent = p
-          ? isPseudo(this.viewNode, "after") &&
-            isPseudo(p.viewNode, "first-letter") &&
-            p.viewNode?.hasChildNodes()
-            ? (p.parent.viewNode as Element) // Fix for issue #1175
+          ? pFirstLetter?.viewNode?.hasChildNodes()
+            ? (pFirstLetter.parent.viewNode as Element) // Fix for issue #1175
             : (p.viewNode as Element)
           : this.viewRoot;
         if (nodeContext.pluginProps["nestedFootnoteDetached"]) {
@@ -2870,7 +2888,7 @@ export class ViewFactory
     return this.createNodeView(nodeContext, firstTime, !!atUnforcedBreak);
   }
 
-  processShadowContent(pos: Vtree.NodeContext): Vtree.NodeContext {
+  processShadowContent(pos: Vtree.ChildNodeContext): Vtree.NodeContext {
     if (
       pos.shadowContext == null ||
       (pos.sourceNode as Element).localName != "content" ||
@@ -2910,7 +2928,7 @@ export class ViewFactory
       nextPos = null;
     }
     if (contentNode) {
-      const r = new Vtree.NodeContext(contentNode, parent, boxOffset);
+      const r = Vtree.NodeContext.childOf(contentNode, parent, boxOffset);
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
       r.shadowSibling = nextPos;
@@ -2931,39 +2949,40 @@ export class ViewFactory
     let boxOffset = pos.boxOffset + 1; // offset for the next position
     if (pos.after) {
       // root, that was the last possible position
-      if (!pos.parent) {
+      let cur = Vtree.asChildNodeContext(pos);
+      if (!cur) {
         return null;
       }
 
       // we are done with this sourceNode, see if there is a next sibling,
       // unless this is the root of the shadow tree
-      if (pos.shadowType != Vtree.ShadowType.ROOTED) {
-        const next = pos.sourceNode.nextSibling;
+      if (cur.shadowType != Vtree.ShadowType.ROOTED) {
+        const next = cur.sourceNode.nextSibling;
         if (next) {
-          pos = pos.modify();
+          cur = cur.modify();
 
           // keep shadowType
-          pos.boxOffset = boxOffset;
-          pos.sourceNode = next;
-          pos.resetView();
-          return this.processShadowContent(pos);
+          cur.boxOffset = boxOffset;
+          cur.sourceNode = next;
+          cur.resetView();
+          return this.processShadowContent(cur);
         }
       }
 
       // if no viable siblings, check if there are shadow siblings
-      if (pos.shadowSibling) {
+      if (cur.shadowSibling) {
         // our next position is the element after shadow:content in the parent
         // shadow tree
-        pos = pos.shadowSibling.modify();
-        pos.boxOffset = boxOffset;
-        return pos;
+        const sibling = cur.shadowSibling.modify();
+        sibling.boxOffset = boxOffset;
+        return sibling;
       }
 
       // if not rootless shadow, move to the "after" position for the parent
-      pos = pos.parent.modify();
-      pos.boxOffset = boxOffset;
-      pos.after = true;
-      return pos;
+      const afterParent = cur.parent.modify();
+      afterParent.boxOffset = boxOffset;
+      afterParent.after = true;
+      return afterParent;
     } else {
       // any shadow trees?
       if (pos.nodeShadow) {
@@ -2972,7 +2991,7 @@ export class ViewFactory
           shadowNode = shadowNode.firstChild;
         }
         if (shadowNode) {
-          const sr = new Vtree.NodeContext(shadowNode, pos, boxOffset);
+          const sr = Vtree.NodeContext.childOf(shadowNode, pos, boxOffset);
           sr.shadowContext = pos.nodeShadow;
           sr.shadowType = pos.nodeShadow.type;
           return this.processShadowContent(sr);
@@ -2983,7 +3002,7 @@ export class ViewFactory
       const child = pos.sourceNode.firstChild;
       if (child) {
         return this.processShadowContent(
-          new Vtree.NodeContext(child, pos, boxOffset),
+          Vtree.NodeContext.childOf(child, pos, boxOffset),
         );
       }
 
@@ -3658,9 +3677,10 @@ export class ViewFactory
     }
     const boxOffset = nodeContext.boxOffset + nodeOffset;
     const arr: Vtree.NodeContext[] = [];
-    while (nodeContext && nodeContext.firstPseudo === firstPseudo) {
-      arr.push(nodeContext);
-      nodeContext = nodeContext.parent;
+    let nc: Vtree.NodeContext | null = nodeContext;
+    while (nc && nc.firstPseudo === firstPseudo) {
+      arr.push(nc);
+      nc = nc.parent;
     }
     // the loop above runs at least once (nodeContext.firstPseudo === firstPseudo)
     let pn = arr.pop()!; // container for that pseudoelement
@@ -3669,23 +3689,19 @@ export class ViewFactory
       .loop(() => {
         while (arr.length > 0) {
           pn = arr.pop()!;
-          nodeContext = new Vtree.NodeContext(
-            pn.sourceNode,
-            nodeContext,
-            boxOffset,
-          );
+          nc = new Vtree.NodeContext(pn.sourceNode, nc, boxOffset);
           if (arr.length == 0) {
-            nodeContext.offsetInNode = offsetInNode;
-            nodeContext.after = after;
+            nc.offsetInNode = offsetInNode;
+            nc.after = after;
           }
-          nodeContext.shadowType = pn.shadowType;
-          nodeContext.shadowContext = pn.shadowContext;
-          nodeContext.nodeShadow = pn.nodeShadow;
-          nodeContext.shadowSibling = pn.shadowSibling
+          nc.shadowType = pn.shadowType;
+          nc.shadowContext = pn.shadowContext;
+          nc.nodeShadow = pn.nodeShadow;
+          nc.shadowSibling = pn.shadowSibling
             ? pn.shadowSibling
             : shadowSibling;
           shadowSibling = null;
-          const result = this.setCurrent(nodeContext, false);
+          const result = this.setCurrent(nc, false);
           if (result.isPending()) {
             return result;
           }
@@ -3693,7 +3709,7 @@ export class ViewFactory
         return Task.newResult(false);
       })
       .then(() => {
-        frame.finish(nodeContext);
+        frame.finish(nc);
       });
     return frame.result();
   }

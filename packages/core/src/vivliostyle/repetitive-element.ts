@@ -74,14 +74,12 @@ export class RepetitiveElementsOwnerFormattingContext
   }
 
   getRootNodeContext(nodeContext: Vtree.NodeContext): Vtree.NodeContext | null {
+    let nc: Vtree.NodeContext | null = nodeContext;
     do {
-      if (
-        !nodeContext.belongsTo(this) &&
-        nodeContext.sourceNode === this.rootSourceNode
-      ) {
-        return nodeContext;
+      if (!nc.belongsTo(this) && nc.sourceNode === this.rootSourceNode) {
+        return nc;
       }
-    } while ((nodeContext = nodeContext.parent));
+    } while ((nc = nc.parent));
     return null;
   }
 
@@ -993,7 +991,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
 }
 
 function eachAncestorNodeContext(
-  nodeContext: Vtree.NodeContext,
+  nodeContext: Vtree.NodeContext | null,
   callback: (
     p1: RepetitiveElementsOwnerFormattingContext,
     p2: Vtree.NodeContext,
@@ -1012,7 +1010,7 @@ function eachAncestorNodeContext(
 }
 
 export function appendHeaderToAncestors(
-  nodeContext: Vtree.NodeContext,
+  nodeContext: Vtree.NodeContext | null,
   column: LayoutType.Column,
 ): void {
   if (!nodeContext) {

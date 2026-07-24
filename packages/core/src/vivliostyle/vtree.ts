@@ -387,6 +387,7 @@ export function eachAncestorFormattingContext(
 }
 
 export type NodePositionStep = Vtree.NodePositionStep;
+export type RootNodePositionStep = Vtree.RootNodePositionStep;
 
 export function isSameNodePositionStep(
   nps1: NodePositionStep,
@@ -442,7 +443,7 @@ export function isSameNodePosition(
 }
 
 export function newNodePositionFromNode(node: Node): NodePosition {
-  const step: NodePositionStep = {
+  const step: RootNodePositionStep = {
     node,
     shadowType: ShadowType.NONE,
     shadowContext: null,
@@ -463,7 +464,7 @@ export function newNodePositionFromNodeContext(
   nodeContext: Vtree.NodeContext,
   initialFragmentIndex: number | null,
 ): NodePosition {
-  const step: NodePositionStep = {
+  const step: RootNodePositionStep = {
     node: nodeContext.sourceNode,
     shadowType: ShadowType.NONE,
     shadowContext: nodeContext.shadowContext,
@@ -488,15 +489,39 @@ export function makeNodeContextFromNodePositionStep(
   parent: Vtree.NodeContext,
 ): NodeContext {
   const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
-  nodeContext.shadowType = step.shadowType;
-  nodeContext.shadowContext = step.shadowContext;
-  nodeContext.nodeShadow = step.nodeShadow;
+  applyNodePositionStep(nodeContext, step);
   nodeContext.shadowSibling = step.shadowSibling
     ? makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy())
     : null;
+  return nodeContext;
+}
+
+export function makeRootNodeContextFromNodePositionStep(
+  step: RootNodePositionStep,
+): NodeContext {
+  const nodeContext = new NodeContext(step.node, null, 0);
+  applyNodePositionStep(nodeContext, step);
+  nodeContext.shadowSibling = step.shadowSibling;
+  return nodeContext;
+}
+
+function applyNodePositionStep(
+  nodeContext: NodeContext,
+  step: NodePositionStep,
+): void {
+  nodeContext.shadowType = step.shadowType;
+  nodeContext.shadowContext = step.shadowContext;
+  nodeContext.nodeShadow = step.nodeShadow;
   nodeContext.formattingContext = step.formattingContext;
   nodeContext.fragmentIndex = step.fragmentIndex + 1;
-  return nodeContext;
+}
+
+export function rootStepOfNodePosition(
+  position: Vtree.NodePosition,
+): RootNodePositionStep {
+  // steps is [...NodePositionStep[], RootNodePositionStep]; TypeScript cannot
+  // index the trailing element of a variadic tuple, so restate its type.
+  return position.steps[position.steps.length - 1] as RootNodePositionStep;
 }
 
 export const ShadowType = Vtree.ShadowType;
@@ -613,9 +638,17 @@ export class NodeContext implements Vtree.NodeContext {
   footnotePolicy: Css.Ident | null = null;
   pageType: string | null;
 
+  static childOf(
+    sourceNode: Node,
+    parent: NodeContext,
+    boxOffset: number,
+  ): ChildNodeContext {
+    return new NodeContext(sourceNode, parent, boxOffset) as ChildNodeContext;
+  }
+
   constructor(
     public sourceNode: Node,
-    public parent: NodeContext,
+    public parent: NodeContext | null,
     public boxOffset: number,
   ) {
     this.shadowType = ShadowType.NONE;
@@ -669,8 +702,12 @@ export class NodeContext implements Vtree.NodeContext {
     this.pageType = this.parent ? this.parent.pageType : null;
   }
 
-  private cloneItem(): NodeContext {
-    const np = new NodeContext(this.sourceNode, this.parent, this.boxOffset);
+  private cloneItem(): this {
+    const np = new NodeContext(
+      this.sourceNode,
+      this.parent,
+      this.boxOffset,
+    ) as this;
     np.offsetInNode = this.offsetInNode;
     np.after = this.after;
     np.nodeShadow = this.nodeShadow;
@@ -712,15 +749,15 @@ export class NodeContext implements Vtree.NodeContext {
     return np;
   }
 
-  modify(): NodeContext {
+  modify(): this {
     if (!this.shared) {
       return this;
     }
     return this.cloneItem();
   }
 
-  copy(): NodeContext {
-    let np: NodeContext = this;
+  copy(): this {
+    let np: NodeContext | null = this;
     do {
       if (np.shared) {
         break;
@@ -731,10 +768,10 @@ export class NodeContext implements Vtree.NodeContext {
     return this;
   }
 
-  clone(): NodeContext {
+  clone(): this {
     const np = this.cloneItem();
-    let npc = np;
-    let npp: NodeContext;
+    let npc: NodeContext = np;
+    let npp: NodeContext | null;
     while ((npp = npc.parent) != null) {
       npp = npp.cloneItem();
       npc.parent = npp;
@@ -762,33 +799,30 @@ export class NodeContext implements Vtree.NodeContext {
   }
 
   toNodePosition(): NodePosition {
-    let nc: NodeContext = this;
-    const steps = [];
-
     // Fix for issue #703
-    if (
-      nc.shadowType === Vtree.ShadowType.ROOTLESS &&
-      (nc.floatReference !== PageFloats.FloatReference.INLINE ||
-        nc.floatSide === "footnote") &&
-      (nc.shadowContext?.styler as PseudoElement.PseudoelementStyler)?.style?.[
-        "_pseudos"
-      ]
-    ) {
-      nc = nc.parent;
-    }
-
-    do {
+    // A float or footnote context inside a pseudo-element shadow is always a
+    // descended one: restored heads keep the constructor's default float
+    // fields and live roots carry no shadow context.
+    const floatInPseudoContent =
+      this.shadowType === Vtree.ShadowType.ROOTLESS &&
+      (this.floatReference !== PageFloats.FloatReference.INLINE ||
+        this.floatSide === "footnote") &&
+      (this.shadowContext?.styler as PseudoElement.PseudoelementStyler)
+        ?.style?.["_pseudos"]
+        ? (this as ChildNodeContext)
+        : null;
+    const steps: NodePositionStep[] = [];
+    let nc = classifyNodeContext(
+      floatInPseudoContent ? floatInPseudoContent.parent : this,
+    );
+    while (hasParent(nc)) {
       // We need fully "peeled" path, so don't record first-XXX pseudoelement
       // containers
-      if (
-        !nc.firstPseudo ||
-        !nc.parent ||
-        nc.parent.firstPseudo === nc.firstPseudo
-      ) {
+      if (!nc.firstPseudo || nc.parent.firstPseudo === nc.firstPseudo) {
         steps.push(nc.toNodePositionStep());
       }
-      nc = nc.parent;
-    } while (nc);
+      nc = classifyNodeContext(nc.parent);
+    }
     const actualOffsetInNode = this.preprocessedTextContent
       ? Diff.resolveOriginalIndex(
           this.preprocessedTextContent,
@@ -796,7 +830,7 @@ export class NodeContext implements Vtree.NodeContext {
         )
       : this.offsetInNode;
     return {
-      steps,
+      steps: [...steps, toRootNodePositionStep(nc)],
       offsetInNode: actualOffsetInNode,
       after: this.after,
       preprocessedTextContent: this.preprocessedTextContent,
@@ -832,6 +866,38 @@ export class NodeContext implements Vtree.NodeContext {
       this.parent.formattingContext === formattingContext
     );
   }
+}
+
+export type ChildNodeContext = NodeContext & Vtree.ChildNodeContext;
+
+export function asChildNodeContext(
+  nc: Vtree.NodeContext,
+): ChildNodeContext | null {
+  return nc.parent !== null ? (nc as ChildNodeContext) : null;
+}
+
+export type RootNodeContext = NodeContext & Vtree.RootNodeContext;
+
+// Total classification by parent presence; the root refinement carries the
+// shadow-sibling correlation declared on Vtree.RootNodeContext.
+export function classifyNodeContext(
+  nc: Vtree.NodeContext,
+): ChildNodeContext | RootNodeContext {
+  return nc.parent !== null
+    ? (nc as ChildNodeContext)
+    : (nc as RootNodeContext);
+}
+
+export function hasParent(
+  nc: ChildNodeContext | RootNodeContext,
+): nc is ChildNodeContext {
+  return nc.parent !== null;
+}
+
+export function toRootNodePositionStep(
+  root: RootNodeContext,
+): RootNodePositionStep {
+  return { ...root.toNodePositionStep(), shadowSibling: root.shadowSibling };
 }
 
 export class ChunkPosition implements Vtree.ChunkPosition {
