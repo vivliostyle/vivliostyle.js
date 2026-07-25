@@ -430,17 +430,15 @@ export class SkippingParserHandler extends ParserHandler {
     public readonly topLevel,
   ) {
     super(scope);
-    if (owner) {
-      this.flavor = owner.flavor;
-    }
+    this.flavor = owner.flavor;
   }
 
   override getCurrentToken(): CssTokenizer.Token {
-    return this.owner?.getCurrentToken();
+    return this.owner.getCurrentToken();
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
-    this.owner?.errorMsg(mnemonics, token);
+    this.owner.errorMsg(mnemonics, token);
   }
 
   override startRuleBody(): void {
@@ -2917,24 +2915,17 @@ export function parseStylesheet(
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
-  const parserHandler = normalizeParserHandler(handler);
   const expandedText = expandNesting(tokenizer.input);
   if (expandedText !== tokenizer.input) {
     return parseStylesheetInternal(
-      new CssTokenizer.Tokenizer(expandedText, parserHandler),
-      parserHandler,
+      new CssTokenizer.Tokenizer(expandedText, handler),
+      handler,
       baseURL,
       classes,
       media,
     );
   }
-  return parseStylesheetInternal(
-    tokenizer,
-    parserHandler,
-    baseURL,
-    classes,
-    media,
-  );
+  return parseStylesheetInternal(tokenizer, handler, baseURL, classes, media);
 }
 
 function parseStylesheetInternal(
@@ -3008,40 +2999,17 @@ export function parseStylesheetFromText(
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
-  const parserHandler = normalizeParserHandler(handler);
   return Task.handle(
     "parseStylesheetFromText",
     (frame) => {
-      const tok = new CssTokenizer.Tokenizer(text, parserHandler);
-      parseStylesheet(tok, parserHandler, baseURL, classes, media).thenFinish(
-        frame,
-      );
+      const tok = new CssTokenizer.Tokenizer(text, handler);
+      parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
       frame.finish(false);
     },
   );
-}
-
-function normalizeParserHandler(handler: ParserHandler): ParserHandler {
-  if (handler instanceof DispatchParserHandler) {
-    return handler;
-  }
-  if (handler instanceof SlaveParserHandler) {
-    if (handler.owner) {
-      return handler.owner;
-    }
-    // Some parser entry points are passed a top-level slave handler. Wrap it in
-    // a dispatch handler once so selector functions parse through the normal
-    // dispatch path and the slave retains a stable owner reference.
-    const dispatchHandler = new DispatchParserHandler();
-    dispatchHandler.flavor = handler.flavor;
-    dispatchHandler.slave = handler;
-    handler.owner = dispatchHandler;
-    return dispatchHandler;
-  }
-  return handler;
 }
 
 export function parseStylesheetFromURL(

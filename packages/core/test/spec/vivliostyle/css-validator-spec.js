@@ -25,20 +25,30 @@ import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
 
 describe("css-validator", function () {
-  function parseCascade(cssText, done, callback) {
-    var handler = new adapt_csscasc.CascadeParserHandler(
+  function cascadeParserHandler(scope, validatorSet) {
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler();
+    const handler = new adapt_csscasc.CascadeParserHandler(
+      scope,
+      dispatchHandler,
       null,
       null,
       null,
-      null,
-      null,
-      adapt_cssvalid.baseValidatorSet(),
+      validatorSet,
       true,
+    );
+    dispatchHandler.slave = handler;
+    return handler;
+  }
+
+  function parseCascade(cssText, done, callback) {
+    var handler = cascadeParserHandler(
+      new adapt_exprs.LexicalScope(null),
+      adapt_cssvalid.baseValidatorSet(),
     );
     handler.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
     adapt_task.start(function () {
       adapt_cssparse
-        .parseStylesheetFromText(cssText, handler, null, null, null)
+        .parseStylesheetFromText(cssText, handler.owner, null, null, null)
         .then(function (result) {
           expect(result).toBe(true);
           callback(handler.finish(), handler);
@@ -374,15 +384,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-or = bar | [ baz || biz ];");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -392,7 +394,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { foo-or: bar; }\n.test2 { foo-or: baz biz; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -434,15 +436,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = bAr | Baz | bIZ ;");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -459,7 +453,7 @@ describe("css-validator", function () {
               ".test6 { foo: BAZ; }" +
               ".test6 { foo: biz; }" +
               "",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -475,15 +469,7 @@ describe("css-validator", function () {
 
     it("should parse selector functions with a top-level cascade handler", function (done) {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       handler.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
@@ -494,7 +480,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             '@namespace epub "http://www.idpf.org/2007/ops";\n:not(a[epub|type~="noteref"], a[epub\\:type~="noteref"], a[role~="doc-noteref"])::footnote-call { content: counter(footnote); }',
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -509,15 +495,7 @@ describe("css-validator", function () {
     });
     it("should parse semantic footnote noteref default selectors", function (done) {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       handler.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
@@ -528,7 +506,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             '@namespace epub "http://www.idpf.org/2007/ops";\na[epub|type="noteref"]:not(sup > *, :has(> sup)),\na[epub\\:type="noteref"]:not(sup > *, :has(> sup)),\na[role="doc-noteref"]:not(sup > *, :has(> sup)) { font-size: 0.75em; vertical-align: super; line-height: 0; }',
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -545,15 +523,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = SPACE(IDENT+);");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -563,7 +533,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { foo: bar; }\n.test2 { foo: bar baz boo; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -581,15 +551,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = COMMA( IDENT+ );");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -599,7 +561,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { foo: bar,baz; }\n .test2{ foo: bar; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -617,15 +579,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-comma = none | COMMA( [ bar | baz ]+ );");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -635,7 +589,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { foo-comma: none; }\n.test2 { foo-comma: bar,baz; }\n .test3 { foo-comma: bar; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -653,15 +607,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("spacefoo = none | SPACE( [ bar | baz ]+ );");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -671,7 +617,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { spacefoo: none; }\n.test2 { spacefoo: bar baz; }\n .test3 { spacefoo: bar; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -695,15 +641,7 @@ describe("css-validator", function () {
         "accept-function = COMMA(AC_VALUES+);";
 
       validatorSet.parse(validation_txt);
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -716,7 +654,7 @@ describe("css-validator", function () {
               ".test2 { accept-function: the-function(foo bar, bar baz); }\n" +
               ".test3 { accept-function: the-function(fff, foo bar, bar baz); }\n" +
               ".test4 { accept-function: the-function(bb bz, foo bar, bar baz); }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -733,15 +671,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = bar( SPACE( POS_NUM [ SLASH POS_NUM ]? ) );");
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -751,7 +681,7 @@ describe("css-validator", function () {
         adapt_cssparse
           .parseStylesheetFromText(
             ".test { foo: bar( 10 / 10 ) ; }\n" + ".test2 { foo: bar( 10 ) ; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
@@ -790,15 +720,7 @@ describe("css-validator", function () {
           "SHORTHANDS\n\n" +
           "font = FONT font-style font-variant font-weight font-stretch ;",
       );
-      var handler = new adapt_csscasc.CascadeParserHandler(
-        null,
-        null,
-        null,
-        null,
-        null,
-        validatorSet,
-        true,
-      );
+      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -814,7 +736,7 @@ describe("css-validator", function () {
               '.test5 { font: oblique small-caps bold ultra-condensed 12px/14px "Times" ; }\n' +
               '.test6 { font: small-caps wider oblique 12px "Times" ; }\n' +
               ".test7 { font: status-bar ; }",
-            handler,
+            handler.owner,
             null,
             null,
             null,
