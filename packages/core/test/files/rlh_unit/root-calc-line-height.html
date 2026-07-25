@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>lh in calc() on the root line-height</title>
+    <style>
+      html {
+        line-height: calc(2 * 1lh);
+      }
+      .rlh-box {
+        width: 100px;
+        height: 1rlh;
+        background: teal;
+      }
+      .ref-box {
+        width: 100px;
+        height: 40px;
+        background: green;
+      }
+      .marker {
+        background: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The root line-height is <code>calc(2 * 1lh)</code>. On the root element
+      <code>lh</code> refers to the initial line height, so the root line
+      height is twice that and the coefficient must not be dropped.
+    </p>
+    <div class="rlh-box"></div>
+    <div class="ref-box"></div>
+    <p class="marker">
+      The teal (1rlh) and green (40px) boxes above must be the same height.
+    </p>
+  </body>
+</html>

@@ -635,7 +635,10 @@ export class Styler implements AbstractStyler {
     const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
     let isRelativeFontSize = true;
     if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
-      const val = fontSize.evaluate(this.context);
+      const evaluated = fontSize.evaluate(this.context);
+      const val = this.resolveRootSizingCalc(evaluated);
+      const fromRelativeCalc =
+        evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Numeric) {
         let px = val.num;
         switch (val.unit) {
@@ -655,7 +658,7 @@ export class Styler implements AbstractStyler {
             if (unitSize) {
               px *= unitSize;
             }
-            isRelativeFontSize = false;
+            isRelativeFontSize = fromRelativeCalc;
           }
         }
         this.context.rootFontSize = px;
@@ -666,8 +669,12 @@ export class Styler implements AbstractStyler {
       this.context.rootFontSize ?? this.context.initialFontSize;
     const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
     let rootLineHeight: number | null = null;
+    let fromRelativeCalc = false;
     if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
-      const val = lineHeight.evaluate(this.context);
+      const evaluated = lineHeight.evaluate(this.context);
+      const val = this.resolveRootSizingCalc(evaluated);
+      fromRelativeCalc =
+        evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Num) {
         rootLineHeight = val.num * rootFontSize;
       } else if (val instanceof Css.Numeric) {
@@ -696,6 +703,17 @@ export class Styler implements AbstractStyler {
     }
     this.context.rootLineHeight =
       rootLineHeight ?? this.context.fontSize() * this.context.pref.lineHeight;
+    this.context.isRootLineHeightFromRelativeCalc = fromRelativeCalc;
+  }
+
+  private resolveRootSizingCalc(val: Css.Val): Css.Val {
+    if (!(val instanceof Css.Func)) {
+      return val;
+    }
+    // filtering visitors always return a value
+    return val.visit(
+      new CssCascade.RootSizingCalcFilterVisitor(this.context),
+    ) as Css.Val;
   }
 
   getTopContainerStyle(): CssCascade.ElementStyle {

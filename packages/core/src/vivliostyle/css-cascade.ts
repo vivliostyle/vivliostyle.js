@@ -6353,11 +6353,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       return value;
     }
     const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
-    if (
-      /\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
-        exprText,
-      )
-    ) {
+    if (this.hasUnresolvableUnit(exprText)) {
       return value;
     }
     const exprVal = CssParser.parseValue(
@@ -6369,7 +6365,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       try {
         const exprResult = exprVal.expr.evaluate(this.context);
         if (typeof exprResult === "number" && !isNaN(exprResult)) {
-          if (/\d(px|in|pt|pc|cm|mm|q|rem|rlh)\W/i.test(exprText)) {
+          if (this.isLengthExpr(exprText)) {
             // length value
             value = new Css.Numeric(exprResult, "px");
           } else if (!/\d[a-z]/i.test(exprText)) {
@@ -6383,6 +6379,16 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       }
     }
     return value;
+  }
+
+  protected hasUnresolvableUnit(exprText: string): boolean {
+    return /\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
+      exprText,
+    );
+  }
+
+  protected isLengthExpr(exprText: string): boolean {
+    return /\d(px|in|pt|pc|cm|mm|q|rem|rlh)\W/i.test(exprText);
   }
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
@@ -6402,6 +6408,18 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       return new Css.Numeric((numeric.num * this.percentRef) / 100, "px");
     }
     return numeric;
+  }
+}
+
+export class RootSizingCalcFilterVisitor extends CalcFilterVisitor {
+  protected override hasUnresolvableUnit(exprText: string): boolean {
+    return /\d(%|em|ex|cap|ch|ic|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
+      exprText,
+    );
+  }
+
+  protected override isLengthExpr(exprText: string): boolean {
+    return /\d(px|in|pt|pc|cm|mm|q|rem|r?lh)\W/i.test(exprText);
   }
 }
 

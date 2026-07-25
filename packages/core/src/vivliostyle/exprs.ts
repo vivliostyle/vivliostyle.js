@@ -328,6 +328,7 @@ export class Context {
   isRelativeRootFontSize: boolean | null = null;
   fontSize: () => number;
   rootLineHeight: number;
+  isRootLineHeightFromRelativeCalc: boolean = false;
   pref: Preferences;
   scopes: { [key: string]: ScopeContext } = {};
   pageAreaWidth: number | null = null;

@@ -1040,8 +1040,10 @@ export class ViewFactory
             name === "line-height" &&
             i === styles.length - 1 &&
             this.context.rootLineHeight &&
-            prop.value instanceof Css.Numeric &&
-            (prop.value.unit === "lh" || prop.value.unit === "rlh")
+            ((prop.value instanceof Css.Numeric &&
+              (prop.value.unit === "lh" || prop.value.unit === "rlh")) ||
+              (prop.value instanceof Css.Func &&
+                this.context.isRootLineHeightFromRelativeCalc))
           ) {
             // line-height with lh or rlh unit on root element
             prop1 = new CssCascade.CascadeValue(
