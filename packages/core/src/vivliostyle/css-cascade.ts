@@ -4699,14 +4699,6 @@ export enum ParseState {
   RULE,
 }
 
-/**
- * Cascade for base User Agent stylesheet.
- */
-export let uaBaseCascade: Cascade = null;
-export function setUABaseCascade(value: Cascade): void {
-  uaBaseCascade = value;
-}
-
 //------------- parsing ------------
 export class CascadeParserHandler
   extends CssParser.SlaveParserHandler
@@ -4735,11 +4727,7 @@ export class CascadeParserHandler
     topLevel: boolean,
   ) {
     super(scope, owner, topLevel);
-    this.cascade = parent
-      ? parent.cascade
-      : uaBaseCascade
-        ? uaBaseCascade.clone()
-        : new Cascade();
+    this.cascade = parent ? parent.cascade : new Cascade();
     this.state = ParseState.TOP;
   }
 
