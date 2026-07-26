@@ -77,7 +77,7 @@ export type AttributeSelectorCaseSensitivity = "i" | "s" | null;
 export class ParserHandler implements CssTokenizer.TokenizerHandler {
   flavor: StylesheetFlavor;
 
-  constructor(public scope: Exprs.LexicalScope) {
+  constructor(public readonly scope: Exprs.LexicalScope) {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
@@ -216,8 +216,8 @@ export class DispatchParserHandler extends ParserHandler {
   tokenizer: CssTokenizer.Tokenizer | null = null;
   slave: ParserHandler | null = null;
 
-  constructor() {
-    super(null);
+  constructor(scope: Exprs.LexicalScope) {
+    super(scope);
   }
 
   pushHandler(slave: ParserHandler): void {
@@ -1368,9 +1368,6 @@ export class Parser {
 
   makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr {
     const scope = this.handler.getScope();
-    if (!scope) {
-      return null;
-    }
     condition = condition || scope._true;
     if (classes) {
       const classList = classes.split(/\s+/);
@@ -2894,17 +2891,13 @@ export class Parser {
 }
 
 export class ErrorHandler extends ParserHandler {
-  constructor(public readonly scope: Exprs.LexicalScope) {
-    super(null);
+  constructor(scope: Exprs.LexicalScope) {
+    super(scope);
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     // throw new Error(mnemonics + " " + token);
     Logging.logger.warn(mnemonics, token.toString());
-  }
-
-  override getScope(): Exprs.LexicalScope {
-    return this.scope;
   }
 }
 

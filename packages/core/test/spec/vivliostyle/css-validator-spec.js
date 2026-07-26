@@ -26,7 +26,7 @@ import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
 
 describe("css-validator", function () {
   function cascadeParserHandler(scope, validatorSet) {
-    const dispatchHandler = new adapt_cssparse.DispatchParserHandler();
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
     const handler = new adapt_csscasc.CascadeParserHandler(
       scope,
       dispatchHandler,

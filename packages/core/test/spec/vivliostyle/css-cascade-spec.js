@@ -27,7 +27,7 @@ import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/
 
 describe("css-cascade", function () {
   function cascadeParserHandler(scope, validatorSet) {
-    const dispatchHandler = new adapt_cssparse.DispatchParserHandler();
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
     const handler = new adapt_csscasc.CascadeParserHandler(
       scope,
       dispatchHandler,

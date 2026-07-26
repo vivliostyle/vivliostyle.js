@@ -19,6 +19,7 @@
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
+import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as vivliostyle_css_page from "../../../src/vivliostyle/css-page";
 
 describe("css-page", function () {
@@ -198,7 +199,9 @@ describe("css-page", function () {
     function createHandler() {
       return new vivliostyle_css_page.PageParserHandler(
         null,
-        new adapt_cssparse.DispatchParserHandler(),
+        new adapt_cssparse.DispatchParserHandler(
+          new adapt_exprs.LexicalScope(null),
+        ),
         null,
         null,
         pageProps,

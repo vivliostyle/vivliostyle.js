@@ -3324,8 +3324,9 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
   pageProps = {} as { [key: string]: CssCascade.ElementStyle };
 
   constructor(public readonly validatorSet: CssValidator.ValidatorSet) {
-    super();
-    this.rootScope = new Exprs.LexicalScope(null);
+    const rootScope = new Exprs.LexicalScope(null);
+    super(rootScope);
+    this.rootScope = rootScope;
     this.pageScope = new Exprs.LexicalScope(this.rootScope);
     this.rootBox = new PageMaster.RootPageBox(this.rootScope);
     this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
