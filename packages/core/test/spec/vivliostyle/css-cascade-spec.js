@@ -26,6 +26,23 @@ import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
 describe("css-cascade", function () {
+  function cascadeParserHandler(scope, validatorSet) {
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(
+      scope,
+      (owner) =>
+        new adapt_csscasc.CascadeParserHandler(
+          scope,
+          owner,
+          null,
+          null,
+          null,
+          validatorSet,
+          null,
+        ),
+    );
+    return dispatchHandler.initialSlave;
+  }
+
   describe("IsNthSiblingAction", function () {
     it("when a=0, matches if currentSiblingOrder=b", function () {
       var action = new adapt_csscasc.IsNthSiblingAction(0, 3);
@@ -847,7 +864,10 @@ describe("css-cascade", function () {
           };
         }
 
-        var handler = new adapt_csscasc.CascadeParserHandler();
+        var handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
         var style = (handler.elementStyle = {});
         handler.simpleProperty("foo", adapt_css.getName("bar"), false);
         var originalPriority = style["foo"].priority;
@@ -874,7 +894,10 @@ describe("css-cascade", function () {
       var handler;
 
       beforeEach(function () {
-        handler = new adapt_csscasc.CascadeParserHandler();
+        handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
         handler.startSelectorRule();
       });
 
@@ -1347,7 +1370,7 @@ describe("css-cascade", function () {
       var styler = {
         root: element,
         validatorSet: validatorSet,
-        scope: validatorSet.scope,
+        scope: new adapt_exprs.LexicalScope(null),
         getStyle: function (currentElement) {
           return styleMap.get(currentElement) || null;
         },
@@ -1600,7 +1623,7 @@ describe("css-cascade", function () {
       var styler = {
         root: element,
         validatorSet: validatorSet,
-        scope: validatorSet.scope,
+        scope: new adapt_exprs.LexicalScope(null),
         getStyle: function () {
           return style;
         },

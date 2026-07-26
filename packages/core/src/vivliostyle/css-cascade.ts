@@ -2020,6 +2020,9 @@ export interface CounterListener {
 }
 
 export interface CounterResolver {
+  readonly rootScope: Exprs.LexicalScope;
+  readonly pageScope: Exprs.LexicalScope;
+
   setStyler(styler: CssStyler.AbstractStyler): void;
 
   /**
@@ -2264,14 +2267,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         expr: Exprs.Val,
       ) => void;
     } | null;
-  }
-
-  private getPageScope(): Exprs.LexicalScope | null {
-    return (
-      this.cascade.context as {
-        style?: { pageScope?: Exprs.LexicalScope | null };
-      }
-    )?.style?.pageScope;
   }
 
   private hasLocalCounterResetOrSet(counterName: string): boolean {
@@ -2528,7 +2523,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const isPageCounter =
         counterName === "pages" ||
         counterStore?.isPageControlledCounter?.(counterName);
-      const pageScope = this.getPageScope();
+      const pageScope = this.counterResolver.pageScope;
       const nativeExpr = new Exprs.Native(
         pageScope,
         () =>
@@ -2585,7 +2580,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const isPageCounter =
         counterName === "pages" ||
         counterStore?.isPageControlledCounter?.(counterName);
-      const pageScope = this.getPageScope();
+      const pageScope = this.counterResolver.pageScope;
       const nativeExpr = new Exprs.Native(
         pageScope,
         () =>
@@ -2840,7 +2835,13 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     if (leader.length == 0) {
       return new Css.Str("");
     }
-    return new Css.Expr(new Exprs.Native(null, () => leader, "viv-leader"));
+    return new Css.Expr(
+      new Exprs.Native(
+        this.counterResolver.rootScope,
+        () => leader,
+        "viv-leader",
+      ),
+    );
   }
 
   override visitFunc(func: Css.Func): Css.Val {
@@ -4436,7 +4437,8 @@ export class CascadeInstance {
         // all variables substituted
         const validatorSet = (styler as any)
           .validatorSet as CssValidator.ValidatorSet;
-        const shorthand = validatorSet?.getShorthand(name, value)?.clone();
+        const scope = (styler as any).scope as Exprs.LexicalScope;
+        const shorthand = validatorSet?.getShorthand(name, value)?.clone(scope);
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
@@ -4451,7 +4453,7 @@ export class CascadeInstance {
             // cannot handle directly, so normalize it through parseValue
             // before expanding the shorthand to longhands.
             const valueSH = CssParser.parseValue(
-              (styler as any).scope,
+              scope,
               new CssTokenizer.Tokenizer(value.toString(), null),
               "",
             );
@@ -4724,9 +4726,9 @@ export class CascadeParserHandler
     parent: CascadeParserHandler,
     public readonly regionId: string | null,
     public readonly validatorSet: CssValidator.ValidatorSet,
-    topLevel: boolean,
+    delegation: CssParser.Delegation | null,
   ) {
-    super(scope, owner, topLevel);
+    super(scope, owner, delegation);
     this.cascade = parent ? parent.cascade : new Cascade();
     this.state = ParseState.TOP;
   }
@@ -5252,6 +5254,7 @@ export class CascadeParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }
@@ -5306,43 +5309,55 @@ export class CascadeParserHandler
     funcName: string,
     params?: (number | string)[],
   ): void {
-    let parameterParserHandler: MatchesParameterParserHandler | undefined;
+    let makeParameterParserHandler:
+      | ((delegation: CssParser.Delegation) => MatchesParameterParserHandler)
+      | undefined;
     switch (funcName) {
       case "is":
-        parameterParserHandler = new MatchesParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new MatchesParameterParserHandler(this, delegation);
         break;
       case "not":
-        parameterParserHandler = new NotParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new NotParameterParserHandler(this, delegation);
         break;
       case "where":
-        parameterParserHandler = new WhereParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new WhereParameterParserHandler(this, delegation);
         break;
       case "has":
-        parameterParserHandler = new HasParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new HasParameterParserHandler(this, delegation);
         break;
       case "nth-child":
         if (params && params.length >= 2) {
-          parameterParserHandler = new NthChildOfSelectorParameterParserHandler(
-            this,
-            params[0] as number,
-            params[1] as number,
-          );
+          makeParameterParserHandler = (delegation) =>
+            new NthChildOfSelectorParameterParserHandler(
+              this,
+              delegation,
+              params[0] as number,
+              params[1] as number,
+            );
         }
         break;
       case "nth-last-child":
         if (params && params.length >= 2) {
-          parameterParserHandler =
+          makeParameterParserHandler = (delegation) =>
             new NthLastChildOfSelectorParameterParserHandler(
               this,
+              delegation,
               params[0] as number,
               params[1] as number,
             );
         }
         break;
     }
-    if (parameterParserHandler) {
-      parameterParserHandler.startSelectorRule();
-      this.owner.pushHandler(parameterParserHandler);
+    if (makeParameterParserHandler) {
+      this.owner.delegateTo((delegation) => {
+        const parameterParserHandler = makeParameterParserHandler(delegation);
+        parameterParserHandler.startSelectorRule();
+        return parameterParserHandler;
+      });
     }
   }
 }
@@ -5368,7 +5383,10 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   selectorTexts: string[] = [];
   containsPseudoelementSelector: boolean = false;
 
-  constructor(public readonly parent: CascadeParserHandler) {
+  constructor(
+    public readonly parent: CascadeParserHandler,
+    delegation: CssParser.Delegation,
+  ) {
     super(
       parent.scope,
       parent.owner,
@@ -5376,7 +5394,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       parent,
       parent.regionId,
       parent.validatorSet,
-      false,
+      delegation,
     );
     this.parentChain = parent.chain;
   }
@@ -5418,7 +5436,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 
   override startRuleBody(): void {
@@ -5445,7 +5463,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       }
     }
     if (!forgiving) {
-      this.owner.popHandler();
+      this.endDelegation();
     }
   }
 
@@ -5522,10 +5540,11 @@ export class HasParameterParserHandler extends MatchesParameterParserHandler {
 export class NthChildOfSelectorParameterParserHandler extends MatchesParameterParserHandler {
   constructor(
     parent: CascadeParserHandler,
+    delegation: CssParser.Delegation,
     public readonly a: number,
     public readonly b: number,
   ) {
-    super(parent);
+    super(parent, delegation);
   }
 
   override endFuncWithSelector(): void {
@@ -5544,7 +5563,7 @@ export class NthChildOfSelectorParameterParserHandler extends MatchesParameterPa
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 
   override forgiving(): boolean {
@@ -5572,7 +5591,7 @@ export class NthLastChildOfSelectorParameterParserHandler extends NthChildOfSele
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 }
 
@@ -5580,8 +5599,9 @@ export class DefineParserHandler extends CssParser.SlaveParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
   }
 
   override property(name: string, value: Css.Val, important: boolean): void {
@@ -5607,9 +5627,10 @@ export class PropSetParserHandler
     public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
     public readonly validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
     public readonly ruleType?: string,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
     this.order = 0;
   }
 
@@ -5621,6 +5642,7 @@ export class PropSetParserHandler
         name,
         value,
         important,
+        this.scope,
         this,
       );
     }
@@ -5673,6 +5695,7 @@ export class PropertyParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }

@@ -77,7 +77,7 @@ export type AttributeSelectorCaseSensitivity = "i" | "s" | null;
 export class ParserHandler implements CssTokenizer.TokenizerHandler {
   flavor: StylesheetFlavor;
 
-  constructor(public scope: Exprs.LexicalScope) {
+  constructor(public readonly scope: Exprs.LexicalScope) {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
@@ -211,22 +211,36 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
   }
 }
 
-export class DispatchParserHandler extends ParserHandler {
-  stack: ParserHandler[] = [];
+export class Delegation {
+  constructor(readonly outer: ParserHandler) {}
+}
+
+export class DispatchParserHandler<
+  T extends ParserHandler = ParserHandler,
+> extends ParserHandler {
   tokenizer: CssTokenizer.Tokenizer | null = null;
-  slave: ParserHandler | null = null;
 
-  constructor() {
-    super(null);
+  readonly initialSlave: T;
+  slave: ParserHandler;
+
+  constructor(
+    scope: Exprs.LexicalScope,
+    makeSlave: (owner: DispatchParserHandler) => T,
+  ) {
+    super(scope);
+    this.initialSlave = this.slave = makeSlave(this);
   }
 
-  pushHandler(slave: ParserHandler): void {
-    this.stack.push(this.slave);
+  delegateTo<S extends ParserHandler>(
+    makeSlave: (delegation: Delegation) => S,
+  ): S {
+    const slave = makeSlave(new Delegation(this.slave));
     this.slave = slave;
+    return slave;
   }
 
-  popHandler(): void {
-    this.slave = this.stack.pop();
+  takeBack(delegation: Delegation): void {
+    this.slave = delegation.outer;
   }
 
   override getCurrentToken(): CssTokenizer.Token {
@@ -257,11 +271,8 @@ export class DispatchParserHandler extends ParserHandler {
 
   override startStylesheet(flavor: StylesheetFlavor): void {
     super.startStylesheet(flavor);
-    if (this.stack.length > 0) {
-      // This can occur as a result of an error
-      this.slave = this.stack[0];
-      this.stack = [];
-    }
+    // Handlers left delegation by an error are dropped here.
+    this.slave = this.initialSlave;
     this.slave.startStylesheet(flavor);
   }
 
@@ -427,29 +438,33 @@ export class SkippingParserHandler extends ParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     public owner: DispatchParserHandler,
-    public readonly topLevel,
+    public readonly delegation: Delegation | null,
   ) {
     super(scope);
-    if (owner) {
-      this.flavor = owner.flavor;
-    }
+    this.flavor = owner.flavor;
   }
 
   override getCurrentToken(): CssTokenizer.Token {
-    return this.owner?.getCurrentToken();
+    return this.owner.getCurrentToken();
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
-    this.owner?.errorMsg(mnemonics, token);
+    this.owner.errorMsg(mnemonics, token);
   }
 
   override startRuleBody(): void {
     this.depth++;
   }
 
+  protected endDelegation(): void {
+    if (this.delegation) {
+      this.owner.takeBack(this.delegation);
+    }
+  }
+
   override endRule(): void {
-    if (--this.depth == 0 && !this.topLevel) {
-      this.owner.popHandler();
+    if (--this.depth == 0) {
+      this.endDelegation();
     }
   }
 }
@@ -458,9 +473,9 @@ export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
-    topLevel: boolean,
+    delegation: Delegation | null,
   ) {
-    super(scope, owner, topLevel);
+    super(scope, owner, delegation);
   }
 
   report(message: string): void {
@@ -469,8 +484,9 @@ export class SlaveParserHandler extends SkippingParserHandler {
 
   reportAndSkip(message: string): void {
     this.report(message);
-    this.owner.pushHandler(
-      new SkippingParserHandler(this.scope, this.owner, false),
+    this.owner.delegateTo(
+      (delegation) =>
+        new SkippingParserHandler(this.scope, this.owner, delegation),
     );
   }
 
@@ -1370,9 +1386,6 @@ export class Parser {
 
   makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr {
     const scope = this.handler.getScope();
-    if (!scope) {
-      return null;
-    }
     condition = condition || scope._true;
     if (classes) {
       const classList = classes.split(/\s+/);
@@ -2896,50 +2909,43 @@ export class Parser {
 }
 
 export class ErrorHandler extends ParserHandler {
-  constructor(public readonly scope: Exprs.LexicalScope) {
-    super(null);
+  constructor(scope: Exprs.LexicalScope) {
+    super(scope);
   }
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     // throw new Error(mnemonics + " " + token);
     Logging.logger.warn(mnemonics, token.toString());
   }
-
-  override getScope(): Exprs.LexicalScope {
-    return this.scope;
-  }
 }
 
+/**
+ * Parses a stylesheet. Sub-handlers for selector functions and at-rules take
+ * over the parse by delegating from the dispatch handler (see `delegateTo()`).
+ */
 export function parseStylesheet(
   tokenizer: CssTokenizer.Tokenizer,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
-  const parserHandler = normalizeParserHandler(handler);
   const expandedText = expandNesting(tokenizer.input);
   if (expandedText !== tokenizer.input) {
     return parseStylesheetInternal(
-      new CssTokenizer.Tokenizer(expandedText, parserHandler),
-      parserHandler,
+      new CssTokenizer.Tokenizer(expandedText, handler),
+      handler,
       baseURL,
       classes,
       media,
     );
   }
-  return parseStylesheetInternal(
-    tokenizer,
-    parserHandler,
-    baseURL,
-    classes,
-    media,
-  );
+  return parseStylesheetInternal(tokenizer, handler, baseURL, classes, media);
 }
 
 function parseStylesheetInternal(
   tokenizer: CssTokenizer.Tokenizer,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
@@ -3003,19 +3009,16 @@ function parseStylesheetInternal(
 
 export function parseStylesheetFromText(
   text: string,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
-  const parserHandler = normalizeParserHandler(handler);
   return Task.handle(
     "parseStylesheetFromText",
     (frame) => {
-      const tok = new CssTokenizer.Tokenizer(text, parserHandler);
-      parseStylesheet(tok, parserHandler, baseURL, classes, media).thenFinish(
-        frame,
-      );
+      const tok = new CssTokenizer.Tokenizer(text, handler);
+      parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
@@ -3024,29 +3027,9 @@ export function parseStylesheetFromText(
   );
 }
 
-function normalizeParserHandler(handler: ParserHandler): ParserHandler {
-  if (handler instanceof DispatchParserHandler) {
-    return handler;
-  }
-  if (handler instanceof SlaveParserHandler) {
-    if (handler.owner) {
-      return handler.owner;
-    }
-    // Some parser entry points are passed a top-level slave handler. Wrap it in
-    // a dispatch handler once so selector functions parse through the normal
-    // dispatch path and the slave retains a stable owner reference.
-    const dispatchHandler = new DispatchParserHandler();
-    dispatchHandler.flavor = handler.flavor;
-    dispatchHandler.slave = handler;
-    handler.owner = dispatchHandler;
-    return dispatchHandler;
-  }
-  return handler;
-}
-
 export function parseStylesheetFromURL(
   url: string,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {

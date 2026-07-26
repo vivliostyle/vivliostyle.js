@@ -77,8 +77,17 @@ class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
     validatorSet: CssValidator.ValidatorSet,
     private readonly counterStyleName: string,
     private readonly counterStyles: CounterStyle.CounterStyleStore,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, null, elementStyle, validatorSet, "counter-style");
+    super(
+      scope,
+      owner,
+      null,
+      elementStyle,
+      validatorSet,
+      delegation,
+      "counter-style",
+    );
   }
 
   override endRule(): void {
@@ -660,6 +669,7 @@ export class StyleInstance
       name,
       val,
       false,
+      this.style.rootScope,
       supportsReceiver,
     );
     return supported;
@@ -3135,19 +3145,15 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
 
   constructor(
     public masterHandler: StyleParserHandler,
+    owner: CssParser.DispatchParserHandler,
+    scope: Exprs.LexicalScope,
+    validatorSet: CssValidator.ValidatorSet,
     condition: Exprs.Val,
     parent: BaseParserHandler,
     regionId: string | null,
+    delegation: CssParser.Delegation | null,
   ) {
-    super(
-      masterHandler.rootScope,
-      masterHandler,
-      condition,
-      parent,
-      regionId,
-      masterHandler.validatorSet,
-      !parent,
-    );
+    super(scope, owner, condition, parent, regionId, validatorSet, delegation);
   }
 
   override startPageTemplateRule(): void {}
@@ -3166,13 +3172,15 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       this.condition,
       this.owner.getBaseSpecificity(),
     );
-    this.masterHandler.pushHandler(
-      new PageMaster.PageMasterParserHandler(
-        pageMaster.scope,
-        this.masterHandler,
-        pageMaster,
-        this.validatorSet,
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new PageMaster.PageMasterParserHandler(
+          pageMaster.scope,
+          this.owner,
+          pageMaster,
+          this.validatorSet,
+          delegation,
+        ),
     );
   }
 
@@ -3181,14 +3189,25 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     if (this.condition != null) {
       condition = Exprs.and(this.scope, this.condition, condition);
     }
-    this.masterHandler.pushHandler(
-      new BaseParserHandler(this.masterHandler, condition, this, this.regionId),
+    this.owner.delegateTo(
+      (delegation) =>
+        new BaseParserHandler(
+          this.masterHandler,
+          this.owner,
+          this.scope,
+          this.validatorSet,
+          condition,
+          this,
+          this.regionId,
+          delegation,
+        ),
     );
   }
 
   override startDefineRule(): void {
-    this.masterHandler.pushHandler(
-      new CssCascade.DefineParserHandler(this.scope, this.owner),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CssCascade.DefineParserHandler(this.scope, this.owner, delegation),
     );
   }
 
@@ -3198,28 +3217,32 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       properties,
       condition: this.condition,
     });
-    this.masterHandler.pushHandler(
-      new CssCascade.PropSetParserHandler(
-        this.scope,
-        this.owner,
-        null,
-        properties,
-        this.masterHandler.validatorSet,
-        "font-face",
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CssCascade.PropSetParserHandler(
+          this.scope,
+          this.owner,
+          null,
+          properties,
+          this.masterHandler.validatorSet,
+          delegation,
+          "font-face",
+        ),
     );
   }
 
   override startCounterStyleRule(name: string): void {
-    this.masterHandler.pushHandler(
-      new CounterStyleParserHandler(
-        this.scope,
-        this.owner,
-        {} as CssCascade.ElementStyle,
-        this.masterHandler.validatorSet,
-        name,
-        this.masterHandler.counterStyles,
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CounterStyleParserHandler(
+          this.scope,
+          this.owner,
+          {} as CssCascade.ElementStyle,
+          this.masterHandler.validatorSet,
+          name,
+          this.masterHandler.counterStyles,
+          delegation,
+        ),
     );
   }
 
@@ -3229,28 +3252,32 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       style = {} as CssCascade.ElementStyle;
       this.masterHandler.flowProps[flowName] = style;
     }
-    this.masterHandler.pushHandler(
-      new CssCascade.PropSetParserHandler(
-        this.scope,
-        this.owner,
-        null,
-        style,
-        this.masterHandler.validatorSet,
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CssCascade.PropSetParserHandler(
+          this.scope,
+          this.owner,
+          null,
+          style,
+          this.masterHandler.validatorSet,
+          delegation,
+        ),
     );
   }
 
   override startViewportRule(): void {
     const viewportProps = {} as CssCascade.ElementStyle;
     this.masterHandler.viewportProps.push(viewportProps);
-    this.masterHandler.pushHandler(
-      new CssCascade.PropSetParserHandler(
-        this.scope,
-        this.owner,
-        this.condition,
-        viewportProps,
-        this.masterHandler.validatorSet,
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CssCascade.PropSetParserHandler(
+          this.scope,
+          this.owner,
+          this.condition,
+          viewportProps,
+          this.masterHandler.validatorSet,
+          delegation,
+        ),
     );
   }
 
@@ -3264,13 +3291,15 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
         pseudos[pseudoelem] = style;
       }
     }
-    this.masterHandler.pushHandler(
-      new CssPage.PageFootnoteAreaParserHandler(
-        this.scope,
-        this.owner,
-        this.masterHandler.validatorSet,
-        style,
-      ),
+    this.owner.delegateTo(
+      (delegation) =>
+        new CssPage.PageFootnoteAreaParserHandler(
+          this.scope,
+          this.owner,
+          this.masterHandler.validatorSet,
+          style,
+          delegation,
+        ),
     );
   }
 
@@ -3280,14 +3309,17 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
   }
 
   override startPageRule(): void {
-    const pageHandler = new CssPage.PageParserHandler(
-      this.masterHandler.pageScope,
-      this.masterHandler,
-      this,
-      this.validatorSet,
-      this.masterHandler.pageProps,
+    const pageHandler = this.owner.delegateTo(
+      (delegation) =>
+        new CssPage.PageParserHandler(
+          this.masterHandler.pageScope,
+          this.owner,
+          this,
+          this.validatorSet,
+          this.masterHandler.pageProps,
+          delegation,
+        ),
     );
-    this.masterHandler.pushHandler(pageHandler);
     pageHandler.startPageRule();
   }
 
@@ -3298,23 +3330,29 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       const regionId = `R${this.masterHandler.regionCount++}`;
       this.special("region-id", Css.getName(regionId));
       this.endRule();
-      const regionHandler = new BaseParserHandler(
-        this.masterHandler,
-        this.condition,
-        this,
-        regionId,
+      const regionHandler = this.owner.delegateTo(
+        (delegation) =>
+          new BaseParserHandler(
+            this.masterHandler,
+            this.owner,
+            this.scope,
+            this.validatorSet,
+            this.condition,
+            this,
+            regionId,
+            delegation,
+          ),
       );
-      this.masterHandler.pushHandler(regionHandler);
       regionHandler.startRuleBody();
     }
   }
 }
 
-export class StyleParserHandler extends CssParser.DispatchParserHandler {
-  rootScope: Exprs.LexicalScope;
-  pageScope: Exprs.LexicalScope;
-  rootBox: PageMaster.RootPageBox;
-  cascadeParserHandler: BaseParserHandler;
+export class StyleParserHandler extends CssParser.DispatchParserHandler<BaseParserHandler> {
+  readonly rootScope: Exprs.LexicalScope;
+  readonly pageScope: Exprs.LexicalScope;
+  readonly rootBox: PageMaster.RootPageBox;
+  readonly cascadeParserHandler: BaseParserHandler;
   regionCount: number = 0;
   fontFaces = [] as FontFace[];
   counterStyles = new CounterStyle.CounterStyleStore();
@@ -3324,12 +3362,27 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler {
   pageProps = {} as { [key: string]: CssCascade.ElementStyle };
 
   constructor(public readonly validatorSet: CssValidator.ValidatorSet) {
-    super();
-    this.rootScope = new Exprs.LexicalScope(null);
+    const rootScope = new Exprs.LexicalScope(null);
+    super(
+      rootScope,
+      // The owner is this handler itself, still inside its own super() call,
+      // so the cascade handler takes its scope and validator set directly.
+      (owner) =>
+        new BaseParserHandler(
+          owner as StyleParserHandler,
+          owner,
+          rootScope,
+          validatorSet,
+          null,
+          null,
+          null,
+          null,
+        ),
+    );
+    this.rootScope = rootScope;
     this.pageScope = new Exprs.LexicalScope(this.rootScope);
     this.rootBox = new PageMaster.RootPageBox(this.rootScope);
-    this.cascadeParserHandler = new BaseParserHandler(this, null, null, null);
-    this.slave = this.cascadeParserHandler;
+    this.cascadeParserHandler = this.initialSlave;
   }
 }
 

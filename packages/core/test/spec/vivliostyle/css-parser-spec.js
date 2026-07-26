@@ -19,11 +19,16 @@
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_cssnesting from "../../../src/vivliostyle/css-nesting";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
+import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_task from "../../../src/vivliostyle/task";
 
 describe("css-parser", function () {
   describe("Parser", function () {
-    var handler = new adapt_cssparse.ParserHandler(null);
+    var scope = new adapt_exprs.LexicalScope(null);
+    var handler = new adapt_cssparse.DispatchParserHandler(
+      scope,
+      () => new adapt_cssparse.ParserHandler(scope),
+    );
 
     beforeEach(function () {
       spyOn(handler, "error");

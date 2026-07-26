@@ -3151,8 +3151,17 @@ export class PageParserHandler
     parent: CssCascade.CascadeParserHandler,
     validatorSet: CssValidator.ValidatorSet,
     private readonly pageProps: { [key: string]: CssCascade.ElementStyle },
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, parent?.condition, parent, null, validatorSet, false);
+    super(
+      scope,
+      owner,
+      parent?.condition,
+      parent,
+      null,
+      validatorSet,
+      delegation,
+    );
   }
 
   override startPageRule(): void {
@@ -3366,13 +3375,16 @@ export class PageParserHandler
       style = pseudoStyle;
     }
 
-    const handler = new PageFootnoteAreaParserHandler(
-      this.scope,
-      this.owner,
-      this.validatorSet,
-      style,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PageFootnoteAreaParserHandler(
+          this.scope,
+          this.owner,
+          this.validatorSet,
+          style,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 
   override startPageMarginBoxRule(name: string): void {
@@ -3385,13 +3397,16 @@ export class PageParserHandler
       boxStyle = {} as CssCascade.ElementStyle;
       marginBoxMap[name] = boxStyle;
     }
-    const handler = new PageMarginBoxParserHandler(
-      this.scope,
-      this.owner,
-      this.validatorSet,
-      boxStyle,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PageMarginBoxParserHandler(
+          this.scope,
+          this.owner,
+          this.validatorSet,
+          boxStyle,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 }
 
@@ -3407,8 +3422,9 @@ export class PageMarginBoxParserHandler
     owner: CssParser.DispatchParserHandler,
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly boxStyle: CssCascade.ElementStyle,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
   }
 
   override property(name: string, value: Css.Val, important: boolean): void {
@@ -3416,6 +3432,7 @@ export class PageMarginBoxParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }
@@ -3452,8 +3469,9 @@ export class PageFootnoteAreaParserHandler
     owner: CssParser.DispatchParserHandler,
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly areaStyle: CssCascade.ElementStyle,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
   }
 
   override property(name: string, value: Css.Val, important: boolean): void {
@@ -3461,6 +3479,7 @@ export class PageFootnoteAreaParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }

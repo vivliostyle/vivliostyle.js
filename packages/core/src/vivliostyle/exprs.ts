@@ -549,7 +549,7 @@ export class Context {
   }
 
   queryVal(scope: LexicalScope, key: string): Result | undefined {
-    const s = scope && this.scopes[scope.scopeKey];
+    const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
   }
 
@@ -563,28 +563,22 @@ export type DependencyCache = {
   [key: string]: boolean | Special;
 };
 
-export class Val {
+export abstract class Val {
   key: string;
 
-  constructor(public scope: LexicalScope) {
-    this.scope = scope;
+  constructor(public readonly scope: LexicalScope) {
     this.key = `_${nextKeyIndex++}`;
   }
 
-  /** @override */
   toString(): string {
     const buf = new Base.StringBuffer();
     this.appendTo(buf, 0);
     return buf.toString();
   }
 
-  appendTo(buf: Base.StringBuffer, priority: number): void {
-    throw new Error("F_ABSTRACT");
-  }
+  abstract appendTo(buf: Base.StringBuffer, priority: number): void;
 
-  protected evaluateCore(context: Context): Result {
-    throw new Error("F_ABSTRACT");
-  }
+  protected abstract evaluateCore(context: Context): Result;
 
   expand(context: Context, params: Val[]): Val {
     return this;
@@ -627,9 +621,7 @@ export class Val {
       return result;
     }
     result = this.evaluateCore(context);
-    if (this.scope) {
-      context.storeVal(this.scope, this.key, result);
-    }
+    context.storeVal(this.scope, this.key, result);
     return result;
   }
 
@@ -638,7 +630,7 @@ export class Val {
   }
 }
 
-export class Prefix extends Val {
+export abstract class Prefix extends Val {
   constructor(
     scope: LexicalScope,
     public val: Val,
@@ -646,13 +638,9 @@ export class Prefix extends Val {
     super(scope);
   }
 
-  protected getOp(): string {
-    throw new Error("F_ABSTRACT");
-  }
+  protected abstract getOp(): string;
 
-  evalPrefix(val: Result): Result {
-    throw new Error("F_ABSTRACT");
-  }
+  abstract evalPrefix(val: Result): Result;
 
   override evaluateCore(context: Context): Result {
     const val = this.val.evaluate(context);
@@ -690,7 +678,7 @@ export class Prefix extends Val {
   }
 }
 
-export class Infix extends Val {
+export abstract class Infix extends Val {
   constructor(
     scope: LexicalScope,
     public lhs: Val,
@@ -699,23 +687,9 @@ export class Infix extends Val {
     super(scope);
   }
 
-  getPriority(): number {
-    throw new Error("F_ABSTRACT");
-  }
+  abstract getPriority(): number;
 
-  getOp(): string {
-    throw new Error("F_ABSTRACT");
-  }
-
-  evalInfix(lhs: Result, rhs: Result): Result {
-    throw new Error("F_ABSTRACT");
-  }
-
-  override evaluateCore(context: Context): Result {
-    const lhs = this.lhs.evaluate(context);
-    const rhs = this.rhs.evaluate(context);
-    return this.evalInfix(lhs, rhs);
-  }
+  abstract getOp(): string;
 
   override dependCore(
     other: Val,
@@ -753,7 +727,17 @@ export class Infix extends Val {
   }
 }
 
-export class Logical extends Infix {
+export abstract class EagerInfix extends Infix {
+  abstract evalInfix(lhs: Result, rhs: Result): Result;
+
+  override evaluateCore(context: Context): Result {
+    const lhs = this.lhs.evaluate(context);
+    const rhs = this.rhs.evaluate(context);
+    return this.evalInfix(lhs, rhs);
+  }
+}
+
+export abstract class Logical extends Infix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
     super(scope, lhs, rhs);
   }
@@ -763,7 +747,7 @@ export class Logical extends Infix {
   }
 }
 
-export class Comparison extends Infix {
+export abstract class Comparison extends EagerInfix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
     super(scope, lhs, rhs);
   }
@@ -773,7 +757,7 @@ export class Comparison extends Infix {
   }
 }
 
-export class Additive extends Infix {
+export abstract class Additive extends EagerInfix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
     super(scope, lhs, rhs);
   }
@@ -783,7 +767,7 @@ export class Additive extends Infix {
   }
 }
 
-export class Multiplicative extends Infix {
+export abstract class Multiplicative extends EagerInfix {
   constructor(scope: LexicalScope, lhs: Val, rhs: Val) {
     super(scope, lhs, rhs);
   }
@@ -1422,6 +1406,10 @@ export class Param extends Val {
   override appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("$");
     buf.append(this.index.toString());
+  }
+
+  override evaluateCore(context: Context): Result {
+    throw new Error(`Parameter not expanded: ${this.index}`);
   }
 
   override expand(context: Context, params: Val[]): Val {

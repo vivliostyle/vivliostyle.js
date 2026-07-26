@@ -3267,7 +3267,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         viewport.height,
       );
       const cssMatrix = CssParser.parseValue(
-        null,
+        viewItem.instance.style.rootScope,
         new CssTokenizer.Tokenizer(matrix, null),
         "",
       );
