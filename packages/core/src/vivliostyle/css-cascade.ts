@@ -4437,7 +4437,8 @@ export class CascadeInstance {
         // all variables substituted
         const validatorSet = (styler as any)
           .validatorSet as CssValidator.ValidatorSet;
-        const shorthand = validatorSet?.getShorthand(name, value)?.clone();
+        const scope = (styler as any).scope as Exprs.LexicalScope;
+        const shorthand = validatorSet?.getShorthand(name, value)?.clone(scope);
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
@@ -4452,7 +4453,7 @@ export class CascadeInstance {
             // cannot handle directly, so normalize it through parseValue
             // before expanding the shorthand to longhands.
             const valueSH = CssParser.parseValue(
-              (styler as any).scope,
+              scope,
               new CssTokenizer.Tokenizer(value.toString(), null),
               "",
             );
@@ -5253,6 +5254,7 @@ export class CascadeParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }
@@ -5622,6 +5624,7 @@ export class PropSetParserHandler
         name,
         value,
         important,
+        this.scope,
         this,
       );
     }
@@ -5674,6 +5677,7 @@ export class PropertyParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }

@@ -1368,7 +1368,7 @@ describe("css-cascade", function () {
       var styler = {
         root: element,
         validatorSet: validatorSet,
-        scope: validatorSet.scope,
+        scope: new adapt_exprs.LexicalScope(null),
         getStyle: function (currentElement) {
           return styleMap.get(currentElement) || null;
         },
@@ -1621,7 +1621,7 @@ describe("css-cascade", function () {
       var styler = {
         root: element,
         validatorSet: validatorSet,
-        scope: validatorSet.scope,
+        scope: new adapt_exprs.LexicalScope(null),
         getStyle: function () {
           return style;
         },

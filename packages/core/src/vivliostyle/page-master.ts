@@ -2078,6 +2078,7 @@ export class PageBoxParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }

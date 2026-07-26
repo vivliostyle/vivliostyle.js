@@ -3416,6 +3416,7 @@ export class PageMarginBoxParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }
@@ -3461,6 +3462,7 @@ export class PageFootnoteAreaParserHandler
       name,
       value,
       important,
+      this.scope,
       this,
     );
   }

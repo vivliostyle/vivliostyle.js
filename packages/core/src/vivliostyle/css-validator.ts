@@ -1347,7 +1347,7 @@ export class ShorthandValidator extends Css.Visitor {
     return new this(validatorSet, syntax, propList);
   }
 
-  clone(): this {
+  clone(scope: Exprs.LexicalScope): ShorthandValidator {
     return new (this.constructor as any)(
       this.validatorSet,
       this.syntax,
@@ -1719,10 +1719,24 @@ export class BrowserShorthandValidator extends ShorthandValidator {
     super(validatorSet, [], propList);
   }
 
-  override clone(): this {
-    return new (this.constructor as any)(this.validatorSet, this.name, [
-      ...this.propList,
-    ]);
+  override clone(scope: Exprs.LexicalScope): ShorthandValidator {
+    return new ScopedBrowserShorthandValidator(
+      this.validatorSet,
+      this.name,
+      [...this.propList],
+      scope,
+    );
+  }
+}
+
+export class ScopedBrowserShorthandValidator extends BrowserShorthandValidator {
+  constructor(
+    validatorSet: ValidatorSet,
+    name: string,
+    propList: string[],
+    public readonly scope: Exprs.LexicalScope,
+  ) {
+    super(validatorSet, name, propList);
   }
 
   private validateValueText(valueText: string): boolean {
@@ -1743,7 +1757,7 @@ export class BrowserShorthandValidator extends ShorthandValidator {
         continue;
       }
       const parsed = CssParser.parseValue(
-        this.validatorSet.scope,
+        this.scope,
         new CssTokenizer.Tokenizer(valueText, null),
         "",
       );
@@ -1893,7 +1907,6 @@ export class ValidatorSet {
   shorthands: { [key: string]: ShorthandValidator } = {};
   layoutProps: ValueMap = {};
   backgroundProps: ValueMap = {};
-  readonly scope = new Exprs.LexicalScope(null);
   private browserShorthandStyle: CSSStyleDeclaration | null = null;
   private browserShorthandMisses: { [key: string]: true } = {};
   private browserPropertyNamesForAll: string[] | null = null;
@@ -2606,6 +2619,7 @@ export class ValidatorSet {
     name: string,
     value: Css.Val,
     important: boolean,
+    scope: Exprs.LexicalScope,
     receiver: PropertyReceiver,
   ): void {
     const ruleType = (receiver as PropertyReceiver & { ruleType?: string })
@@ -2645,7 +2659,7 @@ export class ValidatorSet {
     const px = this.prefixes[name];
     if (!px || !px[prefix]) {
       if (CSS.supports(origName, value.toString())) {
-        const shorthand = this.getShorthand(shorthandName, value)?.clone();
+        const shorthand = this.getShorthand(shorthandName, value)?.clone(scope);
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             shorthand.propagateDefaultingValue(value, important, receiver);
@@ -2691,7 +2705,7 @@ export class ValidatorSet {
         receiver.invalidPropertyValue(origName, value);
       }
     } else {
-      const shorthand = this.getShorthand(name, value)?.clone();
+      const shorthand = this.getShorthand(name, value)?.clone(scope);
       if (!shorthand) {
         receiver.unknownProperty(origName, value);
         return;

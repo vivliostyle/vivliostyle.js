@@ -660,6 +660,7 @@ export class StyleInstance
       name,
       val,
       false,
+      this.style.rootScope,
       supportsReceiver,
     );
     return supported;
