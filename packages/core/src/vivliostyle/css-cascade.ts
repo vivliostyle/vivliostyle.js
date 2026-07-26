@@ -2020,6 +2020,9 @@ export interface CounterListener {
 }
 
 export interface CounterResolver {
+  readonly rootScope: Exprs.LexicalScope;
+  readonly pageScope: Exprs.LexicalScope;
+
   setStyler(styler: CssStyler.AbstractStyler): void;
 
   /**
@@ -2264,14 +2267,6 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         expr: Exprs.Val,
       ) => void;
     } | null;
-  }
-
-  private getPageScope(): Exprs.LexicalScope | null {
-    return (
-      this.cascade.context as {
-        style?: { pageScope?: Exprs.LexicalScope | null };
-      }
-    )?.style?.pageScope;
   }
 
   private hasLocalCounterResetOrSet(counterName: string): boolean {
@@ -2528,7 +2523,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const isPageCounter =
         counterName === "pages" ||
         counterStore?.isPageControlledCounter?.(counterName);
-      const pageScope = this.getPageScope();
+      const pageScope = this.counterResolver.pageScope;
       const nativeExpr = new Exprs.Native(
         pageScope,
         () =>
@@ -2585,7 +2580,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       const isPageCounter =
         counterName === "pages" ||
         counterStore?.isPageControlledCounter?.(counterName);
-      const pageScope = this.getPageScope();
+      const pageScope = this.counterResolver.pageScope;
       const nativeExpr = new Exprs.Native(
         pageScope,
         () =>
@@ -2840,7 +2835,13 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     if (leader.length == 0) {
       return new Css.Str("");
     }
-    return new Css.Expr(new Exprs.Native(null, () => leader, "viv-leader"));
+    return new Css.Expr(
+      new Exprs.Native(
+        this.counterResolver.rootScope,
+        () => leader,
+        "viv-leader",
+      ),
+    );
   }
 
   override visitFunc(func: Css.Func): Css.Val {

@@ -549,7 +549,7 @@ export class Context {
   }
 
   queryVal(scope: LexicalScope, key: string): Result | undefined {
-    const s = scope && this.scopes[scope.scopeKey];
+    const s = this.scopes[scope.scopeKey];
     return s ? s[key] : undefined;
   }
 
@@ -566,8 +566,7 @@ export type DependencyCache = {
 export class Val {
   key: string;
 
-  constructor(public scope: LexicalScope) {
-    this.scope = scope;
+  constructor(public readonly scope: LexicalScope) {
     this.key = `_${nextKeyIndex++}`;
   }
 
@@ -627,9 +626,7 @@ export class Val {
       return result;
     }
     result = this.evaluateCore(context);
-    if (this.scope) {
-      context.storeVal(this.scope, this.key, result);
-    }
+    context.storeVal(this.scope, this.key, result);
     return result;
   }
 
