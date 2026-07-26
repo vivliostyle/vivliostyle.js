@@ -2921,7 +2921,7 @@ export class ErrorHandler extends ParserHandler {
 
 /**
  * Parses a stylesheet. Sub-handlers for selector functions and at-rules take
- * over the parse by pushing themselves onto the dispatch handler's stack.
+ * over the parse by delegating from the dispatch handler (see `delegateTo()`).
  */
 export function parseStylesheet(
   tokenizer: CssTokenizer.Tokenizer,
