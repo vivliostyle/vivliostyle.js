@@ -27,18 +27,20 @@ import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
 describe("css-validator", function () {
   function cascadeParserHandler(validatorSet) {
     const scope = new adapt_exprs.LexicalScope(null);
-    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
-    const handler = new adapt_csscasc.CascadeParserHandler(
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(
       scope,
-      dispatchHandler,
-      null,
-      null,
-      null,
-      validatorSet,
-      true,
+      (owner) =>
+        new adapt_csscasc.CascadeParserHandler(
+          scope,
+          owner,
+          null,
+          null,
+          null,
+          validatorSet,
+          null,
+        ),
     );
-    dispatchHandler.slave = handler;
-    return handler;
+    return dispatchHandler.initialSlave;
   }
 
   function parseCascade(cssText, done, callback) {

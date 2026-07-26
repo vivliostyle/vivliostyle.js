@@ -198,16 +198,21 @@ describe("css-page", function () {
 
     function createHandler() {
       const scope = new adapt_exprs.LexicalScope(null);
-      const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
-      const handler = new vivliostyle_css_page.PageParserHandler(
+      const dispatchHandler = new adapt_cssparse.DispatchParserHandler(
         scope,
-        dispatchHandler,
-        null,
-        null,
-        pageProps,
+        () => new adapt_cssparse.ParserHandler(scope),
       );
-      dispatchHandler.slave = handler;
-      return handler;
+      return dispatchHandler.delegateTo(
+        (delegation) =>
+          new vivliostyle_css_page.PageParserHandler(
+            scope,
+            dispatchHandler,
+            null,
+            null,
+            pageProps,
+            delegation,
+          ),
+      );
     }
 
     beforeEach(function () {

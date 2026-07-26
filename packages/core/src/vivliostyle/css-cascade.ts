@@ -4726,9 +4726,9 @@ export class CascadeParserHandler
     parent: CascadeParserHandler,
     public readonly regionId: string | null,
     public readonly validatorSet: CssValidator.ValidatorSet,
-    topLevel: boolean,
+    delegation: CssParser.Delegation | null,
   ) {
-    super(scope, owner, topLevel);
+    super(scope, owner, delegation);
     this.cascade = parent ? parent.cascade : new Cascade();
     this.state = ParseState.TOP;
   }
@@ -5309,43 +5309,55 @@ export class CascadeParserHandler
     funcName: string,
     params?: (number | string)[],
   ): void {
-    let parameterParserHandler: MatchesParameterParserHandler | undefined;
+    let makeParameterParserHandler:
+      | ((delegation: CssParser.Delegation) => MatchesParameterParserHandler)
+      | undefined;
     switch (funcName) {
       case "is":
-        parameterParserHandler = new MatchesParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new MatchesParameterParserHandler(this, delegation);
         break;
       case "not":
-        parameterParserHandler = new NotParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new NotParameterParserHandler(this, delegation);
         break;
       case "where":
-        parameterParserHandler = new WhereParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new WhereParameterParserHandler(this, delegation);
         break;
       case "has":
-        parameterParserHandler = new HasParameterParserHandler(this);
+        makeParameterParserHandler = (delegation) =>
+          new HasParameterParserHandler(this, delegation);
         break;
       case "nth-child":
         if (params && params.length >= 2) {
-          parameterParserHandler = new NthChildOfSelectorParameterParserHandler(
-            this,
-            params[0] as number,
-            params[1] as number,
-          );
+          makeParameterParserHandler = (delegation) =>
+            new NthChildOfSelectorParameterParserHandler(
+              this,
+              delegation,
+              params[0] as number,
+              params[1] as number,
+            );
         }
         break;
       case "nth-last-child":
         if (params && params.length >= 2) {
-          parameterParserHandler =
+          makeParameterParserHandler = (delegation) =>
             new NthLastChildOfSelectorParameterParserHandler(
               this,
+              delegation,
               params[0] as number,
               params[1] as number,
             );
         }
         break;
     }
-    if (parameterParserHandler) {
-      parameterParserHandler.startSelectorRule();
-      this.owner.pushHandler(parameterParserHandler);
+    if (makeParameterParserHandler) {
+      this.owner.delegateTo((delegation) => {
+        const parameterParserHandler = makeParameterParserHandler(delegation);
+        parameterParserHandler.startSelectorRule();
+        return parameterParserHandler;
+      });
     }
   }
 }
@@ -5371,7 +5383,10 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   selectorTexts: string[] = [];
   containsPseudoelementSelector: boolean = false;
 
-  constructor(public readonly parent: CascadeParserHandler) {
+  constructor(
+    public readonly parent: CascadeParserHandler,
+    delegation: CssParser.Delegation,
+  ) {
     super(
       parent.scope,
       parent.owner,
@@ -5379,7 +5394,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       parent,
       parent.regionId,
       parent.validatorSet,
-      false,
+      delegation,
     );
     this.parentChain = parent.chain;
   }
@@ -5421,7 +5436,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 
   override startRuleBody(): void {
@@ -5448,7 +5463,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       }
     }
     if (!forgiving) {
-      this.owner.popHandler();
+      this.endDelegation();
     }
   }
 
@@ -5525,10 +5540,11 @@ export class HasParameterParserHandler extends MatchesParameterParserHandler {
 export class NthChildOfSelectorParameterParserHandler extends MatchesParameterParserHandler {
   constructor(
     parent: CascadeParserHandler,
+    delegation: CssParser.Delegation,
     public readonly a: number,
     public readonly b: number,
   ) {
-    super(parent);
+    super(parent, delegation);
   }
 
   override endFuncWithSelector(): void {
@@ -5547,7 +5563,7 @@ export class NthChildOfSelectorParameterParserHandler extends MatchesParameterPa
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 
   override forgiving(): boolean {
@@ -5575,7 +5591,7 @@ export class NthLastChildOfSelectorParameterParserHandler extends NthChildOfSele
       this.parentChain.push(new CheckConditionAction("")); // always fails
     }
 
-    this.owner.popHandler();
+    this.endDelegation();
   }
 }
 
@@ -5583,8 +5599,9 @@ export class DefineParserHandler extends CssParser.SlaveParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
   }
 
   override property(name: string, value: Css.Val, important: boolean): void {
@@ -5610,9 +5627,10 @@ export class PropSetParserHandler
     public readonly condition: Exprs.Val,
     public readonly elementStyle: ElementStyle,
     public readonly validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
     public readonly ruleType?: string,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
     this.order = 0;
   }
 

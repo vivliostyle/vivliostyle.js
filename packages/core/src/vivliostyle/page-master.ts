@@ -2069,8 +2069,9 @@ export class PageBoxParserHandler
     owner: CssParser.DispatchParserHandler,
     public readonly target: PageBox,
     public readonly validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, false);
+    super(scope, owner, delegation);
   }
 
   override property(name: string, value: Css.Val, important: boolean): void {
@@ -2110,8 +2111,9 @@ export class PartitionParserHandler extends PageBoxParserHandler {
     owner: CssParser.DispatchParserHandler,
     target: Partition,
     validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet, delegation);
   }
 }
 
@@ -2121,8 +2123,9 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
     owner: CssParser.DispatchParserHandler,
     target: PartitionGroup,
     validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet, delegation);
     target.specified["width"] = new CssCascade.CascadeValue(
       Css.hundredPercent,
       0,
@@ -2145,13 +2148,16 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
       classes,
       this.target,
     );
-    const handler = new PartitionParserHandler(
-      this.scope,
-      this.owner,
-      partition,
-      this.validatorSet,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PartitionParserHandler(
+          this.scope,
+          this.owner,
+          partition,
+          this.validatorSet,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 
   override startPartitionGroupRule(
@@ -2166,13 +2172,16 @@ export class PartitionGroupParserHandler extends PageBoxParserHandler {
       classes,
       this.target,
     );
-    const handler = new PartitionGroupParserHandler(
-      this.scope,
-      this.owner,
-      partitionGroup,
-      this.validatorSet,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PartitionGroupParserHandler(
+          this.scope,
+          this.owner,
+          partitionGroup,
+          this.validatorSet,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 }
 
@@ -2182,8 +2191,9 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
     owner: CssParser.DispatchParserHandler,
     target: PageMaster,
     validatorSet: CssValidator.ValidatorSet,
+    delegation: CssParser.Delegation,
   ) {
-    super(scope, owner, target, validatorSet);
+    super(scope, owner, target, validatorSet, delegation);
   }
 
   override startPartitionRule(
@@ -2198,13 +2208,16 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
       classes,
       this.target,
     );
-    const handler = new PartitionParserHandler(
-      this.scope,
-      this.owner,
-      partition,
-      this.validatorSet,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PartitionParserHandler(
+          this.scope,
+          this.owner,
+          partition,
+          this.validatorSet,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 
   override startPartitionGroupRule(
@@ -2219,12 +2232,15 @@ export class PageMasterParserHandler extends PageBoxParserHandler {
       classes,
       this.target,
     );
-    const handler = new PartitionGroupParserHandler(
-      this.scope,
-      this.owner,
-      partitionGroup,
-      this.validatorSet,
+    this.owner.delegateTo(
+      (delegation) =>
+        new PartitionGroupParserHandler(
+          this.scope,
+          this.owner,
+          partitionGroup,
+          this.validatorSet,
+          delegation,
+        ),
     );
-    this.owner.pushHandler(handler);
   }
 }

@@ -211,22 +211,36 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
   }
 }
 
-export class DispatchParserHandler extends ParserHandler {
-  stack: ParserHandler[] = [];
+export class Delegation {
+  constructor(readonly outer: ParserHandler) {}
+}
+
+export class DispatchParserHandler<
+  T extends ParserHandler = ParserHandler,
+> extends ParserHandler {
   tokenizer: CssTokenizer.Tokenizer | null = null;
-  slave: ParserHandler | null = null;
 
-  constructor(scope: Exprs.LexicalScope) {
+  readonly initialSlave: T;
+  slave: ParserHandler;
+
+  constructor(
+    scope: Exprs.LexicalScope,
+    makeSlave: (owner: DispatchParserHandler) => T,
+  ) {
     super(scope);
+    this.initialSlave = this.slave = makeSlave(this);
   }
 
-  pushHandler(slave: ParserHandler): void {
-    this.stack.push(this.slave);
+  delegateTo<S extends ParserHandler>(
+    makeSlave: (delegation: Delegation) => S,
+  ): S {
+    const slave = makeSlave(new Delegation(this.slave));
     this.slave = slave;
+    return slave;
   }
 
-  popHandler(): void {
-    this.slave = this.stack.pop();
+  takeBack(delegation: Delegation): void {
+    this.slave = delegation.outer;
   }
 
   override getCurrentToken(): CssTokenizer.Token {
@@ -257,11 +271,8 @@ export class DispatchParserHandler extends ParserHandler {
 
   override startStylesheet(flavor: StylesheetFlavor): void {
     super.startStylesheet(flavor);
-    if (this.stack.length > 0) {
-      // This can occur as a result of an error
-      this.slave = this.stack[0];
-      this.stack = [];
-    }
+    // Handlers left delegation by an error are dropped here.
+    this.slave = this.initialSlave;
     this.slave.startStylesheet(flavor);
   }
 
@@ -427,7 +438,7 @@ export class SkippingParserHandler extends ParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     public owner: DispatchParserHandler,
-    public readonly topLevel,
+    public readonly delegation: Delegation | null,
   ) {
     super(scope);
     this.flavor = owner.flavor;
@@ -445,9 +456,15 @@ export class SkippingParserHandler extends ParserHandler {
     this.depth++;
   }
 
+  protected endDelegation(): void {
+    if (this.delegation) {
+      this.owner.takeBack(this.delegation);
+    }
+  }
+
   override endRule(): void {
-    if (--this.depth == 0 && !this.topLevel) {
-      this.owner.popHandler();
+    if (--this.depth == 0) {
+      this.endDelegation();
     }
   }
 }
@@ -456,9 +473,9 @@ export class SlaveParserHandler extends SkippingParserHandler {
   constructor(
     scope: Exprs.LexicalScope,
     owner: DispatchParserHandler,
-    topLevel: boolean,
+    delegation: Delegation | null,
   ) {
-    super(scope, owner, topLevel);
+    super(scope, owner, delegation);
   }
 
   report(message: string): void {
@@ -467,8 +484,9 @@ export class SlaveParserHandler extends SkippingParserHandler {
 
   reportAndSkip(message: string): void {
     this.report(message);
-    this.owner.pushHandler(
-      new SkippingParserHandler(this.scope, this.owner, false),
+    this.owner.delegateTo(
+      (delegation) =>
+        new SkippingParserHandler(this.scope, this.owner, delegation),
     );
   }
 

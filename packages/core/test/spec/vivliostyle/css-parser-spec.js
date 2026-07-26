@@ -25,8 +25,10 @@ import * as adapt_task from "../../../src/vivliostyle/task";
 describe("css-parser", function () {
   describe("Parser", function () {
     var scope = new adapt_exprs.LexicalScope(null);
-    var handler = new adapt_cssparse.DispatchParserHandler(scope);
-    handler.slave = new adapt_cssparse.ParserHandler(scope);
+    var handler = new adapt_cssparse.DispatchParserHandler(
+      scope,
+      () => new adapt_cssparse.ParserHandler(scope),
+    );
 
     beforeEach(function () {
       spyOn(handler, "error");

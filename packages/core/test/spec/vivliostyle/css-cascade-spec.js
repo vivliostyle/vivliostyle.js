@@ -27,18 +27,20 @@ import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/
 
 describe("css-cascade", function () {
   function cascadeParserHandler(scope, validatorSet) {
-    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
-    const handler = new adapt_csscasc.CascadeParserHandler(
+    const dispatchHandler = new adapt_cssparse.DispatchParserHandler(
       scope,
-      dispatchHandler,
-      null,
-      null,
-      null,
-      validatorSet,
-      true,
+      (owner) =>
+        new adapt_csscasc.CascadeParserHandler(
+          scope,
+          owner,
+          null,
+          null,
+          null,
+          validatorSet,
+          null,
+        ),
     );
-    dispatchHandler.slave = handler;
-    return handler;
+    return dispatchHandler.initialSlave;
   }
 
   describe("IsNthSiblingAction", function () {
