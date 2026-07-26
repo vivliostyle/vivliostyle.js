@@ -25,7 +25,8 @@ import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
 
 describe("css-validator", function () {
-  function cascadeParserHandler(scope, validatorSet) {
+  function cascadeParserHandler(validatorSet) {
+    const scope = new adapt_exprs.LexicalScope(null);
     const dispatchHandler = new adapt_cssparse.DispatchParserHandler(scope);
     const handler = new adapt_csscasc.CascadeParserHandler(
       scope,
@@ -41,11 +42,8 @@ describe("css-validator", function () {
   }
 
   function parseCascade(cssText, done, callback) {
-    var handler = cascadeParserHandler(
-      new adapt_exprs.LexicalScope(null),
-      adapt_cssvalid.baseValidatorSet(),
-    );
-    handler.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
+    var handler = cascadeParserHandler(adapt_cssvalid.baseValidatorSet());
+    handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
     adapt_task.start(function () {
       adapt_cssparse
         .parseStylesheetFromText(cssText, handler.owner, null, null, null)
@@ -384,7 +382,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-or = bar | [ baz || biz ];");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -436,7 +434,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = bAr | Baz | bIZ ;");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -469,8 +467,8 @@ describe("css-validator", function () {
 
     it("should parse selector functions with a top-level cascade handler", function (done) {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
-      handler.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
+      var handler = cascadeParserHandler(validatorSet);
+      handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -495,8 +493,8 @@ describe("css-validator", function () {
     });
     it("should parse semantic footnote noteref default selectors", function (done) {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
-      handler.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
+      var handler = cascadeParserHandler(validatorSet);
+      handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -523,7 +521,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = SPACE(IDENT+);");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -551,7 +549,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = COMMA( IDENT+ );");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -579,7 +577,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo-comma = none | COMMA( [ bar | baz ]+ );");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -607,7 +605,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("spacefoo = none | SPACE( [ bar | baz ]+ );");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -641,7 +639,7 @@ describe("css-validator", function () {
         "accept-function = COMMA(AC_VALUES+);";
 
       validatorSet.parse(validation_txt);
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -671,7 +669,7 @@ describe("css-validator", function () {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
       validatorSet.initBuiltInValidators();
       validatorSet.parse("foo = bar( SPACE( POS_NUM [ SLASH POS_NUM ]? ) );");
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
@@ -720,7 +718,7 @@ describe("css-validator", function () {
           "SHORTHANDS\n\n" +
           "font = FONT font-style font-variant font-weight font-stretch ;",
       );
-      var handler = cascadeParserHandler(validatorSet.scope, validatorSet);
+      var handler = cascadeParserHandler(validatorSet);
       var warnListener = jasmine.createSpy("warn listener");
       vivliostyle_logging.logger.addListener(
         vivliostyle_logging.LogLevel.WARN,
