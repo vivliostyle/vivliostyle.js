@@ -465,7 +465,7 @@ describe("css-validator", function () {
       });
     });
 
-    it("should parse selector functions with a top-level cascade handler", function (done) {
+    it("should parse selector functions through the dispatch owner", function (done) {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
       var handler = cascadeParserHandler(validatorSet);
       handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.USER_AGENT);

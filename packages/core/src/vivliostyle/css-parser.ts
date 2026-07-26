@@ -2901,9 +2901,13 @@ export class ErrorHandler extends ParserHandler {
   }
 }
 
+/**
+ * Parses a stylesheet. Sub-handlers for selector functions and at-rules take
+ * over the parse by pushing themselves onto the dispatch handler's stack.
+ */
 export function parseStylesheet(
   tokenizer: CssTokenizer.Tokenizer,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
@@ -2923,7 +2927,7 @@ export function parseStylesheet(
 
 function parseStylesheetInternal(
   tokenizer: CssTokenizer.Tokenizer,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
@@ -2987,7 +2991,7 @@ function parseStylesheetInternal(
 
 export function parseStylesheetFromText(
   text: string,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   baseURL: string,
   classes: string | null,
   media: string | null,
@@ -3007,7 +3011,7 @@ export function parseStylesheetFromText(
 
 export function parseStylesheetFromURL(
   url: string,
-  handler: ParserHandler,
+  handler: DispatchParserHandler,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
