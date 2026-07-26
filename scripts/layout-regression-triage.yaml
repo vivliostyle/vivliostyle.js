@@ -1,1 +1,36 @@
-[]
+- category: General
+  title: "rlh with root line-height: normal"
+  file: rlh_unit/root-line-height-normal.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-root-line-height-domain  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-line-height-normal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-line-height-normal.html&zoom=1&spread=false
+- category: General
+  title: lh in calc() on the root line-height
+  file: rlh_unit/root-calc-line-height.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-root-line-height-domain  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-line-height.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-line-height.html&zoom=1&spread=false
+- category: General
+  title: lh in calc() on the root font-size
+  file: rlh_unit/root-calc-font-size.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-root-line-height-domain  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-font-size.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-font-size.html&zoom=1&spread=false
