@@ -525,6 +525,7 @@ export class Styler implements AbstractStyler {
       this.cascade.lastCounterChangeTypes,
     );
     this.postprocessTopStyle(style, false);
+    this.determineRootSizes(style);
     switch (this.root.namespaceURI) {
       case Base.NS.XHTML:
         this.bodyReached = false;
@@ -628,75 +629,91 @@ export class Styler implements AbstractStyler {
         }
       }
     }
-    if (!isBody) {
-      // root element
-      const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
-      let isRelativeFontSize = true;
-      if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
-        const val = fontSize.evaluate(this.context);
-        if (val instanceof Css.Numeric) {
-          let px = val.num;
-          switch (val.unit) {
-            case "em":
-            case "rem":
-              px *= this.context.initialFontSize;
-              break;
-            case "%":
-              px *= this.context.initialFontSize / 100;
-              break;
-            case "lh":
-            case "rlh":
-              px *=
-                (this.context.initialFontSize * Exprs.defaultUnitSizes["lh"]) /
-                Exprs.defaultUnitSizes["em"];
-              break;
-            default: {
-              const unitSize = Exprs.defaultUnitSizes[val.unit];
-              if (unitSize) {
-                px *= unitSize;
-              }
-              isRelativeFontSize = false;
+  }
+
+  private determineRootSizes(elemStyle: CssCascade.ElementStyle): void {
+    const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
+    let isRelativeFontSize = true;
+    if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
+      const evaluated = fontSize.evaluate(this.context);
+      const val = this.resolveRootSizingCalc(evaluated);
+      const fromRelativeCalc =
+        evaluated instanceof Css.Func && val instanceof Css.Numeric;
+      if (val instanceof Css.Numeric) {
+        let px = val.num;
+        switch (val.unit) {
+          case "em":
+          case "rem":
+            px *= this.context.initialFontSize;
+            break;
+          case "%":
+            px *= this.context.initialFontSize / 100;
+            break;
+          case "lh":
+          case "rlh":
+            px *= this.context.rootLineHeight;
+            break;
+          default: {
+            const unitSize = Exprs.defaultUnitSizes[val.unit];
+            if (unitSize) {
+              px *= unitSize;
             }
+            isRelativeFontSize = fromRelativeCalc;
           }
-          this.context.rootFontSize = px;
-          this.context.isRelativeRootFontSize = isRelativeFontSize;
         }
-      }
-      const rootFontSize =
-        this.context.rootFontSize ?? this.context.initialFontSize;
-      const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
-      if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
-        const val = lineHeight.evaluate(this.context);
-        if (val instanceof Css.Num) {
-          this.context.rootLineHeight = val.num * rootFontSize;
-        } else if (val instanceof Css.Numeric) {
-          let px = val.num;
-          switch (val.unit) {
-            case "em":
-            case "rem":
-              px *= rootFontSize;
-              break;
-            case "%":
-              px *= rootFontSize / 100;
-              break;
-            case "lh":
-            case "rlh":
-              px *= this.context.initialFontSize * this.context.pref.lineHeight;
-              break;
-            default: {
-              const unitSize = Exprs.defaultUnitSizes[val.unit];
-              if (unitSize) {
-                px *= unitSize;
-              }
-            }
-          }
-          this.context.rootLineHeight = px;
-        }
-      } else {
-        this.context.rootLineHeight =
-          this.context.fontSize() * this.context.pref.lineHeight;
+        this.context.rootFontSize = px;
+        this.context.isRelativeRootFontSize = isRelativeFontSize;
       }
     }
+    const rootFontSize =
+      this.context.rootFontSize ?? this.context.initialFontSize;
+    const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
+    let rootLineHeight: number | null = null;
+    let fromRelativeCalc = false;
+    if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
+      const evaluated = lineHeight.evaluate(this.context);
+      const val = this.resolveRootSizingCalc(evaluated);
+      fromRelativeCalc =
+        evaluated instanceof Css.Func && val instanceof Css.Numeric;
+      if (val instanceof Css.Num) {
+        rootLineHeight = val.num * rootFontSize;
+      } else if (val instanceof Css.Numeric) {
+        let px = val.num;
+        switch (val.unit) {
+          case "em":
+          case "rem":
+            px *= rootFontSize;
+            break;
+          case "%":
+            px *= rootFontSize / 100;
+            break;
+          case "lh":
+          case "rlh":
+            px *= this.context.rootLineHeight;
+            break;
+          default: {
+            const unitSize = Exprs.defaultUnitSizes[val.unit];
+            if (unitSize) {
+              px *= unitSize;
+            }
+          }
+        }
+        rootLineHeight = px;
+      }
+    }
+    this.context.rootLineHeight =
+      rootLineHeight ?? this.context.fontSize() * this.context.pref.lineHeight;
+    this.context.isRootLineHeightFromRelativeCalc = fromRelativeCalc;
+  }
+
+  private resolveRootSizingCalc(val: Css.Val): Css.Val {
+    if (!(val instanceof Css.Func)) {
+      return val;
+    }
+    // filtering visitors always return a value
+    return val.visit(
+      new CssCascade.RootSizingCalcFilterVisitor(this.context),
+    ) as Css.Val;
   }
 
   getTopContainerStyle(): CssCascade.ElementStyle {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>lh in calc() on the root font-size</title>
+    <style>
+      html {
+        font-size: calc(2 * 1lh);
+      }
+      .rem-box {
+        width: 100px;
+        height: 1rem;
+        background: teal;
+      }
+      .ref-box {
+        width: 100px;
+        height: 40px;
+        background: green;
+      }
+      .marker {
+        background: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The root font-size is <code>calc(2 * 1lh)</code>. On the root element
+      <code>lh</code> refers to the initial line height, so the root font size
+      is twice that and the coefficient must not be dropped.
+    </p>
+    <div class="rem-box"></div>
+    <div class="ref-box"></div>
+    <p class="marker">
+      The teal (1rem) and green (40px) boxes above must be the same height.
+    </p>
+  </body>
+</html>

@@ -39,6 +39,26 @@ module.exports = [
       },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
+        file: "rlh_unit/root-line-height-normal.html",
+        title: "rlh with root line-height: normal",
+      },
+      {
+        file: "rlh_unit/root-line-height-numeric.html",
+        title: "rlh with numeric root line-height",
+      },
+      {
+        file: "rlh_unit/root-self-reference.html",
+        title: "lh/rlh on the root element itself",
+      },
+      {
+        file: "rlh_unit/root-calc-line-height.html",
+        title: "lh in calc() on the root line-height",
+      },
+      {
+        file: "rlh_unit/root-calc-font-size.html",
+        title: "lh in calc() on the root font-size",
+      },
+      {
         file: "root-font-var-calc.html",
         title: "rem/rlh with font shorthand var() calc() (Issue #1955)",
       },

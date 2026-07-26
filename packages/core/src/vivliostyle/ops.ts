@@ -193,6 +193,7 @@ export class Style {
         viewportWidth,
         viewportHeight,
         fontSize,
+        fontSize * Exprs.defaultPreferencesInstance.lineHeight,
       );
       const viewportProps = CssCascade.mergeAll(context, this.viewportProps);
       const width = viewportProps["width"] as CssCascade.CascadeValue;
@@ -344,7 +345,13 @@ export class StyleInstance
     pageProgression?: Constants.PageProgression,
     isVersoFirstPage?: boolean,
   ) {
-    super(style.rootScope, viewport.width, viewport.height, viewport.fontSize);
+    super(
+      style.rootScope,
+      viewport.width,
+      viewport.height,
+      viewport.fontSize,
+      viewport.fontSize * pref.lineHeight,
+    );
     this.lang = xmldoc.lang || defaultLang;
     this.faces = new Font.DocumentFaces(this.style.fontDeobfuscator);
     this.rootPageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
@@ -576,6 +583,7 @@ export class StyleInstance
         this.pageWidth(),
         this.pageHeight(),
         this.initialFontSize,
+        this.initialFontSize * Exprs.defaultPreferencesInstance.lineHeight,
       );
       const counterListener = this.counterStore.createCounterListener(
         xmldoc.url,

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>rlh with root line-height: normal</title>
+    <style>
+      html {
+        line-height: normal;
+      }
+      .rlh-box {
+        width: 100px;
+        height: 3rlh;
+        background: teal;
+      }
+      .marker {
+        background: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The root element declares <code>line-height: normal</code>. Per CSS
+      Values, <code>rlh</code> must resolve against the resolved (normal) line
+      height of the root element.
+    </p>
+    <div class="rlh-box"></div>
+    <p class="marker">This paragraph must be pushed down by the box above.</p>
+  </body>
+</html>
