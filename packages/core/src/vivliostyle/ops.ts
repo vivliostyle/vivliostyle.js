@@ -64,36 +64,6 @@ import {
   UserAgentTocCss,
 } from "./assets";
 
-export const uaStylesheetBaseFetcher: TaskUtil.Fetcher<boolean> =
-  new TaskUtil.Fetcher(() => {
-    const frame: Task.Frame<boolean> = Task.newFrame("uaStylesheetBase");
-    const validatorSet = CssValidator.baseValidatorSet();
-    const url = Base.resolveURL("user-agent-base.css", Base.resourceBaseURL);
-    const handler = new CssCascade.CascadeParserHandler(
-      null,
-      null,
-      null,
-      null,
-      null,
-      validatorSet,
-      true,
-    );
-    handler.startStylesheet(CssParser.StylesheetFlavor.USER_AGENT);
-    CssCascade.setUABaseCascade(handler.cascade);
-    CssParser.parseStylesheetFromText(
-      UserAgentBaseCss,
-      handler,
-      url,
-      null,
-      null,
-    ).thenFinish(frame);
-    return frame.result();
-  }, "uaStylesheetBaseFetcher");
-
-export function loadUABase(): Task.Result<boolean> {
-  return uaStylesheetBaseFetcher.get();
-}
-
 export type FontFace = {
   properties: CssCascade.ElementStyle;
   condition: Exprs.Val;
@@ -3503,6 +3473,13 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         }
         this.triggersByDocURL[url] = triggers;
         const sources = [] as StyleSource[];
+        sources.push({
+          url: Base.resolveURL("user-agent-base.css", Base.resourceBaseURL),
+          text: UserAgentBaseCss,
+          flavor: CssParser.StylesheetFlavor.USER_AGENT,
+          classes: null,
+          media: null,
+        });
         sources.push({
           url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
           text: UserAgentPageCss,

@@ -100,13 +100,9 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     authorStyleSheets: OPS.StyleSheetParam[] | null,
     userStyleSheets: OPS.StyleSheetParam[] | null,
   ): Task.Result<EPUBDocStore> {
-    const frame = Task.newFrame<EPUBDocStore>("EPUBDocStore.create");
-    OPS.loadUABase().then(() => {
-      const store = new EPUBDocStore(authorStyleSheets, userStyleSheets);
-      store.triggerSingleDocumentPreprocessing = true;
-      frame.finish(store);
-    });
-    return frame.result();
+    const store = new EPUBDocStore(authorStyleSheets, userStyleSheets);
+    store.triggerSingleDocumentPreprocessing = true;
+    return Task.newResult(store);
   }
 
   makeDeobfuscatorFactory():
