@@ -1737,8 +1737,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       float.nodePosition,
       null,
       null,
+      this.pageFloatLayoutContext,
     );
-    pageFloatLayoutContext.setOuterContext(this.pageFloatLayoutContext);
     const parentContainer = parentPageFloatLayoutContext.getContainer();
     const floatContainer = this.pageFloatLayoutContext.getContainer(
       float.floatReference,

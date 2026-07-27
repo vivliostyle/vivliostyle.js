@@ -713,7 +713,6 @@ export namespace PageFloats {
 
     getContainer(floatReference?: FloatReference): Vtree.Container;
     setContainer(container: Vtree.Container);
-    setOuterContext(outerContext: PageFloatLayoutContext): void;
     addPageFloatLayoutContextAsPreviousSibling(
       context: PageFloatLayoutContext,
     ): void;

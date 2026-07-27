@@ -416,15 +416,6 @@ export class PageFloatLayoutContext
    */
   private lineFootnoteFinishInvalidatedOnce: Set<PageFloatID> = new Set();
 
-  /**
-   * Reference to the outer column's context for page float area contexts.
-   * Used only for getParent() navigation to propagate nested page floats
-   * and footnotes to region/page level. Unlike `parent`, this does NOT
-   * affect children registration, isInvalidated() propagation, or
-   * getFloatFragmentExclusions(). (Issue #1675)
-   */
-  private outerContext: PageFloatLayoutContext | null = null;
-
   constructor(
     public readonly parent: PageFloatLayoutContext,
     private readonly floatReference: FloatReference | null,
@@ -433,6 +424,14 @@ export class PageFloatLayoutContext
     public readonly generatingNodePosition: Vtree.NodePosition | null,
     writingMode: Css.Val | null,
     direction: Css.Val | null,
+    /**
+     * Reference to the outer column's context for page float area contexts.
+     * Used only for getParent() navigation to propagate nested page floats
+     * and footnotes to region/page level. Unlike `parent`, this does NOT
+     * affect children registration, isInvalidated() propagation, or
+     * getFloatFragmentExclusions(). (Issue #1675)
+     */
+    private readonly outerContext: PageFloatLayoutContext | null = null,
   ) {
     if (parent) {
       parent.children.push(this);
@@ -445,7 +444,9 @@ export class PageFloatLayoutContext
       (!Css.isDefaultingValue(direction) && direction) ||
       (parent && parent.direction) ||
       Css.ident.ltr;
-    this.floatStore = parent ? parent.floatStore : new PageFloatStore();
+    this.floatStore = parent
+      ? parent.floatStore
+      : (outerContext?.floatStore ?? new PageFloatStore());
     const previousSibling = this.getPreviousSibling();
     this.floatsDeferredFromPrevious = previousSibling
       ? [].concat(previousSibling.floatsDeferredToNext)
@@ -473,16 +474,6 @@ export class PageFloatLayoutContext
       return this.outerContext;
     }
     throw new Error(`No PageFloatLayoutContext for ${floatReference}`);
-  }
-
-  /**
-   * Set the outer context for a page float area context.
-   * This shares the float store so that page floats/footnotes created inside
-   * a page float area are visible at all levels. (Issue #1675)
-   */
-  setOuterContext(outerContext: PageFloatLayoutContext) {
-    this.outerContext = outerContext;
-    this.floatStore = outerContext.floatStore;
   }
 
   /**
