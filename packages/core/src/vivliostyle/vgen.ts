@@ -2470,13 +2470,11 @@ export class ViewFactory
       }
     }
 
-    const startBreakType =
-      (
-        this.context as Exprs.Context & {
-          pageLayout: { position: Vtree.LayoutPosition } | null;
-        }
-      )?.pageLayout?.position.flowPositions[this.flowName]?.startBreakType ??
-      null;
+    const startBreakType = (
+      this.context as Exprs.Context & {
+        currentLayoutPosition: Vtree.LayoutPosition;
+      }
+    )?.currentLayoutPosition?.flowPositions[this.flowName]?.startBreakType;
 
     if (Break.isForcedBreakValue(startBreakType)) {
       return startBreakType; // forced break
