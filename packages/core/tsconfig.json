@@ -3,11 +3,11 @@
   "exclude": ["node_modules", "examples"],
   "compilerOptions": {
     /* Basic Options */
-    "target": "ES2018" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */,
+    "target": "ES2019" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */,
     "module": "esnext" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     "moduleResolution": "bundler",
     "lib": [
-      "es2018",
+      "es2019",
       "dom",
       "dom.iterable"
     ] /* Specify library files to be included in the compilation. */,
