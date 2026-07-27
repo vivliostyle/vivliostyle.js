@@ -128,6 +128,32 @@ describe("epub", function () {
           return adapt_task.newResult(true);
         });
       });
+
+      ["%23", "%3F", "%3A"].forEach(function (encodedCharacter) {
+        it(
+          "preserves " + encodedCharacter + " in the primary entry filename",
+          function (done) {
+            var store = new adapt_epub.EPUBDocStore();
+            var doc = new DOMParser().parseFromString(
+              "<html xmlns='http://www.w3.org/1999/xhtml'><head><title>Reserved character</title></head><body></body></html>",
+              "text/html",
+            );
+            var url =
+              "https://example.com/book/file" + encodedCharacter + "name.html";
+
+            adapt_task.start(function () {
+              adapt_epub.OPFDoc.fromWebPubManifest(store, url, {}, doc).then(
+                function (opf) {
+                  expect(opf.spine.length).toBe(1);
+                  expect(opf.spine[0].src).toBe(url);
+                  done();
+                },
+              );
+              return adapt_task.newResult(true);
+            });
+          },
+        );
+      });
     });
 
     describe("OPFDocumentURLTransformer", function () {

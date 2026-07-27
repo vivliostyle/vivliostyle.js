@@ -72,6 +72,10 @@ function shouldSkipHeadForWebPub(url: string): boolean {
   );
 }
 
+function encodeURLPath(path: string): string {
+  return path.split("/").map(encodeURIComponent).join("/");
+}
+
 export type Position = {
   spineIndex: number;
   pageIndex: number;
@@ -1321,7 +1325,7 @@ export class OPFDoc {
     const primaryEntryPath = getPathFromURL(primaryEntryURL, pubURL);
     const primaryEntryReadingOrderURL =
       primaryEntryPath !== null
-        ? encodeURI(primaryEntryPath)
+        ? encodeURLPath(primaryEntryPath)
         : /^(?:about:|blob:)/i.test(primaryEntryURL)
           ? primaryEntryURL
           : null;
@@ -1347,7 +1351,7 @@ export class OPFDoc {
           Base.resolveURL(href, pubURL),
         );
         const path = getPathFromURL(hrefNoFragment, pubURL);
-        const url = path !== null ? encodeURI(path) : hrefNoFragment;
+        const url = path !== null ? encodeURLPath(path) : hrefNoFragment;
         if (manifestObj["readingOrder"].indexOf(url) == -1) {
           manifestObj["readingOrder"].push(url);
         }
