@@ -28,6 +28,7 @@ describe("page-floats", function () {
   var PageFloatFragment = module.PageFloatFragment;
   var PageFloatContinuation = module.PageFloatContinuation;
   var PageFloatLayoutContext = module.PageFloatLayoutContext;
+  var RootPageFloatLayoutContext = module.RootPageFloatLayoutContext;
 
   var dummyOffsetInNode = 0;
   function dummyNodePosition() {
@@ -144,25 +145,29 @@ describe("page-floats", function () {
   });
 
   describe("PageFloatLayoutContext", function () {
+    function mockContainer() {
+      return {
+        // A distinct element per container, as in production, and one that
+        // answers `contains` so anchor lookups reach a value rather than a
+        // TypeError.
+        element: {
+          contains: jasmine.createSpy("contains").and.returnValue(false),
+        },
+        clear: jasmine.createSpy("clear"),
+      };
+    }
+
     var rootContext;
     beforeEach(function () {
-      rootContext = new PageFloatLayoutContext(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      );
+      rootContext = RootPageFloatLayoutContext.createRoot();
     });
 
     describe("constructor", function () {
       it("uses writing-mode and direction values of the parent if they are not specified", function () {
-        var context = new PageFloatLayoutContext(
+        var context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           adapt_css.ident.vertical_rl,
@@ -172,10 +177,10 @@ describe("page-floats", function () {
         expect(context.writingMode).toBe(adapt_css.ident.vertical_rl);
         expect(context.direction).toBe(adapt_css.ident.rtl);
 
-        context = new PageFloatLayoutContext(
+        context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context,
           FloatReference.REGION,
-          null,
           null,
           null,
           null,
@@ -187,10 +192,10 @@ describe("page-floats", function () {
       });
 
       it("falls back to parent values when CSS defaulting values (inherit, initial, revert, unset) are passed", function () {
-        var parentContext = new PageFloatLayoutContext(
+        var parentContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           adapt_css.ident.vertical_rl,
@@ -205,10 +210,10 @@ describe("page-floats", function () {
         ];
 
         defaultingValues.forEach(function (defaultingValue) {
-          var context = new PageFloatLayoutContext(
+          var context = PageFloatLayoutContext.createWithContainer(
+            mockContainer(),
             parentContext,
             FloatReference.REGION,
-            null,
             null,
             null,
             defaultingValue,
@@ -228,8 +233,7 @@ describe("page-floats", function () {
         ];
 
         defaultingValues.forEach(function (defaultingValue) {
-          var context = new PageFloatLayoutContext(
-            null,
+          var context = PageFloatLayoutContext.create(
             null,
             null,
             null,
@@ -243,10 +247,10 @@ describe("page-floats", function () {
       });
 
       it("registers itself to the parent as a child", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -255,10 +259,10 @@ describe("page-floats", function () {
 
         expect(rootContext.children).toEqual([pageContext]);
 
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
-          null,
           null,
           null,
           null,
@@ -271,10 +275,10 @@ describe("page-floats", function () {
 
     describe("#getPreviousSibling", function () {
       it("returns null if the parent has no children preceding the child", function () {
-        var context = new PageFloatLayoutContext(
+        var context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -285,28 +289,28 @@ describe("page-floats", function () {
       });
 
       it("returns the previous sibling if it has the same floatReference", function () {
-        var context1 = new PageFloatLayoutContext(
+        var context1 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
           null,
         );
-        var context2 = new PageFloatLayoutContext(
+        var context2 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
           null,
         );
-        var context3 = new PageFloatLayoutContext(
+        var context3 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -319,100 +323,100 @@ describe("page-floats", function () {
       });
 
       it("returns the last context with the same floatReference, the same flow and the same generating element", function () {
-        var context1 = new PageFloatLayoutContext(
+        var context1 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        var context2 = new PageFloatLayoutContext(
+        var context2 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context1,
           FloatReference.REGION,
-          null,
           "body",
           null,
           null,
           null,
         );
-        var context3 = new PageFloatLayoutContext(
+        var context3 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context2,
           FloatReference.COLUMN,
-          null,
           "body",
           null,
           null,
           null,
         );
-        var context4 = new PageFloatLayoutContext(
+        var context4 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context1,
           FloatReference.REGION,
-          null,
           "flow",
           null,
           null,
           null,
         );
-        var context5 = new PageFloatLayoutContext(
+        var context5 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context4,
           FloatReference.COLUMN,
-          null,
           "flow",
           null,
           null,
           null,
         );
-        var context6 = new PageFloatLayoutContext(
+        var context6 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context4,
           FloatReference.COLUMN,
-          null,
           "flow",
           {},
           null,
           null,
         ); // generating element exists
-        var context7 = new PageFloatLayoutContext(
+        var context7 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        var context8 = new PageFloatLayoutContext(
+        var context8 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context7,
           FloatReference.REGION,
-          null,
           "body",
           null,
           null,
           null,
         );
-        var context9 = new PageFloatLayoutContext(
+        var context9 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context8,
           FloatReference.COLUMN,
-          null,
           "body",
           null,
           null,
           null,
         );
-        var context10 = new PageFloatLayoutContext(
+        var context10 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context7,
           FloatReference.REGION,
-          null,
           "flow",
           null,
           null,
           null,
         );
-        var context11 = new PageFloatLayoutContext(
+        var context11 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           context10,
           FloatReference.COLUMN,
-          null,
           "flow",
           null,
           null,
@@ -432,19 +436,19 @@ describe("page-floats", function () {
 
     describe("#findPageFloatByNodePosition", function () {
       it("returns a page float registered by PageFloatLayoutContext with the same root PageFloatLayoutContext", function () {
-        var context1 = new PageFloatLayoutContext(
+        var context1 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
           null,
         );
-        var context2 = new PageFloatLayoutContext(
+        var context2 = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -486,10 +490,10 @@ describe("page-floats", function () {
 
     describe("#forbid, #isForbidden", function () {
       it("returns if the page float is forbidden in the context by #forbid method", function () {
-        var context = new PageFloatLayoutContext(
+        var context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -512,28 +516,28 @@ describe("page-floats", function () {
       });
 
       it("returns true if the page float is forbidden by one of ancestors of the context", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -555,10 +559,10 @@ describe("page-floats", function () {
           regionContext.isForbidden(float);
         }).toThrow();
 
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -583,10 +587,10 @@ describe("page-floats", function () {
           pageContext.isForbidden(float);
         }).toThrow();
 
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -595,19 +599,19 @@ describe("page-floats", function () {
 
         expect(columnContext.isForbidden(float)).toBe(true);
 
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -634,10 +638,10 @@ describe("page-floats", function () {
         expect(regionContext.isForbidden(float)).toBe(true);
         expect(pageContext.isForbidden(float)).toBe(true);
 
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -646,19 +650,19 @@ describe("page-floats", function () {
 
         expect(columnContext.isForbidden(float)).toBe(true);
 
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -668,28 +672,28 @@ describe("page-floats", function () {
         expect(columnContext.isForbidden(float)).toBe(true);
         expect(regionContext.isForbidden(float)).toBe(true);
 
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -705,28 +709,28 @@ describe("page-floats", function () {
     describe("#addPageFloatFragment, #findPageFloatFragment", function () {
       var pageContext, regionContext, columnContext, area;
       function reset() {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -743,10 +747,10 @@ describe("page-floats", function () {
       });
 
       it("A PageFloatFragment added by #addPageFloatFragment can be retrieved by #findPageFloatFragment", function () {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -794,10 +798,10 @@ describe("page-floats", function () {
           false,
         );
         columnContext.addPageFloatFragment(fragment);
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -827,19 +831,19 @@ describe("page-floats", function () {
           false,
         );
         columnContext.addPageFloatFragment(fragment);
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -936,12 +940,12 @@ describe("page-floats", function () {
     });
 
     describe("#removePageFloatFragment", function () {
-      var container, context, float, area, fragment;
+      var context, float, area, fragment;
       beforeEach(function () {
-        context = new PageFloatLayoutContext(
+        context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          container,
           null,
           null,
           null,
@@ -1001,28 +1005,28 @@ describe("page-floats", function () {
     describe("#registerPageFloatAnchor", function () {
       var pageContext, regionContext, columnContext, float, anchorViewNode;
       beforeEach(function () {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -1042,7 +1046,9 @@ describe("page-floats", function () {
         columnContext.addPageFloat(float);
         columnContext.registerPageFloatAnchor(float, anchorViewNode);
 
-        expect(columnContext.floatAnchors[float.getId()]).toBe(anchorViewNode);
+        expect(columnContext.collectPageFloatAnchors()[float.getId()]).toBe(
+          anchorViewNode,
+        );
       });
     });
 
@@ -1054,10 +1060,10 @@ describe("page-floats", function () {
             contains: jasmine.createSpy("contains"),
           },
         };
-        context = new PageFloatLayoutContext(
+        context = PageFloatLayoutContext.createWithContainer(
+          container,
           rootContext,
           FloatReference.COLUMN,
-          container,
           "foo",
           null,
           null,
@@ -1097,7 +1103,7 @@ describe("page-floats", function () {
 
       it("returns true if the float is deferred from a previous fragment", function () {
         container.element.contains.and.returnValue(false);
-        context.floatsDeferredFromPrevious.push(
+        context.state.floatsDeferredFromPrevious.push(
           new PageFloatContinuation(float, {}),
         );
 
@@ -1112,19 +1118,19 @@ describe("page-floats", function () {
             contains: jasmine.createSpy("contains"),
           },
         };
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container,
           rootContext,
           FloatReference.PAGE,
-          container,
           "foo",
           null,
           null,
           null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.COLUMN,
-          null,
           "foo",
           null,
           null,
@@ -1156,10 +1162,10 @@ describe("page-floats", function () {
 
     describe("#hasInvalidatedForLineFootnote", function () {
       it("invalidates again when the line footnote retry size changes", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           "foo",
           null,
           null,
@@ -1189,24 +1195,16 @@ describe("page-floats", function () {
 
     describe("#addPageFloatLayoutContextAsPreviousSibling", function () {
       it("seeds isolated roots with continuations from the previous page", function () {
-        var previousPageContext = new PageFloatLayoutContext(
+        var previousPageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        var isolatedRootContext = new PageFloatLayoutContext(
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        );
+        var isolatedRootContext = RootPageFloatLayoutContext.createRoot();
         var float = new PageFloat(
           dummyNodePosition(),
           FloatReference.PAGE,
@@ -1221,10 +1219,10 @@ describe("page-floats", function () {
         isolatedRootContext.addPageFloatLayoutContextAsPreviousSibling(
           previousPageContext,
         );
-        var isolatedPageContext = new PageFloatLayoutContext(
+        var isolatedPageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           isolatedRootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -1240,28 +1238,28 @@ describe("page-floats", function () {
     describe("#deferPageFloat", function () {
       var pageContext, regionContext, columnContext, float;
       beforeEach(function () {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
           null,
           null,
           null,
-          null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
-          null,
           "foo",
           null,
           null,
           null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           "foo",
           null,
           null,
@@ -1280,8 +1278,8 @@ describe("page-floats", function () {
         columnContext.addPageFloat(float);
         columnContext.deferPageFloat(new PageFloatContinuation(float, {}));
 
-        expect(columnContext.floatsDeferredToNext.length).toBe(1);
-        expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
+        expect(columnContext.state.floatsDeferredToNext.length).toBe(1);
+        expect(columnContext.state.floatsDeferredToNext[0].float).toBe(float);
       });
 
       it("replaces an existing deferred PageFloatContinuation with new one if there exists a deferred continuation of the same float", function () {
@@ -1298,9 +1296,9 @@ describe("page-floats", function () {
           new PageFloatContinuation(float, position1),
         );
 
-        expect(columnContext.floatsDeferredToNext.length).toBe(1);
-        expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
-        expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(
+        expect(columnContext.state.floatsDeferredToNext.length).toBe(1);
+        expect(columnContext.state.floatsDeferredToNext[0].float).toBe(float);
+        expect(columnContext.state.floatsDeferredToNext[0].nodePosition).toBe(
           position1,
         );
 
@@ -1309,9 +1307,9 @@ describe("page-floats", function () {
           new PageFloatContinuation(float, position2),
         );
 
-        expect(columnContext.floatsDeferredToNext.length).toBe(1);
-        expect(columnContext.floatsDeferredToNext[0].float).toBe(float);
-        expect(columnContext.floatsDeferredToNext[0].nodePosition).toBe(
+        expect(columnContext.state.floatsDeferredToNext.length).toBe(1);
+        expect(columnContext.state.floatsDeferredToNext[0].float).toBe(float);
+        expect(columnContext.state.floatsDeferredToNext[0].nodePosition).toBe(
           position2,
         );
       });
@@ -1327,9 +1325,9 @@ describe("page-floats", function () {
         columnContext.addPageFloat(float);
         columnContext.deferPageFloat(new PageFloatContinuation(float, {}));
 
-        expect(columnContext.floatsDeferredToNext.length).toBe(0);
-        expect(regionContext.floatsDeferredToNext.length).toBe(1);
-        expect(regionContext.floatsDeferredToNext[0].float).toBe(float);
+        expect(columnContext.state.floatsDeferredToNext.length).toBe(0);
+        expect(regionContext.state.floatsDeferredToNext.length).toBe(1);
+        expect(regionContext.state.floatsDeferredToNext[0].float).toBe(float);
       });
     });
 
@@ -1356,7 +1354,8 @@ describe("page-floats", function () {
         cont5,
         cont6;
       beforeEach(function () {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
@@ -1364,19 +1363,19 @@ describe("page-floats", function () {
           null,
           null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
-          null,
           "foo",
           null,
           null,
           null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           "foo",
           null,
           null,
@@ -1384,22 +1383,22 @@ describe("page-floats", function () {
         );
         var float1 = addPageFloat(FloatReference.PAGE, pageContext, "foo");
         cont1 = new PageFloatContinuation(float1, {});
-        pageContext.floatsDeferredFromPrevious.push(cont1);
+        pageContext.state.floatsDeferredFromPrevious.push(cont1);
         var float2 = addPageFloat(FloatReference.PAGE, pageContext, "bar");
         cont2 = new PageFloatContinuation(float2, {});
-        pageContext.floatsDeferredFromPrevious.push(cont2);
+        pageContext.state.floatsDeferredFromPrevious.push(cont2);
         var float3 = addPageFloat(FloatReference.REGION, regionContext, "foo");
         cont3 = new PageFloatContinuation(float3, {});
-        regionContext.floatsDeferredFromPrevious.push(cont3);
+        regionContext.state.floatsDeferredFromPrevious.push(cont3);
         var float4 = addPageFloat(FloatReference.REGION, regionContext, "bar");
         cont4 = new PageFloatContinuation(float4, {});
-        regionContext.floatsDeferredFromPrevious.push(cont4);
+        regionContext.state.floatsDeferredFromPrevious.push(cont4);
         var float5 = addPageFloat(FloatReference.COLUMN, columnContext, "foo");
         cont5 = new PageFloatContinuation(float5, {});
-        columnContext.floatsDeferredFromPrevious.push(cont5);
+        columnContext.state.floatsDeferredFromPrevious.push(cont5);
         var float6 = addPageFloat(FloatReference.COLUMN, columnContext, "bar");
         cont6 = new PageFloatContinuation(float6, {});
-        columnContext.floatsDeferredFromPrevious.push(cont6);
+        columnContext.state.floatsDeferredFromPrevious.push(cont6);
       });
 
       it("returns all deferred PageFloatContinuations with the corresponding flow name in order of page, region and column", function () {
@@ -1434,7 +1433,8 @@ describe("page-floats", function () {
         cont5,
         cont6;
       beforeEach(function () {
-        pageContext = new PageFloatLayoutContext(
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
           null,
@@ -1442,36 +1442,36 @@ describe("page-floats", function () {
           null,
           null,
         );
-        regionContext = new PageFloatLayoutContext(
+        regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           pageContext,
           FloatReference.REGION,
-          null,
           "foo",
           null,
           null,
           null,
         );
-        columnContext = new PageFloatLayoutContext(
+        columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           "foo",
           null,
           null,
           null,
         );
         cont1 = new PageFloatContinuation({ flowName: "foo" }, {});
-        pageContext.floatsDeferredToNext.push(cont1);
+        pageContext.state.floatsDeferredToNext.push(cont1);
         cont2 = new PageFloatContinuation({ flowName: "bar" }, {});
-        pageContext.floatsDeferredToNext.push(cont2);
+        pageContext.state.floatsDeferredToNext.push(cont2);
         cont3 = new PageFloatContinuation({ flowName: "foo" }, {});
-        regionContext.floatsDeferredToNext.push(cont3);
+        regionContext.state.floatsDeferredToNext.push(cont3);
         cont4 = new PageFloatContinuation({ flowName: "bar" }, {});
-        regionContext.floatsDeferredToNext.push(cont4);
+        regionContext.state.floatsDeferredToNext.push(cont4);
         cont5 = new PageFloatContinuation({ flowName: "foo" }, {});
-        columnContext.floatsDeferredToNext.push(cont5);
+        columnContext.state.floatsDeferredToNext.push(cont5);
         cont6 = new PageFloatContinuation({ flowName: "bar" }, {});
-        columnContext.floatsDeferredToNext.push(cont6);
+        columnContext.state.floatsDeferredToNext.push(cont6);
       });
 
       it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function () {
@@ -1503,10 +1503,10 @@ describe("page-floats", function () {
         float4,
         cont4;
       beforeEach(function () {
-        context = new PageFloatLayoutContext(
+        context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -1567,8 +1567,8 @@ describe("page-floats", function () {
         );
         context.addPageFloat(float4);
         cont4 = new PageFloatContinuation(float4, {});
-        context.floatsDeferredFromPrevious = [cont1, cont3, cont4];
-        context.floatsDeferredToNext = [cont3];
+        context.state.floatsDeferredFromPrevious.push(...[cont1, cont3, cont4]);
+        context.deferPageFloat(cont3);
       });
 
       it("Removes and forbids the last fragment whose anchor have not appeared", function () {
@@ -1581,7 +1581,9 @@ describe("page-floats", function () {
         );
         expect(context.isForbidden(float2)).toBe(true);
         expect(context.isForbidden(float1)).not.toBe(true);
-        expect(context.floatsDeferredToNext).toEqual([cont3]);
+        expect(context.getPageFloatContinuationsDeferredToNext()).toEqual([
+          cont3,
+        ]);
       });
 
       it("Removes the last fragment whose anchor have not appeared", function () {
@@ -1596,7 +1598,9 @@ describe("page-floats", function () {
         );
         expect(context.isForbidden(float1)).toBe(true);
         expect(context.isForbidden(float2)).not.toBe(true);
-        expect(context.floatsDeferredToNext).toEqual([cont3]);
+        expect(context.getPageFloatContinuationsDeferredToNext()).toEqual([
+          cont3,
+        ]);
       });
 
       it("Removes floats deferred to next fragmentainers if their anchors have not appeared", function () {
@@ -1609,14 +1613,17 @@ describe("page-floats", function () {
         );
         context.addPageFloat(float5);
         var cont5 = new PageFloatContinuation(float5, {});
-        context.floatsDeferredToNext = [cont3, cont5];
+        context.deferPageFloat(cont5);
         context.isAnchorAlreadyAppeared.and.callFake(function (id) {
           return id === float1.getId() || id === float2.getId();
         });
         context.finish();
 
         expect(context.removePageFloatFragment).not.toHaveBeenCalled();
-        expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
+        expect(context.getPageFloatContinuationsDeferredToNext()).toEqual([
+          cont3,
+          cont4,
+        ]);
       });
 
       it("Transfer floats deferred from previous fragmentainers and not laid out yet if all anchor view nodes of the float fragments have already appeared", function () {
@@ -1627,14 +1634,17 @@ describe("page-floats", function () {
         context.finish();
 
         expect(context.removePageFloatFragment).not.toHaveBeenCalled();
-        expect(context.floatsDeferredToNext).toEqual([cont3, cont4]);
+        expect(context.getPageFloatContinuationsDeferredToNext()).toEqual([
+          cont3,
+          cont4,
+        ]);
       });
 
       it("retries footnote sizing outside multi-column when the footnote pushes its anchor away", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -1649,7 +1659,7 @@ describe("page-floats", function () {
         );
         float.footnotePolicy = adapt_css.ident.line;
         pageContext.addPageFloat(float);
-        pageContext.footnoteAnchorsSeen.add(float.getId());
+        pageContext.markPageFloatAnchorSeen(float);
         spyOn(pageContext, "hasMultiColumnFootnoteContext").and.returnValue(
           false,
         );
@@ -1686,10 +1696,10 @@ describe("page-floats", function () {
       });
 
       it("forbids deferred line-policy footnotes on page contexts while the anchor is present", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -1706,21 +1716,23 @@ describe("page-floats", function () {
         float.footnotePolicy = adapt_css.ident.line;
         pageContext.addPageFloat(float);
         var continuation = new PageFloatContinuation(float, {});
-        pageContext.floatsDeferredToNext = [continuation];
+        pageContext.deferPageFloat(continuation);
         spyOn(pageContext, "hasCurrentAnchor").and.returnValue(true);
 
         pageContext.finish();
 
         expect(pageContext.isForbidden(float)).toBe(true);
-        expect(pageContext.floatsDeferredToNext).toEqual([]);
+        expect(pageContext.getPageFloatContinuationsDeferredToNext()).toEqual(
+          [],
+        );
         expect(pageContext.invalidate).toHaveBeenCalled();
       });
 
       it("does not forbid deferred line-policy footnotes on page contexts when the anchor moved off the page on retry", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.PAGE,
-          null,
           null,
           null,
           null,
@@ -1737,22 +1749,35 @@ describe("page-floats", function () {
         float.footnotePolicy = adapt_css.ident.line;
         pageContext.addPageFloat(float);
         var continuation = new PageFloatContinuation(float, {});
-        pageContext.floatsDeferredToNext = [continuation];
-        pageContext.footnoteAnchorsSeen.add(float.getId());
+        pageContext.deferPageFloat(continuation);
+        pageContext.markPageFloatAnchorSeen(float);
         spyOn(pageContext, "hasCurrentAnchor").and.returnValue(false);
 
         pageContext.finish();
 
         expect(pageContext.isForbidden(float)).toBe(false);
-        expect(pageContext.floatsDeferredToNext).toEqual([]);
+        expect(pageContext.getPageFloatContinuationsDeferredToNext()).toEqual(
+          [],
+        );
         expect(pageContext.invalidate).not.toHaveBeenCalled();
       });
 
       it("does not forbid deferred line-policy footnotes on region contexts", function () {
-        var regionContext = new PageFloatLayoutContext(
+        // ops builds a region under the page context; the arm handles a
+        // parent without a container too.
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
-          FloatReference.REGION,
+          FloatReference.PAGE,
           null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
+          pageContext,
+          FloatReference.REGION,
           null,
           null,
           null,
@@ -1769,8 +1794,8 @@ describe("page-floats", function () {
         float.footnotePolicy = adapt_css.ident.line;
         regionContext.addPageFloat(float);
         var continuation = new PageFloatContinuation(float, {});
-        regionContext.floatsDeferredToNext = [continuation];
-        regionContext.footnoteAnchorsSeen.add(float.getId());
+        regionContext.deferPageFloat(continuation);
+        regionContext.markPageFloatAnchorSeen(float);
 
         regionContext.finish();
 
@@ -1786,10 +1811,10 @@ describe("page-floats", function () {
           clear: jasmine.createSpy("clear"),
           element: {},
         };
-        context = new PageFloatLayoutContext(
+        context = PageFloatLayoutContext.createWithContainer(
+          container,
           rootContext,
           FloatReference.PAGE,
-          container,
           null,
           null,
           null,
@@ -1818,27 +1843,27 @@ describe("page-floats", function () {
         var anchorViewNode = {};
         context.registerPageFloatAnchor(float, anchorViewNode);
 
-        expect(context.floatAnchors[float.getId()]).toBe(anchorViewNode);
+        expect(context.collectPageFloatAnchors()[float.getId()]).toBe(
+          anchorViewNode,
+        );
 
         context.invalidate();
 
-        expect(Object.keys(context.floatAnchors).length).toBe(0);
+        expect(Object.keys(context.collectPageFloatAnchors()).length).toBe(0);
       });
 
       it("clears children", function () {
-        var child = new PageFloatLayoutContext(
+        var child = PageFloatLayoutContext.createWithContainer(
+          // Same container element as the parent, which is what makes
+          // invalidate() detach this child's fragment views.
+          { clear: jasmine.createSpy("clear"), element: container.element },
           context,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        child.container = {
-          clear: jasmine.createSpy("clear"),
-          element: container.element,
-        };
         var fragment = {
           area: {
             element: {
@@ -1865,28 +1890,28 @@ describe("page-floats", function () {
       }
 
       it("returns true if one of its ancestors is invalidated", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(),
           rootContext,
           FloatReference.PAGE,
-          container(),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(),
           pageContext,
           FloatReference.REGION,
-          container(),
           null,
           null,
           null,
           null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(),
           regionContext,
           FloatReference.COLUMN,
-          container(),
           null,
           null,
           null,
@@ -1927,10 +1952,10 @@ describe("page-floats", function () {
 
     describe("#getFloatFragmentExclusions", function () {
       it("returns an array of exclusions of PageFloatFragments", function () {
-        var context = new PageFloatLayoutContext(
+        var context = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -1989,19 +2014,19 @@ describe("page-floats", function () {
       });
 
       it("returns an array of exclusions of PageFloatFragments, including those registered in the parent context", function () {
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           rootContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2067,6 +2092,7 @@ describe("page-floats", function () {
       function container(vertical) {
         return {
           vertical: vertical,
+          element: {},
           clear: jasmine.createSpy("clear"),
         };
       }
@@ -2095,29 +2121,106 @@ describe("page-floats", function () {
         context.addPageFloatFragment(fragment);
       }
 
-      it("includes ancestor block-end floats when getting block-start edge of block-end floats", function () {
-        var pageContext = new PageFloatLayoutContext(
+      it("resolves the block-end edge axis from its own container too", function () {
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           rootContext,
           FloatReference.PAGE,
-          container(false),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
+          pageContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        // A vertical context folds x1 with Math.min (100), a horizontal one
+        // folds y2 with Math.max (480).
+        addFragment(columnContext, FloatReference.COLUMN, "block-start", {
+          x1: 100,
+          x2: 180,
+          y1: 300,
+          y2: 380,
+        });
+        addFragment(columnContext, FloatReference.COLUMN, "block-start", {
+          x1: 200,
+          x2: 260,
+          y1: 400,
+          y2: 480,
+        });
+
+        expect(columnContext.getBlockEndEdgeOfBlockStartFloats()).toBe(100);
+      });
+
+      it("resolves the axis from its own container, not an ancestor's", function () {
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+        );
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
+          pageContext,
+          FloatReference.COLUMN,
+          null,
+          null,
+          null,
+          null,
+        );
+
+        // Two block-end fragments on the column. A vertical context folds
+        // x2 with Math.max (260), a horizontal one folds y1 with Math.min
+        // (300), so the value says which container decided the axis.
+        addFragment(columnContext, FloatReference.COLUMN, "block-end", {
+          x1: 100,
+          x2: 180,
+          y1: 300,
+          y2: 380,
+        });
+        addFragment(columnContext, FloatReference.COLUMN, "block-end", {
+          x1: 200,
+          x2: 260,
+          y1: 400,
+          y2: 480,
+        });
+
+        expect(columnContext.getBlockStartEdgeOfBlockEndFloats()).toBe(260);
+      });
+
+      it("includes ancestor block-end floats when getting block-start edge of block-end floats", function () {
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
+          rootContext,
+          FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+        );
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2141,28 +2244,28 @@ describe("page-floats", function () {
       });
 
       it("filters block-end floats by inlinePos when getting block-start edge", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           rootContext,
           FloatReference.PAGE,
-          container(false),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2190,28 +2293,28 @@ describe("page-floats", function () {
       });
 
       it("treats block-end inline-* floats as block-end floats", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           rootContext,
           FloatReference.PAGE,
-          container(false),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2242,28 +2345,28 @@ describe("page-floats", function () {
       });
 
       it("filters block-start floats by inlinePos when getting block-end edge", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           rootContext,
           FloatReference.PAGE,
-          container(false),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(false),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2291,28 +2394,28 @@ describe("page-floats", function () {
       });
 
       it("includes ancestor block-end floats in vertical contexts", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           rootContext,
           FloatReference.PAGE,
-          container(true),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,
@@ -2336,28 +2439,28 @@ describe("page-floats", function () {
       });
 
       it("filters block-start floats by inlinePos in vertical contexts", function () {
-        var pageContext = new PageFloatLayoutContext(
+        var pageContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           rootContext,
           FloatReference.PAGE,
-          container(true),
           null,
           null,
           null,
           null,
         );
-        var regionContext = new PageFloatLayoutContext(
+        var regionContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           pageContext,
           FloatReference.REGION,
           null,
           null,
           null,
           null,
-          null,
         );
-        var columnContext = new PageFloatLayoutContext(
+        var columnContext = PageFloatLayoutContext.createWithContainer(
+          container(true),
           regionContext,
           FloatReference.COLUMN,
-          null,
           null,
           null,
           null,

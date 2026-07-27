@@ -418,6 +418,20 @@ export interface InstanceHolder extends Exprs.Context {
   lookupInstance(key: string): PageBoxInstance;
 }
 
+/**
+ * A page box whose subtree establishes the page float area of a page. Which box
+ * becomes the area's container is fixed by the page box tree: the page master
+ * itself for -epubx-page-master, the page area partition for `@page` rules.
+ */
+export interface PageAreaEstablishing {
+  /**
+   * The child whose subtree establishes the area, or null when this box is the
+   * container itself.
+   */
+  readonly pageAreaEstablishingChild:
+    (PageBoxInstance & PageAreaEstablishing) | null;
+}
+
 export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   /**
    * cascaded styles, geometric ones converted to Css.Expr
@@ -1938,10 +1952,19 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
 
 export class PageMasterInstance<
   P extends PageMaster = PageMaster<PageMasterInstance<any>>,
-> extends PageBoxInstance<P> {
+>
+  extends PageBoxInstance<P>
+  implements PageAreaEstablishing
+{
   constructor(parentInstance: PageBoxInstance, pageBox: P) {
     super(parentInstance, pageBox);
     this.pageMasterInstance = this;
+  }
+
+  /** `@page` rules put the area on the page area partition instead. */
+  get pageAreaEstablishingChild():
+    (PageBoxInstance & PageAreaEstablishing) | null {
+    return null;
   }
 
   override boxSpecificEnabled(enabled: Exprs.Val): Exprs.Val {

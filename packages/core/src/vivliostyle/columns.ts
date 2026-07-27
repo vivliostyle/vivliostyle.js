@@ -29,7 +29,7 @@ import { Layout } from "./types";
 export type ColumnLayoutResult = {
   columns: Layout.Column[];
   position: Vtree.LayoutPosition;
-  columnPageFloatLayoutContexts?: PageFloats.PageFloatLayoutContext[];
+  columnPageFloatLayoutContexts?: PageFloats.AttachedPageFloatLayoutContext[];
 };
 
 export type ColumnGenerator = () => Task.Result<ColumnLayoutResult | null>;
@@ -63,7 +63,7 @@ export abstract class ColumnBalancer {
   constructor(
     public readonly layoutContainer: Vtree.Container,
     public readonly columnGenerator: ColumnGenerator,
-    public readonly regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    public readonly regionPageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
   ) {
     this.originalContainerBlockSize = getBlockSize(layoutContainer);
   }
@@ -409,7 +409,7 @@ export function createColumnBalancer(
   columnCount: number,
   columnFill: Css.Ident,
   columnGenerator: ColumnGenerator,
-  regionPageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+  regionPageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
   layoutContainer: Vtree.Container,
   columns: Layout.Column[],
   flowPosition: Vtree.FlowPosition,

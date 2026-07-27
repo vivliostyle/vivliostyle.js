@@ -25,7 +25,7 @@ import * as PageFloats from "./page-floats";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
 import * as Vtree from "./vtree";
-import { Layout } from "./types";
+import { Layout, PageFloats as PageFloatsType } from "./types";
 
 const PageFloatFragment = PageFloats.PageFloatFragment;
 const LINE_POLICY_EDGE_EPSILON = 0.1;
@@ -304,7 +304,7 @@ export class FootnoteLayoutStrategy
   /** @override */
   createPageFloat(
     nodeContext: Vtree.NodeContext,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
     column: Layout.Column,
   ): Task.Result<PageFloats.PageFloat> {
     let floatReference = PageFloats.FloatReference.REGION;
@@ -382,13 +382,12 @@ export class FootnoteLayoutStrategy
   /** @override */
   findPageFloatFragment(
     float: PageFloats.PageFloat,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
   ): PageFloats.PageFloatFragment | null {
     const context = pageFloatLayoutContext.getPageFloatLayoutContext(
       float.floatReference,
     );
-    const container = context.getContainer(float.floatReference);
-    const containerElement = container.element;
+    const containerElement = context.container.element;
     const fragments = context.floatFragments.filter(
       (fr) =>
         fr instanceof FootnoteFragment &&
@@ -463,8 +462,8 @@ export class FootnoteLayoutStrategy
         // footnotes." When the page-level context has
         // ignoreFootnoteAreaMaxHeight set (detected after a prior layout
         // pass found no body content), remove max-height. (Issue #1878)
-        let pageCtx: PageFloats.PageFloatLayoutContext | null =
-          column.pageFloatLayoutContext as PageFloats.PageFloatLayoutContext;
+        let pageCtx: PageFloatsType.PageFloatLayoutContext | null =
+          column.pageFloatLayoutContext;
         while (pageCtx) {
           if (pageCtx.ignoreFootnoteAreaMaxHeight) {
             // Clear both logical and physical max-block-size properties
@@ -485,7 +484,7 @@ export class FootnoteLayoutStrategy
   /** @override */
   forbid(
     float: PageFloats.PageFloat,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
   ) {
     const footnote = float as Footnote;
     switch (footnote.footnotePolicy) {
@@ -497,7 +496,9 @@ export class FootnoteLayoutStrategy
         const constraint = new LineFootnotePolicyLayoutConstraint(
           footnote,
           anchorViewNode,
-          pageFloatLayoutContext.getContainer(footnote.floatReference).vertical,
+          pageFloatLayoutContext.getPageFloatLayoutContext(
+            footnote.floatReference,
+          ).container.vertical,
         );
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,

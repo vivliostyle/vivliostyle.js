@@ -455,12 +455,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   breakAtTheEdgeBeforeFloat: string | null = null;
   private lineFootnoteOverflowEdge: number | null = null;
 
+  readonly pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext;
+
   constructor(
     element: HTMLElement,
     public layoutContext: Vtree.LayoutContext,
     public clientLayout: Vtree.ClientLayout,
     public readonly layoutConstraint: LayoutConstraint,
-    public readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.UnattachedPageFloatLayoutContext,
     geometry: Vtree.ContainerGeometry,
     innerShape: GeometryUtil.Shape | null,
     exclusions: GeometryUtil.Shape[],
@@ -472,7 +474,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     this.last = element.lastChild;
     this.viewDocument = element.ownerDocument;
-    pageFloatLayoutContext.setContainer(this);
+    this.pageFloatLayoutContext = pageFloatLayoutContext.withContainer(this);
 
     VtreeImpl.copyGeometry(geometry, this);
     this.innerShape = innerShape;
@@ -1659,7 +1661,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     condition: PageFloats.PageFloatPlacementCondition,
   ): Task.Result<boolean> {
     const floatLayoutContext = this.pageFloatLayoutContext;
-    const floatContainer = floatLayoutContext.getContainer(floatReference);
+    const floatContainer =
+      floatLayoutContext.getPageFloatLayoutContext(floatReference).container;
     const element = area.element;
     return strategy
       .adjustPageFloatArea(area, floatContainer, this)
@@ -1729,20 +1732,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // Instead, set outerContext for getParent() navigation so nested page
     // floats and footnotes can propagate to the region/page level.
     // (Issue #1675)
-    const pageFloatLayoutContext = new PageFloats.PageFloatLayoutContext(
-      null,
-      PageFloats.FloatReference.COLUMN,
-      null,
-      this.pageFloatLayoutContext.flowName,
-      float.nodePosition,
-      null,
-      null,
-      this.pageFloatLayoutContext,
-    );
-    const parentContainer = parentPageFloatLayoutContext.getContainer();
-    const floatContainer = this.pageFloatLayoutContext.getContainer(
-      float.floatReference,
-    );
+    const pageFloatLayoutContext =
+      PageFloats.PageFloatLayoutContext.createDetached(
+        this.pageFloatLayoutContext,
+        PageFloats.FloatReference.COLUMN,
+        this.pageFloatLayoutContext.flowName,
+        float.nodePosition,
+      );
+    const parentContainer = parentPageFloatLayoutContext.container;
+    const floatContainer =
+      this.pageFloatLayoutContext.getPageFloatLayoutContext(
+        float.floatReference,
+      ).container;
     // The constructor measures through a DOM probe, so attach the element first.
     floatContainer.element.parentNode.appendChild(floatAreaElement);
     const containingBlockRect = floatContainer.getPaddingRect();
@@ -2285,7 +2286,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       PageFloats.FloatReference.REGION,
     );
     const isRegionWider =
-      columnContext.getContainer().width < regionContext.getContainer().width;
+      columnContext.container.width < regionContext.container.width;
     if (isRegionWider && floatReference === PageFloats.FloatReference.COLUMN) {
       if (columnSpan === Css.ident.auto) {
         this.buildDeepElementView(nodeContext.copy()).then((position) => {
@@ -5444,7 +5445,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     layoutContext: Vtree.LayoutContext,
     clientLayout: Vtree.ClientLayout,
     layoutConstraint: LayoutConstraint,
-    pageFloatLayoutContext: PageFloats.PageFloatLayoutContext,
+    pageFloatLayoutContext: PageFloats.UnattachedPageFloatLayoutContext,
     public readonly parentContainer: Vtree.Container,
     geometry: Vtree.ContainerGeometry,
     innerShape: GeometryUtil.Shape | null,

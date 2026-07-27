@@ -140,7 +140,8 @@ export class Page extends Base.SimpleEventTarget {
     left: { [key: string]: Container };
     right: { [key: string]: Container };
   } = { top: {}, bottom: {}, left: {}, right: {} };
-  pageFloatLayoutContext: PageFloats.PageFloatLayoutContext | null = null;
+  pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext | null =
+    null;
   pageType: string | null = null;
 
   constructor(
