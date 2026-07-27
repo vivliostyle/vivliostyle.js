@@ -7,6 +7,10 @@ module.exports = [
     category: "General",
     files: [
       { file: "counter_in_running.html", title: "Counter in running element" },
+      {
+        file: "filename%23hash.html",
+        title: "Reserved character in filename (Issue #2076)",
+      },
       { file: "print_media/index.html", title: "Print media" },
       {
         file: "vivliostyle_media/index.html",
