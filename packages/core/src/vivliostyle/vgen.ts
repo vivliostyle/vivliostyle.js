@@ -2898,7 +2898,6 @@ export class ViewFactory
     }
     const boxOffset = pos.boxOffset;
     const shadow = pos.shadowContext;
-    const parent = pos.parent;
 
     // content that will be inserted
     let contentNode: Node | null;
@@ -2928,7 +2927,7 @@ export class ViewFactory
       nextPos = null;
     }
     if (contentNode) {
-      const r = Vtree.NodeContext.childOf(contentNode, parent, boxOffset);
+      const r = Vtree.NodeContext.childOf(contentNode, pos.parent, boxOffset);
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
       r.shadowSibling = nextPos;
@@ -3092,9 +3091,9 @@ export class ViewFactory
     );
 
     // Create NodeContext for footnote-call with the same parent as footnote
-    const footnoteCallContext = new Vtree.NodeContext(
+    const footnoteCallContext = Vtree.NodeContext.siblingOf(
       footnoteCallSourceNode,
-      footnoteNodeContext.parent as Vtree.NodeContext,
+      footnoteNodeContext,
       footnoteNodeContext.boxOffset,
     );
 
@@ -3693,11 +3692,14 @@ export class ViewFactory
       .loop(() => {
         while (i >= 0) {
           const pn = arr[i];
+          const parentContext = rebuilt ?? container.parent;
           const child = new Vtree.NodeContext(
             pn.sourceNode,
-            rebuilt ?? container.parent,
+            parentContext,
             boxOffset,
           );
+          child.blockContainer =
+            parentContext && Vtree.blockContainerForChildrenOf(parentContext);
           if (i == 0) {
             child.offsetInNode = offsetInNode;
             child.after = after;

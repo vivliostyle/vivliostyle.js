@@ -488,7 +488,9 @@ export function makeNodeContextFromNodePositionStep(
   step: NodePositionStep,
   parent: Vtree.NodeContext,
 ): NodeContext {
-  const nodeContext = new NodeContext(step.node, parent as NodeContext, 0);
+  const parentContext = parent as NodeContext;
+  const nodeContext = new NodeContext(step.node, parentContext, 0);
+  nodeContext.blockContainer = blockContainerForChildrenOf(parentContext);
   applyNodePositionStep(nodeContext, step);
   nodeContext.shadowSibling = step.shadowSibling
     ? makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy())
@@ -635,13 +637,26 @@ export class NodeContext implements Vtree.NodeContext {
   afterIfContinues: Selectors.AfterIfContinues | null = null;
   footnotePolicy: Css.Ident | null = null;
   pageType: string | null;
+  blockContainer: ElementNodeContext | null = null;
 
   static childOf(
     sourceNode: Node,
     parent: NodeContext,
     boxOffset: number,
   ): ChildNodeContext {
-    return new NodeContext(sourceNode, parent, boxOffset) as ChildNodeContext;
+    const nodeContext = new NodeContext(sourceNode, parent, boxOffset);
+    nodeContext.blockContainer = blockContainerForChildrenOf(parent);
+    return nodeContext as ChildNodeContext;
+  }
+
+  static siblingOf(
+    sourceNode: Node,
+    sibling: NodeContext,
+    boxOffset: number,
+  ): NodeContext {
+    const nodeContext = new NodeContext(sourceNode, sibling.parent, boxOffset);
+    nodeContext.blockContainer = sibling.blockContainer;
+    return nodeContext;
   }
 
   constructor(
@@ -744,6 +759,7 @@ export class NodeContext implements Vtree.NodeContext {
     np.afterIfContinues = this.afterIfContinues;
     np.footnotePolicy = this.footnotePolicy;
     np.pageType = this.pageType;
+    np.blockContainer = this.blockContainer;
     return np;
   }
 
@@ -768,12 +784,17 @@ export class NodeContext implements Vtree.NodeContext {
 
   clone(): this {
     const np = this.cloneItem();
+    const chain: NodeContext[] = [np];
     let npc: NodeContext = np;
     let npp: NodeContext | null;
     while ((npp = npc.parent) != null) {
       npp = npp.cloneItem();
       npc.parent = npp;
       npc = npp;
+      chain.push(npp);
+    }
+    for (let i = chain.length - 2; i >= 0; i--) {
+      chain[i].blockContainer = blockContainerForChildrenOf(chain[i + 1]);
     }
     return np;
   }
@@ -940,6 +961,18 @@ export function asRenderedNodeContext(
   nc: Vtree.NodeContext,
 ): RenderedNodeContext | null {
   return asElementNodeContext(nc) ?? asTextNodeContext(nc);
+}
+
+export type ContainedElementNodeContext = NodeContext &
+  Vtree.ContainedElementNodeContext;
+
+export function blockContainerForChildrenOf(
+  parent: NodeContext,
+): ElementNodeContext | null {
+  const element = asElementNodeContext(parent);
+  return element && !(parent.inline && parent.blockContainer)
+    ? element
+    : parent.blockContainer;
 }
 
 export class ChunkPosition implements Vtree.ChunkPosition {
