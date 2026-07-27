@@ -342,6 +342,90 @@ export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   }
 }
 
+/**
+ * The sides a float can take are relative to the writing mode and direction of
+ * the context, and `inside` / `outside` also to which side of the spread the
+ * page is on.
+ */
+function toLogicalSide(side: string, context: PageFloatLayoutContext): string {
+  if (side === "inside" || side === "outside") {
+    const isLeftPage = context.pageSide === Constants.PageSide.LEFT;
+    side =
+      side === "inside"
+        ? isLeftPage
+          ? "right"
+          : "left"
+        : isLeftPage
+          ? "left"
+          : "right";
+  }
+  return CssLogicalUtil.toLogical(
+    side,
+    context.writingMode.toString(),
+    context.direction.toString(),
+  );
+}
+
+function toPhysicalSide(side: string, context: PageFloatLayoutContext): string {
+  return CssLogicalUtil.toPhysical(
+    side,
+    context.writingMode.toString(),
+    context.direction.toString(),
+  );
+}
+
+function toLogicalFloatSides(
+  floatSide: string,
+  context: PageFloatLayoutContext,
+): string[] {
+  const sides = floatSide.split(" ");
+
+  // Convert to logical sides and remove duplicates
+  const logicalSides: string[] = [];
+  for (const side of sides) {
+    const logicalSide = toLogicalSide(side, context);
+    if (!logicalSides.includes(logicalSide)) {
+      logicalSides.push(logicalSide);
+    }
+  }
+
+  // Convert "block-start block-end" to "snap-block" and
+  // "inline-start inline-end" to "snap-inline".
+  // More precisely, when multiple "*block*" values are found
+  // convert the first one to "snap-block" and remove the rest,
+  // and when multiple "*inline*" values are found convert the
+  // first one to "snap-inline" and remove the rest.
+  const logicalFloatSides: string[] = [];
+  let foundSnapBlock = false;
+  let foundSnapInline = false;
+  for (let i = 0; i < logicalSides.length; i++) {
+    const side = logicalSides[i];
+    if (side.includes("block")) {
+      if (!foundSnapBlock) {
+        // Convert to "snap-block" if another block side is found
+        if (logicalSides.slice(i + 1).some((s) => s.includes("block"))) {
+          logicalFloatSides.push("snap-block");
+          foundSnapBlock = true;
+        } else {
+          logicalFloatSides.push(side);
+        }
+      }
+    } else if (side.includes("inline")) {
+      if (!foundSnapInline) {
+        // Convert to "snap-inline" if another inline side is found
+        if (logicalSides.slice(i + 1).some((s) => s.includes("inline"))) {
+          logicalFloatSides.push("snap-inline");
+          foundSnapInline = true;
+        } else {
+          logicalFloatSides.push(side);
+        }
+      }
+    }
+  }
+
+  return logicalFloatSides;
+}
+
 export type PageFloatPlacementCondition =
   PageFloats.PageFloatPlacementCondition;
 
@@ -1201,76 +1285,15 @@ export class PageFloatLayoutContext
   }
 
   private toLogical(side: string): string {
-    const writingMode = this.writingMode.toString();
-    const direction = this.direction.toString();
-
-    if (side === "inside" || side === "outside") {
-      const isLeftPage = this.pageSide === Constants.PageSide.LEFT;
-      side =
-        side === "inside"
-          ? isLeftPage
-            ? "right"
-            : "left"
-          : isLeftPage
-            ? "left"
-            : "right";
-    }
-    return CssLogicalUtil.toLogical(side, writingMode, direction);
+    return toLogicalSide(side, this);
   }
 
   private toPhysical(side: string): string {
-    const writingMode = this.writingMode.toString();
-    const direction = this.direction.toString();
-    return CssLogicalUtil.toPhysical(side, writingMode, direction);
+    return toPhysicalSide(side, this);
   }
 
   private toLogicalFloatSides(floatSide: string): string[] {
-    const sides = floatSide.split(" ");
-
-    // Convert to logical sides and remove duplicates
-    const logicalSides: string[] = [];
-    for (const side of sides) {
-      const logicalSide = this.toLogical(side);
-      if (!logicalSides.includes(logicalSide)) {
-        logicalSides.push(logicalSide);
-      }
-    }
-
-    // Convert "block-start block-end" to "snap-block" and
-    // "inline-start inline-end" to "snap-inline".
-    // More precisely, when multiple "*block*" values are found
-    // convert the first one to "snap-block" and remove the rest,
-    // and when multiple "*inline*" values are found convert the
-    // first one to "snap-inline" and remove the rest.
-    const logicalFloatSides: string[] = [];
-    let foundSnapBlock = false;
-    let foundSnapInline = false;
-    for (let i = 0; i < logicalSides.length; i++) {
-      const side = logicalSides[i];
-      if (side.includes("block")) {
-        if (!foundSnapBlock) {
-          // Convert to "snap-block" if another block side is found
-          if (logicalSides.slice(i + 1).some((s) => s.includes("block"))) {
-            logicalFloatSides.push("snap-block");
-            foundSnapBlock = true;
-          } else {
-            logicalFloatSides.push(side);
-          }
-        }
-      } else if (side.includes("inline")) {
-        if (!foundSnapInline) {
-          // Convert to "snap-inline" if another inline side is found
-          if (logicalSides.slice(i + 1).some((s) => s.includes("inline"))) {
-            logicalFloatSides.push("snap-inline");
-            foundSnapInline = true;
-          } else {
-            logicalFloatSides.push(side);
-          }
-        }
-      }
-    }
-
-    return logicalFloatSides;
+    return toLogicalFloatSides(floatSide, this);
   }
 
   removeEndFloatFragments(floatSide: string) {
