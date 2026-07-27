@@ -356,6 +356,8 @@ export class PageFloatLayoutContext
   private children: PageFloatLayoutContext[] = [];
   writingMode: Css.Val;
   direction: Css.Val;
+  /** Null on the root context and on a TOC box, which has no page side. */
+  readonly pageSide: Constants.PageSide | null;
   private invalidated: boolean = false;
   private floatStore: PageFloatStore;
   private forbiddenFloats: PageFloatID[] = [];
@@ -432,10 +434,13 @@ export class PageFloatLayoutContext
      * getFloatFragmentExclusions(). (Issue #1675)
      */
     private readonly outerContext: PageFloatLayoutContext | null = null,
+    pageSide: Constants.PageSide | null = null,
   ) {
     if (parent) {
       parent.children.push(this);
     }
+    this.pageSide =
+      pageSide ?? parent?.pageSide ?? outerContext?.pageSide ?? null;
     this.writingMode =
       (!Css.isDefaultingValue(writingMode) && writingMode) ||
       (parent && parent.writingMode) ||
@@ -1200,9 +1205,7 @@ export class PageFloatLayoutContext
     const direction = this.direction.toString();
 
     if (side === "inside" || side === "outside") {
-      const isLeftPage = !!this.container.element.closest(
-        "[data-vivliostyle-page-side='left']",
-      );
+      const isLeftPage = this.pageSide === Constants.PageSide.LEFT;
       side =
         side === "inside"
           ? isLeftPage

@@ -3047,6 +3047,8 @@ export class StyleInstance
       null,
       writingMode,
       direction,
+      null,
+      page.side,
     );
     const frame: Task.Frame<Vtree.LayoutPosition> =
       Task.newFrame("layoutNextPage");
