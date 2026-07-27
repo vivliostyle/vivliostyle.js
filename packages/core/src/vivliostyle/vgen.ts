@@ -2927,7 +2927,7 @@ export class ViewFactory
       nextPos = null;
     }
     if (contentNode) {
-      const r = Vtree.NodeContext.siblingOf(contentNode, pos, boxOffset);
+      const r = Vtree.NodeContext.childOf(contentNode, pos.parent, boxOffset);
       r.shadowContext = contentShadow;
       r.shadowType = contentShadowType;
       r.shadowSibling = nextPos;
@@ -3093,7 +3093,7 @@ export class ViewFactory
     // Create NodeContext for footnote-call with the same parent as footnote
     const footnoteCallContext = Vtree.NodeContext.siblingOf(
       footnoteCallSourceNode,
-      footnoteNodeContext as Vtree.ChildNodeContext,
+      footnoteNodeContext,
       footnoteNodeContext.boxOffset,
     );
 

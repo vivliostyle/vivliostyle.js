@@ -651,12 +651,12 @@ export class NodeContext implements Vtree.NodeContext {
 
   static siblingOf(
     sourceNode: Node,
-    sibling: ChildNodeContext,
+    sibling: NodeContext,
     boxOffset: number,
-  ): ChildNodeContext {
+  ): NodeContext {
     const nodeContext = new NodeContext(sourceNode, sibling.parent, boxOffset);
     nodeContext.blockContainer = sibling.blockContainer;
-    return nodeContext as ChildNodeContext;
+    return nodeContext;
   }
 
   constructor(
