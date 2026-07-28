@@ -1289,16 +1289,41 @@ export class IsNthSiblingAction extends IsNthAction {
   }
 }
 
+export type SiblingTypeCounts = {
+  byNamespace: { [ns: string]: { [localName: string]: number } };
+  noNamespace: { [localName: string]: number } | null;
+};
+
+function emptySiblingTypeCounts(): SiblingTypeCounts {
+  return { byNamespace: {}, noNamespace: null };
+}
+
+function typeCountsForNamespace(
+  counts: SiblingTypeCounts,
+  ns: string | null,
+): { [localName: string]: number } {
+  let nsCounts = ns !== null ? counts.byNamespace[ns] : counts.noNamespace;
+  if (!nsCounts) {
+    nsCounts = {};
+    if (ns !== null) {
+      counts.byNamespace[ns] = nsCounts;
+    } else {
+      counts.noNamespace = nsCounts;
+    }
+  }
+  return nsCounts;
+}
+
 export class IsNthSiblingOfTypeAction extends IsNthAction {
   constructor(a: number, b: number) {
     super(a, b);
   }
 
   override matches(cascadeInstance: CascadeInstance): boolean {
-    const order =
-      cascadeInstance.currentSiblingTypeCounts[
-        cascadeInstance.currentNamespace
-      ][cascadeInstance.currentLocalName];
+    const order = typeCountsForNamespace(
+      cascadeInstance.currentSiblingTypeCounts,
+      cascadeInstance.currentNamespace,
+    )[cascadeInstance.currentLocalName];
     return this.matchANPlusB(order);
   }
 
@@ -1335,23 +1360,24 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
 
   override matches(cascadeInstance: CascadeInstance): boolean {
     const counts = cascadeInstance.currentFollowingSiblingTypeCounts;
-    if (!counts[cascadeInstance.currentNamespace]) {
+    let nsCounts =
+      cascadeInstance.currentNamespace !== null
+        ? counts.byNamespace[cascadeInstance.currentNamespace]
+        : counts.noNamespace;
+    if (!nsCounts) {
       let elem = cascadeInstance.currentElement;
       do {
         const ns = elem.namespaceURI;
         const localName = elem.localName;
-        let nsCounts = counts[ns];
-        if (!nsCounts) {
-          nsCounts = counts[ns] = {};
-        }
-        nsCounts[localName] = (nsCounts[localName] || 0) + 1;
+        const elemCounts = typeCountsForNamespace(counts, ns);
+        elemCounts[localName] = (elemCounts[localName] || 0) + 1;
       } while ((elem = elem.nextElementSibling));
+      nsCounts = typeCountsForNamespace(
+        counts,
+        cascadeInstance.currentNamespace,
+      );
     }
-    return this.matchANPlusB(
-      counts[cascadeInstance.currentNamespace][
-        cascadeInstance.currentLocalName
-      ],
-    );
+    return this.matchANPlusB(nsCounts[cascadeInstance.currentLocalName]);
   }
 
   override getPriority(): number {
@@ -1619,9 +1645,9 @@ export class IsNthSiblingOfSelectorAction extends IsNthAction {
     const savedSiblingOrder = cascadeInstance.currentSiblingOrder;
 
     cascadeInstance.currentElement = element;
-    cascadeInstance.currentNamespace = element.namespaceURI || "";
+    cascadeInstance.currentNamespace = element.namespaceURI;
     cascadeInstance.currentLocalName = element.localName;
-    cascadeInstance.currentId = element.id;
+    cascadeInstance.currentId = element.getAttribute("id");
     cascadeInstance.currentClassNames = element.classList
       ? Array.from(element.classList)
       : [];
@@ -3337,9 +3363,9 @@ export class CascadeInstance {
   currentStyle: ElementStyle | null = null;
   currentClassNames: string[] | null = null;
   currentLocalName: string = "";
-  currentNamespace: string = "";
-  currentId: string = "";
-  currentXmlId: string = "";
+  currentNamespace: string | null = null;
+  currentId: string | null = null;
+  currentXmlId: string | null = null;
   currentNSTag: string = "";
   currentEpubTypes: string[] | null = null;
   currentPageType: string | null = null;
@@ -3359,16 +3385,14 @@ export class CascadeInstance {
   lang: string = "";
   siblingOrderStack: number[] = [0];
   currentSiblingOrder: number = 0;
-  siblingTypeCountsStack: { [key: string]: { [key: string]: number } }[] = [{}];
-  currentSiblingTypeCounts: { [key: string]: { [key: string]: number } };
+  siblingTypeCountsStack: SiblingTypeCounts[] = [emptySiblingTypeCounts()];
+  currentSiblingTypeCounts: SiblingTypeCounts;
   currentFollowingSiblingOrder: number | null = null;
   followingSiblingOrderStack: (number | null)[];
-  followingSiblingTypeCountsStack: {
-    [key: string]: { [key: string]: number };
-  }[] = [{}];
-  currentFollowingSiblingTypeCounts: {
-    [key: string]: { [key: string]: number };
-  };
+  followingSiblingTypeCountsStack: SiblingTypeCounts[] = [
+    emptySiblingTypeCounts(),
+  ];
+  currentFollowingSiblingTypeCounts: SiblingTypeCounts;
   viewConditions: { [key: string]: Matchers.Matcher[] } = Object.create(null);
   dependentConditions: string[] = [];
   elementStack: Element[] = [];
@@ -3472,10 +3496,10 @@ export class CascadeInstance {
     this.currentElement = null;
     this.currentElementOffset = null;
     this.currentStyle = baseStyle;
-    this.currentNamespace = "";
+    this.currentNamespace = null;
     this.currentLocalName = "";
-    this.currentId = "";
-    this.currentXmlId = "";
+    this.currentId = null;
+    this.currentXmlId = null;
     this.currentClassNames = classes;
     this.currentNSTag = "";
     this.currentEpubTypes = EMPTY;
@@ -3790,7 +3814,10 @@ export class CascadeInstance {
     this.currentStyle = baseStyle;
     this.currentNamespace = element.namespaceURI;
     this.currentLocalName = element.localName;
-    const prefix = this.code.nsPrefix[this.currentNamespace];
+    const prefix =
+      this.currentNamespace !== null
+        ? this.code.nsPrefix[this.currentNamespace]
+        : undefined;
     if (prefix) {
       this.currentNSTag = prefix + this.currentLocalName;
     } else {
@@ -3824,16 +3851,13 @@ export class CascadeInstance {
     const siblingTypeCountsStack = this.siblingTypeCountsStack;
     const currentSiblingTypeCounts = (this.currentSiblingTypeCounts =
       siblingTypeCountsStack[siblingTypeCountsStack.length - 1]);
-    let currentNamespaceTypeCounts =
-      currentSiblingTypeCounts[this.currentNamespace];
-    if (!currentNamespaceTypeCounts) {
-      currentNamespaceTypeCounts = currentSiblingTypeCounts[
-        this.currentNamespace
-      ] = {};
-    }
+    const currentNamespaceTypeCounts = typeCountsForNamespace(
+      currentSiblingTypeCounts,
+      this.currentNamespace,
+    );
     currentNamespaceTypeCounts[this.currentLocalName] =
       (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
-    siblingTypeCountsStack.push({});
+    siblingTypeCountsStack.push(emptySiblingTypeCounts());
     const followingSiblingOrderStack = this.followingSiblingOrderStack;
     if (
       followingSiblingOrderStack[followingSiblingOrderStack.length - 1] !== null
@@ -3852,15 +3876,15 @@ export class CascadeInstance {
         followingSiblingTypeCountsStack[
           followingSiblingTypeCountsStack.length - 1
         ]);
-    if (
+    const followingNamespaceTypeCounts =
       currentFollowingSiblingTypeCounts &&
-      currentFollowingSiblingTypeCounts[this.currentNamespace]
-    ) {
-      currentFollowingSiblingTypeCounts[this.currentNamespace][
-        this.currentLocalName
-      ]--;
+      (this.currentNamespace !== null
+        ? currentFollowingSiblingTypeCounts.byNamespace[this.currentNamespace]
+        : currentFollowingSiblingTypeCounts.noNamespace);
+    if (followingNamespaceTypeCounts) {
+      followingNamespaceTypeCounts[this.currentLocalName]--;
     }
-    followingSiblingTypeCountsStack.push({});
+    followingSiblingTypeCountsStack.push(emptySiblingTypeCounts());
     this.applyActions();
     this.currentPageType = savedCurrentPageType;
 
@@ -4604,7 +4628,9 @@ export class CascadeInstance {
     for (i = 0; i < this.currentEpubTypes.length; i++) {
       this.applyAction(this.code.epubtypes, this.currentEpubTypes[i]);
     }
-    this.applyAction(this.code.ids, this.currentId);
+    if (this.currentId !== null) {
+      this.applyAction(this.code.ids, this.currentId);
+    }
     this.applyAction(this.code.tags, this.currentLocalName);
     if (this.currentLocalName != "") {
       // Universal selector does not apply to page-master-related rules.
