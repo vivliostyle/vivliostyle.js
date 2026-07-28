@@ -539,6 +539,78 @@ export function getCSSProperty(
   return opt_value || "";
 }
 
+/**
+ * A node reached from another one, which therefore has a parent. lib.dom
+ * declares `parentNode` only on `Node`, where it is nullable. The name avoids
+ * lib.dom's `ChildNode`, a mixin that says nothing about the parent.
+ */
+export interface ChildDomNode extends Node {
+  readonly parentNode: ParentNode;
+}
+
+export interface ChildElement extends Element {
+  readonly parentNode: ParentNode;
+}
+
+export function documentElementOf(doc: Document): ChildElement {
+  // the document element is the element child of the document
+  return doc.documentElement as ChildElement;
+}
+
+export function nextElementSiblingOf(element: Element): ChildElement | null {
+  // a sibling exists only under a parent the two share
+  return element.nextElementSibling as ChildElement | null;
+}
+
+export function previousElementSiblingOf(
+  element: Element,
+): ChildElement | null {
+  // a sibling exists only under a parent the two share
+  return element.previousElementSibling as ChildElement | null;
+}
+
+/**
+ * A position reached from the root the cursor was opened at. Moving never goes
+ * above the root's own parent, which is what makes every position the cursor
+ * yields a node with a parent.
+ */
+export class RootBoundCursor {
+  private constructor(
+    private readonly root: ChildElement,
+    readonly node: ChildDomNode,
+  ) {}
+
+  static atRoot(root: ChildElement): RootBoundCursor {
+    return new RootBoundCursor(root, root);
+  }
+
+  private moveTo(node: Node | null): RootBoundCursor | null {
+    return node === null
+      ? null
+      : new RootBoundCursor(this.root, node as ChildDomNode);
+  }
+
+  get firstChild(): RootBoundCursor | null {
+    return this.moveTo(this.node.firstChild);
+  }
+
+  get nextSibling(): RootBoundCursor | null {
+    return this.moveTo(this.node.nextSibling);
+  }
+
+  get parent(): RootBoundCursor | null {
+    if (this.node === this.root) {
+      return null;
+    }
+    const parent = this.node.parentNode;
+    // the root alone does not bound the walk: a sibling move can leave its
+    // subtree
+    return parent === this.root || parent === this.root.parentNode
+      ? null
+      : this.moveTo(parent);
+  }
+}
+
 export function getLangAttribute(element: Element): string {
   let lang = element.getAttributeNS(NS.XML, "lang");
   if (!lang && element.namespaceURI == NS.XHTML) {

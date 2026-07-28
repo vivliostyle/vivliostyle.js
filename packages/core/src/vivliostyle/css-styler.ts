@@ -466,9 +466,9 @@ export class BoxStack {
 }
 
 export class Styler implements AbstractStyler {
-  root: Element;
+  root: Base.ChildElement;
   cascadeHolder: CssCascade.Cascade;
-  last: Node;
+  last: Base.RootBoundCursor | null;
   rootStyle = {} as CssCascade.ElementStyle;
   styleMap: { [key: string]: CssCascade.ElementStyle } = {};
   counterSnapshots: CounterSnapshot[] = [];
@@ -505,7 +505,7 @@ export class Styler implements AbstractStyler {
   ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
-    this.last = this.root;
+    this.last = Base.RootBoundCursor.atRoot(this.root);
     this.cascade = cascade.createInstance(
       context,
       counterListener,
@@ -1026,11 +1026,11 @@ export class Styler implements AbstractStyler {
     }
     const context = this.context;
     while (this.last) {
-      let next: Node = this.last.firstChild;
+      let next = this.last.firstChild;
       if (next == null) {
         while (this.last) {
-          if (this.last.nodeType == 1) {
-            this.cascade.popElement(this.last as Element);
+          if (this.last.node.nodeType == 1) {
+            this.cascade.popElement(this.last.node as Element);
             this.primary = this.primaryStack.pop();
             const box = this.boxStack.pop(this.lastOffset);
             let breakAfter: string | null = null;
@@ -1060,9 +1060,8 @@ export class Styler implements AbstractStyler {
           if (next) {
             break;
           }
-          this.last = this.last.parentNode;
-          if (!this.last || this.last === this.root) {
-            this.last = null;
+          this.last = this.last.parent;
+          if (!this.last) {
             if (startOffset < this.lastOffset) {
               if (targetSlippedOffset < 0) {
                 slippedOffset = this.offsetMap.slippedByFixed(startOffset);
@@ -1077,17 +1076,18 @@ export class Styler implements AbstractStyler {
           }
         }
       }
-      this.last = next;
-      if (this.last.nodeType != 1) {
-        this.lastOffset += this.last.textContent.length;
-        this.boxStack.encounteredTextNode(this.last);
+      const cursor = next;
+      this.last = cursor;
+      if (cursor.node.nodeType != 1) {
+        this.lastOffset += cursor.node.textContent.length;
+        this.boxStack.encounteredTextNode(cursor.node);
         if (this.primary) {
           this.offsetMap.addStuckRange(this.lastOffset);
         } else {
           this.offsetMap.addSlippedRange(this.lastOffset);
         }
       } else {
-        const elem = this.last as Element;
+        const elem = cursor.node as Base.ChildElement;
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
         this.elementWindow = this.cascade.pushElement(
@@ -1184,7 +1184,7 @@ export class Styler implements AbstractStyler {
           }
         }
         if (VIVLIOSTYLE_DEBUG) {
-          const offset = this.xmldoc.getElementOffset(this.last as Element);
+          const offset = this.xmldoc.getElementOffset(elem);
           if (offset != this.lastOffset) {
             throw new Error("Inconsistent offset");
           }

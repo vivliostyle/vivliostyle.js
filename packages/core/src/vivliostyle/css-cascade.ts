@@ -793,7 +793,7 @@ export class ElementCascadeInstance extends StyledCascadeInstance {
     currentStyle: ElementStyle,
     currentClassNames: string[],
     currentEpubTypes: string[],
-    public readonly currentElement: Element,
+    public readonly currentElement: Base.ChildElement,
   ) {
     super(instance, currentStyle, currentClassNames, currentEpubTypes);
   }
@@ -1364,9 +1364,7 @@ export class IsNthLastSiblingAction extends IsNthAction {
     let order = cascadeInstance.instance.currentFollowingSiblingOrder;
     if (order === null) {
       order = cascadeInstance.instance.currentFollowingSiblingOrder =
-        // the cascade walks connected elements, whose parentNode is an
-        // element or the document
-        cascadeInstance.currentElement.parentNode!.childElementCount -
+        cascadeInstance.currentElement.parentNode.childElementCount -
         cascadeInstance.instance.currentSiblingOrder +
         1;
     }
@@ -1390,13 +1388,13 @@ export class IsNthLastSiblingOfTypeAction extends IsNthAction {
         ? counts.byNamespace[cascadeInstance.instance.currentNamespace]
         : counts.noNamespace;
     if (!nsCounts) {
-      let elem = cascadeInstance.currentElement;
+      let elem: Base.ChildElement | null = cascadeInstance.currentElement;
       do {
         const ns = elem.namespaceURI;
         const localName = elem.localName;
         const elemCounts = typeCountsForNamespace(counts, ns);
         elemCounts[localName] = (elemCounts[localName] || 0) + 1;
-      } while ((elem = elem.nextElementSibling));
+      } while ((elem = Base.nextElementSiblingOf(elem)));
       nsCounts = typeCountsForNamespace(
         counts,
         cascadeInstance.instance.currentNamespace,
@@ -1590,9 +1588,7 @@ export class MatchesRelationalAction extends MatchesAction {
       let scopingRoot: ParentNode;
       if (/^\s*[+~]/.test(selectorText)) {
         // :has(+ F) or :has(~ F)
-        // the cascade walks connected elements, whose parentNode is an
-        // element or the document
-        scopingRoot = cascadeInstance.currentElement.parentNode!;
+        scopingRoot = cascadeInstance.currentElement.parentNode;
         const index = Array.from(scopingRoot.children).indexOf(
           cascadeInstance.currentElement,
         );
@@ -1650,19 +1646,19 @@ export class IsNthSiblingOfSelectorAction extends IsNthAction {
     // Count siblings that match the selector
     const elem = cascadeInstance.currentElement;
     let order = 1;
-    let sibling = elem.previousElementSibling;
+    let sibling = Base.previousElementSiblingOf(elem);
     while (sibling) {
       if (this.matchesSelector(sibling, cascadeInstance)) {
         order++;
       }
-      sibling = sibling.previousElementSibling;
+      sibling = Base.previousElementSiblingOf(sibling);
     }
 
     return this.matchANPlusB(order);
   }
 
   protected matchesSelector(
-    element: Element,
+    element: Base.ChildElement,
     cascadeInstance: ElementCascadeInstance,
   ): boolean {
     const instance = cascadeInstance.instance;
@@ -1739,12 +1735,12 @@ export class IsNthLastSiblingOfSelectorAction extends IsNthSiblingOfSelectorActi
     // Count siblings (from end) that match the selector
     const elem = cascadeInstance.currentElement;
     let order = 1;
-    let sibling = elem.nextElementSibling;
+    let sibling = Base.nextElementSiblingOf(elem);
     while (sibling) {
       if (this.matchesSelector(sibling, cascadeInstance)) {
         order++;
       }
-      sibling = sibling.nextElementSibling;
+      sibling = Base.nextElementSiblingOf(sibling);
     }
 
     return this.matchANPlusB(order);
@@ -3836,7 +3832,7 @@ export class CascadeInstance {
 
   pushElement(
     styler: CssStyler.AbstractStyler,
-    element: Element,
+    element: Base.ChildElement,
     baseStyle: ElementStyle,
     elementOffset: number,
   ): ElementCascadeInstance {
