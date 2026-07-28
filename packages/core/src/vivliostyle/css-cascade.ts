@@ -4795,7 +4795,6 @@ export class CascadeParserHandler
   elementStyle: ElementStyle | null = null;
   conditionCount: number = 0;
   pseudoelement: string | null = null;
-  selectorFunctionContainsPseudoelement: boolean = false;
   footnoteContent: boolean = false;
   cascade: Cascade;
   state: ParseState;
@@ -4846,12 +4845,6 @@ export class CascadeParserHandler
     if (this.pseudoelement) {
       this.invalidSelector(
         `::${this.pseudoelement} followed by ${continuation}`,
-      );
-      return true;
-    }
-    if (this.selectorFunctionContainsPseudoelement) {
-      this.invalidSelector(
-        `Selector containing pseudo-element followed by ${continuation}`,
       );
       return true;
     }
@@ -5259,7 +5252,6 @@ export class CascadeParserHandler
   override nextSelector(): void {
     this.finishChain();
     this.pseudoelement = null;
-    this.selectorFunctionContainsPseudoelement = false;
     this.footnoteContent = false;
     this.specificity = 0;
     if (!this.selectorListVoided) {
@@ -5274,7 +5266,6 @@ export class CascadeParserHandler
     this.state = ParseState.SELECTOR;
     this.elementStyle = {} as ElementStyle;
     this.pseudoelement = null;
-    this.selectorFunctionContainsPseudoelement = false;
     this.specificity = 0;
     this.footnoteContent = false;
     this.selectorListVoided = false;
@@ -5334,7 +5325,6 @@ export class CascadeParserHandler
     this.processChain(this.makeApplyRuleAction(this.specificity));
     this.chain = new NoSelectorChain();
     this.pseudoelement = null;
-    this.selectorFunctionContainsPseudoelement = false;
     this.viewConditionId = null;
     this.footnoteContent = false;
     this.specificity = 0;
@@ -5501,7 +5491,6 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   chains: ChainedAction[][] = [];
   maxSpecificity: number = 0;
   selectorTexts: string[] = [];
-  containsPseudoelementSelector: boolean = false;
 
   constructor(
     public readonly parent: CascadeParserHandler,
@@ -5525,7 +5514,6 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   }
 
   takeAlternative(actions: ChainedAction[]): void {
-    this.containsPseudoelementSelector ||= !!this.pseudoelement;
     this.chains.push(actions);
     this.maxSpecificity = Math.max(this.maxSpecificity, this.specificity);
   }
@@ -5552,8 +5540,6 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
       if (this.increasingSpecificity()) {
         this.parent.specificity += this.maxSpecificity;
       }
-      this.parent.selectorFunctionContainsPseudoelement ||=
-        this.containsPseudoelementSelector;
     } else {
       // func argument is empty or all invalid
       this.parentChain.push(new CheckConditionAction("")); // always fails
@@ -5568,6 +5554,22 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
+    this.voidAlternative();
+  }
+
+  override pseudoelementSelector(
+    name: string,
+    params: (number | string)[] | null,
+  ): void {
+    // Selectors Level 4 keeps pseudo-elements out of every selector list a
+    // pseudo-class takes: `:is()` and `:where()` exclude them outright, and the
+    // <complex-real-selector-list> of `:not()` and of the S of
+    // `:nth-child(An+B of S)` is real, which is what "real" means.
+    this.invalidSelector(`Pseudo-element ::${name} in a selector list`);
+    this.voidAlternative();
+  }
+
+  private voidAlternative(): void {
     this.voidSelector();
     this.pseudoelement = null;
     this.viewConditionId = null;
@@ -5575,10 +5577,10 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     this.specificity = 0;
 
     // A list that is not forgiving is invalid as a whole once one alternative
-    // fails to parse, and so is the selector that contains it. The walk stops
-    // at the first forgiving list, which drops that selector as one of its own
-    // alternatives; reaching the top instead voids the rule and hands the
-    // parse back.
+    // is voided, and so is the selector that contains it. The walk stops at the
+    // first forgiving list, which drops that selector as one of its own
+    // alternatives; reaching the top instead voids the rule and hands the parse
+    // back.
     let handler: CascadeParserHandler = this;
     while (
       handler instanceof MatchesParameterParserHandler &&

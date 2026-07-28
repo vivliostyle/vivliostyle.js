@@ -57,6 +57,10 @@ module.exports = [
         file: "css-parse-error/invalid-selector-in-a-rule.html",
         title: "Invalid selector in a rule",
       },
+      {
+        file: "css-parse-error/pseudo-element-in-a-selector-list.html",
+        title: "Pseudo-element in a selector list",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",

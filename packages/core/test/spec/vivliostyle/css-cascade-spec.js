@@ -1007,25 +1007,25 @@ describe("css-cascade", function () {
   });
 
   describe("the selector under parse", function () {
-    describe("a syntax error inside the argument", function () {
-      function parseCascade(cssText, done, callback) {
-        var handler = cascadeParserHandler(
-          new adapt_exprs.LexicalScope(null),
-          adapt_cssvalid.baseValidatorSet(),
-        );
-        handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
-        adapt_task.start(function () {
-          adapt_cssparse
-            .parseStylesheetFromText(cssText, handler.owner, null, null, null)
-            .then(function (parsed) {
-              expect(parsed).toBe(true);
-              callback(handler.finish());
-              done();
-            });
-          return adapt_task.newResult(true);
-        });
-      }
+    function parseCascade(cssText, done, callback) {
+      var handler = cascadeParserHandler(
+        new adapt_exprs.LexicalScope(null),
+        adapt_cssvalid.baseValidatorSet(),
+      );
+      handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
+      adapt_task.start(function () {
+        adapt_cssparse
+          .parseStylesheetFromText(cssText, handler.owner, null, null, null)
+          .then(function (parsed) {
+            expect(parsed).toBe(true);
+            callback(handler.finish());
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    }
 
+    describe("a syntax error inside the argument", function () {
       it("fails a list whose only alternative was voided", function (done) {
         parseCascade("div:is(!!!) { color: red }", done, function (cascade) {
           var action = cascade.tags["div"];
@@ -1175,25 +1175,53 @@ describe("css-cascade", function () {
       });
     });
 
-    describe("without a syntax error", function () {
-      function parseCascade(cssText, done, callback) {
-        var handler = cascadeParserHandler(
-          new adapt_exprs.LexicalScope(null),
-          adapt_cssvalid.baseValidatorSet(),
+    describe("a pseudo-element inside the argument", function () {
+      it("drops the alternative from a forgiving list", function (done) {
+        parseCascade(
+          "div:is(.x, ::before) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags["span"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+          },
         );
-        handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
-        adapt_task.start(function () {
-          adapt_cssparse
-            .parseStylesheetFromText(cssText, handler.owner, null, null, null)
-            .then(function (parsed) {
-              expect(parsed).toBe(true);
-              callback(handler.finish());
-              done();
-            });
-          return adapt_task.newResult(true);
-        });
-      }
+      });
 
+      it("voids the rule when the list is not forgiving", function (done) {
+        parseCascade(
+          "div:not(.x, ::before) span { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual([]);
+          },
+        );
+      });
+
+      it("matches nothing when it was the only alternative", function (done) {
+        parseCascade(
+          "div:is(::before) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["div"].condition.condition).toBe("");
+          },
+        );
+      });
+
+      it("keeps a pseudo-element outside such a list", function (done) {
+        parseCascade(
+          "div:is(.x) ::before { color: red }",
+          done,
+          function (cascade) {
+            var applied = cascade.tags["*"].list[1].chained;
+            expect(applied.pseudoelement).toBe("before");
+          },
+        );
+      });
+    });
+
+    describe("without a syntax error", function () {
       it("registers a sibling condition before the chain restarts", function (done) {
         // The condition item is read by the rest of the selector, so it must
         // not be guarded by the condition it sets.

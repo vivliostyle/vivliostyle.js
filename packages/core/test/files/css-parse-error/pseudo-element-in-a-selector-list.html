@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pseudo-element in a selector list</title>
+    <style>
+      div:is(.x, ::before) span {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="x"><span>This text should be green.</span></div>
+  </body>
+</html>
