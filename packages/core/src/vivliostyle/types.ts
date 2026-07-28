@@ -187,7 +187,7 @@ export namespace Layout {
     layoutContext: Vtree.LayoutContext;
     clientLayout: Vtree.ClientLayout;
     readonly layoutConstraint: LayoutConstraint;
-    readonly pageFloatLayoutContext: PageFloats.PageFloatLayoutContext;
+    readonly pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext;
 
     getTopEdge(): number;
     getBottomEdge(): number;
@@ -668,7 +668,9 @@ export namespace PageFloats {
 
     getOrder(): number;
     getId(): PageFloatID;
-    isAllowedOnContext(pageFloatLayoutContext: PageFloatLayoutContext): boolean;
+    isAllowedOnContext(
+      pageFloatLayoutContext: AttachedPageFloatLayoutContext,
+    ): boolean;
     isAllowedToPrecede(other: PageFloat): boolean;
   }
 
@@ -681,7 +683,9 @@ export namespace PageFloats {
     readonly continues: boolean;
 
     hasFloat(float: PageFloat): boolean;
-    findNotAllowedFloat(context: PageFloatLayoutContext): PageFloat | null;
+    findNotAllowedFloat(
+      context: AttachedPageFloatLayoutContext,
+    ): PageFloat | null;
     getOuterShape(): GeometryUtil.Shape;
     getOuterRect(): GeometryUtil.Rect;
     getOrder(): number;
@@ -702,21 +706,14 @@ export namespace PageFloats {
   };
 
   export interface PageFloatLayoutContext {
-    writingMode: Css.Val;
     direction: Css.Val;
     floatFragments: PageFloatFragment[];
     ignoreFootnoteAreaMaxHeight: boolean;
-    readonly parent: PageFloatLayoutContext;
+    readonly parent: PageFloatLayoutContext | null;
     readonly effectiveParent: PageFloatLayoutContext | null;
     readonly flowName: string | null;
     readonly generatingNodePosition: Vtree.NodePosition | null;
 
-    getContainer(floatReference?: FloatReference): Vtree.Container;
-    setContainer(container: Vtree.Container);
-    setOuterContext(outerContext: PageFloatLayoutContext): void;
-    addPageFloatLayoutContextAsPreviousSibling(
-      context: PageFloatLayoutContext,
-    ): void;
     addPageFloat(float: PageFloat): void;
     getPageFloatLayoutContext(
       floatReference: FloatReference,
@@ -725,6 +722,56 @@ export namespace PageFloats {
       nodePosition: Vtree.NodePosition,
     ): PageFloat | null;
     isForbidden(float: PageFloat): boolean;
+    findPageFloatFragment(float: PageFloat): PageFloatFragment | null;
+    hasFloatFragments(condition?: (p1: PageFloatFragment) => boolean): boolean;
+    hasContinuingFloatFragmentsInFlow(flowName: string): boolean;
+    markPageFloatAnchorSeen(float: PageFloat): void;
+    registerPageFloatAnchor(float: PageFloat, anchorViewNode: Node): void;
+    deferPageFloat(continuation: PageFloatContinuation): void;
+    removeFloatDeferredToNext(float: PageFloat): void;
+    hasPrecedingFloatsDeferredToNext(
+      float: PageFloat,
+      ignoreReference?: boolean,
+    ): boolean;
+    getDeferredPageFloatContinuations(
+      flowName?: string | null,
+    ): PageFloatContinuation[];
+    getPageFloatContinuationsDeferredToNext(
+      flowName?: string | null,
+    ): PageFloatContinuation[];
+    isInvalidated(): boolean;
+    validate(): void;
+    discardStashedFragments(floatReference: FloatReference): void;
+    getStashedFloatFragments(
+      floatReference: FloatReference,
+    ): PageFloatFragment[];
+    getFloatFragmentExclusions(): GeometryUtil.Shape[];
+    getLayoutConstraints(): Layout.LayoutConstraint[];
+    addLayoutConstraint(
+      layoutConstraint: Layout.LayoutConstraint,
+      floatReference: FloatReference,
+    ): void;
+    lock(): void;
+    unlock(): void;
+    isLocked(): boolean;
+  }
+
+  /** Only the root and an attached context can be one, and only these hold children. */
+  export interface ParentPageFloatLayoutContext extends PageFloatLayoutContext {
+    readonly children: readonly AttachedPageFloatLayoutContext[];
+    collectPageFloatAnchors(): any;
+    getFloatsDeferredToNextInChildContexts(): PageFloat[];
+    detachChildren(): AttachedPageFloatLayoutContext[];
+    attachChildren(children: AttachedPageFloatLayoutContext[]): void;
+  }
+
+  /** Where a float goes can only be asked of a context bound to a container. */
+  export interface AttachedPageFloatLayoutContext extends ParentPageFloatLayoutContext {
+    readonly container: Vtree.Container;
+    getPageFloatLayoutContext(
+      floatReference: FloatReference,
+    ): AttachedPageFloatLayoutContext;
+    restoreStashedFragments(floatReference: FloatReference): void;
     addPageFloatFragment(
       floatFragment: PageFloatFragment,
       dontInvalidate?: boolean,
@@ -733,47 +780,14 @@ export namespace PageFloats {
       floatFragment: PageFloatFragment,
       dontInvalidate?: boolean,
     ): void;
-    findPageFloatFragment(float: PageFloat): PageFloatFragment | null;
-    hasFloatFragments(condition?: (p1: PageFloatFragment) => boolean): boolean;
-    hasContinuingFloatFragmentsInFlow(flowName: string): boolean;
-    markPageFloatAnchorSeen(float: PageFloat): void;
-    registerPageFloatAnchor(float: PageFloat, anchorViewNode: Node): void;
-    collectPageFloatAnchors(): any;
-    isAnchorAlreadyAppeared(floatId: PageFloatID): boolean;
-    deferPageFloat(continuation: PageFloatContinuation): void;
-    removeFloatDeferredToNext(float: PageFloat): void;
-    hasPrecedingFloatsDeferredToNext(
-      float: PageFloat,
-      ignoreReference?: boolean,
-    ): boolean;
-    getLastFollowingFloatInFragments(float: PageFloat): PageFloat | null;
-    getDeferredPageFloatContinuations(
-      flowName?: string | null,
-    ): PageFloatContinuation[];
-    getPageFloatContinuationsDeferredToNext(
-      flowName?: string | null,
-    ): PageFloatContinuation[];
-    getFloatsDeferredToNextInChildContexts(): PageFloat[];
     initFootnoteRetryFromEmptyFragment(
       float: PageFloat,
       area: Layout.PageFloatArea,
     ): boolean;
-    checkAndForbidNotAllowedFloat(): boolean;
-    checkAndForbidFloatFollowingDeferredFloat(): boolean;
     finish(): void;
-    hasSameContainerAs(other: PageFloatLayoutContext): boolean;
+    hasSameContainerAs(other: AttachedPageFloatLayoutContext): boolean;
     invalidate(): void;
-    detachChildren(): PageFloatLayoutContext[];
-    attachChildren(children: PageFloatLayoutContext[]): void;
-    isInvalidated(): boolean;
-    validate(): void;
-    removeEndFloatFragments(floatSide: string): void;
     stashEndFloatFragments(float: PageFloat): void;
-    restoreStashedFragments(floatReference: FloatReference): void;
-    discardStashedFragments(floatReference: FloatReference): void;
-    getStashedFloatFragments(
-      floatReference: FloatReference,
-    ): PageFloatFragment[];
     /**
      * @param anchorEdge Null indicates that the anchor is not in the current
      *     container.
@@ -789,7 +803,6 @@ export namespace PageFloats {
       force: boolean,
       condition: PageFloatPlacementCondition,
     ): string | null;
-    getFloatFragmentExclusions(): GeometryUtil.Shape[];
     getMaxReachedAfterEdge(): number;
     getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number;
     getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number;
@@ -799,15 +812,7 @@ export namespace PageFloats {
       floatSide: string,
       clearSide: string | null,
     ): PageFloatPlacementCondition;
-    getLayoutConstraints(): Layout.LayoutConstraint[];
-    addLayoutConstraint(
-      layoutConstraint: Layout.LayoutConstraint,
-      floatReference: FloatReference,
-    ): void;
     getMaxBlockSizeOfPageFloats(): number;
-    lock(): void;
-    unlock(): void;
-    isLocked(): boolean;
   }
 
   export interface PageFloatLayoutStrategy {
@@ -815,7 +820,7 @@ export namespace PageFloats {
     appliesToFloat(float: PageFloat): boolean;
     createPageFloat(
       nodeContext: Vtree.NodeContext,
-      pageFloatLayoutContext: PageFloatLayoutContext,
+      pageFloatLayoutContext: AttachedPageFloatLayoutContext,
       column: Layout.Column,
     ): Task.Result<PageFloat>;
     createPageFloatFragment(
@@ -827,14 +832,17 @@ export namespace PageFloats {
     ): PageFloatFragment;
     findPageFloatFragment(
       float: PageFloat,
-      pageFloatLayoutContext: PageFloatLayoutContext,
+      pageFloatLayoutContext: AttachedPageFloatLayoutContext,
     ): PageFloatFragment | null;
     adjustPageFloatArea(
       floatArea: Layout.PageFloatArea,
       floatContainer: Vtree.Container,
       column: Layout.Column,
     ): Task.Result<void>;
-    forbid(float: PageFloat, pageFloatLayoutContext: PageFloatLayoutContext);
+    forbid(
+      float: PageFloat,
+      pageFloatLayoutContext: AttachedPageFloatLayoutContext,
+    );
   }
 }
 

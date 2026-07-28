@@ -955,6 +955,8 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
  * @param style Cascaded style for `@page` rules
  */
 export class PageRulePartition extends PageMaster.Partition<PageRulePartitionInstance> {
+  readonly pageAreaPartition: PageAreaPartition;
+
   constructor(
     scope: Exprs.LexicalScope,
     parent: PageRuleMaster,
@@ -962,7 +964,7 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
     public readonly pageSize: PageSize,
   ) {
     super(scope, null, null, [], parent);
-    const partition = new PageAreaPartition(this.scope, this);
+    this.pageAreaPartition = new PageAreaPartition(this.scope, this);
     this.applySpecified(style);
   }
 
@@ -1138,6 +1140,10 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     style["padding-top"] = new Css.Expr(dim.marginTop);
     style["padding-bottom"] = new Css.Expr(dim.marginBottom);
     this.register(context);
+  }
+
+  override get pageAreaEstablishingChild(): PageRulePartitionInstance {
+    return this.pageAreaPartitionInstance;
   }
 
   override applyCascadeAndInit(
@@ -1800,10 +1806,14 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
   }
 }
 
-export class PageRulePartitionInstance extends PageMaster.PartitionInstance<PageRulePartition> {
+export class PageRulePartitionInstance
+  extends PageMaster.PartitionInstance<PageRulePartition>
+  implements PageMaster.PageAreaEstablishing
+{
   readonly contentBoxWidth: Css.Val;
   readonly contentBoxHeight: Css.Val;
   readonly pageAreaDimension: PageAreaDimension;
+  readonly pageAreaEstablishingChild: PageAreaPartitionInstance;
 
   constructor(
     parentInstance: PageMaster.PageBoxInstance,
@@ -1847,15 +1857,24 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
     this.initColumns();
     this.initEnabled();
     this.register(context);
+    this.pageAreaEstablishingChild = new PageAreaPartitionInstance(
+      this,
+      pageRulePartition.pageAreaPartition,
+    );
   }
 
   override applyCascadeAndInit(
     cascade: CssCascade.CascadeInstance,
     docElementStyle: CssCascade.ElementStyle,
   ): void {
-    // Geometry and cascaded style were resolved in the constructor; here only
-    // the page-area child is initialized.
-    this.initChildren(cascade, docElementStyle);
+    // Geometry and cascaded style were resolved in the constructor, and so was
+    // the page-area child, as in PageRuleMasterInstance.
+    cascade.pushRule(this.pageBox.classes, null, this.cascaded);
+    this.pageAreaEstablishingChild.applyCascadeAndInit(
+      cascade,
+      docElementStyle,
+    );
+    cascade.popRule();
   }
 
   /**
@@ -1994,7 +2013,12 @@ export class PageRulePartitionInstance extends PageMaster.PartitionInstance<Page
   }
 }
 
-export class PageAreaPartitionInstance extends PageMaster.PartitionInstance<PageAreaPartition> {
+export class PageAreaPartitionInstance
+  extends PageMaster.PartitionInstance<PageAreaPartition>
+  implements PageMaster.PageAreaEstablishing
+{
+  readonly pageAreaEstablishingChild = null;
+
   constructor(
     parentInstance: PageMaster.PageBoxInstance,
     pageAreaPartition: PageAreaPartition,
