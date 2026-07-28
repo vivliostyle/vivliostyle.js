@@ -1474,7 +1474,7 @@ describe("page-floats", function () {
         columnContext.state.floatsDeferredToNext.push(cont6);
       });
 
-      it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresonding flow name in order of page, region and column", function () {
+      it("returns all PageFloatContinuations deferred to the next fragmentainer with the corresponding flow name in order of page, region and column", function () {
         expect(columnContext.getPageFloatContinuationsDeferredToNext()).toEqual(
           [cont1, cont3, cont5],
         );
