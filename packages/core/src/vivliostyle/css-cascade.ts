@@ -4789,6 +4789,8 @@ export class CascadeParserHandler
   implements CssValidator.PropertyReceiver
 {
   chain: SelectorChain = new NoSelectorChain();
+  selectorListVoided: boolean = false;
+  private pendingChained: CascadeAction[] = [];
   specificity: number = 0;
   elementStyle: ElementStyle | null = null;
   conditionCount: number = 0;
@@ -4823,11 +4825,21 @@ export class CascadeParserHandler
     this.chain.emit(action, this);
   }
 
+  // Nothing enters the cascade until the whole selector list of the rule has
+  // been read, so that an invalid selector takes with it the selectors that
+  // precede it as well as those that follow.
   insertChained(chained: CascadeAction): void {
-    if (chained instanceof WiredAction && chained.makePrimary(this.cascade)) {
-      return;
+    this.pendingChained.push(chained);
+  }
+
+  private takePendingChained(): void {
+    for (const chained of this.pendingChained) {
+      if (chained instanceof WiredAction && chained.makePrimary(this.cascade)) {
+        continue;
+      }
+      this.insertNonPrimary(chained);
     }
-    this.insertNonPrimary(chained);
+    this.pendingChained.splice(0);
   }
 
   private invalidContinuationAfterPseudoelement(continuation: string): boolean {
@@ -5250,7 +5262,9 @@ export class CascadeParserHandler
     this.selectorFunctionContainsPseudoelement = false;
     this.footnoteContent = false;
     this.specificity = 0;
-    this.chain = new AccumulatedSelectorChain();
+    if (!this.selectorListVoided) {
+      this.chain = new AccumulatedSelectorChain();
+    }
   }
 
   override startSelectorRule(): void {
@@ -5263,6 +5277,8 @@ export class CascadeParserHandler
     this.selectorFunctionContainsPseudoelement = false;
     this.specificity = 0;
     this.footnoteContent = false;
+    this.selectorListVoided = false;
+    this.pendingChained.splice(0);
     this.chain = new AccumulatedSelectorChain();
     this.invalid = false;
   }
@@ -5282,6 +5298,11 @@ export class CascadeParserHandler
 
   override startRuleBody(): void {
     this.finishChain();
+    if (this.selectorListVoided) {
+      this.pendingChained.splice(0);
+    } else {
+      this.takePendingChained();
+    }
     super.startRuleBody();
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
@@ -5299,6 +5320,14 @@ export class CascadeParserHandler
 
   voidSelector(): void {
     this.chain = new NoSelectorChain();
+  }
+
+  // A style rule takes a selector list that is not forgiving, so one invalid
+  // selector takes the whole rule with it, including the selectors that follow
+  // the comma.
+  voidSelectorList(): void {
+    this.voidSelector();
+    this.selectorListVoided = true;
   }
 
   applyRuleForSelector(): void {
@@ -5490,6 +5519,11 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     this.parentChain = parent.chain;
   }
 
+  // The rule being parsed belongs to the handler this list is nested in.
+  override insertChained(chained: CascadeAction): void {
+    this.parent.insertChained(chained);
+  }
+
   takeAlternative(actions: ChainedAction[]): void {
     this.containsPseudoelementSelector ||= !!this.pseudoelement;
     this.chains.push(actions);
@@ -5543,16 +5577,18 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     // A list that is not forgiving is invalid as a whole once one alternative
     // fails to parse, and so is the selector that contains it. The walk stops
     // at the first forgiving list, which drops that selector as one of its own
-    // alternatives; reaching the top instead hands the parse back.
+    // alternatives; reaching the top instead voids the rule and hands the
+    // parse back.
     let handler: CascadeParserHandler = this;
     while (
       handler instanceof MatchesParameterParserHandler &&
       !handler.forgiving()
     ) {
-      handler.parent.voidSelector();
       handler = handler.parent;
+      handler.voidSelector();
     }
     if (!(handler instanceof MatchesParameterParserHandler)) {
+      handler.voidSelectorList();
       this.endDelegation();
     }
   }

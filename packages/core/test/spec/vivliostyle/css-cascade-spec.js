@@ -1089,20 +1089,25 @@ describe("css-cascade", function () {
         );
       });
 
-      it("voids the enclosing selector when an unforgiving list is voided", function (done) {
-        // The error hands the parse back to the selector that contains the
-        // list, so what follows is read as a selector of its own.
+      it("voids the rule when an unforgiving list is voided", function (done) {
+        // A style rule takes a selector list that is not forgiving either, so
+        // the selectors after the comma go with it.
         parseCascade(
           "x:not(u|y, .c d, z) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["x"]).toBeUndefined();
-            expect(cascade.classes["c"]).toEqual(
-              jasmine.any(adapt_csscasc.ConditionItemAction),
-            );
-            expect(cascade.tags["d"]).toEqual(
-              jasmine.any(adapt_csscasc.WiredConditionScope),
-            );
+            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Object.keys(cascade.classes)).toEqual([]);
+          },
+        );
+      });
+
+      it("voids the selectors that precede the invalid one", function (done) {
+        parseCascade(
+          "a, b:has(# p), c { color: red } e { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["e"]);
           },
         );
       });
@@ -1159,15 +1164,12 @@ describe("css-cascade", function () {
       });
 
       it("drops a rule whose selector never finished", function (done) {
+        // The rule never reaches its body, so nothing it built is taken.
         parseCascade(
           "div:is(!!!}p>{}) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["div"]).toBeUndefined();
-            expect(cascade.tags["span"]).toBeUndefined();
-            expect(cascade.tags["p"]).toEqual(
-              jasmine.any(adapt_csscasc.ConditionItemAction),
-            );
+            expect(Object.keys(cascade.tags)).toEqual([]);
           },
         );
       });

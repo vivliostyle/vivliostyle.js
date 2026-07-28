@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Invalid selector in a rule</title>
+    <style>
+      x:not(# p), .after {
+        color: red;
+      }
+      .before, y:not(# q) {
+        color: red;
+      }
+      d,
+      e {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <d class="after">This text should be green.</d>
+      <e class="before">This text should be green too.</e>
+    </div>
+  </body>
+</html>
