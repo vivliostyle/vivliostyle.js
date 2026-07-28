@@ -1221,6 +1221,41 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("an unknown pseudo-class", function () {
+      it("voids the rule", function (done) {
+        parseCascade(
+          "p:unknown-pseudo, div { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual([]);
+          },
+        );
+      });
+
+      it("keeps the rules that follow", function (done) {
+        parseCascade(
+          "p:unknown-pseudo { color: red } div { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["div"]);
+          },
+        );
+      });
+
+      it("drops only the alternative inside a forgiving list", function (done) {
+        parseCascade(
+          "div:is(.x, :unknown-pseudo) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags["span"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+          },
+        );
+      });
+    });
+
     describe("without a syntax error", function () {
       it("registers a sibling condition before the chain restarts", function (done) {
         // The condition item is read by the rest of the selector, so it must
@@ -1676,13 +1711,11 @@ describe("css-cascade", function () {
         });
       });
 
-      it("represents nothing when an unsupported operator is passed", function () {
+      it("voids the selector when an unsupported operator is passed", function () {
         handler.attributeSelector("ns", "foo", null, "bar");
 
-        expect(handler.chain.actions.length).toBe(1);
-        var action = handler.chain.actions[0];
-        expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
-        expect(action.condition).toBe("");
+        expect(handler.chain.actions).toBeUndefined();
+        expect(handler.selectorListVoided).toBe(true);
       });
     });
   });

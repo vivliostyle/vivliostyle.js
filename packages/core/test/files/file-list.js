@@ -61,6 +61,10 @@ module.exports = [
         file: "css-parse-error/pseudo-element-in-a-selector-list.html",
         title: "Pseudo-element in a selector list",
       },
+      {
+        file: "css-parse-error/unknown-pseudo-class.html",
+        title: "Unknown pseudo-class in a selector list",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",

@@ -4880,8 +4880,8 @@ export class CascadeParserHandler
 
   invalidSelector(message: string): void {
     Logging.logger.warn(message);
-    this.chain.push(new CheckConditionAction("")); // always fails
     this.setInvalid();
+    this.voidSelectorList();
   }
 
   setInvalid(): void {
@@ -5566,6 +5566,12 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
     // <complex-real-selector-list> of `:not()` and of the S of
     // `:nth-child(An+B of S)` is real, which is what "real" means.
     this.invalidSelector(`Pseudo-element ::${name} in a selector list`);
+  }
+
+  // An alternative of this list is invalid, not the selector that contains it.
+  override invalidSelector(message: string): void {
+    Logging.logger.warn(message);
+    this.setInvalid();
     this.voidAlternative();
   }
 
