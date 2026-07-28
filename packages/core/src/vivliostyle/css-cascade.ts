@@ -5311,6 +5311,12 @@ export class CascadeParserHandler
 
   voidSelector(): void {
     this.chain = new NoSelectorChain();
+    this.pseudoelement = null;
+    // Neither `nextSelector` nor `startSelectorRule` resets this, so a voided
+    // selector would leave it for the next rule to read.
+    this.viewConditionId = null;
+    this.footnoteContent = false;
+    this.specificity = 0;
   }
 
   // A style rule takes a selector list that is not forgiving, so one invalid
@@ -5323,11 +5329,7 @@ export class CascadeParserHandler
 
   applyRuleForSelector(): void {
     this.processChain(this.makeApplyRuleAction(this.specificity));
-    this.chain = new NoSelectorChain();
-    this.pseudoelement = null;
-    this.viewConditionId = null;
-    this.footnoteContent = false;
-    this.specificity = 0;
+    this.voidSelector();
   }
 
   protected makeApplyRuleAction(specificity: number): ApplyRuleAction {
@@ -5577,10 +5579,6 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
 
   private voidAlternative(): void {
     this.voidSelector();
-    this.pseudoelement = null;
-    this.viewConditionId = null;
-    this.footnoteContent = false;
-    this.specificity = 0;
 
     // A list that is not forgiving is invalid as a whole once one alternative
     // is voided, and so is the selector that contains it. The walk stops at the

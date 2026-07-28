@@ -1163,6 +1163,16 @@ describe("css-cascade", function () {
         );
       });
 
+      it("keeps the view condition of the voided selector out of the next rule", function (done) {
+        parseCascade(
+          "p::nth-fragment(2n+1):not(# a) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["q"].viewConditionId).toBeNull();
+          },
+        );
+      });
+
       it("drops a rule whose selector never finished", function (done) {
         // The rule never reaches its body, so nothing it built is taken.
         parseCascade(
@@ -1238,6 +1248,16 @@ describe("css-cascade", function () {
           done,
           function (cascade) {
             expect(Object.keys(cascade.tags)).toEqual(["div"]);
+          },
+        );
+      });
+
+      it("keeps the view condition of the voided selector out of the next rule", function (done) {
+        parseCascade(
+          "p::nth-fragment(2n+1):unknown-pseudo { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["q"].viewConditionId).toBeNull();
           },
         );
       });
