@@ -1047,16 +1047,34 @@ describe("css-cascade", function () {
         );
       });
 
-      it("drops a voided alternative of :nth-child(An+B of S)", function (done) {
+      it("voids :nth-child(An+B of S) whose alternative was voided", function (done) {
+        // Selectors Level 4 gives S a <complex-real-selector-list>.
         parseCascade(
           "div:nth-child(2n of !!!, .x) { color: red }",
           done,
           function (cascade) {
-            var action = cascade.tags["div"].condition;
-            expect(action).toEqual(
-              jasmine.any(adapt_csscasc.IsNthSiblingOfSelectorAction),
-            );
-            expect(action.firstActions.length).toBe(1);
+            expect(Object.keys(cascade.tags)).toEqual([]);
+          },
+        );
+      });
+
+      it("voids :has() whose alternative was voided", function (done) {
+        // Selectors Level 4 gives `:has()` a <relative-selector-list>.
+        parseCascade(
+          "div:has(# p, q) { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual([]);
+          },
+        );
+      });
+
+      it("drops a voided unforgiving list from the forgiving list around it", function (done) {
+        parseCascade(
+          "div:is(:has(.x, # p), .z) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
           },
         );
       });
@@ -1071,16 +1089,14 @@ describe("css-cascade", function () {
         );
       });
 
-      it("keeps building the enclosing selector after a voided list", function (done) {
-        // `:not()` is not forgiving, so the error hands the parse back to the
-        // selector that contains it.
+      it("voids the enclosing selector when an unforgiving list is voided", function (done) {
+        // The error hands the parse back to the selector that contains the
+        // list, so what follows is read as a selector of its own.
         parseCascade(
           "x:not(u|y, .c d, z) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["x"]).toEqual(
-              jasmine.any(adapt_csscasc.ApplyRuleAction),
-            );
+            expect(cascade.tags["x"]).toBeUndefined();
             expect(cascade.classes["c"]).toEqual(
               jasmine.any(adapt_csscasc.ConditionItemAction),
             );
@@ -1142,20 +1158,6 @@ describe("css-cascade", function () {
         );
       });
 
-      it("keeps the source text of the alternatives :has() kept", function (done) {
-        parseCascade(
-          "div:has(# p, q) { color: red }",
-          done,
-          function (cascade) {
-            var action = cascade.tags["div"].condition;
-            expect(action).toEqual(
-              jasmine.any(adapt_csscasc.MatchesRelationalAction),
-            );
-            expect(action.selectorTexts).toEqual([" q"]);
-          },
-        );
-      });
-
       it("drops a rule whose selector never finished", function (done) {
         parseCascade(
           "div:is(!!!}p>{}) span { color: red }",
@@ -1205,6 +1207,16 @@ describe("css-cascade", function () {
           expect(cascade.tags["div"]).toEqual(
             jasmine.any(adapt_csscasc.ConditionItemAction),
           );
+        });
+      });
+
+      it("keeps the source text of the alternatives :has() takes", function (done) {
+        parseCascade("div:has(p, q) { color: red }", done, function (cascade) {
+          var action = cascade.tags["div"].condition;
+          expect(action).toEqual(
+            jasmine.any(adapt_csscasc.MatchesRelationalAction),
+          );
+          expect(action.selectorTexts).toEqual(["p", " q"]);
         });
       });
 

@@ -5297,6 +5297,10 @@ export class CascadeParserHandler
     this.chain.finishIn(this);
   }
 
+  voidSelector(): void {
+    this.chain = new NoSelectorChain();
+  }
+
   applyRuleForSelector(): void {
     this.processChain(this.makeApplyRuleAction(this.specificity));
     this.chain = new NoSelectorChain();
@@ -5530,24 +5534,25 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
 
   override error(mnemonics: string, token: CssTokenizer.Token): void {
     super.error(mnemonics, token);
-    this.chain = new NoSelectorChain();
+    this.voidSelector();
     this.pseudoelement = null;
     this.viewConditionId = null;
     this.footnoteContent = false;
     this.specificity = 0;
 
-    let forgiving = false;
-    for (
-      let handler: CascadeParserHandler = this;
-      handler instanceof MatchesParameterParserHandler;
-      handler = handler.parent
+    // A list that is not forgiving is invalid as a whole once one alternative
+    // fails to parse, and so is the selector that contains it. The walk stops
+    // at the first forgiving list, which drops that selector as one of its own
+    // alternatives; reaching the top instead hands the parse back.
+    let handler: CascadeParserHandler = this;
+    while (
+      handler instanceof MatchesParameterParserHandler &&
+      !handler.forgiving()
     ) {
-      if (handler.forgiving()) {
-        forgiving = true;
-        break;
-      }
+      handler.parent.voidSelector();
+      handler = handler.parent;
     }
-    if (!forgiving) {
+    if (!(handler instanceof MatchesParameterParserHandler)) {
       this.endDelegation();
     }
   }
@@ -5574,7 +5579,7 @@ export class MatchesParameterParserHandler extends CascadeParserHandler {
   }
 
   /**
-   * @returns true if this takes a forgiving selector list (:is/where/has)
+   * @returns true if this takes a forgiving selector list (:is/where)
    */
   forgiving(): boolean {
     return true;
@@ -5617,6 +5622,12 @@ export class HasParameterParserHandler extends MatchesParameterParserHandler {
   override relational(): boolean {
     return true;
   }
+
+  // `:has()` took a <forgiving-relative-selector-list> in an earlier draft.
+  // Selectors Level 4 gives it a <relative-selector-list>.
+  override forgiving(): boolean {
+    return false;
+  }
 }
 
 /**
@@ -5648,8 +5659,9 @@ export class NthChildOfSelectorParameterParserHandler extends MatchesParameterPa
     this.endDelegation();
   }
 
+  // Selectors Level 4 gives S a <complex-real-selector-list>.
   override forgiving(): boolean {
-    return true;
+    return false;
   }
 }
 

@@ -49,6 +49,10 @@ module.exports = [
         file: "css-parse-error/voided-alternative-pseudo-element.html",
         title: "Pseudo-element in a voided alternative",
       },
+      {
+        file: "css-parse-error/unforgiving-selector-list.html",
+        title: "Syntax error in an unforgiving selector list",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Syntax error in an unforgiving selector list</title>
+    <style>
+      div:has(.x, # p) span {
+        color: red;
+      }
+      li:nth-child(2n of .y, # q) {
+        color: red;
+      }
+      span,
+      li {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div><span class="x">This text should be green.</span></div>
+    <ol>
+      <li class="y">This item should be green.</li>
+      <li class="y">This item should be green too.</li>
+    </ol>
+  </body>
+</html>
