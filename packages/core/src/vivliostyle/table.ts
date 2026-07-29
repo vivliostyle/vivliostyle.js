@@ -69,11 +69,13 @@ export class TableCell {
   colSpan: number;
   rowSpan: number;
   height: number = 0;
-  anchorSlot: TableSlot | null = null;
 
   constructor(
     public readonly rowIndex: number,
     public readonly columnIndex: number,
+    // Differs from columnIndex where cells above span rows and keep their
+    // slots in this row taken.
+    public readonly anchorColumnIndex: number,
     viewElement: Element,
   ) {
     this.viewElement = viewElement;
@@ -83,10 +85,6 @@ export class TableCell {
 
   setHeight(height: number) {
     this.height = height;
-  }
-
-  setAnchorSlot(slot: TableSlot) {
-    this.anchorSlot = slot;
   }
 }
 
@@ -474,27 +472,31 @@ export class TableFormattingContext
     return rowSlots;
   }
 
-  addCell(rowIndex: number, cell: TableCell) {
+  addCell(rowIndex: number, columnIndex: number, viewElement: Element) {
     let row = this.rows[rowIndex];
     if (!row) {
       this.addRow(rowIndex, new TableRow(rowIndex, null));
       row = this.rows[rowIndex];
     }
     Asserts.assert(row);
+    const rowSlots = this.getRowSlots(rowIndex);
+    let anchorColumnIndex = 0;
+    while (rowSlots[anchorColumnIndex]) {
+      anchorColumnIndex++;
+    }
+    const cell = new TableCell(
+      rowIndex,
+      columnIndex,
+      anchorColumnIndex,
+      viewElement,
+    );
     row.addCell(cell);
     const rowUpper = rowIndex + cell.rowSpan;
-    let rowSlots = this.getRowSlots(rowIndex);
-    let startColIndex = 0;
-    while (rowSlots[startColIndex]) {
-      startColIndex++;
-    }
-    for (; rowIndex < rowUpper; rowIndex++) {
-      rowSlots = this.getRowSlots(rowIndex);
-      for (let i = startColIndex; i < startColIndex + cell.colSpan; i++) {
-        const slot = (rowSlots[i] = new TableSlot(rowIndex, i, cell));
-        if (!cell.anchorSlot) {
-          cell.setAnchorSlot(slot);
-        }
+    const columnUpper = anchorColumnIndex + cell.colSpan;
+    for (let r = rowIndex; r < rowUpper; r++) {
+      const slots = this.getRowSlots(r);
+      for (let i = anchorColumnIndex; i < columnUpper; i++) {
+        slots[i] = new TableSlot(r, i, cell);
       }
     }
   }
@@ -960,10 +962,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               this.inRow = true;
             }
             const elem = nodeContext.viewNode as Element;
-            formattingContext.addCell(
-              this.rowIndex,
-              new TableCell(this.rowIndex, this.columnIndex, elem),
-            );
+            formattingContext.addCell(this.rowIndex, this.columnIndex, elem);
             this.columnIndex++;
             fixTableCellWrapperForBaseline(elem);
             // Propagate cell break values to the row for forced break detection
@@ -1070,7 +1069,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     Asserts.assert(colWidths);
     let width = 0;
     for (let i = 0; i < cell.colSpan; i++) {
-      width += colWidths[cell.anchorSlot.columnIndex + i];
+      width += colWidths[cell.anchorColumnIndex + i];
     }
     width += this.formattingContext.inlineBorderSpacing * (cell.colSpan - 1);
     return width;
@@ -1130,7 +1129,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     for (let i = 0; i < cellBreakPositions.length; i++) {
       const p = cellBreakPositions[i];
       if (
-        p.cell.anchorSlot.columnIndex === slotIndex &&
+        p.cell.anchorColumnIndex === slotIndex &&
         p.cellNodePosition.steps[0].node === sourceNode
       ) {
         return { position: p, index: i };
@@ -1219,7 +1218,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           rowCellBreakPositions.forEach((cellBreakPosition) => {
             cont1 = cont1.thenAsync(() => {
               const cell = cellBreakPosition.cell;
-              addDummyCellUntil(cell.anchorSlot.columnIndex);
+              addDummyCellUntil(cell.anchorColumnIndex);
               const cellNodePosition = cellBreakPosition.cellNodePosition;
               const cellNodeContext =
                 VtreeImpl.makeNodeContextFromNodePositionStep(
@@ -1408,7 +1407,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     let cont: Task.Result<Vtree.ChunkPosition>;
     // Use sourceNode matching instead of sequential index to support layout retry (issue #1663)
     const brokenCell = this.findBrokenCellAtSlot(
-      cell.anchorSlot.columnIndex,
+      cell.anchorColumnIndex,
       nodeContext.sourceNode,
     );
     if (brokenCell) {
