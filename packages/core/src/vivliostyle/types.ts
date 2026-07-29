@@ -886,7 +886,7 @@ export namespace PseudoElement {
     contentProcessed: { [key: string]: boolean };
     readonly element: Element;
     style: CssCascade.ElementStyle;
-    styler: CssStyler.AbstractStyler;
+    readonly styler: CssStyler.AbstractStyler;
     readonly context: Exprs.Context;
     readonly exprContentListener: Vtree.ExprContentListener;
   }

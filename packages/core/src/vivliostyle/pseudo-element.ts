@@ -63,12 +63,14 @@ export function setPseudoName(element: Element, name: string): void {
 export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   contentProcessed: { [key: string]: boolean } = {};
 
-  // after content: update style
+  // The ::after style is first asked for only after all of the element's
+  // descendants are processed.
+  private afterStyleTaken = false;
 
   constructor(
     public readonly element: Element,
     public style: CssCascade.ElementStyle,
-    public styler: CssStyler.AbstractStyler,
+    public readonly styler: CssStyler.AbstractStyler,
     public readonly context: Exprs.Context,
     public readonly exprContentListener: Vtree.ExprContentListener,
   ) {}
@@ -76,9 +78,9 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
   /** @override */
   getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     const pseudoName = getPseudoName(element);
-    if (this.styler && pseudoName && pseudoName.match(/after$/)) {
+    if (!this.afterStyleTaken && pseudoName && pseudoName.match(/after$/)) {
       this.style = this.styler.getStyle(this.element, true);
-      this.styler = null;
+      this.afterStyleTaken = true;
     }
     const pseudoMap = CssCascade.getStyleMap(this.style, "_pseudos");
     const style = pseudoMap?.[pseudoName] || ({} as CssCascade.ElementStyle);
