@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pseudo-element in a voided alternative</title>
+    <style>
+      div:is(.x, # ::before) span {
+        color: green;
+      }
+      p:is(*, # ::before) {
+        color: red;
+      }
+      p {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="x"><span>This text should be green.</span></div>
+    <p>This paragraph should be green.</p>
+  </body>
+</html>

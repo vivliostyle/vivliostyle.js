@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Unknown pseudo-class in a selector list</title>
+    <style>
+      p:unknown-pseudo, .c {
+        color: red;
+      }
+      div {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="c">This text should be green.</div>
+  </body>
+</html>
