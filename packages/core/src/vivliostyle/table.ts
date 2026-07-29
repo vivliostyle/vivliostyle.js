@@ -802,9 +802,11 @@ function layoutFloatOrFootnoteIfNeeded(
   column: Layout.Column,
   state: LayoutUtil.RenderedActiveLayoutIteratorState,
 ): Task.Result<boolean> | null {
-  const nodeContext = state.nodeContext;
+  // Column.asFloatNodeContext drops the float that opened a page float area.
+  // This edge asks about that float too.
+  const nodeContext = VtreeImpl.asFloatNodeContext(state.nodeContext);
   if (
-    !nodeContext.floatSide ||
+    !nodeContext ||
     !(
       PageFloats.isPageFloat(nodeContext.floatReference) ||
       nodeContext.floatSide === "footnote"

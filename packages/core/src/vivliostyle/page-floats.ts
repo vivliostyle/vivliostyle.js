@@ -2764,13 +2764,12 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
 
   /** @override */
   createPageFloat(
-    nodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.FloatNodeContext,
     pageFloatLayoutContext: AttachedPageFloatLayoutContext,
     column: LayoutType.Column,
   ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
-    Asserts.assert(nodeContext.floatSide);
-    const floatSide: string = nodeContext.floatSide;
+    const floatSide = nodeContext.floatSide;
     const nodePosition = nodeContext.toNodePosition();
     const insidePageFloat = !!pageFloatLayoutContext.generatingNodePosition;
     return column
