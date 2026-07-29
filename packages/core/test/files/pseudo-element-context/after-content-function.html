@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>content(before) in the ::after of an element with children</title>
+    <style>
+      p::before {
+        content: "BEFORE";
+      }
+      p::after {
+        content: " / after sees [" content(before) "]";
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph has a child element <span>here</span>.</p>
+  </body>
+</html>

@@ -1738,13 +1738,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       // page/margin-box content so sibling margin boxes do not inherit each
       // other's local counter operations.
       cascade.counterScoping.push(null);
-      cascade.pushCounters(style, cascade.currentStyle);
+      // the callers push this box's rule before resolving its content
+      cascade.pushCounters(style, style);
       style["content"] = content.filterValue(
         new CssCascade.ContentPropVisitor(
           cascade,
           null,
           cascade.counterResolver,
-          cascade.currentStyle,
+          style,
         ),
       );
       cascade.popCounters();

@@ -478,6 +478,9 @@ export class Styler implements AbstractStyler {
   flowToReach: string | null = null;
   idToReach: string | null = null;
   cascade: CssCascade.CascadeInstance;
+  // the last element the cascade opened, kept across pops: vgen reads it when
+  // it re-evaluates generated content
+  elementWindow: CssCascade.ElementCascadeInstance;
   offsetMap: SlipMap;
   primary: boolean = true;
   primaryStack = [] as boolean[];
@@ -517,7 +520,12 @@ export class Styler implements AbstractStyler {
     this.boxStack = new BoxStack(context);
     this.offsetMap.addStuckRange(rootOffset);
     const style = this.getAttrStyle(this.root);
-    this.cascade.pushElement(this, this.root, style, rootOffset);
+    this.elementWindow = this.cascade.pushElement(
+      this,
+      this.root,
+      style,
+      rootOffset,
+    );
     this.recordCounterSnapshot(
       rootOffset,
       this.cascade.counters,
@@ -1082,7 +1090,12 @@ export class Styler implements AbstractStyler {
         const elem = this.last as Element;
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
-        this.cascade.pushElement(this, elem, style, this.lastOffset);
+        this.elementWindow = this.cascade.pushElement(
+          this,
+          elem,
+          style,
+          this.lastOffset,
+        );
         if (this.cascade.lastCounterChanges.length > 0) {
           this.recordCounterSnapshot(
             this.lastOffset,

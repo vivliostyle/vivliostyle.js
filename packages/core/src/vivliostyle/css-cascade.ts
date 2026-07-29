@@ -2301,7 +2301,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     public cascade: CascadeInstance,
     public element: Element,
     public readonly counterResolver: CounterResolver,
-    private readonly elementStyle: ElementStyle | null,
+    private readonly elementStyle: ElementStyle,
     private readonly pseudoName?: string,
   ) {
     super();
@@ -2346,8 +2346,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     propName: "counter-reset" | "counter-set" | "counter-increment",
     options: { reset?: boolean; defaultValue?: number },
   ): boolean {
-    const currentStyle = this.cascade.currentStyle;
-    const cascVal = currentStyle?.[propName] as CascadeValue;
+    const cascVal = this.elementStyle[propName] as CascadeValue;
     if (!cascVal) {
       return false;
     }
@@ -2832,9 +2831,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
             stringValue = pseudoElem.textContent || "";
           } else {
             // Fallback: get from stored styles and evaluate counter() functions
-            const pseudos = this.elementStyle
-              ? getStyleMap(this.elementStyle, "_pseudos")
-              : undefined;
+            const pseudos = getStyleMap(this.elementStyle, "_pseudos");
             const val = (pseudos?.[pseudoName]?.["content"] as CascadeValue)
               ?.value;
             if (val) {
@@ -2842,7 +2839,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
             } else if (pseudoName === "marker") {
               // Native ::marker: content was extracted to --viv-marker-content
               const markerVal = (
-                this.elementStyle?.["--viv-marker-content"] as CascadeValue
+                this.elementStyle["--viv-marker-content"] as CascadeValue
               )?.value;
               stringValue = getStringValueFromCssContentVal(
                 markerVal,
@@ -2855,9 +2852,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       case "first-letter":
         {
           // Respect ::before/after pseudo-elements (Issue #1174)
-          const pseudos = this.elementStyle
-            ? getStyleMap(this.elementStyle, "_pseudos")
-            : undefined;
+          const pseudos = getStyleMap(this.elementStyle, "_pseudos");
           const beforeVal = (pseudos?.["before"]?.["content"] as CascadeValue)
             ?.value;
           const afterVal = (pseudos?.["after"]?.["content"] as CascadeValue)
@@ -3397,14 +3392,11 @@ export class CascadeInstance {
   conditions = Object.create(null) as { [key: string]: number };
   currentElement: Element | null = null;
   currentElementOffset: number | null = null;
-  currentStyle: ElementStyle | null = null;
-  currentClassNames: string[] | null = null;
   currentLocalName: string = "";
   currentNamespace: string | null = null;
   currentId: string | null = null;
   currentXmlId: string | null = null;
   currentNSTag: string = "";
-  currentEpubTypes: string[] | null = null;
   currentPageType: string | null = null;
   previousPageType: string | null = null;
   firstPageType: string | null = null;
@@ -3536,14 +3528,11 @@ export class CascadeInstance {
   ): void {
     this.currentElement = null;
     this.currentElementOffset = null;
-    this.currentStyle = baseStyle;
     this.currentNamespace = null;
     this.currentLocalName = "";
     this.currentId = null;
     this.currentXmlId = null;
-    this.currentClassNames = classes;
     this.currentNSTag = "";
-    this.currentEpubTypes = EMPTY;
     this.currentPageType = pageType;
     this.applyActions(
       new StyledCascadeInstance(this, baseStyle, classes, EMPTY),
@@ -3567,7 +3556,7 @@ export class CascadeInstance {
     scoping[counterName] = true;
   }
 
-  pushCounters(props: ElementStyle, elementStyle: ElementStyle | null): void {
+  pushCounters(props: ElementStyle, elementStyle: ElementStyle): void {
     const counterChanges = new Set<string>();
     const counterChangeTypes: {
       [key: string]: "reset" | "set" | "increment";
@@ -3653,7 +3642,7 @@ export class CascadeInstance {
     }
     if (
       floatVal === Css.ident.footnote &&
-      !elementStyle?.["--viv-semantic-footnote-content"]
+      !elementStyle["--viv-semantic-footnote-content"]
     ) {
       if (!incrementMap) {
         incrementMap = Object.create(null);
@@ -3664,7 +3653,7 @@ export class CascadeInstance {
       // on the element (parent element of the pseudo element).
       if (incrementMap["footnote"] === undefined) {
         const incrPropValue = (
-          elementStyle?.["counter-increment"] as CascadeValue
+          elementStyle["counter-increment"] as CascadeValue
         )?.value;
         if (
           !incrPropValue ||
@@ -3850,7 +3839,7 @@ export class CascadeInstance {
     element: Element,
     baseStyle: ElementStyle,
     elementOffset: number,
-  ): void {
+  ): ElementCascadeInstance {
     if (VIVLIOSTYLE_DEBUG) {
       this.elementStack.push(element);
     }
@@ -3861,7 +3850,6 @@ export class CascadeInstance {
     this.currentPageType = null;
     this.currentElement = element;
     this.currentElementOffset = elementOffset;
-    this.currentStyle = baseStyle;
     this.currentNamespace = element.namespaceURI;
     this.currentLocalName = element.localName;
     const prefix =
@@ -3877,10 +3865,8 @@ export class CascadeInstance {
     this.currentXmlId = element.getAttributeNS(Base.NS.XML, "id");
     const classes = element.getAttribute("class");
     const classNames = classes ? classes.split(/\s+/) : EMPTY;
-    this.currentClassNames = classNames;
     const types = element.getAttributeNS(Base.NS.epub, "type");
     const epubTypes = types ? types.split(/\s+/) : EMPTY;
-    this.currentEpubTypes = epubTypes;
     const lang = Base.getLangAttribute(element);
     if (lang) {
       this.stack[this.stack.length - 1].push(new RestoreLangItem(this.lang));
@@ -3929,15 +3915,14 @@ export class CascadeInstance {
       followingNamespaceTypeCounts[this.currentLocalName]--;
     }
     followingSiblingTypeCountsStack.push(emptySiblingTypeCounts());
-    this.applyActions(
-      new ElementCascadeInstance(
-        this,
-        baseStyle,
-        classNames,
-        epubTypes,
-        element,
-      ),
+    const cascadeInstance = new ElementCascadeInstance(
+      this,
+      baseStyle,
+      classNames,
+      epubTypes,
+      element,
     );
+    this.applyActions(cascadeInstance);
     this.currentPageType = savedCurrentPageType;
 
     // Substitute var()
@@ -3984,7 +3969,7 @@ export class CascadeInstance {
       });
       this.counterListener.countersOfId(id, counters);
     }
-    const pseudos = getStyleMap(this.currentStyle, "_pseudos");
+    const pseudos = getStyleMap(baseStyle, "_pseudos");
     if (pseudos) {
       let before = true;
       for (const pseudoName of pseudoNames) {
@@ -3994,7 +3979,7 @@ export class CascadeInstance {
         }
         const pseudoProps = pseudos[pseudoName];
         if (pseudoProps) {
-          const floatValue = getProp(this.currentStyle, "float")?.value;
+          const floatValue = getProp(baseStyle, "float")?.value;
           const isSemanticNoteref =
             element instanceof Element &&
             SemanticFootnote.isSemanticFootnoteNoterefElement(element);
@@ -4002,7 +3987,7 @@ export class CascadeInstance {
             element instanceof Element &&
             SemanticFootnote.isSemanticFootnoteElement(element);
           const isSemanticFootnoteContent = !!getProp(
-            this.currentStyle,
+            baseStyle,
             "--viv-semantic-footnote-content",
           );
           const isFootnoteFloat = floatValue === Css.ident.footnote;
@@ -4077,6 +4062,7 @@ export class CascadeInstance {
                   "list-style-position",
                   styler,
                   element,
+                  baseStyle,
                 );
               if (fnMarkerListStylePos === Css.ident.outside) {
                 // Use native ::marker with CSS custom properties
@@ -4092,8 +4078,7 @@ export class CascadeInstance {
                   "content"
                 ] as CascadeValue;
                 if (footnoteMarkerContent) {
-                  this.currentStyle["_footnote-marker-content"] =
-                    footnoteMarkerContent;
+                  baseStyle["_footnote-marker-content"] = footnoteMarkerContent;
                 }
                 // Set display: list-item for native ::marker to work
                 baseStyle["display"] = new CascadeValue(
@@ -4104,11 +4089,11 @@ export class CascadeInstance {
                   Css.ident.outside,
                   0,
                 );
-                this.currentStyle["list-style-type"] = new CascadeValue(
+                baseStyle["list-style-type"] = new CascadeValue(
                   Css.ident.none,
                   0,
                 );
-                this.currentStyle["list-style-image"] = new CascadeValue(
+                baseStyle["list-style-image"] = new CascadeValue(
                   Css.ident.none,
                   0,
                 );
@@ -4129,7 +4114,7 @@ export class CascadeInstance {
                 initialLetterVal !== Css.ident.normal &&
                 !Css.isDefaultingValue(initialLetterVal)
               ) {
-                this.currentStyle["--viv-initialLetter"] = new CascadeValue(
+                baseStyle["--viv-initialLetter"] = new CascadeValue(
                   initialLetterVal,
                   0,
                 );
@@ -4154,6 +4139,7 @@ export class CascadeInstance {
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);
     }
+    return cascadeInstance;
   }
 
   private hasNonTrivialViewConditionalPseudoContent(
@@ -4197,7 +4183,7 @@ export class CascadeInstance {
 
   /**
    * Extract ::marker or ::footnote-marker properties into CSS custom
-   * properties (--viv-marker-*) on the parent element's currentStyle,
+   * properties (--viv-marker-*) on the parent element's style,
    * so that the browser's native ::marker can be controlled via polyfill CSS.
    *
    * For ::marker: the content is resolved from list-style-type/list-style-image
@@ -4225,11 +4211,13 @@ export class CascadeInstance {
         "list-style-type",
         styler,
         element,
+        elementStyle,
       );
       const listStyleImage = this.getInheritedPropertyValue(
         "list-style-image",
         styler,
         element,
+        elementStyle,
       );
       if (listStyleImage instanceof Css.URL) {
         // list-style-image: <URL> -> content: <URL> " "
@@ -4305,6 +4293,7 @@ export class CascadeInstance {
         "list-style-position",
         styler,
         element,
+        elementStyle,
       );
       if (
         listStylePosition &&
@@ -4346,18 +4335,18 @@ export class CascadeInstance {
    * @param propName
    * @param styler
    * @param element
+   * @param elementStyle style being cascaded for `element`, which the styler
+   *     cannot serve until the cascade for it finishes
    * @returns the inherited property value, or the initial value (or null) if not found
    */
   getInheritedPropertyValue(
     propName: string,
     styler: CssStyler.AbstractStyler,
     element: Element,
+    elementStyle: ElementStyle,
   ): Css.Val | null {
     for (let e = element; e; e = e.parentElement) {
-      const style =
-        e === this.currentElement
-          ? this.currentStyle
-          : styler.getStyle(e, false);
+      const style = e === element ? elementStyle : styler.getStyle(e, false);
       const prop = style[propName] as CascadeValue;
       if (prop) {
         const val = prop.evaluate(this.context, propName);
@@ -4384,6 +4373,7 @@ export class CascadeInstance {
     propName: string,
     styler: CssStyler.AbstractStyler,
     element: Element,
+    elementStyle: ElementStyle,
   ): Css.Val | null {
     const prop = pseudoProps[propName] as CascadeValue;
     if (prop) {
@@ -4404,7 +4394,12 @@ export class CascadeInstance {
         return val;
       }
     }
-    return this.getInheritedPropertyValue(propName, styler, element);
+    return this.getInheritedPropertyValue(
+      propName,
+      styler,
+      element,
+      elementStyle,
+    );
   }
 
   private applyAttrFilterInner(
@@ -4447,12 +4442,11 @@ export class CascadeInstance {
     styler: CssStyler.AbstractStyler,
     elementStyle: ElementStyle,
   ): void {
-    const currentStyle = elementStyle;
-    const pseudoMap = getStyleMap(currentStyle, "_pseudos");
+    const pseudoMap = getStyleMap(elementStyle, "_pseudos");
     for (const pseudoName in pseudoMap) {
       this.applyAttrFilterInner(styler, element, pseudoMap[pseudoName]);
     }
-    this.applyAttrFilterInner(styler, element, currentStyle);
+    this.applyAttrFilterInner(styler, element, elementStyle);
   }
 
   /**
