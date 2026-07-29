@@ -416,7 +416,7 @@ export namespace Layout {
       forceRemoveSelf: boolean,
       endOfColumn: boolean,
     ): Task.Result<boolean>;
-    findAcceptableBreakPosition(): BreakPositionAndNodeContext;
+    findAcceptableBreakPosition(): BreakPositionAndNodeContext | null;
     doFinishBreak(
       nodeContext: Vtree.NodeContext,
       overflownNodeContext: Vtree.NodeContext,

@@ -121,7 +121,7 @@ export class TableCellFragment {
     if (alignContent && alignContent !== "normal") {
       Base.setCSSProperty(element, "align-content", "normal");
     }
-    const bp = this.pseudoColumn.findAcceptableBreakPosition(true);
+    const bp = this.pseudoColumn.findAcceptableBreakPosition();
     Base.setCSSProperty(element, "vertical-align", verticalAlign);
     if (alignContent && alignContent !== "normal") {
       Base.setCSSProperty(element, "align-content", alignContent);
@@ -200,10 +200,7 @@ export class BetweenTableRowBreakPosition
       const cellFragment = this.formattingContext.getCellFragmentOfCell(cell);
       if (cellFragment) {
         const bp = cellFragment.findAcceptableBreakPosition();
-        if (
-          bp.nodeContext &&
-          !cellFragment.pseudoColumn.isLastAfterNodeContext(bp.nodeContext)
-        ) {
+        if (!cellFragment.pseudoColumn.isLastAfterNodeContext(bp.nodeContext)) {
           return true;
         }
       }
@@ -280,18 +277,16 @@ export class InsideTableRowBreakPosition
     }
     const cellFragments = this.getCellFragments();
     const acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
-    const allCellsBreakable =
-      acceptableCellBreakPositions.every((bp) => !!bp.nodeContext) &&
-      acceptableCellBreakPositions.some((bp, index) => {
-        const pseudoColumn = cellFragments[index].pseudoColumn;
-        const nodeContext = bp.nodeContext;
-        return (
-          !pseudoColumn.isStartNodeContext(nodeContext) &&
-          !pseudoColumn.isLastAfterNodeContext(nodeContext)
-        );
-      });
+    const allCellsBreakable = acceptableCellBreakPositions.some((bp, index) => {
+      const pseudoColumn = cellFragments[index].pseudoColumn;
+      const nodeContext = bp.nodeContext;
+      return (
+        !pseudoColumn.isStartNodeContext(nodeContext) &&
+        !pseudoColumn.isLastAfterNodeContext(nodeContext)
+      );
+    });
     this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(
-      (bp) => bp.nodeContext && bp.nodeContext.overflow,
+      (bp) => bp.nodeContext.overflow,
     );
     if (allCellsBreakable) {
       return this.beforeNodeContext;

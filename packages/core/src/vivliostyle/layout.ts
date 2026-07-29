@@ -3299,21 +3299,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return result;
   }
 
-  findAcceptableBreakPosition(): BreakPositionAndNodeContext {
-    let bp: Layout.BreakPosition = null;
-    let nodeContext: Vtree.NodeContext = null;
+  findAcceptableBreakPosition(): BreakPositionAndNodeContext | null {
+    let found: BreakPositionAndNodeContext | null = null;
     let penalty = 0;
     let nextPenalty = 0;
     do {
       penalty = nextPenalty;
       nextPenalty = Number.MAX_VALUE;
-      for (
-        let i = this.breakPositions.length - 1;
-        i >= 0 && !nodeContext;
-        --i
-      ) {
-        bp = this.breakPositions[i];
-        nodeContext = bp.findAcceptableBreak(this, penalty);
+      for (let i = this.breakPositions.length - 1; i >= 0 && !found; --i) {
+        const bp = this.breakPositions[i];
+        const nodeContext = bp.findAcceptableBreak(this, penalty);
+        if (nodeContext) {
+          found = { breakPosition: bp, nodeContext };
+        }
         const minPenalty = bp.getMinBreakPenalty();
         if (minPenalty > penalty) {
           nextPenalty = Math.min(nextPenalty, minPenalty);
@@ -3323,10 +3321,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // Don't need to find a non-optimal break position if
       // forceNonfitting=false
       nextPenalty > penalty &&
-      !nodeContext &&
+      !found &&
       this.forceNonfitting
     );
-    return { breakPosition: nodeContext ? bp : null, nodeContext };
+    return found;
   }
 
   doFinishBreak(
@@ -4947,8 +4945,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // page break
                 overflownNodeContext = nodeContext;
                 const bp = this.findAcceptableBreakPosition();
-                nodeContext = bp.nodeContext;
-                if (bp.breakPosition) {
+                nodeContext = bp && bp.nodeContext;
+                if (bp) {
                   bp.breakPosition.breakPositionChosen(this);
                 }
                 loopFrame.breakLoop(); // Loop end
@@ -5081,24 +5079,19 @@ export class PseudoColumn {
   ): Task.Result<Vtree.ChunkPosition> {
     return this.column.layout(chunkPosition, leadingEdge);
   }
-  findAcceptableBreakPosition(
-    allowBreakAtStartPosition: boolean,
-  ): Layout.BreakPositionAndNodeContext {
+  findAcceptableBreakPosition(): Layout.BreakPositionAndNodeContext {
     const p = this.column.findAcceptableBreakPosition();
-    if (allowBreakAtStartPosition) {
-      const startNodeContext = this.startNodeContexts[0].copy();
-      const bp = new BreakPosition.EdgeBreakPosition(
-        startNodeContext,
-        null,
-        startNodeContext.overflow,
-        0,
-      );
-      bp.findAcceptableBreak(this.column, 0);
-      if (!p.nodeContext) {
-        return { breakPosition: bp, nodeContext: startNodeContext };
-      }
-    }
-    return p;
+    const startNodeContext = this.startNodeContexts[0].copy();
+    const bp = new BreakPosition.EdgeBreakPosition(
+      startNodeContext,
+      null,
+      startNodeContext.overflow,
+      0,
+    );
+    // updates the column's overflow state, so it runs whether or not the
+    // start position is the one taken
+    bp.findAcceptableBreak(this.column, 0);
+    return p ?? { breakPosition: bp, nodeContext: startNodeContext };
   }
   /**
    * @return holing true
