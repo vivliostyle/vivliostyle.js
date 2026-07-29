@@ -165,22 +165,14 @@ export class BetweenTableRowBreakPosition
     if (penalty < this.getMinBreakPenalty()) {
       return null;
     }
-    const allCellsBreakable = this.getAcceptableCellBreakPositions().every(
-      (bp) => !!bp.nodeContext,
-    );
-    if (allCellsBreakable) {
-      // Also verify that all non-spanning cells in the row have fully rendered.
-      // If any cell has remaining content, this between-row break would lose it
-      // because finishBreak for between-row breaks only saves break positions
-      // for row-spanning cells. An InsideTableRowBreakPosition should be used
-      // instead. (Issue #1663)
-      if (this.hasUnfinishedCells()) {
-        return null;
-      }
-      return breakNodeContext;
-    } else {
+    // If any cell has remaining content, this between-row break would lose it
+    // because finishBreak for between-row breaks only saves break positions
+    // for row-spanning cells. An InsideTableRowBreakPosition should be used
+    // instead. (Issue #1663)
+    if (this.hasUnfinishedCells()) {
       return null;
     }
+    return breakNodeContext;
   }
 
   /**
@@ -277,18 +269,20 @@ export class InsideTableRowBreakPosition
     }
     const cellFragments = this.getCellFragments();
     const acceptableCellBreakPositions = this.getAcceptableCellBreakPositions();
-    const allCellsBreakable = acceptableCellBreakPositions.some((bp, index) => {
-      const pseudoColumn = cellFragments[index].pseudoColumn;
-      const nodeContext = bp.nodeContext;
-      return (
-        !pseudoColumn.isStartNodeContext(nodeContext) &&
-        !pseudoColumn.isLastAfterNodeContext(nodeContext)
-      );
-    });
+    const foundBreakInsideCell = acceptableCellBreakPositions.some(
+      (bp, index) => {
+        const pseudoColumn = cellFragments[index].pseudoColumn;
+        const nodeContext = bp.nodeContext;
+        return (
+          !pseudoColumn.isStartNodeContext(nodeContext) &&
+          !pseudoColumn.isLastAfterNodeContext(nodeContext)
+        );
+      },
+    );
     this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(
       (bp) => bp.nodeContext.overflow,
     );
-    if (allCellsBreakable) {
+    if (foundBreakInsideCell) {
       return this.beforeNodeContext;
     } else {
       return null;
@@ -2093,7 +2087,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
             const cellFragment = formattingContext.getCellFragmentOfCell(cell);
             const breakNodeContext =
               cellFragment.findAcceptableBreakPosition().nodeContext;
-            Asserts.assert(breakNodeContext);
             const cellNodeContext = cellFragment.cellNodeContext;
             const cellNodePosition = cellNodeContext.toNodePosition();
             const breakChunkPosition = new VtreeImpl.ChunkPosition(
