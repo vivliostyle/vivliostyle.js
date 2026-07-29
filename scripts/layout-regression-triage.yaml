@@ -1,4 +1,100 @@
 - category: General
+  title: Syntax error in a forgiving selector list
+  file: css-parse-error/forgiving-selector-list.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-forgiving-selector-list  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/forgiving-selector-list.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/forgiving-selector-list.html&zoom=1&spread=false
+- category: General
+  title: Pseudo-element in a voided alternative
+  file: css-parse-error/voided-alternative-pseudo-element.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-forgiving-selector-list  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/voided-alternative-pseudo-element.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/voided-alternative-pseudo-element.html&zoom=1&spread=false
+- category: General
+  title: Syntax error in an unforgiving selector list
+  file: css-parse-error/unforgiving-selector-list.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-forgiving-selector-list  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/unforgiving-selector-list.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/unforgiving-selector-list.html&zoom=1&spread=false
+- category: General
+  title: Pseudo-element in a selector list
+  file: css-parse-error/pseudo-element-in-a-selector-list.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-forgiving-selector-list  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/pseudo-element-in-a-selector-list.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/pseudo-element-in-a-selector-list.html&zoom=1&spread=false
+- category: General
+  title: Unknown pseudo-class in a selector list
+  file: css-parse-error/unknown-pseudo-class.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-forgiving-selector-list  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/unknown-pseudo-class.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/unknown-pseudo-class.html&zoom=1&spread=false
+- category: General
+  title: Explicit counter-increment on an element with a footnote ::after
+  file: pseudo-element-context/after-float-footnote-increment.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-refactor-cascade-match-windows  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/pseudo-element-context/after-float-footnote-increment.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/pseudo-element-context/after-float-footnote-increment.html&zoom=1&spread=false
+- category: General
+  title: content(before) in the ::after of an element with children
+  file: pseudo-element-context/after-content-function.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-refactor-cascade-match-windows  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/pseudo-element-context/after-content-function.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/pseudo-element-context/after-content-function.html&zoom=1&spread=false
+- category: Table
+  title: "Table rowspan in anchor target (Issue #1905)"
+  file: table/table-rowspan-anchor-target.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-refactor-cascade-match-windows  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-rowspan-anchor-target.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table-rowspan-anchor-target.html&zoom=1&spread=false
+- category: General
   title: "Reserved character in filename (Issue #2076)"
   file: filename%23hash.html
   decision: expected  # regression / expected / skip
