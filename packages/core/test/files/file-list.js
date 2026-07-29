@@ -65,6 +65,19 @@ module.exports = [
         file: "css-parse-error/unknown-pseudo-class.html",
         title: "Unknown pseudo-class in a selector list",
       },
+      {
+        file: "pseudo-element-context/after-float-footnote-increment.html",
+        title:
+          "Explicit counter-increment on an element with a footnote ::after",
+      },
+      {
+        file: "pseudo-element-context/after-content-function.html",
+        title: "content(before) in the ::after of an element with children",
+      },
+      {
+        file: "pseudo-element-context/after-list-item-counter.html",
+        title: "list-item counter in the pseudo-elements of an ordered list",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",

@@ -29,7 +29,7 @@ export type XMLDocStore = XmlDoc.XMLDocStore;
 export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   lang: string | null = null;
   totalOffset: number = -1;
-  root: Element;
+  root: Base.ChildElement;
   body: Element;
   head: Element;
   last: Element;
@@ -41,7 +41,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     public readonly url: string,
     public readonly document: Document,
   ) {
-    this.root = document.documentElement; // html element
+    this.root = Base.documentElementOf(document); // html element
     let body: Element = null;
     let head: Element = null;
     if (this.root.namespaceURI == Base.NS.XHTML) {
@@ -168,7 +168,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     // First, find the last element in the document, such that
     // this.getElementOffset(element) <= offset; if offest matches
     // exactly, just return it.
-    let element = this.root;
+    let element: Element = this.root;
     while (true) {
       elementOffset = this.getElementOffset(element);
       if (elementOffset >= offset) {

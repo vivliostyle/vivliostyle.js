@@ -1423,7 +1423,7 @@ export namespace XmlDoc {
   export interface XMLDocHolder {
     lang: string | null;
     totalOffset: number;
-    root: Element;
+    root: Base.ChildElement;
     body: Element;
     head: Element;
     last: Element;

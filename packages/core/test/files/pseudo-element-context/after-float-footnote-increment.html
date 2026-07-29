@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Explicit counter-increment on an element with a footnote ::after</title>
+    <style>
+      p {
+        counter-increment: footnote 5;
+      }
+      p::after {
+        float: footnote;
+        content: "footnote=" counter(footnote) " (should be 5)";
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph has a child element <span>here</span>.</p>
+  </body>
+</html>

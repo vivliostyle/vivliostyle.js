@@ -1222,6 +1222,7 @@ export class ViewFactory
               this.styler.cascade,
               target,
               this.styler.cascade.counterResolver,
+              this.styler.elementWindow.currentStyle,
               "footnote-marker",
             ),
           ).value,
@@ -3805,6 +3806,7 @@ export class ViewFactory
                 this.styler.cascade,
                 contentElement,
                 this.styler.cascade.counterResolver,
+                this.styler.elementWindow.currentStyle,
                 "before",
               ),
             )

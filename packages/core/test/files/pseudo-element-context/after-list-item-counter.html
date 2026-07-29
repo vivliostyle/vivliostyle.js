@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>list-item counter in the pseudo-elements of an ordered list</title>
+    <style>
+      ol::before {
+        display: block;
+        content: "before=" counter(list-item) " (should be 4)";
+      }
+      ol::after {
+        display: block;
+        content: "after=" counter(list-item) " (should be 6)";
+      }
+    </style>
+  </head>
+  <body>
+    <ol start="5">
+      <li>first</li>
+      <li>second</li>
+    </ol>
+  </body>
+</html>
