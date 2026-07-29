@@ -3586,15 +3586,32 @@ export class StyleParserHandler extends CssParser.DispatchParserHandler<BasePars
   }
 }
 
-export type StyleSource = {
-  url: string;
-  text: string | null;
+export type StyleSheetParam =
+  | { url: string; text?: null }
+  // url, if present, is the base for resolving relative URLs in the text
+  | { url: string | null; text: string };
+
+export type StyleSource = StyleSheetParam & {
   flavor: CssParser.StylesheetFlavor;
   classes: string | null;
   media: string | null;
 };
 
-export type StyleSheetParam = { url: string | null; text: string | null };
+function toStyleSource(
+  stylesheet: StyleSheetParam,
+  flavor: CssParser.StylesheetFlavor,
+): StyleSource {
+  if (stylesheet.text != null) {
+    const url = stylesheet.url
+      ? Base.resolveURL(Base.convertSpecialURL(stylesheet.url), Base.baseURL)
+      : stylesheet.url;
+    return { url, text: stylesheet.text, flavor, classes: null, media: null };
+  }
+  const url = stylesheet.url
+    ? Base.resolveURL(Base.convertSpecialURL(stylesheet.url), Base.baseURL)
+    : stylesheet.url;
+  return { url, flavor, classes: null, media: null };
+}
 
 export function parseOPSResource(
   response: Net.FetchResponse,
@@ -3619,7 +3636,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     userStyleSheets: StyleSheetParam[] | null = null,
   ) {
     super(parseOPSResource, Net.FetchResponseType.DOCUMENT);
-    this.setStyleSheets(authorStyleSheets as any, userStyleSheets as any);
+    this.setStyleSheets(authorStyleSheets, userStyleSheets);
   }
 
   getStyleForDoc(xmldoc: XmlDoc.XMLDocHolder): Style {
@@ -3635,8 +3652,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
    * removed.
    */
   private setStyleSheets(
-    authorStyleSheets: StyleSource[] | null,
-    userStyleSheets: StyleSource[] | null,
+    authorStyleSheets: StyleSheetParam[] | null,
+    userStyleSheets: StyleSheetParam[] | null,
   ) {
     this.clearStyleSheets();
     if (authorStyleSheets) {
@@ -3651,32 +3668,16 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     this.styleSheets.splice(0);
   }
 
-  private addAuthorStyleSheet(stylesheet: StyleSource) {
-    let url = stylesheet.url;
-    if (url) {
-      url = Base.resolveURL(Base.convertSpecialURL(url), Base.baseURL);
-    }
-    this.styleSheets.push({
-      url,
-      text: stylesheet.text,
-      flavor: CssParser.StylesheetFlavor.AUTHOR,
-      classes: null,
-      media: null,
-    });
+  private addAuthorStyleSheet(stylesheet: StyleSheetParam) {
+    this.styleSheets.push(
+      toStyleSource(stylesheet, CssParser.StylesheetFlavor.AUTHOR),
+    );
   }
 
-  private addUserStyleSheet(stylesheet: StyleSource) {
-    let url = stylesheet.url;
-    if (url) {
-      url = Base.resolveURL(Base.convertSpecialURL(url), Base.baseURL);
-    }
-    this.styleSheets.push({
-      url,
-      text: stylesheet.text,
-      flavor: CssParser.StylesheetFlavor.USER,
-      classes: null,
-      media: null,
-    });
+  private addUserStyleSheet(stylesheet: StyleSheetParam) {
+    this.styleSheets.push(
+      toStyleSource(stylesheet, CssParser.StylesheetFlavor.USER),
+    );
   }
 
   parseOPSResource(
@@ -3841,7 +3842,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                 if (index < sources.length) {
                   const source = sources[index++];
                   sph.startStylesheet(source.flavor);
-                  if (source.text !== null) {
+                  if (source.text != null) {
                     return CssParser.parseStylesheetFromText(
                       source.text,
                       sph,

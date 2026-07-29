@@ -26,6 +26,7 @@ import * as Epub from "./epub";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as Logging from "./logging";
+import * as OPS from "./ops";
 import * as Plugin from "./plugin";
 import * as Profile from "./profile";
 import * as Scripts from "./scripts";
@@ -252,14 +253,10 @@ export class AdaptiveViewer {
     this.setReadyState(Constants.ReadyState.LOADING);
     const url = command["url"] as string;
     const fragment = command["fragment"] as string | null;
-    const authorStyleSheet = command["authorStyleSheet"] as {
-      url: string | null;
-      text: string | null;
-    }[];
-    const userStyleSheet = command["userStyleSheet"] as {
-      url: string | null;
-      text: string | null;
-    }[];
+    const authorStyleSheet = command[
+      "authorStyleSheet"
+    ] as OPS.StyleSheetParam[];
+    const userStyleSheet = command["userStyleSheet"] as OPS.StyleSheetParam[];
     this.cmykReserveMapUrl = command["cmykReserveMapUrl"] as string | undefined;
     this.viewport = null;
     const frame: Task.Frame<boolean> = Task.newFrame("loadPublication");
@@ -295,14 +292,10 @@ export class AdaptiveViewer {
     const params: SingleDocumentParam[] = command["url"];
     const doc = command["document"] as Document;
     const fragment = command["fragment"] as string | null;
-    const authorStyleSheet = command["authorStyleSheet"] as {
-      url: string | null;
-      text: string | null;
-    }[];
-    const userStyleSheet = command["userStyleSheet"] as {
-      url: string | null;
-      text: string | null;
-    }[];
+    const authorStyleSheet = command[
+      "authorStyleSheet"
+    ] as OPS.StyleSheetParam[];
+    const userStyleSheet = command["userStyleSheet"] as OPS.StyleSheetParam[];
     this.cmykReserveMapUrl = command["cmykReserveMapUrl"] as string | undefined;
 
     // force relayout

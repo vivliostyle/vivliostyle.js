@@ -2926,21 +2926,24 @@ export class ErrorHandler extends ParserHandler {
 export function parseStylesheet(
   tokenizer: CssTokenizer.Tokenizer,
   handler: DispatchParserHandler,
-  baseURL: string,
+  baseURL: string | null,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
+  // A style sheet given as text alone has no base. resolveURL() reads the
+  // empty string as no base.
+  const base = baseURL ?? "";
   const expandedText = expandNesting(tokenizer.input);
   if (expandedText !== tokenizer.input) {
     return parseStylesheetInternal(
       new CssTokenizer.Tokenizer(expandedText, handler),
       handler,
-      baseURL,
+      base,
       classes,
       media,
     );
   }
-  return parseStylesheetInternal(tokenizer, handler, baseURL, classes, media);
+  return parseStylesheetInternal(tokenizer, handler, base, classes, media);
 }
 
 function parseStylesheetInternal(
@@ -3010,7 +3013,7 @@ function parseStylesheetInternal(
 export function parseStylesheetFromText(
   text: string,
   handler: DispatchParserHandler,
-  baseURL: string,
+  baseURL: string | null,
   classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {

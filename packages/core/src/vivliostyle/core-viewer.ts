@@ -22,6 +22,7 @@ import * as Base from "./base";
 import * as CmykStore from "./cmyk-store";
 import * as Constants from "./constants";
 import * as Epub from "./epub";
+import * as OPS from "./ops";
 import * as Profile from "./profile";
 import * as Toc from "./toc";
 import { ErrorInfo } from "./logging";
@@ -324,9 +325,20 @@ export class CoreViewer {
   ) {
     const documentOptions = opt_documentOptions || {};
 
-    function convertStyleSheetArray(arr) {
+    function convertStyleSheetArray(
+      arr?: { url?: string; text?: string }[],
+    ): OPS.StyleSheetParam[] | undefined {
       if (arr) {
-        return arr.map((s) => ({ url: s.url || null, text: s.text || null }));
+        return arr.flatMap((s): OPS.StyleSheetParam[] => {
+          const url = s.url || null;
+          const text = s.text || null;
+          // An entry with neither url nor text names no style sheet to read.
+          return text !== null
+            ? [{ url, text }]
+            : url !== null
+              ? [{ url }]
+              : [];
+        });
       } else {
         return undefined;
       }
