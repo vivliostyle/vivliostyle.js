@@ -478,7 +478,6 @@ export abstract class LayoutEntireBlock implements LayoutType.LayoutMode {
   ): boolean {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (repetitiveElements) {
-      Asserts.assert(column.clientLayout);
       if (!repetitiveElements.doneInitialLayout) {
         repetitiveElements.updateHeight(column);
         repetitiveElements.doneInitialLayout = true;

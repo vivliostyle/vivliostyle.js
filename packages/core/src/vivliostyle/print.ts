@@ -10,7 +10,7 @@ interface IFrameWindowForPrint {
 export interface PrintConfig {
   title: string;
   printCallback: (iframeWin: Window) => void;
-  errorCallback: (message: string) => void | null;
+  errorCallback: ((message: string) => void) | null;
   hideIframe: boolean;
   removeIframe: boolean;
 }
@@ -19,7 +19,7 @@ class VivliostylePrint {
   htmlDoc: string;
   title: string;
   printCallback: (iframeWin: Window) => void;
-  errorCallback: (message: string) => void;
+  errorCallback: ((message: string) => void) | null;
   hideIframe: boolean;
   removeIframe: boolean;
   iframe: HTMLIFrameElement;

@@ -707,7 +707,6 @@ export class InheritanceVisitor extends Css.FilterVisitor {
   }
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
-    Asserts.assert(this.context);
     if (this.propName === "font-size") {
       return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
     } else if (

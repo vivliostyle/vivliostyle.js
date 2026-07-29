@@ -2027,7 +2027,6 @@ export class AttachedPageFloatLayoutContext
         return null;
       }
     }
-    Asserts.assert(area.clientLayout);
 
     // Preceding page floats on the opposite side should not affect
     // the positioning limit unless clear:inline-start/end is specified.
@@ -2512,7 +2511,6 @@ export class AttachedPageFloatLayoutContext
       }
     }
 
-    Asserts.assert(column.clientLayout);
     const blockStartLimit = this.getLimitValue(
       "block-start",
       null,
@@ -2654,7 +2652,6 @@ export class AttachedPageFloatLayoutContext
   isColumnFullWithPageFloats(column: LayoutType.Column): boolean {
     const layoutContext = column.layoutContext;
     const clientLayout = column.clientLayout;
-    Asserts.assert(clientLayout);
     let context: AttachedPageFloatLayoutContext | null = this;
     let limits: {
       top: number;

@@ -467,7 +467,6 @@ export class TableFormattingContext
       this.addRow(rowIndex, new TableRow(rowIndex, null));
       row = this.rows[rowIndex];
     }
-    Asserts.assert(row);
     const rowSlots = this.getRowSlots(rowIndex);
     let anchorColumnIndex = 0;
     while (rowSlots[anchorColumnIndex]) {
@@ -882,7 +881,6 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
         if (!this.inHeaderOrFooter) {
           this.inRow = true;
           this.rowIndex++;
-          Asserts.assert(nodeContext.sourceNode);
           this.columnIndex = 0;
           formattingContext.addRow(
             this.rowIndex,
@@ -1272,7 +1270,6 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const nodeContext = state.nodeContext;
     const formattingContext = this.formattingContext;
     if (this.currentRowIndex < 0) {
-      Asserts.assert(nodeContext.sourceNode);
       this.currentRowIndex = formattingContext.findRowIndexBySourceNode(
         nodeContext.sourceNode,
       );
@@ -1736,7 +1733,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     if (!lastRow) {
       return;
     }
-    Asserts.assert(lastRow);
     formattingContext.lastRowViewNode = null;
     const doc = lastRow.ownerDocument;
     const fragment = doc.createDocumentFragment();
@@ -1786,7 +1782,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     );
     formattingContext.vertical = nodeContext.vertical;
     formattingContext.initializeRepetitiveElements(nodeContext.vertical);
-    Asserts.assert(nodeContext.sourceNode);
     const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
     clearTableLayoutOptionCache(nodeContext.sourceNode);
     const frame = Task.newFrame<Vtree.NodeContext>(
@@ -2055,7 +2050,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       nodeContext.formattingContext,
     );
     if (nodeContext.display === "table-row") {
-      Asserts.assert(nodeContext.sourceNode);
       const rowIndex = formattingContext.findRowIndexBySourceNode(
         nodeContext.sourceNode,
       );
@@ -2111,7 +2105,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
               cellFragment.pseudoColumn
                 .finishBreak(breakNodeContext, false, true)
                 .then(() => {
-                  Asserts.assert(cellFragment);
                   adjustCellHeight(
                     cellFragment,
                     formattingContext,
@@ -2445,7 +2438,6 @@ export class EntireTableLayoutConstraint
     initialPosition: Vtree.NodeContext,
     column: Layout.Column,
   ) {
-    Asserts.assert(positionAfter.sourceNode);
     tableLayoutOptionCache.push({
       root: positionAfter.sourceNode,
       tableLayoutOption: {
@@ -2684,7 +2676,6 @@ export class TableRowLayoutConstraint
   ): { fragment: TableCellFragment; breakPosition: Vtree.NodeContext }[] {
     let rowIndex = Number.MAX_VALUE;
     if (nodeContext && nodeContext.display === "table-row") {
-      Asserts.assert(nodeContext.sourceNode);
       rowIndex =
         formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode) + 1;
     }

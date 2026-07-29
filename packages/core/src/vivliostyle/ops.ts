@@ -1768,7 +1768,8 @@ export class StyleInstance
         }
         return result;
       } else {
-        Asserts.assert("column.lastAfterPosition === null");
+        // Deferred floats do not imply an after position. A column that laid
+        // out no content leaves none.
         return null;
       }
     } else {
