@@ -4481,10 +4481,9 @@ export class CascadeInstance {
       }
       if (value !== cascVal.value) {
         // all variables substituted
-        const scope = this.scope;
         const shorthand = this.validatorSet
           .getShorthand(name, value)
-          ?.clone(scope);
+          ?.clone(this.scope);
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
@@ -4499,7 +4498,7 @@ export class CascadeInstance {
             // cannot handle directly, so normalize it through parseValue
             // before expanding the shorthand to longhands.
             const valueSH = CssParser.parseValue(
-              scope,
+              this.scope,
               new CssTokenizer.Tokenizer(value.toString(), null),
               "",
             );
