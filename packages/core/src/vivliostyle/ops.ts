@@ -417,6 +417,10 @@ export class StyleInstance
       this.lang,
       this.style.counterStyleStore,
       this.cmykStore,
+      this.xmldoc.root,
+      this.style.rootScope,
+      this.style.validatorSet,
+      this.styler.styles,
     );
 
     // Named page type at first page
@@ -446,7 +450,7 @@ export class StyleInstance
       };
 
       // Substitute var() in @page
-      this.styler.cascade.applyVarFilter([pageStyle], this.styler, null);
+      this.styler.cascade.applyVarFilter([pageStyle], null);
 
       // Calculate calc()
       this.styler.cascade.applyCalcFilter(pageStyle, this.styler.context);
@@ -3135,7 +3139,7 @@ export class StyleInstance
     this.currentCascadedPageStyle = cascadedPageStyle;
 
     // Substitute var()
-    this.styler.cascade.applyVarFilter([cascadedPageStyle], this.styler, null);
+    this.styler.cascade.applyVarFilter([cascadedPageStyle], null);
 
     // Calculate calc()
     this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);

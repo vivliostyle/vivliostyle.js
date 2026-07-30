@@ -37,7 +37,6 @@ import * as SemanticFootnote from "./semantic-footnote";
 import * as Vtree from "./vtree";
 import { CssCascade, CssStyler, Layout } from "./types";
 import { TokenType } from "./css-tokenizer";
-import { AbstractStyler } from "./css-styler";
 
 export type ElementStyle = {
   [key: string]:
@@ -2160,7 +2159,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     public element: Element,
     private readonly scope: Exprs.LexicalScope,
     private readonly propName: string,
-    private readonly validatorSet?: CssValidator.ValidatorSet,
+    private readonly validatorSet: CssValidator.ValidatorSet,
   ) {
     super();
   }
@@ -2169,7 +2168,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     if (Css.isDefaultingValue(value)) {
       return value;
     }
-    const validator = this.validatorSet?.validators[this.propName];
+    const validator = this.validatorSet.validators[this.propName];
     if (validator) {
       return value.visit(validator) ?? Css.ident.unset;
     }
@@ -3365,6 +3364,10 @@ export class Cascade {
     lang,
     counterStyleStore: CounterStyle.CounterStyleStore,
     cmykStore: CmykStore.CmykStore,
+    root: Element,
+    scope: Exprs.LexicalScope,
+    validatorSet: CssValidator.ValidatorSet,
+    styles: StyleReader,
   ): CascadeInstance {
     return new CascadeInstance(
       this,
@@ -3374,12 +3377,20 @@ export class Cascade {
       lang,
       counterStyleStore,
       cmykStore,
+      root,
+      scope,
+      validatorSet,
+      styles,
     );
   }
 
   nextOrder(): number {
     return (this.order += ORDER_INCREMENT);
   }
+}
+
+export interface StyleReader {
+  styleOf(element: Element): ElementStyle;
 }
 
 export class CascadeInstance {
@@ -3430,6 +3441,10 @@ export class CascadeInstance {
     lang: string,
     public readonly counterStyleStore: CounterStyle.CounterStyleStore,
     public readonly cmykStore: CmykStore.CmykStore,
+    public readonly root: Element,
+    public readonly scope: Exprs.LexicalScope,
+    public readonly validatorSet: CssValidator.ValidatorSet,
+    public readonly styles: StyleReader,
   ) {
     this.code = cascade;
     this.quotes = [
@@ -3831,7 +3846,6 @@ export class CascadeInstance {
   }
 
   pushElement(
-    styler: CssStyler.AbstractStyler,
     element: Base.ChildElement,
     baseStyle: ElementStyle,
     elementOffset: number,
@@ -3922,7 +3936,7 @@ export class CascadeInstance {
     this.currentPageType = savedCurrentPageType;
 
     // Substitute var()
-    this.applyVarFilter([baseStyle], styler, element);
+    this.applyVarFilter([baseStyle], element);
 
     // Calculate calc()
     this.applyCalcFilter(baseStyle, this.context);
@@ -3930,7 +3944,7 @@ export class CascadeInstance {
     // Convert device-cmyk() to color(srgb ...)
     this.applyCmykFilter(baseStyle, element);
 
-    this.applyAttrFilter(element, styler, baseStyle);
+    this.applyAttrFilter(element, baseStyle);
     const quotesCasc = baseStyle["quotes"] as CascadeValue;
     let itemToPushLast: QuotesScopeItem | null = null;
     if (quotesCasc) {
@@ -4042,7 +4056,6 @@ export class CascadeInstance {
               this.processMarkerPseudoelementProps(
                 pseudoProps,
                 element,
-                styler,
                 baseStyle,
               );
               // Delete the pseudo to prevent fake element generation
@@ -4056,7 +4069,6 @@ export class CascadeInstance {
                 this.resolvePseudoelementInheritedPropertyValue(
                   pseudoProps,
                   "list-style-position",
-                  styler,
                   element,
                   baseStyle,
                 );
@@ -4065,7 +4077,6 @@ export class CascadeInstance {
                 this.processMarkerPseudoelementProps(
                   pseudoProps,
                   element,
-                  styler,
                   baseStyle,
                 );
                 // Preserve the original footnote-marker content for semantic
@@ -4189,7 +4200,6 @@ export class CascadeInstance {
   processMarkerPseudoelementProps(
     pseudoProps: ElementStyle,
     element: Element,
-    styler: CssStyler.AbstractStyler,
     elementStyle: ElementStyle,
   ): void {
     const isListItem = Display.isListItem(
@@ -4205,13 +4215,11 @@ export class CascadeInstance {
     ) {
       const listStyleType = this.getInheritedPropertyValue(
         "list-style-type",
-        styler,
         element,
         elementStyle,
       );
       const listStyleImage = this.getInheritedPropertyValue(
         "list-style-image",
-        styler,
         element,
         elementStyle,
       );
@@ -4287,7 +4295,6 @@ export class CascadeInstance {
     if (!Display.isInlineLevel(getProp(elementStyle, "display")?.value)) {
       const listStylePosition = this.getInheritedPropertyValue(
         "list-style-position",
-        styler,
         element,
         elementStyle,
       );
@@ -4329,20 +4336,18 @@ export class CascadeInstance {
   /**
    * Get inherited property value
    * @param propName
-   * @param styler
    * @param element
-   * @param elementStyle style being cascaded for `element`, which the styler
-   *     cannot serve until the cascade for it finishes
+   * @param elementStyle style being cascaded for `element`, which the style
+   *     store cannot serve until the cascade for it finishes
    * @returns the inherited property value, or the initial value (or null) if not found
    */
   getInheritedPropertyValue(
     propName: string,
-    styler: CssStyler.AbstractStyler,
     element: Element,
     elementStyle: ElementStyle,
   ): Css.Val | null {
     for (let e = element; e; e = e.parentElement) {
-      const style = e === element ? elementStyle : styler.getStyle(e, false);
+      const style = e === element ? elementStyle : this.styles.styleOf(e);
       const prop = style[propName] as CascadeValue;
       if (prop) {
         const val = prop.evaluate(this.context, propName);
@@ -4358,16 +4363,12 @@ export class CascadeInstance {
         return val;
       }
     }
-    const validatorSet = (
-      styler as AbstractStyler & { validatorSet: CssValidator.ValidatorSet }
-    ).validatorSet;
-    return validatorSet?.defaultValues[propName] ?? null;
+    return this.validatorSet.defaultValues[propName] ?? null;
   }
 
   resolvePseudoelementInheritedPropertyValue(
     pseudoProps: ElementStyle,
     propName: string,
-    styler: CssStyler.AbstractStyler,
     element: Element,
     elementStyle: ElementStyle,
   ): Css.Val | null {
@@ -4380,44 +4381,26 @@ export class CascadeInstance {
         val !== Css.ident.revert
       ) {
         if (val === Css.ident.initial) {
-          const validatorSet = (
-            styler as AbstractStyler & {
-              validatorSet: CssValidator.ValidatorSet;
-            }
-          ).validatorSet;
-          return validatorSet?.defaultValues[propName] ?? null;
+          return this.validatorSet.defaultValues[propName] ?? null;
         }
         return val;
       }
     }
-    return this.getInheritedPropertyValue(
-      propName,
-      styler,
-      element,
-      elementStyle,
-    );
+    return this.getInheritedPropertyValue(propName, element, elementStyle);
   }
 
   private applyAttrFilterInner(
-    styler: CssStyler.AbstractStyler,
     element: Element,
     elementStyle: ElementStyle,
   ): void {
-    const scope = (styler as AbstractStyler & { scope: Exprs.LexicalScope })
-      .scope;
-    const validatorSet = (
-      styler as AbstractStyler & {
-        validatorSet: CssValidator.ValidatorSet;
-      }
-    ).validatorSet;
     for (const propName in elementStyle) {
       if (isPropName(propName) && !Css.isCustomPropName(propName)) {
         const cascVal = elementStyle[propName] as CascadeValue;
         const visitor = new AttrValueFilterVisitor(
           element,
-          scope,
+          this.scope,
           propName,
-          validatorSet,
+          this.validatorSet,
         );
         const filtered = cascVal.filterValue(visitor);
         if (!visitor.hadAttrFunction) {
@@ -4433,26 +4416,18 @@ export class CascadeInstance {
     }
   }
 
-  private applyAttrFilter(
-    element: Element,
-    styler: CssStyler.AbstractStyler,
-    elementStyle: ElementStyle,
-  ): void {
+  private applyAttrFilter(element: Element, elementStyle: ElementStyle): void {
     const pseudoMap = getStyleMap(elementStyle, "_pseudos");
     for (const pseudoName in pseudoMap) {
-      this.applyAttrFilterInner(styler, element, pseudoMap[pseudoName]);
+      this.applyAttrFilterInner(element, pseudoMap[pseudoName]);
     }
-    this.applyAttrFilterInner(styler, element, elementStyle);
+    this.applyAttrFilterInner(element, elementStyle);
   }
 
   /**
    * Substitute all variables in property values in elementStyle
    */
-  applyVarFilter(
-    elementStyles: ElementStyle[],
-    styler: CssStyler.AbstractStyler,
-    element: Element | null,
-  ): void {
+  applyVarFilter(elementStyles: ElementStyle[], element: Element | null): void {
     const elementStyle = elementStyles[0];
     const sourceElementStyles = elementStyles.map((style) => ({ ...style }));
     const LIMIT_LOOP = 32; // prevent cyclic or too deep dependency
@@ -4468,7 +4443,8 @@ export class CascadeInstance {
         : elementStyles;
       const visitor = new VarFilterVisitor(
         lookupElementStyles,
-        styler,
+        this.styles,
+        this.root,
         element,
         Css.isCustomPropName(name) ? name : null,
       );
@@ -4505,10 +4481,10 @@ export class CascadeInstance {
       }
       if (value !== cascVal.value) {
         // all variables substituted
-        const validatorSet = (styler as any)
-          .validatorSet as CssValidator.ValidatorSet;
-        const scope = (styler as any).scope as Exprs.LexicalScope;
-        const shorthand = validatorSet?.getShorthand(name, value)?.clone(scope);
+        const scope = this.scope;
+        const shorthand = this.validatorSet
+          .getShorthand(name, value)
+          ?.clone(scope);
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
@@ -4533,7 +4509,7 @@ export class CascadeInstance {
                 for (const nameLH of shorthand.propList) {
                   const avLH = new CascadeValue(
                     shorthand.values[nameLH] ??
-                      validatorSet.defaultValues[nameLH] ??
+                      this.validatorSet.defaultValues[nameLH] ??
                       Css.ident.initial,
                     cascVal.priority,
                   );
@@ -4569,7 +4545,6 @@ export class CascadeInstance {
         for (const pseudoName in pseudoMap) {
           this.applyVarFilter(
             [pseudoMap[pseudoName], ...elementStyles],
-            styler,
             element,
           );
         }
@@ -4589,7 +4564,6 @@ export class CascadeInstance {
       for (const pseudoName in pendingPseudoMap) {
         this.applyVarFilter(
           [pendingPseudoMap[pseudoName], ...elementStyles],
-          styler,
           element,
         );
       }
@@ -6143,7 +6117,8 @@ export class VarFilterVisitor extends Css.FilterVisitor {
 
   constructor(
     public elementStyles: ElementStyle[],
-    public styler: CssStyler.AbstractStyler,
+    public readonly styles: StyleReader,
+    public readonly root: Element,
     public element: Element | null,
     private readonly currentCustomPropertyName: string | null = null,
   ) {
@@ -6163,7 +6138,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     elementStyles: ElementStyle[];
     element: Element | null;
   } {
-    let elem = element ?? ((this.styler as any).root as Element);
+    let elem = element ?? this.root;
     if (elementStyles?.length) {
       for (let index = 0; index < elementStyles.length; index++) {
         const style = elementStyles[index];
@@ -6198,7 +6173,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       }
     }
     for (; elem; elem = elem.parentElement) {
-      const style = this.styler.getStyle(elem, false);
+      const style = this.styles.styleOf(elem);
       const val = (style?.[name] as CascadeValue)?.value;
       if (!val) {
         continue;
@@ -6376,7 +6351,8 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     this.varResolutionState.cycleMembers = new Set();
     const nestedVisitor = new VarFilterVisitor(
       elementStyles,
-      this.styler,
+      this.styles,
+      this.root,
       element,
       name,
     );
@@ -6412,7 +6388,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
   }
 
   private getVarValue(name: string): Css.Val {
-    let elem = this.element ?? ((this.styler as any).root as Element);
+    let elem = this.element ?? this.root;
     if (this.elementStyles?.length) {
       for (let index = 0; index < this.elementStyles.length; index++) {
         const style = this.elementStyles[index];
@@ -6437,7 +6413,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       }
     }
     for (; elem; elem = elem.parentElement) {
-      const style = this.styler.getStyle(elem, false);
+      const style = this.styles.styleOf(elem);
       const resolved = this.resolveCustomProperty(
         name,
         (style?.[name] as CascadeValue)?.value,

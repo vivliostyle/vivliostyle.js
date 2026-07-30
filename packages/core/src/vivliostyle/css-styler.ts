@@ -465,7 +465,7 @@ export class BoxStack {
   }
 }
 
-export class StyleStore {
+export class StyleStore implements CssCascade.StyleReader {
   private readonly map: { [key: string]: CssCascade.ElementStyle } = {};
 
   constructor(private readonly xmldoc: XmlDoc.XMLDocHolder) {}
@@ -528,6 +528,10 @@ export class Styler implements AbstractStyler {
       xmldoc.lang,
       counterStyleStore,
       cmykStore,
+      this.root,
+      scope,
+      validatorSet,
+      this.styles,
     );
     this.offsetMap = new SlipMap();
     const rootOffset = xmldoc.getElementOffset(this.root);
@@ -535,12 +539,7 @@ export class Styler implements AbstractStyler {
     this.boxStack = new BoxStack(context);
     this.offsetMap.addStuckRange(rootOffset);
     const style = this.getAttrStyle(this.root);
-    this.elementWindow = this.cascade.pushElement(
-      this,
-      this.root,
-      style,
-      rootOffset,
-    );
+    this.elementWindow = this.cascade.pushElement(this.root, style, rootOffset);
     this.recordCounterSnapshot(
       rootOffset,
       this.cascade.counters,
@@ -1105,7 +1104,6 @@ export class Styler implements AbstractStyler {
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
         this.elementWindow = this.cascade.pushElement(
-          this,
           elem,
           style,
           this.lastOffset,
