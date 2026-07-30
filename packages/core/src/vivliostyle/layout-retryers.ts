@@ -25,7 +25,7 @@ import { Layout, Vtree } from "./types";
  */
 export abstract class AbstractLayoutRetryer {
   initialBreakPositions: Layout.BreakPosition[] | null = null;
-  initialStateOfFormattingContext: Vtree.NodeContext | null = null;
+  initialStateOfFormattingContext: unknown = null;
   initialPosition: Vtree.NodeContext | null = null;
   initialFragmentLayoutConstraints: Layout.FragmentLayoutConstraint[] | null =
     null;
