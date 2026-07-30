@@ -596,7 +596,7 @@ export namespace LayoutProcessor {
   export function isInstanceOfBlockFormattingContext(
     object: Vtree.FormattingContext,
   ): object is BlockFormattingContext {
-    return object && object.formattingContextType === "Block";
+    return object.formattingContextType === "Block";
   }
 }
 
@@ -910,9 +910,6 @@ export namespace RepetitiveElement {
   export function isInstanceOfRepetitiveElementsOwnerFormattingContext(
     object: Vtree.FormattingContext,
   ): object is RepetitiveElementsOwnerFormattingContext {
-    if (!object) {
-      return false;
-    }
     const type = object.formattingContextType;
     return (
       type === "RepetitiveElementsOwner" ||
@@ -998,7 +995,7 @@ export namespace Table {
   export function isInstanceOfTableFormattingContext(
     object: Vtree.FormattingContext,
   ): object is TableFormattingContext {
-    return object && object.formattingContextType === "Table";
+    return object.formattingContextType === "Table";
   }
 
   export interface TableRowLayoutConstraint

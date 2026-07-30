@@ -1769,7 +1769,7 @@ export class ViewFactory
         floatSide,
         isRoot,
       );
-      if (nodeContext.parent && nodeContext.parent.formattingContext) {
+      if (nodeContext.parent) {
         firstTime = nodeContext.parent.formattingContext.isFirstTime(
           nodeContext,
           firstTime,
@@ -2724,7 +2724,7 @@ export class ViewFactory
         return;
       }
       const parent = nodeContext.parent;
-      const parentFormattingContext = parent && parent.formattingContext;
+      const parentFormattingContext = parent ? parent.formattingContext : null;
       nodeContext.formattingContext =
         new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
           parentFormattingContext,

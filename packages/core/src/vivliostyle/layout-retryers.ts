@@ -96,19 +96,15 @@ export abstract class AbstractLayoutRetryer {
     this.initialFragmentLayoutConstraints = [].concat(
       column.fragmentLayoutConstraints,
     );
-    if (nodeContext.formattingContext) {
-      this.initialStateOfFormattingContext =
-        nodeContext.formattingContext.saveState();
-    }
+    this.initialStateOfFormattingContext =
+      nodeContext.formattingContext.saveState();
   }
 
   restoreState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     column.breakPositions = this.initialBreakPositions;
     column.fragmentLayoutConstraints = this.initialFragmentLayoutConstraints;
-    if (nodeContext.formattingContext) {
-      nodeContext.formattingContext.restoreState(
-        this.initialStateOfFormattingContext,
-      );
-    }
+    nodeContext.formattingContext.restoreState(
+      this.initialStateOfFormattingContext,
+    );
   }
 }
