@@ -388,6 +388,7 @@ export class StyleInstance
       counterResolver,
       this.style.counterStyleStore,
       this.cmykStore,
+      this.style.validatorSet,
     );
     counterResolver.setStyler(this.styler);
     this.styler.resetFlowChunkStream(this);
@@ -421,6 +422,7 @@ export class StyleInstance
       this.style.rootScope,
       this.style.validatorSet,
       this.styler.styles,
+      this.style.validatorSet,
     );
 
     // Named page type at first page
@@ -592,6 +594,7 @@ export class StyleInstance
         counterResolver,
         style.counterStyleStore,
         this.cmykStore,
+        null,
       );
       this.stylerMap[xmldoc.url] = styler;
     }

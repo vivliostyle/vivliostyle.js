@@ -516,6 +516,7 @@ export class Styler implements AbstractStyler {
     counterResolver: CssCascade.CounterResolver,
     counterStyleStore: CounterStyle.CounterStyleStore,
     cmykStore: CmykStore.CmykStore,
+    mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
@@ -532,6 +533,7 @@ export class Styler implements AbstractStyler {
       scope,
       validatorSet,
       this.styles,
+      mergeValidatorSet,
     );
     this.offsetMap = new SlipMap();
     const rootOffset = xmldoc.getElementOffset(this.root);

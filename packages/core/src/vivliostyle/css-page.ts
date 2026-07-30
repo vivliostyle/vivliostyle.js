@@ -3073,7 +3073,16 @@ export function mergeInPageRule(
   specificity: number,
   cascadeInstance: CssCascade.StyledCascadeInstance,
 ): void {
-  CssCascade.mergeIn(context, target, style, specificity, null, null, null);
+  CssCascade.mergeIn(
+    context,
+    target,
+    style,
+    specificity,
+    null,
+    null,
+    null,
+    cascadeInstance.instance.mergeValidatorSet,
+  );
   const marginBoxes = style[marginBoxesKey];
   if (marginBoxes) {
     const targetMap = CssCascade.getMutableStyleMap(target, marginBoxesKey);
@@ -3092,6 +3101,7 @@ export function mergeInPageRule(
           null,
           null,
           null,
+          cascadeInstance.instance.mergeValidatorSet,
         );
       }
     }

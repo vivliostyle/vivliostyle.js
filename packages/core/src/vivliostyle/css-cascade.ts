@@ -600,6 +600,7 @@ export function mergeIn(
   pseudoelement: string | null,
   regionId: string | null,
   viewConditionMatcher: Matchers.Matcher | null,
+  validatorSet: CssValidator.ValidatorSet | null,
 ): void {
   const hierarchy = [
     { id: pseudoelement, styleKey: "_pseudos" },
@@ -643,11 +644,6 @@ export function mergeIn(
 
       // Reserve longhand slots for shorthand declarations, including
       // browser-supported shorthands discovered lazily by ValidatorSet.
-      const validatorSet = (
-        context as Exprs.Context & {
-          style: { validatorSet: CssValidator.ValidatorSet };
-        }
-      ).style?.validatorSet;
       const propListLH = validatorSet?.getShorthand(prop, av.value)?.propList;
       if (propListLH) {
         for (const propLH of propListLH) {
@@ -665,7 +661,7 @@ export function mergeAll(
 ): ElementStyle {
   const target = {} as ElementStyle;
   for (let k = 0; k < styles.length; k++) {
-    mergeIn(context, target, styles[k], 0, null, null, null);
+    mergeIn(context, target, styles[k], 0, null, null, null, null);
   }
   return target;
 }
@@ -864,6 +860,7 @@ export class ApplyRuleAction extends CascadeAction {
       this.pseudoelement,
       this.regionId,
       cascadeInstance.instance.buildViewConditionMatcher(this.viewConditionId),
+      cascadeInstance.instance.mergeValidatorSet,
     );
   }
 }
@@ -3368,6 +3365,7 @@ export class Cascade {
     scope: Exprs.LexicalScope,
     validatorSet: CssValidator.ValidatorSet,
     styles: StyleReader,
+    mergeValidatorSet: CssValidator.ValidatorSet | null,
   ): CascadeInstance {
     return new CascadeInstance(
       this,
@@ -3381,6 +3379,7 @@ export class Cascade {
       scope,
       validatorSet,
       styles,
+      mergeValidatorSet,
     );
   }
 
@@ -3445,6 +3444,7 @@ export class CascadeInstance {
     public readonly scope: Exprs.LexicalScope,
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly styles: StyleReader,
+    public readonly mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.code = cascade;
     this.quotes = [
