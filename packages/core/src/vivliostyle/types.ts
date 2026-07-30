@@ -146,7 +146,7 @@ export namespace Layout {
   export interface Column extends Vtree.Container {
     last: Node;
     viewDocument: Document;
-    flowRootFormattingContext: Vtree.FormattingContext | null;
+    flowRootFormattingContext: Vtree.FormattingContext;
     // Issue #1842: distinguishes auto-advanced follow-up columns from the first
     // column on a page so leading-edge forced breaks can be handled differently.
     isNonFirstColumn: boolean;

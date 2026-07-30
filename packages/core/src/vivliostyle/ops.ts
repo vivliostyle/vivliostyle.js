@@ -1604,11 +1604,6 @@ export class StyleInstance
     return false;
   }
 
-  setFormattingContextToColumn(column: LayoutType.Column, flowName: string) {
-    column.flowRootFormattingContext =
-      this.currentLayoutPosition.flows[flowName].formattingContext;
-  }
-
   beginIsolatedRootPageFloatLayoutContext(
     previousPageFloatLayoutContext?: PageFloatsType.AttachedPageFloatLayoutContext | null,
   ): PageFloats.RootPageFloatLayoutContext {
@@ -1781,6 +1776,17 @@ export class StyleInstance
     }
   }
 
+  // A flow is registered only once a chunk of it is encountered, so a column
+  // for a flow that has none has no root to share a context with.
+  private flowRootFormattingContextFor(
+    flowName: string,
+  ): Vtree.FormattingContext {
+    return (
+      this.currentLayoutPosition.flows[flowName]?.formattingContext ??
+      new LayoutProcessor.BlockFormattingContext(null)
+    );
+  }
+
   /**
    * @return holding true
    */
@@ -1794,13 +1800,11 @@ export class StyleInstance
       // still try to place deferred page floats such as footnotes that were
       // deferred from the previous page. (Issue #1880)
       if (flowPosition) {
-        this.setFormattingContextToColumn(column, flowName);
         return this.layoutDeferredPageFloats(column);
       }
       return Task.newResult(true);
     }
 
-    this.setFormattingContextToColumn(column, flowName);
     if (this.primaryFlows[flowName] && column.bands.length > 0) {
       // In general, we force non-fitting content. Exception is only for primary
       // flow columns that have exclusions.
@@ -2153,6 +2157,7 @@ export class StyleInstance
             },
             innerShape,
             dontApplyExclusions ? [] : exclusions.concat(),
+            this.flowRootFormattingContextFor(flowNameStr),
           );
           // Issue #1842: columns after the first treat already-satisfied leading
           // column breaks differently.
@@ -2168,6 +2173,7 @@ export class StyleInstance
             layoutContainer,
             innerShape,
             dontApplyExclusions ? [] : exclusions.concat(),
+            this.flowRootFormattingContextFor(flowNameStr),
           );
           // Single-column layout always behaves like the first column on a page.
           column.isNonFirstColumn = false;

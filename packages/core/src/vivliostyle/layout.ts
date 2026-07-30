@@ -425,7 +425,6 @@ export function validateCheckPoints(
 export class Column extends VtreeImpl.Container implements Layout.Column {
   last: Node;
   viewDocument: Document;
-  flowRootFormattingContext: Vtree.FormattingContext | null = null;
   // Issue #1842: true only for columns reached after automatic column overflow.
   isNonFirstColumn: boolean = false;
   isFloat: boolean = false;
@@ -466,6 +465,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     geometry: Vtree.ContainerGeometry,
     innerShape: GeometryUtil.Shape | null,
     exclusions: GeometryUtil.Shape[],
+    public flowRootFormattingContext: Vtree.FormattingContext,
   ) {
     super(element);
 
@@ -1787,6 +1787,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       },
       null,
       (floatContainer.exclusions || []).concat(),
+      this.flowRootFormattingContext,
     );
     floatArea.isFloat = true;
     floatArea.forceNonfitting =
@@ -5443,6 +5444,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     geometry: Vtree.ContainerGeometry,
     innerShape: GeometryUtil.Shape | null,
     exclusions: GeometryUtil.Shape[],
+    flowRootFormattingContext: Vtree.FormattingContext,
   ) {
     super(
       element,
@@ -5453,6 +5455,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       geometry,
       innerShape,
       exclusions,
+      flowRootFormattingContext,
     );
     this.parentElement = parentContainer.element;
   }
