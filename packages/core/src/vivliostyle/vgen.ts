@@ -3698,6 +3698,7 @@ export class ViewFactory
             pn.sourceNode,
             parentContext,
             boxOffset,
+            (parentContext ?? container).formattingContext,
           );
           child.blockContainer =
             parentContext && Vtree.blockContainerForChildrenOf(parentContext);

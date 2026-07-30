@@ -16,6 +16,7 @@
  */
 
 import * as adapt_layout from "../../../src/vivliostyle/layout";
+import * as adapt_layoutprocessor from "../../../src/vivliostyle/layout-processor";
 import * as adapt_vtree from "../../../src/vivliostyle/vtree";
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
@@ -35,7 +36,12 @@ describe("layout", function () {
       };
       spyOn(textNode, "replaceData").and.callThrough();
 
-      nodeContext = new adapt_vtree.NodeContext({}, null, 3);
+      nodeContext = new adapt_vtree.NodeContext(
+        {},
+        null,
+        3,
+        new adapt_layoutprocessor.BlockFormattingContext(null),
+      );
       nodeContext.preprocessedTextContent = [
         [0, "abcdeabcde"],
         [1, "\u00AD"],

@@ -608,13 +608,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               )
             : VtreeImpl.makeRootNodeContextFromNodePositionStep(
                 VtreeImpl.rootStepOfNodePosition(position),
+                this.flowRootFormattingContext,
               );
-          if (
-            stepIndex === steps.length - 1 &&
-            !nodeContext.formattingContext
-          ) {
-            nodeContext.formattingContext = this.flowRootFormattingContext;
-          }
           if (stepIndex == 0) {
             nodeContext.offsetInNode =
               this.calculateOffsetInNodeForNodeContext(position);
@@ -3279,7 +3274,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     forceRemoveSelf: boolean,
     endOfColumn: boolean,
   ): Task.Result<boolean> {
-    Asserts.assert(nodeContext.formattingContext);
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
       nodeContext.formattingContext,
     );
@@ -3978,7 +3972,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     frame
       .loopWithFrame((loopFrame) => {
         while (nodeContext) {
-          Asserts.assert(nodeContext.formattingContext);
           const layoutProcessor =
             new LayoutProcessor.LayoutProcessorResolver().find(
               nodeContext.formattingContext,
@@ -4569,7 +4562,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           frame.finish(nodeContext);
         } else {
           const formattingContext = nodeContext.formattingContext;
-          Asserts.assert(formattingContext);
           const layoutProcessor =
             new LayoutProcessor.LayoutProcessorResolver().find(
               formattingContext,
@@ -4596,7 +4588,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext = parent, parent = parent ? parent.parent : null
     ) {
       const formattingContext = (parent || nodeContext).formattingContext;
-      Asserts.assert(formattingContext);
       const layoutProcessor =
         new LayoutProcessor.LayoutProcessorResolver().find(formattingContext);
       layoutProcessor.clearOverflownViewNodes(
@@ -4705,7 +4696,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     breakAtEdge: string | null,
     overflows: boolean,
   ): void {
-    Asserts.assert(position.formattingContext);
     const copy = position.copy();
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
       position.formattingContext,
