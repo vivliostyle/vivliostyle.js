@@ -31,6 +31,7 @@ import * as CssProp from "./css-prop";
 import * as CssValidator from "./css-validator";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
+import * as LayoutProcessor from "./layout-processor";
 import * as Vtree from "./vtree";
 import { CssStyler, XmlDoc } from "./types";
 
@@ -976,7 +977,11 @@ export class Styler implements AbstractStyler {
     let flow = this.flows[flowName];
     if (!flow) {
       const parentFlowName = this.boxStack.lastFlowName();
-      flow = this.flows[flowName] = new Vtree.Flow(flowName, parentFlowName);
+      flow = this.flows[flowName] = new Vtree.Flow(
+        flowName,
+        parentFlowName,
+        new LayoutProcessor.BlockFormattingContext(null),
+      );
     }
     const flowChunk = new Vtree.FlowChunk(
       flowName,

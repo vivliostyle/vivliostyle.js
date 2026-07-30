@@ -1605,11 +1605,8 @@ export class StyleInstance
   }
 
   setFormattingContextToColumn(column: LayoutType.Column, flowName: string) {
-    const flow = this.currentLayoutPosition.flows[flowName];
-    if (!flow.formattingContext) {
-      flow.formattingContext = new LayoutProcessor.BlockFormattingContext(null);
-    }
-    column.flowRootFormattingContext = flow.formattingContext;
+    column.flowRootFormattingContext =
+      this.currentLayoutPosition.flows[flowName].formattingContext;
   }
 
   beginIsolatedRootPageFloatLayoutContext(

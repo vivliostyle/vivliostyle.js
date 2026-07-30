@@ -306,11 +306,11 @@ export function canIgnoreText(text: string, whitespace?: Whitespace): boolean {
 
 export class Flow {
   forcedBreakOffsets = [] as number[];
-  formattingContext: FormattingContext | null = null;
 
   constructor(
     public readonly flowName: string,
     public readonly parentFlowName: string | null,
+    public readonly formattingContext: FormattingContext,
   ) {}
 }
 
