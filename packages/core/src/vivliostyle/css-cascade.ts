@@ -756,13 +756,28 @@ export function convertFontSizeToPx(
   parentFontSize: number | null,
   context: Exprs.Context,
 ): Css.Numeric {
-  numeric = convertFontRelativeLengthToPx(numeric, parentFontSize, context);
+  // FIXME: This fallback to 0 is obviously an invalid value. A null arrives
+  // from reading back the computed style of an element whose view is detached
+  // from the document, as found in these files of the layout regression corpus:
+  // - footnotes/footnotes-anywhere.html
+  // - footnotes/footnotes-in-table.html
+  // - footnotes/footnotes-in-table-2.html
+  // - footnotes/footnotes-in-table-rowspan-colspan.html
+  // In these documents the detachment is Container.clear() in
+  // AttachedPageFloatLayoutContext.invalidate(). That trial is discarded. The
+  // real DOM is built again while attached to the document, and the invalid
+  // value does not reach the rendered result.
+  numeric = convertFontRelativeLengthToPx(
+    numeric,
+    parentFontSize ?? 0,
+    context,
+  );
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "px") {
     return numeric;
   } else if (unit === "%") {
-    return new Css.Numeric((num / 100) * parentFontSize, "px");
+    return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
   } else {
     return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
   }
