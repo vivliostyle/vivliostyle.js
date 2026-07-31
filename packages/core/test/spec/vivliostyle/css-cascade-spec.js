@@ -2020,20 +2020,20 @@ describe("css-cascade", function () {
         defaultValues: {},
       };
 
-      var styler = {
-        root: element,
-        validatorSet: validatorSet,
-        scope: new adapt_exprs.LexicalScope(null),
-        getStyle: function (currentElement) {
-          return styleMap.get(currentElement) || null;
-        },
-      };
       var cascadeInstance = {
         context: {},
+        root: element,
+        scope: new adapt_exprs.LexicalScope(null),
+        validatorSet: validatorSet,
+        styles: {
+          styleOf: function (currentElement) {
+            return styleMap.get(currentElement) || null;
+          },
+        },
       };
       cascadeInstance.applyVarFilter =
         adapt_csscasc.CascadeInstance.prototype.applyVarFilter;
-      cascadeInstance.applyVarFilter([style], styler, element);
+      cascadeInstance.applyVarFilter([style], element);
     }
 
     it("keeps self-referential custom properties guaranteed-invalid instead of using their fallback", function () {
@@ -2273,20 +2273,15 @@ describe("css-cascade", function () {
     function applyAttrFilter(style, element, validatorSet) {
       validatorSet = validatorSet || adapt_cssvalid.baseValidatorSet();
 
-      var styler = {
-        root: element,
-        validatorSet: validatorSet,
+      var cascadeInstance = {
         scope: new adapt_exprs.LexicalScope(null),
-        getStyle: function () {
-          return style;
-        },
+        validatorSet: validatorSet,
       };
-      var cascadeInstance = {};
       cascadeInstance.applyAttrFilter =
         adapt_csscasc.CascadeInstance.prototype.applyAttrFilter;
       cascadeInstance.applyAttrFilterInner =
         adapt_csscasc.CascadeInstance.prototype.applyAttrFilterInner;
-      cascadeInstance.applyAttrFilter(element, styler, style);
+      cascadeInstance.applyAttrFilter(element, style);
     }
 
     it("treats missing typed attr() without fallback as unset", function () {

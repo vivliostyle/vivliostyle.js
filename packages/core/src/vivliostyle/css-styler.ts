@@ -465,12 +465,26 @@ export class BoxStack {
   }
 }
 
+export class StyleStore implements CssCascade.StyleReader {
+  private readonly map: { [key: string]: CssCascade.ElementStyle } = {};
+
+  constructor(private readonly xmldoc: XmlDoc.XMLDocHolder) {}
+
+  setAt(offset: number, style: CssCascade.ElementStyle): void {
+    this.map[`e${offset}`] = style;
+  }
+
+  styleOf(element: Element): CssCascade.ElementStyle {
+    return this.map[`e${this.xmldoc.getElementOffset(element)}`];
+  }
+}
+
 export class Styler implements AbstractStyler {
   root: Base.ChildElement;
   cascadeHolder: CssCascade.Cascade;
   last: Base.RootBoundCursor | null;
   rootStyle = {} as CssCascade.ElementStyle;
-  styleMap: { [key: string]: CssCascade.ElementStyle } = {};
+  styles: StyleStore;
   counterSnapshots: CounterSnapshot[] = [];
   flows = {} as { [key: string]: Vtree.Flow };
   flowChunks = [] as Vtree.FlowChunk[];
@@ -502,9 +516,11 @@ export class Styler implements AbstractStyler {
     counterResolver: CssCascade.CounterResolver,
     counterStyleStore: CounterStyle.CounterStyleStore,
     cmykStore: CmykStore.CmykStore,
+    mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.root = xmldoc.root;
     this.cascadeHolder = cascade;
+    this.styles = new StyleStore(xmldoc);
     this.last = Base.RootBoundCursor.atRoot(this.root);
     this.cascade = cascade.createInstance(
       context,
@@ -513,6 +529,11 @@ export class Styler implements AbstractStyler {
       xmldoc.lang,
       counterStyleStore,
       cmykStore,
+      this.root,
+      scope,
+      validatorSet,
+      this.styles,
+      mergeValidatorSet,
     );
     this.offsetMap = new SlipMap();
     const rootOffset = xmldoc.getElementOffset(this.root);
@@ -520,12 +541,7 @@ export class Styler implements AbstractStyler {
     this.boxStack = new BoxStack(context);
     this.offsetMap.addStuckRange(rootOffset);
     const style = this.getAttrStyle(this.root);
-    this.elementWindow = this.cascade.pushElement(
-      this,
-      this.root,
-      style,
-      rootOffset,
-    );
+    this.elementWindow = this.cascade.pushElement(this.root, style, rootOffset);
     this.recordCounterSnapshot(
       rootOffset,
       this.cascade.counters,
@@ -540,8 +556,7 @@ export class Styler implements AbstractStyler {
         break;
     }
     this.primaryStack.push(true);
-    this.styleMap = {};
-    this.styleMap[`e${rootOffset}`] = style;
+    this.styles.setAt(rootOffset, style);
     this.lastOffset++;
     this.replayFlowElementsFromOffset(-1);
   }
@@ -1091,7 +1106,6 @@ export class Styler implements AbstractStyler {
         const style = this.getAttrStyle(elem);
         this.primaryStack.push(this.primary);
         this.elementWindow = this.cascade.pushElement(
-          this,
           elem,
           style,
           this.lastOffset,
@@ -1189,7 +1203,7 @@ export class Styler implements AbstractStyler {
             throw new Error("Inconsistent offset");
           }
         }
-        this.styleMap[`e${this.lastOffset}`] = style;
+        this.styles.setAt(this.lastOffset, style);
         this.lastOffset++;
         if (this.primary) {
           this.offsetMap.addStuckRange(this.lastOffset);
@@ -1219,14 +1233,13 @@ export class Styler implements AbstractStyler {
   /** @override */
   getStyle(element: Element, deep: boolean): CssCascade.ElementStyle {
     let offset = this.xmldoc.getElementOffset(element);
-    const key = `e${offset}`;
     if (deep) {
       offset = this.xmldoc.getNodeOffset(element, 0, true);
     }
     if (this.lastOffset <= offset) {
       this.styleUntil(offset, 0);
     }
-    return this.styleMap[key];
+    return this.styles.styleOf(element);
   }
 
   /** @override */
