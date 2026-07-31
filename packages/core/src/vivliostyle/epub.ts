@@ -875,7 +875,7 @@ export class OPFDoc {
   epageCount: number = 0;
   prePaginated: boolean = false;
   epageIsRenderedPage: boolean = true;
-  epageCountCallback: (p1: number) => void | null = null;
+  epageCountCallback: ((p1: number) => void) | null = null;
   metadata: Meta = {};
   toc: OPFItem | null = null;
   cover: OPFItem | null = null;
@@ -2417,7 +2417,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
           !nextLayoutPosition &&
           viewItem.item.spineIndex === this.opf.spine.length - 1;
         if (currentPage.isLastPage) {
-          Asserts.assert(this.viewport);
           this.counterStore.finishLastPage(this.viewport);
         }
         currentPage.container.setAttribute(

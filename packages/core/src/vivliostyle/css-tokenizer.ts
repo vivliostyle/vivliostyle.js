@@ -1478,7 +1478,7 @@ export class Tokenizer {
 
   constructor(
     public input: string,
-    public readonly handler: TokenizerHandler,
+    public readonly handler: TokenizerHandler | null,
   ) {
     this.indexMask = INITIAL_INDEX_MASK;
     this.buffer = Array(this.indexMask + 1);

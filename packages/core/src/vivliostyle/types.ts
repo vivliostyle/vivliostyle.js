@@ -77,19 +77,19 @@ export namespace Layout {
   export interface FragmentLayoutConstraint {
     flagmentLayoutConstraintType: FragmentLayoutConstraintType;
     allowLayout(
-      nodeContext: Vtree.NodeContext,
-      overflownNodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
+      overflownNodeContext: Vtree.NodeContext | null,
       column: Column,
     ): boolean;
-    nextCandidate(nodeContext: Vtree.NodeContext): boolean;
+    nextCandidate(nodeContext: Vtree.NodeContext | null): boolean;
     postLayout(
       allowed: boolean,
-      positionAfter: Vtree.NodeContext,
-      initialPosition: Vtree.NodeContext,
+      positionAfter: Vtree.NodeContext | null,
+      initialPosition: Vtree.NodeContext | null,
       column: Column,
     );
     finishBreak(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       column: Column,
     ): Task.Result<boolean>;
     equalsTo(constraint: FragmentLayoutConstraint): boolean;
@@ -103,7 +103,10 @@ export namespace Layout {
     /**
      * @return break position, if found
      */
-    findAcceptableBreak(column: Column, penalty: number): Vtree.NodeContext;
+    findAcceptableBreak(
+      column: Column,
+      penalty: number,
+    ): Vtree.NodeContext | null;
     /**
      * @return penalty for this break position
      */
@@ -113,7 +116,7 @@ export namespace Layout {
   }
 
   export interface AbstractBreakPosition extends BreakPosition {
-    getNodeContext(): Vtree.NodeContext;
+    getNodeContext(): Vtree.NodeContext | null;
   }
 
   export type BreakPositionAndNodeContext = {
@@ -144,7 +147,7 @@ export namespace Layout {
   }
 
   export interface Column extends Vtree.Container {
-    last: Node;
+    last: Node | null;
     viewDocument: Document;
     flowRootFormattingContext: Vtree.FormattingContext;
     // Issue #1842: distinguishes auto-advanced follow-up columns from the first
@@ -240,7 +243,7 @@ export namespace Layout {
      * @return newly created float element.
      */
     createFloat(
-      ref: Node,
+      ref: Node | null,
       side: string,
       width: number,
       height: number,
@@ -261,7 +264,7 @@ export namespace Layout {
      * @return edge position
      */
     calculateEdge(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
       index: number,
       boxOffset: number,
@@ -315,7 +318,7 @@ export namespace Layout {
       condition: PageFloats.PageFloatPlacementCondition,
     ): Task.Result<boolean>;
     createPageFloatArea(
-      float: PageFloats.PageFloat | null,
+      float: PageFloats.PageFloat,
       floatSide: string,
       anchorEdge: number | null,
       strategy: PageFloats.PageFloatLayoutStrategy,
@@ -341,12 +344,12 @@ export namespace Layout {
     ): Vtree.RenderedNodeContext;
     resolveFloatReferenceFromColumnSpan(
       floatReference: PageFloats.FloatReference,
-      columnSpan: Css.Val,
+      columnSpan: Css.Val | null,
       nodeContext: Vtree.NodeContext,
     ): Task.Result<PageFloats.FloatReference>;
     layoutPageFloat(
       nodeContext: Vtree.FloatNodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
       resNodeContext: Vtree.NodeContext,
@@ -398,7 +401,7 @@ export namespace Layout {
     findBoxBreakPosition(
       bp: BoxBreakPosition,
       force: boolean,
-    ): Vtree.NodeContext;
+    ): Vtree.NodeContext | null;
     getAfterEdgeOfBlockContainer(nodeContext: Vtree.NodeContext): number;
     findFirstOverflowingEdgeAndCheckPoint(
       checkPoints: Vtree.RenderedNodeContext[],
@@ -431,8 +434,8 @@ export namespace Layout {
      * @return true if overflows
      */
     checkOverflowAndSaveEdge(
-      nodeContext: Vtree.NodeContext,
-      trailingEdgeContexts: Vtree.NodeContext[],
+      nodeContext: Vtree.NodeContext | null,
+      trailingEdgeContexts: Vtree.NodeContext[] | null,
     ): boolean;
     /**
      * Save a possible page break position on a CSS block edge. Check if it
@@ -440,8 +443,8 @@ export namespace Layout {
      * @return true if overflows
      */
     checkOverflowAndSaveEdgeAndBreakPosition(
-      nodeContext: Vtree.NodeContext,
-      trailingEdgeContexts: Vtree.NodeContext[],
+      nodeContext: Vtree.NodeContext | null,
+      trailingEdgeContexts: Vtree.NodeContext[] | null,
       saveEvenOverflown: boolean,
       breakAtTheEdge: string | null,
     ): boolean;
@@ -456,7 +459,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
       leadingEdge: boolean,
       forcedBreakValue: string | null,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Skips non-renderable positions until it hits the end of the flow or some
      * renderable content. Returns the nodeContext that was passed in if some
@@ -464,10 +467,10 @@ export namespace Layout {
      */
     skipTailEdges(
       nodeContext: Vtree.NodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     layoutFloatOrFootnote(
       nodeContext: Vtree.FloatNodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Layout next portion of the source.
      */
@@ -503,21 +506,23 @@ export namespace Layout {
       chunkPosition: Vtree.ChunkPosition,
       leadingEdge: boolean,
       breakAfter?: string | null,
-    ): Task.Result<Vtree.ChunkPosition>;
+    ): Task.Result<Vtree.ChunkPosition | null>;
     isFullWithPageFloats(): boolean;
     getMaxBlockSizeOfPageFloats(): number;
-    doFinishBreakOfFragmentLayoutConstraints(nodeContext): void;
+    doFinishBreakOfFragmentLayoutConstraints(
+      nodeContext: Vtree.NodeContext,
+    ): Task.Result<boolean>;
     /**
      * @param nodeContext starting position.
      * @return holding end position.
      */
     doLayout(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       leadingEdge: boolean,
       breakAfter?: string | null,
     ): Task.Result<{
-      nodeContext: Vtree.NodeContext;
-      overflownNodeContext: Vtree.NodeContext;
+      nodeContext: Vtree.NodeContext | null;
+      overflownNodeContext: Vtree.NodeContext | null;
     }>;
     saveDistanceToBlockEndFloats(): void;
     collectElementsOffset(): RepetitiveElement.ElementsOffset[];
@@ -580,6 +585,7 @@ export namespace Layout {
     readonly parentContainer: Vtree.Container;
     readonly parentElement: Element | null;
 
+    applyCompactFootnoteDisplay(): void;
     convertPercentageSizesToPx(target: Element): void;
     fixFloatSizeAndPosition(nodeContext: Vtree.NodeContext): void;
     getRootViewNodeCount(): number;
@@ -1007,7 +1013,7 @@ export namespace Table {
 
     removeDummyRowNodes(nodeContext: Vtree.NodeContext): void;
     getElementsOffsetsForTableCell(
-      column: Layout.Column,
+      column: Layout.Column | null,
     ): RepetitiveElement.ElementsOffset[];
   }
 
@@ -1254,8 +1260,8 @@ export namespace Vtree {
     getInnerRect(): GeometryUtil.Rect;
     getPaddingRect(): GeometryUtil.Rect;
     getOuterShape(
-      outerShapeProp: Css.Val,
-      context: Exprs.Context,
+      outerShapeProp: Css.Val | null,
+      context: Exprs.Context | null,
     ): GeometryUtil.Shape;
     getOuterRect(): GeometryUtil.Rect;
   }

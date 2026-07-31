@@ -717,7 +717,7 @@ export const processingOrder = {
   color: 3,
 };
 
-export function isDefaultingValue(value: Val): boolean {
+export function isDefaultingValue(value: Val | null | undefined): boolean {
   return (
     value === ident.inherit ||
     value === ident.initial ||

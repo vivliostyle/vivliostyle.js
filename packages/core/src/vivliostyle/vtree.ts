@@ -1490,8 +1490,8 @@ export class Container implements Vtree.Container {
   }
 
   getOuterShape(
-    outerShapeProp: Css.Val,
-    context: Exprs.Context,
+    outerShapeProp: Css.Val | null,
+    context: Exprs.Context | null,
   ): GeometryUtil.Shape {
     const rect = this.getOuterRect();
     return CssProp.toShape(

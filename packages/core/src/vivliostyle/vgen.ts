@@ -2630,7 +2630,6 @@ export class ViewFactory
             const minWidth = computedStyle["min-width"] || Css.numericZero;
             const minHeight = computedStyle["min-height"] || Css.numericZero;
             Asserts.assert(minWidth.isNumeric());
-            Asserts.assert(minWidth.isNumeric());
             const numericMinWidth = minWidth as Css.Numeric;
             const numericMinHeight = minHeight as Css.Numeric;
             if (numericMinWidth.num === 0 && numericMinHeight.num === 0) {
@@ -4099,7 +4098,6 @@ export class ViewFactory
       const fontSize = parseFloat(
         clientLayout.getElementComputedStyle(elem as Element)["font-size"],
       );
-      Asserts.assert(this.context);
       return CssCascade.convertFontRelativeLengthToPx(
         numeric,
         fontSize,

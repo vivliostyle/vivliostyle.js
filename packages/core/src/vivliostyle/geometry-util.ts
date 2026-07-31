@@ -636,7 +636,7 @@ export function addFloatToBands(
   box: Rect,
   bands: Band[],
   floatBox: Rect,
-  floatBands: Band[],
+  floatBands: Band[] | null,
   side: string,
 ): void {
   if (!floatBands) {

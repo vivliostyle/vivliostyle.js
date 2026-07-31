@@ -19,7 +19,6 @@
  * @fileoverview CssStyler - Apply CSS cascade to a document incrementally and
  * cache the result.
  */
-import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Break from "./break";
 import * as CmykStore from "./cmyk-store";
@@ -827,7 +826,6 @@ export class Styler implements AbstractStyler {
     const rootOffset = this.xmldoc.getElementOffset(this.root);
     if (offset < rootOffset) {
       const rootStyle = this.getStyle(this.root, false);
-      Asserts.assert(rootStyle);
       if (!this.cascade.firstPageType) {
         const rootPageCV = rootStyle["page"] as CssCascade.CascadeValue;
         const rootPageType =

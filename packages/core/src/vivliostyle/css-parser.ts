@@ -3119,7 +3119,7 @@ export function takesOnlyNum(propName: string): boolean {
 export function evaluateExprToCSS(
   context: Exprs.Context,
   val: Exprs.Val,
-  propName: string,
+  propName: string | undefined,
 ): Css.Val {
   // Preserve viv-leader expressions as Css.Expr (Issue #1563)
   // leader() must be processed by ContentPropertyHandler, not evaluated here
