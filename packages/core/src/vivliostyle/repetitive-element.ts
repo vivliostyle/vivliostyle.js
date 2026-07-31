@@ -1004,7 +1004,6 @@ function eachAncestorNodeContext(
   for (let nc = nodeContext; nc; nc = nc.parent) {
     const formattingContext = nc.formattingContext;
     if (
-      formattingContext &&
       formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
       !nc.belongsTo(formattingContext)
     ) {
@@ -1098,9 +1097,6 @@ function getRepetitiveElementsOwnerFormattingContextOrNull(
   nodeContext: Vtree.NodeContext,
 ): RepetitiveElement.RepetitiveElementsOwnerFormattingContext | null {
   const formattingContext = nodeContext.formattingContext;
-  if (!formattingContext) {
-    return null;
-  }
   if (
     !(formattingContext instanceof RepetitiveElementsOwnerFormattingContext)
   ) {

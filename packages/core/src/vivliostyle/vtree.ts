@@ -306,11 +306,11 @@ export function canIgnoreText(text: string, whitespace?: Whitespace): boolean {
 
 export class Flow {
   forcedBreakOffsets = [] as number[];
-  formattingContext: FormattingContext | null = null;
 
   constructor(
     public readonly flowName: string,
     public readonly parentFlowName: string | null,
+    public readonly formattingContext: FormattingContext,
   ) {}
 }
 
@@ -490,7 +490,12 @@ export function makeNodeContextFromNodePositionStep(
   parent: Vtree.NodeContext,
 ): NodeContext {
   const parentContext = parent as NodeContext;
-  const nodeContext = new NodeContext(step.node, parentContext, 0);
+  const nodeContext = new NodeContext(
+    step.node,
+    parentContext,
+    0,
+    step.formattingContext ?? parentContext.formattingContext,
+  );
   nodeContext.blockContainer = blockContainerForChildrenOf(parentContext);
   applyNodePositionStep(nodeContext, step);
   nodeContext.shadowSibling = step.shadowSibling
@@ -501,8 +506,14 @@ export function makeNodeContextFromNodePositionStep(
 
 export function makeRootNodeContextFromNodePositionStep(
   step: RootNodePositionStep,
+  flowRootFormattingContext: FormattingContext,
 ): NodeContext {
-  const nodeContext = new NodeContext(step.node, null, 0);
+  const nodeContext = new NodeContext(
+    step.node,
+    null,
+    0,
+    step.formattingContext ?? flowRootFormattingContext,
+  );
   applyNodePositionStep(nodeContext, step);
   nodeContext.shadowSibling = step.shadowSibling;
   return nodeContext;
@@ -515,7 +526,6 @@ function applyNodePositionStep(
   nodeContext.shadowType = step.shadowType;
   nodeContext.shadowContext = step.shadowContext;
   nodeContext.nodeShadow = step.nodeShadow;
-  nodeContext.formattingContext = step.formattingContext;
   nodeContext.fragmentIndex = step.fragmentIndex + 1;
 }
 
@@ -629,7 +639,6 @@ export class NodeContext implements Vtree.NodeContext {
   firstPseudo: FirstPseudo;
   lang: string | null = null;
   preprocessedTextContent: Diff.Change[] | null = null;
-  formattingContext: FormattingContext;
   repeatOnBreak: string | null = null;
   pluginProps: {
     [key: string]: string | number | undefined | null | (number | null)[];
@@ -645,7 +654,12 @@ export class NodeContext implements Vtree.NodeContext {
     parent: NodeContext,
     boxOffset: number,
   ): ChildNodeContext {
-    const nodeContext = new NodeContext(sourceNode, parent, boxOffset);
+    const nodeContext = new NodeContext(
+      sourceNode,
+      parent,
+      boxOffset,
+      parent.formattingContext,
+    );
     nodeContext.blockContainer = blockContainerForChildrenOf(parent);
     return nodeContext as ChildNodeContext;
   }
@@ -655,7 +669,13 @@ export class NodeContext implements Vtree.NodeContext {
     sibling: NodeContext,
     boxOffset: number,
   ): NodeContext {
-    const nodeContext = new NodeContext(sourceNode, sibling.parent, boxOffset);
+    const parent = sibling.parent;
+    const nodeContext = new NodeContext(
+      sourceNode,
+      parent,
+      boxOffset,
+      (parent ?? sibling).formattingContext,
+    );
     nodeContext.blockContainer = sibling.blockContainer;
     return nodeContext;
   }
@@ -664,6 +684,7 @@ export class NodeContext implements Vtree.NodeContext {
     public sourceNode: Node,
     public parent: NodeContext | null,
     public boxOffset: number,
+    public formattingContext: FormattingContext,
   ) {
     this.shadowType = ShadowType.NONE;
     this.shadowContext = parent ? parent.shadowContext : null;
@@ -676,7 +697,6 @@ export class NodeContext implements Vtree.NodeContext {
     this.vertical = parent ? parent.vertical : false;
     this.direction = parent ? parent.direction : "ltr";
     this.firstPseudo = parent ? parent.firstPseudo : null;
-    this.formattingContext = parent ? parent.formattingContext : null;
     this.pageType = parent ? parent.pageType : null;
   }
 
@@ -707,7 +727,9 @@ export class NodeContext implements Vtree.NodeContext {
     this.vertical = this.parent ? this.parent.vertical : false;
     this.nodeShadow = null;
     this.preprocessedTextContent = null;
-    this.formattingContext = this.parent ? this.parent.formattingContext : null;
+    if (this.parent) {
+      this.formattingContext = this.parent.formattingContext;
+    }
     this.repeatOnBreak = null;
     this.pluginProps = {};
     this.fragmentIndex = 1;
@@ -721,6 +743,7 @@ export class NodeContext implements Vtree.NodeContext {
       this.sourceNode,
       this.parent,
       this.boxOffset,
+      this.formattingContext,
     ) as this;
     np.offsetInNode = this.offsetInNode;
     np.after = this.after;
@@ -753,7 +776,6 @@ export class NodeContext implements Vtree.NodeContext {
     np.vertical = this.vertical;
     np.overflow = this.overflow;
     np.preprocessedTextContent = this.preprocessedTextContent;
-    np.formattingContext = this.formattingContext;
     np.repeatOnBreak = this.repeatOnBreak;
     np.pluginProps = Object.create(this.pluginProps);
     np.fragmentIndex = this.fragmentIndex;

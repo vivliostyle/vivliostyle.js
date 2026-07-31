@@ -146,7 +146,7 @@ export namespace Layout {
   export interface Column extends Vtree.Container {
     last: Node;
     viewDocument: Document;
-    flowRootFormattingContext: Vtree.FormattingContext | null;
+    flowRootFormattingContext: Vtree.FormattingContext;
     // Issue #1842: distinguishes auto-advanced follow-up columns from the first
     // column on a page so leading-edge forced breaks can be handled differently.
     isNonFirstColumn: boolean;
@@ -596,7 +596,7 @@ export namespace LayoutProcessor {
   export function isInstanceOfBlockFormattingContext(
     object: Vtree.FormattingContext,
   ): object is BlockFormattingContext {
-    return object && object.formattingContextType === "Block";
+    return object.formattingContextType === "Block";
   }
 }
 
@@ -910,9 +910,6 @@ export namespace RepetitiveElement {
   export function isInstanceOfRepetitiveElementsOwnerFormattingContext(
     object: Vtree.FormattingContext,
   ): object is RepetitiveElementsOwnerFormattingContext {
-    if (!object) {
-      return false;
-    }
     const type = object.formattingContextType;
     return (
       type === "RepetitiveElementsOwner" ||
@@ -998,7 +995,7 @@ export namespace Table {
   export function isInstanceOfTableFormattingContext(
     object: Vtree.FormattingContext,
   ): object is TableFormattingContext {
-    return object && object.formattingContextType === "Table";
+    return object.formattingContextType === "Table";
   }
 
   export interface TableRowLayoutConstraint
