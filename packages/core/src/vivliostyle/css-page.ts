@@ -1015,14 +1015,6 @@ export class PageAreaPartition extends PageMaster.Partition<PageAreaPartitionIns
       0,
     );
   }
-
-  override createInstance(
-    parentInstance: PageMaster.PageBoxInstance,
-    context: Exprs.Context,
-    docElementStyle: CssCascade.ElementStyle,
-  ): PageMaster.PageBoxInstance {
-    return new PageAreaPartitionInstance(parentInstance, this);
-  }
 }
 
 /**
@@ -2018,12 +2010,14 @@ export class PageAreaPartitionInstance
   implements PageMaster.PageAreaEstablishing
 {
   readonly pageAreaEstablishingChild = null;
+  private readonly pageRulePartitionInstance: PageRulePartitionInstance;
 
   constructor(
-    parentInstance: PageMaster.PageBoxInstance,
+    parentInstance: PageRulePartitionInstance,
     pageAreaPartition: PageAreaPartition,
   ) {
     super(parentInstance, pageAreaPartition);
+    this.pageRulePartitionInstance = parentInstance;
   }
 
   override applyCascadeAndInit(
@@ -2040,12 +2034,11 @@ export class PageAreaPartitionInstance
 
   override initHorizontal(): void {
     const style = this.style;
-    const parentStyle = this.parentInstance.style;
+    const parent = this.pageRulePartitionInstance;
+    const parentStyle = parent.style;
     const scope = this.pageBox.scope;
     style["left"] = parentStyle["padding-left"];
-    style["width"] = (
-      this.parentInstance as PageRulePartitionInstance
-    ).contentBoxWidth;
+    style["width"] = parent.contentBoxWidth;
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-left"] = new Css.Expr(
@@ -2064,12 +2057,11 @@ export class PageAreaPartitionInstance
 
   override initVertical(): void {
     const style = this.style;
-    const parentStyle = this.parentInstance.style;
+    const parent = this.pageRulePartitionInstance;
+    const parentStyle = parent.style;
     const scope = this.pageBox.scope;
     style["top"] = parentStyle["padding-top"];
-    style["height"] = (
-      this.parentInstance as PageRulePartitionInstance
-    ).contentBoxHeight;
+    style["height"] = parent.contentBoxHeight;
 
     // Use negative margins and transparent borders to improve text selection behavior.
     style["margin-top"] = new Css.Expr(

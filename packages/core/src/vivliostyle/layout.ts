@@ -2318,7 +2318,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   layoutPageFloat(
-    nodeContext: Vtree.RenderedNodeContext,
+    nodeContext: Vtree.FloatNodeContext,
   ): Task.Result<Vtree.NodeContext> {
     const context = this.pageFloatLayoutContext;
     const strategy =
@@ -4513,7 +4513,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   layoutFloatOrFootnote(
-    nodeContext: Vtree.RenderedNodeContext,
+    nodeContext: Vtree.FloatNodeContext,
   ): Task.Result<Vtree.NodeContext> {
     if (
       PageFloats.isPageFloat(nodeContext.floatReference) ||
@@ -4530,7 +4530,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         generatingNodePosition &&
         nodeContext.sourceNode === generatingNodePosition.steps[0].node
       ) {
-        const nodeContextMod = nodeContext.modify();
+        const nodeContextMod: Vtree.NodeContext = nodeContext.modify();
         nodeContextMod.floatSide = null;
         nodeContextMod.floatReference = PageFloats.FloatReference.INLINE;
         nodeContextMod.clearSide = null;

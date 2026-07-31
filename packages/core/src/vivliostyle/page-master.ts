@@ -1710,22 +1710,6 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
   }
 
-  protected initChildren(
-    cascade: CssCascade.CascadeInstance,
-    docElementStyle: CssCascade.ElementStyle,
-  ): void {
-    cascade.pushRule(this.pageBox.classes, null, this.cascaded);
-    for (const child of this.pageBox.children) {
-      const childInstance = child.createInstance(
-        this,
-        cascade.context,
-        docElementStyle,
-      );
-      childInstance.applyCascadeAndInit(cascade, docElementStyle);
-    }
-    cascade.popRule();
-  }
-
   protected resolveContent(cascade: CssCascade.CascadeInstance): void {
     const style = this.cascaded;
     const content = style["content"] as CssCascade.CascadeValue;

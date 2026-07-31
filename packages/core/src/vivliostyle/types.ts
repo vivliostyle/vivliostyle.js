@@ -345,7 +345,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
     ): Task.Result<PageFloats.FloatReference>;
     layoutPageFloat(
-      nodeContext: Vtree.RenderedNodeContext,
+      nodeContext: Vtree.FloatNodeContext,
     ): Task.Result<Vtree.NodeContext>;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
@@ -466,7 +466,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
     ): Task.Result<Vtree.NodeContext>;
     layoutFloatOrFootnote(
-      nodeContext: Vtree.RenderedNodeContext,
+      nodeContext: Vtree.FloatNodeContext,
     ): Task.Result<Vtree.NodeContext>;
     /**
      * Layout next portion of the source.
@@ -819,7 +819,7 @@ export namespace PageFloats {
     appliesToNodeContext(nodeContext: Vtree.NodeContext): boolean;
     appliesToFloat(float: PageFloat): boolean;
     createPageFloat(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.FloatNodeContext,
       pageFloatLayoutContext: AttachedPageFloatLayoutContext,
       column: Layout.Column,
     ): Task.Result<PageFloat>;
@@ -886,7 +886,7 @@ export namespace PseudoElement {
     contentProcessed: { [key: string]: boolean };
     readonly element: Element;
     style: CssCascade.ElementStyle;
-    styler: CssStyler.AbstractStyler;
+    readonly styler: CssStyler.AbstractStyler;
     readonly context: Exprs.Context;
     readonly exprContentListener: Vtree.ExprContentListener;
   }

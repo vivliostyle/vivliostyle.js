@@ -930,6 +930,7 @@ export function asTextNodeContext(
 
 export type RenderedNodeContext = NodeContext & Vtree.RenderedNodeContext;
 export type ElementNodeContext = NodeContext & Vtree.ElementNodeContext;
+export type FloatNodeContext = NodeContext & Vtree.FloatNodeContext;
 export type ClearNodeContext = NodeContext & Vtree.ClearNodeContext;
 export type AfterIfContinuesNodeContext = NodeContext &
   Vtree.AfterIfContinuesNodeContext;
@@ -939,6 +940,14 @@ export function asElementNodeContext(
 ): ElementNodeContext | null {
   return nc.viewNode !== null && nc.viewNode.nodeType === 1
     ? (nc as ElementNodeContext)
+    : null;
+}
+
+export function asFloatNodeContext(
+  nc: Vtree.NodeContext,
+): FloatNodeContext | null {
+  return nc.floatSide !== null && nc.viewNode?.nodeType === 1
+    ? (nc as FloatNodeContext)
     : null;
 }
 

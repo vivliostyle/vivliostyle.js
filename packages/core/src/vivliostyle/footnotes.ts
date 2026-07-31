@@ -303,7 +303,7 @@ export class FootnoteLayoutStrategy
 
   /** @override */
   createPageFloat(
-    nodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.FloatNodeContext,
     pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
     column: Layout.Column,
   ): Task.Result<PageFloats.PageFloat> {
