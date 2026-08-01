@@ -1150,6 +1150,7 @@ describe("css-cascade", function () {
         new adapt_exprs.LexicalScope(null),
         adapt_cssvalid.baseValidatorSet(),
       );
+      parseCascade.handler = handler;
       handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
       adapt_task.start(function () {
         adapt_cssparse
@@ -1414,6 +1415,707 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("a pseudo-class delegated to the native matcher", function () {
+      it("keeps the rule and compiles to a native match", function (done) {
+        parseCascade(
+          "p:focus-visible, q { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredGuard),
+            );
+            expect(cascade.tags["p"].condition).toEqual(
+              jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+            );
+            expect(cascade.tags["p"].condition.selector).toBe(":focus-visible");
+            expect(cascade.tags["p"].chained.specificity).toBe(257);
+          },
+        );
+      });
+
+      it("takes the name case-insensitively", function (done) {
+        parseCascade(
+          "p:FOCUS-VISIBLE { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"].condition.selector).toBe(":focus-visible");
+          },
+        );
+      });
+
+      it("adds no specificity inside :where()", function (done) {
+        parseCascade(
+          "p:where(:focus-visible) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["p"].condition;
+            expect(action).toEqual(jasmine.any(adapt_csscasc.MatchesAction));
+            expect(action.firstActions.length).toBe(1);
+            expect(action.firstActions[0].condition).toEqual(
+              jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+            );
+            expect(action.firstActions[0].condition.selector).toBe(
+              ":focus-visible",
+            );
+            expect(cascade.tags["p"].chained.specificity).toBe(1);
+          },
+        );
+      });
+
+      it("delegates an escaped name after decoding", function (done) {
+        parseCascade(
+          "p:\\66 ocus-visible { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["p"].condition.selector).toBe(":focus-visible");
+          },
+        );
+      });
+
+      it("voids the rule for a decoded name that spells a complex selector", function (done) {
+        spyOn(CSS, "supports").and.callThrough();
+        parseCascade(
+          "p:\\6e ot\\(\\.a\\)\\ span { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            // The decoded name is probed by its escaped spelling.
+            var probes = CSS.supports.calls.allArgs().filter(function (args) {
+              return args.length === 1 && /^selector\(/.test(args[0]);
+            });
+            expect(probes).toEqual([["selector(:not\\(\\.a\\)\\ span)"]]);
+          },
+        );
+      });
+
+      it("voids the rule for a functional pseudo-class the browser takes", function (done) {
+        parseCascade(
+          "p:host(.x), q { color: red } r { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["r"]);
+          },
+        );
+      });
+
+      it("reports a name the browser does not take as unsupported", function (done) {
+        parseCascade("p:vivlio-not-a-pseudo { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(true);
+        });
+      });
+
+      it("voids the rule when the engine does not take :dir()", function (done) {
+        var original = CSS.supports.bind(CSS);
+        spyOn(CSS, "supports").and.callFake(function (condition) {
+          if (arguments.length === 1 && /^selector\(:dir\(/.test(condition)) {
+            return false;
+          }
+          return original.apply(null, arguments);
+        });
+        parseCascade(
+          "p:dir(rtl) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      // A null class asserts only that the probe did not take over. Those
+      // chains hold several actions and their sort order is not contractual.
+      [
+        ["enabled", "IsEnabledAction"],
+        ["disabled", "IsDisabledAction"],
+        ["checked", "IsCheckedAction"],
+        ["link", null],
+        ["any-link", null],
+        ["visited", "CheckConditionAction"],
+        ["active", "CheckConditionAction"],
+        ["hover", "CheckConditionAction"],
+        ["focus", "CheckConditionAction"],
+        ["first-child", "IsFirstAction"],
+        ["last-child", null],
+        ["first-of-type", null],
+        ["last-of-type", null],
+        ["only-child", null],
+        ["only-of-type", null],
+        ["empty", "IsEmptyAction"],
+      ].forEach(function (entry) {
+        var name = entry[0];
+        var className = entry[1];
+        it("keeps its own implementation of :" + name, function (done) {
+          parseCascade(
+            "p:" + name + " { color: red }",
+            done,
+            function (cascade) {
+              if (className) {
+                expect(cascade.tags["p"].condition).toEqual(
+                  jasmine.any(adapt_csscasc[className]),
+                );
+              } else {
+                expect(cascade.tags["p"].condition).not.toEqual(
+                  jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+                );
+              }
+            },
+          );
+        });
+      });
+
+      ["root", "scope"].forEach(function (name) {
+        it("keeps its own implementation of :" + name, function (done) {
+          parseCascade(
+            "p:" + name + " { color: red }",
+            done,
+            function (cascade) {
+              expect(cascade.tags["p"]).toBeUndefined();
+              expect(cascade.tags["*"].condition).toEqual(
+                jasmine.any(adapt_csscasc.IsRootAction),
+              );
+            },
+          );
+        });
+      });
+
+      it("keeps its own implementation of :footnote-content", function (done) {
+        parseCascade(
+          "p:footnote-content { color: red }",
+          done,
+          function (cascade) {
+            // The pseudo-class sets a flag and pushes no condition. The
+            // rule applies directly.
+            expect(cascade.tags["p"]).toEqual(
+              jasmine.any(adapt_csscasc.ApplyRuleAction),
+            );
+          },
+        );
+      });
+
+      it("voids the rule for an identifier the probe must not take", function (done) {
+        parseCascade(
+          "p:not\\(\\#x\\) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule when :has() holds an unsupported name", function (done) {
+        parseCascade(
+          "div:has(:vivlio-unknown-probe) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule for a name the browser does not take", function (done) {
+        parseCascade(
+          "p:vivlio-unknown-probe { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("keeps the alternative inside a forgiving list", function (done) {
+        parseCascade(
+          "div:is(.x, :focus-visible) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(2);
+            var alternative = cascade.tags["*"].condition.firstActions[1];
+            expect(alternative.condition).toEqual(
+              jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+            );
+            expect(alternative.condition.selector).toBe(":focus-visible");
+            expect(cascade.tags["span"]).toBeDefined();
+          },
+        );
+      });
+
+      it("keeps the source text :has() takes for a delegated pseudo-class", function (done) {
+        parseCascade(
+          "div:has(:focus-visible) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual([":focus-visible"]);
+          },
+        );
+      });
+
+      it("keeps the source text :has() takes for :visited", function (done) {
+        parseCascade(
+          "div:has(:visited) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual([":visited"]);
+          },
+        );
+      });
+
+      it("keeps its own implementation ahead of the probe", function (done) {
+        // The browser takes :visited too, but Vivliostyle's own never-match
+        // implementation answers first.
+        parseCascade(":visited { color: red }", done, function (cascade) {
+          expect(cascade.tags["*"]).toEqual(
+            jasmine.any(adapt_csscasc.WiredConditionScope),
+          );
+          expect(cascade.tags["*"].condition.condition).toBe("");
+        });
+      });
+
+      it("reports a delegated pseudo-class as a supported selector", function (done) {
+        // @supports selector() reads the handler's invalid flag.
+        parseCascade("p:focus-visible { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(false);
+        });
+      });
+
+      it("reports the wrong form as an unsupported selector", function (done) {
+        parseCascade("a:link(x) { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(true);
+        });
+      });
+
+      it("reports :dir(rtl) as a supported selector", function (done) {
+        parseCascade("p:dir(rtl) { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(false);
+        });
+      });
+
+      it("reports :dir(foo) as a supported selector", function (done) {
+        parseCascade("p:dir(foo) { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(false);
+        });
+      });
+
+      it("reports :dir() as an unsupported selector", function (done) {
+        parseCascade("p:dir() { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(true);
+        });
+      });
+
+      it("reports :any-link as a supported selector", function (done) {
+        parseCascade(":any-link { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(false);
+        });
+      });
+
+      it("reports a bare functional form as an unsupported selector", function (done) {
+        parseCascade("p:nth-child { color: red }", done, function () {
+          expect(parseCascade.handler.invalid).toBe(true);
+        });
+      });
+
+      it("keeps the rule when the list around it is not forgiving", function (done) {
+        parseCascade(
+          "li:nth-child(2n of *:target) { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["li"]);
+            var action = cascade.tags["li"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.IsNthSiblingOfSelectorAction),
+            );
+            expect(action.firstActions.length).toBe(1);
+            expect(action.firstActions[0].condition).toEqual(
+              jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+            );
+            expect(action.firstActions[0].condition.selector).toBe(":target");
+          },
+        );
+      });
+
+      it("voids the rule for the functional form", function (done) {
+        parseCascade(
+          "p:target(x) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule for a functional-only name", function (done) {
+        parseCascade(
+          "p:nth-col(1), q { color: red } r { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["r"]);
+          },
+        );
+      });
+
+      it("voids the rule for a functional-only name in the plain form", function (done) {
+        parseCascade(
+          "p:nth-col, q { color: red } r { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["r"]);
+          },
+        );
+      });
+    });
+
+    describe("a pseudo-class in the wrong form", function () {
+      it("voids the rule for the functional form of a plain pseudo-class", function (done) {
+        parseCascade(
+          "p:empty(x) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule for the functional form of :link", function (done) {
+        parseCascade(
+          "a:link(x) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      [
+        "dir",
+        "href-epub-type",
+        "href-role-type",
+        "lang",
+        "nth-child",
+        "nth-last-child",
+        "nth-last-of-type",
+        "nth-of-type",
+      ].forEach(function (name) {
+        it("voids the rule for a bare :" + name, function (done) {
+          parseCascade(
+            "p:" + name + " { color: red } q { color: blue }",
+            done,
+            function (cascade) {
+              expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            },
+          );
+        });
+      });
+
+      it("voids the selectors around a bare href-epub-type", function (done) {
+        parseCascade(
+          "a:href-epub-type, q { color: red } r { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["r"]);
+          },
+        );
+      });
+
+      it("keeps the view condition out of the next rule when the void comes first", function (done) {
+        parseCascade(
+          "p:lang::nth-fragment(2n+1) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(cascade.tags["q"].viewConditionId).toBeNull();
+          },
+        );
+      });
+    });
+
+    describe("a pseudo-element name case", function () {
+      it("takes a pseudo-element name case-insensitively", function (done) {
+        parseCascade("p:BEFORE, h1 { color: red }", done, function (cascade) {
+          expect(Object.keys(cascade.tags)).toEqual(["p", "h1"]);
+          expect(cascade.tags["p"].pseudoelement).toBe("before");
+        });
+      });
+
+      it("takes a functional pseudo-element name case-insensitively", function (done) {
+        parseCascade(
+          "p::NTH-FRAGMENT(2n+1) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"].viewConditionId).toBe("NFS_2_1");
+          },
+        );
+      });
+
+      it("voids the rule for the functional form of a pseudo-element alias", function (done) {
+        parseCascade(
+          "p:before(x) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+    });
+
+    describe(":any-link", function () {
+      it("matches as :link does", function (done) {
+        parseCascade(":any-link { color: red }", done, function (cascade) {
+          expect(Object.keys(cascade.tags)).toEqual(["a"]);
+          expect(cascade.tags["a"].condition).toEqual(
+            jasmine.any(adapt_csscasc.CheckAttributePresentAction),
+          );
+          expect(cascade.tags["a"].condition.ns).toBe("");
+          expect(cascade.tags["a"].condition.name).toBe("href");
+          expect(cascade.tags["a"].chained.specificity).toBe(256);
+        });
+      });
+
+      it("keeps the source text :has() takes for :any-link", function (done) {
+        parseCascade(
+          "div:has(:any-link) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual([":any-link"]);
+          },
+        );
+      });
+
+      it("voids the rule for the functional form", function (done) {
+        parseCascade(
+          ":any-link(x) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+    });
+
+    describe(":dir()", function () {
+      it("compiles to a directionality check", function (done) {
+        parseCascade("p:dir(rtl) { color: red }", done, function (cascade) {
+          expect(cascade.tags["p"]).toEqual(
+            jasmine.any(adapt_csscasc.WiredGuard),
+          );
+          expect(cascade.tags["p"].condition).toEqual(
+            jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
+          );
+          expect(cascade.tags["p"].condition.selector).toBe(":dir(rtl)");
+          expect(cascade.tags["p"].chained.specificity).toBe(257);
+        });
+      });
+
+      it("takes the name and the argument case-insensitively", function (done) {
+        parseCascade(
+          "p:DIR(RTL) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"].condition.selector).toBe(":dir(rtl)");
+          },
+        );
+      });
+
+      it("matches nothing for an identifier other than ltr and rtl", function (done) {
+        parseCascade(
+          "p:dir(foo) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"]).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+            expect(cascade.tags["p"].condition.condition).toBe("");
+            expect(cascade.tags["p"].chained.specificity).toBe(257);
+          },
+        );
+      });
+
+      it("voids the rule when the argument is missing", function (done) {
+        parseCascade(
+          "p:dir() { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule when the argument is not a single identifier", function (done) {
+        parseCascade(
+          "p:dir(ltr rtl) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule when the argument is a string", function (done) {
+        parseCascade(
+          'p:dir("ltr") { color: red } q { color: blue }',
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids the rule when used without an argument list", function (done) {
+        parseCascade(
+          "p:dir { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("voids only the enclosing rule inside :not()", function (done) {
+        parseCascade(
+          "p:not(:dir()) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("drops only the alternative from a forgiving list", function (done) {
+        parseCascade(
+          "div:is(:dir(), .x) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags["span"]).toBeDefined();
+          },
+        );
+      });
+
+      it("keeps the selectors after the comma when the only alternative is voided", function (done) {
+        parseCascade(
+          "p:is(:dir()), q { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"].condition.condition).toBe("");
+          },
+        );
+      });
+
+      it("drops only the alternative when the void starts two lists deep", function (done) {
+        parseCascade(
+          "div:is(:not(:dir()), .x) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags["span"]).toBeDefined();
+          },
+        );
+      });
+
+      it("voids the selectors before and after when :has() holds it", function (done) {
+        parseCascade(
+          "a, b:has(:dir()), c { color: red } e { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["e"]);
+          },
+        );
+      });
+
+      it("balances nested parentheses in an invalid argument", function (done) {
+        parseCascade(
+          "div:is(:dir(a(b)), .x) span { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags["span"]).toBeDefined();
+          },
+        );
+      });
+
+      it("keeps the source text of a forgiving list :has() takes", function (done) {
+        parseCascade(
+          "div:has(:is(:dir())) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual([":is(:dir())"]);
+          },
+        );
+      });
+
+      it("voids the rule when the of-S list holds it", function (done) {
+        parseCascade(
+          "li:nth-child(2n of :dir()) { color: red } q { color: blue }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+          },
+        );
+      });
+
+      it("keeps the selectors after the comma inside :where()", function (done) {
+        parseCascade(
+          "p:where(:dir()), q { color: red }",
+          done,
+          function (cascade) {
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            expect(cascade.tags["p"].condition.condition).toBe("");
+          },
+        );
+      });
+
+      it("keeps the rule inside :not()", function (done) {
+        parseCascade(
+          ":not(:dir(ltr)) + div { color: red }",
+          done,
+          function (cascade) {
+            expect(cascade.tags["*"].condition).toEqual(
+              jasmine.any(adapt_csscasc.MatchesNoneAction),
+            );
+            expect(
+              cascade.tags["*"].condition.firstActions[0].condition,
+            ).toEqual(jasmine.any(adapt_csscasc.MatchesNativeSelectorAction));
+            expect(cascade.tags["*"].chained).toEqual(
+              jasmine.any(adapt_csscasc.ConditionItemAction),
+            );
+            expect(cascade.tags["div"]).toBeDefined();
+          },
+        );
+      });
+
+      it("keeps the source text of the alternative :has() takes", function (done) {
+        parseCascade(
+          "div:has(*:dir(ltr)) { color: red }",
+          done,
+          function (cascade) {
+            var action = cascade.tags["div"].condition;
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.MatchesRelationalAction),
+            );
+            expect(action.selectorTexts).toEqual(["*:dir(ltr)"]);
+          },
+        );
+      });
+    });
+
     describe("without a syntax error", function () {
       it("registers a sibling condition before the chain restarts", function (done) {
         // The condition item is read by the rest of the selector, so it must
@@ -1495,6 +2197,51 @@ describe("css-cascade", function () {
           },
         );
       });
+    });
+  });
+
+  describe("MatchesNativeSelectorAction", function () {
+    function matches(element, selector) {
+      return new adapt_csscasc.MatchesNativeSelectorAction(selector).matches({
+        currentElement: element,
+      });
+    }
+
+    it("matches in an XHTML document", function () {
+      var doc = new DOMParser().parseFromString(
+        '<html xmlns="http://www.w3.org/1999/xhtml"><body>' +
+          '<section dir="rtl"><p></p></section></body></html>',
+        "application/xhtml+xml",
+      );
+      var element = doc.getElementsByTagName("p")[0];
+      expect(matches(element, ":dir(rtl)")).toBe(true);
+      expect(matches(element, ":dir(ltr)")).toBe(false);
+    });
+
+    it("hands the selector to the matcher for every element it answers for", function () {
+      var first = {
+        matches: jasmine.createSpy("matches").and.returnValue(true),
+      };
+      var second = {
+        matches: jasmine.createSpy("matches").and.returnValue(false),
+      };
+      var third = {
+        matches: jasmine.createSpy("matches").and.returnValue(true),
+      };
+      var action = new adapt_csscasc.MatchesNativeSelectorAction(":dir(rtl)");
+      expect(action.matches({ currentElement: first })).toBe(true);
+      expect(action.matches({ currentElement: second })).toBe(false);
+      expect(action.matches({ currentElement: third })).toBe(true);
+      expect(first.matches).toHaveBeenCalledWith(":dir(rtl)");
+      expect(second.matches).toHaveBeenCalledWith(":dir(rtl)");
+      expect(third.matches).toHaveBeenCalledWith(":dir(rtl)");
+    });
+
+    it("matches nothing without an element", function () {
+      var action = new adapt_csscasc.MatchesNativeSelectorAction(":dir(ltr)");
+      // A rule cascade carries no element at all.
+      expect(action.matches({})).toBe(false);
+      expect(action.matches({ currentElement: null })).toBe(false);
     });
   });
 

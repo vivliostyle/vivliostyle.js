@@ -1709,7 +1709,7 @@ export class Parser {
               }
               continue;
             case TokenType.FUNC:
-              text = token.text;
+              text = token.text.toLowerCase();
               tokenizer.consume();
               switch (text) {
                 case "is":
@@ -1821,6 +1821,17 @@ export class Parser {
                   } else {
                     break;
                   }
+                case "dir":
+                  token = tokenizer.token();
+                  if (
+                    token.type === TokenType.IDENT &&
+                    tokenizer.nthToken(1).type === TokenType.C_PAR
+                  ) {
+                    params = [token.text];
+                    tokenizer.consume();
+                    break;
+                  }
+                // fall through
                 default:
                   params = [];
                   if (!this.skipPseudoFunctionContents()) {
@@ -1863,7 +1874,7 @@ export class Parser {
               tokenizer.consume();
               continue;
             case TokenType.FUNC:
-              text = token.text;
+              text = token.text.toLowerCase();
               tokenizer.consume();
               if (text == "nth-fragment") {
                 params = this.readNthPseudoParams();

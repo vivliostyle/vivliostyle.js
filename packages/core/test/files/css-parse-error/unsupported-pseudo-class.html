@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Valid but unsupported pseudo-classes</title>
+    <style>
+      p {
+        color: red;
+      }
+      p:not(:dir(rtl)) {
+        color: green;
+      }
+      #d1 {
+        color: red;
+      }
+      #d1:has(span:dir(rtl)) {
+        color: green;
+      }
+      #d2 a {
+        color: red;
+      }
+      #d2 a:any-link {
+        color: green;
+      }
+      #d3 {
+        color: red;
+      }
+      #d3:has(:any-link) {
+        color: green;
+      }
+      .d {
+        color: red;
+      }
+      .d:dir(ltr) {
+        color: green;
+      }
+      .e {
+        color: red;
+      }
+      .e:dir(rtl) {
+        color: green;
+      }
+      .w {
+        color: red;
+      }
+      .w:read-only {
+        color: green;
+      }
+      .y {
+        color: red;
+      }
+      /* No .x element exists. The rule must survive for .y to turn green. */
+      .y,
+      .x:focus-visible {
+        color: green;
+      }
+      .z {
+        color: green;
+      }
+      .z:fullscreen {
+        color: red;
+      }
+      .f {
+        color: red;
+      }
+      .f:is(:dir(), .f) {
+        color: green;
+      }
+      .g {
+        color: green;
+      }
+      .g:dir(auto) {
+        color: red;
+      }
+      .g2 {
+        color: red;
+      }
+      .g2:dir(auto),
+      .g2 {
+        color: green;
+      }
+      .m {
+        color: green;
+      }
+      .m:read-only(x),
+      .m {
+        color: red;
+      }
+      .n {
+        color: red;
+      }
+      .n:not(:fullscreen) {
+        color: green;
+      }
+      .s {
+        color: red;
+      }
+      @supports selector(:focus-visible) {
+        .s {
+          color: green;
+        }
+      }
+      .t {
+        color: green;
+      }
+      @supports selector(:link(x)) {
+        .t {
+          color: red;
+        }
+      }
+      .u {
+        color: green;
+      }
+      @supports selector(:vivlio-unknown-probe) {
+        .u {
+          color: red;
+        }
+      }
+      #d5 a {
+        color: green;
+      }
+      #d5 a:any-link {
+        color: red;
+      }
+      .i2 {
+        color: red;
+      }
+      .i2:dir(rtl) {
+        color: green;
+      }
+      .v2 {
+        color: red;
+      }
+      @supports selector(:dir(rtl)) {
+        .v2 {
+          color: green;
+        }
+      }
+      .w2 {
+        color: red;
+      }
+      @supports selector(:any-link) {
+        .w2 {
+          color: green;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph should be green.</p>
+    <div id="d1"><span dir="rtl">rtl</span> and this text should be green.</div>
+    <div id="d2">Only <a href="#x">this link</a> should be green here.</div>
+    <div id="d3">This text around <a href="#x">a link</a> should be green.</div>
+    <div class="d">This text should be green.</div>
+    <div class="e" dir="rtl">This text should be green.</div>
+    <div class="w">This text should be green.</div>
+    <div class="y">This text should be green too.</div>
+    <div class="z">This text should be green as well.</div>
+    <div class="f">This text also should be green.</div>
+    <div class="g">This text stays green.</div>
+    <div class="g2">This text should be green here.</div>
+    <div class="m">This text stays green too.</div>
+    <div class="n">This text should be green as usual.</div>
+    <div class="s">This text should be green after all.</div>
+    <div class="t">This text stays green as before.</div>
+    <div class="u">This text stays green in the end.</div>
+    <div id="d5"><a>A link without href</a> stays green.</div>
+    <div dir="rtl"><span class="i2">This text should be green.</span></div>
+    <div class="v2">This text should be green as well.</div>
+    <div class="w2">This text should be green too.</div>
+  </body>
+</html>
