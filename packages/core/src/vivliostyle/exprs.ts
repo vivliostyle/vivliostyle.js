@@ -435,19 +435,20 @@ export class Context {
   }
 
   evalName(scope: LexicalScope, qualifiedName: string): Val {
-    do {
-      let val = scope.values[qualifiedName];
+    let s: LexicalScope | null = scope;
+    while (s) {
+      let val: Val | null = s.values[qualifiedName];
       if (val) {
         return val;
       }
-      if (scope.resolver) {
-        val = scope.resolver.call(this, qualifiedName, false);
+      if (s.resolver) {
+        val = s.resolver.call(this, qualifiedName, false);
         if (val) {
           return val;
         }
       }
-      scope = scope.parent;
-    } while (scope);
+      s = s.parent;
+    }
     throw new Error(`Name '${qualifiedName}' is undefined`);
   }
 
@@ -460,30 +461,31 @@ export class Context {
     params: Val[],
     noBuiltInEval: boolean,
   ): Val {
-    do {
-      let body = scope.funcs[qualifiedName];
+    let s: LexicalScope | null = scope;
+    while (s) {
+      let body: Val | null = s.funcs[qualifiedName];
       if (body) {
         return body; // will be expanded by callee
       }
-      if (scope.resolver) {
-        body = scope.resolver.call(this, qualifiedName, true);
+      if (s.resolver) {
+        body = s.resolver.call(this, qualifiedName, true);
         if (body) {
           return body;
         }
       }
-      const fn = scope.builtIns[qualifiedName];
+      const fn = s.builtIns[qualifiedName];
       if (fn) {
         if (noBuiltInEval) {
-          return scope.zero;
+          return s.zero;
         }
         const args = Array(params.length);
         for (let i = 0; i < params.length; i++) {
           args[i] = params[i].evaluate(this);
         }
-        return new Const(scope, fn.apply(this, args));
+        return new Const(s, fn.apply(this, args));
       }
-      scope = scope.parent;
-    } while (scope);
+      s = s.parent;
+    }
     throw new Error(`Function '${qualifiedName}' is undefined`);
   }
 
@@ -492,7 +494,7 @@ export class Context {
     return not ? !enabled : enabled;
   }
 
-  evalMediaTest(feature: string, value: Val): boolean {
+  evalMediaTest(feature: string, value: Val | null): boolean {
     let prefix = "";
     const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
@@ -544,7 +546,11 @@ export class Context {
     return false;
   }
 
-  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
+  evalSupportsTest(
+    name: string | undefined,
+    value: string,
+    isFunc: boolean,
+  ): boolean {
     return false;
   }
 

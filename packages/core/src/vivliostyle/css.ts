@@ -97,7 +97,7 @@ export class FilterVisitor extends Visitor {
   }
 
   override visitValues(values: Val[]): Val[] {
-    let arr: Val[] = null;
+    let arr: Val[] | null = null;
     for (let i = 0; i < values.length; i++) {
       const before = values[i];
       const after = before.visit(this);
@@ -209,7 +209,7 @@ export class Val {
     return buf.toString();
   }
 
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
+  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val | null {
     return null;
   }
 
