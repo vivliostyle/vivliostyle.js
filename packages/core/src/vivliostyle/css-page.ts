@@ -1427,8 +1427,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     } = {};
     if (!centerBoxParam) {
       const startEndSizes = this.distributeAutoMarginBoxSizes(
-        startBoxParam,
-        endBoxParam,
+        startBoxParam ?? null,
+        endBoxParam ?? null,
         availableSize,
       );
       if (startEndSizes.xSize != null) {
@@ -3209,7 +3209,7 @@ export class PageParserHandler
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     name = name.toLowerCase();
     if (params) {
@@ -3283,7 +3283,7 @@ export class PageParserHandler
    * Save currently processed selector and reset variables.
    */
   private finishSelector() {
-    let selectors: string[];
+    let selectors: string[] | null;
     if (
       !this.currentNamedPageSelector &&
       !this.currentPseudoPageClassSelectors.length
