@@ -813,7 +813,7 @@ class CounterResolver implements CssCascade.CounterResolver {
               if (elementAtPageStartOffset) {
                 // Find if the element at the offset is (the first child of)* the element at page start
                 for (
-                  let element = elementAtPageStartOffset;
+                  let element: Element | null = elementAtPageStartOffset;
                   element;
                   element = element.firstElementChild
                 ) {
@@ -1152,7 +1152,7 @@ export class CounterStore {
         incrementMap["page"] = 1;
       }
     } else {
-      incrementMap = Object.create(null);
+      incrementMap = Object.create(null) as { [key: string]: number };
       if (!(docCounterInfo["page"] && docCounterInfo["page"].reset)) {
         incrementMap["page"] = 1;
       }
@@ -1355,7 +1355,7 @@ export class CounterStore {
             if (!unresolvedRefs) {
               unresolvedRefs = this.unresolvedReferences[id] = [];
             }
-            let ref: TargetCounterReference;
+            let ref: TargetCounterReference | undefined;
             while ((ref = resolvedRefs.shift())) {
               ref.unresolve();
               unresolvedRefs.push(ref);
@@ -1366,7 +1366,7 @@ export class CounterStore {
       });
     }
     const prevPageCounters = this.previousPageCounters;
-    let ref: TargetCounterReference;
+    let ref: TargetCounterReference | undefined;
     while ((ref = this.newReferencesOfCurrentPage.shift())) {
       ref.pageCounters = prevPageCounters;
       ref.spineIndex = spineIndex;
@@ -1633,13 +1633,13 @@ export class CounterStore {
     const result: {
       spineIndex: number;
       pageIndex: number;
-      pageCounters: CssCascade.CounterValues;
+      pageCounters: CssCascade.CounterValues | null;
       refs: TargetCounterReference[];
     }[] = [];
     let o: {
       spineIndex: number;
       pageIndex: number;
-      pageCounters: CssCascade.CounterValues;
+      pageCounters: CssCascade.CounterValues | null;
       refs: TargetCounterReference[];
     } = null;
     refs.forEach((ref) => {
