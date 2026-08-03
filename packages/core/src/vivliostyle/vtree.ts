@@ -253,8 +253,8 @@ export class Page extends Base.SimpleEventTarget {
 }
 
 export type Spread = {
-  left: Page;
-  right: Page;
+  left: Page | null;
+  right: Page | null;
 };
 
 export const Whitespace = Vtree.Whitespace;

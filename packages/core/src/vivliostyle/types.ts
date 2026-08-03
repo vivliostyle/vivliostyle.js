@@ -614,7 +614,7 @@ export namespace Net {
     contentType: string | null;
     responseText: string | null;
     responseXML: Document;
-    responseBlob: Blob;
+    responseBlob: Blob | null;
   };
 
   export interface ResourceStore<Resource> {

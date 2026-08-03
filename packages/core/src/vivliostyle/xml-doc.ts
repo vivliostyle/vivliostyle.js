@@ -498,8 +498,8 @@ export class NodeList implements XmlDoc.NodeList {
   /**
    * @template T
    */
-  forEachNonNull<T>(fn: (p1: Node) => T): T[] {
-    const arr = [];
+  forEachNonNull<T>(fn: (p1: Node) => T | null): T[] {
+    const arr: T[] = [];
     for (let i = 0; i < this.nodes.length; i++) {
       const t = fn(this.nodes[i]);
       if (t != null) {

@@ -1605,7 +1605,7 @@ export type OPFViewItem = {
 };
 
 export class OPFView implements Vgen.CustomRendererFactory {
-  spineItems: OPFViewItem[] = [];
+  spineItems: (OPFViewItem | null)[] = [];
   spineItemLoadingContinuations: Task.Continuation<any>[][] = [];
   pref: Exprs.Preferences;
   clientLayout: Vgen.DefaultClientLayout;
@@ -2520,7 +2520,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   private normalizeSeekPosition(
     position: Position,
     viewItem: OPFViewItem,
-  ): Position | null {
+  ): Position {
     let pageIndex = position.pageIndex;
     let seekOffset = -1;
     if (pageIndex < 0) {
@@ -3434,9 +3434,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     };
   }
 
-  getPageViewItem(spineIndex: number): Task.Result<OPFViewItem> {
+  getPageViewItem(spineIndex: number): Task.Result<OPFViewItem | null> {
     if (spineIndex === -1 || spineIndex >= this.opf.spine.length) {
-      return Task.newResult(null as OPFViewItem);
+      return Task.newResult<OPFViewItem | null>(null);
     }
     let viewItem = this.spineItems[spineIndex];
     if (viewItem) {

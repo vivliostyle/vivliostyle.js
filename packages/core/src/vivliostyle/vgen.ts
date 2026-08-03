@@ -132,7 +132,7 @@ export type CustomRenderer = (
   p1: Element,
   p2: Element,
   p3: { [key: string]: Css.Val },
-) => Task.Result<Element>;
+) => Task.Result<Element | null>;
 
 export interface CustomRendererFactory {
   makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): CustomRenderer;
