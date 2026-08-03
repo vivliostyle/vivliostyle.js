@@ -81,7 +81,7 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
-  getCurrentToken(): CssTokenizer.Token {
+  getCurrentToken(): CssTokenizer.Token | null {
     return null;
   }
 
@@ -243,7 +243,7 @@ export class DispatchParserHandler<
     this.slave = delegation.outer;
   }
 
-  override getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token | null {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
@@ -444,7 +444,7 @@ export class SkippingParserHandler extends ParserHandler {
     this.flavor = owner.flavor;
   }
 
-  override getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token | null {
     return this.owner.getCurrentToken();
   }
 
@@ -921,7 +921,7 @@ export class Parser {
       // Check invalid var()
       if (func.name === "var") {
         const name = func.values[0] instanceof Css.Ident && func.values[0].name;
-        if (!Css.isCustomPropName(name)) {
+        if (!Css.isCustomPropName(name || undefined)) {
           this.handler.error(`E_CSS_INVALID_VAR ${func.toString()}`, token);
           this.actions = actionsErrorDecl;
         }
@@ -1131,7 +1131,7 @@ export class Parser {
     return false;
   }
 
-  readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest {
+  readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest | null {
     // `@supports (prop-name:...)`
     // `@supports func-name(...)`
     const isFunc = token.type === TokenType.FUNC;
@@ -1208,7 +1208,7 @@ export class Parser {
   }
 
   readPseudoParams(): (number | string)[] {
-    const arr = [];
+    const arr: (number | string)[] = [];
     while (true) {
       const token = this.tokenizer.token();
       switch (token.type) {
@@ -1384,7 +1384,7 @@ export class Parser {
     return null;
   }
 
-  makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr {
+  makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr | null {
     const scope = this.handler.getScope();
     condition = condition || scope._true;
     if (classes) {
@@ -2966,7 +2966,7 @@ function parseStylesheetInternal(
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
-  let condition: Css.Expr = null;
+  let condition: Css.Expr | null = null;
   if (media) {
     condition = parseMediaQuery(
       new CssTokenizer.Tokenizer(media, handler),
@@ -3120,7 +3120,7 @@ export const numProp: { [key: string]: boolean } = {
   utilization: true,
 };
 
-export function takesOnlyNum(propName: string): boolean {
+export function takesOnlyNum(propName: string | undefined): boolean {
   return !!numProp[propName];
 }
 
