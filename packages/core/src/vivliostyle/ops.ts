@@ -959,7 +959,7 @@ export class StyleInstance
   }
 
   getPageStartPageType(
-    layoutPosition: Vtree.LayoutPosition,
+    layoutPosition: Vtree.LayoutPosition | null,
   ): string | null | undefined {
     const pageStartOffset = this.getPageStartOffset(layoutPosition, true);
     const startElement = this.getPageStartElement(
@@ -983,7 +983,7 @@ export class StyleInstance
   }
 
   getPageStartPageTypeOverride(
-    layoutPosition: Vtree.LayoutPosition,
+    layoutPosition: Vtree.LayoutPosition | null,
   ): string | null | undefined {
     const pageStartPageType = this.getPageStartPageType(layoutPosition);
     if (pageStartPageType !== "") {
