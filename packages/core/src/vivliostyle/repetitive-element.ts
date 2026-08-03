@@ -45,7 +45,7 @@ export class RepetitiveElementsOwnerFormattingContext
   repetitiveElements: RepetitiveElement.RepetitiveElements | null = null;
 
   constructor(
-    public readonly parent: Vtree.FormattingContext,
+    public readonly parent: Vtree.FormattingContext | null,
     public readonly rootSourceNode: Element,
   ) {}
 

@@ -66,7 +66,7 @@ import {
 
 export type FontFace = {
   properties: CssCascade.ElementStyle;
-  condition: Exprs.Val;
+  condition: Exprs.Val | null;
 };
 
 class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
@@ -542,7 +542,7 @@ export class StyleInstance
     return frame.result();
   }
 
-  private matchStartPageSide(side: string): boolean {
+  private matchStartPageSide(side: string | null): boolean {
     const isRectoStart =
       this.pageNumberOffset % 2 == (this.isVersoFirstPage ? 1 : 0);
     const isLTR = this.pageProgression == Constants.PageProgression.LTR;
@@ -779,7 +779,7 @@ export class StyleInstance
   }
 
   private getPageStartOffset(
-    layoutPosition?: Vtree.LayoutPosition,
+    layoutPosition?: Vtree.LayoutPosition | null,
     noLookAhead?: boolean,
   ): number {
     if (!layoutPosition) {
@@ -866,7 +866,7 @@ export class StyleInstance
   }
 
   private getPageStartElement(
-    layoutPosition: Vtree.LayoutPosition,
+    layoutPosition: Vtree.LayoutPosition | null,
     pageStartOffset: number = this.getPageStartOffset(layoutPosition),
   ): Element | null {
     if (!isFinite(pageStartOffset)) {
@@ -1468,7 +1468,7 @@ export class StyleInstance
    */
   selectPageMaster(
     cascadedPageStyle: CssCascade.ElementStyle,
-  ): PageMaster.PageMasterInstance {
+  ): PageMaster.PageMasterInstance | null {
     const cp = this.currentLayoutPosition;
 
     // 3.5. Page Layout Processing Model
@@ -2241,7 +2241,7 @@ export class StyleInstance
     layoutContainer: Vtree.Container,
     flowNameStr: string,
     columnCount: number,
-  ): Task.Result<LayoutType.Column[]> {
+  ): Task.Result<LayoutType.Column[] | null> {
     const positionAtContainerStart = this.currentLayoutPosition.clone();
     const regionPageFloatLayoutContext = this.getRegionPageFloatLayoutContext(
       pagePageFloatLayoutContext,
@@ -2382,7 +2382,7 @@ export class StyleInstance
       this.semanticFootnoteFirstRefOffsetsInitialized,
     );
     let columnIndex = 0;
-    let column: LayoutType.Column = null;
+    let column: LayoutType.Column | null = null;
     let columns: LayoutType.Column[] = [];
     frame
       .loopWithFrame((loopFrame) => {
@@ -3062,8 +3062,8 @@ export class StyleInstance
 
   layoutNextPage(
     page: Vtree.Page,
-    cp?: Vtree.LayoutPosition,
-  ): Task.Result<Vtree.LayoutPosition> {
+    cp?: Vtree.LayoutPosition | null,
+  ): Task.Result<Vtree.LayoutPosition | null> {
     // TOC box is special page container, no pagination
     const isTocBox = page.container === page.bleedBox;
 
@@ -3169,7 +3169,7 @@ export class StyleInstance
     const pageMaster = this.selectPageMaster(cascadedPageStyle);
     if (!pageMaster) {
       // end of primary content
-      return Task.newResult(null as Vtree.LayoutPosition);
+      return Task.newResult<Vtree.LayoutPosition | null>(null);
     }
     let bleedBoxPaddingEdge = 0;
     if (!isTocBox) {
@@ -3249,7 +3249,7 @@ export class StyleInstance
       null,
       page.side,
     );
-    const frame: Task.Frame<Vtree.LayoutPosition> =
+    const frame: Task.Frame<Vtree.LayoutPosition | null> =
       Task.newFrame("layoutNextPage");
     let attachedPageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext | null =
       null;
@@ -3352,8 +3352,8 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     owner: CssParser.DispatchParserHandler,
     scope: Exprs.LexicalScope,
     validatorSet: CssValidator.ValidatorSet,
-    condition: Exprs.Val,
-    parent: BaseParserHandler,
+    condition: Exprs.Val | null,
+    parent: BaseParserHandler | null,
     regionId: string | null,
     delegation: CssParser.Delegation | null,
   ) {
@@ -3620,7 +3620,7 @@ function toStyleSource(
 export function parseOPSResource(
   response: Net.FetchResponse,
   store: XmlDoc.XMLDocStore,
-): Task.Result<XmlDoc.XMLDocHolder> {
+): Task.Result<XmlDoc.XMLDocHolder | null> {
   return (store as OPSDocStore).parseOPSResource(response);
 }
 
@@ -3686,8 +3686,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
 
   parseOPSResource(
     response: Net.FetchResponse,
-  ): Task.Result<XmlDoc.XMLDocHolder> {
-    const frame: Task.Frame<XmlDoc.XMLDocHolder> =
+  ): Task.Result<XmlDoc.XMLDocHolder | null> {
+    const frame: Task.Frame<XmlDoc.XMLDocHolder | null> =
       Task.newFrame("OPSDocStore.load");
     const url = response.url;
 
@@ -3695,7 +3695,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     const isTocBox = Base.isTocBoxURL(url);
 
     XmlDoc.parseXMLResource(response, this).then(
-      (xmldoc: XmlDoc.XMLDocHolder) => {
+      (xmldoc: XmlDoc.XMLDocHolder | null) => {
         if (!xmldoc) {
           frame.finish(null);
           return;
@@ -3714,7 +3714,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             }
           }
         }
-        const triggers = [];
+        const triggers: Vtree.Trigger[] = [];
         const triggerList = xmldoc.document.getElementsByTagNameNS(
           Base.NS.epub,
           "trigger",

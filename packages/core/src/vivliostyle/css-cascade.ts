@@ -4863,8 +4863,8 @@ export class CascadeParserHandler
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
-    public readonly condition: Exprs.Val,
-    parent: CascadeParserHandler,
+    public readonly condition: Exprs.Val | null,
+    parent: CascadeParserHandler | null,
     public readonly regionId: string | null,
     public readonly validatorSet: CssValidator.ValidatorSet,
     delegation: CssParser.Delegation | null,
@@ -5856,7 +5856,7 @@ export class PropSetParserHandler
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
-    public readonly condition: Exprs.Val,
+    public readonly condition: Exprs.Val | null,
     public readonly elementStyle: ElementStyle,
     public readonly validatorSet: CssValidator.ValidatorSet,
     delegation: CssParser.Delegation,

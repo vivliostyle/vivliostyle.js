@@ -641,7 +641,7 @@ export function isOrphan(node: Node | null): boolean {
 }
 
 export function removeFollowingSiblings(
-  parentNode: Node,
+  parentNode: Node | null,
   viewNode: Node,
 ): void {
   if (!parentNode) {

@@ -410,7 +410,7 @@ export function parseXMLResource(
 }
 
 export function newXMLDocStore(): XMLDocStore {
-  return new Net.ResourceStore(
+  return new Net.ResourceStore<XmlDoc.XMLDocHolder>(
     parseXMLResource,
     Net.FetchResponseType.DOCUMENT,
   );

@@ -1139,7 +1139,7 @@ export class LayoutPosition {
     return newcp;
   }
 
-  isSamePosition(other: LayoutPosition): boolean {
+  isSamePosition(other: LayoutPosition | null): boolean {
     if (this === other) {
       return true;
     }

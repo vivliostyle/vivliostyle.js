@@ -1975,7 +1975,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     continuation: PageFloats.PageFloatContinuation,
     strategy: PageFloats.PageFloatLayoutStrategy,
     anchorEdge: number | null,
-    pageFloatFragment?: PageFloats.PageFloatFragment,
+    pageFloatFragment?: PageFloats.PageFloatFragment | null,
   ): Task.Result<boolean> {
     const context = this.pageFloatLayoutContext;
     const float = continuation.float;

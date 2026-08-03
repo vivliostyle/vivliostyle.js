@@ -1219,7 +1219,7 @@ export function processGeneratedContent(
   textAutospace: Css.Val,
   textSpacingTrim: Css.Val,
   hangingPunctuation: Css.Val,
-  lang: string,
+  lang: string | null,
   vertical: boolean,
 ): void {
   textPolyfill.processGeneratedContent(

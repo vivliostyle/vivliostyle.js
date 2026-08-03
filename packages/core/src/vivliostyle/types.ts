@@ -337,7 +337,7 @@ export namespace Layout {
       continuation: PageFloats.PageFloatContinuation,
       strategy: PageFloats.PageFloatLayoutStrategy,
       anchorEdge: number | null,
-      pageFloatFragment?: PageFloats.PageFloatFragment,
+      pageFloatFragment?: PageFloats.PageFloatFragment | null,
     ): Task.Result<boolean>;
     setFloatAnchorViewNode(
       nodeContext: Vtree.RenderedNodeContext,
@@ -613,17 +613,17 @@ export namespace Net {
     url: string;
     contentType: string | null;
     responseText: string | null;
-    responseXML: Document;
+    responseXML: Document | null;
     responseBlob: Blob | null;
   };
 
   export interface ResourceStore<Resource> {
-    resources: { [key: string]: Resource };
-    fetchers: { [key: string]: TaskUtil.Fetcher<Resource> };
+    resources: { [key: string]: Resource | null };
+    fetchers: { [key: string]: TaskUtil.Fetcher<Resource | null> };
     readonly parser: (
       p1: FetchResponse,
       p2: ResourceStore<Resource>,
-    ) => Task.Result<Resource>;
+    ) => Task.Result<Resource | null>;
     readonly type: XMLHttpRequestResponseType;
 
     /**
@@ -633,7 +633,7 @@ export namespace Net {
       url: string,
       opt_required?: boolean,
       opt_message?: string,
-    ): Task.Result<Resource>;
+    ): Task.Result<Resource | null>;
     /**
      * @return fetcher for the resource for the given URL
      */
@@ -641,7 +641,7 @@ export namespace Net {
       url: string,
       opt_required?: boolean,
       opt_message?: string,
-    ): TaskUtil.Fetcher<Resource>;
+    ): TaskUtil.Fetcher<Resource | null> | null;
     get(url: string): XmlDoc.XMLDocHolder;
     delete(url: string): void;
   }
@@ -903,7 +903,7 @@ export namespace RepetitiveElement {
     extends Vtree.FormattingContext {
     isRoot: boolean;
     repetitiveElements: RepetitiveElements | null;
-    readonly parent: Vtree.FormattingContext;
+    readonly parent: Vtree.FormattingContext | null;
     readonly rootSourceNode: Element;
     getRepetitiveElements(): RepetitiveElements | null;
     getRootViewNode(position: Vtree.NodeContext): Element | null;
@@ -1155,7 +1155,7 @@ export namespace Vtree {
     formattingContextType: FormattingContextType;
     getName(): string;
     isFirstTime(nodeContext: NodeContext, firstTime: boolean): boolean;
-    getParent(): FormattingContext;
+    getParent(): FormattingContext | null;
     saveState(): any;
     restoreState(state: any);
   }
