@@ -64,7 +64,7 @@ export class RepetitiveElementsOwnerFormattingContext
     return this.parent;
   }
 
-  getRepetitiveElements(): RepetitiveElement.RepetitiveElements {
+  getRepetitiveElements(): RepetitiveElement.RepetitiveElements | null {
     return this.repetitiveElements;
   }
 
@@ -355,7 +355,7 @@ export class RepetitiveElements
     nodeContext: Vtree.NodeContext,
     includeChildren: boolean,
   ): boolean {
-    const parentsOfNode = [];
+    const parentsOfNode: Node[] = [];
     for (let n: Node | null = node; n; n = n.parentNode) {
       if (nodeContext.sourceNode === n) {
         return nodeContext.after;

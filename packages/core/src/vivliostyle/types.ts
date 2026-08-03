@@ -905,7 +905,7 @@ export namespace RepetitiveElement {
     repetitiveElements: RepetitiveElements | null;
     readonly parent: Vtree.FormattingContext;
     readonly rootSourceNode: Element;
-    getRepetitiveElements(): RepetitiveElements;
+    getRepetitiveElements(): RepetitiveElements | null;
     getRootViewNode(position: Vtree.NodeContext): Element | null;
     getRootNodeContext(
       nodeContext: Vtree.NodeContext,
@@ -975,7 +975,7 @@ export namespace RepetitiveElement {
 
   export interface RepetitiveElementsOwnerLayoutConstraint
     extends Layout.FragmentLayoutConstraint {
-    getRepetitiveElements(): RepetitiveElements;
+    getRepetitiveElements(): RepetitiveElements | null;
   }
 
   export function isInstanceOfRepetitiveElementsOwnerLayoutConstraint(
