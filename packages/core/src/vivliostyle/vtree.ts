@@ -382,7 +382,11 @@ export function eachAncestorFormattingContext(
   if (!nodeContext) {
     return;
   }
-  for (let fc = nodeContext.formattingContext; fc; fc = fc.getParent()) {
+  for (
+    let fc: FormattingContext | null = nodeContext.formattingContext;
+    fc;
+    fc = fc.getParent()
+  ) {
     callback(fc);
   }
 }

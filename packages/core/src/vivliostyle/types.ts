@@ -1349,7 +1349,7 @@ export namespace Vtree {
     firstPseudo: FirstPseudo | null;
     lang: string | null;
     preprocessedTextContent: Diff.Change[] | null;
-    formattingContext: FormattingContext | null;
+    formattingContext: FormattingContext;
     repeatOnBreak: string | null;
     pluginProps: {
       [key: string]: string | number | undefined | null | (number | null)[];
