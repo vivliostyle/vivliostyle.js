@@ -132,7 +132,7 @@ export class LexicalScope {
   one: Const;
   _true: Const;
   _false: Const;
-  values: { [key: string]: Val } = {};
+  values: { [key: string]: Val | null } = {};
   funcs: { [key: string]: Val } = {};
   builtIns: { [key: string]: (...p1: Result[]) => Result } = {};
 
@@ -206,7 +206,7 @@ export class LexicalScope {
     this.values[name] = new Native(this, fn, name);
   }
 
-  defineName(qualifiedName: string, val: Val): void {
+  defineName(qualifiedName: string, val: Val | null): void {
     this.values[qualifiedName] = val;
   }
 

@@ -871,7 +871,7 @@ function isSupportedAttrType(type: AttrType): boolean {
   return false;
 }
 
-export function getImplicitAttrFallback(type: AttrType): Css.Val | null {
+export function getImplicitAttrFallback(type: AttrType): Css.Val {
   switch (type.kind) {
     case "url":
       return new Css.URL("about:invalid");
