@@ -1140,7 +1140,7 @@ export class Parser {
     const isFunc = token.type === TokenType.FUNC;
     const tokenizer = this.tokenizer;
     let startPosition: number;
-    let name: string | undefined;
+    let name = "";
     if (isFunc) {
       name = token.text;
       startPosition = token.position + name.length + 1;

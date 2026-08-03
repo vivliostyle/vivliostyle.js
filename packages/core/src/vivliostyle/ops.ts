@@ -636,7 +636,7 @@ export class StyleInstance
   }
 
   override evalSupportsTest(
-    name: string | undefined,
+    name: string,
     value: string,
     isFunc: boolean,
   ): boolean {

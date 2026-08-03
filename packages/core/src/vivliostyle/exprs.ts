@@ -546,11 +546,7 @@ export class Context {
     return false;
   }
 
-  evalSupportsTest(
-    name: string | undefined,
-    value: string,
-    isFunc: boolean,
-  ): boolean {
+  evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
     return false;
   }
 
@@ -1376,7 +1372,7 @@ export class MediaTest extends Val {
 export class SupportsTest extends Val {
   constructor(
     scope: LexicalScope,
-    public name: string | undefined,
+    public name: string,
     public value: string,
     public isFunc: boolean,
   ) {
