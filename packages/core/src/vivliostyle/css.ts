@@ -209,7 +209,7 @@ export class Val {
     return buf.toString();
   }
 
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return null;
   }
 
@@ -256,7 +256,7 @@ export class Empty extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, "");
   }
 
@@ -283,7 +283,7 @@ export class Slash extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, "/");
   }
 
@@ -303,7 +303,7 @@ export class Str extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, this.str);
   }
 
@@ -333,7 +333,7 @@ export class Ident extends Val {
     nameTable[name] = this;
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, this.name);
   }
 
@@ -373,7 +373,7 @@ export class Numeric extends Val {
     this.unit = unit?.toLowerCase() ?? ""; // units are case-insensitive in CSS
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -409,7 +409,7 @@ export class Num extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }

@@ -138,7 +138,7 @@ export class LexicalScope {
 
   constructor(
     public parent: LexicalScope | null,
-    public resolver?: (p1: string, p2: boolean) => Val,
+    public resolver?: (p1: string, p2: boolean) => Val | null,
   ) {
     this.scopeKey = `S${nextKeyIndex++}`;
     this.zero = new Const(this, 0);
@@ -1439,7 +1439,7 @@ export function and(scope: LexicalScope, v1: Val, v2: Val): Val {
   return new And(scope, v1, v2);
 }
 
-export function add(scope: LexicalScope, v1: Val, v2: Val): Val {
+export function add(scope: LexicalScope, v1: Val | null, v2: Val | null): Val {
   if (v1 === scope.zero) {
     return v2;
   }
@@ -1449,7 +1449,7 @@ export function add(scope: LexicalScope, v1: Val, v2: Val): Val {
   return new Add(scope, v1, v2);
 }
 
-export function sub(scope: LexicalScope, v1: Val, v2: Val): Val {
+export function sub(scope: LexicalScope, v1: Val | null, v2: Val | null): Val {
   if (v1 === scope.zero) {
     return new Negate(scope, v2);
   }

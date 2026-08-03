@@ -58,7 +58,7 @@ export abstract class PageBox<
     public readonly name: string | null,
     public readonly pseudoName: string | null,
     public readonly classes: string[],
-    public readonly parent: PageBox,
+    public readonly parent: PageBox | null,
   ) {
     this._scope = scope;
     this.key = `p${keyCount++}`;
@@ -163,7 +163,7 @@ export class PageMaster<
     pseudoName: string | null,
     classes: string[],
     parent: RootPageBox,
-    public readonly condition: Exprs.Val,
+    public readonly condition: Exprs.Val | null,
     public readonly specificity: number,
   ) {
     super(scope, name, pseudoName, classes, parent);
@@ -331,8 +331,8 @@ export function toExprIdent(
 export function toExprAuto(
   scope: Exprs.LexicalScope,
   val: Css.Val,
-  ref: Exprs.Val,
-): Exprs.Val {
+  ref: Exprs.Val | null,
+): Exprs.Val | null {
   if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return null;
   }
@@ -342,8 +342,8 @@ export function toExprAuto(
 export function toExprNormal(
   scope: Exprs.LexicalScope,
   val: Css.Val,
-  ref: Exprs.Val,
-): Exprs.Val {
+  ref: Exprs.Val | null,
+): Exprs.Val | null {
   if (!val || val === Css.ident.normal || Css.isDefaultingValue(val)) {
     return null;
   }
@@ -353,7 +353,7 @@ export function toExprNormal(
 export function toExprZero(
   scope: Exprs.LexicalScope,
   val: Css.Val,
-  ref: Exprs.Val,
+  ref: Exprs.Val | null,
 ): Exprs.Val {
   if (!val || val === Css.ident.auto || Css.isDefaultingValue(val)) {
     return scope.zero;
@@ -369,8 +369,8 @@ export function toExprZero(
 export function toExprZeroAuto(
   scope: Exprs.LexicalScope,
   val: Css.Val,
-  ref: Exprs.Val,
-): Exprs.Val {
+  ref: Exprs.Val | null,
+): Exprs.Val | null {
   if (!val || Css.isDefaultingValue(val)) {
     return scope.zero;
   } else if (val === Css.ident.auto) {
@@ -384,7 +384,7 @@ export function toExprZeroBorder(
   scope: Exprs.LexicalScope,
   val: Css.Val,
   styleVal: Css.Val,
-  ref: Exprs.Val,
+  ref: Exprs.Val | null,
 ): Exprs.Val {
   if (!val || styleVal === Css.ident.none || Css.isDefaultingValue(val)) {
     return scope.zero;
@@ -456,7 +456,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   borderBoxSizing: boolean = false;
 
   constructor(
-    public readonly parentInstance: PageBoxInstance,
+    public readonly parentInstance: PageBoxInstance | null,
     public readonly pageBox: P,
   ) {
     if (parentInstance) {
@@ -1062,7 +1062,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     return Css.toNumber(val, context);
   }
 
-  getSpecial(context: Exprs.Context, name: string): Css.Val[] {
+  getSpecial(context: Exprs.Context, name: string): Css.Val[] | null {
     const arr = CssCascade.getSpecial(this.cascaded, name);
     if (arr) {
       const result = [] as Css.Val[];
@@ -1079,7 +1079,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     return null;
   }
 
-  getActiveRegions(context: Exprs.Context): string[] {
+  getActiveRegions(context: Exprs.Context): string[] | null {
     const arr = this.getSpecial(context, "region-id");
     if (arr) {
       const result = [] as string[];
@@ -1470,7 +1470,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
     const readHeight = (this.vertical || !column) && this.isAutoHeight;
     const readWidth = (!this.vertical || !column) && this.isAutoWidth;
-    let bbox: Vtree.ClientRect = null;
+    let bbox: Vtree.ClientRect | null = null;
     if (readWidth || readHeight) {
       if (readWidth) {
         Base.setCSSProperty(container.element, "width", "auto");
@@ -1581,11 +1581,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           const blockStartFloatEndEdge =
             columnLike.pageFloatLayoutContext?.parent?.getBlockEndEdgeOfBlockStartFloats?.(
               physicalInlinePos,
-            );
+            ) ?? NaN;
           const blockEndFloatStartEdge =
             columnLike.pageFloatLayoutContext?.parent?.getBlockStartEdgeOfBlockEndFloats?.(
               physicalInlinePos,
-            );
+            ) ?? NaN;
           const blockStartLimit = isFinite(blockStartFloatEndEdge)
             ? this.vertical
               ? blockStartFloatEndEdge - basePaddingRect.x1
@@ -1992,7 +1992,7 @@ export class PartitionInstance<
     listVal: Css.Val,
     conflicting: boolean,
   ): Exprs.Val {
-    let list: Css.Val[] = null;
+    let list: Css.Val[] | null = null;
     if (listVal instanceof Css.Ident) {
       list = [listVal];
     }

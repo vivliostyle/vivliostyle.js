@@ -2320,7 +2320,7 @@ function buildDeferredStringSetVal(
 export class ContentPropVisitor extends Css.FilterVisitor {
   constructor(
     public cascade: CascadeInstance,
-    public element: Element,
+    public element: Element | null,
     public readonly counterResolver: CounterResolver,
     private readonly elementStyle: ElementStyle,
     private readonly pseudoName?: string,
@@ -6043,7 +6043,7 @@ export function isRtl(
 export function flattenCascadedStyle(
   style: ElementStyle,
   context: Exprs.Context,
-  regionIds: string[],
+  regionIds: string[] | null,
   isFootnote: boolean,
 ): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
