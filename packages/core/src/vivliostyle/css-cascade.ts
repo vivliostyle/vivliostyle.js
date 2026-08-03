@@ -4963,7 +4963,7 @@ export class CascadeParserHandler
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     if (this.invalidContinuationAfterPseudoelement(`:${name}`)) {
       return;
@@ -5105,7 +5105,7 @@ export class CascadeParserHandler
 
   override pseudoelementSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     name = name.toLowerCase();
     if (this.invalidContinuationAfterPseudoelement(`::${name}`)) {

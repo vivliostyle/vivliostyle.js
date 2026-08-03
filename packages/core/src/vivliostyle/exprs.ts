@@ -1330,7 +1330,7 @@ export class MediaTest extends Val {
   constructor(
     scope: LexicalScope,
     public name: MediaName,
-    public value: Val,
+    public value: Val | null,
   ) {
     super(scope);
   }
@@ -1370,7 +1370,7 @@ export class MediaTest extends Val {
 export class SupportsTest extends Val {
   constructor(
     scope: LexicalScope,
-    public name: string,
+    public name: string | undefined,
     public value: string,
     public isFunc: boolean,
   ) {

@@ -735,6 +735,6 @@ export function processingOrderFn(name1: string, name2: string): number {
   return n1 - n2;
 }
 
-export function isCustomPropName(name: string): boolean {
-  return name?.length > 2 && name.startsWith("--");
+export function isCustomPropName(name: string | undefined): boolean {
+  return name != null && name.length > 2 && name.startsWith("--");
 }

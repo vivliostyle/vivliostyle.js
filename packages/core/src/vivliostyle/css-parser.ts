@@ -89,7 +89,7 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
     return this.scope;
   }
 
-  error(mnemonics: string, token: CssTokenizer.Token): void {}
+  error(mnemonics: string, token: CssTokenizer.Token | null): void {}
 
   startStylesheet(flavor: StylesheetFlavor): void {
     this.flavor = flavor;
@@ -99,9 +99,12 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
 
   classSelector(name: string): void {}
 
-  pseudoclassSelector(name: string, params: (number | string)[]): void {}
+  pseudoclassSelector(name: string, params: (number | string)[] | null): void {}
 
-  pseudoelementSelector(name: string, params: (number | string)[]): void {}
+  pseudoelementSelector(
+    name: string,
+    params: (number | string)[] | null,
+  ): void {}
 
   idSelector(id: string): void {}
 
@@ -258,14 +261,14 @@ export class DispatchParserHandler<
    * Forwards call to slave.
    * @override
    */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token | null): void {
     this.slave.error(mnemonics, token);
   }
 
   /**
    * Called by a slave.
    */
-  errorMsg(mnemonics: string, token: CssTokenizer.Token): void {
+  errorMsg(mnemonics: string, token: CssTokenizer.Token | null): void {
     Logging.logger.warn(mnemonics, token?.toString() ?? "");
   }
 
@@ -286,14 +289,14 @@ export class DispatchParserHandler<
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     this.slave.pseudoclassSelector(name, params);
   }
 
   override pseudoelementSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     this.slave.pseudoelementSelector(name, params);
   }
@@ -448,7 +451,7 @@ export class SkippingParserHandler extends ParserHandler {
     return this.owner.getCurrentToken();
   }
 
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token | null): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
@@ -869,7 +872,7 @@ export class Parser {
     return arr;
   }
 
-  valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val {
+  valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val | null {
     const valStack = this.valStack;
     let index = valStack.length;
     let parLevel = 0;
@@ -1384,7 +1387,10 @@ export class Parser {
     return null;
   }
 
-  makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr | null {
+  makeCondition(
+    classes: string | null,
+    condition: Exprs.Val | null,
+  ): Css.Expr | null {
     const scope = this.handler.getScope();
     condition = condition || scope._true;
     if (classes) {
@@ -1462,7 +1468,7 @@ export class Parser {
     let text: string | null;
     let num: number;
     let val: Css.Val | null = null;
-    let params: (number | string)[];
+    let params: (number | string)[] | null;
     let selectorStartPosition: number | null = null;
 
     if (parsingStyleAttr) {
@@ -2924,7 +2930,7 @@ export class ErrorHandler extends ParserHandler {
     super(scope);
   }
 
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token | null): void {
     // throw new Error(mnemonics + " " + token);
     Logging.logger.warn(mnemonics, token.toString());
   }
@@ -3121,7 +3127,7 @@ export const numProp: { [key: string]: boolean } = {
 };
 
 export function takesOnlyNum(propName: string | undefined): boolean {
-  return !!numProp[propName];
+  return !!(propName && numProp[propName]);
 }
 
 /**
