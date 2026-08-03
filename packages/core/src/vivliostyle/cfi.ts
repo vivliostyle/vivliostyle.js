@@ -26,7 +26,7 @@ export type Position = {
   offset: number;
   after: boolean;
   sideBias: string | null;
-  ref: Fragment;
+  ref: Fragment | null;
 };
 
 export function getId(node: Node): string | null {
@@ -59,7 +59,7 @@ export function unescape(str: string): string {
 }
 
 export function parseExtVal(extstr: string): string | string[] {
-  const result = [];
+  const result: string[] = [];
   do {
     const r = extstr.match(/^(\^,|[^,])*/);
     const p = unescape(r[0]);
@@ -134,7 +134,7 @@ export class ChildStep implements Step {
     const elem = pos.node as Element;
     const childElements = elem.children;
     const childElementCount = childElements.length;
-    let child: Node;
+    let child: Node | null;
     const childIndex = Math.floor(this.index / 2) - 1;
     if (childIndex < 0 || childElementCount == 0) {
       child = elem.firstChild;
@@ -240,7 +240,7 @@ export class Fragment {
     }
     const str = decodeURIComponent(r[1]);
     let i = 0;
-    const steps = [];
+    const steps: Step[] = [];
     while (true) {
       let ext: {
         [key: string]: string | string[];
@@ -256,7 +256,7 @@ export class Fragment {
           }
           i += r[0].length;
           const index = parseInt(r[1], 10);
-          const id = r[3];
+          const id = r[3] ?? null;
           ext = parseExt(r[4]);
           steps.push(new ChildStep(index, id, Base.asString(ext["s"])));
           break;
@@ -273,11 +273,11 @@ export class Fragment {
           }
           i += r[0].length;
           const offset = parseInt(r[1], 10);
-          let textBefore = r[4];
+          let textBefore: string | null = r[4] ?? null;
           if (textBefore) {
             textBefore = unescape(textBefore);
           }
-          let textAfter = r[7];
+          let textAfter: string | null = r[7] ?? null;
           if (textAfter) {
             textAfter = unescape(textAfter);
           }
