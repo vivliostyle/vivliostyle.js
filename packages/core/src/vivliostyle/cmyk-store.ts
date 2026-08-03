@@ -132,13 +132,13 @@ export function isValidCmykReserveMap(
     const rgbObj = rgb as { r: unknown; g: unknown; b: unknown };
     const cmykObj = cmyk as { c: unknown; m: unknown; y: unknown; k: unknown };
     return (
-      Number.isFinite(rgbObj.r as number) &&
-      Number.isFinite(rgbObj.g as number) &&
-      Number.isFinite(rgbObj.b as number) &&
-      Number.isFinite(cmykObj.c as number) &&
-      Number.isFinite(cmykObj.m as number) &&
-      Number.isFinite(cmykObj.y as number) &&
-      Number.isFinite(cmykObj.k as number)
+      Number.isFinite(rgbObj.r) &&
+      Number.isFinite(rgbObj.g) &&
+      Number.isFinite(rgbObj.b) &&
+      Number.isFinite(cmykObj.c) &&
+      Number.isFinite(cmykObj.m) &&
+      Number.isFinite(cmykObj.y) &&
+      Number.isFinite(cmykObj.k)
     );
   });
 }

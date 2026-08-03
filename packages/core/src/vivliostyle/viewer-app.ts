@@ -61,9 +61,13 @@ export function navigateToRightPage(): void {
   });
 }
 
-export function keydown(evt: KeyboardEvent): void {
+interface LegacyKeyboardEvent extends KeyboardEvent {
+  keyIdentifier?: string;
+}
+
+export function keydown(evt: LegacyKeyboardEvent): void {
   const key = evt.key;
-  const keyIdentifier = (evt as any).keyIdentifier;
+  const keyIdentifier = evt.keyIdentifier;
   const location = evt.location;
   if (key === "End" || keyIdentifier === "End") {
     sendCommand({ a: "moveTo", where: "last" });
