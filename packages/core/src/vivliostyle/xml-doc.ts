@@ -37,7 +37,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   idMap: { [key: string]: Element } | null = null;
 
   constructor(
-    public readonly store: XMLDocStore,
+    public readonly store: XMLDocStore | null,
     public readonly url: string,
     public readonly document: Document,
   ) {

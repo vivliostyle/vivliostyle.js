@@ -88,7 +88,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
   opfByURL: { [key: string]: OPFDoc } = {};
   primaryOPFByEPubURL: { [key: string]: OPFDoc } = {};
   deobfuscators: { [key: string]: (p1: Blob) => Task.Result<Blob> } = {};
-  documents: { [key: string]: Task.Result<XmlDoc.XMLDocHolder> } = {};
+  documents: { [key: string]: Task.Result<XmlDoc.XMLDocHolder | null> } = {};
 
   private constructor(
     authorStyleSheets: OPS.StyleSheetParam[] | null = null,
@@ -480,7 +480,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
       return "";
     }
     const vals = {};
-    let r: RegExpMatchArray;
+    let r: RegExpMatchArray | null;
     while (
       (r = content.match(
         /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
@@ -637,7 +637,7 @@ export const metaTerms = {
 
 export function getMetadataComparator(
   term: string,
-  lang: string,
+  lang: string | null,
 ): (p1: MetaItem, p2: MetaItem) => number {
   const empty = {};
   return (item1, item2) => {
@@ -691,7 +691,7 @@ export function readMetadata(
     for (const pn in predefinedPrefixes) {
       prefixMap[pn] = predefinedPrefixes[pn];
     }
-    let r: RegExpMatchArray;
+    let r: RegExpMatchArray | null;
 
     // This code permits any non-ASCII characters in the name to avoid bloating
     // the pattern.
@@ -1358,7 +1358,7 @@ export class OPFDoc {
       }
     }
 
-    const params = [];
+    const params: OPFItemParam[] = [];
     let itemCount = 0;
     let tocFound = -1;
     [manifestObj["readingOrder"], manifestObj["resources"]].forEach(
@@ -2439,7 +2439,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
    */
   private renderSinglePage(
     viewItem: OPFViewItem,
-    pos: Vtree.LayoutPosition,
+    pos: Vtree.LayoutPosition | null,
   ): Task.Result<RenderSinglePageResult> {
     const frame: Task.Frame<RenderSinglePageResult> =
       Task.newFrame("renderSinglePage");
@@ -2479,7 +2479,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     );
 
     viewItem.instance.layoutNextPage(page, pos).then((posParam) => {
-      pos = posParam as Vtree.LayoutPosition;
+      pos = posParam;
       const pageIndex = pos
         ? pos.page - 1
         : viewItem.layoutPositions.length - 1;
@@ -2674,16 +2674,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
   // Track renderPage tasks so navigation can wait only until its requested
   // page is available, without canceling background pagination (Issue #2047).
-  private renderingPageTasks = new Map<Task.Task, number>();
+  private renderingPageTasks = new Map<Task.Task | null, number>();
 
-  private beginRenderingPage(task: Task.Task): void {
+  private beginRenderingPage(task: Task.Task | null): void {
     this.renderingPageTasks.set(
       task,
       (this.renderingPageTasks.get(task) || 0) + 1,
     );
   }
 
-  private endRenderingPage(task: Task.Task): void {
+  private endRenderingPage(task: Task.Task | null): void {
     const depth = this.renderingPageTasks.get(task);
     if (depth === 1) {
       this.renderingPageTasks.delete(task);
@@ -2834,7 +2834,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       s = spineIndex;
     }
 
-    let lastResult: PageAndPosition;
+    let lastResult: PageAndPosition | null = null;
     frame
       .loopWithFrame((loopFrame) => {
         const pos = {
@@ -3233,7 +3233,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return frame.result();
   }
 
-  makePage(viewItem: OPFViewItem, pos: Vtree.LayoutPosition): Vtree.Page {
+  makePage(
+    viewItem: OPFViewItem,
+    pos: Vtree.LayoutPosition | null,
+  ): Vtree.Page {
     const viewport = viewItem.instance.viewport;
     const pageCont = viewport.document.createElement("div");
     pageCont.setAttribute("data-vivliostyle-page-container", "true");
@@ -3286,7 +3289,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     srcElem: Element,
     viewParent: Element,
     computedStyle: { [key: string]: Css.Val },
-  ): Task.Result<Element> {
+  ): Task.Result<Element | null> {
     let data = srcElem.getAttribute("data");
     let result: Element | null = null;
     if (data) {
@@ -3314,7 +3317,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           sb.append(srcParam);
           sb.append("&type=");
           sb.append(typeParam);
-          for (let c: Node = srcElem.firstChild; c; c = c.nextSibling) {
+          for (let c: Node | null = srcElem.firstChild; c; c = c.nextSibling) {
             if (c.nodeType == 1) {
               const ce = c as Element;
               if (ce.localName == "param" && ce.namespaceURI == Base.NS.XHTML) {
@@ -3358,7 +3361,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     srcElem: Element,
     viewParent: Element,
     computedStyle: { [key: string]: Css.Val },
-  ): Task.Result<Element> {
+  ): Task.Result<Element | null> {
     // See if MathJax installed, use it if it is.
     const hub = getMathJaxHub();
     if (hub) {
@@ -3416,7 +3419,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       srcElem: Element,
       viewParent: Element,
       computedStyle: { [key: string]: Css.Val },
-    ): Task.Result<Element> => {
+    ): Task.Result<Element | null> => {
       if (
         srcElem.localName == "object" &&
         srcElem.namespaceURI == Base.NS.XHTML
@@ -3642,7 +3645,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return this.spineItems.some((item) => item && item.pages.length > 0);
   }
 
-  showTOC(autohide: boolean): Task.Result<Vtree.Page> {
+  showTOC(autohide: boolean): Task.Result<Vtree.Page | null> {
     const opf = this.opf;
     const toc = opf.toc;
     this.tocAutohide = autohide;
@@ -3717,5 +3720,5 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
 export interface RenderSinglePageResult {
   pageAndPosition: PageAndPosition;
-  nextLayoutPosition: Vtree.LayoutPosition;
+  nextLayoutPosition: Vtree.LayoutPosition | null;
 }

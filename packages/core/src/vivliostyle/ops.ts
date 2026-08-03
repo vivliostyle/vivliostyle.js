@@ -333,7 +333,7 @@ export class StyleInstance
     pref: Exprs.Preferences,
     pubTitle: string | null,
     docTitle: string | null,
-    pageProgression?: Constants.PageProgression,
+    pageProgression?: Constants.PageProgression | null,
     isVersoFirstPage?: boolean,
   ) {
     super(
@@ -487,7 +487,7 @@ export class StyleInstance
     pref: Exprs.Preferences,
     pubTitle: string | null,
     docTitle: string | null,
-    pageProgression?: Constants.PageProgression,
+    pageProgression?: Constants.PageProgression | null,
     isVersoFirstPage?: boolean,
   ): Task.Result<StyleInstance> {
     const instance = new StyleInstance(

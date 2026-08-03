@@ -1432,7 +1432,7 @@ export namespace XmlDoc {
     last: Element;
     lastOffset: number;
     idMap: { [key: string]: Element } | null;
-    readonly store: XMLDocStore;
+    readonly store: XMLDocStore | null;
     readonly url: string;
     readonly document: Document;
 
@@ -1470,7 +1470,7 @@ export namespace XmlDoc {
     predicate(pr: Predicate): NodeList;
     forEachNode(fn: (p1: Node, p2: (p1: Node) => void) => void): NodeList;
     forEach<T>(fn: (p1: Node) => T): T[];
-    forEachNonNull<T>(fn: (p1: Node) => T): T[];
+    forEachNonNull<T>(fn: (p1: Node) => T | null): T[];
     child(tag: string): NodeList;
     childElements(): NodeList;
     attribute(name: string): (string | null)[];
