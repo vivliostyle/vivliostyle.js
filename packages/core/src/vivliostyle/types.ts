@@ -301,13 +301,13 @@ export namespace Layout {
      */
     layoutUnbreakable(
       nodeContextIn: Vtree.NodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Layout a single float element.
      */
     layoutFloat(
       nodeContext: Vtree.RenderedNodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
 
     setupFloatArea(
       area: PageFloatArea,
@@ -352,9 +352,9 @@ export namespace Layout {
     ): Task.Result<Vtree.NodeContext | null>;
     processLineStyling(
       nodeContext: Vtree.NodeContext,
-      resNodeContext: Vtree.NodeContext,
+      resNodeContext: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     isLoneImage(checkPoints: Vtree.RenderedNodeContext[]): boolean;
     getTrailingMarginEdgeAdjustment(
       trailingEdgeContexts: Vtree.NodeContext[],
@@ -364,9 +364,9 @@ export namespace Layout {
      */
     layoutBreakableBlock(
       nodeContext: Vtree.NodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     postLayoutBlock(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
     ): void;
     findEndOfLine(
@@ -382,7 +382,7 @@ export namespace Layout {
       checkPoints: Vtree.RenderedNodeContext[],
       edgePosition: number,
       force: boolean,
-    ): Vtree.NodeContext;
+    ): Vtree.NodeContext | null;
     resolveTextNodeBreaker(nodeContext: Vtree.NodeContext): TextNodeBreaker;
     /**
      * Read ranges skipping special elments
@@ -421,11 +421,11 @@ export namespace Layout {
     ): Task.Result<boolean>;
     findAcceptableBreakPosition(): BreakPositionAndNodeContext | null;
     doFinishBreak(
-      nodeContext: Vtree.NodeContext,
-      overflownNodeContext: Vtree.NodeContext,
-      initialNodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
+      overflownNodeContext: Vtree.NodeContext | null,
+      initialNodeContext: Vtree.NodeContext | null,
       initialComputedBlockSize: number,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     /**
      * Determines if a page break is acceptable at this position
      */
@@ -480,7 +480,7 @@ export namespace Layout {
       forcedBreakValue?: string | null,
     ): Task.Result<Vtree.NodeContext>;
     clearOverflownViewNodes(
-      nodeContext: Vtree.NodeContext,
+      nodeContext: Vtree.NodeContext | null,
       removeSelf: boolean,
     ): void;
     /**
@@ -569,7 +569,7 @@ export namespace Layout {
     doLayout(
       nodeContext: Vtree.NodeContext,
       column: Layout.Column,
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean;
     postLayout(
       positionAfter: Vtree.NodeContext,
@@ -924,8 +924,8 @@ export namespace RepetitiveElement {
   }
 
   export interface ElementsOffset {
-    calculateOffset(nodeContext: Vtree.NodeContext): number;
-    calculateMinimumOffset(nodeContext: Vtree.NodeContext): number;
+    calculateOffset(nodeContext: Vtree.NodeContext | null): number;
+    calculateMinimumOffset(nodeContext: Vtree.NodeContext | null): number;
   }
 
   export interface RepetitiveElements extends ElementsOffset {

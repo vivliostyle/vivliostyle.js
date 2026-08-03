@@ -78,7 +78,7 @@ export function resolveInlineFloatDirection(
   floatSide: string,
   vertical: boolean,
   direction: string,
-  pageSide: Constants.PageSide,
+  pageSide: Constants.PageSide | null,
 ): string {
   const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {

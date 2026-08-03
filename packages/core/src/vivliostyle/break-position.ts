@@ -51,7 +51,7 @@ export abstract class AbstractBreakPosition
 }
 
 export function calculateOffset(
-  nodeContext: Vtree.NodeContext,
+  nodeContext: Vtree.NodeContext | null,
   elementsOffsets: RepetitiveElement.ElementsOffset[],
 ): { current: number; minimum: number } {
   return {

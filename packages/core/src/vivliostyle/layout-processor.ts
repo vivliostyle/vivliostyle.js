@@ -73,7 +73,7 @@ export interface LayoutProcessor {
 
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: Vtree.NodeContext,
+    parentNodeContext: Vtree.NodeContext | null,
     nodeContext: Vtree.NodeContext,
     removeSelf: boolean,
   );
@@ -150,7 +150,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /** @override */
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: Vtree.NodeContext,
+    parentNodeContext: Vtree.NodeContext | null,
     nodeContext: Vtree.NodeContext,
     removeSelf: boolean,
   ) {

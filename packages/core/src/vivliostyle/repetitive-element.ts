@@ -276,7 +276,7 @@ export class RepetitiveElements
   }
 
   /** @override */
-  calculateOffset(nodeContext: Vtree.NodeContext): number {
+  calculateOffset(nodeContext: Vtree.NodeContext | null): number {
     let offset = 0;
     if (nodeContext && !this.affectTo(nodeContext)) {
       return offset;
@@ -294,7 +294,7 @@ export class RepetitiveElements
   }
 
   /** @override */
-  calculateMinimumOffset(nodeContext: Vtree.NodeContext): number {
+  calculateMinimumOffset(nodeContext: Vtree.NodeContext | null): number {
     let offset = 0;
     if (nodeContext && !this.affectTo(nodeContext)) {
       return offset;
