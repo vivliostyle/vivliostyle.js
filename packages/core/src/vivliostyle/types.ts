@@ -1265,7 +1265,7 @@ export namespace Vtree {
     getOuterShape(
       outerShapeProp: Css.Val | null,
       context: Exprs.Context | null,
-    ): GeometryUtil.Shape;
+    ): GeometryUtil.Shape | null;
     getOuterRect(): GeometryUtil.Rect;
   }
 

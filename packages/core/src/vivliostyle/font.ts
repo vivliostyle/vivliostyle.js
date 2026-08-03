@@ -87,7 +87,7 @@ export class Face {
   /**
    * Create "at" font-face rule.
    */
-  makeAtRule(src: string, fontBytes: Blob): string {
+  makeAtRule(src: string, fontBytes: Blob | null): string {
     const sb = new Base.StringBuffer();
     sb.append("@font-face {\n  font-family: ");
     sb.append(this.family as string);
@@ -175,7 +175,7 @@ export class Mapper {
   /**
    * Maps Face.src to an entry for an already-loaded font.
    */
-  srcURLMap: { [key: string]: TaskUtil.Fetcher<Face> } = {};
+  srcURLMap: { [key: string]: TaskUtil.Fetcher<Face | null> } = {};
   familyPrefix: string;
   familyCounter: number = 0;
 
@@ -203,7 +203,7 @@ export class Mapper {
    */
   private initFont(
     srcFace: Face,
-    fontBytes: Blob,
+    fontBytes: Blob | null,
     documentFaces: DocumentFaces,
   ): Task.Result<Face> {
     const frame: Task.Frame<Face> = Task.newFrame("initFont");
@@ -226,7 +226,7 @@ export class Mapper {
   loadFont(
     srcFace: Face,
     documentFaces: DocumentFaces,
-  ): TaskUtil.Fetcher<Face> {
+  ): TaskUtil.Fetcher<Face | null> {
     const src = srcFace.src as string;
     const faceKey = srcFace.family + ";" + src + ";" + srcFace.fontTraitKey;
     let fetcher = this.srcURLMap[faceKey];
@@ -237,7 +237,7 @@ export class Mapper {
       });
     } else {
       fetcher = new TaskUtil.Fetcher(() => {
-        const frame: Task.Frame<Face> = Task.newFrame("loadFont");
+        const frame: Task.Frame<Face | null> = Task.newFrame("loadFont");
         // Get URL from `@font-face` src value.
         const url = src.replace(/^url\("([^"]+)"\).*$/, "$1");
         const deobfuscator = documentFaces.deobfuscator
@@ -270,7 +270,7 @@ export class Mapper {
     srcFaces: Face[],
     documentFaces: DocumentFaces,
   ): Task.Result<boolean> {
-    const fetchers = [] as TaskUtil.Fetcher<Face>[];
+    const fetchers = [] as TaskUtil.Fetcher<Face | null>[];
     for (const srcFace of srcFaces) {
       if (!srcFace.src || !srcFace.family) {
         Logging.logger.warn("E_FONT_FACE_INVALID");

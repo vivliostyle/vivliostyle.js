@@ -180,7 +180,7 @@ export class CoreViewer {
     private readonly settings: CoreViewerSettings,
     opt_options?: CoreViewerOptions,
   ) {
-    Constants.setDebug(settings.debug);
+    Constants.setDebug(!!settings.debug);
     this.adaptViewer_ = new AdaptiveViewer.AdaptiveViewer(
       settings["window"] || window,
       settings["viewportElement"],
@@ -482,7 +482,7 @@ export class CoreViewer {
    * Returns the current structure of the TOC once it has
    * been shown, or the empty array if there is no TOC.
    */
-  getTOC(): Toc.TOCItem[] {
+  getTOC(): Toc.TOCItem[] | undefined {
     return this.adaptViewer_.opfView?.tocView?.getTOC();
   }
 
@@ -517,7 +517,7 @@ export class CoreViewer {
 }
 
 function convertSingleDocumentOptions(
-  singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[],
+  singleDocumentOptions: SingleDocumentOptions | SingleDocumentOptions[] | null,
 ): AdaptiveViewer.SingleDocumentParam[] | null {
   function toNumberOrNull(num: any): number | null {
     return typeof num === "number" ? num : null;

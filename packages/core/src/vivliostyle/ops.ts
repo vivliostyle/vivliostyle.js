@@ -2055,7 +2055,7 @@ export class StyleInstance
     columnCount: number,
     columnGap: number,
     columnWidth: number,
-    innerShape: GeometryUtil.Shape,
+    innerShape: GeometryUtil.Shape | null,
     layoutContext: Vtree.LayoutContext,
     forceNonFitting: boolean,
   ): Task.Result<LayoutType.Column> {

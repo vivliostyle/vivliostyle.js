@@ -1823,7 +1823,7 @@ export class AttachedPageFloatLayoutContext
       p2: AttachedPageFloatLayoutContext,
     ) => boolean,
     logicalSide?: string,
-    logicalSide2?: string,
+    logicalSide2?: string | null,
     excludedArea?: LayoutType.PageFloatArea,
   ): {
     top: number;

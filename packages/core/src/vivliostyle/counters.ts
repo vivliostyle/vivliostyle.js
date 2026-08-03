@@ -1616,7 +1616,7 @@ export class CounterStore {
   getUnresolvedRefsToPage(page: Vtree.Page): {
     spineIndex: number;
     pageIndex: number;
-    pageCounters: CssCascade.CounterValues;
+    pageCounters: CssCascade.CounterValues | null;
     refs: TargetCounterReference[];
   }[] {
     let refs: TargetCounterReference[] = [];
@@ -1641,7 +1641,7 @@ export class CounterStore {
       pageIndex: number;
       pageCounters: CssCascade.CounterValues | null;
       refs: TargetCounterReference[];
-    } = null;
+    } | null = null;
     refs.forEach((ref) => {
       if (
         !o ||

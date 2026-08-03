@@ -194,7 +194,7 @@ export function toShape(
   width: number,
   height: number,
   context: Exprs.Context | null,
-): GeometryUtil.Shape {
+): GeometryUtil.Shape | null {
   if (val) {
     const visitor = new ShapeVisitor();
     try {
