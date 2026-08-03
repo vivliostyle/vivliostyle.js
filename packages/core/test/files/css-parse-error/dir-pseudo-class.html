@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>:dir() pseudo-class</title>
+    <style>
+      div {
+        color: red;
+      }
+      .not:not(:dir(rtl)) {
+        color: green;
+      }
+      .has:has(span:dir(rtl)) {
+        color: green;
+      }
+      .ltr:dir(ltr) {
+        color: green;
+      }
+      .rtl:dir(rtl) {
+        color: green;
+      }
+      .inherited:dir(rtl) {
+        color: green;
+      }
+      .empty:is(:dir(), .empty) {
+        color: green;
+      }
+      .invalid-value {
+        color: green;
+      }
+      .invalid-value:dir(auto) {
+        color: red;
+      }
+      .invalid-list:dir(auto),
+      .invalid-list {
+        color: green;
+      }
+      @supports selector(:dir(rtl)) {
+        .supports {
+          color: green;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="not">This text should be green.</div>
+    <div class="has">
+      <span dir="rtl">This text and its parent should be green.</span>
+    </div>
+    <div class="ltr">This text should be green.</div>
+    <div class="rtl" dir="rtl">This text should be green.</div>
+    <div dir="rtl">
+      <div class="inherited">This text should be green.</div>
+    </div>
+    <div class="empty">This text should be green.</div>
+    <div class="invalid-value">This text should stay green.</div>
+    <div class="invalid-list">This text should be green.</div>
+    <div class="supports">This text should be green.</div>
+  </body>
+</html>

@@ -5036,10 +5036,6 @@ export class CascadeParserHandler
         break;
       case "dir":
         if (params && params.length == 1 && typeof params[0] == "string") {
-          if (!CSS.supports("selector(:dir(ltr))")) {
-            this.invalidSelector(`Unsupported pseudo-class :${name}()`);
-            return;
-          }
           if (/^(ltr|rtl)$/i.test(params[0] as string)) {
             this.chain.push(
               new MatchesNativeSelectorAction(
@@ -5096,16 +5092,9 @@ export class CascadeParserHandler
       case "first-letter":
         this.pseudoelementSelector(name, params);
         return;
-      default: {
-        // The tokenizer decodes escapes into the name.
-        const pseudo = `:${CSS.escape(name.toLowerCase())}`;
-        if (CSS.supports(`selector(${pseudo})`)) {
-          this.chain.push(new MatchesNativeSelectorAction(pseudo));
-          break;
-        }
+      default:
         this.invalidSelector(`Unknown pseudo-class :${name}`);
         return;
-      }
     }
     this.specificity += 256;
   }

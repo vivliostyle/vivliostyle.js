@@ -66,8 +66,12 @@ module.exports = [
         title: "Unknown pseudo-class in a selector list",
       },
       {
-        file: "css-parse-error/unsupported-pseudo-class.html",
-        title: "Valid but unsupported pseudo-classes",
+        file: "css-parse-error/dir-pseudo-class.html",
+        title: ":dir() pseudo-class",
+      },
+      {
+        file: "css-parse-error/any-link-pseudo-class.html",
+        title: ":any-link pseudo-class",
       },
       {
         file: "pseudo-element-context/after-float-footnote-increment.html",

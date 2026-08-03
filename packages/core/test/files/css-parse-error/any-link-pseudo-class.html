@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>:any-link pseudo-class</title>
+    <style>
+      div,
+      a {
+        color: red;
+      }
+      .direct a:any-link {
+        color: green;
+      }
+      .has:has(:any-link) {
+        color: green;
+      }
+      .without-href a {
+        color: green;
+      }
+      .without-href a:any-link {
+        color: red;
+      }
+      @supports selector(:any-link) {
+        .supports {
+          color: green;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="direct">
+      Only <a href="#target">this link</a> should be green here.
+    </div>
+    <div class="has">
+      This text around <a href="#target">a link</a> should be green.
+    </div>
+    <div class="without-href"><a>A link without href</a> stays green.</div>
+    <div class="supports">This text should be green.</div>
+  </body>
+</html>
