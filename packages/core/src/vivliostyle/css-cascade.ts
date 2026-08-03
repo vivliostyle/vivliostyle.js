@@ -6067,7 +6067,7 @@ export function flattenCascadedStyle(
 
 export function forEachStylesInRegion(
   style: ElementStyle,
-  regionIds: string[],
+  regionIds: string[] | null,
   isFootnote: boolean,
   callback: (p1: string, p2: ElementStyle) => any,
 ): void {
@@ -6285,7 +6285,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
   private collectReferencedCustomProperties(val: Css.Val): string[] {
     const names = new Set<string>();
     class ReferenceVisitor extends Css.Visitor {
-      override visitFunc(func: Css.Func): Css.Val {
+      override visitFunc(func: Css.Func): Css.Val | null {
         const name = func.values[0] instanceof Css.Ident && func.values[0].name;
         if (func.name === "var" && name && Css.isCustomPropName(name)) {
           names.add(name);
@@ -6339,7 +6339,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     let cycleStartName: string | null = null;
     const self = this;
     class FallbackReferenceVisitor extends Css.Visitor {
-      override visitFunc(func: Css.Func): Css.Val {
+      override visitFunc(func: Css.Func): Css.Val | null {
         if (func.name === "var") {
           for (const fallbackVal of func.values.slice(1)) {
             const referencedCycleStart = self.findReferencedCycleStart(
