@@ -168,8 +168,8 @@ function validateSystem(value: Css.Val): value is SystemDescriptorValue {
     );
   }
   if (value instanceof Css.SpaceList && value.values.length === 2) {
-    const first = value.values[0]!;
-    const second = value.values[1]!;
+    const first = value.values[0];
+    const second = value.values[1];
     if (first instanceof Css.Ident) {
       const name = first.name;
       return (
@@ -299,8 +299,8 @@ function validateNegative(value: Css.Val): value is NegativeDescriptorValue {
     return true;
   }
   if (value instanceof Css.SpaceList && value.values.length === 2) {
-    const first = value.values[0]!;
-    const second = value.values[1]!;
+    const first = value.values[0];
+    const second = value.values[1];
     return validateSymbol(first) && validateSymbol(second);
   }
   return false;
@@ -340,8 +340,8 @@ function validateRangeTuple(value: Css.Val): value is RangeTuple {
   if (!(value instanceof Css.SpaceList && value.values.length === 2)) {
     return false;
   }
-  const first = value.values[0]!;
-  const second = value.values[1]!;
+  const first = value.values[0];
+  const second = value.values[1];
   if (!(validateRangeBound(first) && validateRangeBound(second))) {
     return false;
   }
@@ -402,8 +402,8 @@ function validateNonNegativeIntAndSymbolSet(
   if (!(value instanceof Css.SpaceList && value.values.length === 2)) {
     return false;
   }
-  const first = value.values[0]!;
-  const second = value.values[1]!;
+  const first = value.values[0];
+  const second = value.values[1];
   return (
     (first instanceof Css.Int && first.num >= 0 && validateSymbol(second)) ||
     (validateSymbol(first) && second instanceof Css.Int && second.num >= 0)
