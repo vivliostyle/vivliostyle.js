@@ -1380,7 +1380,7 @@ export class StyleInstance
    * @return document offset of the given layoutPosition
    */
   getPosition(
-    layoutPosition?: Vtree.LayoutPosition,
+    layoutPosition?: Vtree.LayoutPosition | null,
     noLookAhead?: boolean,
   ): number {
     if (!layoutPosition) {

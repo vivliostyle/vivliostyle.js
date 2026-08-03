@@ -140,7 +140,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return this.jsonStore.load(url, opt_required, opt_message);
   }
 
-  loadWebPubManifest(url: string, frame: Task.Frame<OPFDoc>): void {
+  loadWebPubManifest(url: string, frame: Task.Frame<OPFDoc | null>): void {
     this.loadAsJSON(url, true).then((manifestObj) => {
       if (!manifestObj) {
         this.reportLoadError(url);
@@ -155,8 +155,8 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     });
   }
 
-  loadPubDoc(url: string): Task.Result<OPFDoc> {
-    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadPubDoc");
+  loadPubDoc(url: string): Task.Result<OPFDoc | null> {
+    const frame: Task.Frame<OPFDoc | null> = Task.newFrame("loadPubDoc");
 
     if (/\.opf(?:[#?]|$)/i.test(url)) {
       // EPUB OPF
@@ -181,7 +181,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     } else {
       // For ambiguous URLs (no recognized extension), use HEAD to check
       // content type and availability before loading.
-      Net.fetchFromURL(url, null, "HEAD").then((response) => {
+      Net.fetchFromURL(url, undefined, "HEAD").then((response) => {
         if (response.status >= 400) {
           // This url can be the root of an unzipped EPUB.
           this.loadEPUBDoc(url).then((opf) => {
@@ -248,8 +248,8 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
-  loadEPUBDoc(url: string): Task.Result<OPFDoc> {
-    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadEPUBDoc");
+  loadEPUBDoc(url: string): Task.Result<OPFDoc | null> {
+    const frame: Task.Frame<OPFDoc | null> = Task.newFrame("loadEPUBDoc");
     if (!url.endsWith("/")) {
       url = url + "/";
     }
@@ -275,13 +275,13 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
-  loadOPF(pubURL: string, root: string): Task.Result<OPFDoc> {
+  loadOPF(pubURL: string, root: string): Task.Result<OPFDoc | null> {
     const url = pubURL + root;
     const opf = this.opfByURL[url];
     if (opf) {
       return Task.newResult(opf);
     }
-    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadOPF");
+    const frame: Task.Frame<OPFDoc | null> = Task.newFrame("loadOPF");
     this.loadAsPlainXML(url, true, `Failed to fetch EPUB OPF ${url}`).then(
       (opfXML) => {
         if (!opfXML) {
@@ -309,8 +309,8 @@ export class EPUBDocStore extends OPS.OPSDocStore {
     return frame.result();
   }
 
-  loadWebPub(url: string): Task.Result<OPFDoc> {
-    const frame: Task.Frame<OPFDoc> = Task.newFrame("loadWebPub");
+  loadWebPub(url: string): Task.Result<OPFDoc | null> {
+    const frame: Task.Frame<OPFDoc | null> = Task.newFrame("loadWebPub");
 
     // Load the primary entry page (X)HTML
     this.load(url).then((xmldoc) => {
@@ -823,7 +823,7 @@ export function readMetadata(
   return metadata;
 }
 
-export function getMathJaxHub(): object {
+export function getMathJaxHub(): object | null {
   const math = window["MathJax"];
   if (math) {
     return math["Hub"];
@@ -1606,7 +1606,7 @@ export type OPFViewItem = {
 
 export class OPFView implements Vgen.CustomRendererFactory {
   spineItems: (OPFViewItem | null)[] = [];
-  spineItemLoadingContinuations: Task.Continuation<any>[][] = [];
+  spineItemLoadingContinuations: (Task.Continuation<any>[] | null)[] = [];
   pref: Exprs.Preferences;
   clientLayout: Vgen.DefaultClientLayout;
   counterStore: Counters.CounterStore;
@@ -1646,7 +1646,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  private getPage(position: Position): Vtree.Page {
+  private getPage(position: Position): Vtree.Page | null {
     const viewItem = this.spineItems[position.spineIndex];
     return viewItem ? viewItem.pages[position.pageIndex] : null;
   }
@@ -2581,7 +2581,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           frame.finish(null);
           return;
         }
-        let resultPage: Vtree.Page = null;
+        let resultPage: Vtree.Page | null = null;
         let pageIndex: number;
         frame
           .loopWithFrame((loopFrame) => {
@@ -2979,7 +2979,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
     const frame: Task.Frame<Vtree.Spread> = Task.newFrame("getSpread");
     const isLeft = page.side === Constants.PageSide.LEFT;
-    let other: Task.Result<PageAndPosition>;
+    let other: Task.Result<PageAndPosition | null>;
     if (this.isRectoPage(page, position)) {
       other = this.previousPage(position, sync);
     } else {
@@ -3377,7 +3377,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       });
       return frame.result();
     }
-    return Task.newResult(null as Element);
+    return Task.newResult<Element | null>(null);
   }
 
   private resolveURLsInMathML(node: Node, xmldoc: XmlDoc.XMLDocHolder) {
@@ -3430,7 +3430,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       ) {
         return this.makeMathJaxView(xmldoc, srcElem, viewParent, computedStyle);
       }
-      return Task.newResult(null as Element);
+      return Task.newResult<Element | null>(null);
     };
   }
 
@@ -3647,7 +3647,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const toc = opf.toc;
     this.tocAutohide = autohide;
     if (!toc) {
-      return Task.newResult(null as Vtree.Page);
+      return Task.newResult<Vtree.Page | null>(null);
     }
     this.tocVisible = true;
     if (this.tocView && this.tocView.page) {
