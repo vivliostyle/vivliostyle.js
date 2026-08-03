@@ -188,12 +188,12 @@ export class ShapeVisitor extends Css.Visitor {
 }
 
 export function toShape(
-  val: Css.Val,
+  val: Css.Val | null,
   x: number,
   y: number,
   width: number,
   height: number,
-  context: Exprs.Context,
+  context: Exprs.Context | null,
 ): GeometryUtil.Shape {
   if (val) {
     const visitor = new ShapeVisitor();

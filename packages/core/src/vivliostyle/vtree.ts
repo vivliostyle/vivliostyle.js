@@ -391,8 +391,8 @@ export type NodePositionStep = Vtree.NodePositionStep;
 export type RootNodePositionStep = Vtree.RootNodePositionStep;
 
 export function isSameNodePositionStep(
-  nps1: NodePositionStep,
-  nps2: NodePositionStep,
+  nps1: NodePositionStep | null,
+  nps2: NodePositionStep | null,
 ): boolean {
   if (nps1 === nps2) {
     return true;
@@ -572,8 +572,8 @@ export class ShadowContext implements Vtree.ShadowContext {
 }
 
 export function isSameShadowContext(
-  sc1: Vtree.ShadowContext,
-  sc2: Vtree.ShadowContext,
+  sc1: Vtree.ShadowContext | null,
+  sc2: Vtree.ShadowContext | null,
 ): boolean {
   return sc1 === sc2 || (!!sc1 && !!sc2 && sc1.equals(sc2));
 }
@@ -636,7 +636,7 @@ export class NodeContext implements Vtree.NodeContext {
   inheritedProps: { [key: string]: number | string | Css.Val | undefined };
   vertical: boolean;
   direction: string;
-  firstPseudo: FirstPseudo;
+  firstPseudo: FirstPseudo | null;
   lang: string | null = null;
   preprocessedTextContent: Diff.Change[] | null = null;
   repeatOnBreak: string | null = null;
@@ -1450,7 +1450,7 @@ export class Container implements Vtree.Container {
 
   clear() {
     const parent = this.element;
-    let c: Node;
+    let c: Node | null;
     while ((c = parent.lastChild)) {
       parent.removeChild(c);
     }
@@ -1542,12 +1542,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     this.elem.appendChild(node);
   }
 
-  override visitStr(str: Css.Str): Css.Val {
+  override visitStr(str: Css.Str): Css.Val | null {
     this.visitStrInner(str.str);
     return null;
   }
 
-  override visitURL(url: Css.URL): Css.Val {
+  override visitURL(url: Css.URL): Css.Val | null {
     if (this.rootContentValue instanceof Css.URL) {
       this.elem.setAttribute("src", url.url);
     } else {
@@ -1558,12 +1558,12 @@ export class ContentPropertyHandler extends Css.Visitor {
     return null;
   }
 
-  override visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val | null {
     this.visitValues(list.values);
     return null;
   }
 
-  override visitExpr(expr: Css.Expr): Css.Val {
+  override visitExpr(expr: Css.Expr): Css.Val | null {
     const ex = expr.toExpr();
     // When a named string (string()) holds a content list with page-based
     // counters, render that list so the counters become patchable nodes

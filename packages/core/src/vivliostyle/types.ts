@@ -1343,10 +1343,10 @@ export namespace Vtree {
     inheritedProps: { [key: string]: number | string | Css.Val | undefined };
     vertical: boolean;
     direction: string;
-    firstPseudo: FirstPseudo;
+    firstPseudo: FirstPseudo | null;
     lang: string | null;
     preprocessedTextContent: Diff.Change[] | null;
-    formattingContext: FormattingContext;
+    formattingContext: FormattingContext | null;
     repeatOnBreak: string | null;
     pluginProps: {
       [key: string]: string | number | undefined | null | (number | null)[];
