@@ -342,7 +342,7 @@ export class Continuation<T> implements Base.Comparable {
   result: T | null = null;
   canceled: boolean = false;
 
-  constructor(public task: Task) {}
+  constructor(public task: Task | null) {}
 
   /** @override */
   compare(otherComp: Base.Comparable): number {
@@ -492,7 +492,7 @@ export class Task {
     }
   }
 
-  raise(err: Error, opt_frame?: Frame<any>): void {
+  raise(err: Error, opt_frame?: Frame<any> | null): void {
     this.fillStack(err);
     if (opt_frame) {
       let f = this.top;
@@ -642,7 +642,7 @@ export class Frame<T> {
 
   constructor(
     public task: Task,
-    public parent: Frame<T>,
+    public parent: Frame<T> | null,
     public name: string,
   ) {
     this.state = FrameState.INIT;
@@ -822,7 +822,7 @@ export class Frame<T> {
 }
 
 export class LoopBodyFrame extends Frame<boolean> {
-  constructor(task: Task, parent: Frame<boolean>) {
+  constructor(task: Task, parent: Frame<boolean> | null) {
     super(task, parent, "loop");
   }
 
@@ -838,7 +838,7 @@ export class LoopBodyFrame extends Frame<boolean> {
 export class EventItem {
   next: EventItem | null = null;
 
-  constructor(public event: Base.Event) {}
+  constructor(public event: Base.Event | null) {}
 }
 
 /**
@@ -894,7 +894,7 @@ export class EventSource {
       target: Base.SimpleEventTarget;
       type: string;
       listener: Base.EventListener;
-    } = null;
+    } | null = null;
     while (i < this.listeners.length) {
       item = this.listeners[i];
       if (item.type == type && item.target === target) {

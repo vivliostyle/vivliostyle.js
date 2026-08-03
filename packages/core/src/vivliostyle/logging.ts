@@ -30,7 +30,7 @@ export enum LogLevel {
 }
 
 export type ErrorInfo = {
-  error: Error;
+  error: Error | null;
   messages: any[];
 };
 
@@ -135,7 +135,7 @@ export class Logger {
  */
 function argumentsToErrorInfo(args: IArguments): ErrorInfo {
   const a = Array.from(args);
-  let e: Error = null;
+  let e: Error | null = null;
   if (a[0] instanceof Error) {
     e = a.shift();
   }
@@ -145,7 +145,7 @@ function argumentsToErrorInfo(args: IArguments): ErrorInfo {
 function buildMessageAndStackTrace(args: ErrorInfo): string[] {
   const e = args.error;
   const stack = e && (e["frameTrace"] || e["stack"]);
-  let messages = [].concat(args["messages"]);
+  let messages = ([] as any[]).concat(args["messages"]);
   if (e) {
     if (messages.length > 0) {
       messages = messages.concat(["\n"]);
