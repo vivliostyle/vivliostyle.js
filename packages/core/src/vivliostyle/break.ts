@@ -255,7 +255,9 @@ export function resolveEffectiveBreakValue(
 }
 
 export function breakValueToStartBreakType(breakValue: string | null): string {
-  return isForcedBreakValue(breakValue) ? breakValue : "auto";
+  return breakValue != null && isForcedBreakValue(breakValue)
+    ? breakValue
+    : "auto";
 }
 
 Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

@@ -866,7 +866,9 @@ abstract class CounterStyle {
   }
 
   protected _getFallback(): CounterStyle | null {
-    return this._store.get(this.#fallbackName) ?? null;
+    return this.#fallbackName != null
+      ? (this._store.get(this.#fallbackName) ?? null)
+      : null;
   }
   protected static _getFallbackFrom(style: CounterStyle): CounterStyle | null {
     return style._getFallback();
