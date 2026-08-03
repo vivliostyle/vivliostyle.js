@@ -226,10 +226,11 @@ export function parseDeviceCmyk(
     return null;
   }
 
+  const first = func.values.length === 1 ? func.values[0] : null;
   const values =
     // Modern syntax: space-separated values in a single SpaceList
-    func.values.length === 1 && func.values[0] instanceof Css.SpaceList
-      ? (func.values[0] as Css.SpaceList).values
+    first instanceof Css.SpaceList
+      ? first.values
       : // Legacy syntax: comma-separated values directly in func.values
         func.values;
   if (values.length < 4 || values.length > 6) {

@@ -692,7 +692,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         return this.layoutContext.peelOff(textPosition, firstLetterLength);
       }
     }
-    return Task.newResult(position) as Task.Result<Vtree.NodeContext>;
+    return Task.newResult<Vtree.NodeContext>(position);
   }
 
   /**

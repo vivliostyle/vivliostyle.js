@@ -2733,7 +2733,7 @@ export class PageManager {
     pageMasterInstance: PageMaster.PageMasterInstance,
     cascadedPageStyle: CssCascade.ElementStyle,
   ): PageMaster.PageMasterInstance {
-    const pageMaster = pageMasterInstance.pageBox as PageMaster.PageMaster;
+    const pageMaster = pageMasterInstance.pageBox;
 
     // If no properties are specified in @page rules, use the original page
     // master.

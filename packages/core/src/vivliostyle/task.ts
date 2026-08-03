@@ -259,11 +259,10 @@ export class Scheduler {
   }
 
   schedule(continuation: Continuation<any>, opt_delay?: number): void {
-    const c = continuation as Continuation<any>;
     const now = this.timer.currentTime();
-    c.order = this.order++;
-    c.scheduledTime = now + (opt_delay || 0);
-    this.queue.add(c);
+    continuation.order = this.order++;
+    continuation.scheduledTime = now + (opt_delay || 0);
+    this.queue.add(continuation);
     this.arm();
   }
 
