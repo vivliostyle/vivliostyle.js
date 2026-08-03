@@ -74,7 +74,7 @@ export function isAbsolutelyPositioned(position: Css.Val): boolean {
  * Check if the position value is 'running()'.
  * https://drafts.csswg.org/css-gcpm/#running-elements
  */
-export function isRunning(position: Css.Val): boolean {
+export function isRunning(position: Css.Val | null | undefined): boolean {
   return position instanceof Css.Func && position.name === "running";
 }
 

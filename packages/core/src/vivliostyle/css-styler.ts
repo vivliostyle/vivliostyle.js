@@ -623,7 +623,7 @@ export class Styler implements AbstractStyler {
         ? (elemStyle["background-color"] as CssCascade.CascadeValue).evaluate(
             this.context,
           )
-        : (null as Css.Val);
+        : null;
       const backgroundImage = this.hasProp(
         elemStyle,
         this.validatorSet.backgroundProps,
@@ -632,7 +632,7 @@ export class Styler implements AbstractStyler {
         ? (elemStyle["background-image"] as CssCascade.CascadeValue).evaluate(
             this.context,
           )
-        : (null as Css.Val);
+        : null;
       if (
         (backgroundColor && !Css.isDefaultingValue(backgroundColor)) ||
         (backgroundImage && !Css.isDefaultingValue(backgroundImage))
@@ -878,7 +878,7 @@ export class Styler implements AbstractStyler {
       if (nodeOffset >= this.lastOffset) {
         break;
       }
-      let next: Node = node.firstChild;
+      let next: Node | null = node.firstChild;
       if (next == null) {
         while (true) {
           next = node.nextSibling;
