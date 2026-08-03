@@ -570,9 +570,12 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
       column: Layout.Column,
     ): Task.Result<Vtree.NodeContext | null>;
-    accept(nodeContext: Vtree.NodeContext, column: Layout.Column): boolean;
+    accept(
+      nodeContext: Vtree.NodeContext | null,
+      column: Layout.Column,
+    ): boolean;
     postLayout(
-      positionAfter: Vtree.NodeContext,
+      positionAfter: Vtree.NodeContext | null,
       initialPosition: Vtree.NodeContext,
       column: Layout.Column,
       accepted: boolean,
