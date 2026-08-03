@@ -218,9 +218,9 @@ export namespace Layout {
      * @return holding box edge position reached or null if the source is exhausted.
      */
     buildViewToNextBlockEdge(
-      position: Vtree.NodeContext,
+      position: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
-    ): Task.Result<Vtree.NodeContext>;
+    ): Task.Result<Vtree.NodeContext | null>;
     nextInTree(
       position: Vtree.NodeContext,
       atUnforcedBreak?: boolean,
@@ -231,8 +231,8 @@ export namespace Layout {
      * @return holding box edge position reached or null if the source is exhausted.
      */
     buildDeepElementView(
-      position: Vtree.NodeContext,
-    ): Task.Result<Vtree.NodeContext>;
+      position: Vtree.NodeContext | null,
+    ): Task.Result<Vtree.NodeContext | null>;
 
     /**
      * Create a single floating element (for exclusion areas).

@@ -782,7 +782,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             ) {
               this.layoutFloatOrFootnote(floatNodeContext).then(
                 (positionParam) => {
-                  position = positionParam as Vtree.NodeContext;
+                  position = positionParam;
                   if (this.pageFloatLayoutContext.isInvalidated()) {
                     position = null;
                   }
@@ -898,7 +898,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             ) {
               this.layoutFloatOrFootnote(floatNodeContext).then(
                 (positionParam) => {
-                  position = positionParam as Vtree.NodeContext;
+                  position = positionParam;
                   if (this.pageFloatLayoutContext.isInvalidated()) {
                     position = null;
                   }
