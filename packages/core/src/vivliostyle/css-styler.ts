@@ -159,7 +159,7 @@ export class Box {
   flowName: string;
   isBlockValue: boolean | null = null;
   hasBoxValue: boolean | null = null;
-  styleValues = {} as { [key: string]: Css.Val };
+  styleValues = {} as { [key: string]: Css.Val | null };
   beforeBox: Box | null = null;
   afterBox: Box | null = null;
   breakBefore: string | null = null;

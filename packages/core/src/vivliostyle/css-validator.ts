@@ -704,7 +704,7 @@ export function parseAttrFunction(func: Css.Func): AttrFunction | null {
   }
 
   let attributeName: string;
-  let type: AttrType = { kind: "string" };
+  let type: AttrType | null = { kind: "string" };
   const attributeArg = func.values[0];
   if (attributeArg instanceof Css.Ident) {
     attributeName = attributeArg.name;
@@ -963,7 +963,7 @@ export class ListValidator extends PropertyValidator {
         continue;
       }
       const inval = arr[index];
-      let outval = inval;
+      let outval: Css.Val | null = inval;
       if (current.isSpecial()) {
         let success = true;
         if (current.isStartGroup()) {

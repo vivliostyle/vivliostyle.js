@@ -95,7 +95,7 @@ export class MatcherBuilder {
   static buildViewConditionMatcher(
     elementOffset: number,
     viewCondition: string,
-  ): Matcher {
+  ): Matcher | null {
     const strs = viewCondition.split("_");
     if (strs[0] == "NFS") {
       return new NthFragmentMatcher(

@@ -38,7 +38,7 @@ export class SetVisitor extends Css.Visitor {
     return ident;
   }
 
-  override visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val | null {
     this.visitValues(list.values);
     return list;
   }
@@ -90,26 +90,26 @@ export class ShapeVisitor extends Css.Visitor {
     super();
   }
 
-  override visitNumeric(numeric: Css.Numeric): Css.Val {
+  override visitNumeric(numeric: Css.Numeric): Css.Val | null {
     if (this.collect) {
       this.coords.push(numeric);
     }
     return null;
   }
 
-  override visitNum(num: Css.Num): Css.Val {
+  override visitNum(num: Css.Num): Css.Val | null {
     if (this.collect && num.num == 0) {
       this.coords.push(new Css.Numeric(0, "px"));
     }
     return null;
   }
 
-  override visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val | null {
     this.visitValues(list.values);
     return null;
   }
 
-  override visitFunc(func: Css.Func): Css.Val {
+  override visitFunc(func: Css.Func): Css.Val | null {
     if (!this.collect) {
       this.collect = true;
       this.visitValues(func.values);
@@ -124,8 +124,8 @@ export class ShapeVisitor extends Css.Visitor {
     y: number,
     width: number,
     height: number,
-    context: Exprs.Context,
-  ): GeometryUtil.Shape {
+    context: Exprs.Context | null,
+  ): GeometryUtil.Shape | null {
     if (this.coords.length > 0) {
       const numbers: number[] = [];
       this.coords.forEach((coord, i) => {
@@ -237,7 +237,7 @@ export class CountersVisitor extends Css.Visitor {
     return num;
   }
 
-  override visitSpaceList(list: Css.SpaceList): Css.Val {
+  override visitSpaceList(list: Css.SpaceList): Css.Val | null {
     this.visitValues(list.values);
     return list;
   }

@@ -154,7 +154,7 @@ export const forcedBreakValues: { [key: string]: boolean | null } = {
  * @param value The break value to be judged. Treats null as 'auto'.
  */
 export function isForcedBreakValue(value: string | null): boolean {
-  return !!forcedBreakValues[value];
+  return value != null && !!forcedBreakValues[value];
 }
 
 export const spreadBreakValues: { [key: string]: boolean | null } = {
@@ -169,7 +169,7 @@ export const spreadBreakValues: { [key: string]: boolean | null } = {
  * @param value The break value to be judged. Treats null as 'auto'.
  */
 export function isSpreadBreakValue(value: string | null): boolean {
-  return !!spreadBreakValues[value];
+  return value != null && !!spreadBreakValues[value];
 }
 
 /**
@@ -193,7 +193,7 @@ export const avoidBreakValues: { [key: string]: boolean | null } = {
  * @param value The break value to be judged. Treats null as 'auto'.
  */
 export function isAvoidBreakValue(value: string | null): boolean {
-  return !!avoidBreakValues[value];
+  return value != null && !!avoidBreakValues[value];
 }
 
 /**
