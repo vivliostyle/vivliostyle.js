@@ -137,7 +137,7 @@ export class LexicalScope {
   builtIns: { [key: string]: (...p1: Result[]) => Result } = {};
 
   constructor(
-    public parent: LexicalScope,
+    public parent: LexicalScope | null,
     public resolver?: (p1: string, p2: boolean) => Val,
   ) {
     this.scopeKey = `S${nextKeyIndex++}`;
