@@ -60,7 +60,7 @@ export class RepetitiveElementsOwnerFormattingContext
   }
 
   /** @override */
-  getParent(): Vtree.FormattingContext {
+  getParent(): Vtree.FormattingContext | null {
     return this.parent;
   }
 
@@ -462,7 +462,7 @@ export abstract class LayoutEntireBlock implements LayoutType.LayoutMode {
   abstract doLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext>;
+  ): Task.Result<Vtree.NodeContext | null>;
 
   /** @override */
   accept(nodeContext: Vtree.NodeContext, column: LayoutType.Column): boolean {
@@ -499,7 +499,7 @@ export abstract class LayoutFragmentedBlock implements LayoutType.LayoutMode {
   abstract doLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext>;
+  ): Task.Result<Vtree.NodeContext | null>;
 
   /** @override */
   accept(nodeContext: Vtree.NodeContext, column: LayoutType.Column): boolean {

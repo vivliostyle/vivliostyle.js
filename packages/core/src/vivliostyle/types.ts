@@ -1008,7 +1008,7 @@ export namespace Table {
     extends RepetitiveElement.RepetitiveElementsOwnerLayoutConstraint {
     cellFragmentLayoutConstraints: {
       constraints: Layout.FragmentLayoutConstraint[];
-      breakPosition: Vtree.NodeContext;
+      breakPosition: Vtree.NodeContext | null;
     }[];
 
     removeDummyRowNodes(nodeContext: Vtree.NodeContext): void;

@@ -119,10 +119,10 @@ export class LayoutIterator {
 
   iterate(
     initialNodeContext: Vtree.NodeContext,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const strategy = this.strategy;
     const state = strategy.initialState(initialNodeContext);
-    const frame: Task.Frame<Vtree.NodeContext> =
+    const frame: Task.Frame<Vtree.NodeContext | null> =
       Task.newFrame("LayoutIterator");
     frame
       .loopWithFrame((loopFrame) => {
