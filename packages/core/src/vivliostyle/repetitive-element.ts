@@ -528,7 +528,7 @@ export class LayoutEntireOwnerBlock extends LayoutEntireBlock {
   override doLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     // FIXME: LayoutEntireBlock.prototype.doLayout is undefined because it's abstract method.
     //        Probably, removing this call is ok.
     // LayoutEntireBlock.prototype.doLayout.call(this, nodeContext, column);
@@ -554,7 +554,7 @@ export class LayoutFragmentedOwnerBlock extends LayoutFragmentedBlock {
   override doLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
       column.fragmentLayoutConstraints.unshift(
         new RepetitiveElementsOwnerLayoutConstraint(nodeContext),
@@ -669,7 +669,7 @@ export class RepetitiveElementsOwnerLayoutConstraint
     );
   }
 
-  getRepetitiveElements(): RepetitiveElement.RepetitiveElements {
+  getRepetitiveElements(): RepetitiveElement.RepetitiveElements | null {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       this.nodeContext.formattingContext,
     );
@@ -822,7 +822,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
     leadingEdge: boolean,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const floatNodeContext = column.asFloatNodeContext(nodeContext);
     if (floatNodeContext) {
       return column.layoutFloatOrFootnote(floatNodeContext);
@@ -876,11 +876,11 @@ export class RepetitiveElementsOwnerLayoutProcessor
   doInitialLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
     );
-    const frame = Task.newFrame<Vtree.NodeContext>(
+    const frame = Task.newFrame<Vtree.NodeContext | null>(
       "BlockLayoutProcessor.doInitialLayout",
     );
     this.layoutEntireBlock(nodeContext, column).thenFinish(frame);
@@ -890,7 +890,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
   private layoutEntireBlock(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
     );
@@ -905,11 +905,12 @@ export class RepetitiveElementsOwnerLayoutProcessor
   doLayout(
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getRepetitiveElementsOwnerFormattingContext(
       nodeContext.formattingContext,
     );
-    const frame: Task.Frame<Vtree.NodeContext> = Task.newFrame("doLayout");
+    const frame: Task.Frame<Vtree.NodeContext | null> =
+      Task.newFrame("doLayout");
     const cont = column.layoutContext.nextInTree(nodeContext, false);
     Layout.processAfterIfContinues(cont, column).then((resNodeContext) => {
       let nextNodeContext = resNodeContext;
@@ -1105,7 +1106,7 @@ function getRepetitiveElementsOwnerFormattingContextOrNull(
 }
 
 function getRepetitiveElementsOwnerFormattingContext(
-  formattingContext: Vtree.FormattingContext,
+  formattingContext: Vtree.FormattingContext | null,
 ): RepetitiveElement.RepetitiveElementsOwnerFormattingContext {
   Asserts.assert(
     formattingContext instanceof RepetitiveElementsOwnerFormattingContext,
