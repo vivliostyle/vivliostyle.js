@@ -66,6 +66,14 @@ module.exports = [
         title: "Unknown pseudo-class in a selector list",
       },
       {
+        file: "css-parse-error/dir-pseudo-class.html",
+        title: ":dir() pseudo-class",
+      },
+      {
+        file: "css-parse-error/any-link-pseudo-class.html",
+        title: ":any-link pseudo-class",
+      },
+      {
         file: "pseudo-element-context/after-float-footnote-increment.html",
         title:
           "Explicit counter-increment on an element with a footnote ::after",

@@ -1491,6 +1491,21 @@ export class IsCheckedAction extends ChainedAction {
   }
 }
 
+export class MatchesNativeSelectorAction extends ChainedAction {
+  constructor(public readonly selector: string) {
+    super();
+  }
+
+  override matches(cascadeInstance: ElementCascadeInstance): boolean {
+    const element = cascadeInstance.currentElement;
+    try {
+      return !!element && element.matches(this.selector);
+    } catch {
+      return false;
+    }
+  }
+}
+
 export class CheckConditionAction extends ChainedAction {
   constructor(public readonly condition: string) {
     super();
@@ -4953,6 +4968,16 @@ export class CascadeParserHandler
     if (this.invalidContinuationAfterPseudoelement(`:${name}`)) {
       return;
     }
+    // The parser reports the plain form with null params and the functional
+    // form with an array.
+    if (
+      params
+        ? !functionalPseudoClasses.has(name.toLowerCase())
+        : functionalPseudoClasses.has(name.toLowerCase())
+    ) {
+      this.invalidSelector(`Unsupported pseudo-class :${name}`);
+      return;
+    }
     switch (name.toLowerCase()) {
       case "enabled":
         this.chain.push(new IsEnabledAction());
@@ -4968,6 +4993,7 @@ export class CascadeParserHandler
         this.chain.push(new IsRootAction());
         break;
       case "link":
+      case "any-link":
         this.chain.push(new CheckLocalNameAction("a"));
         this.chain.push(new CheckAttributePresentAction("", "href"));
         break;
@@ -5012,6 +5038,21 @@ export class CascadeParserHandler
           this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
+      case "dir":
+        if (params && params.length == 1 && typeof params[0] == "string") {
+          if (/^(ltr|rtl)$/i.test(params[0] as string)) {
+            this.chain.push(
+              new MatchesNativeSelectorAction(
+                `:dir(${(params[0] as string).toLowerCase()})`,
+              ),
+            );
+          } else {
+            this.chain.push(new CheckConditionAction("")); // always fails
+          }
+          break;
+        }
+        this.invalidSelector(`Invalid pseudo-class :${name}`);
+        return;
       case "nth-child":
       case "nth-last-child":
       case "nth-of-type":
@@ -5055,7 +5096,7 @@ export class CascadeParserHandler
       case "first-letter":
         this.pseudoelementSelector(name, params);
         return;
-      default: // always fails
+      default:
         this.invalidSelector(`Unknown pseudo-class :${name}`);
         return;
     }
@@ -5066,6 +5107,7 @@ export class CascadeParserHandler
     name: string,
     params: (number | string)[],
   ): void {
+    name = name.toLowerCase();
     if (this.invalidContinuationAfterPseudoelement(`::${name}`)) {
       return;
     }
@@ -5309,6 +5351,7 @@ export class CascadeParserHandler
     this.state = ParseState.SELECTOR;
     this.elementStyle = {} as ElementStyle;
     this.pseudoelement = null;
+    this.viewConditionId = null;
     this.specificity = 0;
     this.footnoteContent = false;
     this.selectorListVoided = false;
@@ -5525,6 +5568,19 @@ export const nthSelectorActionClasses: {
   "nth-last-child": IsNthLastSiblingAction,
   "nth-last-of-type": IsNthLastSiblingOfTypeAction,
 };
+
+// The functional names the switch in `pseudoclassSelector` implements. Each
+// name takes exactly one of the two forms.
+const functionalPseudoClasses: ReadonlySet<string> = new Set([
+  "dir",
+  "href-epub-type",
+  "href-role-type",
+  "lang",
+  "nth-child",
+  "nth-last-child",
+  "nth-last-of-type",
+  "nth-of-type",
+]);
 
 export let conditionCount: number = 0;
 

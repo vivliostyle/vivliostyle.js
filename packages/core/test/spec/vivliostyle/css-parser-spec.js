@@ -342,6 +342,101 @@ describe("css-parser", function () {
         });
       });
 
+      describe(":dir", function () {
+        it("takes one identifier as an argument", function (done) {
+          parse(done, ":dir(rtl) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("dir", [
+              "rtl",
+            ]);
+          });
+        });
+
+        it("allows white space around the argument", function (done) {
+          parse(done, ":dir( rtl ) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("dir", [
+              "rtl",
+            ]);
+          });
+        });
+
+        // Unlike :lang(), which errors out and cannot recover inside a
+        // forgiving list, an invalid argument reaches the handler with an
+        // empty params array (the same contract unknown functional
+        // pseudo-classes follow). The handler can void the selector and an
+        // enclosing forgiving list can recover.
+        it("hands an empty argument list to the handler instead of erroring", function (done) {
+          parse(done, ":dir() {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("dir", []);
+          });
+        });
+
+        it("consumes an argument that is not a single identifier", function (done) {
+          parse(done, ":dir(ltr rtl) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("dir", []);
+          });
+        });
+
+        it("balances nested parentheses in an invalid argument", function (done) {
+          parse(done, ":dir(a(b)) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("dir", []);
+          });
+        });
+
+        it("errors when the argument list is never closed", function (done) {
+          parse(done, ":dir(rtl", function () {
+            expect(handler.error).toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).not.toHaveBeenCalled();
+          });
+        });
+      });
+
+      describe("function name case", function () {
+        it("matches the selector functions case-insensitively", function (done) {
+          parse(done, ":IS(.x) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.startFuncWithSelector).toHaveBeenCalledWith("is");
+          });
+        });
+
+        it("matches :NOT() case-insensitively", function (done) {
+          parse(done, ":NOT(.x) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.startFuncWithSelector).toHaveBeenCalledWith("not");
+          });
+        });
+
+        it("matches :HAS() case-insensitively", function (done) {
+          parse(done, ":HAS(q) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.startFuncWithSelector).toHaveBeenCalledWith("has");
+          });
+        });
+
+        it("matches :lang() case-insensitively", function (done) {
+          parse(done, ":LANG(ja) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith("lang", [
+              "ja",
+            ]);
+          });
+        });
+
+        it("matches :nth-child() case-insensitively", function (done) {
+          parse(done, ":NTH-CHILD(2n) {}", function () {
+            expect(handler.error).not.toHaveBeenCalled();
+            expect(handler.pseudoclassSelector).toHaveBeenCalledWith(
+              "nth-child",
+              [2, 0],
+            );
+          });
+        });
+      });
+
       describe(":href-epub-type", function () {
         it("takes one identifier as an argument", function (done) {
           parse(done, ":href-epub-type(foo) {}", function () {
