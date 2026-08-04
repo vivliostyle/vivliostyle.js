@@ -353,7 +353,7 @@ export class Continuation<T> implements Base.Comparable {
   /**
    * Continuation's task
    */
-  getTask(): Task {
+  getTask(): Task | null {
     return this.task;
   }
 
@@ -363,7 +363,10 @@ export class Continuation<T> implements Base.Comparable {
    */
   schedule(result: T, opt_delay?: number) {
     this.result = result;
-    this.task.scheduler.schedule(this, opt_delay);
+    const task = this.task;
+    if (task) {
+      task.scheduler.schedule(this, opt_delay);
+    }
   }
 
   resumeInternal(): boolean {
