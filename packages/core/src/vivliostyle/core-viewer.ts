@@ -482,8 +482,8 @@ export class CoreViewer {
    * Returns the current structure of the TOC once it has
    * been shown, or the empty array if there is no TOC.
    */
-  getTOC(): Toc.TOCItem[] | undefined {
-    return this.adaptViewer_.opfView?.tocView?.getTOC();
+  getTOC(): Toc.TOCItem[] {
+    return this.adaptViewer_.opfView?.tocView?.getTOC() ?? [];
   }
 
   /**
