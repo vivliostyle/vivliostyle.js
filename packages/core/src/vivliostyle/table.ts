@@ -374,7 +374,7 @@ export class TableFormattingContext
   vertical: boolean = false;
   columnCount: number = -1;
   tableWidth: number = 0;
-  captions: TableCaptionView[] = [];
+  captions: (TableCaptionView | null)[] = [];
   colGroups: DocumentFragment | null = null;
   colWidths: number[] | null = null;
   inlineBorderSpacing: number = 0;
@@ -386,7 +386,7 @@ export class TableFormattingContext
   repetitiveElements: RepetitiveElement.RepetitiveElements | null = null;
 
   constructor(
-    parent: Vtree.FormattingContext,
+    parent: Vtree.FormattingContext | null,
     public readonly tableSourceNode: Element,
   ) {
     super(parent, tableSourceNode);
@@ -441,7 +441,7 @@ export class TableFormattingContext
     }
   }
 
-  override getParent(): Vtree.FormattingContext {
+  override getParent(): Vtree.FormattingContext | null {
     return this.parent;
   }
 
@@ -739,7 +739,7 @@ export class ElementsOffsetOfTableCell
 }
 
 function getTableFormattingContext(
-  formattingContext: Vtree.FormattingContext,
+  formattingContext: Vtree.FormattingContext | null,
 ): TableFormattingContext {
   Asserts.assert(formattingContext instanceof TableFormattingContext);
   return formattingContext as TableFormattingContext;
@@ -1623,7 +1623,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   private layoutEntireTable(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
@@ -1643,7 +1643,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   ): number[] {
     const doc = lastRow.ownerDocument;
     const dummyRow = doc.createElement("tr");
-    const dummyCells = [];
+    const dummyCells: HTMLTableCellElement[] = [];
     for (let i = 0; i < columnCount; i++) {
       const cell = doc.createElement("td");
       dummyRow.appendChild(cell);
@@ -1666,7 +1666,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   }
 
   private getColGroupElements(tableElement: Element): Element[] {
-    const colGroups = [];
+    const colGroups: Element[] = [];
     let child = tableElement.firstElementChild;
     while (child) {
       if (child.localName === "colgroup") {
@@ -1678,7 +1678,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   }
 
   private normalizeAndGetColElements(colGroups: Element[]): Element[] {
-    const cols = [];
+    const cols: Element[] = [];
     colGroups.forEach((colGroup) => {
       // Replace colgroup[span=n] with colgroup with n col elements
       let span = (colGroup as any).span;
@@ -1691,7 +1691,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
           col.removeAttribute("span");
           span -= s;
           while (s-- > 1) {
-            const cloned = col.cloneNode(true);
+            const cloned = col.cloneNode(true) as Element;
             colGroup.insertBefore(cloned, col);
             cols.push(cloned);
           }
@@ -1782,7 +1782,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   doInitialLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
@@ -1790,7 +1790,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     formattingContext.initializeRepetitiveElements(nodeContext.vertical);
     const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
     clearTableLayoutOptionCache(nodeContext.sourceNode);
-    const frame = Task.newFrame<Vtree.NodeContext>(
+    const frame = Task.newFrame<Vtree.NodeContext | null>(
       "TableLayoutProcessor.doInitialLayout",
     );
     const initialNodeContext = nodeContext.copy();
@@ -1938,7 +1938,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
 
   removeColGroups(
     formattingContext: TableFormattingContext,
-    rootViewNode: Element,
+    rootViewNode: Element | null,
   ) {
     if (formattingContext.colGroups && rootViewNode) {
       const colGroups = this.getColGroupElements(rootViewNode);
@@ -1953,7 +1953,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
@@ -1968,7 +1968,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       strategy,
       column.layoutContext,
     );
-    const frame = Task.newFrame<Vtree.NodeContext>(
+    const frame = Task.newFrame<Vtree.NodeContext | null>(
       "TableFormattingContext.doLayout",
     );
     iterator.iterate(nodeContext).thenFinish(frame);
@@ -1980,7 +1980,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
     leadingEdge: boolean,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
@@ -2306,7 +2306,7 @@ function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
     rowToBeAdjusted.querySelector(":scope>*>div>div")
   ) {
     for (
-      let row = rowToBeAdjusted;
+      let row: Element | null = rowToBeAdjusted;
       row && row !== tbodyElement.lastElementChild;
       row = row.nextElementSibling
     ) {
@@ -2384,7 +2384,7 @@ export class LayoutEntireTable extends RepetitiveElementImpl.LayoutEntireBlock {
   override doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     return this.processor.doInitialLayout(nodeContext, column);
   }
 }
@@ -2487,7 +2487,7 @@ export class LayoutFragmentedTable
   override doLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (
       repetitiveElements &&
@@ -2511,7 +2511,7 @@ export class TableRowLayoutConstraint
   flagmentLayoutConstraintType: FragmentLayoutConstraintType = "TableRow";
   cellFragmentLayoutConstraints: {
     constraints: Layout.FragmentLayoutConstraint[];
-    breakPosition: Vtree.NodeContext;
+    breakPosition: Vtree.NodeContext | null;
   }[] = [];
 
   constructor(nodeContext: Vtree.NodeContext) {
@@ -2621,7 +2621,10 @@ export class TableRowLayoutConstraint
             breakPosition: entry.breakPosition,
           })),
         ),
-      [],
+      [] as {
+        constraint: Layout.FragmentLayoutConstraint;
+        breakPosition: Vtree.NodeContext | null;
+      }[],
     );
     let i = 0;
     frame
@@ -2665,7 +2668,7 @@ export class TableRowLayoutConstraint
     formattingContext: TableFormattingContext,
   ): {
     constraints: Layout.FragmentLayoutConstraint[];
-    breakPosition: Vtree.NodeContext;
+    breakPosition: Vtree.NodeContext | null;
   }[] {
     return this.getCellFragemnts(nodeContext, formattingContext).map(
       (entry) => ({
@@ -2679,14 +2682,20 @@ export class TableRowLayoutConstraint
   private getCellFragemnts(
     nodeContext: Vtree.NodeContext,
     formattingContext: TableFormattingContext,
-  ): { fragment: TableCellFragment; breakPosition: Vtree.NodeContext }[] {
+  ): {
+    fragment: TableCellFragment;
+    breakPosition: Vtree.NodeContext | null;
+  }[] {
     let rowIndex = Number.MAX_VALUE;
     if (nodeContext && nodeContext.display === "table-row") {
       rowIndex =
         formattingContext.findRowIndexBySourceNode(nodeContext.sourceNode) + 1;
     }
     rowIndex = Math.min(formattingContext.cellFragments.length, rowIndex);
-    const cellFragments = [];
+    const cellFragments: {
+      fragment: TableCellFragment;
+      breakPosition: Vtree.NodeContext | null;
+    }[] = [];
     for (let i = 0; i < rowIndex; i++) {
       if (!formattingContext.cellFragments[i]) {
         continue;

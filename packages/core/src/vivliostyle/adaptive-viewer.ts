@@ -352,7 +352,7 @@ export class AdaptiveViewer {
   private resolveLength(specified: string): number {
     const value = parseFloat(specified);
     const unitPattern = /[a-z]+$/;
-    let matched: RegExpMatchArray;
+    let matched: RegExpMatchArray | null;
     if (
       typeof specified === "string" &&
       (matched = specified.match(unitPattern))
@@ -529,13 +529,17 @@ export class AdaptiveViewer {
    * Iterate through currently displayed pages and do something
    */
   private forCurrentPages(fn: (p1: Vtree.Page) => any) {
-    const pages = [];
+    const pages: Vtree.Page[] = [];
     if (this.currentPage) {
       pages.push(this.currentPage);
     }
     if (this.currentSpread) {
-      pages.push(this.currentSpread.left);
-      pages.push(this.currentSpread.right);
+      if (this.currentSpread.left) {
+        pages.push(this.currentSpread.left);
+      }
+      if (this.currentSpread.right) {
+        pages.push(this.currentSpread.right);
+      }
     }
     pages.forEach((page) => {
       if (page) {
@@ -668,7 +672,7 @@ export class AdaptiveViewer {
   }
 
   private resolveSpreadView(
-    viewport: Vgen.Viewport,
+    viewport: Vgen.Viewport | null,
     pageSize: { width: number; height: number } | null,
   ): boolean {
     switch (this.pageViewMode) {
@@ -879,7 +883,7 @@ export class AdaptiveViewer {
 
     if (spreadView) {
       return this.opfView
-        .getSpread(this.pagePosition, sync)
+        .getSpread(this.pagePosition, !!sync)
         .thenAsync((spread) => {
           if (!spread.left && !spread.right) {
             return Task.newResult(null);
@@ -1142,17 +1146,15 @@ export class AdaptiveViewer {
       metadata: this.opf.metadata,
       docTitle: this.opf.spine[page.spineIndex].title,
     };
-    this.opf
-      .getEPageFromPosition(this.pagePosition as Epub.Position)
-      .then((epage) => {
-        notification["epage"] = epage;
-        notification["epageCount"] = this.opf.epageCount;
-        if (cfi) {
-          notification["cfi"] = cfi;
-        }
-        this.callback(notification);
-        frame.finish(true);
-      });
+    this.opf.getEPageFromPosition(this.pagePosition).then((epage) => {
+      notification["epage"] = epage;
+      notification["epageCount"] = this.opf.epageCount;
+      if (cfi) {
+        notification["cfi"] = cfi;
+      }
+      this.callback(notification);
+      frame.finish(true);
+    });
     return frame.result();
   }
 
@@ -1417,7 +1419,7 @@ class RenderingCanceledError extends Error {
     // Set the prototype explicitly.
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, RenderingCanceledError.prototype);
-    this.stack = new Error().stack;
+    this.stack = new Error().stack ?? "";
   }
 }
 

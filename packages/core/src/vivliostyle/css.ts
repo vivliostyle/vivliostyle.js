@@ -22,69 +22,69 @@ import * as Base from "./base";
 import * as Exprs from "./exprs";
 
 export class Visitor {
-  visitValues(values: Val[]): Val[] {
+  visitValues(values: Val[]): Val[] | null {
     for (let i = 0; i < values.length; i++) {
       values[i].visit(this);
     }
     return null;
   }
 
-  visitEmpty(empty: Val): Val {
+  visitEmpty(empty: Val): Val | null {
     return null;
   }
 
-  visitSlash(slash: Val): Val {
+  visitSlash(slash: Val): Val | null {
     return null;
   }
 
-  visitStr(str: Str): Val {
+  visitStr(str: Str): Val | null {
     return null;
   }
 
-  visitIdent(ident: Ident): Val {
+  visitIdent(ident: Ident): Val | null {
     return null;
   }
 
-  visitNumeric(numeric: Numeric): Val {
+  visitNumeric(numeric: Numeric): Val | null {
     return null;
   }
 
-  visitNum(num: Num): Val {
+  visitNum(num: Num): Val | null {
     return null;
   }
 
-  visitInt(num: Int): Val {
+  visitInt(num: Int): Val | null {
     return this.visitNum(num);
   }
 
-  visitHexColor(color: HexColor): Val {
+  visitHexColor(color: HexColor): Val | null {
     return null;
   }
 
-  visitURL(url: URL): Val {
+  visitURL(url: URL): Val | null {
     return null;
   }
 
-  visitURange(urange: URange): Val {
+  visitURange(urange: URange): Val | null {
     return null;
   }
 
-  visitSpaceList(list: SpaceList): Val {
+  visitSpaceList(list: SpaceList): Val | null {
     this.visitValues(list.values);
     return null;
   }
 
-  visitCommaList(list: CommaList): Val {
+  visitCommaList(list: CommaList): Val | null {
     this.visitValues(list.values);
     return null;
   }
 
-  visitFunc(func: Func): Val {
+  visitFunc(func: Func): Val | null {
     this.visitValues(func.values);
     return null;
   }
 
-  visitExpr(expr: Expr): Val {
+  visitExpr(expr: Expr): Val | null {
     return null;
   }
 }
@@ -97,7 +97,7 @@ export class FilterVisitor extends Visitor {
   }
 
   override visitValues(values: Val[]): Val[] {
-    let arr: Val[] = null;
+    let arr: Val[] | null = null;
     for (let i = 0; i < values.length; i++) {
       const before = values[i];
       const after = before.visit(this);
@@ -209,7 +209,7 @@ export class Val {
     return buf.toString();
   }
 
-  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val | null {
     return null;
   }
 
@@ -237,7 +237,7 @@ export class Val {
     return false;
   }
 
-  visit(visitor: Visitor): Val {
+  visit(visitor: Visitor): Val | null {
     return this;
   }
 }
@@ -256,13 +256,13 @@ export class Empty extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, "");
   }
 
   override appendTo(buf: Base.StringBuffer, toString: boolean): void {}
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitEmpty(this);
   }
 }
@@ -283,7 +283,7 @@ export class Slash extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, "/");
   }
 
@@ -291,7 +291,7 @@ export class Slash extends Val {
     buf.append("/");
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitSlash(this);
   }
 }
@@ -303,7 +303,7 @@ export class Str extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, this.str);
   }
 
@@ -317,7 +317,7 @@ export class Str extends Val {
     }
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitStr(this);
   }
 }
@@ -333,7 +333,7 @@ export class Ident extends Val {
     nameTable[name] = this;
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     return new Exprs.Const(scope, this.name);
   }
 
@@ -345,7 +345,7 @@ export class Ident extends Val {
     }
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitIdent(this);
   }
 
@@ -373,7 +373,7 @@ export class Numeric extends Val {
     this.unit = unit?.toLowerCase() ?? ""; // units are case-insensitive in CSS
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -395,7 +395,7 @@ export class Numeric extends Val {
     buf.append(this.unit);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitNumeric(this);
   }
 
@@ -409,7 +409,7 @@ export class Num extends Val {
     super();
   }
 
-  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val): Exprs.Val {
+  override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
     if (this.num == 0) {
       return scope.zero;
     }
@@ -423,7 +423,7 @@ export class Num extends Val {
     buf.append(this.num.toString());
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitNum(this);
   }
 
@@ -437,7 +437,7 @@ export class Int extends Num {
     super(num);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitInt(this);
   }
 }
@@ -452,7 +452,7 @@ export class HexColor extends Val {
     buf.append(this.hex);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitHexColor(this);
   }
 }
@@ -468,7 +468,7 @@ export class URL extends Val {
     buf.append('")');
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitURL(this);
   }
 }
@@ -482,7 +482,7 @@ export class URange extends Val {
     buf.append(this.urangeText);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitURange(this);
   }
 }
@@ -512,7 +512,7 @@ export class SpaceList extends Val {
     appendList(buf, this.values, " ", toString);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitSpaceList(this);
   }
 
@@ -530,7 +530,7 @@ export class CommaList extends Val {
     appendList(buf, this.values, ",", toString);
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitCommaList(this);
   }
 }
@@ -550,7 +550,7 @@ export class Func extends Val {
     buf.append(")");
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitFunc(this);
   }
 }
@@ -577,7 +577,7 @@ export class Expr extends Val {
     }
   }
 
-  override visit(visitor: Visitor): Val {
+  override visit(visitor: Visitor): Val | null {
     return visitor.visitExpr(this);
   }
 
@@ -735,6 +735,6 @@ export function processingOrderFn(name1: string, name2: string): number {
   return n1 - n2;
 }
 
-export function isCustomPropName(name: string): boolean {
-  return name?.length > 2 && name.startsWith("--");
+export function isCustomPropName(name: string | undefined): boolean {
+  return name != null && name.length > 2 && name.startsWith("--");
 }

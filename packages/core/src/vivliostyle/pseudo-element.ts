@@ -86,7 +86,7 @@ export class PseudoelementStyler implements PseudoElement.PseudoelementStyler {
     const style = pseudoMap?.[pseudoName] || ({} as CssCascade.ElementStyle);
     if (pseudoName.match(/^first-/) && !style["x-first-pseudo"]) {
       let nest = 1;
-      let r: RegExpMatchArray;
+      let r: RegExpMatchArray | null;
       if (pseudoName == "first-letter") {
         nest = 0;
       } else if ((r = pseudoName.match(/^first-([0-9]+)-lines$/)) != null) {

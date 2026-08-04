@@ -37,16 +37,16 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   idMap: { [key: string]: Element } | null = null;
 
   constructor(
-    public readonly store: XMLDocStore,
+    public readonly store: XMLDocStore | null,
     public readonly url: string,
     public readonly document: Document,
   ) {
     this.root = Base.documentElementOf(document); // html element
-    let body: Element = null;
-    let head: Element = null;
+    let body: Element | null = null;
+    let head: Element | null = null;
     if (this.root.namespaceURI == Base.NS.XHTML) {
       for (
-        let child: Node = this.root.firstChild;
+        let child: Node | null = this.root.firstChild;
         child;
         child = child.nextSibling
       ) {
@@ -259,7 +259,7 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       return null;
     }
     const id = m[2];
-    let r: Element = this.document.getElementById(id);
+    let r: Element | null = this.document.getElementById(id);
     if (!r && this.document.getElementsByName) {
       r = this.document.getElementsByName(id)[0];
     }
@@ -359,8 +359,8 @@ export function resolveContentType(response: Net.FetchResponse): string | null {
 export function parseXMLResource(
   response: Net.FetchResponse,
   store: XMLDocStore,
-): Task.Result<XmlDoc.XMLDocHolder> {
-  let doc = response.responseXML;
+): Task.Result<XmlDoc.XMLDocHolder | null> {
+  let doc: Document | null = response.responseXML;
   if (!doc) {
     const parser = new DOMParser();
     const text = response.responseText;
@@ -410,7 +410,7 @@ export function parseXMLResource(
 }
 
 export function newXMLDocStore(): XMLDocStore {
-  return new Net.ResourceStore(
+  return new Net.ResourceStore<XmlDoc.XMLDocHolder>(
     parseXMLResource,
     Net.FetchResponseType.DOCUMENT,
   );
@@ -464,7 +464,7 @@ export class NodeList implements XmlDoc.NodeList {
    * Filter with predicate
    */
   predicate(pr: Predicate): NodeList {
-    const arr = [];
+    const arr: Node[] = [];
     for (const n of this.nodes) {
       if (pr.check(n)) {
         arr.push(n);
@@ -474,7 +474,7 @@ export class NodeList implements XmlDoc.NodeList {
   }
 
   forEachNode(fn: (p1: Node, p2: (p1: Node) => void) => void): NodeList {
-    const arr = [];
+    const arr: Node[] = [];
     const add = (n) => {
       arr.push(n);
     };
@@ -488,7 +488,7 @@ export class NodeList implements XmlDoc.NodeList {
    * @template T
    */
   forEach<T>(fn: (p1: Node) => T): T[] {
-    const arr = [];
+    const arr: T[] = [];
     for (let i = 0; i < this.nodes.length; i++) {
       arr.push(fn(this.nodes[i]));
     }
@@ -498,8 +498,8 @@ export class NodeList implements XmlDoc.NodeList {
   /**
    * @template T
    */
-  forEachNonNull<T>(fn: (p1: Node) => T): T[] {
-    const arr = [];
+  forEachNonNull<T>(fn: (p1: Node) => T | null): T[] {
+    const arr: T[] = [];
     for (let i = 0; i < this.nodes.length; i++) {
       const t = fn(this.nodes[i]);
       if (t != null) {
@@ -511,7 +511,7 @@ export class NodeList implements XmlDoc.NodeList {
 
   child(tag: string): NodeList {
     return this.forEachNode((node, add) => {
-      for (let c: Node = node.firstChild; c; c = c.nextSibling) {
+      for (let c: Node | null = node.firstChild; c; c = c.nextSibling) {
         if (c.nodeType == 1 && (c as Element).localName == tag) {
           add(c);
         }
@@ -521,7 +521,7 @@ export class NodeList implements XmlDoc.NodeList {
 
   childElements(): NodeList {
     return this.forEachNode((node, add) => {
-      for (let c: Node = node.firstChild; c; c = c.nextSibling) {
+      for (let c: Node | null = node.firstChild; c; c = c.nextSibling) {
         if (c.nodeType == 1) {
           add(c);
         }

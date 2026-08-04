@@ -214,7 +214,7 @@ export function resolvePageSizeAndBleed(style: {
     /** !type {!Css.Val} */
     const value = size.value;
     let val1: Css.Val;
-    let val2: Css.Val;
+    let val2: Css.Val | null;
     if (value.isSpaceList()) {
       val1 = (value as Css.SpaceList).values[0];
       val2 = (value as Css.SpaceList).values[1];
@@ -701,7 +701,7 @@ export type PageMarginBoxInformation = {
   isInBottomRow: boolean;
   isInLeftColumn: boolean;
   isInRightColumn: boolean;
-  positionAlongVariableDimension: MarginBoxPositionAlongVariableDimension;
+  positionAlongVariableDimension: MarginBoxPositionAlongVariableDimension | null;
 };
 
 /**
@@ -1312,7 +1312,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       );
       if (maxSize) {
         const evaluatedMaxSize = maxSize.evaluate(context) as number;
-        if (sizes[name] > evaluatedMaxSize) {
+        const size = sizes[name];
+        if (size != null && size > evaluatedMaxSize) {
           const p = (boxParams[name] = new FixedSizeMarginBoxSizingParam(
             containers[name],
             boxInstances[name].style,
@@ -1350,7 +1351,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       );
       if (minSize) {
         const evaluatedMinSize = minSize.evaluate(context) as number;
-        if (sizes[name] < evaluatedMinSize) {
+        const size = sizes[name];
+        if (size != null && size < evaluatedMinSize) {
           const p = (boxParams[name] = new FixedSizeMarginBoxSizingParam(
             containers[name],
             boxInstances[name].style,
@@ -1425,8 +1427,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     } = {};
     if (!centerBoxParam) {
       const startEndSizes = this.distributeAutoMarginBoxSizes(
-        startBoxParam,
-        endBoxParam,
+        startBoxParam ?? null,
+        endBoxParam ?? null,
         availableSize,
       );
       if (startEndSizes.xSize != null) {
@@ -1480,8 +1482,8 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
    *     when the size of the corresponding box is 'auto'.
    */
   private distributeAutoMarginBoxSizes(
-    x: MarginBoxSizingParam,
-    y: MarginBoxSizingParam,
+    x: MarginBoxSizingParam | null,
+    y: MarginBoxSizingParam | null,
     availableSize: number,
   ): { xSize: number | null; ySize: number | null } {
     const result: { xSize: number | null; ySize: number | null } = {
@@ -1522,7 +1524,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
                 (availableSize * xOuterMinContentSize) / minContentSizeSum;
             }
           }
-          if (result.xSize > 0) {
+          if (result.xSize != null && result.xSize > 0) {
             result.ySize = availableSize - result.xSize;
           }
         } else if (xOuterMaxContentSize > 0) {
@@ -2339,10 +2341,10 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     );
     const extent = PageMaster.toExprAuto(scope, style[extentName], pageMargin);
     let result: {
-      extent: Exprs.Result;
-      marginInside: Exprs.Result;
-      marginOutside: Exprs.Result;
-    } = null;
+      extent: Exprs.Result | null;
+      marginInside: Exprs.Result | null;
+      marginOutside: Exprs.Result | null;
+    } | null = null;
 
     function getComputedValues(context: Exprs.Context): {
       extent: Exprs.Result | null;
@@ -2731,7 +2733,7 @@ export class PageManager {
     pageMasterInstance: PageMaster.PageMasterInstance,
     cascadedPageStyle: CssCascade.ElementStyle,
   ): PageMaster.PageMasterInstance {
-    const pageMaster = pageMasterInstance.pageBox as PageMaster.PageMaster;
+    const pageMaster = pageMasterInstance.pageBox;
 
     // If no properties are specified in @page rules, use the original page
     // master.
@@ -3207,7 +3209,7 @@ export class PageParserHandler
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     name = name.toLowerCase();
     if (params) {
@@ -3281,7 +3283,7 @@ export class PageParserHandler
    * Save currently processed selector and reset variables.
    */
   private finishSelector() {
-    let selectors: string[];
+    let selectors: string[] | null;
     if (
       !this.currentNamedPageSelector &&
       !this.currentPseudoPageClassSelectors.length

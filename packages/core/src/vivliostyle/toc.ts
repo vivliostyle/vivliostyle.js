@@ -64,7 +64,7 @@ export function findTocElements(doc: Document): Array<Element> {
     if (tocElems.find((e) => e.contains(elem))) {
       continue; // Skip nested TOC elements.
     }
-    let tocElem = elem;
+    let tocElem: Element | null = elem;
     if (/^h[1-6]$/.test(tocElem.localName)) {
       // If the element is a heading, use its parent or next sibling as TOC element.
       if (!tocElem.previousElementSibling) {
@@ -120,7 +120,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
     if (depth-- == 0) {
       return;
     }
-    for (let c: Node = elem.firstChild; c; c = c.nextSibling) {
+    for (let c: Node | null = elem.firstChild; c; c = c.nextSibling) {
       if (c.nodeType == 1) {
         const e = c as Element;
         if (Base.getCSSProperty(e, "height", "auto") != "auto") {
@@ -142,7 +142,7 @@ export class TOCView implements Vgen.CustomRendererFactory {
       srcElem: Element,
       viewParent: Element,
       computedStyle: { [key: string]: Css.Val },
-    ): Task.Result<Element> => {
+    ): Task.Result<Element | null> => {
       const behavior = computedStyle["behavior"];
       if (behavior) {
         switch (behavior.toString()) {
@@ -362,7 +362,7 @@ export function toggleNodeExpansion(evt: Event): void {
   const tocNodeElem = elem.parentNode as Element;
   elem.setAttribute("aria-expanded", open ? "true" : "false");
   tocNodeElem.setAttribute("aria-expanded", open ? "true" : "false");
-  let c: Node = tocNodeElem.firstChild;
+  let c: Node | null = tocNodeElem.firstChild;
   while (c) {
     if (c.nodeType === 1) {
       const ce = c as HTMLElement;

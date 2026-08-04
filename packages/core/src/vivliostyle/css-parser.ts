@@ -81,7 +81,7 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
     this.flavor = StylesheetFlavor.AUTHOR;
   }
 
-  getCurrentToken(): CssTokenizer.Token {
+  getCurrentToken(): CssTokenizer.Token | null {
     return null;
   }
 
@@ -89,7 +89,7 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
     return this.scope;
   }
 
-  error(mnemonics: string, token: CssTokenizer.Token): void {}
+  error(mnemonics: string, token: CssTokenizer.Token | null): void {}
 
   startStylesheet(flavor: StylesheetFlavor): void {
     this.flavor = flavor;
@@ -99,9 +99,12 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
 
   classSelector(name: string): void {}
 
-  pseudoclassSelector(name: string, params: (number | string)[]): void {}
+  pseudoclassSelector(name: string, params: (number | string)[] | null): void {}
 
-  pseudoelementSelector(name: string, params: (number | string)[]): void {}
+  pseudoelementSelector(
+    name: string,
+    params: (number | string)[] | null,
+  ): void {}
 
   idSelector(id: string): void {}
 
@@ -243,7 +246,7 @@ export class DispatchParserHandler<
     this.slave = delegation.outer;
   }
 
-  override getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token | null {
     if (this.tokenizer) {
       return this.tokenizer.token();
     }
@@ -258,14 +261,14 @@ export class DispatchParserHandler<
    * Forwards call to slave.
    * @override
    */
-  error(mnemonics: string, token: CssTokenizer.Token): void {
+  error(mnemonics: string, token: CssTokenizer.Token | null): void {
     this.slave.error(mnemonics, token);
   }
 
   /**
    * Called by a slave.
    */
-  errorMsg(mnemonics: string, token: CssTokenizer.Token): void {
+  errorMsg(mnemonics: string, token: CssTokenizer.Token | null): void {
     Logging.logger.warn(mnemonics, token?.toString() ?? "");
   }
 
@@ -286,14 +289,14 @@ export class DispatchParserHandler<
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     this.slave.pseudoclassSelector(name, params);
   }
 
   override pseudoelementSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     this.slave.pseudoelementSelector(name, params);
   }
@@ -444,11 +447,11 @@ export class SkippingParserHandler extends ParserHandler {
     this.flavor = owner.flavor;
   }
 
-  override getCurrentToken(): CssTokenizer.Token {
+  override getCurrentToken(): CssTokenizer.Token | null {
     return this.owner.getCurrentToken();
   }
 
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token | null): void {
     this.owner.errorMsg(mnemonics, token);
   }
 
@@ -869,7 +872,7 @@ export class Parser {
     return arr;
   }
 
-  valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val {
+  valStackReduce(sep: string, token: CssTokenizer.Token): Css.Val | null {
     const valStack = this.valStack;
     let index = valStack.length;
     let parLevel = 0;
@@ -921,7 +924,7 @@ export class Parser {
       // Check invalid var()
       if (func.name === "var") {
         const name = func.values[0] instanceof Css.Ident && func.values[0].name;
-        if (!Css.isCustomPropName(name)) {
+        if (!Css.isCustomPropName(name || undefined)) {
           this.handler.error(`E_CSS_INVALID_VAR ${func.toString()}`, token);
           this.actions = actionsErrorDecl;
         }
@@ -1131,13 +1134,13 @@ export class Parser {
     return false;
   }
 
-  readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest {
+  readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest | null {
     // `@supports (prop-name:...)`
     // `@supports func-name(...)`
     const isFunc = token.type === TokenType.FUNC;
     const tokenizer = this.tokenizer;
     let startPosition: number;
-    let name: string | undefined;
+    let name = "";
     if (isFunc) {
       name = token.text;
       startPosition = token.position + name.length + 1;
@@ -1208,7 +1211,7 @@ export class Parser {
   }
 
   readPseudoParams(): (number | string)[] {
-    const arr = [];
+    const arr: (number | string)[] = [];
     while (true) {
       const token = this.tokenizer.token();
       switch (token.type) {
@@ -1384,7 +1387,10 @@ export class Parser {
     return null;
   }
 
-  makeCondition(classes: string | null, condition: Exprs.Val): Css.Expr {
+  makeCondition(
+    classes: string | null,
+    condition: Exprs.Val | null,
+  ): Css.Expr | null {
     const scope = this.handler.getScope();
     condition = condition || scope._true;
     if (classes) {
@@ -1462,7 +1468,7 @@ export class Parser {
     let text: string | null;
     let num: number;
     let val: Css.Val | null = null;
-    let params: (number | string)[];
+    let params: (number | string)[] | null;
     let selectorStartPosition: number | null = null;
 
     if (parsingStyleAttr) {
@@ -2924,7 +2930,7 @@ export class ErrorHandler extends ParserHandler {
     super(scope);
   }
 
-  override error(mnemonics: string, token: CssTokenizer.Token): void {
+  override error(mnemonics: string, token: CssTokenizer.Token | null): void {
     // throw new Error(mnemonics + " " + token);
     Logging.logger.warn(mnemonics, token.toString());
   }
@@ -2966,7 +2972,7 @@ function parseStylesheetInternal(
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
   const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
-  let condition: Css.Expr = null;
+  let condition: Css.Expr | null = null;
   if (media) {
     condition = parseMediaQuery(
       new CssTokenizer.Tokenizer(media, handler),
@@ -3120,8 +3126,8 @@ export const numProp: { [key: string]: boolean } = {
   utilization: true,
 };
 
-export function takesOnlyNum(propName: string): boolean {
-  return !!numProp[propName];
+export function takesOnlyNum(propName: string | undefined): boolean {
+  return !!(propName && numProp[propName]);
 }
 
 /**

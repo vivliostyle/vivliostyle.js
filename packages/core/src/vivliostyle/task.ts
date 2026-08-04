@@ -259,11 +259,10 @@ export class Scheduler {
   }
 
   schedule(continuation: Continuation<any>, opt_delay?: number): void {
-    const c = continuation as Continuation<any>;
     const now = this.timer.currentTime();
-    c.order = this.order++;
-    c.scheduledTime = now + (opt_delay || 0);
-    this.queue.add(c);
+    continuation.order = this.order++;
+    continuation.scheduledTime = now + (opt_delay || 0);
+    this.queue.add(continuation);
     this.arm();
   }
 
@@ -342,7 +341,7 @@ export class Continuation<T> implements Base.Comparable {
   result: T | null = null;
   canceled: boolean = false;
 
-  constructor(public task: Task) {}
+  constructor(public task: Task | null) {}
 
   /** @override */
   compare(otherComp: Base.Comparable): number {
@@ -354,7 +353,7 @@ export class Continuation<T> implements Base.Comparable {
   /**
    * Continuation's task
    */
-  getTask(): Task {
+  getTask(): Task | null {
     return this.task;
   }
 
@@ -364,7 +363,10 @@ export class Continuation<T> implements Base.Comparable {
    */
   schedule(result: T, opt_delay?: number) {
     this.result = result;
-    this.task.scheduler.schedule(this, opt_delay);
+    const task = this.task;
+    if (task) {
+      task.scheduler.schedule(this, opt_delay);
+    }
   }
 
   resumeInternal(): boolean {
@@ -492,7 +494,7 @@ export class Task {
     }
   }
 
-  raise(err: Error, opt_frame?: Frame<any>): void {
+  raise(err: Error, opt_frame?: Frame<any> | null): void {
     this.fillStack(err);
     if (opt_frame) {
       let f = this.top;
@@ -642,7 +644,7 @@ export class Frame<T> {
 
   constructor(
     public task: Task,
-    public parent: Frame<T>,
+    public parent: Frame<T> | null,
     public name: string,
   ) {
     this.state = FrameState.INIT;
@@ -822,7 +824,7 @@ export class Frame<T> {
 }
 
 export class LoopBodyFrame extends Frame<boolean> {
-  constructor(task: Task, parent: Frame<boolean>) {
+  constructor(task: Task, parent: Frame<boolean> | null) {
     super(task, parent, "loop");
   }
 
@@ -838,7 +840,7 @@ export class LoopBodyFrame extends Frame<boolean> {
 export class EventItem {
   next: EventItem | null = null;
 
-  constructor(public event: Base.Event) {}
+  constructor(public event: Base.Event | null) {}
 }
 
 /**
@@ -894,7 +896,7 @@ export class EventSource {
       target: Base.SimpleEventTarget;
       type: string;
       listener: Base.EventListener;
-    } = null;
+    } | null = null;
     while (i < this.listeners.length) {
       item = this.listeners[i];
       if (item.type == type && item.target === target) {

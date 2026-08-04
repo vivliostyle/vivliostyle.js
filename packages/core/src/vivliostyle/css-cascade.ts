@@ -2320,7 +2320,7 @@ function buildDeferredStringSetVal(
 export class ContentPropVisitor extends Css.FilterVisitor {
   constructor(
     public cascade: CascadeInstance,
-    public element: Element,
+    public element: Element | null,
     public readonly counterResolver: CounterResolver,
     private readonly elementStyle: ElementStyle,
     private readonly pseudoName?: string,
@@ -4863,8 +4863,8 @@ export class CascadeParserHandler
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
-    public readonly condition: Exprs.Val,
-    parent: CascadeParserHandler,
+    public readonly condition: Exprs.Val | null,
+    parent: CascadeParserHandler | null,
     public readonly regionId: string | null,
     public readonly validatorSet: CssValidator.ValidatorSet,
     delegation: CssParser.Delegation | null,
@@ -4963,7 +4963,7 @@ export class CascadeParserHandler
 
   override pseudoclassSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     if (this.invalidContinuationAfterPseudoelement(`:${name}`)) {
       return;
@@ -5105,7 +5105,7 @@ export class CascadeParserHandler
 
   override pseudoelementSelector(
     name: string,
-    params: (number | string)[],
+    params: (number | string)[] | null,
   ): void {
     name = name.toLowerCase();
     if (this.invalidContinuationAfterPseudoelement(`::${name}`)) {
@@ -5856,7 +5856,7 @@ export class PropSetParserHandler
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,
-    public readonly condition: Exprs.Val,
+    public readonly condition: Exprs.Val | null,
     public readonly elementStyle: ElementStyle,
     public readonly validatorSet: CssValidator.ValidatorSet,
     delegation: CssParser.Delegation,
@@ -6043,7 +6043,7 @@ export function isRtl(
 export function flattenCascadedStyle(
   style: ElementStyle,
   context: Exprs.Context,
-  regionIds: string[],
+  regionIds: string[] | null,
   isFootnote: boolean,
 ): { [key: string]: CascadeValue } {
   const cascMap = {} as { [key: string]: CascadeValue };
@@ -6067,7 +6067,7 @@ export function flattenCascadedStyle(
 
 export function forEachStylesInRegion(
   style: ElementStyle,
-  regionIds: string[],
+  regionIds: string[] | null,
   isFootnote: boolean,
   callback: (p1: string, p2: ElementStyle) => any,
 ): void {
@@ -6285,7 +6285,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
   private collectReferencedCustomProperties(val: Css.Val): string[] {
     const names = new Set<string>();
     class ReferenceVisitor extends Css.Visitor {
-      override visitFunc(func: Css.Func): Css.Val {
+      override visitFunc(func: Css.Func): Css.Val | null {
         const name = func.values[0] instanceof Css.Ident && func.values[0].name;
         if (func.name === "var" && name && Css.isCustomPropName(name)) {
           names.add(name);
@@ -6339,7 +6339,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     let cycleStartName: string | null = null;
     const self = this;
     class FallbackReferenceVisitor extends Css.Visitor {
-      override visitFunc(func: Css.Func): Css.Val {
+      override visitFunc(func: Css.Func): Css.Val | null {
         if (func.name === "var") {
           for (const fallbackVal of func.values.slice(1)) {
             const referencedCycleStart = self.findReferencedCycleStart(

@@ -66,7 +66,9 @@ export function blockify(display: Css.Ident): Css.Ident {
 /**
  * Judge if the generated box is absolutely positioned.
  */
-export function isAbsolutelyPositioned(position: Css.Val): boolean {
+export function isAbsolutelyPositioned(
+  position: Css.Val | null | undefined,
+): boolean {
   return position === Css.ident.absolute || position === Css.ident.fixed;
 }
 
@@ -74,7 +76,7 @@ export function isAbsolutelyPositioned(position: Css.Val): boolean {
  * Check if the position value is 'running()'.
  * https://drafts.csswg.org/css-gcpm/#running-elements
  */
-export function isRunning(position: Css.Val): boolean {
+export function isRunning(position: Css.Val | null | undefined): boolean {
   return position instanceof Css.Func && position.name === "running";
 }
 
@@ -119,7 +121,7 @@ export function isBlock(
 }
 
 function isDisplayType(
-  display: Css.Val | string | undefined,
+  display: Css.Val | string | null | undefined,
 ): display is Css.Ident | Css.SpaceList | string {
   return (
     display instanceof Css.Ident ||

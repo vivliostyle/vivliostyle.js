@@ -34,7 +34,7 @@ export interface LayoutProcessor {
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
     leadingEdge: boolean,
-  ): Task.Result<Vtree.NodeContext>;
+  ): Task.Result<Vtree.NodeContext | null>;
 
   /**
    * Potential edge breaking position.
@@ -73,7 +73,7 @@ export interface LayoutProcessor {
 
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: Vtree.NodeContext,
+    parentNodeContext: Vtree.NodeContext | null,
     nodeContext: Vtree.NodeContext,
     removeSelf: boolean,
   );
@@ -108,7 +108,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
     leadingEdge: boolean,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     const floatNodeContext = column.asFloatNodeContext(nodeContext);
     if (floatNodeContext) {
       return column.layoutFloatOrFootnote(floatNodeContext);
@@ -150,7 +150,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
   /** @override */
   clearOverflownViewNodes(
     column: Layout.Column,
-    parentNodeContext: Vtree.NodeContext,
+    parentNodeContext: Vtree.NodeContext | null,
     nodeContext: Vtree.NodeContext,
     removeSelf: boolean,
   ) {
@@ -204,7 +204,7 @@ export class BlockFormattingContext
 {
   formattingContextType: FormattingContextType = "Block";
 
-  constructor(private readonly parent: Vtree.FormattingContext) {}
+  constructor(private readonly parent: Vtree.FormattingContext | null) {}
 
   /** @override */
   getName(): string {
@@ -217,7 +217,7 @@ export class BlockFormattingContext
   }
 
   /** @override */
-  getParent(): Vtree.FormattingContext {
+  getParent(): Vtree.FormattingContext | null {
     return this.parent;
   }
 

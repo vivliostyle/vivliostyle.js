@@ -143,8 +143,8 @@ export function loadScript(
   if (src) {
     scriptElem.src = src;
   }
-  scriptElem.async = async;
-  scriptElem.defer = defer;
+  scriptElem.async = !!async;
+  scriptElem.defer = !!defer;
   scriptElem.setAttribute("data-vivliostyle-scripting", "true");
 
   for (const attr of srcScriptElem.attributes) {

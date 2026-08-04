@@ -132,13 +132,13 @@ export function isValidCmykReserveMap(
     const rgbObj = rgb as { r: unknown; g: unknown; b: unknown };
     const cmykObj = cmyk as { c: unknown; m: unknown; y: unknown; k: unknown };
     return (
-      Number.isFinite(rgbObj.r as number) &&
-      Number.isFinite(rgbObj.g as number) &&
-      Number.isFinite(rgbObj.b as number) &&
-      Number.isFinite(cmykObj.c as number) &&
-      Number.isFinite(cmykObj.m as number) &&
-      Number.isFinite(cmykObj.y as number) &&
-      Number.isFinite(cmykObj.k as number)
+      Number.isFinite(rgbObj.r) &&
+      Number.isFinite(rgbObj.g) &&
+      Number.isFinite(rgbObj.b) &&
+      Number.isFinite(cmykObj.c) &&
+      Number.isFinite(cmykObj.m) &&
+      Number.isFinite(cmykObj.y) &&
+      Number.isFinite(cmykObj.k)
     );
   });
 }
@@ -226,38 +226,39 @@ export function parseDeviceCmyk(
     return null;
   }
 
+  const first = func.values.length === 1 ? func.values[0] : null;
   const values =
     // Modern syntax: space-separated values in a single SpaceList
-    func.values.length === 1 && func.values[0]! instanceof Css.SpaceList
-      ? (func.values[0]! as Css.SpaceList).values
+    first instanceof Css.SpaceList
+      ? first.values
       : // Legacy syntax: comma-separated values directly in func.values
         func.values;
   if (values.length < 4 || values.length > 6) {
     return null;
   }
 
-  const c = getNumValue(values[0]!);
-  const m = getNumValue(values[1]!);
-  const y = getNumValue(values[2]!);
-  const k = getNumValue(values[3]!);
+  const c = getNumValue(values[0]);
+  const m = getNumValue(values[1]);
+  const y = getNumValue(values[2]);
+  const k = getNumValue(values[3]);
   if (c === null || m === null || y === null || k === null) {
     return null;
   }
 
   let alpha: number | null = null;
   if (values.length >= 5) {
-    if (values[4]! === Css.slash) {
+    if (values[4] === Css.slash) {
       // Modern syntax: c m y k / alpha - must have exactly 6 values
       if (values.length !== 6) {
         return null;
       }
-      alpha = getNumValue(values[5]!);
+      alpha = getNumValue(values[5]);
     } else {
       // Legacy syntax: c, m, y, k, alpha - must have exactly 5 values
       if (values.length !== 5) {
         return null;
       }
-      alpha = getNumValue(values[4]!);
+      alpha = getNumValue(values[4]);
     }
     if (alpha === null) {
       return null;

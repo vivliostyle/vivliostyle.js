@@ -33,7 +33,7 @@ export abstract class AbstractLayoutRetryer {
   layout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
+  ): Task.Result<Vtree.NodeContext | null> {
     this.prepareLayout(nodeContext, column);
     return this.tryLayout(nodeContext, column);
   }
@@ -41,8 +41,8 @@ export abstract class AbstractLayoutRetryer {
   private tryLayout(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext> {
-    const frame = Task.newFrame<Vtree.NodeContext>(
+  ): Task.Result<Vtree.NodeContext | null> {
+    const frame = Task.newFrame<Vtree.NodeContext | null>(
       "AbstractLayoutRetryer.tryLayout",
     );
     this.saveState(nodeContext, column);
@@ -80,11 +80,11 @@ export abstract class AbstractLayoutRetryer {
     if (!viewNode) {
       return;
     }
-    let child: Node;
+    let child: Node | null;
     while ((child = viewNode.lastChild)) {
       viewNode.removeChild(child);
     }
-    let sibling: ChildNode;
+    let sibling: ChildNode | null;
     while ((sibling = viewNode.nextSibling)) {
       sibling.remove();
     }
@@ -92,10 +92,12 @@ export abstract class AbstractLayoutRetryer {
 
   saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     this.initialPosition = nodeContext.copy();
-    this.initialBreakPositions = [].concat(column.breakPositions);
-    this.initialFragmentLayoutConstraints = [].concat(
-      column.fragmentLayoutConstraints,
+    this.initialBreakPositions = ([] as Layout.BreakPosition[]).concat(
+      column.breakPositions,
     );
+    this.initialFragmentLayoutConstraints = (
+      [] as Layout.FragmentLayoutConstraint[]
+    ).concat(column.fragmentLayoutConstraints);
     this.initialStateOfFormattingContext =
       nodeContext.formattingContext.saveState();
   }

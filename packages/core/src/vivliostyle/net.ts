@@ -66,10 +66,9 @@ export function fetchFromURL(
       response.status = res.status;
       response.url = res.url;
       response.statusText = res.statusText;
-      response.contentType = res.headers
-        .get("Content-Type")
-        ?.replace(/;.*$/, "")
-        .toLowerCase();
+      response.contentType =
+        res.headers.get("Content-Type")?.replace(/;.*$/, "").toLowerCase() ??
+        null;
 
       if (!res.ok) {
         throw new Error(
@@ -172,14 +171,14 @@ export function createObjectURL(blob: Blob): string {
  * @template Resource
  */
 export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
-  resources: { [key: string]: Resource } = {};
-  fetchers: { [key: string]: TaskUtil.Fetcher<Resource> } = {};
+  resources: { [key: string]: Resource | null } = {};
+  fetchers: { [key: string]: TaskUtil.Fetcher<Resource | null> } = {};
 
   constructor(
     public readonly parser: (
       p1: FetchResponse,
       p2: ResourceStore<Resource>,
-    ) => Task.Result<Resource>,
+    ) => Task.Result<Resource | null>,
     public readonly type: FetchResponseType,
   ) {}
 
@@ -190,7 +189,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string,
-  ): Task.Result<Resource> {
+  ): Task.Result<Resource | null> {
     url = Base.stripFragment(url);
     const resource = this.resources[url];
     if (typeof resource != "undefined") {
@@ -203,8 +202,8 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string,
-  ): Task.Result<Resource> {
-    const frame: Task.Frame<Resource> = Task.newFrame("fetch");
+  ): Task.Result<Resource | null> {
+    const frame: Task.Frame<Resource | null> = Task.newFrame("fetch");
 
     // Hack for TOCView.showTOC()
     const isTocBox = Base.isTocBoxURL(url);
@@ -256,7 +255,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     url: string,
     opt_required?: boolean,
     opt_message?: string,
-  ): TaskUtil.Fetcher<Resource> {
+  ): TaskUtil.Fetcher<Resource | null> | null {
     url = Base.stripFragment(url);
     const resource = this.resources[url];
     if (resource) {

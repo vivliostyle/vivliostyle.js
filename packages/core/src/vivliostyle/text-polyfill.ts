@@ -24,7 +24,7 @@ import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
 import * as Vtree from "./vtree";
 
-type PropertyValue = string | number | Css.Val;
+type PropertyValue = string | number | Css.Val | undefined;
 
 type HangingPunctuation = {
   first: boolean;
@@ -277,7 +277,7 @@ function isTextSpacingNone(
   );
 }
 
-function normalizeLang(lang: string): string | null {
+function normalizeLang(lang: string | null | undefined): string | null {
   if (lang) {
     // Normalize CJK lang
     lang = lang.toLowerCase();
@@ -373,7 +373,7 @@ class TextSpacingPolyfill {
     autospaceVal: Css.Val,
     spacingTrimVal: Css.Val,
     hangingPunctuationVal: Css.Val,
-    lang: string,
+    lang: string | null,
     vertical: boolean,
   ): void {
     lang = normalizeLang(lang);
@@ -455,7 +455,7 @@ class TextSpacingPolyfill {
       return (
         position === "absolute" ||
         position === "fixed" ||
-        (float && float !== "none")
+        !!(float && float !== "none")
       );
     }
 
@@ -582,12 +582,12 @@ class TextSpacingPolyfill {
         ) {
           continue;
         }
-        if (/\b(flex|grid)\b/.test(textP.parent.display)) {
+        if (/\b(flex|grid)\b/.test(textP.parent.display ?? "")) {
           // Cannot process if parent is flex or grid. (Issue #926)
           continue;
         }
-        let prevNode: Node = null;
-        let nextNode: Node = null;
+        let prevNode: Node | null = null;
+        let nextNode: Node | null = null;
         let isFirstAfterBreak = i === iFirst;
         let isFirstInBlock = i === iFirst && isFirstFragment;
         let isFirstAfterForcedLineBreak =
@@ -791,12 +791,12 @@ class TextSpacingPolyfill {
     isFirstAfterForcedLineBreak: boolean,
     isLastBeforeForcedLineBreak: boolean,
     isLastInBlock: boolean,
-    prevNode: Node,
-    nextNode: Node,
+    prevNode: Node | null,
+    nextNode: Node | null,
     autospace: Autospace,
     spacingTrim: SpacingTrim,
     hangingPunctuation: HangingPunctuation,
-    lang: string,
+    lang: string | null,
     vertical: boolean,
   ): number {
     const text = textNode.textContent;
@@ -1219,7 +1219,7 @@ export function processGeneratedContent(
   textAutospace: Css.Val,
   textSpacingTrim: Css.Val,
   hangingPunctuation: Css.Val,
-  lang: string,
+  lang: string | null,
   vertical: boolean,
 ): void {
   textPolyfill.processGeneratedContent(

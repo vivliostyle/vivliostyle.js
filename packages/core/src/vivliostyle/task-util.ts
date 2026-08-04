@@ -31,7 +31,7 @@ import * as Task from "./task";
  *    a resource; it will be run in a separate task.
  */
 export class Fetcher<T> {
-  name: string;
+  name: string | undefined;
   arrived: boolean = false;
   resource: T | null = null;
   task: Task.Task | null = null;

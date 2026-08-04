@@ -630,7 +630,7 @@ export function getElementHeight(
     : rect["height"] + margin["top"] + margin["bottom"];
 }
 
-export function isOrphan(node: Node): boolean {
+export function isOrphan(node: Node | null): boolean {
   while (node) {
     if (node.parentNode === node.ownerDocument) {
       return false;
@@ -641,7 +641,7 @@ export function isOrphan(node: Node): boolean {
 }
 
 export function removeFollowingSiblings(
-  parentNode: Node,
+  parentNode: Node | null,
   viewNode: Node,
 ): void {
   if (!parentNode) {

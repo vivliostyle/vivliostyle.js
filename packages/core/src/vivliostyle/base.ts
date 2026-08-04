@@ -143,7 +143,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
   if (baseURL.match(/^\w{2,}:\/\/[^\/]+$/)) {
     baseURL = `${baseURL}/`;
   }
-  let r: string[];
+  let r: string[] | null;
   if (relURL.match(/^\/\//)) {
     r = baseURL.match(/^(\w{2,}:)\/\//);
     if (r) {
@@ -224,7 +224,7 @@ export function convertAboutBlankURL(url: string): string {
  * @return converted URL
  */
 export function convertSpecialURL(url: string): string {
-  let r: RegExpMatchArray;
+  let r: RegExpMatchArray | null;
 
   if ((url = convertAboutBlankURL(url)) !== url) {
     // already converted
@@ -368,7 +368,7 @@ export interface Comparable {
  * A priority queue.
  */
 export class PriorityQueue {
-  queue: Comparable[] = [null];
+  queue: (Comparable | null)[] = [null];
 
   length(): number {
     return this.queue.length - 1;
@@ -439,7 +439,7 @@ export class PriorityQueue {
 
 export const knownPrefixes = ["", "-webkit-", "-moz-"];
 
-export const propNameMap: { [key: string]: string[] } = {};
+export const propNameMap: { [key: string]: string[] | null } = {};
 
 export function checkIfPropertySupported(
   prefix: string,
@@ -611,7 +611,7 @@ export class RootBoundCursor {
   }
 }
 
-export function getLangAttribute(element: Element): string {
+export function getLangAttribute(element: Element): string | null {
   let lang = element.getAttributeNS(NS.XML, "lang");
   if (!lang && element.namespaceURI == NS.XHTML) {
     lang = element.getAttribute("lang");

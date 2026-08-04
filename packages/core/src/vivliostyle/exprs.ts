@@ -132,13 +132,13 @@ export class LexicalScope {
   one: Const;
   _true: Const;
   _false: Const;
-  values: { [key: string]: Val } = {};
+  values: { [key: string]: Val | null } = {};
   funcs: { [key: string]: Val } = {};
   builtIns: { [key: string]: (...p1: Result[]) => Result } = {};
 
   constructor(
-    public parent: LexicalScope,
-    public resolver?: (p1: string, p2: boolean) => Val,
+    public parent: LexicalScope | null,
+    public resolver?: (p1: string, p2: boolean) => Val | null,
   ) {
     this.scopeKey = `S${nextKeyIndex++}`;
     this.zero = new Const(this, 0);
@@ -206,7 +206,7 @@ export class LexicalScope {
     this.values[name] = new Native(this, fn, name);
   }
 
-  defineName(qualifiedName: string, val: Val): void {
+  defineName(qualifiedName: string, val: Val | null): void {
     this.values[qualifiedName] = val;
   }
 
@@ -435,19 +435,20 @@ export class Context {
   }
 
   evalName(scope: LexicalScope, qualifiedName: string): Val {
-    do {
-      let val = scope.values[qualifiedName];
+    let s: LexicalScope | null = scope;
+    while (s) {
+      let val: Val | null = s.values[qualifiedName];
       if (val) {
         return val;
       }
-      if (scope.resolver) {
-        val = scope.resolver.call(this, qualifiedName, false);
+      if (s.resolver) {
+        val = s.resolver.call(this, qualifiedName, false);
         if (val) {
           return val;
         }
       }
-      scope = scope.parent;
-    } while (scope);
+      s = s.parent;
+    }
     throw new Error(`Name '${qualifiedName}' is undefined`);
   }
 
@@ -460,30 +461,31 @@ export class Context {
     params: Val[],
     noBuiltInEval: boolean,
   ): Val {
-    do {
-      let body = scope.funcs[qualifiedName];
+    let s: LexicalScope | null = scope;
+    while (s) {
+      let body: Val | null = s.funcs[qualifiedName];
       if (body) {
         return body; // will be expanded by callee
       }
-      if (scope.resolver) {
-        body = scope.resolver.call(this, qualifiedName, true);
+      if (s.resolver) {
+        body = s.resolver.call(this, qualifiedName, true);
         if (body) {
           return body;
         }
       }
-      const fn = scope.builtIns[qualifiedName];
+      const fn = s.builtIns[qualifiedName];
       if (fn) {
         if (noBuiltInEval) {
-          return scope.zero;
+          return s.zero;
         }
         const args = Array(params.length);
         for (let i = 0; i < params.length; i++) {
           args[i] = params[i].evaluate(this);
         }
-        return new Const(scope, fn.apply(this, args));
+        return new Const(s, fn.apply(this, args));
       }
-      scope = scope.parent;
-    } while (scope);
+      s = s.parent;
+    }
     throw new Error(`Function '${qualifiedName}' is undefined`);
   }
 
@@ -492,7 +494,7 @@ export class Context {
     return not ? !enabled : enabled;
   }
 
-  evalMediaTest(feature: string, value: Val): boolean {
+  evalMediaTest(feature: string, value: Val | null): boolean {
     let prefix = "";
     const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
@@ -1330,7 +1332,7 @@ export class MediaTest extends Val {
   constructor(
     scope: LexicalScope,
     public name: MediaName,
-    public value: Val,
+    public value: Val | null,
   ) {
     super(scope);
   }
@@ -1439,7 +1441,7 @@ export function and(scope: LexicalScope, v1: Val, v2: Val): Val {
   return new And(scope, v1, v2);
 }
 
-export function add(scope: LexicalScope, v1: Val, v2: Val): Val {
+export function add(scope: LexicalScope, v1: Val | null, v2: Val | null): Val {
   if (v1 === scope.zero) {
     return v2;
   }
@@ -1449,7 +1451,7 @@ export function add(scope: LexicalScope, v1: Val, v2: Val): Val {
   return new Add(scope, v1, v2);
 }
 
-export function sub(scope: LexicalScope, v1: Val, v2: Val): Val {
+export function sub(scope: LexicalScope, v1: Val | null, v2: Val | null): Val {
   if (v1 === scope.zero) {
     return new Negate(scope, v2);
   }

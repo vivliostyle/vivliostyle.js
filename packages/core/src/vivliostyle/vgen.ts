@@ -132,7 +132,7 @@ export type CustomRenderer = (
   p1: Element,
   p2: Element,
   p3: { [key: string]: Css.Val },
-) => Task.Result<Element>;
+) => Task.Result<Element | null>;
 
 export interface CustomRendererFactory {
   makeCustomRenderer(xmldoc: XmlDoc.XMLDocHolder): CustomRenderer;
@@ -207,7 +207,7 @@ export class ViewFactory
     public readonly context: Exprs.Context,
     public readonly viewport: Viewport,
     public readonly styler: CssStyler.Styler,
-    public readonly regionIds: string[],
+    public readonly regionIds: string[] | null,
     public readonly xmldoc: XmlDoc.XMLDocHolder,
     public readonly docFaces: Font.DocumentFaces,
     public readonly footnoteStyle: CssCascade.ElementStyle,
@@ -217,7 +217,7 @@ export class ViewFactory
     public readonly fallbackMap: { [key: string]: string },
     public readonly documentURLTransformer: Base.DocumentURLTransformer,
     public readonly pageProps?: { [key: string]: CssCascade.ElementStyle },
-    public readonly cascadedPageStyle?: CssCascade.ElementStyle,
+    public readonly cascadedPageStyle?: CssCascade.ElementStyle | null,
     private readonly semanticFootnoteFirstRefOffsets: Map<
       string,
       number
@@ -553,7 +553,7 @@ export class ViewFactory
 
   getPseudoMap(
     cascStyle: CssCascade.ElementStyle,
-    regionIds: string[],
+    regionIds: string[] | null,
     isFootnote: boolean,
     nodeContext: Vtree.NodeContext,
     context: Exprs.Context,
@@ -2471,11 +2471,13 @@ export class ViewFactory
       }
     }
 
-    const startBreakType = (
-      this.context as Exprs.Context & {
-        currentLayoutPosition: Vtree.LayoutPosition;
-      }
-    )?.currentLayoutPosition?.flowPositions[this.flowName]?.startBreakType;
+    const startBreakType =
+      (
+        this.context as Exprs.Context & {
+          currentLayoutPosition: Vtree.LayoutPosition | null;
+        }
+      )?.currentLayoutPosition?.flowPositions[this.flowName]?.startBreakType ??
+      null;
 
     if (Break.isForcedBreakValue(startBreakType)) {
       return startBreakType; // forced break
