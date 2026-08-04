@@ -28,6 +28,8 @@ export class PageViewModeInstance {
         return "false";
       case PageViewMode.AUTO_SPREAD:
         return "auto";
+      case PageViewMode.CONTINUOUS_SCROLL:
+        return "continuousScroll";
       default:
         throw new Error("Invalid PageViewMode");
     }
@@ -40,6 +42,8 @@ export class PageViewModeInstance {
         return "singlePage"; // vivliostyle.viewer.PageViewMode.SINGLE_PAGE;
       case PageViewMode.AUTO_SPREAD:
         return "autoSpread"; // vivliostyle.viewer.PageViewMode.AUTO_SPREAD;
+      case PageViewMode.CONTINUOUS_SCROLL:
+        return "continuousScroll"; // vivliostyle.viewer.PageViewMode.CONTINUOUS_SCROLL;
       default:
         throw new Error("Invalid PageViewMode");
     }
@@ -50,6 +54,7 @@ const PageViewMode = {
   AUTO_SPREAD: new PageViewModeInstance(),
   SINGLE_PAGE: new PageViewModeInstance(),
   SPREAD: new PageViewModeInstance(),
+  CONTINUOUS_SCROLL: new PageViewModeInstance(),
   defaultMode(): CorePageViewMode {
     return this.AUTO_SPREAD;
   },
@@ -59,6 +64,8 @@ const PageViewMode = {
         return this.SPREAD;
       case "false":
         return this.SINGLE_PAGE;
+      case "continuousScroll":
+        return this.CONTINUOUS_SCROLL;
       case "auto":
       default:
         return this.AUTO_SPREAD;
@@ -72,6 +79,8 @@ const PageViewMode = {
         return this.SINGLE_PAGE;
       case CorePageViewMode.AUTO_SPREAD:
         return this.AUTO_SPREAD;
+      case CorePageViewMode.CONTINUOUS_SCROLL:
+        return this.CONTINUOUS_SCROLL;
       default:
         throw new Error(`Invalid PageViewMode name: ${name}`);
     }

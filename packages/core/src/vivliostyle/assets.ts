@@ -87,6 +87,25 @@ export const VivliostyleViewportScreenCss = `
     margin-right: auto;
     transform-origin: center top;
   }
+
+  /* Continuous scroll view mode: stack every page vertically (Issue #1235). */
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-continuous-scroll="true"] {
+    align-items: flex-start;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-continuous-scroll="true"]
+    [data-vivliostyle-spread-container] {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 8px;
+  }
+
+  [data-vivliostyle-viewer-viewport][data-vivliostyle-continuous-scroll="true"]
+    [data-vivliostyle-spread-container]
+    [data-vivliostyle-page-container] {
+    margin: 0 auto;
+    transform-origin: center top;
+  }
 }
 `;
 
