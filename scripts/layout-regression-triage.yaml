@@ -1,4 +1,28 @@
 - category: General
+  title: ":dir() pseudo-class"
+  file: css-parse-error/dir-pseudo-class.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-unsupported-pseudo-classes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/dir-pseudo-class.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/dir-pseudo-class.html&zoom=1&spread=false
+- category: General
+  title: ":any-link pseudo-class"
+  file: css-parse-error/any-link-pseudo-class.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-unsupported-pseudo-classes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/any-link-pseudo-class.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/css-parse-error/any-link-pseudo-class.html&zoom=1&spread=false
+- category: General
   title: Syntax error in a forgiving selector list
   file: css-parse-error/forgiving-selector-list.html
   decision: expected  # regression / expected / skip
