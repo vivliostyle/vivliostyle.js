@@ -1498,7 +1498,11 @@ export class MatchesNativeSelectorAction extends ChainedAction {
 
   override matches(cascadeInstance: ElementCascadeInstance): boolean {
     const element = cascadeInstance.currentElement;
-    return !!element && element.matches(this.selector);
+    try {
+      return !!element && element.matches(this.selector);
+    } catch {
+      return false;
+    }
   }
 }
 

@@ -1898,6 +1898,17 @@ describe("css-cascade", function () {
       expect(action.matches({})).toBe(false);
       expect(action.matches({ currentElement: null })).toBe(false);
     });
+
+    it("matches nothing when the native matcher throws", function () {
+      var element = {
+        matches: jasmine
+          .createSpy("matches")
+          .and.throwError(new DOMException("Invalid selector", "SyntaxError")),
+      };
+      var action = new adapt_csscasc.MatchesNativeSelectorAction(":dir(rtl)");
+      expect(action.matches({ currentElement: element })).toBe(false);
+      expect(element.matches).toHaveBeenCalledWith(":dir(rtl)");
+    });
   });
 
   describe("CascadeParserHandler", function () {
