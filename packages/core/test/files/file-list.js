@@ -36,6 +36,10 @@ module.exports = [
         skipLayoutRegression: true,
       },
       { file: "case_sensitivity/html.html", title: "HTML case sensitivity" },
+      {
+        file: "lowercase-doctype",
+        title: "Lowercase doctype must not cause parser error (Issue #2101)",
+      },
       { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
       {
         file: "css-parse-error/gradient-background-image.html",

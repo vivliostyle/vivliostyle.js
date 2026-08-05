@@ -1,0 +1,26 @@
+<!-- Test case for Issue #2101: Lowercase `<!doctype html>` may cause parser error -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lowercase doctype test</title>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      h1 {
+        color: #b00000;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test</h1>
+    <p>
+      This document starts with a lowercase <code>&lt;!doctype html&gt;</code>.
+      It should render normally instead of showing a parser error page.
+    </p>
+  </body>
+</html>
