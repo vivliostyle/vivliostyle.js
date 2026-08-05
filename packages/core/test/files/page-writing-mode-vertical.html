@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2001: writing-mode at @page (root also vertical) -->
+<meta charset="utf-8">
+<style>
+  @page {
+    writing-mode: vertical-rl;
+    size: 400px 800px;
+    margin-inline-start: 2%;
+    margin-block-start: 8%;
+    margin-inline-end: 6%;
+    margin-block-end: 20%;
+    background: blue;
+  }
+  :root {
+    writing-mode: vertical-rl;
+  }
+  body {
+    margin: 0;
+    background: hotpink;
+  }
+</style>
+<div style="box-sizing:border-box; padding:4px; height:100vh; background:yellow;">
+  This document should be in vertical-rl writing mode (inherited from the root).
+  The page margins (in blue) should be smallest at the top, larger at the right,
+  even larger at the bottom, and largest at the left.
+</div>
