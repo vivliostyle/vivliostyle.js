@@ -302,18 +302,19 @@ export function parseAndReturnNullIfError(
   } catch (e) {}
   if (!doc) {
     return null;
-  } else {
-    const docElement = doc.documentElement;
-    const errorTagName = "parsererror";
-    if (docElement.localName === errorTagName) {
-      return null;
-    } else {
-      for (let c = docElement.firstElementChild; c; c = c.nextElementSibling) {
-        if (c.localName === errorTagName) {
-          return null;
-        }
-      }
-    }
+  }
+  // XML parsing errors are reported as a "parsererror" element in the result
+  // document. It is not always a direct child of the documentElement: e.g.,
+  // when XML-parsing a lowercase "<!doctype html>" the parsererror element is
+  // nested inside <body>. Search the whole document so such parse errors are
+  // detected. HTML parsing never generates a "parsererror" element, so skip
+  // this check for text/html to avoid rejecting valid HTML that happens to
+  // contain a literal "<parsererror>" element. (Issue #2101)
+  if (
+    type !== DOMParserSupportedType.TEXT_HTML &&
+    doc.querySelector("parsererror")
+  ) {
+    return null;
   }
   return doc;
 }
