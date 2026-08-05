@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2001: writing-mode at @page not working correctly -->
+<!-- Based on WPT test: css/css-page/page-box-009-print.html -->
+<meta charset="utf-8">
+<style>
+  @page {
+    writing-mode: vertical-rl;
+    size: 400px 800px;
+    margin-inline-start: 2%;
+    margin-block-start: 8%;
+    margin-inline-end: 6%;
+    margin-block-end: 20%;
+    padding-inline-start: 2%;
+    padding-block-start: 8%;
+    padding-inline-end: 6%;
+    padding-block-end: 20%;
+    background: blue;
+  }
+  :root {
+    print-color-adjust: exact;
+  }
+  body {
+    margin: 0;
+    background: hotpink;
+  }
+</style>
+<div style="box-sizing:border-box; padding:4px; height:100vh; background:yellow;">
+  This document should be in horizontal-tb writing mode.<br>
+  The page padding (in hotpink) and margins (in blue) should be identical.  They
+  should be smallest at the top, larger at the right, even larger at the bottom,
+  and largest at the left.
+</div>

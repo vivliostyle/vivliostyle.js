@@ -649,6 +649,10 @@ export const propertiesAppliedToPartition = (() => {
     height: true,
     "block-size": true,
     "inline-size": true,
+    // The page box's own writing mode and direction, used to resolve logical
+    // properties (margin/padding/etc.) on the `@page` context. (Issue #2001)
+    "writing-mode": true,
+    direction: true,
     margin: true,
     padding: true,
     border: true,
@@ -2031,6 +2035,15 @@ export class PageAreaPartitionInstance
         this.cascaded[name] = docElementStyle[name];
       }
     }
+    // The page area content follows the root element's writing mode and
+    // direction, not those of the `@page` context. (Issue #2001)
+    // The root element defaults to horizontal-tb / ltr when not specified.
+    this.cascaded["writing-mode"] =
+      docElementStyle["writing-mode"] ??
+      new CssCascade.CascadeValue(Css.ident.horizontal_tb, 0);
+    this.cascaded["direction"] =
+      docElementStyle["direction"] ??
+      new CssCascade.CascadeValue(Css.ident.ltr, 0);
     super.applyCascadeAndInit(cascade, {});
   }
 

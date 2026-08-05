@@ -153,6 +153,14 @@ module.exports = [
         file: "outline-offset-at-page.html",
         title: "outline-offset on @page (Issue #2000)",
       },
+      {
+        file: "page-writing-mode.html",
+        title: "writing-mode on @page (Issue #2001)",
+      },
+      {
+        file: "page-writing-mode-vertical.html",
+        title: "writing-mode on @page, vertical root (Issue #2001)",
+      },
       { file: "font-feature-settings.html", title: "Font feature settings" },
       {
         file: "font-variation-settings.html",
