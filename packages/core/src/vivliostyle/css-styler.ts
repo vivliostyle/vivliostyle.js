@@ -484,6 +484,13 @@ export class Styler implements AbstractStyler {
   cascadeHolder: CssCascade.Cascade;
   last: Base.RootBoundCursor | null;
   rootStyle = {} as CssCascade.ElementStyle;
+  /**
+   * writing-mode and direction values propagated from the body element to
+   * the root element. Per CSS Writing Modes spec, this propagation is done
+   * on used values rather than computed values, so these values must not be
+   * inherited by the page context. (Issue #1122)
+   */
+  bodyPropagatedStyle = {} as CssCascade.ElementStyle;
   styles: StyleStore;
   counterSnapshots: CounterSnapshot[] = [];
   flows = {} as { [key: string]: Vtree.Flow };
@@ -602,9 +609,12 @@ export class Styler implements AbstractStyler {
   ): void {
     if (isBody) {
       for (const propName of ["writing-mode", "direction"]) {
-        if (elemStyle[propName] && !(isBody && this.rootStyle[propName])) {
-          // Copy it over, but keep it at the root element as well.
+        if (elemStyle[propName] && !this.rootStyle[propName]) {
+          // Copy it over, but keep it at the body element as well.
           this.rootStyle[propName] = elemStyle[propName];
+          // Record the value propagated from the body element so that it
+          // can be excluded from the page context inheritance. (Issue #1122)
+          this.bodyPropagatedStyle[propName] = elemStyle[propName];
         }
       }
     } else {

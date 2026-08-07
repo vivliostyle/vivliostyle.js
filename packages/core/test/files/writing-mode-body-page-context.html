@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1122: writing-mode specified on the body element should not be inherited by the page context -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <style>
+      @page {
+        size: 400px 300px;
+        margin: 40px;
+        @top-center {
+          content: "ここは横書きのはず";
+          border: 1px solid blue;
+        }
+      }
+      body {
+        writing-mode: vertical-rl;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ここは縦書き</h1>
+    <p>body要素に指定されたwriting-modeプロパティはルート要素に指定された場合と異なり、ページコンテキスト（@pageルール内）に継承されるべきではない。</p>
+  </body>
+</html>

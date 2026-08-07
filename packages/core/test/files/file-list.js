@@ -165,6 +165,11 @@ module.exports = [
         file: "page-writing-mode-vertical.html",
         title: "writing-mode on @page, vertical root (Issue #2001)",
       },
+      {
+        file: "writing-mode-body-page-context.html",
+        title:
+          "writing-mode on body not inherited by page context (Issue #1122)",
+      },
       { file: "font-feature-settings.html", title: "Font feature settings" },
       {
         file: "font-variation-settings.html",
