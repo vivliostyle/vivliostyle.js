@@ -29,7 +29,7 @@ describe("layout", function () {
     var textNode, nodeContext;
     function openTextNodeContext(options) {
       var settings = options || {};
-      var context = adapt_nodecontext.openAt(
+      var opened = adapt_nodecontext.openAt(
         {},
         null,
         3,
@@ -47,9 +47,11 @@ describe("layout", function () {
           ],
         },
       );
-      context.hyphenateCharacter = "_";
-      context.breakWord = !!settings.breakWord;
-      return context;
+      return {
+        ...opened,
+        hyphenateCharacter: "_",
+        breakWord: !!settings.breakWord,
+      };
     }
     beforeEach(function () {
       breaker = new adapt_layout.TextNodeBreaker();
