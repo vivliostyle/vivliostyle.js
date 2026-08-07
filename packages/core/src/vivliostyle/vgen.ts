@@ -3115,7 +3115,10 @@ export class ViewFactory
         // our next position is the element after shadow:content in the parent
         // shadow tree
         const resumed = NodeContext.latestContinuation(cur.shadowSibling);
-        const advanced = NodeContext.withBoxOffset(resumed, boxOffset);
+        const advanced = NodeContext.setBoxOffset(
+          NodeContext.derived(resumed),
+          boxOffset,
+        );
         NodeContext.resumeContinuation(cur.shadowSibling, advanced);
         return advanced;
       }

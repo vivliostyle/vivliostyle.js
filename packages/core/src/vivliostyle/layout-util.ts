@@ -296,8 +296,8 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       state.breakAtTheEdge,
     );
     if (overflow) {
-      state.nodeContext = NodeContext.withOverflow(
-        state.lastAfterNodeContext || state.nodeContext,
+      state.nodeContext = NodeContext.setOverflow(
+        NodeContext.derived(state.lastAfterNodeContext || state.nodeContext),
         true,
       );
     }
@@ -321,8 +321,8 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         false,
         state.breakAtTheEdge,
       );
-      nodeContext = state.nodeContext = NodeContext.withOverflow(
-        nodeContext,
+      nodeContext = state.nodeContext = NodeContext.setOverflow(
+        NodeContext.derived(nodeContext),
         true,
       );
     }

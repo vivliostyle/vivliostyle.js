@@ -23,19 +23,11 @@ import * as Break from "./break";
 import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssProp from "./css-prop";
-import * as Diff from "./diff";
 import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as TaskUtil from "./task-util";
 import { assert } from "./asserts";
-import {
-  CssStyler,
-  PageFloats,
-  PseudoElement,
-  Selectors,
-  Vtree,
-  XmlDoc,
-} from "./types";
+import { CssStyler, PageFloats, Vtree, XmlDoc } from "./types";
 
 export const delayedProps = {
   transform: true,

@@ -775,7 +775,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               !this.layoutConstraint.allowLayout(position)
             ) {
               violateConstraint = true;
-              position = NodeContext.withOverflow(position, true);
+              position = NodeContext.setOverflow(
+                NodeContext.derived(position),
+                true,
+              );
             }
             const floatNodeContext = this.asFloatNodeContext(position);
             if (
@@ -886,7 +889,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               return;
             }
             if (!this.layoutConstraint.allowLayout(position)) {
-              position = NodeContext.withOverflow(position, true);
+              position = NodeContext.setOverflow(
+                NodeContext.derived(position),
+                true,
+              );
               if (this.stopAtOverflow) {
                 bodyFrame.breakLoop();
                 return;
@@ -1659,7 +1665,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.updateMaxReachedAfterEdge(floatBoxEdge);
         frame.finish(nodeContextAfter);
       } else {
-        nodeContext = NodeContext.withOverflow(nodeContext, true);
+        nodeContext = NodeContext.setOverflow(
+          NodeContext.derived(nodeContext),
+          true,
+        );
         frame.finish(nodeContext);
       }
     });
@@ -2724,7 +2733,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             this.findLineFootnoteOverflowBreak(checkPoints);
           if (lineFootnoteOverflowBreak) {
             const overflowNodeContext = NodeContext.setPluginProp(
-              NodeContext.withOverflow(lineFootnoteOverflowBreak, true),
+              NodeContext.setOverflow(
+                NodeContext.derived(lineFootnoteOverflowBreak),
+                true,
+              ),
               "lineFootnoteOverflow",
               1,
             );
@@ -2741,7 +2753,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
             // TODO: how to signal overflow in the last pagargaph???
             if (overflown && !this.isLoneImage(checkPoints) && nodeContext) {
-              nodeContext = NodeContext.withOverflow(nodeContext, true);
+              nodeContext = NodeContext.setOverflow(
+                NodeContext.derived(nodeContext),
+                true,
+              );
             }
           }
           frame.finish(nodeContext);
@@ -3259,7 +3274,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       blockParent = blockParent.parent;
     } while (blockParent && blockParent.inline);
     if (blockParent) {
-      blockParent = NodeContext.detachedAfterEdgeOf(blockParent);
+      blockParent = NodeContext.afterEdgeOf(blockParent);
       return LayoutHelper.calculateEdge(
         blockParent,
         this.clientLayout,
@@ -3377,7 +3392,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         Logging.logger.warn("Could not find any page breaks?!!");
         this.skipTailEdges(overflownNodeContext).then((nodeContext) => {
           if (nodeContext) {
-            nodeContext = NodeContext.withOverflow(nodeContext, false);
+            nodeContext = NodeContext.setOverflow(
+              NodeContext.derived(nodeContext),
+              false,
+            );
             this.finishBreak(nodeContext, forceRemoveSelf, true).then(() => {
               frame.finish(nodeContext);
             });
@@ -4087,10 +4105,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     breakAtTheEdge,
                   )
                 ) {
-                  nodeContext = NodeContext.withOverflow(
-                    this.stopAtOverflow
-                      ? lastAfterNodeContext || nodeContext
-                      : nodeContext,
+                  nodeContext = NodeContext.setOverflow(
+                    NodeContext.derived(
+                      this.stopAtOverflow
+                        ? lastAfterNodeContext || nodeContext
+                        : nodeContext,
+                    ),
                     true,
                   );
                 } else {
@@ -4118,8 +4138,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   if (breakAtTheEdge === "column" && nodeContext.viewNode) {
                     Break.unsuppressColumnBreakBefore(nodeContext.viewNode);
                   }
-                  nodeContext = NodeContext.withBreakBefore(
-                    nodeContext,
+                  nodeContext = NodeContext.setBreakBefore(
+                    NodeContext.derived(nodeContext),
                     breakAtTheEdge,
                   );
                 }
@@ -4221,10 +4241,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   !this.layoutConstraint.allowLayout(nodeContext)
                 ) {
                   // overflow
-                  nodeContext = NodeContext.withOverflow(
-                    this.stopAtOverflow
-                      ? lastAfterNodeContext || nodeContext
-                      : nodeContext,
+                  nodeContext = NodeContext.setOverflow(
+                    NodeContext.derived(
+                      this.stopAtOverflow
+                        ? lastAfterNodeContext || nodeContext
+                        : nodeContext,
+                    ),
                     true,
                   );
                 }
@@ -4372,7 +4394,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   !this.stopAtOverflow,
                   breakAtTheEdge,
                 );
-                nodeContext = NodeContext.withOverflow(nodeContext, true);
+                nodeContext = NodeContext.setOverflow(
+                  NodeContext.derived(nodeContext),
+                  true,
+                );
                 if (this.stopAtOverflow) {
                   loopFrame.breakLoop();
                   return;
@@ -4393,10 +4418,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   )
                 ) {
                   // overflow
-                  nodeContext = NodeContext.withOverflow(
-                    this.stopAtOverflow
-                      ? lastAfterNodeContext || nodeContext
-                      : nodeContext,
+                  nodeContext = NodeContext.setOverflow(
+                    NodeContext.derived(
+                      this.stopAtOverflow
+                        ? lastAfterNodeContext || nodeContext
+                        : nodeContext,
+                    ),
                     true,
                   );
                 }
@@ -4433,7 +4460,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           )
         ) {
           if (lastAfterNodeContext && this.stopAtOverflow) {
-            nodeContext = NodeContext.withOverflow(lastAfterNodeContext, true);
+            nodeContext = NodeContext.setOverflow(
+              NodeContext.derived(lastAfterNodeContext),
+              true,
+            );
           } else {
             // TODO: what to return here??
           }
@@ -5285,7 +5315,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
-      nodeContext = NodeContext.withOffsetInNode(nodeContext, textNode.length);
+      nodeContext = NodeContext.setOffsetInNode(nodeContext, textNode.length);
     } else {
       // Character with index low is the last one that fits.
       let viewIndex = low - nodeContext.boxOffset;

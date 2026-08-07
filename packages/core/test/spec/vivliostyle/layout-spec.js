@@ -120,6 +120,64 @@ describe("layout", function () {
         expect(textNode.replaceData).toHaveBeenCalledWith(8, 9, "");
       });
     });
+
+    describe("#breakAfterSoftHyphen", function () {
+      function openJoiningTextNodeContext(preprocessedTextContent) {
+        var opened = adapt_nodecontext.openAt(
+          {},
+          null,
+          0,
+          new adapt_layoutprocessor.BlockFormattingContext(null),
+          { shadowType: adapt_vtree.ShadowType.NONE, shadowContext: null },
+          {
+            offsetInNode: 0,
+            after: false,
+            preprocessedTextContent: preprocessedTextContent,
+          },
+        );
+        return { ...opened, hyphenateCharacter: "_" };
+      }
+
+      it("writes the joiner into the text content every value shares", function () {
+        var joining = openJoiningTextNodeContext([[0, "\u0628\u00ADx"]]);
+        var derived = adapt_nodecontext.derived(joining);
+        var brokenNode = {
+          length: 3,
+          data: "\u0628\u00ADx",
+          replaceData: function () {},
+        };
+        var viewIndex = breaker.breakAfterSoftHyphen(
+          brokenNode,
+          brokenNode.data,
+          1,
+          joining,
+        );
+        expect(viewIndex).toBe(2);
+        expect(joining.preprocessedTextContent[0][1]).toBe(
+          "\u0628\u00AD\u200Dx",
+        );
+        expect(derived.preprocessedTextContent[0][1]).toBe(
+          "\u0628\u00AD\u200Dx",
+        );
+      });
+
+      it("leaves the text content alone where no joiner is needed", function () {
+        var plain = openJoiningTextNodeContext([[0, "a\u00ADx"]]);
+        var brokenNode = {
+          length: 3,
+          data: "a\u00ADx",
+          replaceData: function () {},
+        };
+        var viewIndex = breaker.breakAfterSoftHyphen(
+          brokenNode,
+          brokenNode.data,
+          1,
+          plain,
+        );
+        expect(viewIndex).toBe(2);
+        expect(plain.preprocessedTextContent[0][1]).toBe("a\u00ADx");
+      });
+    });
   });
 
   describe("adapt_layout.resolveHyphenateCharacter", function () {

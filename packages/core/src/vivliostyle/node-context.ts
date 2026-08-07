@@ -32,7 +32,6 @@ export type PositionHead = {
   offsetInNode: number;
   after: boolean;
   preprocessedTextContent?: Diff.Change[] | null;
-  fragmentIndex?: number;
 };
 
 const unstyled: Vtree.UnstyledFields = {
@@ -61,7 +60,7 @@ function derivedFromParent(parent: Vtree.ParentNodeContext | null): Pick<
   };
 }
 
-function derived<T extends Vtree.NodeContext>(nodeContext: T): T {
+export function derived<T extends Vtree.NodeContext>(nodeContext: T): T {
   return { ...nodeContext, ...derivedFromParent(nodeContext.parent) };
 }
 
@@ -134,10 +133,6 @@ function withPositionHead(
     ...nodeContext,
     offsetInNode: head.offsetInNode,
     preprocessedTextContent: head.preprocessedTextContent ?? null,
-    fragmentIndex:
-      head.fragmentIndex === undefined
-        ? nodeContext.fragmentIndex
-        : head.fragmentIndex,
   };
   return head.after
     ? { ...positioned, kind: "after-none", after: true }
@@ -559,13 +554,7 @@ export function afterEdgeAt(
   return { ...moved, kind: "after-text", after: true };
 }
 
-export function detachedAfterEdgeOf(
-  nodeContext: Vtree.NodeContext,
-): Vtree.AfterEdgeNodeContext {
-  return afterEdgeOf(nodeContext);
-}
-
-export function detachedBeforeEdgeOf(
+export function beforeEdgeOf(
   nodeContext: Vtree.NodeContext,
 ): Vtree.BeforeEdgeNodeContext {
   const moved = derived(nodeContext);
@@ -602,25 +591,11 @@ export function anchoredAfterOf(
   };
 }
 
-export function withOverflow<T extends Vtree.NodeContext>(
-  nodeContext: T,
-  overflow: boolean,
-): T {
-  return { ...derived(nodeContext), overflow };
-}
-
 export function setOverflow<T extends Vtree.NodeContext>(
   nodeContext: T,
   overflow: boolean,
 ): T {
   return { ...nodeContext, overflow };
-}
-
-export function withBoxOffset<T extends Vtree.NodeContext>(
-  nodeContext: T,
-  boxOffset: number,
-): T {
-  return { ...derived(nodeContext), boxOffset };
 }
 
 export function setBoxOffset<T extends Vtree.NodeContext>(
@@ -630,11 +605,11 @@ export function setBoxOffset<T extends Vtree.NodeContext>(
   return { ...nodeContext, boxOffset };
 }
 
-export function withOffsetInNode<T extends Vtree.NodeContext>(
+export function setOffsetInNode<T extends Vtree.NodeContext>(
   nodeContext: T,
   offsetInNode: number,
 ): T {
-  return { ...derived(nodeContext), offsetInNode };
+  return { ...nodeContext, offsetInNode };
 }
 
 export function textBrokenAt<T extends Vtree.NodeContext>(
@@ -646,13 +621,6 @@ export function textBrokenAt<T extends Vtree.NodeContext>(
     offsetInNode: nodeContext.offsetInNode + viewIndex,
     breakBefore: null,
   };
-}
-
-export function withBreakBefore<T extends Vtree.NodeContext>(
-  nodeContext: T,
-  breakBefore: string | null,
-): T {
-  return { ...derived(nodeContext), breakBefore };
 }
 
 export function setBreakBefore<T extends Vtree.NodeContext>(
@@ -787,7 +755,7 @@ export function positionChainOf<T extends Vtree.NodeContext>(
   };
 }
 
-export function toNodePositionStep(
+function toNodePositionStep(
   nodeContext: Vtree.NodeContext,
 ): Vtree.NodePositionStep {
   return {
@@ -807,7 +775,7 @@ export function toNodePositionStep(
   };
 }
 
-export function toRootNodePositionStep(
+function toRootNodePositionStep(
   root: Vtree.RootNodeContext,
 ): Vtree.RootNodePositionStep {
   return {

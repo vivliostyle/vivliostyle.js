@@ -181,6 +181,59 @@ describe("node-context", function () {
     });
   });
 
+  describe("continuation", function () {
+    it("keeps the continuation of each slot apart", function () {
+      var oneSlot = openedAt(false);
+      var otherSlot = openedAt(false);
+      var one = vivliostyle_node_context.derived(oneSlot);
+      var other = vivliostyle_node_context.derived(otherSlot);
+      vivliostyle_node_context.resumeContinuation(oneSlot, one);
+      vivliostyle_node_context.resumeContinuation(otherSlot, other);
+      var moved = vivliostyle_node_context.derived(one);
+      vivliostyle_node_context.followContinuation(one, moved);
+      expect(vivliostyle_node_context.latestContinuation(oneSlot)).toBe(moved);
+      expect(vivliostyle_node_context.latestContinuation(otherSlot)).toBe(
+        other,
+      );
+    });
+
+    it("releases the value a slot no longer continues at", function () {
+      var slot = openedAt(false);
+      var first = vivliostyle_node_context.derived(slot);
+      vivliostyle_node_context.resumeContinuation(slot, first);
+      var second = vivliostyle_node_context.derived(slot);
+      vivliostyle_node_context.resumeContinuation(slot, second);
+      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
+      var moved = vivliostyle_node_context.derived(first);
+      vivliostyle_node_context.followContinuation(first, moved);
+      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
+    });
+
+    it("lets a released value carry the continuation of another slot", function () {
+      var slot = openedAt(false);
+      var first = vivliostyle_node_context.derived(slot);
+      vivliostyle_node_context.resumeContinuation(slot, first);
+      var second = vivliostyle_node_context.derived(slot);
+      vivliostyle_node_context.resumeContinuation(slot, second);
+      var otherSlot = openedAt(false);
+      vivliostyle_node_context.resumeContinuation(otherSlot, first);
+      var moved = vivliostyle_node_context.derived(first);
+      vivliostyle_node_context.followContinuation(first, moved);
+      expect(vivliostyle_node_context.latestContinuation(otherSlot)).toBe(
+        moved,
+      );
+      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
+    });
+
+    it("leaves a value no slot continues at alone", function () {
+      var value = openedAt(false);
+      var next = vivliostyle_node_context.derived(value);
+      vivliostyle_node_context.followContinuation(value, next);
+      expect(vivliostyle_node_context.latestContinuation(value)).toBe(value);
+      expect(vivliostyle_node_context.latestContinuation(next)).toBe(next);
+    });
+  });
+
   describe("openNextSiblingOf", function () {
     it("keeps the inherited fields the previous sibling carried", function () {
       var element = elementNodeContext();
