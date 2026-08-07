@@ -781,7 +781,7 @@ export class NodeContext implements Vtree.NodeContext {
     np.overflow = this.overflow;
     np.preprocessedTextContent = this.preprocessedTextContent;
     np.repeatOnBreak = this.repeatOnBreak;
-    np.pluginProps = Object.create(this.pluginProps);
+    np.pluginProps = { ...this.pluginProps };
     np.fragmentIndex = this.fragmentIndex;
     np.afterIfContinues = this.afterIfContinues;
     np.footnotePolicy = this.footnotePolicy;
