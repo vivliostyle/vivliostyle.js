@@ -25,6 +25,74 @@ import { Layout, RepetitiveElement, Vtree } from "./types";
  */
 export type BreakPosition = Layout.BreakPosition;
 
+type LayoutPass = Record<string, never>;
+
+type EdgeOverflow = {
+  pass: LayoutPass;
+  before: Map<number, boolean>;
+  after: Map<number, boolean>;
+};
+
+const edgeOverflown = new WeakMap<Element | Text, EdgeOverflow>();
+
+const layoutPassOfColumn = new WeakMap<Layout.Column, LayoutPass>();
+
+function layoutPassOf(column: Layout.Column): LayoutPass {
+  let pass = layoutPassOfColumn.get(column);
+  if (!pass) {
+    pass = {};
+    layoutPassOfColumn.set(column, pass);
+  }
+  return pass;
+}
+
+export function beginLayoutPass(column: Layout.Column): void {
+  layoutPassOfColumn.set(column, {});
+}
+
+function edgesAt(
+  column: Layout.Column,
+  nodeContext: Vtree.NodeContext,
+): Map<number, boolean> | null {
+  const viewNode = nodeContext.viewNode;
+  const edges = viewNode === null ? undefined : edgeOverflown.get(viewNode);
+  if (!edges || edges.pass !== layoutPassOf(column)) {
+    return null;
+  }
+  return nodeContext.after ? edges.after : edges.before;
+}
+
+export function recordEdgeOverflow(
+  column: Layout.Column,
+  nodeContext: Vtree.NodeContext,
+  overflows: boolean,
+): void {
+  const viewNode = nodeContext.viewNode;
+  if (!viewNode) {
+    return;
+  }
+  let edges = edgesAt(column, nodeContext);
+  if (!edges) {
+    const created = {
+      pass: layoutPassOf(column),
+      before: new Map<number, boolean>(),
+      after: new Map<number, boolean>(),
+    };
+    edgeOverflown.set(viewNode, created);
+    edges = nodeContext.after ? created.after : created.before;
+  }
+  edges.set(nodeContext.boxOffset, overflows);
+}
+
+export function effectiveOverflow(
+  column: Layout.Column,
+  nodeContext: Vtree.NodeContext,
+): boolean {
+  const edges = edgesAt(column, nodeContext);
+  const recorded = edges ? edges.get(nodeContext.boxOffset) : undefined;
+  return nodeContext.overflow || recorded === true;
+}
+
 export abstract class AbstractBreakPosition
   implements Layout.AbstractBreakPosition
 {
@@ -183,9 +251,10 @@ export class EdgeBreakPosition
     this.overflowIfRepetitiveElementsDropped = column.isOverflown(
       edge + (column.vertical ? -1 : 1) * offsets.minimum,
     );
-    this.overflows = this.position.overflow = column.isOverflown(
+    this.overflows = column.isOverflown(
       edge + (column.vertical ? -1 : 1) * offsets.current,
     );
+    recordEdgeOverflow(column, this.position, this.overflows);
   }
 
   override getNodeContext(): Vtree.NodeContext {

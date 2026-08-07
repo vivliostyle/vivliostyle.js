@@ -3254,7 +3254,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     edge: number;
     checkPoint: Vtree.RenderedNodeContext | null;
   } {
-    const index = checkPoints.findIndex((cp) => cp.overflow);
+    const index = checkPoints.findIndex((cp) =>
+      BreakPosition.effectiveOverflow(this, cp),
+    );
     if (index < 0) {
       return { edge: NaN, checkPoint: null };
     }
@@ -3270,6 +3272,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): Vtree.NodeContext {
     this.computedBlockSize =
       bp.computedBlockSize + this.getOffsetByRepetitiveElements(bp);
+    bp.position.overflow = bp.overflows;
     return bp.position;
   }
 
@@ -4935,6 +4938,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let overflownNodeContext: Vtree.NodeContext | null = null;
 
     // ------ init backtracking list -----
+    BreakPosition.beginLayoutPass(this);
     this.breakPositions = [];
     this.nodeContextOverflowingDueToRepetitiveElements = null;
 
@@ -5116,9 +5120,10 @@ export class PseudoColumn {
       startNodeContext.overflow,
       0,
     );
+    bp.findAcceptableBreak(this.column, 0);
     // updates the column's overflow state, so it runs whether or not the
     // start position is the one taken
-    bp.findAcceptableBreak(this.column, 0);
+    startNodeContext.overflow = bp.overflows;
     return p ?? { breakPosition: bp, nodeContext: startNodeContext };
   }
   /**
