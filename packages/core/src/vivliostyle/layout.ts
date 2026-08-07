@@ -5206,6 +5206,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
+      nodeContext = nodeContext.modify();
       nodeContext.offsetInNode = textNode.length;
     } else {
       // Character with index low is the last one that fits.
