@@ -762,16 +762,31 @@ export class ViewFactory
     );
     const isRoot = !this.nodeContext?.parent;
     if (isRoot) {
-      // Ensure that writing-mode and direction are set on the root element.
-      if (!cascMap["writing-mode"] && this.styler.rootStyle["writing-mode"]) {
-        cascMap["writing-mode"] = this.styler.rootStyle[
-          "writing-mode"
-        ] as CssCascade.CascadeValue;
+      // Ensure that writing-mode and direction are set on the root element,
+      // except when the values are propagated from the body element. That
+      // propagation is done on used values rather than computed values
+      // (CSS Writing Modes spec), so it must not affect the root element's
+      // computed style; otherwise the values would be inherited by the page
+      // context (e.g., page margin boxes). (Issue #1122)
+      const rootWritingMode = this.styler.rootStyle[
+        "writing-mode"
+      ] as CssCascade.CascadeValue;
+      if (
+        !cascMap["writing-mode"] &&
+        rootWritingMode &&
+        this.styler.bodyPropagatedStyle["writing-mode"] !== rootWritingMode
+      ) {
+        cascMap["writing-mode"] = rootWritingMode;
       }
-      if (!cascMap["direction"] && this.styler.rootStyle["direction"]) {
-        cascMap["direction"] = this.styler.rootStyle[
-          "direction"
-        ] as CssCascade.CascadeValue;
+      const rootDirection = this.styler.rootStyle[
+        "direction"
+      ] as CssCascade.CascadeValue;
+      if (
+        !cascMap["direction"] &&
+        rootDirection &&
+        this.styler.bodyPropagatedStyle["direction"] !== rootDirection
+      ) {
+        cascMap["direction"] = rootDirection;
       }
     }
     const verticalParent = vertical;

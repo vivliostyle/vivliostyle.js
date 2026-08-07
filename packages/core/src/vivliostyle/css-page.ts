@@ -1104,11 +1104,22 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     docElementStyle: CssCascade.ElementStyle,
   ) {
     super(parentInstance, pageRuleMaster);
+    const bodyPropagatedStyle = (
+      context as Exprs.Context & {
+        styler?: { bodyPropagatedStyle?: CssCascade.ElementStyle };
+      }
+    ).styler?.bodyPropagatedStyle;
     for (const name in docElementStyle) {
       if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
         switch (name) {
           case "writing-mode":
           case "direction":
+            // writing-mode and direction propagated from the body element
+            // are used values of the root element and must not be inherited
+            // by the page context. (Issue #1122)
+            if (bodyPropagatedStyle?.[name] === docElementStyle[name]) {
+              break;
+            }
             this.cascaded[name] = docElementStyle[name];
         }
       }
