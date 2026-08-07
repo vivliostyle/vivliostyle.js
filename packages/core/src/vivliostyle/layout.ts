@@ -3484,23 +3484,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     };
   }
 
-  /**
-   * @return true if overflows
-   */
   checkOverflowAndSaveEdge(
     nodeContext: Vtree.NodeContext | null,
     trailingEdgeContexts: Vtree.NodeContext[] | null,
-  ): boolean {
+  ): Layout.OverflowCheckResult {
     if (!nodeContext) {
-      return false;
+      return { overflown: false, recordedRepetitiveOverflow: false };
     }
     for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
       if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
-        return false;
+        return { overflown: false, recordedRepetitiveOverflow: false };
       }
     }
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
-      return false;
+      return { overflown: false, recordedRepetitiveOverflow: false };
     }
     const restoreInset = this.suppressOpenAncestorBlockEndInset(nodeContext);
     let edge = LayoutHelper.calculateEdge(
@@ -3517,11 +3514,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const overflown = this.isOverflown(
       edge + (this.vertical ? -1 : 1) * offsets.minimum,
     );
+    let recordedRepetitiveOverflow = false;
     if (
       this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
       !this.nodeContextOverflowingDueToRepetitiveElements
     ) {
       this.nodeContextOverflowingDueToRepetitiveElements = nodeContext;
+      recordedRepetitiveOverflow = true;
     } else if (trailingEdgeContexts) {
       // If the edge does not overflow add the trailing margin, which is
       // truncated to the remaining fragmentainer extent.
@@ -3534,7 +3533,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         : Math.max(edge, Math.min(marginEdge, footnoteEdge));
     }
     this.updateMaxReachedAfterEdge(edge);
-    return overflown;
+    return { overflown, recordedRepetitiveOverflow };
   }
 
   /**
@@ -3554,7 +3553,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
-    const overflown = this.checkOverflowAndSaveEdge(
+    const { overflown } = this.checkOverflowAndSaveEdge(
       nodeContext,
       trailingEdgeContexts,
     );

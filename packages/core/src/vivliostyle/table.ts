@@ -327,7 +327,7 @@ export class InsideTableRowBreakPosition
         const overflows = cellFragments[i].column.checkOverflowAndSaveEdge(
           bp.nodeContext,
           null,
-        );
+        ).overflown;
         if (!overflows) {
           penalty1 -= 3;
         }
@@ -1542,7 +1542,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       nodeContext.overflow = this.column.checkOverflowAndSaveEdge(
         nodeContext,
         null,
-      );
+      ).overflown;
       this.resetColumn();
       state.break = true;
     } else if (display === "table-row" && !this.inHeader && !this.inFooter) {
@@ -1550,24 +1550,19 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       const pending = cont && cont.isPending() ? cont : Task.newResult(true);
       return pending.thenAsync(() => {
         if (!state.break) {
-          const overflown = this.column.checkOverflowAndSaveEdge(
-            nodeContext,
-            null,
-          );
+          const { overflown, recordedRepetitiveOverflow } =
+            this.column.checkOverflowAndSaveEdge(nodeContext, null);
           const repetitiveElements =
             this.formattingContext.getRepetitiveElements();
-          const overflownDueToRepetitiveElements =
-            this.column.nodeContextOverflowingDueToRepetitiveElements ===
-            nodeContext;
           // Keep this guard broad. During repetitive-element retry passes the
           // footer may already be marked skipped in the current state even
           // though footer dropping is still the mechanism that resolves the
           // overflow for this table fragment.
           const canResolveByDroppingFooter =
             !overflown &&
-            overflownDueToRepetitiveElements &&
+            recordedRepetitiveOverflow &&
             !!repetitiveElements?.isFooterRegistered();
-          if (overflown || overflownDueToRepetitiveElements) {
+          if (overflown || recordedRepetitiveOverflow) {
             // Catch row overflow as soon as the row finishes; otherwise the
             // next row start detects it one row too late and content can drift
             // into the page margin before the break is taken. (Issue #1902)
