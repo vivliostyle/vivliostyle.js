@@ -489,50 +489,6 @@ export function newNodePositionFromNodeContext(
   };
 }
 
-export function makeNodeContextFromNodePositionStep(
-  step: NodePositionStep,
-  parent: Vtree.NodeContext,
-): NodeContext {
-  const parentContext = parent as NodeContext;
-  const nodeContext = new NodeContext(
-    step.node,
-    parentContext,
-    0,
-    step.formattingContext ?? parentContext.formattingContext,
-  );
-  nodeContext.blockContainer = blockContainerForChildrenOf(parentContext);
-  applyNodePositionStep(nodeContext, step);
-  nodeContext.shadowSibling = step.shadowSibling
-    ? makeNodeContextFromNodePositionStep(step.shadowSibling, parent.copy())
-    : null;
-  return nodeContext;
-}
-
-export function makeRootNodeContextFromNodePositionStep(
-  step: RootNodePositionStep,
-  flowRootFormattingContext: FormattingContext,
-): NodeContext {
-  const nodeContext = new NodeContext(
-    step.node,
-    null,
-    0,
-    step.formattingContext ?? flowRootFormattingContext,
-  );
-  applyNodePositionStep(nodeContext, step);
-  nodeContext.shadowSibling = step.shadowSibling;
-  return nodeContext;
-}
-
-function applyNodePositionStep(
-  nodeContext: NodeContext,
-  step: NodePositionStep,
-): void {
-  nodeContext.shadowType = step.shadowType;
-  nodeContext.shadowContext = step.shadowContext;
-  nodeContext.nodeShadow = step.nodeShadow;
-  nodeContext.fragmentIndex = step.fragmentIndex + 1;
-}
-
 export function rootStepOfNodePosition(
   position: Vtree.NodePosition,
 ): RootNodePositionStep {
@@ -652,37 +608,6 @@ export class NodeContext implements Vtree.NodeContext {
   footnotePolicy: Css.Ident | null = null;
   pageType: string | null;
   blockContainer: ElementNodeContext | null = null;
-
-  static childOf(
-    sourceNode: Node,
-    parent: NodeContext,
-    boxOffset: number,
-  ): ChildNodeContext {
-    const nodeContext = new NodeContext(
-      sourceNode,
-      parent,
-      boxOffset,
-      parent.formattingContext,
-    );
-    nodeContext.blockContainer = blockContainerForChildrenOf(parent);
-    return nodeContext as ChildNodeContext;
-  }
-
-  static siblingOf(
-    sourceNode: Node,
-    sibling: NodeContext,
-    boxOffset: number,
-  ): NodeContext {
-    const parent = sibling.parent;
-    const nodeContext = new NodeContext(
-      sourceNode,
-      parent,
-      boxOffset,
-      (parent ?? sibling).formattingContext,
-    );
-    nodeContext.blockContainer = sibling.blockContainer;
-    return nodeContext;
-  }
 
   constructor(
     public sourceNode: Node,

@@ -26,6 +26,7 @@ import * as LayoutHelper from "./layout-helper";
 import * as LayoutProcessor from "./layout-processor";
 import * as LayoutRetryers from "./layout-retryers";
 import * as LayoutUtil from "./layout-util";
+import * as NodeContext from "./node-context";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as RepetitiveElementImpl from "./repetitive-element";
@@ -1190,7 +1191,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       cont = cont.thenAsync(() => {
         // Is it always correct to assume steps[1] to be the row?
         // A table row under layout always sits below its table element context.
-        const rowNodeContext = VtreeImpl.makeNodeContextFromNodePositionStep(
+        const rowNodeContext = NodeContext.openFromStep(
           rowCellBreakPositions[0].cellNodePosition.steps[1],
           (currentRow as Vtree.ChildNodeContext).parent,
         );
@@ -1218,15 +1219,15 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               const cell = cellBreakPosition.cell;
               addDummyCellUntil(cell.anchorColumnIndex);
               const cellNodePosition = cellBreakPosition.cellNodePosition;
-              const cellNodeContext =
-                VtreeImpl.makeNodeContextFromNodePositionStep(
-                  cellNodePosition.steps[0],
-                  rowNodeContext,
-                );
-              cellNodeContext.offsetInNode = cellNodePosition.offsetInNode;
-              cellNodeContext.after = cellNodePosition.after;
-              cellNodeContext.fragmentIndex =
-                cellNodePosition.steps[0].fragmentIndex + 1;
+              const cellNodeContext = NodeContext.openFromStep(
+                cellNodePosition.steps[0],
+                rowNodeContext,
+                {
+                  offsetInNode: cellNodePosition.offsetInNode,
+                  after: cellNodePosition.after,
+                  fragmentIndex: cellNodePosition.steps[0].fragmentIndex + 1,
+                },
+              );
               return layoutContext
                 .setCurrent(cellNodeContext, false)
                 .thenAsync(() => {

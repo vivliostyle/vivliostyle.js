@@ -38,6 +38,7 @@ import * as LayoutProcessor from "./layout-processor";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as Matchers from "./matchers";
+import * as NodeContext from "./node-context";
 import * as PseudoElement from "./pseudo-element";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
@@ -601,24 +602,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       .loop(() => {
         while (stepIndex >= 0) {
           const prevContext = nodeContext;
+          const head =
+            stepIndex == 0
+              ? NodeContext.afterHeadFromPosition(
+                  position,
+                  this.calculateOffsetInNodeForNodeContext(position),
+                )
+              : undefined;
           nodeContext = prevContext
-            ? VtreeImpl.makeNodeContextFromNodePositionStep(
-                steps[stepIndex],
-                prevContext,
-              )
-            : VtreeImpl.makeRootNodeContextFromNodePositionStep(
+            ? NodeContext.openFromStep(steps[stepIndex], prevContext, head)
+            : NodeContext.openRootFromStep(
                 VtreeImpl.rootStepOfNodePosition(position),
                 this.flowRootFormattingContext,
+                head,
               );
-          if (stepIndex == 0) {
-            nodeContext.offsetInNode =
-              this.calculateOffsetInNodeForNodeContext(position);
-            nodeContext.after = position.after;
-            nodeContext.preprocessedTextContent =
-              position.preprocessedTextContent;
-            if (nodeContext.after) {
-              break;
-            }
+          if (head?.after) {
+            break;
           }
           const r = this.layoutContext.setCurrent(
             nodeContext,

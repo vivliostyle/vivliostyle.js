@@ -36,6 +36,7 @@ import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Net from "./net";
+import * as NodeContext from "./node-context";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
@@ -2968,10 +2969,11 @@ export class ViewFactory
       nextPos = null;
     }
     if (contentNode) {
-      const r = Vtree.NodeContext.childOf(contentNode, pos.parent, boxOffset);
-      r.shadowContext = contentShadow;
-      r.shadowType = contentShadowType;
-      r.shadowSibling = nextPos;
+      const r = NodeContext.openChildOf(contentNode, pos.parent, boxOffset, {
+        shadowType: contentShadowType,
+        shadowContext: contentShadow,
+        shadowSibling: nextPos,
+      });
       return this.processShadowContent(r);
     }
     if (nextPos === null) {
@@ -3031,9 +3033,10 @@ export class ViewFactory
           shadowNode = shadowNode.firstChild;
         }
         if (shadowNode) {
-          const sr = Vtree.NodeContext.childOf(shadowNode, pos, boxOffset);
-          sr.shadowContext = pos.nodeShadow;
-          sr.shadowType = pos.nodeShadow.type;
+          const sr = NodeContext.openChildOf(shadowNode, pos, boxOffset, {
+            shadowType: pos.nodeShadow.type,
+            shadowContext: pos.nodeShadow,
+          });
           return this.processShadowContent(sr);
         }
       }
@@ -3042,7 +3045,7 @@ export class ViewFactory
       const child = pos.sourceNode.firstChild;
       if (child) {
         return this.processShadowContent(
-          Vtree.NodeContext.childOf(child, pos, boxOffset),
+          NodeContext.openChildOf(child, pos, boxOffset),
         );
       }
 
@@ -3132,7 +3135,7 @@ export class ViewFactory
     );
 
     // Create NodeContext for footnote-call with the same parent as footnote
-    const footnoteCallContext = Vtree.NodeContext.siblingOf(
+    const footnoteCallContext = NodeContext.openSiblingOf(
       footnoteCallSourceNode,
       footnoteNodeContext,
       footnoteNodeContext.boxOffset,
@@ -3734,24 +3737,19 @@ export class ViewFactory
         while (i >= 0) {
           const pn = arr[i];
           const parentContext = rebuilt ?? container.parent;
-          const child = new Vtree.NodeContext(
+          const child = NodeContext.openAt(
             pn.sourceNode,
             parentContext,
             boxOffset,
             (parentContext ?? container).formattingContext,
+            {
+              shadowType: pn.shadowType,
+              shadowContext: pn.shadowContext,
+              nodeShadow: pn.nodeShadow,
+              shadowSibling: pn.shadowSibling ?? shadowSibling,
+            },
+            i == 0 ? { offsetInNode, after } : undefined,
           );
-          child.blockContainer =
-            parentContext && Vtree.blockContainerForChildrenOf(parentContext);
-          if (i == 0) {
-            child.offsetInNode = offsetInNode;
-            child.after = after;
-          }
-          child.shadowType = pn.shadowType;
-          child.shadowContext = pn.shadowContext;
-          child.nodeShadow = pn.nodeShadow;
-          child.shadowSibling = pn.shadowSibling
-            ? pn.shadowSibling
-            : shadowSibling;
           shadowSibling = null;
           rebuilt = child;
           i--;
