@@ -17,6 +17,7 @@
 
 import * as adapt_layout from "../../../src/vivliostyle/layout";
 import * as adapt_layoutprocessor from "../../../src/vivliostyle/layout-processor";
+import * as adapt_nodecontext from "../../../src/vivliostyle/node-context";
 import * as adapt_vtree from "../../../src/vivliostyle/vtree";
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
@@ -26,6 +27,30 @@ describe("layout", function () {
   describe("adapt_layout.TextNodeBreaker", function () {
     var breaker;
     var textNode, nodeContext;
+    function openTextNodeContext(options) {
+      var settings = options || {};
+      var context = adapt_nodecontext.openAt(
+        {},
+        null,
+        3,
+        new adapt_layoutprocessor.BlockFormattingContext(null),
+        { shadowType: adapt_vtree.ShadowType.NONE, shadowContext: null },
+        {
+          offsetInNode: 0,
+          after: !!settings.after,
+          preprocessedTextContent: [
+            [0, "abcdeabcde"],
+            [1, "\u00AD"],
+            [0, "f gh"],
+            [1, "\u00AD"],
+            [0, "j"],
+          ],
+        },
+      );
+      context.hyphenateCharacter = "_";
+      context.breakWord = !!settings.breakWord;
+      return context;
+    }
     beforeEach(function () {
       breaker = new adapt_layout.TextNodeBreaker();
 
@@ -36,21 +61,7 @@ describe("layout", function () {
       };
       spyOn(textNode, "replaceData").and.callThrough();
 
-      nodeContext = new adapt_vtree.NodeContext(
-        {},
-        null,
-        3,
-        new adapt_layoutprocessor.BlockFormattingContext(null),
-      );
-      nodeContext.preprocessedTextContent = [
-        [0, "abcdeabcde"],
-        [1, "\u00AD"],
-        [0, "f gh"],
-        [1, "\u00AD"],
-        [0, "j"],
-      ];
-      nodeContext.hyphenateCharacter = "_";
-      nodeContext.offsetInNode = 0;
+      nodeContext = openTextNodeContext();
     });
     afterEach(function () {
       textNode.replaceData.calls.reset();
@@ -58,7 +69,7 @@ describe("layout", function () {
 
     describe("#breakTextNode", function () {
       it("increments `offsetInNode` when nodeContext#after is true.", function () {
-        nodeContext.after = true;
+        nodeContext = openTextNodeContext({ after: true });
         var newContext = breaker.breakTextNode(textNode, nodeContext, 8);
         expect(newContext.offsetInNode).toEqual(17);
         expect(newContext.preprocessedTextContent).toEqual(
@@ -75,7 +86,7 @@ describe("layout", function () {
         expect(textNode.replaceData).toHaveBeenCalledWith(10, 7, "_");
       });
       it("removes characters after split point but does not insert a hyphenation character when splits a text node at the soft-hyphen character and NodeContext#breakWord is true.", function () {
-        nodeContext.breakWord = true;
+        nodeContext = openTextNodeContext({ breakWord: true });
         var newContext = breaker.breakTextNode(textNode, nodeContext, 13);
         expect(newContext.offsetInNode).toEqual(11);
         expect(newContext.preprocessedTextContent).toEqual(
@@ -100,7 +111,7 @@ describe("layout", function () {
         expect(textNode.replaceData).toHaveBeenCalledWith(8, 9, "_");
       });
       it("removes characters after split point but does not insert a hyphenation character when splits a text node at the normal character and NodeContext#breakWord is true.", function () {
-        nodeContext.breakWord = true;
+        nodeContext = openTextNodeContext({ breakWord: true });
         var newContext = breaker.breakTextNode(textNode, nodeContext, 10);
         expect(newContext.offsetInNode).toEqual(8);
         expect(newContext.preprocessedTextContent).toEqual(
