@@ -371,9 +371,9 @@ export class ViewFactory
       return;
     }
     if (!Break.isSpreadBreakValue(nodeContext.breakBefore)) {
-      nodeContext.breakBefore = Break.resolveEffectiveBreakValue(
-        nodeContext.breakBefore,
-        "page",
+      NodeContext.setBreakBefore(
+        nodeContext,
+        Break.resolveEffectiveBreakValue(nodeContext.breakBefore, "page"),
       );
     }
     if (pageType !== this.styler.cascade.previousPageType) {
@@ -2810,7 +2810,10 @@ export class ViewFactory
       })
       .then(() => {
         const preprocessedTextContent = Diff.diffChars(originl, textContent);
-        nodeContext.preprocessedTextContent = preprocessedTextContent;
+        NodeContext.setPreprocessedTextContent(
+          nodeContext,
+          preprocessedTextContent,
+        );
         frame.finish(preprocessedTextContent);
       });
     return frame.result();
@@ -2839,7 +2842,7 @@ export class ViewFactory
     }
     result.then((processChildren) => {
       needToProcessChildren = processChildren;
-      nodeContext.viewNode = this.viewNode;
+      NodeContext.setViewNode(nodeContext, this.viewNode);
       if (this.viewNode) {
         const isPseudo = (node: Node | null, name: string): boolean =>
           node?.nodeType === 1 &&
@@ -2943,11 +2946,9 @@ export class ViewFactory
       return this.processShadowContent(r);
     }
     if (nextPos === null) {
-      nextPos = pos.parent.modify();
-      nextPos.after = true;
+      nextPos = NodeContext.afterEdgeOf(pos.parent);
     }
-    nextPos.boxOffset = boxOffset;
-    return nextPos;
+    return NodeContext.setBoxOffset(nextPos, boxOffset);
   }
 
   private nextPositionInTree(
@@ -2981,16 +2982,11 @@ export class ViewFactory
       if (cur.shadowSibling) {
         // our next position is the element after shadow:content in the parent
         // shadow tree
-        const sibling = cur.shadowSibling.modify();
-        sibling.boxOffset = boxOffset;
-        return sibling;
+        return NodeContext.withBoxOffset(cur.shadowSibling, boxOffset);
       }
 
       // if not rootless shadow, move to the "after" position for the parent
-      const afterParent = cur.parent.modify();
-      afterParent.boxOffset = boxOffset;
-      afterParent.after = true;
-      return afterParent;
+      return NodeContext.afterEdgeAt(cur.parent, boxOffset);
     } else {
       // any shadow trees?
       if (pos.nodeShadow) {
@@ -3020,10 +3016,7 @@ export class ViewFactory
         const content = Diff.restoreNewText(preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
-      pos = pos.modify();
-      pos.boxOffset = boxOffset;
-      pos.after = true;
-      return pos;
+      return NodeContext.afterEdgeAt(pos, boxOffset);
     }
   }
 
@@ -3108,7 +3101,7 @@ export class ViewFactory
     );
 
     // Set up properties for inline element
-    footnoteCallContext.inline = true;
+    NodeContext.setInline(footnoteCallContext, true);
 
     // Create shadow context for footnote-call styling
     // Use the footnote element's styler to get ::footnote-call styles
@@ -3119,22 +3112,27 @@ export class ViewFactory
       this.context,
       this.exprContentListener,
     );
-    footnoteCallContext.shadowContext = new Vtree.ShadowContext(
-      footnoteNodeContext.sourceNode as Element,
-      footnoteCallSourceNode, // Use the span directly as root, not a shadow:root
-      null,
-      footnoteNodeContext.parent?.shadowContext || null,
-      null,
-      Vtree.ShadowType.ROOTLESS,
-      shadowStyler,
+    NodeContext.setShadowContext(
+      footnoteCallContext,
+      new Vtree.ShadowContext(
+        footnoteNodeContext.sourceNode as Element,
+        footnoteCallSourceNode, // Use the span directly as root, not a shadow:root
+        null,
+        footnoteNodeContext.parent?.shadowContext || null,
+        null,
+        Vtree.ShadowType.ROOTLESS,
+        shadowStyler,
+      ),
     );
 
     // Set up shadow sibling to return to footnote after footnote-call is done
-    footnoteCallContext.shadowSibling =
-      footnoteNodeContext as Vtree.NodeContext;
+    NodeContext.setShadowSibling(footnoteCallContext, footnoteNodeContext);
 
     // Increment footnote's boxOffset since footnote-call takes one position
-    (footnoteNodeContext as Vtree.NodeContext).boxOffset++;
+    NodeContext.setBoxOffset(
+      footnoteNodeContext,
+      footnoteNodeContext.boxOffset + 1,
+    );
 
     // Remove the footnote element's viewNode from DOM if it was already created
     // (setCurrent was called before we detected this is a footnote)
@@ -3155,12 +3153,7 @@ export class ViewFactory
           frame.finish(footnoteCallContext);
         } else {
           // No children to process, mark as done
-          const modified = footnoteCallContext.modify();
-          modified.after = true;
-          if (!footnoteCallContext.viewNode) {
-            modified.inline = true;
-          }
-          frame.finish(modified);
+          frame.finish(NodeContext.skippedAfterOf(footnoteCallContext));
         }
       },
     );
@@ -3205,11 +3198,7 @@ export class ViewFactory
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
       (processChildren) => {
         if (!nodeContext.viewNode || !processChildren) {
-          nodeContext = nodeContext.modify();
-          nodeContext.after = true; // skip
-          if (!nodeContext.viewNode) {
-            nodeContext.inline = true;
-          }
+          nodeContext = NodeContext.skippedAfterOf(nodeContext); // skip
         }
 
         // Issue #868: Insert footnote-call before footnote element
@@ -3234,10 +3223,10 @@ export class ViewFactory
           if (this.isFootnote && nodeContext.parent) {
             // Detach nested footnote content into footnote area while keeping
             // the call marker in the parent footnote text. (Issue #1352)
-            nodeContext.pluginProps["nestedFootnoteDetached"] = 1;
+            NodeContext.setPluginProp(nodeContext, "nestedFootnoteDetached", 1);
           }
           // Mark as processed to avoid infinite loop when returning via shadowSibling
-          nodeContext.pluginProps["footnoteCallProcessed"] = 1;
+          NodeContext.setPluginProp(nodeContext, "footnoteCallProcessed", 1);
           // Return footnote-call first, footnote will be processed via shadowSibling
           this.insertFootnoteCall(nodeContext).then((footnoteCallContext) => {
             this.dispatchEvent({

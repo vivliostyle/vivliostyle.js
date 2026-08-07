@@ -18,7 +18,7 @@
  */
 import * as Diff from "./diff";
 import * as VtreeImpl from "./vtree";
-import { Vtree } from "./types";
+import { PageFloats, Vtree } from "./types";
 
 export type ShadowPlacement = {
   shadowType: Vtree.ShadowType;
@@ -256,5 +256,211 @@ export function renderedElement(
   nodeContext.hyphenateCharacter = result.hyphenateCharacter;
   nodeContext.breakWord = result.breakWord;
   nodeContext.repeatOnBreak = result.repeatOnBreak;
+  return nodeContext;
+}
+
+export function afterEdgeOf<T extends Vtree.NodeContext>(nodeContext: T): T {
+  const afterEdge = nodeContext.modify();
+  afterEdge.after = true;
+  return afterEdge;
+}
+
+export function afterEdgeAt<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  boxOffset: number,
+): T {
+  const afterEdge = nodeContext.modify();
+  afterEdge.boxOffset = boxOffset;
+  afterEdge.after = true;
+  return afterEdge;
+}
+
+export function detachedAfterEdgeOf<T extends Vtree.NodeContext>(
+  nodeContext: T,
+): T {
+  const afterEdge = nodeContext.copy().modify();
+  afterEdge.after = true;
+  return afterEdge;
+}
+
+export function detachedBeforeEdgeOf<T extends Vtree.NodeContext>(
+  nodeContext: T,
+): T {
+  const beforeEdge = nodeContext.copy().modify();
+  beforeEdge.after = false;
+  return beforeEdge;
+}
+
+export function skippedAfterOf<T extends Vtree.NodeContext>(nodeContext: T): T {
+  const skipped = nodeContext.modify();
+  skipped.after = true;
+  if (!skipped.viewNode) {
+    skipped.inline = true;
+  }
+  return skipped;
+}
+
+export function anchoredAfterOf<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  anchor: Element,
+  asInline: boolean,
+): T {
+  const anchored = nodeContext.modify();
+  anchored.after = true;
+  anchored.viewNode = anchor;
+  if (asInline) {
+    anchored.display = "inline";
+  }
+  return anchored;
+}
+
+export function withOverflow<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  overflow: boolean,
+): T {
+  const modified = nodeContext.modify();
+  modified.overflow = overflow;
+  return modified;
+}
+
+export function setOverflow<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  overflow: boolean,
+): T {
+  nodeContext.overflow = overflow;
+  return nodeContext;
+}
+
+export function withBoxOffset<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  boxOffset: number,
+): T {
+  const modified = nodeContext.modify();
+  modified.boxOffset = boxOffset;
+  return modified;
+}
+
+export function setBoxOffset<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  boxOffset: number,
+): T {
+  nodeContext.boxOffset = boxOffset;
+  return nodeContext;
+}
+
+export function withOffsetInNode<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  offsetInNode: number,
+): T {
+  const modified = nodeContext.modify();
+  modified.offsetInNode = offsetInNode;
+  return modified;
+}
+
+export function textBrokenAt<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  viewIndex: number,
+): T {
+  const modified = nodeContext.modify();
+  modified.offsetInNode += viewIndex;
+  modified.breakBefore = null;
+  return modified;
+}
+
+export function withBreakBefore<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  breakBefore: string | null,
+): T {
+  const modified = nodeContext.modify();
+  modified.breakBefore = breakBefore;
+  return modified;
+}
+
+export function setBreakBefore<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  breakBefore: string | null,
+): T {
+  nodeContext.breakBefore = breakBefore;
+  return nodeContext;
+}
+
+export function withoutFloat<T extends Vtree.NodeContext>(nodeContext: T): T {
+  const modified = nodeContext.modify();
+  modified.floatSide = null;
+  modified.floatReference = PageFloats.FloatReference.INLINE;
+  modified.clearSide = null;
+  return modified;
+}
+
+export function setClearSpacer<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  clearSpacer: Element | null,
+): T {
+  nodeContext.clearSpacer = clearSpacer;
+  return nodeContext;
+}
+
+export function setRepeatOnBreak<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  repeatOnBreak: string | null,
+): T {
+  nodeContext.repeatOnBreak = repeatOnBreak;
+  return nodeContext;
+}
+
+export function setFragmentIndex<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  fragmentIndex: number,
+): T {
+  nodeContext.fragmentIndex = fragmentIndex;
+  return nodeContext;
+}
+
+export function setPluginProp<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  name: string,
+  value: Vtree.NodeContext["pluginProps"][string],
+): T {
+  nodeContext.pluginProps[name] = value;
+  return nodeContext;
+}
+
+export function setViewNode<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  viewNode: Element | Text | null,
+): T {
+  nodeContext.viewNode = viewNode;
+  return nodeContext;
+}
+
+export function setPreprocessedTextContent<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  preprocessedTextContent: Diff.Change[] | null,
+): T {
+  nodeContext.preprocessedTextContent = preprocessedTextContent;
+  return nodeContext;
+}
+
+export function setInline<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  inline: boolean,
+): T {
+  nodeContext.inline = inline;
+  return nodeContext;
+}
+
+export function setShadowContext<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  shadowContext: Vtree.ShadowContext | null,
+): T {
+  nodeContext.shadowContext = shadowContext;
+  return nodeContext;
+}
+
+export function setShadowSibling<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  shadowSibling: Vtree.NodeContext | null,
+): T {
+  nodeContext.shadowSibling = shadowSibling;
   return nodeContext;
 }

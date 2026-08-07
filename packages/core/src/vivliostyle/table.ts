@@ -280,8 +280,9 @@ export class InsideTableRowBreakPosition
         );
       },
     );
-    this.beforeNodeContext.overflow = acceptableCellBreakPositions.some(
-      (bp) => bp.nodeContext.overflow,
+    NodeContext.setOverflow(
+      this.beforeNodeContext,
+      acceptableCellBreakPositions.some((bp) => bp.nodeContext.overflow),
     );
     if (foundBreakInsideCell) {
       return this.beforeNodeContext;
@@ -1346,7 +1347,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           ).length === 0
         ) {
           this.resetColumn();
-          nodeContext.overflow = true;
+          NodeContext.setOverflow(nodeContext, true);
           state.break = true;
         }
         return Task.newResult(true);
@@ -1398,8 +1399,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       state.break = true;
       return Task.newResult(true);
     }
-    const afterNodeContext = nodeContext.copy().modify();
-    afterNodeContext.after = true;
+    const afterNodeContext = NodeContext.detachedAfterEdgeOf(nodeContext);
     state.nodeContext = afterNodeContext;
     const frame = Task.newFrame<boolean>("startTableCell");
     let cont: Task.Result<Vtree.ChunkPosition>;
@@ -1414,8 +1414,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       // subsequent rows are not affected by stale entries.
       // (Old code used cellBreakPositions.shift() which consumed entries.)
       this.formattingContext.cellBreakPositions.splice(brokenCell.index, 1);
-      nodeContext.fragmentIndex =
-        cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1;
+      NodeContext.setFragmentIndex(
+        nodeContext,
+        cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1,
+      );
       cont = Task.newResult(cellBreakPosition.breakChunkPosition);
     } else {
       cont = this.column
@@ -1488,8 +1490,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (display === "table-row") {
       this.inRow = false;
       if (!this.inHeader && !this.inFooter) {
-        const beforeNodeContext = nodeContext.copy().modify();
-        beforeNodeContext.after = false;
+        const beforeNodeContext = NodeContext.detachedBeforeEdgeOf(nodeContext);
         const bp = new InsideTableRowBreakPosition(
           this.currentRowIndex,
           beforeNodeContext,
@@ -1543,10 +1544,10 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     } else if (
       nodeContext.sourceNode === this.formattingContext.tableSourceNode
     ) {
-      nodeContext.overflow = this.column.checkOverflowAndSaveEdge(
+      NodeContext.setOverflow(
         nodeContext,
-        null,
-      ).overflown;
+        this.column.checkOverflowAndSaveEdge(nodeContext, null).overflown,
+      );
       this.resetColumn();
       state.break = true;
     } else if (display === "table-row" && !this.inHeader && !this.inFooter) {
@@ -1577,7 +1578,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               ).length === 0
             ) {
               this.resetColumn();
-              nodeContext.overflow = true;
+              NodeContext.setOverflow(nodeContext, true);
               state.break = true;
             }
           }

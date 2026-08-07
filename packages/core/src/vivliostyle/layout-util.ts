@@ -18,6 +18,7 @@
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
 import * as Break from "./break";
+import * as NodeContext from "./node-context";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
@@ -279,10 +280,10 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       state.breakAtTheEdge,
     );
     if (overflow) {
-      state.nodeContext = (
-        state.lastAfterNodeContext || state.nodeContext
-      ).modify();
-      state.nodeContext.overflow = true;
+      state.nodeContext = NodeContext.withOverflow(
+        state.lastAfterNodeContext || state.nodeContext,
+        true,
+      );
     }
     return overflow;
   }
@@ -304,8 +305,10 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         false,
         state.breakAtTheEdge,
       );
-      nodeContext = state.nodeContext = nodeContext.modify();
-      nodeContext.overflow = true;
+      nodeContext = state.nodeContext = NodeContext.withOverflow(
+        nodeContext,
+        true,
+      );
     }
     return violateConstraint;
   }

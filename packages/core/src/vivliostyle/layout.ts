@@ -769,8 +769,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               !this.layoutConstraint.allowLayout(position)
             ) {
               violateConstraint = true;
-              position = position.modify();
-              position.overflow = true;
+              position = NodeContext.withOverflow(position, true);
             }
             const floatNodeContext = this.asFloatNodeContext(position);
             if (
@@ -881,8 +880,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               return;
             }
             if (!this.layoutConstraint.allowLayout(position)) {
-              position = position.modify();
-              position.overflow = true;
+              position = NodeContext.withOverflow(position, true);
               if (this.stopAtOverflow) {
                 bodyFrame.breakLoop();
                 return;
@@ -1609,7 +1607,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Base.setCSSProperty(element, "top", `${topValue}px`);
       if (nodeContext.clearSpacer) {
         nodeContext.clearSpacer.remove();
-        nodeContext.clearSpacer = null;
+        NodeContext.setClearSpacer(nodeContext, null);
       }
       const floatBoxEdge = this.vertical ? floatBox.x1 : floatBox.y2;
       const floatBoxTop = this.vertical ? floatBox.x2 : floatBox.y1;
@@ -1644,8 +1642,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.updateMaxReachedAfterEdge(floatBoxEdge);
         frame.finish(nodeContextAfter);
       } else {
-        nodeContext = nodeContext.modify();
-        nodeContext.overflow = true;
+        nodeContext = NodeContext.withOverflow(nodeContext, true);
         frame.finish(nodeContext);
       }
     });
@@ -2265,15 +2262,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
 
     nodeContext.viewNode.remove();
-    const nodeContextAfter = nodeContext.modify();
-    nodeContextAfter.after = true;
-    nodeContextAfter.viewNode = anchor;
-    // Issue #868: For footnote-call anchors, set display to inline so that
-    // text-spacing can look through this element to find adjacent text nodes
-    if (nodeContext.floatSide === "footnote") {
-      nodeContextAfter.display = "inline";
-    }
-    return nodeContextAfter;
+    return NodeContext.anchoredAfterOf(
+      nodeContext,
+      anchor,
+      // Issue #868: For footnote-call anchors, set display to inline so that
+      // text-spacing can look through this element to find adjacent text nodes
+      nodeContext.floatSide === "footnote",
+    );
   }
 
   resolveFloatReferenceFromColumnSpan(
@@ -2711,9 +2706,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const lineFootnoteOverflowBreak =
             this.findLineFootnoteOverflowBreak(checkPoints);
           if (lineFootnoteOverflowBreak) {
-            const overflowNodeContext = lineFootnoteOverflowBreak.modify();
-            overflowNodeContext.overflow = true;
-            overflowNodeContext.pluginProps["lineFootnoteOverflow"] = 1;
+            const overflowNodeContext = NodeContext.setPluginProp(
+              NodeContext.withOverflow(lineFootnoteOverflowBreak, true),
+              "lineFootnoteOverflow",
+              1,
+            );
             this.breakPositions = [];
             this.saveEdgeBreakPosition(overflowNodeContext, null, true);
             this.lineFootnoteOverflowEdge = null;
@@ -2727,8 +2724,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
             // TODO: how to signal overflow in the last pagargaph???
             if (overflown && !this.isLoneImage(checkPoints) && nodeContext) {
-              nodeContext = nodeContext.modify();
-              nodeContext.overflow = true;
+              nodeContext = NodeContext.withOverflow(nodeContext, true);
             }
           }
           frame.finish(nodeContext);
@@ -3240,8 +3236,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       blockParent = blockParent.parent;
     } while (blockParent && blockParent.inline);
     if (blockParent) {
-      blockParent = blockParent.copy().modify();
-      blockParent.after = true;
+      blockParent = NodeContext.detachedAfterEdgeOf(blockParent);
       return LayoutHelper.calculateEdge(
         blockParent,
         this.clientLayout,
@@ -3275,7 +3270,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   ): Vtree.NodeContext {
     this.computedBlockSize =
       bp.computedBlockSize + this.getOffsetByRepetitiveElements(bp);
-    bp.position.overflow = bp.overflows;
+    NodeContext.setOverflow(bp.position, bp.overflows);
     return bp.position;
   }
 
@@ -3358,8 +3353,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         Logging.logger.warn("Could not find any page breaks?!!");
         this.skipTailEdges(overflownNodeContext).then((nodeContext) => {
           if (nodeContext) {
-            nodeContext = nodeContext.modify();
-            nodeContext.overflow = false;
+            nodeContext = NodeContext.withOverflow(nodeContext, false);
             this.finishBreak(nodeContext, forceRemoveSelf, true).then(() => {
               frame.finish(nodeContext);
             });
@@ -3720,7 +3714,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           spacer.style.marginBottom = `${hAdj}px`;
         }
       }
-      nodeContext.clearSpacer = spacer;
+      NodeContext.setClearSpacer(nodeContext, spacer);
       return true;
     }
   }
@@ -4032,12 +4026,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     breakAtTheEdge,
                   )
                 ) {
-                  nodeContext = (
+                  nodeContext = NodeContext.withOverflow(
                     this.stopAtOverflow
                       ? lastAfterNodeContext || nodeContext
-                      : nodeContext
-                  ).modify();
-                  nodeContext.overflow = true;
+                      : nodeContext,
+                    true,
+                  );
                 } else {
                   // When lastAfterNodeContext is null (no in-flow trailing
                   // edge before this content, e.g. after CSS floats
@@ -4060,8 +4054,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                       false,
                     );
                   }
-                  nodeContext = nodeContext.modify();
-                  nodeContext.breakBefore = breakAtTheEdge;
+                  nodeContext = NodeContext.withBreakBefore(
+                    nodeContext,
+                    breakAtTheEdge,
+                  );
                 }
                 loopFrame.breakLoop();
                 return;
@@ -4159,12 +4155,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   !this.layoutConstraint.allowLayout(nodeContext)
                 ) {
                   // overflow
-                  nodeContext = (
+                  nodeContext = NodeContext.withOverflow(
                     this.stopAtOverflow
                       ? lastAfterNodeContext || nodeContext
-                      : nodeContext
-                  ).modify();
-                  nodeContext.overflow = true;
+                      : nodeContext,
+                    true,
+                  );
                 }
                 loopFrame.breakLoop();
                 return;
@@ -4310,8 +4306,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   !this.stopAtOverflow,
                   breakAtTheEdge,
                 );
-                nodeContext = nodeContext.modify();
-                nodeContext.overflow = true;
+                nodeContext = NodeContext.withOverflow(nodeContext, true);
                 if (this.stopAtOverflow) {
                   loopFrame.breakLoop();
                   return;
@@ -4332,12 +4327,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   )
                 ) {
                   // overflow
-                  nodeContext = (
+                  nodeContext = NodeContext.withOverflow(
                     this.stopAtOverflow
                       ? lastAfterNodeContext || nodeContext
-                      : nodeContext
-                  ).modify();
-                  nodeContext.overflow = true;
+                      : nodeContext,
+                    true,
+                  );
                 }
                 loopFrame.breakLoop();
                 return;
@@ -4372,8 +4367,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           )
         ) {
           if (lastAfterNodeContext && this.stopAtOverflow) {
-            nodeContext = lastAfterNodeContext.modify();
-            nodeContext.overflow = true;
+            nodeContext = NodeContext.withOverflow(lastAfterNodeContext, true);
           } else {
             // TODO: what to return here??
           }
@@ -4542,10 +4536,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         generatingNodePosition &&
         nodeContext.sourceNode === generatingNodePosition.steps[0].node
       ) {
-        const nodeContextMod: Vtree.NodeContext = nodeContext.modify();
-        nodeContextMod.floatSide = null;
-        nodeContextMod.floatReference = PageFloats.FloatReference.INLINE;
-        nodeContextMod.clearSide = null;
+        const nodeContextMod: Vtree.NodeContext =
+          NodeContext.withoutFloat(nodeContext);
         if (this.isBreakable(nodeContextMod)) {
           return this.layoutBreakableBlock(nodeContextMod);
         } else {
@@ -4939,9 +4931,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 this.stopAtOverflow
               ) {
                 this.pageBreakType = null;
-                nodeContext =
-                  this.nodeContextOverflowingDueToRepetitiveElements;
-                nodeContext.overflow = true;
+                nodeContext = NodeContext.setOverflow(
+                  this.nodeContextOverflowingDueToRepetitiveElements,
+                  true,
+                );
               } else {
                 nodeContext = nodeContextParam;
               }
@@ -5105,7 +5098,7 @@ export class PseudoColumn {
     bp.findAcceptableBreak(this.column, 0);
     // updates the column's overflow state, so it runs whether or not the
     // start position is the one taken
-    startNodeContext.overflow = bp.overflows;
+    NodeContext.setOverflow(startNodeContext, bp.overflows);
     return p ?? { breakPosition: bp, nodeContext: startNodeContext };
   }
   /**
@@ -5205,8 +5198,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
-      nodeContext = nodeContext.modify();
-      nodeContext.offsetInNode = textNode.length;
+      nodeContext = NodeContext.withOffsetInNode(nodeContext, textNode.length);
     } else {
       // Character with index low is the last one that fits.
       let viewIndex = low - nodeContext.boxOffset;
@@ -5287,10 +5279,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     viewIndex: number,
     textNode: Text,
   ): Vtree.NodeContext {
-    nodeContext = nodeContext.modify();
-    nodeContext.offsetInNode += viewIndex;
-    nodeContext.breakBefore = null;
-    return nodeContext;
+    return NodeContext.textBrokenAt(nodeContext, viewIndex);
   }
 
   static instance: TextNodeBreaker;
