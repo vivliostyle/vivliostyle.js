@@ -2484,14 +2484,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     nodeContext: Vtree.NodeContext,
     resNodeContext: Vtree.NodeContext | null,
     checkPoints: Vtree.RenderedNodeContext[],
-  ): Task.Result<Vtree.NodeContext | null> {
-    const frame: Task.Frame<Vtree.NodeContext | null> =
+  ): Task.Result<Layout.LineStylingResult> {
+    const frame: Task.Frame<Layout.LineStylingResult> =
       Task.newFrame("processLineStyling");
     if (VIVLIOSTYLE_DEBUG) {
       validateCheckPoints(checkPoints);
     }
     let lastCheckPoints = checkPoints.concat([]); // make a copy
-    checkPoints.splice(0, checkPoints.length); // make empty
     let totalLineCount = 0;
     let firstPseudo = nodeContext.firstPseudo; // :first-letter is not processed here
     if (firstPseudo?.count === 0) {
@@ -2538,11 +2537,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         });
       })
       .then(() => {
-        Array.prototype.push.apply(checkPoints, lastCheckPoints);
         if (VIVLIOSTYLE_DEBUG) {
-          validateCheckPoints(checkPoints);
+          validateCheckPoints(lastCheckPoints);
         }
-        frame.finish(resNodeContext);
+        frame.finish({
+          nodeContext: resNodeContext,
+          checkPoints: lastCheckPoints,
+        });
       });
     return frame.result();
   }
@@ -2688,7 +2689,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           edge += this.getTrailingMarginEdgeAdjustment(checkPoints);
         }
         this.updateMaxReachedAfterEdge(edge);
-        let lineCont: Task.Result<Vtree.NodeContext | null>;
+        let lineCont: Task.Result<Layout.LineStylingResult>;
         if (nodeContext.firstPseudo) {
           // possibly need to deal with :first-line and friends
           lineCont = this.processLineStyling(
@@ -2697,12 +2698,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             checkPoints,
           );
         } else {
-          lineCont = Task.newResult(resNodeContext);
+          lineCont = Task.newResult({
+            nodeContext: resNodeContext,
+            checkPoints,
+          });
         }
-        lineCont.then((nodeContext) => {
+        lineCont.then((lineResult) => {
           // Text-spacing etc. must be done before calculating edge. (Issue #898)
           // this.postLayoutBlock(nodeContext, checkPoints);
 
+          let nodeContext = lineResult.nodeContext;
+          const checkPoints = lineResult.checkPoints;
           const lineFootnoteOverflowBreak =
             this.findLineFootnoteOverflowBreak(checkPoints);
           if (lineFootnoteOverflowBreak) {
@@ -4736,7 +4742,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
       penalty = block.breakPenalty;
     }
-    const bp = new BoxBreakPosition(checkPoints, penalty);
+    const bp = new BoxBreakPosition([...checkPoints], penalty);
     this.breakPositions.push(bp);
   }
 
