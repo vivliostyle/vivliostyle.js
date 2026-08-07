@@ -150,7 +150,7 @@ export namespace Layout {
    */
   export interface EdgeBreakPosition extends AbstractBreakPosition {
     overflowIfRepetitiveElementsDropped: boolean;
-    readonly position: Vtree.NodeContext;
+    position: Vtree.NodeContext;
     readonly breakOnEdge: string | null;
     overflows: boolean;
     readonly computedBlockSize: number;

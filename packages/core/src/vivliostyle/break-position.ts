@@ -18,6 +18,7 @@
  */
 import * as Break from "./break";
 import * as LayoutHelper from "./layout-helper";
+import * as NodeContext from "./node-context";
 import { Layout, RepetitiveElement, Vtree } from "./types";
 
 /**
@@ -148,7 +149,7 @@ export class EdgeBreakPosition
   private edge: number = 0;
 
   constructor(
-    public readonly position: Vtree.NodeContext,
+    public position: Vtree.NodeContext,
     public readonly breakOnEdge: string | null,
     public overflows: boolean,
     public readonly computedBlockSize: number,
@@ -255,6 +256,7 @@ export class EdgeBreakPosition
       edge + (column.vertical ? -1 : 1) * offsets.current,
     );
     recordEdgeOverflow(column, this.position, this.overflows);
+    this.position = NodeContext.setOverflow(this.position, this.overflows);
   }
 
   override getNodeContext(): Vtree.NodeContext {

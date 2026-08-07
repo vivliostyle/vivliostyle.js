@@ -23,6 +23,7 @@ import * as LayoutHelper from "./layout-helper";
 import * as LayoutProcessor from "./layout-processor";
 import * as LayoutRetryers from "./layout-retryers";
 import * as LayoutUtil from "./layout-util";
+import * as NodeContext from "./node-context";
 import * as Plugin from "./plugin";
 import * as Shared from "./shared";
 import * as Task from "./task";
@@ -757,7 +758,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
             repetitiveElements.setHeaderNodeContext(nodeContext);
             return Task.newResult(true);
           } else {
-            nodeContext.repeatOnBreak = "none";
+            NodeContext.setRepeatOnBreak(nodeContext, "none");
           }
           break;
         case "footer":
@@ -765,7 +766,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
             repetitiveElements.setFooterNodeContext(nodeContext);
             return Task.newResult(true);
           } else {
-            nodeContext.repeatOnBreak = "none";
+            NodeContext.setRepeatOnBreak(nodeContext, "none");
           }
           break;
       }
