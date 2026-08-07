@@ -549,267 +549,20 @@ export class FirstPseudo implements Vtree.FirstPseudo {
   ) {}
 }
 
-/**
- * NodeContext represents a position in the document + layout-related
- * information attached to it. When after=false and offsetInNode=0, the
- * position is inside the element (node), but just before its first child.
- * When offsetInNode>0 it represents offset in the textual content of the
- * node. When after=true it represents position right after the last child
- * of the node. boxOffset is incremented by 1 for any valid node position.
- */
-export class NodeContext implements Vtree.NodeContext {
-  // position itself
-  offsetInNode: number = 0;
-  after: boolean = false;
-  shadowType: ShadowType;
-
-  // parent's shadow type
-  shadowContext: Vtree.ShadowContext | null;
-  nodeShadow: Vtree.ShadowContext | null = null;
-  shadowSibling: NodeContext | null = null;
-
-  // next "sibling" in the shadow tree
-  // other stuff
-  shared: boolean = false;
-  inline: boolean = true;
-  overflow: boolean = false;
-  breakPenalty: number;
-  display: string | null = null;
-  floatReference: PageFloats.FloatReference;
-  floatSide: string | null = null;
-  clearSide: string | null = null;
-  floatMinWrapBlock: Css.Numeric | null = null;
-  columnSpan: Css.Val | null = null;
-  captionSide: string = "top";
-  inlineBorderSpacing: number = 0;
-  blockBorderSpacing: number = 0;
-  flexContainer: boolean = false;
-  whitespace: Whitespace;
-  hyphenateCharacter: string | null;
-  breakWord: boolean;
-  establishesBFC: boolean = false;
-  containingBlockForAbsolute: boolean = false;
-  breakBefore: string | null = null;
-  breakAfter: string | null = null;
-  viewNode: Element | Text | null = null;
-  clearSpacer: Element | null = null;
-  inheritedProps: { [key: string]: number | string | Css.Val | undefined };
-  vertical: boolean;
-  direction: string;
-  firstPseudo: FirstPseudo | null;
-  lang: string | null = null;
-  preprocessedTextContent: Diff.Change[] | null = null;
-  repeatOnBreak: string | null = null;
-  pluginProps: {
-    [key: string]: string | number | undefined | null | (number | null)[];
-  } = {};
-  fragmentIndex: number = 1;
-  afterIfContinues: Selectors.AfterIfContinues | null = null;
-  footnotePolicy: Css.Ident | null = null;
-  pageType: string | null;
-  blockContainer: ElementNodeContext | null = null;
-
-  constructor(
-    public sourceNode: Node,
-    public parent: NodeContext | null,
-    public boxOffset: number,
-    public formattingContext: FormattingContext,
-  ) {
-    this.shadowType = ShadowType.NONE;
-    this.shadowContext = parent ? parent.shadowContext : null;
-    this.breakPenalty = parent ? parent.breakPenalty : 0;
-    this.floatReference = PageFloats.FloatReference.INLINE;
-    this.whitespace = parent ? parent.whitespace : Whitespace.IGNORE;
-    this.hyphenateCharacter = parent ? parent.hyphenateCharacter : null;
-    this.breakWord = parent ? parent.breakWord : false;
-    this.inheritedProps = parent ? parent.inheritedProps : {};
-    this.vertical = parent ? parent.vertical : false;
-    this.direction = parent ? parent.direction : "ltr";
-    this.firstPseudo = parent ? parent.firstPseudo : null;
-    this.pageType = parent ? parent.pageType : null;
-  }
-
-  resetView(): void {
-    this.inline = true;
-    this.breakPenalty = this.parent ? this.parent.breakPenalty : 0;
-    this.viewNode = null;
-    this.clearSpacer = null;
-    this.offsetInNode = 0;
-    this.after = false;
-    this.display = null;
-    this.floatReference = PageFloats.FloatReference.INLINE;
-    this.floatSide = null;
-    this.clearSide = null;
-    this.floatMinWrapBlock = null;
-    this.columnSpan = null;
-    this.flexContainer = false;
-    this.whitespace = this.parent ? this.parent.whitespace : Whitespace.IGNORE;
-    this.hyphenateCharacter = this.parent
-      ? this.parent.hyphenateCharacter
-      : null;
-    this.breakWord = this.parent ? this.parent.breakWord : false;
-    this.breakBefore = null;
-    this.breakAfter = null;
-    this.nodeShadow = null;
-    this.establishesBFC = false;
-    this.containingBlockForAbsolute = false;
-    this.vertical = this.parent ? this.parent.vertical : false;
-    this.nodeShadow = null;
-    this.preprocessedTextContent = null;
-    if (this.parent) {
-      this.formattingContext = this.parent.formattingContext;
-    }
-    this.repeatOnBreak = null;
-    this.pluginProps = {};
-    this.fragmentIndex = 1;
-    this.afterIfContinues = null;
-    this.footnotePolicy = null;
-    this.pageType = this.parent ? this.parent.pageType : null;
-  }
-
-  private cloneItem(): this {
-    const np = new NodeContext(
-      this.sourceNode,
-      this.parent,
-      this.boxOffset,
-      this.formattingContext,
-    ) as this;
-    np.offsetInNode = this.offsetInNode;
-    np.after = this.after;
-    np.nodeShadow = this.nodeShadow;
-    np.shadowType = this.shadowType;
-    np.shadowContext = this.shadowContext;
-    np.shadowSibling = this.shadowSibling;
-    np.inline = this.inline;
-    np.breakPenalty = this.breakPenalty;
-    np.display = this.display;
-    np.floatReference = this.floatReference;
-    np.floatSide = this.floatSide;
-    np.clearSide = this.clearSide;
-    np.floatMinWrapBlock = this.floatMinWrapBlock;
-    np.columnSpan = this.columnSpan;
-    np.captionSide = this.captionSide;
-    np.inlineBorderSpacing = this.inlineBorderSpacing;
-    np.blockBorderSpacing = this.blockBorderSpacing;
-    np.establishesBFC = this.establishesBFC;
-    np.containingBlockForAbsolute = this.containingBlockForAbsolute;
-    np.flexContainer = this.flexContainer;
-    np.whitespace = this.whitespace;
-    np.hyphenateCharacter = this.hyphenateCharacter;
-    np.breakWord = this.breakWord;
-    np.breakBefore = this.breakBefore;
-    np.breakAfter = this.breakAfter;
-    np.viewNode = this.viewNode;
-    np.clearSpacer = this.clearSpacer;
-    np.firstPseudo = this.firstPseudo;
-    np.vertical = this.vertical;
-    np.overflow = this.overflow;
-    np.preprocessedTextContent = this.preprocessedTextContent;
-    np.repeatOnBreak = this.repeatOnBreak;
-    np.pluginProps = { ...this.pluginProps };
-    np.fragmentIndex = this.fragmentIndex;
-    np.afterIfContinues = this.afterIfContinues;
-    np.footnotePolicy = this.footnotePolicy;
-    np.pageType = this.pageType;
-    np.blockContainer = this.blockContainer;
-    return np;
-  }
-
-  modify(): this {
-    if (!this.shared) {
-      return this;
-    }
-    return this.cloneItem();
-  }
-
-  copy(): this {
-    let np: NodeContext | null = this;
-    do {
-      if (np.shared) {
-        break;
-      }
-      np.shared = true;
-      np = np.parent;
-    } while (np);
-    return this;
-  }
-
-  clone(): this {
-    const np = this.cloneItem();
-    const chain: NodeContext[] = [np];
-    let npc: NodeContext = np;
-    let npp: NodeContext | null;
-    while ((npp = npc.parent) != null) {
-      npp = npp.cloneItem();
-      npc.parent = npp;
-      npc = npp;
-      chain.push(npp);
-    }
-    for (let i = chain.length - 2; i >= 0; i--) {
-      chain[i].blockContainer = blockContainerForChildrenOf(chain[i + 1]);
-    }
-    return np;
-  }
-
-  toNodePositionStep(): NodePositionStep {
-    return {
-      node: this.sourceNode,
-      shadowType: this.shadowType,
-      shadowContext: this.shadowContext,
-      nodeShadow: this.nodeShadow,
-      shadowSibling: this.shadowSibling
-        ? this.shadowSibling.toNodePositionStep()
-        : null,
-      formattingContext: this.formattingContext,
-
-      // fragmentIndex needs to be reset to 0 if this viewNode has been removed
-      // from the view tree by forced break processing. (Issue #1557)
-      fragmentIndex:
-        this.viewNode?.parentNode === null ? 0 : this.fragmentIndex,
-    };
-  }
-
-  toNodePosition(): NodePosition {
-    // Fix for issue #703
-    // A float or footnote context inside a pseudo-element shadow is always a
-    // descended one: restored heads keep the constructor's default float
-    // fields and live roots carry no shadow context.
-    const floatInPseudoContent =
-      this.shadowType === Vtree.ShadowType.ROOTLESS &&
-      (this.floatReference !== PageFloats.FloatReference.INLINE ||
-        this.floatSide === "footnote") &&
-      (this.shadowContext?.styler as PseudoElement.PseudoelementStyler)
-        ?.style?.["_pseudos"]
-        ? (this as ChildNodeContext)
-        : null;
-    const steps: NodePositionStep[] = [];
-    let nc = classifyNodeContext(
-      floatInPseudoContent ? floatInPseudoContent.parent : this,
-    );
-    while (hasParent(nc)) {
-      // We need fully "peeled" path, so don't record first-XXX pseudoelement
-      // containers
-      if (!nc.firstPseudo || nc.parent.firstPseudo === nc.firstPseudo) {
-        steps.push(nc.toNodePositionStep());
-      }
-      nc = classifyNodeContext(nc.parent);
-    }
-    const actualOffsetInNode = this.preprocessedTextContent
-      ? Diff.resolveOriginalIndex(
-          this.preprocessedTextContent,
-          this.offsetInNode,
-        )
-      : this.offsetInNode;
-    return {
-      steps: [...steps, toRootNodePositionStep(nc)],
-      offsetInNode: actualOffsetInNode,
-      after: this.after,
-      preprocessedTextContent: this.preprocessedTextContent,
-    };
-  }
-}
-
-export type ChildNodeContext = NodeContext & Vtree.ChildNodeContext;
+export type NodeContext = Vtree.NodeContext;
+export type BeforeEdgeNodeContext = Vtree.BeforeEdgeNodeContext;
+export type AfterEdgeNodeContext = Vtree.AfterEdgeNodeContext;
+export type RenderResult<T extends Vtree.NodeContext> = Vtree.RenderResult<T>;
+export type ParentNodeContext = Vtree.ParentNodeContext;
+export type ChildNodeContext = Vtree.ChildNodeContext;
+export type RootNodeContext = Vtree.RootNodeContext;
+export type TextNodeContext = Vtree.TextNodeContext;
+export type ElementNodeContext = Vtree.ElementNodeContext;
+export type RenderedNodeContext = Vtree.RenderedNodeContext;
+export type FloatNodeContext = Vtree.FloatNodeContext;
+export type ClearNodeContext = Vtree.ClearNodeContext;
+export type AfterIfContinuesNodeContext = Vtree.AfterIfContinuesNodeContext;
+export type ContainedElementNodeContext = Vtree.ContainedElementNodeContext;
 
 export function asChildNodeContext(
   nc: Vtree.NodeContext,
@@ -817,74 +570,46 @@ export function asChildNodeContext(
   return nc.parent !== null ? (nc as ChildNodeContext) : null;
 }
 
-export type RootNodeContext = NodeContext & Vtree.RootNodeContext;
-
-export function classifyNodeContext(
-  nc: Vtree.NodeContext,
-): ChildNodeContext | RootNodeContext {
-  return nc.parent !== null
-    ? (nc as ChildNodeContext)
-    : (nc as RootNodeContext);
+export function asRootNodeContext(nc: Vtree.NodeContext): RootNodeContext {
+  return nc as RootNodeContext;
 }
-
-export function hasParent(
-  nc: ChildNodeContext | RootNodeContext,
-): nc is ChildNodeContext {
-  return nc.parent !== null;
-}
-
-export function toRootNodePositionStep(
-  root: RootNodeContext,
-): RootNodePositionStep {
-  return { ...root.toNodePositionStep(), shadowSibling: root.shadowSibling };
-}
-
-export type TextNodeContext = NodeContext & Vtree.TextNodeContext;
 
 export function asTextNodeContext(
   nc: Vtree.NodeContext,
 ): TextNodeContext | null {
-  return nc.parent !== null && nc.viewNode?.nodeType === 3
-    ? (nc as TextNodeContext)
-    : null;
+  return nc.kind === "text" || nc.kind === "after-text" ? nc : null;
 }
-
-export type RenderedNodeContext = NodeContext & Vtree.RenderedNodeContext;
-export type ElementNodeContext = NodeContext & Vtree.ElementNodeContext;
-export type FloatNodeContext = NodeContext & Vtree.FloatNodeContext;
-export type ClearNodeContext = NodeContext & Vtree.ClearNodeContext;
-export type AfterIfContinuesNodeContext = NodeContext &
-  Vtree.AfterIfContinuesNodeContext;
 
 export function asElementNodeContext(
   nc: Vtree.NodeContext,
 ): ElementNodeContext | null {
-  return nc.viewNode !== null && nc.viewNode.nodeType === 1
-    ? (nc as ElementNodeContext)
-    : null;
+  return nc.kind === "element" || nc.kind === "after-element" ? nc : null;
 }
 
 export function asFloatNodeContext(
   nc: Vtree.NodeContext,
 ): FloatNodeContext | null {
-  return nc.floatSide !== null && nc.viewNode?.nodeType === 1
-    ? (nc as FloatNodeContext)
+  const element = asElementNodeContext(nc);
+  return element !== null && element.floatSide !== null
+    ? (element as FloatNodeContext)
     : null;
 }
 
 export function asClearNodeContext(
   nc: Vtree.NodeContext,
 ): ClearNodeContext | null {
-  return nc.clearSide !== null && nc.viewNode?.nodeType === 1
-    ? (nc as ClearNodeContext)
+  const element = asElementNodeContext(nc);
+  return element !== null && element.clearSide !== null
+    ? (element as ClearNodeContext)
     : null;
 }
 
 export function asAfterIfContinuesNodeContext(
   nc: Vtree.NodeContext,
 ): AfterIfContinuesNodeContext | null {
-  return nc.afterIfContinues !== null && nc.viewNode?.nodeType === 1
-    ? (nc as AfterIfContinuesNodeContext)
+  const element = asElementNodeContext(nc);
+  return element !== null && element.afterIfContinues !== null
+    ? (element as AfterIfContinuesNodeContext)
     : null;
 }
 
@@ -894,11 +619,8 @@ export function asRenderedNodeContext(
   return asElementNodeContext(nc) ?? asTextNodeContext(nc);
 }
 
-export type ContainedElementNodeContext = NodeContext &
-  Vtree.ContainedElementNodeContext;
-
 export function blockContainerForChildrenOf(
-  parent: NodeContext,
+  parent: Vtree.NodeContext,
 ): ElementNodeContext | null {
   const element = asElementNodeContext(parent);
   return element && !(parent.inline && parent.blockContainer)

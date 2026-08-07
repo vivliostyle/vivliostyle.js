@@ -60,6 +60,19 @@ export function asRenderedActiveState(
     : null;
 }
 
+export interface ElementActiveLayoutIteratorState extends RenderedActiveLayoutIteratorState {
+  get nodeContext(): Vtree.ElementNodeContext;
+  set nodeContext(nodeContext: Vtree.NodeContext | null);
+}
+
+export function asElementActiveState(
+  state: RenderedActiveLayoutIteratorState,
+): ElementActiveLayoutIteratorState | null {
+  return VtreeImpl.asElementNodeContext(state.nodeContext) !== null
+    ? (state as ElementActiveLayoutIteratorState)
+    : null;
+}
+
 export class LayoutIteratorStrategy {
   initialState(initialNodeContext: Vtree.NodeContext): LayoutIteratorState {
     return {
@@ -94,19 +107,19 @@ export class LayoutIteratorStrategy {
   ): void | Task.Result<boolean> {}
 
   startInlineElementNode(
-    state: RenderedActiveLayoutIteratorState,
+    state: ElementActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterInlineElementNode(
-    state: RenderedActiveLayoutIteratorState,
+    state: ElementActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   startNonInlineElementNode(
-    state: RenderedActiveLayoutIteratorState,
+    state: ElementActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   afterNonInlineElementNode(
-    state: RenderedActiveLayoutIteratorState,
+    state: ElementActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {}
 
   finish(state: LayoutIteratorState): void | Task.Result<boolean> {}
@@ -171,37 +184,40 @@ export class LayoutIterator {
       } else {
         r = strategy.startNonDisplayableNode(state);
       }
-    } else if (rendered.nodeContext.viewNode.nodeType !== 1) {
-      if (
-        VtreeImpl.canIgnore(
-          rendered.nodeContext.viewNode,
-          rendered.nodeContext.whitespace,
-        )
-      ) {
-        if (rendered.nodeContext.after) {
-          r = strategy.afterIgnoredTextNode(rendered);
-        } else {
-          r = strategy.startIgnoredTextNode(rendered);
-        }
-      } else {
-        if (rendered.nodeContext.after) {
-          r = strategy.afterNonElementNode(rendered);
-        } else {
-          r = strategy.startNonElementNode(rendered);
-        }
-      }
     } else {
-      if (rendered.nodeContext.inline) {
-        if (rendered.nodeContext.after) {
-          r = strategy.afterInlineElementNode(rendered);
+      const element = asElementActiveState(rendered);
+      if (!element) {
+        if (
+          VtreeImpl.canIgnore(
+            rendered.nodeContext.viewNode,
+            rendered.nodeContext.whitespace,
+          )
+        ) {
+          if (rendered.nodeContext.after) {
+            r = strategy.afterIgnoredTextNode(rendered);
+          } else {
+            r = strategy.startIgnoredTextNode(rendered);
+          }
         } else {
-          r = strategy.startInlineElementNode(rendered);
+          if (rendered.nodeContext.after) {
+            r = strategy.afterNonElementNode(rendered);
+          } else {
+            r = strategy.startNonElementNode(rendered);
+          }
         }
       } else {
-        if (rendered.nodeContext.after) {
-          r = strategy.afterNonInlineElementNode(rendered);
+        if (element.nodeContext.inline) {
+          if (element.nodeContext.after) {
+            r = strategy.afterInlineElementNode(element);
+          } else {
+            r = strategy.startInlineElementNode(element);
+          }
         } else {
-          r = strategy.startNonInlineElementNode(rendered);
+          if (element.nodeContext.after) {
+            r = strategy.afterNonInlineElementNode(element);
+          } else {
+            r = strategy.startNonInlineElementNode(element);
+          }
         }
       }
     }
@@ -322,7 +338,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   override startNonInlineElementNode(
     state: RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
-    state.leadingEdgeContexts.push(state.nodeContext.copy());
+    state.leadingEdgeContexts.push(state.nodeContext);
     state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
       state.breakAtTheEdge,
       Break.effectiveBreakBefore(state.nodeContext),
@@ -355,7 +371,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     return cont.thenAsync(() => {
       if (!state.break) {
         state.onStartEdges = false;
-        state.lastAfterNodeContext = state.nodeContext.copy();
+        state.lastAfterNodeContext = state.nodeContext;
         state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
           state.breakAtTheEdge,
           Break.effectiveBreakAfter(state.nodeContext),

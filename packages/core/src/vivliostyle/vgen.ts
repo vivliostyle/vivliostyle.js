@@ -358,29 +358,32 @@ export class ViewFactory
     return effectivePageType;
   }
 
-  private syncTextNodePageTypeBoundary(nodeContext: Vtree.NodeContext): void {
+  private syncTextNodePageTypeBoundary<T extends Vtree.NodeContext>(
+    nodeContext: T,
+  ): T {
     if (
       nodeContext.sourceNode.nodeType !== Node.TEXT_NODE ||
       Vtree.canIgnore(nodeContext.sourceNode) ||
       nodeContext.fragmentIndex !== 1
     ) {
-      return;
+      return nodeContext;
     }
     const pageType = nodeContext.pageType;
     if (this.styler.cascade.currentPageType === pageType) {
-      return;
+      return nodeContext;
     }
-    if (!Break.isSpreadBreakValue(nodeContext.breakBefore)) {
-      NodeContext.setBreakBefore(
-        nodeContext,
-        Break.resolveEffectiveBreakValue(nodeContext.breakBefore, "page"),
-      );
-    }
+    const synced = Break.isSpreadBreakValue(nodeContext.breakBefore)
+      ? nodeContext
+      : NodeContext.setBreakBefore(
+          nodeContext,
+          Break.resolveEffectiveBreakValue(nodeContext.breakBefore, "page"),
+        );
     if (pageType !== this.styler.cascade.previousPageType) {
       this.styler.cascade.previousPageType =
         this.styler.cascade.currentPageType;
     }
     this.styler.cascade.currentPageType = pageType;
+    return synced;
   }
 
   private syncSemanticFootnoteCounterToTarget(element: Element): void {
@@ -1093,15 +1096,19 @@ export class ViewFactory
     return this.fallbackMap[url] || url;
   }
 
-  inheritLangAttribute(nodeContext: Vtree.NodeContext) {
-    nodeContext.lang =
+  inheritLangAttribute(
+    nodeContext: Vtree.NodeContext,
+    rendered: NodeContext.ElementRenderDraft,
+  ) {
+    rendered.lang =
       Base.getLangAttribute(nodeContext.sourceNode as Element) ||
       (nodeContext.parent && nodeContext.parent.lang) ||
-      nodeContext.lang;
+      rendered.lang;
   }
 
   transferPolyfilledInheritedProps(
     nodeContext: Vtree.NodeContext,
+    rendered: NodeContext.ElementRenderDraft,
     computedStyle: { [key: string]: Css.Val },
   ) {
     const polyfilledInheritedProps =
@@ -1109,9 +1116,9 @@ export class ViewFactory
         (name) => computedStyle[name],
       );
     if (polyfilledInheritedProps.length) {
-      let props = nodeContext.inheritedProps;
+      let props = rendered.inheritedProps;
       if (nodeContext.parent) {
-        props = nodeContext.inheritedProps = {};
+        props = rendered.inheritedProps = {};
         for (const n in nodeContext.parent.inheritedProps) {
           props[n] = nodeContext.parent.inheritedProps[n];
         }
@@ -1155,6 +1162,7 @@ export class ViewFactory
 
   resolveFormattingContext(
     nodeContext: Vtree.NodeContext,
+    rendered: NodeContext.ElementRenderDraft,
     firstTime: boolean,
     display: Css.Val | null | undefined,
     position: Css.Ident | null | undefined,
@@ -1164,9 +1172,10 @@ export class ViewFactory
     const hooks: Plugin.ResolveFormattingContextHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     );
+    const inProgress = NodeContext.elementRenderProgress(nodeContext, rendered);
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
-        nodeContext,
+        inProgress,
         firstTime,
         display,
         position,
@@ -1174,7 +1183,7 @@ export class ViewFactory
         isRoot,
       );
       if (formattingContext) {
-        nodeContext.formattingContext = formattingContext;
+        rendered.formattingContext = formattingContext;
         return;
       }
     }
@@ -1187,9 +1196,11 @@ export class ViewFactory
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
     atUnforcedBreak: boolean,
-  ): Task.Result<boolean> {
+  ): Task.Result<Vtree.RenderResult<Vtree.NodeContext>> {
     let needToProcessChildren = true;
-    const frame: Task.Frame<boolean> = Task.newFrame("createElementView");
+    const frame: Task.Frame<Vtree.RenderResult<Vtree.NodeContext>> =
+      Task.newFrame("createElementView");
+    const rendered = NodeContext.elementRenderResultOf(nodeContext);
 
     // Figure out element's styles
     let element = this.sourceNode as Element;
@@ -1234,7 +1245,7 @@ export class ViewFactory
         elementStyle,
       );
       elementStyle = inheritedValues.elementStyle;
-      nodeContext.lang = inheritedValues.lang;
+      rendered.lang = inheritedValues.lang;
     }
     const positionCV: CssCascade.CascadeValue = elementStyle["position"];
     const floatCV: CssCascade.CascadeValue = elementStyle["float"];
@@ -1265,7 +1276,7 @@ export class ViewFactory
         elementStyle,
       );
       elementStyle = inheritedValues.elementStyle;
-      nodeContext.lang = inheritedValues.lang;
+      rendered.lang = inheritedValues.lang;
     }
     elementStyle = SemanticFootnote.mergeSemanticFootnoteIncludeStyle(
       element,
@@ -1283,9 +1294,9 @@ export class ViewFactory
       this.context,
       semanticFootnoteStyleAccess,
     );
-    nodeContext.vertical = this.computeStyle(
-      nodeContext.vertical,
-      nodeContext.direction === "rtl",
+    rendered.vertical = this.computeStyle(
+      rendered.vertical,
+      rendered.direction === "rtl",
       elementStyle,
       computedStyle,
     );
@@ -1298,17 +1309,22 @@ export class ViewFactory
       computedStyle["display"] = Css.ident.flow_root;
     }
     styler.processContent(element, computedStyle, nodeContext);
-    this.transferPolyfilledInheritedProps(nodeContext, computedStyle);
-    this.inheritLangAttribute(nodeContext);
+    this.transferPolyfilledInheritedProps(nodeContext, rendered, computedStyle);
+    this.inheritLangAttribute(nodeContext, rendered);
     if (computedStyle["direction"]) {
-      nodeContext.direction = computedStyle["direction"].toString();
+      rendered.direction = computedStyle["direction"].toString();
     }
 
     // Sort out the properties
     const flow = computedStyle["flow-into"];
     if (flow && flow.toString() != this.flowName) {
       // foreign flow, don't create a view
-      frame.finish(false);
+      frame.finish({
+        nodeContext: NodeContext.viewless(
+          NodeContext.elementRenderProgress(nodeContext, rendered),
+        ),
+        processChildren: false,
+      });
       return frame.result();
     }
     if (
@@ -1316,10 +1332,15 @@ export class ViewFactory
       element.localName === "script" &&
       element.namespaceURI === Base.NS.XHTML
     ) {
+      const scriptContext = NodeContext.viewless(
+        NodeContext.elementRenderProgress(nodeContext, rendered),
+      );
       Scripts.loadScript(
         element as HTMLScriptElement,
         this.viewport.window,
-      ).thenFinish(frame);
+      ).then((processChildren) => {
+        frame.finish({ nodeContext: scriptContext, processChildren });
+      });
       return frame.result();
     }
 
@@ -1346,11 +1367,16 @@ export class ViewFactory
     }
     if (display === Css.ident.none) {
       // no content
-      frame.finish(false);
+      frame.finish({
+        nodeContext: NodeContext.viewless(
+          NodeContext.elementRenderProgress(nodeContext, rendered),
+        ),
+        processChildren: false,
+      });
       return frame.result();
     }
     const isRoot = nodeContext.parent == null;
-    const blockSize = computedStyle[nodeContext.vertical ? "width" : "height"];
+    const blockSize = computedStyle[rendered.vertical ? "width" : "height"];
     // Issue #1999: fixed-size grid boxes used as synthetic page references
     // must stay whole. Once fragmented, continuation fragments lose the block
     // size and later reference pages collapse.
@@ -1358,7 +1384,6 @@ export class ViewFactory
       (display === Css.ident.grid || display === Css.ident.inline_grid) &&
       !!blockSize &&
       !(blockSize === Css.ident.auto || Css.isDefaultingValue(blockSize));
-    const rendered = NodeContext.elementRenderResultOf(nodeContext);
     rendered.flexContainer =
       display === Css.ident.flex || isFixedSizeGridContainer;
     this.createShadows(
@@ -1375,7 +1400,7 @@ export class ViewFactory
       const position = computedStyle["position"] as Css.Ident;
       let floatSide: Css.Val | null = computedStyle["float"];
       let clearSide: Css.Ident | null = computedStyle["clear"] as Css.Ident;
-      const writingMode = nodeContext.vertical
+      const writingMode = rendered.vertical
         ? Css.ident.vertical_rl
         : Css.ident.horizontal_tb;
       const parentWritingMode = nodeContext.parent
@@ -1393,7 +1418,7 @@ export class ViewFactory
         (columnWidth &&
           columnWidth !== Css.ident.auto &&
           !Css.isDefaultingValue(columnWidth));
-      nodeContext.establishesBFC = Display.establishesBFC(
+      rendered.establishesBFC = Display.establishesBFC(
         display,
         position,
         floatSide,
@@ -1569,8 +1594,8 @@ export class ViewFactory
         (!floating && !display) ||
         Display.isInlineLevel(display) ||
         Display.isRubyInternalDisplay(display);
-      nodeContext.display = display ? display.toString() : "inline";
-      nodeContext.floatSide = floating ? floatSideName : null;
+      rendered.display = display ? display.toString() : "inline";
+      rendered.floatSide = floating ? floatSideName : null;
       rendered.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
       const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
@@ -1611,8 +1636,8 @@ export class ViewFactory
           !Css.isDefaultingValue(breakBefore) &&
           !(insideNonRootMultiColumn && breakBefore === Css.ident.column)
         ) {
-          nodeContext.breakBefore = breakBefore.toString();
-          if (Break.forcedBreakValues[nodeContext.breakBefore]) {
+          rendered.breakBefore = breakBefore.toString();
+          if (Break.forcedBreakValues[rendered.breakBefore]) {
             if (this.isAtStartOfPage()) {
               delete computedStyle["break-before"];
             } else {
@@ -1621,7 +1646,7 @@ export class ViewFactory
             }
           }
           if (nodeContext.fragmentIndex !== 1) {
-            nodeContext.breakBefore = null;
+            rendered.breakBefore = null;
           }
         }
         // Named page type
@@ -1665,9 +1690,9 @@ export class ViewFactory
         ) {
           if (
             nodeContext.fragmentIndex === 1 &&
-            !Break.isSpreadBreakValue(nodeContext.breakBefore)
+            !Break.isSpreadBreakValue(rendered.breakBefore)
           ) {
-            nodeContext.breakBefore = "page";
+            rendered.breakBefore = "page";
           }
           // Fix for issue #1309
           if (effectivePageType !== this.styler.cascade.previousPageType) {
@@ -1768,6 +1793,7 @@ export class ViewFactory
       // Resolve formatting context
       this.resolveFormattingContext(
         nodeContext,
+        rendered,
         firstTime,
         display,
         position,
@@ -1776,13 +1802,18 @@ export class ViewFactory
       );
       if (nodeContext.parent) {
         firstTime = nodeContext.parent.formattingContext.isFirstTime(
-          nodeContext,
+          NodeContext.elementRenderProgress(nodeContext, rendered),
           firstTime,
         );
       }
       if (!rendered.inline) {
         rendered.repeatOnBreak = this.processRepeatOnBreak(computedStyle);
-        this.findAndProcessRepeatingElements(nodeContext, element, styler);
+        this.findAndProcessRepeatingElements(
+          nodeContext,
+          rendered,
+          element,
+          styler,
+        );
       }
 
       // Create the view element
@@ -1879,8 +1910,10 @@ export class ViewFactory
         } else if (computedStyle["display"] === Css.ident.none) {
           // No element should be created if display:none is set.
           // (Fix issue #924)
-          NodeContext.renderedElement(nodeContext, rendered);
-          frame.finish(false);
+          frame.finish({
+            nodeContext: NodeContext.viewlessRender(nodeContext, rendered),
+            processChildren: false,
+          });
           return;
         } else {
           result = this.createElement(ns, tag);
@@ -1891,7 +1924,7 @@ export class ViewFactory
           isMultiColumn &&
           computedStyle["column-fill"] === Css.ident.auto
         ) {
-          const blockSize = nodeContext.vertical
+          const blockSize = rendered.vertical
             ? computedStyle["width"]
             : computedStyle["height"];
           if (
@@ -1926,9 +1959,8 @@ export class ViewFactory
         ) {
           initIFrame(result as HTMLIFrameElement);
         }
-        const imageResolution = nodeContext.inheritedProps[
-          "image-resolution"
-        ] as number | undefined;
+        const imageResolution = rendered.inheritedProps["image-resolution"] as
+          number | undefined;
         const images: {
           image: HTMLElement;
           element: HTMLElement;
@@ -2200,7 +2232,7 @@ export class ViewFactory
           const hasPercentBlockSize = (): boolean => {
             // Check if the image has percentage block size, which is usually same as auto,
             // which means the size is not determined until the image is loaded.
-            const blockSize = nodeContext.vertical ? cssWidth : cssHeight;
+            const blockSize = rendered.vertical ? cssWidth : cssHeight;
             return blockSize instanceof Css.Numeric && blockSize.unit === "%";
           };
           if (
@@ -2294,7 +2326,10 @@ export class ViewFactory
           this.page.fetchers.push(Net.loadElement(result));
         }
 
-        this.preprocessElementStyle(nodeContext, computedStyle);
+        this.preprocessElementStyle(
+          NodeContext.elementRenderProgress(nodeContext, rendered),
+          computedStyle,
+        );
         this.applyComputedStyles(result, computedStyle);
 
         if (rendered.inline) {
@@ -2306,7 +2341,7 @@ export class ViewFactory
           }
         } else {
           if (!firstTime) {
-            const blockSizeP = nodeContext.vertical ? "width" : "height";
+            const blockSizeP = rendered.vertical ? "width" : "height";
             if (Base.getCSSProperty(result, blockSizeP)) {
               // When a box with a specified block size is fragmented,
               // the fragmented box should not have the block size.
@@ -2317,7 +2352,7 @@ export class ViewFactory
               Base.setCSSProperty(
                 result,
                 blockSizeP,
-                nodeContext.display === "table-row" ? "0.01px" : "",
+                rendered.display === "table-row" ? "0.01px" : "",
               );
             }
             Break.setBoxBreakFlag(result, "block-start");
@@ -2333,14 +2368,16 @@ export class ViewFactory
             // Detect forced or unforced break at this point
             // to handle margin-break properly.
             // Note: Do not use `atUnforcedBreak` which may be inaccurate.
-            const breakType = this.getBreakTypeAt(nodeContext);
+            const breakType = this.getBreakTypeAt(
+              NodeContext.elementRenderProgress(nodeContext, rendered),
+            );
             const anyBreak = breakType !== null;
             const unforcedBreak = breakType === "auto";
             if (
               (marginBreak === Css.ident.discard && anyBreak) ||
               (marginBreak !== Css.ident.keep &&
                 unforcedBreak &&
-                !nodeContext.floatSide)
+                !rendered.floatSide)
             ) {
               Break.setMarginDiscardFlag(result, "block-start");
             }
@@ -2355,7 +2392,11 @@ export class ViewFactory
           }
         }
 
-        NodeContext.renderedElement(nodeContext, rendered);
+        const elementContext = NodeContext.renderedElement(
+          nodeContext,
+          result,
+          rendered,
+        );
         this.viewNode = result;
         if (fetchers.length) {
           TaskUtil.waitForFetchers(fetchers).then(() => {
@@ -2364,14 +2405,20 @@ export class ViewFactory
                 images,
                 imageResolution,
                 computedStyle,
-                nodeContext.vertical,
+                rendered.vertical,
               );
             }
-            frame.finish(needToProcessChildren);
+            frame.finish({
+              nodeContext: elementContext,
+              processChildren: needToProcessChildren,
+            });
           });
         } else {
           frame.timeSlice().then(() => {
-            frame.finish(needToProcessChildren);
+            frame.finish({
+              nodeContext: elementContext,
+              processChildren: needToProcessChildren,
+            });
           });
         }
       });
@@ -2700,6 +2747,7 @@ export class ViewFactory
 
   private findAndProcessRepeatingElements(
     nodeContext: Vtree.NodeContext,
+    rendered: NodeContext.ElementRenderDraft,
     element: Element,
     styler: CssStyler.AbstractStyler,
   ) {
@@ -2714,8 +2762,8 @@ export class ViewFactory
       const computedStyle: { [key: string]: Css.Val } = {};
       const elementStyle = styler.getStyle(child as Element, false);
       this.computeStyle(
-        nodeContext.vertical,
-        nodeContext.direction === "rtl",
+        rendered.vertical,
+        rendered.direction === "rtl",
         elementStyle,
         computedStyle,
       );
@@ -2724,22 +2772,24 @@ export class ViewFactory
         continue;
       }
       if (
-        nodeContext.formattingContext instanceof
+        rendered.formattingContext instanceof
           RepetitiveElement.RepetitiveElementsOwnerFormattingContext &&
-        !NodeContext.belongsTo(nodeContext, nodeContext.formattingContext)
+        !NodeContext.belongsTo(
+          NodeContext.elementRenderProgress(nodeContext, rendered),
+          rendered.formattingContext,
+        )
       ) {
         return;
       }
       const parent = nodeContext.parent;
       const parentFormattingContext = parent ? parent.formattingContext : null;
-      nodeContext.formattingContext =
+      const formattingContext =
         new RepetitiveElement.RepetitiveElementsOwnerFormattingContext(
           parentFormattingContext,
           nodeContext.sourceNode as Element,
         );
-      (
-        nodeContext.formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext
-      ).initializeRepetitiveElements(nodeContext.vertical);
+      rendered.formattingContext = formattingContext;
+      formattingContext.initializeRepetitiveElements(rendered.vertical);
       return;
     }
   }
@@ -2768,15 +2818,24 @@ export class ViewFactory
 
   private createTextNodeView(
     nodeContext: Vtree.NodeContext,
-  ): Task.Result<boolean> {
-    const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
+  ): Task.Result<Vtree.RenderResult<Vtree.TextNodeContext>> {
+    const frame: Task.Frame<Vtree.RenderResult<Vtree.TextNodeContext>> =
+      Task.newFrame("createTextNodeView");
     this.preprocessTextContent(nodeContext).then((preprocessedTextContent) => {
       const offsetInNode = this.offsetInNode || 0;
       const textContent = Diff.restoreNewText(preprocessedTextContent).substr(
         offsetInNode,
       );
-      this.viewNode = document.createTextNode(textContent);
-      frame.finish(true);
+      const textView = document.createTextNode(textContent);
+      this.viewNode = textView;
+      frame.finish({
+        nodeContext: NodeContext.renderedText(
+          NodeContext.viewless(nodeContext),
+          textView,
+          preprocessedTextContent,
+        ),
+        processChildren: true,
+      });
     });
     return frame.result();
   }
@@ -2809,12 +2868,7 @@ export class ViewFactory
         );
       })
       .then(() => {
-        const preprocessedTextContent = Diff.diffChars(originl, textContent);
-        NodeContext.setPreprocessedTextContent(
-          nodeContext,
-          preprocessedTextContent,
-        );
-        frame.finish(preprocessedTextContent);
+        frame.finish(Diff.diffChars(originl, textContent));
       });
     return frame.result();
   }
@@ -2826,23 +2880,26 @@ export class ViewFactory
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
     atUnforcedBreak: boolean,
-  ): Task.Result<boolean> {
-    const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
-    let result: Task.Result<boolean>;
-    let needToProcessChildren = true;
+  ): Task.Result<Vtree.RenderResult<Vtree.NodeContext>> {
+    const frame: Task.Frame<Vtree.RenderResult<Vtree.NodeContext>> =
+      Task.newFrame("createNodeView");
+    let result: Task.Result<Vtree.RenderResult<Vtree.NodeContext>>;
     if (nodeContext.sourceNode.nodeType == 1) {
       result = this.createElementView(nodeContext, firstTime, atUnforcedBreak);
     } else {
       if (nodeContext.sourceNode.nodeType == 8) {
         this.viewNode = null; // comment node
-        result = Task.newResult(true);
+        result = Task.newResult({
+          nodeContext: NodeContext.viewless(nodeContext),
+          processChildren: true,
+        });
       } else {
         result = this.createTextNodeView(nodeContext);
       }
     }
-    result.then((processChildren) => {
-      needToProcessChildren = processChildren;
-      NodeContext.setViewNode(nodeContext, this.viewNode);
+    result.then((rendered) => {
+      this.replaceWalkedContext(nodeContext, rendered.nodeContext);
+      nodeContext = rendered.nodeContext;
       if (this.viewNode) {
         const isPseudo = (node: Node | null, name: string): boolean =>
           node?.nodeType === 1 &&
@@ -2881,17 +2938,28 @@ export class ViewFactory
           LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode);
         }
       }
-      frame.finish(needToProcessChildren);
+      frame.finish(rendered);
     });
     return frame.result();
   }
+
+  setCurrent(
+    nodeContext: Vtree.BeforeEdgeNodeContext,
+    firstTime: boolean,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<Vtree.RenderResult<Vtree.BeforeEdgeNodeContext>>;
+  setCurrent(
+    nodeContext: Vtree.NodeContext,
+    firstTime: boolean,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<Vtree.RenderResult<Vtree.NodeContext>>;
 
   /** @override */
   setCurrent(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
     atUnforcedBreak?: boolean,
-  ): Task.Result<boolean> {
+  ): Task.Result<Vtree.RenderResult<Vtree.NodeContext>> {
     this.nodeContext = nodeContext;
     this.sourceNode = nodeContext.sourceNode;
     this.offsetInNode = nodeContext.offsetInNode;
@@ -2928,10 +2996,13 @@ export class ViewFactory
     }
     const nextSibling = pos.sourceNode.nextSibling;
     let nextPos: Vtree.NodeContext | null;
+    let slot: Vtree.NodeContext | null = null;
     if (nextSibling) {
       nextPos = NodeContext.openNextSiblingOf(pos, nextSibling);
+      this.replaceWalkedContext(pos, nextPos);
     } else if (pos.shadowSibling) {
-      nextPos = pos.shadowSibling;
+      slot = pos.shadowSibling;
+      nextPos = slot;
     } else {
       nextPos = null;
     }
@@ -2946,7 +3017,29 @@ export class ViewFactory
     if (nextPos === null) {
       nextPos = NodeContext.afterEdgeOf(pos.parent);
     }
-    return NodeContext.setBoxOffset(nextPos, boxOffset);
+    const resumed = slot ? NodeContext.latestContinuation(slot) : nextPos;
+    const positioned = NodeContext.setBoxOffset(resumed, boxOffset);
+    if (slot) {
+      NodeContext.resumeContinuation(slot, positioned);
+    }
+    this.replaceWalkedContext(resumed, positioned);
+    return positioned;
+  }
+
+  private replaceWalkedContext(
+    previousNodeContext: Vtree.NodeContext,
+    nodeContext: Vtree.NodeContext,
+    cursorAdvance = false,
+  ): void {
+    if (!cursorAdvance) {
+      NodeContext.followContinuation(previousNodeContext, nodeContext);
+    }
+    this.dispatchEvent({
+      type: "replaceWalkedContext",
+      previousNodeContext,
+      nodeContext,
+      cursorAdvance,
+    });
   }
 
   private nextPositionInTree(
@@ -2954,7 +3047,7 @@ export class ViewFactory
     preprocessedTextContent: Diff.Change[] | null,
   ): Vtree.NodeContext | null {
     let boxOffset = pos.boxOffset + 1; // offset for the next position
-    if (pos.after) {
+    if (pos.after === true) {
       // root, that was the last possible position
       let cur = Vtree.asChildNodeContext(pos);
       if (!cur) {
@@ -2967,8 +3060,9 @@ export class ViewFactory
         const next = cur.sourceNode.nextSibling;
         if (next) {
           // keep shadowType
-          cur = NodeContext.openNextSiblingOf(cur.modify(), next, boxOffset);
-          return this.processShadowContent(cur);
+          const advanced = NodeContext.openNextSiblingOf(cur, next, boxOffset);
+          this.replaceWalkedContext(cur, advanced, true);
+          return this.processShadowContent(advanced);
         }
       }
 
@@ -2976,7 +3070,10 @@ export class ViewFactory
       if (cur.shadowSibling) {
         // our next position is the element after shadow:content in the parent
         // shadow tree
-        return NodeContext.withBoxOffset(cur.shadowSibling, boxOffset);
+        const resumed = NodeContext.latestContinuation(cur.shadowSibling);
+        const advanced = NodeContext.withBoxOffset(resumed, boxOffset);
+        NodeContext.resumeContinuation(cur.shadowSibling, advanced);
+        return advanced;
       }
 
       // if not rootless shadow, move to the "after" position for the parent
@@ -3010,7 +3107,9 @@ export class ViewFactory
         const content = Diff.restoreNewText(preprocessedTextContent);
         boxOffset += content.length - 1 - pos.offsetInNode;
       }
-      return NodeContext.afterEdgeAt(pos, boxOffset);
+      const afterEdge = NodeContext.afterEdgeAt(pos, boxOffset);
+      this.replaceWalkedContext(pos, afterEdge, true);
+      return afterEdge;
     }
   }
 
@@ -3088,14 +3187,14 @@ export class ViewFactory
     );
 
     // Create NodeContext for footnote-call with the same parent as footnote
-    const footnoteCallContext = NodeContext.openSiblingOf(
+    const openedCallContext = NodeContext.openSiblingOf(
       footnoteCallSourceNode,
       footnoteNodeContext,
       footnoteNodeContext.boxOffset,
     );
 
     // Set up properties for inline element
-    NodeContext.setInline(footnoteCallContext, true);
+    const inlineCallContext = NodeContext.setInline(openedCallContext, true);
 
     // Create shadow context for footnote-call styling
     // Use the footnote element's styler to get ::footnote-call styles
@@ -3106,8 +3205,8 @@ export class ViewFactory
       this.context,
       this.exprContentListener,
     );
-    NodeContext.setShadowContext(
-      footnoteCallContext,
+    const shadowedCallContext = NodeContext.setShadowContext(
+      inlineCallContext,
       new Vtree.ShadowContext(
         footnoteNodeContext.sourceNode as Element,
         footnoteCallSourceNode, // Use the span directly as root, not a shadow:root
@@ -3119,13 +3218,16 @@ export class ViewFactory
       ),
     );
 
-    // Set up shadow sibling to return to footnote after footnote-call is done
-    NodeContext.setShadowSibling(footnoteCallContext, footnoteNodeContext);
-
     // Increment footnote's boxOffset since footnote-call takes one position
-    NodeContext.setBoxOffset(
+    const bumpedFootnoteContext = NodeContext.setBoxOffset(
       footnoteNodeContext,
       footnoteNodeContext.boxOffset + 1,
+    );
+
+    // Set up shadow sibling to return to footnote after footnote-call is done
+    const footnoteCallContext = NodeContext.setShadowSibling(
+      shadowedCallContext,
+      bumpedFootnoteContext,
     );
 
     // Remove the footnote element's viewNode from DOM if it was already created
@@ -3138,16 +3240,16 @@ export class ViewFactory
 
     // Now create the view for footnote-call
     this.setCurrent(footnoteCallContext, true, false).then(
-      (processChildren) => {
+      ({ nodeContext: renderedCallContext, processChildren }) => {
         // If processChildren is true and the source node has children (generated content),
         // let the normal layout flow process them by NOT setting after=true.
         // This ensures text-spacing polyfill is applied via postLayoutBlock.
         if (processChildren && footnoteCallSourceNode.hasChildNodes()) {
           // Return the footnote-call context as-is to process children
-          frame.finish(footnoteCallContext);
+          frame.finish(renderedCallContext);
         } else {
           // No children to process, mark as done
-          frame.finish(NodeContext.skippedAfterOf(footnoteCallContext));
+          frame.finish(NodeContext.skippedAfterOf(renderedCallContext));
         }
       },
     );
@@ -3164,13 +3266,21 @@ export class ViewFactory
       !position.after && position.sourceNode.nodeType != 1
         ? this.preprocessTextContent(position)
         : Task.newResult<Diff.Change[] | null>(null);
-    return preprocessResult.thenAsync((preprocessedTextContent) =>
-      this.nextInTreeWithPreprocessedText(
-        position,
+    return preprocessResult.thenAsync((preprocessedTextContent) => {
+      let preprocessed = position;
+      if (preprocessedTextContent) {
+        preprocessed = NodeContext.setPreprocessedTextContent(
+          position,
+          preprocessedTextContent,
+        );
+        this.replaceWalkedContext(position, preprocessed);
+      }
+      return this.nextInTreeWithPreprocessedText(
+        preprocessed,
         preprocessedTextContent,
         atUnforcedBreak,
-      ),
-    );
+      );
+    });
   }
 
   private nextInTreeWithPreprocessedText(
@@ -3185,14 +3295,18 @@ export class ViewFactory
     if (!nextPosition || nextPosition.after) {
       return Task.newResult<Vtree.NodeContext | null>(nextPosition);
     }
-    this.syncTextNodePageTypeBoundary(nextPosition);
-    let nodeContext = nextPosition;
+    let nodeContext: Vtree.NodeContext =
+      this.syncTextNodePageTypeBoundary(nextPosition);
+    this.replaceWalkedContext(nextPosition, nodeContext);
     const frame: Task.Frame<Vtree.NodeContext | null> =
       Task.newFrame("nextInTree");
     this.setCurrent(nodeContext, true, atUnforcedBreak).then(
-      (processChildren) => {
+      ({ nodeContext: renderedContext, processChildren }) => {
+        nodeContext = renderedContext;
         if (!nodeContext.viewNode || !processChildren) {
-          nodeContext = NodeContext.skippedAfterOf(nodeContext); // skip
+          const skipped = NodeContext.skippedAfterOf(nodeContext); // skip
+          this.replaceWalkedContext(nodeContext, skipped, true);
+          nodeContext = skipped;
         }
 
         // Issue #868: Insert footnote-call before footnote element
@@ -3217,22 +3331,34 @@ export class ViewFactory
           if (this.isFootnote && nodeContext.parent) {
             // Detach nested footnote content into footnote area while keeping
             // the call marker in the parent footnote text. (Issue #1352)
-            NodeContext.setPluginProp(nodeContext, "nestedFootnoteDetached", 1);
+            const detached = NodeContext.setPluginProp(
+              nodeContext,
+              "nestedFootnoteDetached",
+              1,
+            );
+            this.replaceWalkedContext(nodeContext, detached);
+            nodeContext = detached;
           }
           // Mark as processed to avoid infinite loop when returning via shadowSibling
-          NodeContext.setPluginProp(nodeContext, "footnoteCallProcessed", 1);
+          const processed = NodeContext.setPluginProp(
+            nodeContext,
+            "footnoteCallProcessed",
+            1,
+          );
+          this.replaceWalkedContext(nodeContext, processed);
+          nodeContext = processed;
           // Return footnote-call first, footnote will be processed via shadowSibling
           this.insertFootnoteCall(nodeContext).then((footnoteCallContext) => {
             this.dispatchEvent({
               type: "nextInTree",
               nodeContext: footnoteCallContext,
-            } as any);
+            });
             frame.finish(footnoteCallContext);
           });
           return;
         }
 
-        this.dispatchEvent({ type: "nextInTree", nodeContext } as any);
+        this.dispatchEvent({ type: "nextInTree", nodeContext });
         frame.finish(nodeContext);
       },
     );
@@ -3627,7 +3753,7 @@ export class ViewFactory
       return;
     }
     const computedStyle: { [key: string]: Css.Val } = {};
-    nodeContext.vertical = this.computeStyle(
+    this.computeStyle(
       nodeContext.vertical,
       nodeContext.direction === "rtl",
       elementStyle,
@@ -3681,11 +3807,12 @@ export class ViewFactory
     let shadowSibling = container.shadowSibling;
     let i = arr.length - 1;
     let rebuilt: Vtree.NodeContext | null = null;
+    let openParent: Vtree.ParentNodeContext | null = null;
     frame
       .loop(() => {
         while (i >= 0) {
           const pn = arr[i];
-          const parentContext = rebuilt ?? container.parent;
+          const parentContext = openParent ?? container.parent;
           const child = NodeContext.openAt(
             pn.sourceNode,
             parentContext,
@@ -3702,7 +3829,15 @@ export class ViewFactory
           shadowSibling = null;
           rebuilt = child;
           i--;
-          const result = this.setCurrent(child, false);
+          const result = this.setCurrent(child, false).thenAsync(
+            ({ nodeContext: renderedChild, processChildren }) => {
+              rebuilt = renderedChild;
+              if (renderedChild.after === false) {
+                openParent = renderedChild;
+              }
+              return Task.newResult(processChildren);
+            },
+          );
           if (result.isPending()) {
             return result;
           }

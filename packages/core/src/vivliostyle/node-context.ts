@@ -17,6 +17,7 @@
  * @fileoverview NodeContext - Construction of node contexts.
  */
 import * as Diff from "./diff";
+import * as PseudoElement from "./pseudo-element";
 import * as VtreeImpl from "./vtree";
 import { PageFloats, Vtree } from "./types";
 
@@ -24,7 +25,7 @@ export type ShadowPlacement = {
   shadowType: Vtree.ShadowType;
   shadowContext: Vtree.ShadowContext | null;
   nodeShadow?: Vtree.ShadowContext | null;
-  shadowSibling?: VtreeImpl.NodeContext | null;
+  shadowSibling?: Vtree.NodeContext | null;
 };
 
 export type PositionHead = {
@@ -34,150 +35,278 @@ export type PositionHead = {
   fragmentIndex?: number;
 };
 
-function applyShadowPlacement(
-  nodeContext: VtreeImpl.NodeContext,
+const unstyled: Vtree.UnstyledFields = {
+  floatReference: PageFloats.FloatReference.INLINE,
+  clearSide: null,
+  floatMinWrapBlock: null,
+  columnSpan: null,
+  flexContainer: false,
+  containingBlockForAbsolute: false,
+  breakAfter: null,
+  repeatOnBreak: null,
+  afterIfContinues: null,
+  footnotePolicy: null,
+};
+
+function derivedFromParent(parent: Vtree.ParentNodeContext | null): Pick<
+  Vtree.NodeContextCore,
+  "direction" | "inheritedProps"
+> & {
+  lang: null;
+} {
+  return {
+    lang: null,
+    direction: parent ? parent.direction : "ltr",
+    inheritedProps: parent ? parent.inheritedProps : {},
+  };
+}
+
+function derived<T extends Vtree.NodeContext>(nodeContext: T): T {
+  return { ...nodeContext, ...derivedFromParent(nodeContext.parent) };
+}
+
+function openCore<P extends Vtree.ParentNodeContext | null>(
+  sourceNode: Node,
+  parent: P,
+  boxOffset: number,
+  formattingContext: Vtree.FormattingContext,
+  blockContainer: Vtree.ElementNodeContext | null,
+): Omit<Vtree.OpenNodeContext, "parent"> & { readonly parent: P } {
+  return {
+    kind: "open",
+    after: false,
+    viewNode: null,
+    preprocessedTextContent: null,
+    sourceNode,
+    parent,
+    boxOffset,
+    formattingContext,
+    blockContainer,
+    offsetInNode: 0,
+    shadowType: Vtree.ShadowType.NONE,
+    shadowContext: parent ? parent.shadowContext : null,
+    nodeShadow: null,
+    shadowSibling: null,
+    fragmentIndex: 1,
+    inline: true,
+    overflow: false,
+    breakBefore: null,
+    breakPenalty: parent ? parent.breakPenalty : 0,
+    whitespace: parent ? parent.whitespace : Vtree.Whitespace.IGNORE,
+    hyphenateCharacter: parent ? parent.hyphenateCharacter : null,
+    breakWord: parent ? parent.breakWord : false,
+    firstPseudo: parent ? parent.firstPseudo : null,
+    pageType: parent ? parent.pageType : null,
+    vertical: parent ? parent.vertical : false,
+    direction: parent ? parent.direction : "ltr",
+    lang: null,
+    inheritedProps: parent ? parent.inheritedProps : {},
+    pluginProps: {},
+    clearSpacer: null,
+    display: null,
+    floatSide: null,
+    establishesBFC: false,
+    captionSide: "top",
+    inlineBorderSpacing: 0,
+    blockBorderSpacing: 0,
+    ...unstyled,
+  };
+}
+
+function withShadowPlacement<T extends Vtree.NodeContext>(
+  nodeContext: T,
   placement: ShadowPlacement,
-): void {
-  nodeContext.shadowType = placement.shadowType;
-  nodeContext.shadowContext = placement.shadowContext;
-  nodeContext.nodeShadow = placement.nodeShadow ?? null;
-  nodeContext.shadowSibling = placement.shadowSibling ?? null;
+): T {
+  return {
+    ...nodeContext,
+    shadowType: placement.shadowType,
+    shadowContext: placement.shadowContext,
+    nodeShadow: placement.nodeShadow ?? null,
+    shadowSibling: placement.shadowSibling ?? null,
+  };
 }
 
-function applyPositionHead(
-  nodeContext: VtreeImpl.NodeContext,
+function withPositionHead(
+  nodeContext: Vtree.OpenNodeContext,
   head: PositionHead,
-): void {
-  nodeContext.offsetInNode = head.offsetInNode;
-  nodeContext.after = head.after;
-  nodeContext.preprocessedTextContent = head.preprocessedTextContent ?? null;
-  if (head.fragmentIndex !== undefined) {
-    nodeContext.fragmentIndex = head.fragmentIndex;
-  }
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
+  const positioned = {
+    ...nodeContext,
+    offsetInNode: head.offsetInNode,
+    preprocessedTextContent: head.preprocessedTextContent ?? null,
+    fragmentIndex:
+      head.fragmentIndex === undefined
+        ? nodeContext.fragmentIndex
+        : head.fragmentIndex,
+  };
+  return head.after
+    ? { ...positioned, kind: "after-none", after: true }
+    : positioned;
 }
 
-function applyNodePositionStep(
-  nodeContext: VtreeImpl.NodeContext,
+function withNodePositionStep(
+  nodeContext: Vtree.OpenNodeContext,
   step: Vtree.NodePositionStep,
-): void {
-  nodeContext.shadowType = step.shadowType;
-  nodeContext.shadowContext = step.shadowContext;
-  nodeContext.nodeShadow = step.nodeShadow;
-  nodeContext.fragmentIndex = step.fragmentIndex + 1;
+): Vtree.OpenNodeContext {
+  return {
+    ...nodeContext,
+    shadowType: step.shadowType,
+    shadowContext: step.shadowContext,
+    nodeShadow: step.nodeShadow,
+    fragmentIndex: step.fragmentIndex + 1,
+  };
 }
 
 export function openChildOf(
   sourceNode: Node,
-  parent: VtreeImpl.NodeContext,
+  parent: Vtree.ParentNodeContext,
   boxOffset: number,
   placement?: ShadowPlacement,
-): VtreeImpl.ChildNodeContext {
-  const nodeContext = new VtreeImpl.NodeContext(
+): Vtree.OpenNodeContext & Vtree.ChildNodeContext {
+  const nodeContext = openCore(
     sourceNode,
     parent,
     boxOffset,
     parent.formattingContext,
+    VtreeImpl.blockContainerForChildrenOf(parent),
   );
-  nodeContext.blockContainer = VtreeImpl.blockContainerForChildrenOf(parent);
-  if (placement) {
-    applyShadowPlacement(nodeContext, placement);
-  }
-  return nodeContext as VtreeImpl.ChildNodeContext;
+  return placement ? withShadowPlacement(nodeContext, placement) : nodeContext;
 }
 
 export function openSiblingOf(
   sourceNode: Node,
-  sibling: VtreeImpl.NodeContext,
+  sibling: Vtree.NodeContext,
   boxOffset: number,
-): VtreeImpl.NodeContext {
+): Vtree.OpenNodeContext {
   const parent = sibling.parent;
-  const nodeContext = new VtreeImpl.NodeContext(
+  return openCore(
     sourceNode,
     parent,
     boxOffset,
     (parent ?? sibling).formattingContext,
+    sibling.blockContainer,
   );
-  nodeContext.blockContainer = sibling.blockContainer;
-  return nodeContext;
 }
 
 export function openNextSiblingOf<T extends Vtree.NodeContext>(
   nodeContext: T,
   sourceNode: Node,
   boxOffset?: number,
-): T {
-  if (boxOffset !== undefined) {
-    nodeContext.boxOffset = boxOffset;
-  }
-  nodeContext.sourceNode = sourceNode;
-  nodeContext.resetView();
-  return nodeContext;
+): Omit<Vtree.OpenNodeContext, "parent"> & { readonly parent: T["parent"] } {
+  const parent = nodeContext.parent;
+  return {
+    ...nodeContext,
+    ...unstyled,
+    ...derivedFromParent(parent),
+    kind: "open",
+    after: false,
+    viewNode: null,
+    sourceNode,
+    boxOffset: boxOffset === undefined ? nodeContext.boxOffset : boxOffset,
+    inline: true,
+    breakPenalty: parent ? parent.breakPenalty : 0,
+    clearSpacer: null,
+    display: null,
+    floatSide: null,
+    establishesBFC: false,
+    offsetInNode: 0,
+    whitespace: parent ? parent.whitespace : Vtree.Whitespace.IGNORE,
+    hyphenateCharacter: parent ? parent.hyphenateCharacter : null,
+    breakWord: parent ? parent.breakWord : false,
+    breakBefore: null,
+    nodeShadow: null,
+    vertical: parent ? parent.vertical : false,
+    preprocessedTextContent: null,
+    formattingContext: parent
+      ? parent.formattingContext
+      : nodeContext.formattingContext,
+    pluginProps: {},
+    fragmentIndex: 1,
+    pageType: parent ? parent.pageType : null,
+  };
 }
 
 export function openAt(
   sourceNode: Node,
-  parent: VtreeImpl.NodeContext | null,
+  parent: Vtree.ParentNodeContext | null,
   boxOffset: number,
   formattingContext: Vtree.FormattingContext,
   placement: ShadowPlacement,
   head?: PositionHead,
-): VtreeImpl.NodeContext {
-  const nodeContext = new VtreeImpl.NodeContext(
+): Vtree.NodeContext {
+  const nodeContext = openCore(
     sourceNode,
     parent,
     boxOffset,
     formattingContext,
+    parent && VtreeImpl.blockContainerForChildrenOf(parent),
   );
-  nodeContext.blockContainer =
-    parent && VtreeImpl.blockContainerForChildrenOf(parent);
-  if (head) {
-    applyPositionHead(nodeContext, head);
-  }
-  applyShadowPlacement(nodeContext, placement);
-  return nodeContext;
+  const positioned = head ? withPositionHead(nodeContext, head) : nodeContext;
+  return withShadowPlacement(positioned, placement);
 }
 
 export function openFromStep(
   step: Vtree.NodePositionStep,
-  parent: Vtree.NodeContext,
+  parent: Vtree.ParentNodeContext,
+): Vtree.OpenNodeContext;
+export function openFromStep( // eslint-disable-line no-redeclare
+  step: Vtree.NodePositionStep,
+  parent: Vtree.ParentNodeContext,
   head?: PositionHead,
-): VtreeImpl.NodeContext {
-  const parentContext = parent as VtreeImpl.NodeContext;
-  const nodeContext = new VtreeImpl.NodeContext(
-    step.node,
-    parentContext,
-    0,
-    step.formattingContext ?? parentContext.formattingContext,
+): Vtree.NodeContext;
+export function openFromStep( // eslint-disable-line no-redeclare
+  step: Vtree.NodePositionStep,
+  parent: Vtree.ParentNodeContext,
+  head?: PositionHead,
+): Vtree.NodeContext {
+  const opened = withNodePositionStep(
+    openCore(
+      step.node,
+      parent,
+      0,
+      step.formattingContext ?? parent.formattingContext,
+      VtreeImpl.blockContainerForChildrenOf(parent),
+    ),
+    step,
   );
-  nodeContext.blockContainer =
-    VtreeImpl.blockContainerForChildrenOf(parentContext);
-  applyNodePositionStep(nodeContext, step);
-  nodeContext.shadowSibling = step.shadowSibling
-    ? openFromStep(step.shadowSibling, parent.copy())
-    : null;
-  if (head) {
-    applyPositionHead(nodeContext, head);
-  }
-  return nodeContext;
+  const chained: Vtree.OpenNodeContext = {
+    ...opened,
+    shadowSibling: step.shadowSibling
+      ? openFromStep(step.shadowSibling, parent)
+      : null,
+  };
+  return head ? withPositionHead(chained, head) : chained;
 }
 
 export function openRootFromStep(
   step: Vtree.RootNodePositionStep,
   flowRootFormattingContext: Vtree.FormattingContext,
+): Vtree.OpenNodeContext;
+export function openRootFromStep( // eslint-disable-line no-redeclare
+  step: Vtree.RootNodePositionStep,
+  flowRootFormattingContext: Vtree.FormattingContext,
   head?: PositionHead,
-): VtreeImpl.NodeContext {
-  const nodeContext = new VtreeImpl.NodeContext(
-    step.node,
-    null,
-    0,
-    step.formattingContext ?? flowRootFormattingContext,
+): Vtree.NodeContext;
+export function openRootFromStep( // eslint-disable-line no-redeclare
+  step: Vtree.RootNodePositionStep,
+  flowRootFormattingContext: Vtree.FormattingContext,
+  head?: PositionHead,
+): Vtree.NodeContext {
+  const opened = withNodePositionStep(
+    openCore(
+      step.node,
+      null,
+      0,
+      step.formattingContext ?? flowRootFormattingContext,
+      null,
+    ),
+    step,
   );
-  applyNodePositionStep(nodeContext, step);
-  nodeContext.shadowSibling = step.shadowSibling;
-  if (head) {
-    applyPositionHead(nodeContext, head);
-  }
-  return nodeContext;
+  const chained: Vtree.OpenNodeContext = {
+    ...opened,
+    shadowSibling: step.shadowSibling,
+  };
+  return head ? withPositionHead(chained, head) : chained;
 }
 
 export function afterHeadFromPosition(
@@ -192,7 +321,7 @@ export function afterHeadFromPosition(
 }
 
 export type ElementRenderResult = Pick<
-  Vtree.NodeContext,
+  Vtree.BeforeElementNodeContext,
   | "nodeShadow"
   | "containingBlockForAbsolute"
   | "flexContainer"
@@ -214,11 +343,24 @@ export type ElementRenderResult = Pick<
   | "hyphenateCharacter"
   | "breakWord"
   | "repeatOnBreak"
+  | "lang"
+  | "vertical"
+  | "direction"
+  | "inheritedProps"
+  | "establishesBFC"
+  | "display"
+  | "floatSide"
+  | "breakBefore"
+  | "formattingContext"
 >;
+
+export type ElementRenderDraft = {
+  -readonly [K in keyof ElementRenderResult]: ElementRenderResult[K];
+};
 
 export function elementRenderResultOf(
   nodeContext: Vtree.NodeContext,
-): ElementRenderResult {
+): ElementRenderDraft {
   return {
     nodeShadow: nodeContext.nodeShadow,
     containingBlockForAbsolute: nodeContext.containingBlockForAbsolute,
@@ -241,247 +383,480 @@ export function elementRenderResultOf(
     hyphenateCharacter: nodeContext.hyphenateCharacter,
     breakWord: nodeContext.breakWord,
     repeatOnBreak: nodeContext.repeatOnBreak,
+    lang: nodeContext.lang,
+    vertical: nodeContext.vertical,
+    direction: nodeContext.direction,
+    inheritedProps: nodeContext.inheritedProps,
+    establishesBFC: nodeContext.establishesBFC,
+    display: nodeContext.display,
+    floatSide: nodeContext.floatSide,
+    breakBefore: nodeContext.breakBefore,
+    formattingContext: nodeContext.formattingContext,
   };
 }
 
-export function renderedElement(
-  nodeContext: VtreeImpl.NodeContext,
-  result: ElementRenderResult,
-): VtreeImpl.NodeContext {
-  nodeContext.nodeShadow = result.nodeShadow;
-  nodeContext.containingBlockForAbsolute = result.containingBlockForAbsolute;
-  nodeContext.flexContainer = result.flexContainer;
-  nodeContext.inline = result.inline;
-  nodeContext.breakPenalty = result.breakPenalty;
-  nodeContext.clearSide = result.clearSide;
-  nodeContext.floatReference = result.floatReference;
-  nodeContext.floatMinWrapBlock = result.floatMinWrapBlock;
-  nodeContext.columnSpan = result.columnSpan;
-  nodeContext.breakAfter = result.breakAfter;
-  nodeContext.pageType = result.pageType;
-  nodeContext.captionSide = result.captionSide;
-  nodeContext.inlineBorderSpacing = result.inlineBorderSpacing;
-  nodeContext.blockBorderSpacing = result.blockBorderSpacing;
-  nodeContext.footnotePolicy = result.footnotePolicy;
-  nodeContext.firstPseudo = result.firstPseudo;
-  nodeContext.afterIfContinues = result.afterIfContinues;
-  nodeContext.whitespace = result.whitespace;
-  nodeContext.hyphenateCharacter = result.hyphenateCharacter;
-  nodeContext.breakWord = result.breakWord;
-  nodeContext.repeatOnBreak = result.repeatOnBreak;
-  return nodeContext;
-}
+export type ViewlessChildNodeContext = (
+  Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext
+) &
+  Vtree.ChildNodeContext;
 
-export function afterEdgeOf<T extends Vtree.NodeContext>(nodeContext: T): T {
-  const afterEdge = nodeContext.modify();
-  afterEdge.after = true;
-  return afterEdge;
-}
+export type ElementRenderProgress = Pick<
+  ElementRenderResult,
+  | "lang"
+  | "vertical"
+  | "direction"
+  | "inheritedProps"
+  | "establishesBFC"
+  | "display"
+  | "floatSide"
+  | "breakBefore"
+  | "formattingContext"
+>;
 
-export function afterEdgeAt<T extends Vtree.NodeContext>(
+export function elementRenderProgress<T extends Vtree.NodeContext>(
   nodeContext: T,
-  boxOffset: number,
+  progress: ElementRenderProgress,
 ): T {
-  const afterEdge = nodeContext.modify();
-  afterEdge.boxOffset = boxOffset;
-  afterEdge.after = true;
-  return afterEdge;
+  return {
+    ...nodeContext,
+    lang: progress.lang,
+    vertical: progress.vertical,
+    direction: progress.direction,
+    inheritedProps: progress.inheritedProps,
+    establishesBFC: progress.establishesBFC,
+    display: progress.display,
+    floatSide: progress.floatSide,
+    breakBefore: progress.breakBefore,
+    formattingContext: progress.formattingContext,
+  };
 }
 
-export function detachedAfterEdgeOf<T extends Vtree.NodeContext>(
-  nodeContext: T,
-): T {
-  const afterEdge = nodeContext.copy().modify();
-  afterEdge.after = true;
-  return afterEdge;
-}
-
-export function detachedBeforeEdgeOf<T extends Vtree.NodeContext>(
-  nodeContext: T,
-): T {
-  const beforeEdge = nodeContext.copy().modify();
-  beforeEdge.after = false;
-  return beforeEdge;
-}
-
-export function skippedAfterOf<T extends Vtree.NodeContext>(nodeContext: T): T {
-  const skipped = nodeContext.modify();
-  skipped.after = true;
-  if (!skipped.viewNode) {
-    skipped.inline = true;
+export function viewless(
+  nodeContext: Vtree.BeforeEdgeNodeContext,
+): Vtree.OpenNodeContext;
+export function viewless( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext;
+export function viewless( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
+  switch (nodeContext.kind) {
+    case "open":
+    case "after-none":
+      return nodeContext;
+    case "element":
+    case "text":
+      return {
+        ...nodeContext,
+        ...unstyled,
+        kind: "open",
+        after: false,
+        viewNode: null,
+      };
   }
-  return skipped;
+  return {
+    ...nodeContext,
+    ...unstyled,
+    kind: "after-none",
+    after: true,
+    viewNode: null,
+  };
 }
 
-export function anchoredAfterOf<T extends Vtree.NodeContext>(
-  nodeContext: T,
+export function viewlessRender(
+  nodeContext: Vtree.BeforeEdgeNodeContext,
+  result: ElementRenderResult,
+): Vtree.OpenNodeContext;
+export function viewlessRender( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+  result: ElementRenderResult,
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext;
+export function viewlessRender( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+  result: ElementRenderResult,
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
+  return viewless({
+    ...elementRenderProgress(nodeContext, result),
+    nodeShadow: result.nodeShadow,
+    inline: result.inline,
+    breakPenalty: result.breakPenalty,
+    pageType: result.pageType,
+    captionSide: result.captionSide,
+    inlineBorderSpacing: result.inlineBorderSpacing,
+    blockBorderSpacing: result.blockBorderSpacing,
+    firstPseudo: result.firstPseudo,
+    whitespace: result.whitespace,
+    hyphenateCharacter: result.hyphenateCharacter,
+    breakWord: result.breakWord,
+  });
+}
+
+export function renderedElement(
+  nodeContext: Vtree.BeforeEdgeNodeContext,
+  viewNode: Element,
+  result: ElementRenderResult,
+): Vtree.BeforeElementNodeContext;
+export function renderedElement( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+  viewNode: Element,
+  result: ElementRenderResult,
+): Vtree.ElementNodeContext;
+export function renderedElement( // eslint-disable-line no-redeclare
+  nodeContext: Vtree.NodeContext,
+  viewNode: Element,
+  result: ElementRenderResult,
+): Vtree.ElementNodeContext {
+  const rendered = { ...nodeContext, ...result, viewNode };
+  return nodeContext.after
+    ? { ...rendered, kind: "after-element", after: true }
+    : { ...rendered, kind: "element", after: false };
+}
+
+export function renderedText(
+  nodeContext: Vtree.OpenNodeContext & Vtree.ChildNodeContext,
+  viewNode: Text,
+  preprocessedTextContent: Diff.Change[],
+): Vtree.BeforeTextNodeContext;
+export function renderedText( // eslint-disable-line no-redeclare
+  nodeContext: ViewlessChildNodeContext,
+  viewNode: Text,
+  preprocessedTextContent: Diff.Change[],
+): Vtree.TextNodeContext;
+export function renderedText( // eslint-disable-line no-redeclare
+  nodeContext: ViewlessChildNodeContext,
+  viewNode: Text,
+  preprocessedTextContent: Diff.Change[],
+): Vtree.TextNodeContext {
+  const rendered = {
+    ...nodeContext,
+    viewNode,
+    preprocessedTextContent,
+    parent: nodeContext.parent,
+  };
+  return nodeContext.after
+    ? { ...rendered, kind: "after-text", after: true }
+    : { ...rendered, kind: "text", after: false };
+}
+
+export function afterEdgeOf(
+  nodeContext: Vtree.NodeContext,
+): Vtree.AfterEdgeNodeContext {
+  return afterEdgeAt(nodeContext, nodeContext.boxOffset);
+}
+
+export function afterEdgeAt(
+  nodeContext: Vtree.NodeContext,
+  boxOffset: number,
+): Vtree.AfterEdgeNodeContext {
+  const moved = { ...derived(nodeContext), boxOffset };
+  switch (moved.kind) {
+    case "open":
+    case "after-none":
+      return { ...moved, kind: "after-none", after: true };
+    case "element":
+    case "after-element":
+      return { ...moved, kind: "after-element", after: true };
+  }
+  return { ...moved, kind: "after-text", after: true };
+}
+
+export function detachedAfterEdgeOf(
+  nodeContext: Vtree.NodeContext,
+): Vtree.AfterEdgeNodeContext {
+  return afterEdgeOf(nodeContext);
+}
+
+export function detachedBeforeEdgeOf(
+  nodeContext: Vtree.NodeContext,
+): Vtree.BeforeEdgeNodeContext {
+  const moved = derived(nodeContext);
+  switch (moved.kind) {
+    case "open":
+    case "after-none":
+      return { ...moved, kind: "open", after: false };
+    case "element":
+    case "after-element":
+      return { ...moved, kind: "element", after: false };
+  }
+  return { ...moved, kind: "text", after: false };
+}
+
+export function skippedAfterOf(
+  nodeContext: Vtree.NodeContext,
+): Vtree.AfterEdgeNodeContext {
+  const after = afterEdgeOf(nodeContext);
+  return after.viewNode ? after : { ...after, inline: true };
+}
+
+export function anchoredAfterOf(
+  nodeContext: Vtree.NodeContext,
   anchor: Element,
   asInline: boolean,
-): T {
-  const anchored = nodeContext.modify();
-  anchored.after = true;
-  anchored.viewNode = anchor;
-  if (asInline) {
-    anchored.display = "inline";
-  }
-  return anchored;
+): Vtree.AfterElementNodeContext {
+  const moved = derived(nodeContext);
+  return {
+    ...moved,
+    kind: "after-element",
+    after: true,
+    viewNode: anchor,
+    display: asInline ? "inline" : moved.display,
+  };
 }
 
 export function withOverflow<T extends Vtree.NodeContext>(
   nodeContext: T,
   overflow: boolean,
 ): T {
-  const modified = nodeContext.modify();
-  modified.overflow = overflow;
-  return modified;
+  return { ...derived(nodeContext), overflow };
 }
 
 export function setOverflow<T extends Vtree.NodeContext>(
   nodeContext: T,
   overflow: boolean,
 ): T {
-  nodeContext.overflow = overflow;
-  return nodeContext;
+  return { ...nodeContext, overflow };
 }
 
 export function withBoxOffset<T extends Vtree.NodeContext>(
   nodeContext: T,
   boxOffset: number,
 ): T {
-  const modified = nodeContext.modify();
-  modified.boxOffset = boxOffset;
-  return modified;
+  return { ...derived(nodeContext), boxOffset };
 }
 
 export function setBoxOffset<T extends Vtree.NodeContext>(
   nodeContext: T,
   boxOffset: number,
 ): T {
-  nodeContext.boxOffset = boxOffset;
-  return nodeContext;
+  return { ...nodeContext, boxOffset };
 }
 
 export function withOffsetInNode<T extends Vtree.NodeContext>(
   nodeContext: T,
   offsetInNode: number,
 ): T {
-  const modified = nodeContext.modify();
-  modified.offsetInNode = offsetInNode;
-  return modified;
+  return { ...derived(nodeContext), offsetInNode };
 }
 
 export function textBrokenAt<T extends Vtree.NodeContext>(
   nodeContext: T,
   viewIndex: number,
 ): T {
-  const modified = nodeContext.modify();
-  modified.offsetInNode += viewIndex;
-  modified.breakBefore = null;
-  return modified;
+  return {
+    ...derived(nodeContext),
+    offsetInNode: nodeContext.offsetInNode + viewIndex,
+    breakBefore: null,
+  };
 }
 
 export function withBreakBefore<T extends Vtree.NodeContext>(
   nodeContext: T,
   breakBefore: string | null,
 ): T {
-  const modified = nodeContext.modify();
-  modified.breakBefore = breakBefore;
-  return modified;
+  return { ...derived(nodeContext), breakBefore };
 }
 
 export function setBreakBefore<T extends Vtree.NodeContext>(
   nodeContext: T,
   breakBefore: string | null,
 ): T {
-  nodeContext.breakBefore = breakBefore;
-  return nodeContext;
+  return { ...nodeContext, breakBefore };
 }
 
 export function withoutFloat<T extends Vtree.NodeContext>(nodeContext: T): T {
-  const modified = nodeContext.modify();
-  modified.floatSide = null;
-  modified.floatReference = PageFloats.FloatReference.INLINE;
-  modified.clearSide = null;
-  return modified;
+  return {
+    ...derived(nodeContext),
+    floatSide: null,
+    floatReference: PageFloats.FloatReference.INLINE,
+    clearSide: null,
+  };
 }
 
 export function setClearSpacer<T extends Vtree.NodeContext>(
   nodeContext: T,
   clearSpacer: Element | null,
 ): T {
-  nodeContext.clearSpacer = clearSpacer;
-  return nodeContext;
+  return { ...nodeContext, clearSpacer };
 }
 
-export function setRepeatOnBreak<T extends Vtree.NodeContext>(
-  nodeContext: T,
+export function setRepeatOnBreak(
+  nodeContext: Vtree.ElementNodeContext,
   repeatOnBreak: string | null,
-): T {
-  nodeContext.repeatOnBreak = repeatOnBreak;
-  return nodeContext;
+): Vtree.ElementNodeContext {
+  return { ...nodeContext, repeatOnBreak };
 }
 
 export function setFragmentIndex<T extends Vtree.NodeContext>(
   nodeContext: T,
   fragmentIndex: number,
 ): T {
-  nodeContext.fragmentIndex = fragmentIndex;
-  return nodeContext;
+  return { ...nodeContext, fragmentIndex };
 }
 
 export function setPluginProp<T extends Vtree.NodeContext>(
   nodeContext: T,
   name: string,
-  value: Vtree.NodeContext["pluginProps"][string],
+  value: Vtree.PluginProps[string],
 ): T {
-  nodeContext.pluginProps[name] = value;
-  return nodeContext;
-}
-
-export function setViewNode<T extends Vtree.NodeContext>(
-  nodeContext: T,
-  viewNode: Element | Text | null,
-): T {
-  nodeContext.viewNode = viewNode;
-  return nodeContext;
-}
-
-export function setPreprocessedTextContent<T extends Vtree.NodeContext>(
-  nodeContext: T,
-  preprocessedTextContent: Diff.Change[] | null,
-): T {
-  nodeContext.preprocessedTextContent = preprocessedTextContent;
-  return nodeContext;
+  return {
+    ...nodeContext,
+    pluginProps: { ...nodeContext.pluginProps, [name]: value },
+  };
 }
 
 export function setInline<T extends Vtree.NodeContext>(
   nodeContext: T,
   inline: boolean,
 ): T {
-  nodeContext.inline = inline;
-  return nodeContext;
+  return { ...nodeContext, inline };
 }
 
 export function setShadowContext<T extends Vtree.NodeContext>(
   nodeContext: T,
   shadowContext: Vtree.ShadowContext | null,
 ): T {
-  nodeContext.shadowContext = shadowContext;
-  return nodeContext;
+  return { ...nodeContext, shadowContext };
 }
 
 export function setShadowSibling<T extends Vtree.NodeContext>(
   nodeContext: T,
   shadowSibling: Vtree.NodeContext | null,
 ): T {
-  nodeContext.shadowSibling = shadowSibling;
-  return nodeContext;
+  return { ...nodeContext, shadowSibling };
+}
+
+export function setPreprocessedTextContent<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  preprocessedTextContent: Diff.Change[] | null,
+): T {
+  return { ...nodeContext, preprocessedTextContent };
+}
+
+type ContinuationHolder = { current: Vtree.NodeContext };
+
+const continuationOfSlot = new WeakMap<Vtree.NodeContext, ContinuationHolder>();
+const continuationAtValue = new WeakMap<
+  Vtree.NodeContext,
+  ContinuationHolder
+>();
+
+export function latestContinuation(slot: Vtree.NodeContext): Vtree.NodeContext {
+  return continuationOfSlot.get(slot)?.current ?? slot;
+}
+
+export function resumeContinuation(
+  slot: Vtree.NodeContext,
+  resumed: Vtree.NodeContext,
+): void {
+  const holder = continuationOfSlot.get(slot);
+  if (holder) {
+    continuationAtValue.delete(holder.current);
+    holder.current = resumed;
+    continuationAtValue.set(resumed, holder);
+    return;
+  }
+  const started = { current: resumed };
+  continuationOfSlot.set(slot, started);
+  continuationAtValue.set(resumed, started);
+}
+
+export function followContinuation(
+  previous: Vtree.NodeContext,
+  next: Vtree.NodeContext,
+): void {
+  const holder = continuationAtValue.get(previous);
+  if (!holder) {
+    return;
+  }
+  continuationAtValue.delete(previous);
+  holder.current = next;
+  continuationAtValue.set(next, holder);
+}
+
+export function positionChainOf<T extends Vtree.NodeContext>(
+  nodeContext: T,
+): T {
+  const parent = nodeContext.parent;
+  if (!parent) {
+    return derived(nodeContext);
+  }
+  const chainedParent = positionChainOf(parent);
+  return {
+    ...derived(nodeContext),
+    parent: chainedParent,
+    blockContainer: VtreeImpl.blockContainerForChildrenOf(chainedParent),
+  };
+}
+
+export function toNodePositionStep(
+  nodeContext: Vtree.NodeContext,
+): Vtree.NodePositionStep {
+  return {
+    node: nodeContext.sourceNode,
+    shadowType: nodeContext.shadowType,
+    shadowContext: nodeContext.shadowContext,
+    nodeShadow: nodeContext.nodeShadow,
+    shadowSibling: nodeContext.shadowSibling
+      ? toNodePositionStep(latestContinuation(nodeContext.shadowSibling))
+      : null,
+    formattingContext: nodeContext.formattingContext,
+
+    // fragmentIndex needs to be reset to 0 if this viewNode has been removed
+    // from the view tree by forced break processing. (Issue #1557)
+    fragmentIndex:
+      nodeContext.viewNode?.parentNode === null ? 0 : nodeContext.fragmentIndex,
+  };
+}
+
+export function toRootNodePositionStep(
+  root: Vtree.RootNodeContext,
+): Vtree.RootNodePositionStep {
+  return {
+    ...toNodePositionStep(root),
+    shadowSibling: root.shadowSibling,
+  };
 }
 
 export function toNodePosition(
   nodeContext: Vtree.NodeContext,
 ): Vtree.NodePosition {
-  return nodeContext.toNodePosition();
+  // Fix for issue #703
+  // A float or footnote context inside a pseudo-element shadow is always a
+  // descended one: restored heads keep the constructor's default float
+  // fields and live roots carry no shadow context.
+  const floatInPseudoContent =
+    nodeContext.shadowType === Vtree.ShadowType.ROOTLESS &&
+    (nodeContext.floatReference !== PageFloats.FloatReference.INLINE ||
+      nodeContext.floatSide === "footnote") &&
+    (nodeContext.shadowContext?.styler as PseudoElement.PseudoelementStyler)
+      ?.style?.["_pseudos"]
+      ? VtreeImpl.asChildNodeContext(nodeContext)
+      : null;
+  const steps: Vtree.NodePositionStep[] = [];
+  let nc: Vtree.NodeContext = floatInPseudoContent
+    ? floatInPseudoContent.parent
+    : nodeContext;
+  let parent: Vtree.ParentNodeContext | null;
+  while ((parent = nc.parent) !== null) {
+    // We need fully "peeled" path, so don't record first-XXX pseudoelement
+    // containers
+    if (!nc.firstPseudo || parent.firstPseudo === nc.firstPseudo) {
+      steps.push(toNodePositionStep(nc));
+    }
+    nc = parent;
+  }
+  const actualOffsetInNode = nodeContext.preprocessedTextContent
+    ? Diff.resolveOriginalIndex(
+        nodeContext.preprocessedTextContent,
+        nodeContext.offsetInNode,
+      )
+    : nodeContext.offsetInNode;
+  return {
+    steps: [...steps, toRootNodePositionStep(VtreeImpl.asRootNodeContext(nc))],
+    offsetInNode: actualOffsetInNode,
+    after: nodeContext.after,
+    preprocessedTextContent: nodeContext.preprocessedTextContent,
+  };
 }
 
 export function isInsideBFC(nodeContext: Vtree.NodeContext): boolean {

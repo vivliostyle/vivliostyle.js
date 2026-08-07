@@ -455,7 +455,7 @@ export namespace Layout {
       saveEvenOverflown: boolean,
       breakAtTheEdge: string | null,
     ): boolean;
-    applyClearance(nodeContext: Vtree.RenderedNodeContext): boolean;
+    applyClearance(nodeContext: Vtree.RenderedNodeContext): Element | null;
     isBFC(formattingContext: Vtree.FormattingContext): boolean;
     /**
      * Skips positions until either the start of unbreakable block or inline
@@ -558,7 +558,7 @@ export namespace Layout {
       text: string,
       viewIndex: number,
       nodeContext: Vtree.NodeContext,
-    ): number;
+    ): { viewIndex: number; nodeContext: Vtree.NodeContext };
     breakAfterOtherCharacter(
       textNode: Text,
       text: string,
@@ -1081,13 +1081,19 @@ export namespace Vtree {
      * Set the current source node and create a view. Parameter firstTime
      * is true (and possibly offsetInNode > 0) if node was broken on
      * the previous page.
-     * @return true if children should be processed as well
+     * @return the rendered node context and whether children should be
+     *     processed as well
      */
+    setCurrent(
+      nodeContext: BeforeEdgeNodeContext,
+      firstTime: boolean,
+      atUnforcedBreak?: boolean,
+    ): Task.Result<RenderResult<BeforeEdgeNodeContext>>;
     setCurrent(
       nodeContext: NodeContext,
       firstTime: boolean,
       atUnforcedBreak?: boolean,
-    ): Task.Result<boolean>;
+    ): Task.Result<RenderResult<NodeContext>>;
     /**
      * Set the container element that holds view elements produced from the
      * source.
@@ -1310,6 +1316,131 @@ export namespace Vtree {
     readonly count: number;
   }
 
+  export type NodeContextKind =
+    "open" | "element" | "text" | "after-element" | "after-text" | "after-none";
+
+  export type PluginProps = {
+    readonly [key: string]:
+      string | number | undefined | null | (number | null)[];
+  };
+
+  export interface NodeContextCore {
+    readonly kind: NodeContextKind;
+
+    // position itself
+    readonly offsetInNode: number;
+    readonly shadowType: ShadowType; // parent's shadow type
+    readonly shadowContext: Vtree.ShadowContext | null;
+    readonly nodeShadow: Vtree.ShadowContext | null;
+    readonly shadowSibling: NodeContext | null; // next "sibling" in the shadow tree
+    // other stuff
+    readonly inline: boolean;
+    readonly overflow: boolean;
+    readonly breakPenalty: number;
+    readonly whitespace: Whitespace;
+    readonly hyphenateCharacter: string | null;
+    readonly breakWord: boolean;
+    readonly breakBefore: string | null;
+    readonly clearSpacer: Element | null;
+    readonly display: string | null;
+    readonly floatSide: string | null;
+    readonly establishesBFC: boolean;
+    readonly captionSide: string;
+    readonly inlineBorderSpacing: number;
+    readonly blockBorderSpacing: number;
+    readonly inheritedProps: {
+      [key: string]: number | string | Css.Val | undefined;
+    };
+    readonly vertical: boolean;
+    readonly direction: string;
+    readonly firstPseudo: FirstPseudo | null;
+    readonly lang: string | null;
+    readonly formattingContext: FormattingContext;
+    readonly pluginProps: PluginProps;
+    readonly fragmentIndex: number;
+    readonly pageType: string | null;
+
+    readonly sourceNode: Node;
+    readonly parent: ParentNodeContext | null;
+    readonly blockContainer: ElementNodeContext | null;
+    readonly boxOffset: number;
+  }
+
+  export interface ElementStyleFields {
+    readonly floatReference: PageFloats.FloatReference;
+    readonly clearSide: string | null;
+    readonly floatMinWrapBlock: Css.Numeric | null;
+    readonly columnSpan: Css.Val | null;
+    readonly flexContainer: boolean;
+    readonly containingBlockForAbsolute: boolean;
+    readonly breakAfter: string | null;
+    readonly repeatOnBreak: string | null;
+    readonly afterIfContinues: Selectors.AfterIfContinues | null;
+    readonly footnotePolicy: Css.Ident | null;
+  }
+
+  export interface UnstyledFields {
+    readonly floatReference: PageFloats.FloatReference.INLINE;
+    readonly clearSide: null;
+    readonly floatMinWrapBlock: null;
+    readonly columnSpan: null;
+    readonly flexContainer: false;
+    readonly containingBlockForAbsolute: false;
+    readonly breakAfter: null;
+    readonly repeatOnBreak: null;
+    readonly afterIfContinues: null;
+    readonly footnotePolicy: null;
+  }
+
+  export interface OpenNodeContext extends NodeContextCore, UnstyledFields {
+    readonly kind: "open";
+    readonly after: false;
+    readonly viewNode: null;
+    readonly preprocessedTextContent: Diff.Change[] | null;
+  }
+
+  export interface BeforeElementNodeContext
+    extends NodeContextCore, ElementStyleFields {
+    readonly kind: "element";
+    readonly after: false;
+    readonly viewNode: Element;
+    readonly preprocessedTextContent: Diff.Change[] | null;
+  }
+
+  export interface BeforeTextNodeContext
+    extends NodeContextCore, UnstyledFields {
+    readonly kind: "text";
+    readonly after: false;
+    readonly viewNode: Text;
+    readonly parent: ParentNodeContext;
+    readonly preprocessedTextContent: Diff.Change[];
+  }
+
+  export interface AfterElementNodeContext
+    extends NodeContextCore, ElementStyleFields {
+    readonly kind: "after-element";
+    readonly after: true;
+    readonly viewNode: Element;
+    readonly preprocessedTextContent: Diff.Change[] | null;
+  }
+
+  export interface AfterTextNodeContext
+    extends NodeContextCore, UnstyledFields {
+    readonly kind: "after-text";
+    readonly after: true;
+    readonly viewNode: Text;
+    readonly parent: ParentNodeContext;
+    readonly preprocessedTextContent: Diff.Change[];
+  }
+
+  export interface AfterNoneNodeContext
+    extends NodeContextCore, UnstyledFields {
+    readonly kind: "after-none";
+    readonly after: true;
+    readonly viewNode: null;
+    readonly preprocessedTextContent: Diff.Change[] | null;
+  }
+
   /**
    * NodeContext represents a position in the document + layout-related
    * information attached to it. When after=false and offsetInNode=0, the
@@ -1318,101 +1449,58 @@ export namespace Vtree {
    * node. When after=true it represents position right after the last child
    * of the node. boxOffset is incremented by 1 for any valid node position.
    */
-  export interface NodeContext {
-    // position itself
-    offsetInNode: number;
-    after: boolean;
-    shadowType: ShadowType; // parent's shadow type
-    shadowContext: Vtree.ShadowContext | null;
-    nodeShadow: Vtree.ShadowContext | null;
-    shadowSibling: NodeContext | null; // next "sibling" in the shadow tree
-    // other stuff
-    shared: boolean;
-    inline: boolean;
-    overflow: boolean;
-    breakPenalty: number;
-    display: string | null;
-    floatReference: PageFloats.FloatReference;
-    floatSide: string | null;
-    clearSide: string | null;
-    floatMinWrapBlock: Css.Numeric | null;
-    columnSpan: Css.Val | null;
-    captionSide: string;
-    inlineBorderSpacing: number;
-    blockBorderSpacing: number;
-    flexContainer: boolean;
-    whitespace: Whitespace;
-    hyphenateCharacter: string | null;
-    breakWord: boolean;
-    establishesBFC: boolean;
-    containingBlockForAbsolute: boolean;
-    breakBefore: string | null;
-    breakAfter: string | null;
-    viewNode: Element | Text | null;
-    clearSpacer: Element | null;
-    inheritedProps: { [key: string]: number | string | Css.Val | undefined };
-    vertical: boolean;
-    direction: string;
-    firstPseudo: FirstPseudo | null;
-    lang: string | null;
-    preprocessedTextContent: Diff.Change[] | null;
-    formattingContext: FormattingContext;
-    repeatOnBreak: string | null;
-    pluginProps: {
-      [key: string]: string | number | undefined | null | (number | null)[];
-    };
-    fragmentIndex: number;
-    afterIfContinues: Selectors.AfterIfContinues | null;
-    footnotePolicy: Css.Ident | null;
-    pageType: string | null;
+  export type NodeContext =
+    | OpenNodeContext
+    | BeforeElementNodeContext
+    | BeforeTextNodeContext
+    | AfterElementNodeContext
+    | AfterTextNodeContext
+    | AfterNoneNodeContext;
 
-    sourceNode: Node;
-    parent: NodeContext | null;
-    blockContainer: ElementNodeContext | null;
-    boxOffset: number;
+  export type BeforeEdgeNodeContext =
+    OpenNodeContext | BeforeElementNodeContext | BeforeTextNodeContext;
 
-    resetView(): void;
-    modify(): this;
-    copy(): this;
-    clone(): this;
-    toNodePositionStep(): NodePositionStep;
-    toNodePosition(): NodePosition;
-  }
+  export type AfterEdgeNodeContext =
+    AfterElementNodeContext | AfterTextNodeContext | AfterNoneNodeContext;
 
-  export interface ChildNodeContext extends NodeContext {
-    parent: NodeContext;
-  }
+  export type ParentNodeContext = BeforeEdgeNodeContext;
 
-  export interface RootNodeContext extends NodeContext {
-    parent: null;
-    shadowSibling: null;
-  }
+  export type RenderResult<T extends NodeContext> = {
+    readonly nodeContext: T;
+    readonly processChildren: boolean;
+  };
 
-  export interface TextNodeContext extends ChildNodeContext {
-    viewNode: Text;
-  }
+  export type ChildNodeContext = NodeContext & {
+    readonly parent: ParentNodeContext;
+  };
 
-  export interface ElementNodeContext extends NodeContext {
-    viewNode: Element;
-  }
+  export type RootNodeContext = NodeContext & {
+    readonly parent: null;
+    readonly shadowSibling: null;
+  };
+
+  export type TextNodeContext = BeforeTextNodeContext | AfterTextNodeContext;
+
+  export type ElementNodeContext =
+    BeforeElementNodeContext | AfterElementNodeContext;
 
   export type RenderedNodeContext = ElementNodeContext | TextNodeContext;
 
-  export interface ContainedElementNodeContext extends ElementNodeContext {
-    blockContainer: ElementNodeContext;
-  }
+  export type ContainedElementNodeContext = ElementNodeContext & {
+    readonly blockContainer: ElementNodeContext;
+  };
 
-  export interface FloatNodeContext extends ElementNodeContext {
-    floatSide: string;
-  }
+  export type FloatNodeContext = ElementNodeContext & {
+    readonly floatSide: string;
+  };
 
-  export interface ClearNodeContext extends ElementNodeContext {
-    clearSide: string;
-  }
+  export type ClearNodeContext = ElementNodeContext & {
+    readonly clearSide: string;
+  };
 
-  export interface AfterIfContinuesNodeContext extends ElementNodeContext {
-    afterIfContinues: Selectors.AfterIfContinues;
-  }
+  export type AfterIfContinuesNodeContext = ElementNodeContext & {
+    readonly afterIfContinues: Selectors.AfterIfContinues;
+  };
 
   export interface ChunkPosition {
     floats: NodePosition[] | null;
