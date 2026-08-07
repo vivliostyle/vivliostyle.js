@@ -893,9 +893,9 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             new TableRow(this.rowIndex, nodeContext.sourceNode),
           );
           // Capture row's own breakBefore for forced break detection
-          if (nodeContext.breakBefore) {
-            formattingContext.rows[this.rowIndex].breakBefore =
-              nodeContext.breakBefore;
+          const rowBreakBefore = Break.effectiveBreakBefore(nodeContext);
+          if (rowBreakBefore) {
+            formattingContext.rows[this.rowIndex].breakBefore = rowBreakBefore;
           }
           if (!repetitiveElements.firstContentSourceNode) {
             repetitiveElements.firstContentSourceNode =
@@ -941,10 +941,11 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             this.inRow = false;
             // Capture row's own breakAfter for forced break detection
             const row = formattingContext.rows[this.rowIndex];
-            if (row && nodeContext.breakAfter) {
+            const rowBreakAfter = Break.effectiveBreakAfter(nodeContext);
+            if (row && rowBreakAfter) {
               row.breakAfter = Break.resolveEffectiveBreakValue(
                 row.breakAfter,
-                nodeContext.breakAfter,
+                rowBreakAfter,
               );
             }
           }
@@ -963,16 +964,18 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             // Propagate cell break values to the row for forced break detection
             const cellRow = formattingContext.rows[this.rowIndex];
             if (cellRow) {
-              if (nodeContext.breakBefore) {
+              const cellBreakBefore = Break.effectiveBreakBefore(nodeContext);
+              if (cellBreakBefore) {
                 cellRow.breakBefore = Break.resolveEffectiveBreakValue(
                   cellRow.breakBefore,
-                  nodeContext.breakBefore,
+                  cellBreakBefore,
                 );
               }
-              if (nodeContext.breakAfter) {
+              const cellBreakAfter = Break.effectiveBreakAfter(nodeContext);
+              if (cellBreakAfter) {
                 cellRow.breakAfter = Break.resolveEffectiveBreakValue(
                   cellRow.breakAfter,
-                  nodeContext.breakAfter,
+                  cellBreakAfter,
                 );
               }
             }

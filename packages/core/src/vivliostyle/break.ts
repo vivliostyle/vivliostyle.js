@@ -19,6 +19,7 @@
  */
 import * as Css from "./css";
 import * as Plugin from "./plugin";
+import { Vtree } from "./types";
 
 /**
  * Check if style="box-decoration-break: clone" is set
@@ -258,6 +259,92 @@ export function breakValueToStartBreakType(breakValue: string | null): string {
   return breakValue != null && isForcedBreakValue(breakValue)
     ? breakValue
     : "auto";
+}
+
+const suppressedColumnBreakBefore = new WeakSet<Element | Text>();
+const suppressedColumnBreakAfter = new WeakSet<Element | Text>();
+
+export function suppressColumnBreakBefore(viewNode: Element | Text): void {
+  suppressedColumnBreakBefore.add(viewNode);
+}
+
+export function suppressColumnBreakAfter(viewNode: Element | Text): void {
+  suppressedColumnBreakAfter.add(viewNode);
+}
+
+export function unsuppressColumnBreakBefore(viewNode: Element | Text): void {
+  suppressedColumnBreakBefore.delete(viewNode);
+}
+
+export function unsuppressColumnBreakAfter(viewNode: Element | Text): void {
+  suppressedColumnBreakAfter.delete(viewNode);
+}
+
+const reportedBreakBefore = new WeakMap<Vtree.NodeContext, string>();
+const reportedBreakAfter = new WeakMap<Vtree.NodeContext, string>();
+
+function rawBreakBefore(nodeContext: Vtree.NodeContext): string | null {
+  const reported = reportedBreakBefore.get(nodeContext);
+  return reported !== undefined && nodeContext.breakBefore === null
+    ? reported
+    : nodeContext.breakBefore;
+}
+
+function rawBreakAfter(nodeContext: Vtree.NodeContext): string | null {
+  const reported = reportedBreakAfter.get(nodeContext);
+  return reported !== undefined && nodeContext.breakAfter === null
+    ? reported
+    : nodeContext.breakAfter;
+}
+
+export function effectiveBreakBefore(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const viewNode = nodeContext.viewNode;
+  const breakBefore = rawBreakBefore(nodeContext);
+  return viewNode !== null &&
+    breakBefore === "column" &&
+    suppressedColumnBreakBefore.has(viewNode)
+    ? null
+    : breakBefore;
+}
+
+export function effectiveBreakAfter(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const viewNode = nodeContext.viewNode;
+  const breakAfter = rawBreakAfter(nodeContext);
+  return viewNode !== null &&
+    breakAfter === "column" &&
+    suppressedColumnBreakAfter.has(viewNode)
+    ? null
+    : breakAfter;
+}
+
+export function reportEffectiveBreakBefore(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const breakBefore = rawBreakBefore(nodeContext);
+  const effective = effectiveBreakBefore(nodeContext);
+  if (effective === breakBefore) {
+    reportedBreakBefore.delete(nodeContext);
+  } else {
+    reportedBreakBefore.set(nodeContext, breakBefore);
+  }
+  return effective;
+}
+
+export function reportEffectiveBreakAfter(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const breakAfter = rawBreakAfter(nodeContext);
+  const effective = effectiveBreakAfter(nodeContext);
+  if (effective === breakAfter) {
+    reportedBreakAfter.delete(nodeContext);
+  } else {
+    reportedBreakAfter.set(nodeContext, breakAfter);
+  }
+  return effective;
 }
 
 Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

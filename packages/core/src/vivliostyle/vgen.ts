@@ -2465,8 +2465,9 @@ export class ViewFactory
       nc && !nc.after;
       nc = nc.parent
     ) {
-      if (Break.isForcedBreakValue(nc.breakBefore)) {
-        return nc.breakBefore; // forced break
+      const breakBefore = Break.effectiveBreakBefore(nc);
+      if (Break.isForcedBreakValue(breakBefore)) {
+        return breakBefore; // forced break
       }
       const parent = nc.parent;
       if (nc.fragmentIndex === 1 && !parent) {

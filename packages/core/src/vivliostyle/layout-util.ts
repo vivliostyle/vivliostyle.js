@@ -322,7 +322,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     state.leadingEdgeContexts.push(state.nodeContext.copy());
     state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
       state.breakAtTheEdge,
-      state.nodeContext.breakBefore,
+      Break.effectiveBreakBefore(state.nodeContext),
     );
     state.onStartEdges = true;
     return this.startNonInlineBox(state);
@@ -355,7 +355,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         state.lastAfterNodeContext = state.nodeContext.copy();
         state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
           state.breakAtTheEdge,
-          state.nodeContext.breakAfter,
+          Break.effectiveBreakAfter(state.nodeContext),
         );
       }
       return Task.newResult(true);
