@@ -1358,7 +1358,8 @@ export class ViewFactory
       (display === Css.ident.grid || display === Css.ident.inline_grid) &&
       !!blockSize &&
       !(blockSize === Css.ident.auto || Css.isDefaultingValue(blockSize));
-    nodeContext.flexContainer =
+    const rendered = NodeContext.elementRenderResultOf(nodeContext);
+    rendered.flexContainer =
       display === Css.ident.flex || isFixedSizeGridContainer;
     this.createShadows(
       nodeContext,
@@ -1370,7 +1371,7 @@ export class ViewFactory
       this.context,
       nodeContext.shadowContext,
     ).then((shadowParam) => {
-      nodeContext.nodeShadow = shadowParam;
+      rendered.nodeShadow = shadowParam;
       const position = computedStyle["position"] as Css.Ident;
       let floatSide: Css.Val | null = computedStyle["float"];
       let clearSide: Css.Ident | null = computedStyle["clear"] as Css.Ident;
@@ -1401,7 +1402,7 @@ export class ViewFactory
         parentWritingMode,
         isMultiColumn || isFlowRoot,
       );
-      nodeContext.containingBlockForAbsolute =
+      rendered.containingBlockForAbsolute =
         Display.establishesCBForAbsolute(position);
       if (
         nodeContext.isInsideBFC() &&
@@ -1537,7 +1538,7 @@ export class ViewFactory
             (computedStyle["display"] &&
               computedStyle["display"] != Css.ident.inline)
           ) {
-            nodeContext.clearSide = clearSide.toString();
+            rendered.clearSide = clearSide.toString();
           }
         }
       }
@@ -1554,7 +1555,7 @@ export class ViewFactory
           !Css.isDefaultingValue(breakInside) &&
           breakInside !== Css.ident.auto)
       ) {
-        nodeContext.breakPenalty++;
+        rendered.breakPenalty++;
       }
       if (
         display &&
@@ -1562,18 +1563,18 @@ export class ViewFactory
         Display.isInlineLevel(display)
       ) {
         // Don't break inside ruby, inline-block, etc.
-        nodeContext.breakPenalty++;
+        rendered.breakPenalty++;
       }
-      nodeContext.inline =
+      rendered.inline =
         (!floating && !display) ||
         Display.isInlineLevel(display) ||
         Display.isRubyInternalDisplay(display);
       nodeContext.display = display ? display.toString() : "inline";
       nodeContext.floatSide = floating ? floatSideName : null;
-      nodeContext.floatReference =
+      rendered.floatReference =
         floatReference || PageFloats.FloatReference.INLINE;
       const floatMinWrapBlock = computedStyle["float-min-wrap-block"];
-      nodeContext.floatMinWrapBlock =
+      rendered.floatMinWrapBlock =
         floatMinWrapBlock && !Css.isDefaultingValue(floatMinWrapBlock)
           ? (floatMinWrapBlock as Css.Numeric)
           : null;
@@ -1583,21 +1584,21 @@ export class ViewFactory
         this.isInsideNonRootMultiColumn(nodeContext);
 
       const columnSpan = computedStyle["column-span"];
-      nodeContext.columnSpan =
+      rendered.columnSpan =
         !insideNonRootMultiColumn &&
         columnSpan &&
         !Css.isDefaultingValue(columnSpan)
           ? columnSpan
           : null;
-      if (!nodeContext.inline) {
+      if (!rendered.inline) {
         const breakAfter = computedStyle["break-after"];
         if (
           breakAfter &&
           !Css.isDefaultingValue(breakAfter) &&
           !(insideNonRootMultiColumn && breakAfter === Css.ident.column)
         ) {
-          nodeContext.breakAfter = breakAfter.toString();
-          if (Break.forcedBreakValues[nodeContext.breakAfter]) {
+          rendered.breakAfter = breakAfter.toString();
+          if (Break.forcedBreakValues[rendered.breakAfter]) {
             // delete computedStyle["break-after"];
 
             // Instead of deleting, set to "column" so that the browser can handle it.
@@ -1641,9 +1642,9 @@ export class ViewFactory
           pageType = this.styler.cascade.currentPageType;
         }
         if (!pageType || pageType.toLowerCase() === "auto") {
-          pageType = nodeContext.pageType;
+          pageType = rendered.pageType;
         } else {
-          nodeContext.pageType = pageType;
+          rendered.pageType = pageType;
         }
         const hasExplicitPageType =
           specifiedPageType != null &&
@@ -1676,7 +1677,7 @@ export class ViewFactory
           this.styler.cascade.currentPageType = effectivePageType;
         }
       }
-      nodeContext.captionSide =
+      rendered.captionSide =
         (computedStyle["caption-side"] &&
           computedStyle["caption-side"].toString()) ||
         "top";
@@ -1693,13 +1694,13 @@ export class ViewFactory
             inlineBorderSpacing = blockBorderSpacing = borderSpacing;
           }
           if (inlineBorderSpacing.isNumeric()) {
-            nodeContext.inlineBorderSpacing = Css.toNumber(
+            rendered.inlineBorderSpacing = Css.toNumber(
               inlineBorderSpacing,
               this.context,
             );
           }
           if (blockBorderSpacing.isNumeric()) {
-            nodeContext.blockBorderSpacing = Css.toNumber(
+            rendered.blockBorderSpacing = Css.toNumber(
               blockBorderSpacing,
               this.context,
             );
@@ -1712,7 +1713,7 @@ export class ViewFactory
       if (footnotePolicy && !Css.isDefaultingValue(footnotePolicy)) {
         computedStyle["--viv-footnote-policy"] = footnotePolicy;
       }
-      nodeContext.footnotePolicy =
+      rendered.footnotePolicy =
         footnotePolicy && !Css.isDefaultingValue(footnotePolicy)
           ? footnotePolicy
           : null;
@@ -1721,20 +1722,23 @@ export class ViewFactory
         const outerPseudo = nodeContext.parent
           ? nodeContext.parent.firstPseudo
           : null;
-        nodeContext.firstPseudo = new Vtree.FirstPseudo(
+        rendered.firstPseudo = new Vtree.FirstPseudo(
           outerPseudo,
           /** Css.Int */
           firstPseudo.num,
         );
       }
-      if (!nodeContext.inline) {
-        this.processAfterIfcontinues(
+      if (!rendered.inline) {
+        const afterIfContinues = this.resolveAfterIfContinues(
           nodeContext,
           element,
           elementStyle,
           styler,
           this.context,
         );
+        if (afterIfContinues) {
+          rendered.afterIfContinues = afterIfContinues;
+        }
       }
       const whitespace = computedStyle["white-space"];
       if (whitespace) {
@@ -1742,12 +1746,12 @@ export class ViewFactory
           whitespace.toString(),
         );
         if (whitespaceValue !== null) {
-          nodeContext.whitespace = whitespaceValue;
+          rendered.whitespace = whitespaceValue;
         }
       }
       const hyphenateCharacter = computedStyle["hyphenate-character"];
       if (hyphenateCharacter && hyphenateCharacter instanceof Css.Str) {
-        nodeContext.hyphenateCharacter = hyphenateCharacter.str;
+        rendered.hyphenateCharacter = hyphenateCharacter.str;
       }
       const wordBreak = computedStyle["word-break"];
       const lineBreak = computedStyle["line-break"];
@@ -1758,7 +1762,7 @@ export class ViewFactory
         overflowWrap === Css.ident.break_word ||
         overflowWrap === Css.ident.anywhere
       ) {
-        nodeContext.breakWord = true;
+        rendered.breakWord = true;
       }
 
       // Resolve formatting context
@@ -1776,8 +1780,8 @@ export class ViewFactory
           firstTime,
         );
       }
-      if (!nodeContext.inline) {
-        nodeContext.repeatOnBreak = this.processRepeatOnBreak(computedStyle);
+      if (!rendered.inline) {
+        rendered.repeatOnBreak = this.processRepeatOnBreak(computedStyle);
         this.findAndProcessRepeatingElements(nodeContext, element, styler);
       }
 
@@ -1810,7 +1814,7 @@ export class ViewFactory
         ns = Base.NS.XHTML;
       } else if (ns == Base.NS.SHADOW) {
         ns = Base.NS.XHTML;
-        tag = nodeContext.inline ? "span" : "div";
+        tag = rendered.inline ? "span" : "div";
       } else {
         custom = true;
       }
@@ -1875,6 +1879,7 @@ export class ViewFactory
         } else if (computedStyle["display"] === Css.ident.none) {
           // No element should be created if display:none is set.
           // (Fix issue #924)
+          NodeContext.renderedElement(nodeContext, rendered);
           frame.finish(false);
           return;
         } else {
@@ -2292,7 +2297,7 @@ export class ViewFactory
         this.preprocessElementStyle(nodeContext, computedStyle);
         this.applyComputedStyles(result, computedStyle);
 
-        if (nodeContext.inline) {
+        if (rendered.inline) {
           if (!firstTime) {
             Break.setBoxBreakFlag(result, "inline-start");
             if (Break.isCloneBoxDecorationBreak(result)) {
@@ -2350,6 +2355,7 @@ export class ViewFactory
           }
         }
 
+        NodeContext.renderedElement(nodeContext, rendered);
         this.viewNode = result;
         if (fetchers.length) {
           TaskUtil.waitForFetchers(fetchers).then(() => {
@@ -2501,13 +2507,13 @@ export class ViewFactory
     return false;
   }
 
-  private processAfterIfcontinues(
+  private resolveAfterIfContinues(
     nodeContext: Vtree.NodeContext,
     element: Element,
     cascStyle: CssCascade.ElementStyle,
     styler: CssStyler.AbstractStyler,
     context: Exprs.Context,
-  ) {
+  ): Layout.AfterIfContinues | null {
     const pseudoMap = this.getPseudoMap(
       cascStyle,
       this.regionIds,
@@ -2516,7 +2522,7 @@ export class ViewFactory
       context,
     );
     if (!pseudoMap) {
-      return;
+      return null;
     }
     if (
       pseudoMap["after-if-continues"] &&
@@ -2529,11 +2535,9 @@ export class ViewFactory
         context,
         this.exprContentListener,
       );
-      nodeContext.afterIfContinues = new Layout.AfterIfContinues(
-        element,
-        shadowStyler,
-      );
+      return new Layout.AfterIfContinues(element, shadowStyler);
     }
+    return null;
   }
 
   isSVGUrlAttribute(attributeName: string): boolean {

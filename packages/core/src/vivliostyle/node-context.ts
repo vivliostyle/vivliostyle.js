@@ -177,3 +177,84 @@ export function afterHeadFromPosition(
     preprocessedTextContent: position.preprocessedTextContent,
   };
 }
+
+export type ElementRenderResult = Pick<
+  Vtree.NodeContext,
+  | "nodeShadow"
+  | "containingBlockForAbsolute"
+  | "flexContainer"
+  | "inline"
+  | "breakPenalty"
+  | "clearSide"
+  | "floatReference"
+  | "floatMinWrapBlock"
+  | "columnSpan"
+  | "breakAfter"
+  | "pageType"
+  | "captionSide"
+  | "inlineBorderSpacing"
+  | "blockBorderSpacing"
+  | "footnotePolicy"
+  | "firstPseudo"
+  | "afterIfContinues"
+  | "whitespace"
+  | "hyphenateCharacter"
+  | "breakWord"
+  | "repeatOnBreak"
+>;
+
+export function elementRenderResultOf(
+  nodeContext: Vtree.NodeContext,
+): ElementRenderResult {
+  return {
+    nodeShadow: nodeContext.nodeShadow,
+    containingBlockForAbsolute: nodeContext.containingBlockForAbsolute,
+    flexContainer: nodeContext.flexContainer,
+    inline: nodeContext.inline,
+    breakPenalty: nodeContext.breakPenalty,
+    clearSide: nodeContext.clearSide,
+    floatReference: nodeContext.floatReference,
+    floatMinWrapBlock: nodeContext.floatMinWrapBlock,
+    columnSpan: nodeContext.columnSpan,
+    breakAfter: nodeContext.breakAfter,
+    pageType: nodeContext.pageType,
+    captionSide: nodeContext.captionSide,
+    inlineBorderSpacing: nodeContext.inlineBorderSpacing,
+    blockBorderSpacing: nodeContext.blockBorderSpacing,
+    footnotePolicy: nodeContext.footnotePolicy,
+    firstPseudo: nodeContext.firstPseudo,
+    afterIfContinues: nodeContext.afterIfContinues,
+    whitespace: nodeContext.whitespace,
+    hyphenateCharacter: nodeContext.hyphenateCharacter,
+    breakWord: nodeContext.breakWord,
+    repeatOnBreak: nodeContext.repeatOnBreak,
+  };
+}
+
+export function renderedElement(
+  nodeContext: VtreeImpl.NodeContext,
+  result: ElementRenderResult,
+): VtreeImpl.NodeContext {
+  nodeContext.nodeShadow = result.nodeShadow;
+  nodeContext.containingBlockForAbsolute = result.containingBlockForAbsolute;
+  nodeContext.flexContainer = result.flexContainer;
+  nodeContext.inline = result.inline;
+  nodeContext.breakPenalty = result.breakPenalty;
+  nodeContext.clearSide = result.clearSide;
+  nodeContext.floatReference = result.floatReference;
+  nodeContext.floatMinWrapBlock = result.floatMinWrapBlock;
+  nodeContext.columnSpan = result.columnSpan;
+  nodeContext.breakAfter = result.breakAfter;
+  nodeContext.pageType = result.pageType;
+  nodeContext.captionSide = result.captionSide;
+  nodeContext.inlineBorderSpacing = result.inlineBorderSpacing;
+  nodeContext.blockBorderSpacing = result.blockBorderSpacing;
+  nodeContext.footnotePolicy = result.footnotePolicy;
+  nodeContext.firstPseudo = result.firstPseudo;
+  nodeContext.afterIfContinues = result.afterIfContinues;
+  nodeContext.whitespace = result.whitespace;
+  nodeContext.hyphenateCharacter = result.hyphenateCharacter;
+  nodeContext.breakWord = result.breakWord;
+  nodeContext.repeatOnBreak = result.repeatOnBreak;
+  return nodeContext;
+}
