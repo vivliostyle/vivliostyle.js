@@ -129,6 +129,11 @@ export namespace Layout {
     recordedRepetitiveOverflow: boolean;
   };
 
+  export type LineStylingResult = {
+    nodeContext: Vtree.NodeContext | null;
+    checkPoints: Vtree.RenderedNodeContext[];
+  };
+
   /**
    * Potential breaking position inside CSS box (between lines).
    * @param checkPoints array of breaking points for
@@ -359,7 +364,7 @@ export namespace Layout {
       nodeContext: Vtree.NodeContext,
       resNodeContext: Vtree.NodeContext | null,
       checkPoints: Vtree.RenderedNodeContext[],
-    ): Task.Result<Vtree.NodeContext | null>;
+    ): Task.Result<LineStylingResult>;
     isLoneImage(checkPoints: Vtree.RenderedNodeContext[]): boolean;
     getTrailingMarginEdgeAdjustment(
       trailingEdgeContexts: Vtree.NodeContext[],
