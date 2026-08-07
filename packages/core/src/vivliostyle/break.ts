@@ -19,6 +19,7 @@
  */
 import * as Css from "./css";
 import * as Plugin from "./plugin";
+import { Vtree } from "./types";
 
 /**
  * Check if style="box-decoration-break: clone" is set
@@ -258,6 +259,39 @@ export function breakValueToStartBreakType(breakValue: string | null): string {
   return breakValue != null && isForcedBreakValue(breakValue)
     ? breakValue
     : "auto";
+}
+
+const suppressedColumnBreakBefore = new WeakSet<Element | Text>();
+const suppressedColumnBreakAfter = new WeakSet<Element | Text>();
+
+export function suppressColumnBreakBefore(viewNode: Element | Text): void {
+  suppressedColumnBreakBefore.add(viewNode);
+}
+
+export function suppressColumnBreakAfter(viewNode: Element | Text): void {
+  suppressedColumnBreakAfter.add(viewNode);
+}
+
+export function effectiveBreakBefore(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const viewNode = nodeContext.viewNode;
+  return viewNode !== null &&
+    nodeContext.breakBefore === "column" &&
+    suppressedColumnBreakBefore.has(viewNode)
+    ? null
+    : nodeContext.breakBefore;
+}
+
+export function effectiveBreakAfter(
+  nodeContext: Vtree.NodeContext,
+): string | null {
+  const viewNode = nodeContext.viewNode;
+  return viewNode !== null &&
+    nodeContext.breakAfter === "column" &&
+    suppressedColumnBreakAfter.has(viewNode)
+    ? null
+    : nodeContext.breakAfter;
 }
 
 Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);

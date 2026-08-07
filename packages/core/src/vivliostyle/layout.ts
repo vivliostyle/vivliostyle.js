@@ -3798,8 +3798,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nc;
         nc = nc.parent
       ) {
-        if (nc.breakBefore === "column") {
-          nc.breakBefore = null;
+        if (Break.effectiveBreakBefore(nc) === "column") {
+          Break.suppressColumnBreakBefore(nc.viewNode);
         }
         if (nc.viewNode?.nodeType === 1) {
           const elem = nc.viewNode as HTMLElement;
@@ -3828,8 +3828,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nc;
         nc = nc.parent
       ) {
-        if (nc.breakBefore === "column") {
-          nc.breakBefore = null;
+        if (Break.effectiveBreakBefore(nc) === "column") {
+          Break.suppressColumnBreakBefore(nc.viewNode);
         }
         if (nc.viewNode?.nodeType === 1) {
           const elem = nc.viewNode as HTMLElement;
@@ -3852,8 +3852,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nc;
         nc = nc.parent
       ) {
-        if (nc.breakAfter === "column") {
-          nc.breakAfter = null;
+        if (Break.effectiveBreakAfter(nc) === "column") {
+          Break.suppressColumnBreakAfter(nc.viewNode);
         }
         if (nc.viewNode?.nodeType === 1) {
           const elem = nc.viewNode as HTMLElement;
@@ -4012,7 +4012,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 break;
               }
               if (!nodeContext.after) {
-                setBreakAtTheEdge(nodeContext.breakBefore);
+                setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
                 suppressWeakerLeadingColumnBreaks(nodeContext);
                 consumeSatisfiedLeadingColumnBreak(nodeContext);
                 // Leading edge of non-empty block -> finished going through
@@ -4137,7 +4137,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // new formatting context, or float or flex container,
                 // or empty block box (unbreakable)
                 leadingEdgeContexts.push(rendered.copy());
-                setBreakAtTheEdge(nodeContext.breakBefore);
+                setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
                 suppressWeakerLeadingColumnBreaks(nodeContext);
                 consumeSatisfiedLeadingColumnBreak(nodeContext);
 
@@ -4195,7 +4195,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 lastAfterNodeContext = elementContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
                 breakAtTheEdge = null;
-                setBreakAtTheEdge(nodeContext.breakAfter);
+                setBreakAtTheEdge(Break.effectiveBreakAfter(nodeContext));
                 suppressWeakerTrailingColumnBreaks(nodeContext);
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
@@ -4262,7 +4262,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 lastAfterNodeContext = elementContext.copy();
                 trailingEdgeContexts.push(lastAfterNodeContext);
               }
-              setBreakAtTheEdge(nodeContext.breakAfter);
+              setBreakAtTheEdge(Break.effectiveBreakAfter(nodeContext));
               suppressWeakerTrailingColumnBreaks(nodeContext);
               if (
                 style &&
@@ -4279,7 +4279,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             } else {
               // Leading edge
               leadingEdgeContexts.push(elementContext.copy());
-              setBreakAtTheEdge(nodeContext.breakBefore);
+              setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
               suppressWeakerLeadingColumnBreaks(nodeContext);
               consumeSatisfiedLeadingColumnBreak(nodeContext);
 
@@ -4438,7 +4438,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // float or flex container (unbreakable)
                 breakAtTheEdge = Break.resolveEffectiveBreakValue(
                   breakAtTheEdge,
-                  nodeContext.breakBefore,
+                  Break.effectiveBreakBefore(nodeContext),
                 );
 
                 // check if a forced break must occur before the block.
@@ -4472,13 +4472,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               onStartEdges = false; // we are now on end edges.
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakAfter,
+                Break.effectiveBreakAfter(nodeContext),
               );
             } else {
               // Leading edge
               breakAtTheEdge = Break.resolveEffectiveBreakValue(
                 breakAtTheEdge,
-                nodeContext.breakBefore,
+                Break.effectiveBreakBefore(nodeContext),
               );
               const viewTag = viewElement.localName;
               if (Base.mediaTags[viewTag]) {
