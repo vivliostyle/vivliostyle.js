@@ -2850,6 +2850,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         position.checkPointIndex,
         force,
       );
+      if (cpNodeContext.after) {
+        const brokenCheckPoint = VtreeImpl.asRenderedNodeContext(nodeContext);
+        if (brokenCheckPoint) {
+          checkPoints[position.checkPointIndex] = brokenCheckPoint;
+        }
+      }
     } else {
       // Fix for issue #821, #885, #1459
       const p = LayoutHelper.findAncestorSpecialInlineNodeContext(nodeContext);
@@ -5232,6 +5238,7 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
+      nodeContext = nodeContext.modify();
       nodeContext.offsetInNode = textNode.length;
     } else {
       // Character with index low is the last one that fits.
