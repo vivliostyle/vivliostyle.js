@@ -450,6 +450,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   pseudoParent: Column | null = null;
   nodeContextOverflowingDueToRepetitiveElements: Vtree.NodeContext | null =
     null;
+  private initialNodeContext: Vtree.NodeContext | null = null;
   blockDistanceToBlockEndFloats: number = NaN;
   lastLineStride: number = 0;
   breakAtTheEdgeBeforeFloat: string | null = null;
@@ -598,10 +599,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.layoutContext.setViewRoot(this.element, this.isFootnote);
     let stepIndex = steps.length - 1;
     let nodeContext: Vtree.NodeContext | null = null;
+    let openContext: Vtree.ParentNodeContext | null = null;
     frame
       .loop(() => {
         while (stepIndex >= 0) {
-          const prevContext = nodeContext;
+          const prevContext = openContext;
           const head =
             stepIndex == 0
               ? NodeContext.afterHeadFromPosition(
@@ -609,20 +611,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   this.calculateOffsetInNodeForNodeContext(position),
                 )
               : undefined;
-          nodeContext = prevContext
+          const opened = prevContext
             ? NodeContext.openFromStep(steps[stepIndex], prevContext, head)
             : NodeContext.openRootFromStep(
                 VtreeImpl.rootStepOfNodePosition(position),
                 this.flowRootFormattingContext,
                 head,
               );
-          if (head?.after) {
+          nodeContext = opened;
+          if (opened.after === true) {
             break;
           }
-          const r = this.layoutContext.setCurrent(
-            nodeContext,
-            stepIndex == 0 && nodeContext.offsetInNode == 0,
-          );
+          const r = this.layoutContext
+            .setCurrent(opened, stepIndex == 0 && opened.offsetInNode == 0)
+            .thenAsync(({ nodeContext: rendered, processChildren }) => {
+              nodeContext = rendered;
+              openContext = rendered;
+              return Task.newResult(processChildren);
+            });
           stepIndex--;
           if (r.isPending()) {
             return r;
@@ -717,7 +723,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // Prevent breaking inside SVG etc. (Issue #1406)
           renderedPos.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
         ) {
-          checkPoints.push(renderedPos.copy());
+          checkPoints.push(renderedPos);
 
           // Prevent performance degradation when the text block is very large.
           // (Issue #1256)
@@ -754,7 +760,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               renderedPeeled &&
               !LayoutHelper.isSpecialNodeContext(renderedPeeled)
             ) {
-              checkPoints.push(renderedPeeled.copy());
+              checkPoints.push(renderedPeeled);
             }
           }
           this.nextInTree(position).then((positionParam) => {
@@ -845,7 +851,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           renderedPos.inline &&
           !LayoutHelper.isSpecialNodeContext(renderedPos)
         ) {
-          checkPoints.push(renderedPos.copy());
+          checkPoints.push(renderedPos);
         } else {
           if (checkPoints.length > 0) {
             this.postLayoutBlock(position, checkPoints);
@@ -870,7 +876,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               renderedPeeled &&
               !LayoutHelper.isSpecialNodeContext(renderedPeeled)
             ) {
-              checkPoints.push(renderedPeeled.copy());
+              checkPoints.push(renderedPeeled);
             }
           }
           this.nextInTree(position1).then((positionParam) => {
@@ -1608,9 +1614,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (nodeContext.clearSpacer) {
         const clearSpacer = nodeContext.clearSpacer;
         clearSpacer.remove();
-        NodeContext.setClearSpacer(nodeContext, null);
+        const uncleared = NodeContext.setClearSpacer(nodeContext, null);
+        this.followWalkedContext(nodeContext, uncleared);
+        nodeContext = uncleared;
         if (nodeContextAfter.clearSpacer === clearSpacer) {
-          NodeContext.setClearSpacer(nodeContextAfter, null);
+          const unclearedAfter = NodeContext.setClearSpacer(
+            nodeContextAfter,
+            null,
+          );
+          this.followWalkedContext(nodeContextAfter, unclearedAfter);
+          nodeContextAfter = unclearedAfter;
         }
       }
       const floatBoxEdge = this.vertical ? floatBox.x1 : floatBox.y2;
@@ -2291,7 +2304,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       columnContext.container.width < regionContext.container.width;
     if (isRegionWider && floatReference === PageFloats.FloatReference.COLUMN) {
       if (columnSpan === Css.ident.auto) {
-        this.buildDeepElementView(nodeContext.copy()).then((position) => {
+        this.buildDeepElementView(nodeContext).then((position) => {
           const element = position.viewNode as Element;
           let inlineSize = Sizing.getSize(this.clientLayout, element, [
             Sizing.Size.MIN_CONTENT_INLINE_SIZE,
@@ -3594,18 +3607,32 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return overflown;
   }
 
-  applyClearance(nodeContext: Vtree.RenderedNodeContext): boolean {
+  private followWalkedContext(
+    previous: Vtree.NodeContext,
+    next: Vtree.NodeContext,
+    cursorAdvance = false,
+  ): void {
+    if (cursorAdvance) {
+      return;
+    }
+    NodeContext.followContinuation(previous, next);
+    if (this.initialNodeContext === previous) {
+      this.initialNodeContext = next;
+    }
+  }
+
+  applyClearance(nodeContext: Vtree.RenderedNodeContext): Element | null {
     if (!nodeContext.viewNode.parentNode) {
       // Cannot do clearance for nodes without parents
-      return false;
+      return null;
     }
     if (nodeContext.floatReference !== PageFloats.FloatReference.INLINE) {
       // For page floats, clearance is handled differently
-      return false;
+      return null;
     }
     if (nodeContext.floatSide) {
       // Clear on inline floats is handled in layoutFloat()
-      return false;
+      return null;
     }
 
     const clear =
@@ -3715,7 +3742,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (edge * dir + tolerance > clearEdge * dir) {
       // No need for clearance
       nodeContext.viewNode.parentNode.removeChild(spacer);
-      return false;
+      return null;
     } else {
       // Need some clearance, determine how much. Add the clearance node,
       // measure its after edge and adjust after margin (required due to
@@ -3745,8 +3772,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           spacer.style.marginBottom = `${hAdj}px`;
         }
       }
-      NodeContext.setClearSpacer(nodeContext, spacer);
-      return true;
+      return spacer;
     }
   }
 
@@ -3981,7 +4007,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         return false;
       }
       let sawOutOfFlowSibling = false;
-      for (let nc = nodeContext; nc?.parent && !nc.after; nc = nc.parent) {
+      for (
+        let nc: Vtree.NodeContext | null = nodeContext;
+        nc?.parent && !nc.after;
+        nc = nc.parent
+      ) {
         if (nc !== nodeContext && LayoutHelper.isOutOfFlow(nc.viewNode)) {
           return false;
         }
@@ -4021,7 +4051,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // A code block to be able to use break. Break moves to the next
           // node position.
           do {
-            const rendered = VtreeImpl.asRenderedNodeContext(nodeContext);
+            let rendered = VtreeImpl.asRenderedNodeContext(nodeContext);
             if (!rendered) {
               // Non-displayable content, skip
               break;
@@ -4116,16 +4146,22 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 VtreeImpl.asClearNodeContext(nodeContext);
               if (clearNodeContext) {
                 // clear
-                if (
-                  this.applyClearance(clearNodeContext) &&
-                  leadingEdge &&
-                  this.breakPositions.length === 0
-                ) {
-                  this.saveEdgeBreakPosition(
-                    nodeContext.copy(),
-                    breakAtTheEdge,
-                    false,
+                const clearSpacer = this.applyClearance(clearNodeContext);
+                if (clearSpacer) {
+                  const cleared = NodeContext.setClearSpacer(
+                    clearNodeContext,
+                    clearSpacer,
                   );
+                  this.followWalkedContext(nodeContext, cleared);
+                  nodeContext = cleared;
+                  rendered = cleared;
+                  if (leadingEdge && this.breakPositions.length === 0) {
+                    this.saveEdgeBreakPosition(
+                      nodeContext,
+                      breakAtTheEdge,
+                      false,
+                    );
+                  }
                 }
               }
               // Check break opportunity between anonymous block box and block-level box
@@ -4148,11 +4184,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     // break opportunity above. (Issue #1786)
                     (!leadingEdge && leadingEdgeContexts.length === 0))
               ) {
-                this.saveEdgeBreakPosition(
-                  nodeContext.copy(),
-                  breakAtTheEdge,
-                  false,
-                );
+                this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, false);
               }
               if (
                 !this.isBFC(nodeContext.formattingContext) ||
@@ -4171,7 +4203,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               ) {
                 // new formatting context, or float or flex container,
                 // or empty block box (unbreakable)
-                leadingEdgeContexts.push(rendered.copy());
+                leadingEdgeContexts.push(rendered);
                 setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
                 suppressWeakerLeadingColumnBreaks(nodeContext);
                 consumeSatisfiedLeadingColumnBreak(nodeContext);
@@ -4227,7 +4259,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 element.getAttribute("data-math-typeset") === "true"
               ) {
                 onStartEdges = false;
-                lastAfterNodeContext = elementContext.copy();
+                lastAfterNodeContext = elementContext;
                 trailingEdgeContexts.push(lastAfterNodeContext);
                 breakAtTheEdge = null;
                 setBreakAtTheEdge(Break.effectiveBreakAfter(nodeContext));
@@ -4294,7 +4326,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               // which are positioned in normal flow and are needed for
               // break position tracking. (Issue #1790)
               if (!LayoutHelper.isCssOutOfFlow(elementContext.viewNode)) {
-                lastAfterNodeContext = elementContext.copy();
+                lastAfterNodeContext = elementContext;
                 trailingEdgeContexts.push(lastAfterNodeContext);
               }
               setBreakAtTheEdge(Break.effectiveBreakAfter(nodeContext));
@@ -4313,7 +4345,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             } else {
               // Leading edge
-              leadingEdgeContexts.push(elementContext.copy());
+              leadingEdgeContexts.push(elementContext);
               setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
               suppressWeakerLeadingColumnBreaks(nodeContext);
               consumeSatisfiedLeadingColumnBreak(nodeContext);
@@ -4429,7 +4461,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     initialNodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext | null> {
     let nodeContext: Vtree.NodeContext | null = initialNodeContext;
-    let resultNodeContext: Vtree.NodeContext | null = nodeContext.copy();
+    let resultNodeContext: Vtree.NodeContext | null = nodeContext;
     const frame: Task.Frame<Vtree.NodeContext | null> =
       Task.newFrame("skipEdges");
     let breakAtTheEdge: string | null = null;
@@ -4741,7 +4773,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     breakAtEdge: string | null,
     overflows: boolean,
   ): void {
-    const copy = position.copy();
+    const copy = position;
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
       position.formattingContext,
     );
@@ -4815,27 +4847,46 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // ------ start the column -----------
     this.openAllViews(chunkPosition.primary).then((nodeContext) => {
-      let initialNodeContext: Vtree.NodeContext | null = null;
+      this.initialNodeContext = null;
+      const replaceWalkedContextListener = (evt) => {
+        this.followWalkedContext(
+          evt.previousNodeContext,
+          evt.nodeContext,
+          evt.cursorAdvance,
+        );
+      };
+      this.layoutContext.addEventListener(
+        "replaceWalkedContext",
+        replaceWalkedContextListener,
+      );
+      const nextInTreeListener = (evt) => {
+        if (evt.nodeContext.viewNode) {
+          this.initialNodeContext = evt.nodeContext;
+          this.layoutContext.removeEventListener(
+            "nextInTree",
+            nextInTreeListener,
+          );
+        }
+      };
       if (nodeContext.viewNode) {
-        initialNodeContext = nodeContext.copy();
+        this.initialNodeContext = nodeContext;
       } else {
-        const nextInTreeListener = (evt) => {
-          if (evt.nodeContext.viewNode) {
-            initialNodeContext = evt.nodeContext;
-            this.layoutContext.removeEventListener(
-              "nextInTree",
-              nextInTreeListener,
-            );
-          }
-        };
         this.layoutContext.addEventListener("nextInTree", nextInTreeListener);
       }
       const retryer = new ColumnLayoutRetryer(leadingEdge, breakAfter);
       retryer.layout(nodeContext, this).then((nodeContextParam) => {
+        this.layoutContext.removeEventListener(
+          "replaceWalkedContext",
+          replaceWalkedContextListener,
+        );
+        this.layoutContext.removeEventListener(
+          "nextInTree",
+          nextInTreeListener,
+        );
         this.doFinishBreak(
           nodeContextParam,
           retryer.context.overflownNodeContext,
-          initialNodeContext,
+          this.initialNodeContext,
           retryer.initialComputedBlockSize,
         ).then((positionAfter) => {
           let cont: Task.Result<boolean>;
@@ -5107,7 +5158,7 @@ export class PseudoColumn {
       return Column.prototype.openAllViews
         .call(this, position)
         .thenAsync((result) => {
-          pseudoColumn.startNodeContexts.push(result.copy());
+          pseudoColumn.startNodeContexts.push(result);
           return Task.newResult(result);
         });
     };
@@ -5124,7 +5175,7 @@ export class PseudoColumn {
   }
   findAcceptableBreakPosition(): Layout.BreakPositionAndNodeContext {
     const p = this.column.findAcceptableBreakPosition();
-    const startNodeContext = this.startNodeContexts[0].copy();
+    const startNodeContext = this.startNodeContexts[0];
     const bp = new BreakPosition.EdgeBreakPosition(
       startNodeContext,
       null,
@@ -5281,8 +5332,9 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
         : "",
     );
     if (zwj) {
-      const p = nodeContext.preprocessedTextContent[0][1] as string;
-      nodeContext.preprocessedTextContent[0][1] =
+      const preprocessedTextContent = nodeContext.preprocessedTextContent;
+      const p = preprocessedTextContent[0][1] as string;
+      preprocessedTextContent[0][1] =
         p.slice(0, viewIndex + 1) + zwj + p.slice(viewIndex + 1);
     }
     return viewIndex + 1;

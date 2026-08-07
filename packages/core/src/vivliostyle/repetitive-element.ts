@@ -749,7 +749,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 
   override startNonInlineElementNode(
-    state: LayoutUtil.RenderedActiveLayoutIteratorState,
+    state: LayoutUtil.ElementActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
     const formattingContext = this.formattingContext;
     const nodeContext = state.nodeContext;
@@ -764,7 +764,10 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
             repetitiveElements.setHeaderNodeContext(nodeContext);
             return Task.newResult(true);
           } else {
-            NodeContext.setRepeatOnBreak(nodeContext, "none");
+            state.nodeContext = NodeContext.setRepeatOnBreak(
+              nodeContext,
+              "none",
+            );
           }
           break;
         case "footer":
@@ -772,7 +775,10 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
             repetitiveElements.setFooterNodeContext(nodeContext);
             return Task.newResult(true);
           } else {
-            NodeContext.setRepeatOnBreak(nodeContext, "none");
+            state.nodeContext = NodeContext.setRepeatOnBreak(
+              nodeContext,
+              "none",
+            );
           }
           break;
       }

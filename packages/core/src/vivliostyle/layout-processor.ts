@@ -127,7 +127,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     columnBlockSize: number,
   ): Layout.BreakPosition {
     return new BreakPosition.EdgeBreakPosition(
-      position.copy(),
+      position,
       breakOnEdge,
       overflows,
       columnBlockSize,

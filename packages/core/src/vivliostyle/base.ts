@@ -818,6 +818,9 @@ export type Event = {
   anchorElement?;
   href?;
   content?;
+  nodeContext?;
+  previousNodeContext?;
+  cursorAdvance?;
 };
 
 export type EventListener = (p1: Event) => void;

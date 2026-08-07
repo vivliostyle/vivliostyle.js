@@ -280,12 +280,12 @@ export class InsideTableRowBreakPosition
         );
       },
     );
-    NodeContext.setOverflow(
+    const beforeNodeContext = NodeContext.setOverflow(
       this.beforeNodeContext,
       acceptableCellBreakPositions.some((bp) => bp.nodeContext.overflow),
     );
     if (foundBreakInsideCell) {
-      return this.beforeNodeContext;
+      return beforeNodeContext;
     } else {
       return null;
     }
@@ -1015,7 +1015,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   registerCheckPoint(state: LayoutUtil.RenderedActiveLayoutIteratorState) {
     const nodeContext = state.nodeContext;
     if (!LayoutHelper.isSpecialNodeContext(nodeContext)) {
-      this.checkPoints.push(nodeContext.clone());
+      this.checkPoints.push(NodeContext.positionChainOf(nodeContext));
     }
   }
 
@@ -1196,76 +1196,79 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           rowCellBreakPositions[0].cellNodePosition.steps[1],
           (currentRow as Vtree.ChildNodeContext).parent,
         );
-        return layoutContext.setCurrent(rowNodeContext, false).thenAsync(() => {
-          // the row was rendered in the previous fragment and re-renders here
-          const rowElementContext =
-            VtreeImpl.asElementNodeContext(rowNodeContext);
-          Asserts.assert(rowElementContext);
-          const rowViewNode = rowElementContext.viewNode;
-          let cont1 = Task.newResult(true);
-          let columnIndex = 0;
+        return layoutContext
+          .setCurrent(rowNodeContext, false)
+          .thenAsync(({ nodeContext: renderedRow }) => {
+            // the row was rendered in the previous fragment and re-renders here
+            const rowElementContext =
+              VtreeImpl.asElementNodeContext(renderedRow);
+            Asserts.assert(rowElementContext);
+            const rowViewNode = rowElementContext.viewNode;
+            let cont1 = Task.newResult(true);
+            let columnIndex = 0;
 
-          function addDummyCellUntil(upperColumnIndex) {
-            while (columnIndex < upperColumnIndex) {
-              if (!occupiedSlotIndices.includes(columnIndex)) {
-                const dummy = rowViewNode.ownerDocument.createElement("td");
-                Base.setCSSProperty(dummy, "padding", "0");
-                rowViewNode.appendChild(dummy);
+            function addDummyCellUntil(upperColumnIndex) {
+              while (columnIndex < upperColumnIndex) {
+                if (!occupiedSlotIndices.includes(columnIndex)) {
+                  const dummy = rowViewNode.ownerDocument.createElement("td");
+                  Base.setCSSProperty(dummy, "padding", "0");
+                  rowViewNode.appendChild(dummy);
+                }
+                columnIndex++;
               }
-              columnIndex++;
             }
-          }
-          rowCellBreakPositions.forEach((cellBreakPosition) => {
-            cont1 = cont1.thenAsync(() => {
-              const cell = cellBreakPosition.cell;
-              addDummyCellUntil(cell.anchorColumnIndex);
-              const cellNodePosition = cellBreakPosition.cellNodePosition;
-              const cellNodeContext = NodeContext.openFromStep(
-                cellNodePosition.steps[0],
-                rowNodeContext,
-                {
-                  offsetInNode: cellNodePosition.offsetInNode,
-                  after: cellNodePosition.after,
-                  fragmentIndex: cellNodePosition.steps[0].fragmentIndex + 1,
-                },
-              );
-              return layoutContext
-                .setCurrent(cellNodeContext, false)
-                .thenAsync(() => {
-                  const breakChunkPosition =
-                    cellBreakPosition.breakChunkPosition;
-                  for (let i = 0; i < cell.colSpan; i++) {
-                    occupiedSlotIndices.push(columnIndex + i);
-                  }
-                  columnIndex += cell.colSpan;
-                  return this.layoutCell(
-                    cell,
-                    cellNodeContext,
-                    breakChunkPosition,
-                  ).thenAsync(() => {
-                    (cellNodeContext.viewNode as HTMLTableCellElement).rowSpan =
-                      cell.rowIndex +
-                      cell.rowSpan -
-                      this.currentRowIndex +
-                      rowCount -
-                      spanningCellRowIndex;
-                    return Task.newResult(true);
+            rowCellBreakPositions.forEach((cellBreakPosition) => {
+              cont1 = cont1.thenAsync(() => {
+                const cell = cellBreakPosition.cell;
+                addDummyCellUntil(cell.anchorColumnIndex);
+                const cellNodePosition = cellBreakPosition.cellNodePosition;
+                const cellNodeContext = NodeContext.openFromStep(
+                  cellNodePosition.steps[0],
+                  renderedRow,
+                  {
+                    offsetInNode: cellNodePosition.offsetInNode,
+                    after: cellNodePosition.after,
+                    fragmentIndex: cellNodePosition.steps[0].fragmentIndex + 1,
+                  },
+                );
+                return layoutContext
+                  .setCurrent(cellNodeContext, false)
+                  .thenAsync(({ nodeContext: renderedCell }) => {
+                    const breakChunkPosition =
+                      cellBreakPosition.breakChunkPosition;
+                    for (let i = 0; i < cell.colSpan; i++) {
+                      occupiedSlotIndices.push(columnIndex + i);
+                    }
+                    columnIndex += cell.colSpan;
+                    return this.layoutCell(
+                      cell,
+                      renderedCell,
+                      breakChunkPosition,
+                    ).thenAsync(() => {
+                      (renderedCell.viewNode as HTMLTableCellElement).rowSpan =
+                        cell.rowIndex +
+                        cell.rowSpan -
+                        this.currentRowIndex +
+                        rowCount -
+                        spanningCellRowIndex;
+                      return Task.newResult(true);
+                    });
                   });
-                });
+              });
+            });
+            return cont1.thenAsync(() => {
+              addDummyCellUntil(formattingContext.getColumnCount());
+              spanningCellRowIndex++;
+              return Task.newResult(true);
             });
           });
-          return cont1.thenAsync(() => {
-            addDummyCellUntil(formattingContext.getColumnCount());
-            spanningCellRowIndex++;
-            return Task.newResult(true);
-          });
-        });
       });
     });
     cont.then(() => {
       layoutContext
         .setCurrent(currentRow, true, state.atUnforcedBreak)
-        .then(() => {
+        .then(({ nodeContext: renderedRow }) => {
+          state.nodeContext = renderedRow;
           frame.finish(true);
         });
     });
@@ -1291,6 +1294,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     this.inRow = true;
     return this.layoutRowSpanningCellsFromPreviousFragment(state).thenAsync(
       () => {
+        const rowNodeContext = state.nodeContext;
         this.registerCellFragmentIndex();
 
         // Merge pre-collected cell/row break values with state.breakAtTheEdge
@@ -1320,7 +1324,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             true,
             breakAtEdge,
           );
-          nodeContext.viewNode?.remove();
+          rowNodeContext.viewNode?.remove();
           // Set block-end box-break flags on the table and its ancestors
           // since doFinishBreak skips finishBreak when pageBreakType is set
           if (state.lastAfterNodeContext) {
@@ -1347,7 +1351,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           ).length === 0
         ) {
           this.resetColumn();
-          NodeContext.setOverflow(nodeContext, true);
+          state.nodeContext = NodeContext.setOverflow(rowNodeContext, true);
           state.break = true;
         }
         return Task.newResult(true);
@@ -1382,7 +1386,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (this.inHeader || this.inFooter) {
       return Task.newResult(true);
     }
-    const nodeContext = state.nodeContext;
+    let nodeContext = state.nodeContext;
     if (!this.inRow) {
       if (this.currentRowIndex < 0) {
         this.currentRowIndex = 0;
@@ -1414,7 +1418,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       // subsequent rows are not affected by stale entries.
       // (Old code used cellBreakPositions.shift() which consumed entries.)
       this.formattingContext.cellBreakPositions.splice(brokenCell.index, 1);
-      NodeContext.setFragmentIndex(
+      nodeContext = NodeContext.setFragmentIndex(
         nodeContext,
         cellBreakPosition.cellNodePosition.steps[0].fragmentIndex + 1,
       );
@@ -1544,7 +1548,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     } else if (
       nodeContext.sourceNode === this.formattingContext.tableSourceNode
     ) {
-      NodeContext.setOverflow(
+      state.nodeContext = NodeContext.setOverflow(
         nodeContext,
         this.column.checkOverflowAndSaveEdge(nodeContext, null).overflown,
       );
@@ -1578,7 +1582,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
               ).length === 0
             ) {
               this.resetColumn();
-              NodeContext.setOverflow(nodeContext, true);
+              state.nodeContext = NodeContext.setOverflow(nodeContext, true);
               state.break = true;
             }
           }
@@ -1793,7 +1797,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const frame = Task.newFrame<Vtree.NodeContext | null>(
       "TableLayoutProcessor.doInitialLayout",
     );
-    const initialNodeContext = nodeContext.copy();
+    const initialNodeContext = nodeContext;
     this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
       const tableElement = nodeContextAfter.viewNode as Element;
 

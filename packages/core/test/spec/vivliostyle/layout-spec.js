@@ -142,6 +142,181 @@ describe("layout", function () {
       expect(adapt_layout.resolveHyphenateCharacter({})).toEqual("-");
     });
   });
+
+  describe("adapt_layout.Column#checkOverflowAndSaveEdge", function () {
+    var viewNode;
+
+    function columnWithEdgeAt(edge) {
+      var column = Object.create(adapt_layout.Column.prototype);
+      column.element = document.createElement("div");
+      column.clientLayout = {
+        pixelRatio: 1,
+        layoutUnitPerPixel: 1,
+        getElementClientRect: function () {
+          return {
+            left: 0,
+            top: edge,
+            right: 100,
+            bottom: edge,
+            width: 100,
+            height: 0,
+          };
+        },
+        getElementComputedStyle: function () {
+          return {
+            display: "block",
+            whiteSpace: "normal",
+            marginBlockStart: "0px",
+          };
+        },
+      };
+      column.vertical = false;
+      column.beforeEdge = 0;
+      column.footnoteEdge = 50;
+      column.computedBlockSize = 0;
+      column.fragmentLayoutConstraints = [];
+      column.pseudoParent = null;
+      column.nodeContextOverflowingDueToRepetitiveElements = null;
+      return column;
+    }
+
+    function blockEdgeOf(sourceNode, boxOffset, node) {
+      var opened = adapt_nodecontext.openAt(
+        sourceNode,
+        null,
+        boxOffset || 0,
+        new adapt_layoutprocessor.BlockFormattingContext(null),
+        { shadowType: adapt_vtree.ShadowType.NONE, shadowContext: null },
+        { offsetInNode: 0, after: false },
+      );
+      var rendered = adapt_nodecontext.elementRenderResultOf(opened);
+      rendered.inline = false;
+      return adapt_nodecontext.renderedElement(
+        opened,
+        node || viewNode,
+        rendered,
+      );
+    }
+
+    beforeEach(function () {
+      viewNode = document.createElement("div");
+      document.body.appendChild(viewNode);
+    });
+
+    afterEach(function () {
+      viewNode.remove();
+    });
+
+    it("reports the repetitive overflow it records", function () {
+      var column = columnWithEdgeAt(80);
+      var result = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(document.createElement("div")),
+        null,
+      );
+      expect(result.overflown).toBe(true);
+      expect(result.recordedRepetitiveOverflow).toBe(true);
+    });
+
+    it("reports the repetitive overflow another value recorded for the same position", function () {
+      var column = columnWithEdgeAt(80);
+      var sourceNode = document.createElement("div");
+      column.checkOverflowAndSaveEdge(blockEdgeOf(sourceNode), null);
+      var again = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(sourceNode),
+        null,
+      );
+      expect(again.recordedRepetitiveOverflow).toBe(true);
+    });
+
+    it("reports no repetitive overflow at another source node", function () {
+      var column = columnWithEdgeAt(80);
+      column.checkOverflowAndSaveEdge(
+        blockEdgeOf(document.createElement("div")),
+        null,
+      );
+      var other = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(document.createElement("div")),
+        null,
+      );
+      expect(other.recordedRepetitiveOverflow).toBe(false);
+    });
+
+    it("reports no repetitive overflow at the other edge of the same source node", function () {
+      var column = columnWithEdgeAt(80);
+      var sourceNode = document.createElement("div");
+      column.checkOverflowAndSaveEdge(blockEdgeOf(sourceNode), null);
+      var after = column.checkOverflowAndSaveEdge(
+        adapt_nodecontext.afterEdgeOf(blockEdgeOf(sourceNode)),
+        null,
+      );
+      expect(after.recordedRepetitiveOverflow).toBe(false);
+    });
+
+    it("reports no repetitive overflow at another box offset of the same source node", function () {
+      var column = columnWithEdgeAt(80);
+      var sourceNode = document.createElement("div");
+      column.checkOverflowAndSaveEdge(blockEdgeOf(sourceNode), null);
+      var moved = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(sourceNode, 5),
+        null,
+      );
+      expect(moved.recordedRepetitiveOverflow).toBe(false);
+    });
+
+    it("reports the repetitive overflow recorded for an orphan node", function () {
+      var column = columnWithEdgeAt(80);
+      var sourceNode = document.createElement("div");
+      column.checkOverflowAndSaveEdge(blockEdgeOf(sourceNode), null);
+      var orphan = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(sourceNode, 0, document.createElement("div")),
+        null,
+      );
+      expect(orphan.overflown).toBe(false);
+      expect(orphan.recordedRepetitiveOverflow).toBe(true);
+    });
+
+    it("reports the repetitive overflow recorded for an out-of-flow node", function () {
+      var column = columnWithEdgeAt(80);
+      var sourceNode = document.createElement("div");
+      column.checkOverflowAndSaveEdge(blockEdgeOf(sourceNode), null);
+      var floating = document.createElement("div");
+      floating.style.float = "left";
+      viewNode.appendChild(floating);
+      var outOfFlow = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(sourceNode, 0, floating),
+        null,
+      );
+      expect(outOfFlow.overflown).toBe(false);
+      expect(outOfFlow.recordedRepetitiveOverflow).toBe(true);
+    });
+
+    it("reports no repetitive overflow for an orphan node at another position", function () {
+      var column = columnWithEdgeAt(80);
+      column.checkOverflowAndSaveEdge(
+        blockEdgeOf(document.createElement("div")),
+        null,
+      );
+      var orphan = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(
+          document.createElement("div"),
+          0,
+          document.createElement("div"),
+        ),
+        null,
+      );
+      expect(orphan.recordedRepetitiveOverflow).toBe(false);
+    });
+
+    it("reports no repetitive overflow while nothing is recorded", function () {
+      var column = columnWithEdgeAt(20);
+      var result = column.checkOverflowAndSaveEdge(
+        blockEdgeOf(document.createElement("div")),
+        null,
+      );
+      expect(result.overflown).toBe(false);
+      expect(result.recordedRepetitiveOverflow).toBe(false);
+    });
+  });
 });
 
 describe("selectors", function () {
