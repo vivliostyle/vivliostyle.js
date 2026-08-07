@@ -1559,7 +1559,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const containingBlockForAbsolute = parent
         ? parent.containingBlockForAbsolute
           ? VtreeImpl.asElementNodeContext(parent)
-          : parent.getContainingBlockForAbsolute()
+          : NodeContext.containingBlockForAbsoluteOf(parent)
         : null;
       if (containingBlockForAbsolute) {
         const containingBlockViewNode = containingBlockForAbsolute.viewNode;
@@ -2325,7 +2325,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       );
     let cont: Task.Result<PageFloats.PageFloat>;
     const float = context.findPageFloatByNodePosition(
-      nodeContext.toNodePosition(),
+      NodeContext.toNodePosition(nodeContext),
     );
     if (!float) {
       cont = strategy.createPageFloat(nodeContext, context, this);
@@ -4378,7 +4378,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       })
       .then(() => {
         if (lastAfterNodeContext) {
-          this.lastAfterPosition = lastAfterNodeContext.toNodePosition();
+          this.lastAfterPosition =
+            NodeContext.toNodePosition(lastAfterNodeContext);
         }
         frame.finish(nodeContext);
       });
@@ -4845,7 +4846,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             } else {
               this.overflown = true;
               const result = new VtreeImpl.ChunkPosition(
-                positionAfter.toNodePosition(),
+                NodeContext.toNodePosition(positionAfter),
               );
               frame.finish(result);
             }
@@ -5125,7 +5126,7 @@ export class PseudoColumn {
   isLastAfterNodeContext(nodeContext: Vtree.NodeContext): boolean {
     return (
       VtreeImpl.isSameNodePosition(
-        nodeContext.toNodePosition(),
+        NodeContext.toNodePosition(nodeContext),
         this.column.lastAfterPosition,
       ) || this.isEffectivelyLastAfterNodeContext(nodeContext)
     );

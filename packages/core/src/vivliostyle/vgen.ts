@@ -1405,7 +1405,7 @@ export class ViewFactory
       rendered.containingBlockForAbsolute =
         Display.establishesCBForAbsolute(position);
       if (
-        nodeContext.isInsideBFC() &&
+        NodeContext.isInsideBFC(nodeContext) &&
         floatSide !== Css.ident.footnote &&
         !(floatReference && PageFloats.isPageFloat(floatReference))
       ) {
@@ -2726,7 +2726,7 @@ export class ViewFactory
       if (
         nodeContext.formattingContext instanceof
           RepetitiveElement.RepetitiveElementsOwnerFormattingContext &&
-        !nodeContext.belongsTo(nodeContext.formattingContext)
+        !NodeContext.belongsTo(nodeContext, nodeContext.formattingContext)
       ) {
         return;
       }

@@ -464,3 +464,44 @@ export function setShadowSibling<T extends Vtree.NodeContext>(
   nodeContext.shadowSibling = shadowSibling;
   return nodeContext;
 }
+
+export function toNodePosition(
+  nodeContext: Vtree.NodeContext,
+): Vtree.NodePosition {
+  return nodeContext.toNodePosition();
+}
+
+export function isInsideBFC(nodeContext: Vtree.NodeContext): boolean {
+  let parent = nodeContext.parent;
+  while (parent) {
+    if (parent.establishesBFC) {
+      return true;
+    }
+    parent = parent.parent;
+  }
+  return false;
+}
+
+export function containingBlockForAbsoluteOf(
+  nodeContext: Vtree.NodeContext,
+): Vtree.ElementNodeContext | null {
+  let parent = nodeContext.parent;
+  while (parent) {
+    if (parent.containingBlockForAbsolute) {
+      return VtreeImpl.asElementNodeContext(parent);
+    }
+    parent = parent.parent;
+  }
+  return null;
+}
+
+export function belongsTo(
+  nodeContext: Vtree.NodeContext,
+  formattingContext: Vtree.FormattingContext,
+): boolean {
+  return (
+    nodeContext.formattingContext === formattingContext &&
+    !!nodeContext.parent &&
+    nodeContext.parent.formattingContext === formattingContext
+  );
+}
