@@ -1228,7 +1228,6 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
                   {
                     offsetInNode: cellNodePosition.offsetInNode,
                     after: cellNodePosition.after,
-                    fragmentIndex: cellNodePosition.steps[0].fragmentIndex + 1,
                   },
                 );
                 return layoutContext
@@ -1402,7 +1401,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       state.break = true;
       return Task.newResult(true);
     }
-    const afterNodeContext = NodeContext.detachedAfterEdgeOf(nodeContext);
+    const afterNodeContext = NodeContext.afterEdgeOf(nodeContext);
     state.nodeContext = afterNodeContext;
     const frame = Task.newFrame<boolean>("startTableCell");
     let cont: Task.Result<Vtree.ChunkPosition>;
@@ -1493,7 +1492,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (display === "table-row") {
       this.inRow = false;
       if (!this.inHeader && !this.inFooter) {
-        const beforeNodeContext = NodeContext.detachedBeforeEdgeOf(nodeContext);
+        const beforeNodeContext = NodeContext.beforeEdgeOf(nodeContext);
         const bp = new InsideTableRowBreakPosition(
           this.currentRowIndex,
           beforeNodeContext,

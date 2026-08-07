@@ -32,7 +32,6 @@ export type PositionHead = {
   offsetInNode: number;
   after: boolean;
   preprocessedTextContent?: Diff.Change[] | null;
-  fragmentIndex?: number;
 };
 
 const unstyled: Vtree.UnstyledFields = {
@@ -134,10 +133,6 @@ function withPositionHead(
     ...nodeContext,
     offsetInNode: head.offsetInNode,
     preprocessedTextContent: head.preprocessedTextContent ?? null,
-    fragmentIndex:
-      head.fragmentIndex === undefined
-        ? nodeContext.fragmentIndex
-        : head.fragmentIndex,
   };
   return head.after
     ? { ...positioned, kind: "after-none", after: true }
@@ -560,13 +555,7 @@ export function afterEdgeAt(
   return { ...moved, kind: "after-text", after: true };
 }
 
-export function detachedAfterEdgeOf(
-  nodeContext: Vtree.NodeContext,
-): Vtree.AfterEdgeNodeContext {
-  return afterEdgeOf(nodeContext);
-}
-
-export function detachedBeforeEdgeOf(
+export function beforeEdgeOf(
   nodeContext: Vtree.NodeContext,
 ): Vtree.BeforeEdgeNodeContext {
   const moved = derived(nodeContext);
@@ -788,7 +777,7 @@ export function positionChainOf<T extends Vtree.NodeContext>(
   };
 }
 
-export function toNodePositionStep(
+function toNodePositionStep(
   nodeContext: Vtree.NodeContext,
 ): Vtree.NodePositionStep {
   return {
@@ -808,7 +797,7 @@ export function toNodePositionStep(
   };
 }
 
-export function toRootNodePositionStep(
+function toRootNodePositionStep(
   root: Vtree.RootNodeContext,
 ): Vtree.RootNodePositionStep {
   return {

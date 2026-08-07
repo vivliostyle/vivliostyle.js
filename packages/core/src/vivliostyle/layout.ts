@@ -3245,7 +3245,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       blockParent = blockParent.parent;
     } while (blockParent && blockParent.inline);
     if (blockParent) {
-      blockParent = NodeContext.detachedAfterEdgeOf(blockParent);
+      blockParent = NodeContext.afterEdgeOf(blockParent);
       return LayoutHelper.calculateEdge(
         blockParent,
         this.clientLayout,
