@@ -2090,9 +2090,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
             const breakNodeContext =
               cellFragment.findAcceptableBreakPosition().nodeContext;
             const cellNodeContext = cellFragment.cellNodeContext;
-            const cellNodePosition = cellNodeContext.toNodePosition();
+            const cellNodePosition =
+              NodeContext.toNodePosition(cellNodeContext);
             const breakChunkPosition = new VtreeImpl.ChunkPosition(
-              breakNodeContext.toNodePosition(),
+              NodeContext.toNodePosition(breakNodeContext),
             );
             formattingContext.cellBreakPositions.push({
               cellNodePosition,

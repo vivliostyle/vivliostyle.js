@@ -1377,9 +1377,6 @@ export namespace Vtree {
     clone(): this;
     toNodePositionStep(): NodePositionStep;
     toNodePosition(): NodePosition;
-    isInsideBFC(): boolean;
-    getContainingBlockForAbsolute(): ElementNodeContext | null;
-    belongsTo(formattingContext: FormattingContext): boolean;
   }
 
   export interface ChildNodeContext extends NodeContext {

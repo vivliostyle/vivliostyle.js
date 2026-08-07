@@ -807,36 +807,6 @@ export class NodeContext implements Vtree.NodeContext {
       preprocessedTextContent: this.preprocessedTextContent,
     };
   }
-
-  isInsideBFC(): boolean {
-    let parent = this.parent;
-    while (parent) {
-      if (parent.establishesBFC) {
-        return true;
-      }
-      parent = parent.parent;
-    }
-    return false;
-  }
-
-  getContainingBlockForAbsolute(): Vtree.ElementNodeContext | null {
-    let parent = this.parent;
-    while (parent) {
-      if (parent.containingBlockForAbsolute) {
-        return asElementNodeContext(parent);
-      }
-      parent = parent.parent;
-    }
-    return null;
-  }
-
-  belongsTo(formattingContext: FormattingContext): boolean {
-    return (
-      this.formattingContext === formattingContext &&
-      !!this.parent &&
-      this.parent.formattingContext === formattingContext
-    );
-  }
 }
 
 export type ChildNodeContext = NodeContext & Vtree.ChildNodeContext;

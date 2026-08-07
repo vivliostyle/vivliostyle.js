@@ -77,7 +77,10 @@ export class RepetitiveElementsOwnerFormattingContext
   getRootNodeContext(nodeContext: Vtree.NodeContext): Vtree.NodeContext | null {
     let nc: Vtree.NodeContext | null = nodeContext;
     do {
-      if (!nc.belongsTo(this) && nc.sourceNode === this.rootSourceNode) {
+      if (
+        !NodeContext.belongsTo(nc, this) &&
+        nc.sourceNode === this.rootSourceNode
+      ) {
         return nc;
       }
     } while ((nc = nc.parent));
@@ -556,7 +559,10 @@ export class LayoutFragmentedOwnerBlock extends LayoutFragmentedBlock {
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext | null> {
-    if (!nodeContext.belongsTo(this.formattingContext) && !nodeContext.after) {
+    if (
+      !NodeContext.belongsTo(nodeContext, this.formattingContext) &&
+      !nodeContext.after
+    ) {
       column.fragmentLayoutConstraints.unshift(
         new RepetitiveElementsOwnerLayoutConstraint(nodeContext),
       );
@@ -713,13 +719,13 @@ export class RepetitiveElementsOwnerLayoutRetryer
   ): LayoutType.LayoutMode {
     const repetitiveElements = this.formattingContext.getRepetitiveElements();
     if (
-      !nodeContext.belongsTo(this.formattingContext) &&
+      !NodeContext.belongsTo(nodeContext, this.formattingContext) &&
       !repetitiveElements.doneInitialLayout
     ) {
       return new LayoutEntireOwnerBlock(this.formattingContext, this.processor);
     } else {
       if (
-        !nodeContext.belongsTo(this.formattingContext) &&
+        !NodeContext.belongsTo(nodeContext, this.formattingContext) &&
         !nodeContext.after
       ) {
         if (repetitiveElements) {
@@ -838,7 +844,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
       if (leadingEdge) {
         appendHeaderToAncestors(nodeContext.parent, column);
       }
-      if (!nodeContext.belongsTo(formattingContext)) {
+      if (!NodeContext.belongsTo(nodeContext, formattingContext)) {
         return new RepetitiveElementsOwnerLayoutRetryer(
           formattingContext,
           this,
@@ -1006,7 +1012,7 @@ function eachAncestorNodeContext(
     const formattingContext = nc.formattingContext;
     if (
       formattingContext instanceof RepetitiveElementsOwnerFormattingContext &&
-      !nc.belongsTo(formattingContext)
+      !NodeContext.belongsTo(nc, formattingContext)
     ) {
       callback(formattingContext, nc);
     }

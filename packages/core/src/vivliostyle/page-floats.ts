@@ -22,6 +22,7 @@ import * as Css from "./css";
 import * as Constants from "./constants";
 import * as GeometryUtil from "./geometry-util";
 import * as LayoutHelper from "./layout-helper";
+import * as NodeContext from "./node-context";
 import * as Logging from "./logging";
 import * as CssLogicalUtil from "./css-logical-util";
 import * as Sizing from "./sizing";
@@ -2759,7 +2760,7 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
     const floatSide = nodeContext.floatSide;
-    const nodePosition = nodeContext.toNodePosition();
+    const nodePosition = NodeContext.toNodePosition(nodeContext);
     const insidePageFloat = !!pageFloatLayoutContext.generatingNodePosition;
     return column
       .resolveFloatReferenceFromColumnSpan(

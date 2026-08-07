@@ -21,6 +21,7 @@ import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
+import * as NodeContext from "./node-context";
 import * as PageFloats from "./page-floats";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
@@ -283,7 +284,7 @@ export class LineFootnotePolicyLayoutConstraint
         );
       }
     }
-    const nodePosition = nodeContext.toNodePosition();
+    const nodePosition = NodeContext.toNodePosition(nodeContext);
     return !Vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
   }
 }
@@ -328,7 +329,7 @@ export class FootnoteLayoutStrategy
       floatReference = PageFloats.FloatReference.PAGE;
     }
 
-    const nodePosition = nodeContext.toNodePosition();
+    const nodePosition = NodeContext.toNodePosition(nodeContext);
     Asserts.assert(pageFloatLayoutContext.flowName);
     let policyAnchorNode: Node = nodeContext.sourceNode;
     const shadowOwner = nodeContext.shadowContext?.owner;
