@@ -4,14 +4,16 @@
   file: writing-mode-body-page-context.html
   type: difference
   decision: expected  # regression / expected / skip
-  notes: "Fix for Issue #1122: writing-mode on body is propagated to the root as a used value only, so the page context (@top-center margin box) stays horizontal while the page area content follows the body writing mode."
-  approvedViewer: git-fix-issue1122  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: >-
+    Fix for Issue #1122: writing-mode on body is propagated to the root as a used value only, so the page context
+    (@top-center margin box) stays horizontal while the page area content follows the body writing mode.
+  approvedViewer: git-fix-issue1122a  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/writing-mode-body-page-context.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: >-
-    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/writing-mode-body-page-context.html&zoom=1&spread=false
+    https://vivliostyle-git-fix-issue1122-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/writing-mode-body-page-context.html&zoom=1&spread=false
   diffPages:
     - 1
 - category: General
