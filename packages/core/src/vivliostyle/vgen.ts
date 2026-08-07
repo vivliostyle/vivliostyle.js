@@ -2967,9 +2967,7 @@ export class ViewFactory
     const nextSibling = pos.sourceNode.nextSibling;
     let nextPos: Vtree.NodeContext | null;
     if (nextSibling) {
-      pos.sourceNode = nextSibling;
-      pos.resetView();
-      nextPos = pos;
+      nextPos = NodeContext.openNextSiblingOf(pos, nextSibling);
     } else if (pos.shadowSibling) {
       nextPos = pos.shadowSibling;
     } else {
@@ -3006,12 +3004,8 @@ export class ViewFactory
       if (cur.shadowType != Vtree.ShadowType.ROOTED) {
         const next = cur.sourceNode.nextSibling;
         if (next) {
-          cur = cur.modify();
-
           // keep shadowType
-          cur.boxOffset = boxOffset;
-          cur.sourceNode = next;
-          cur.resetView();
+          cur = NodeContext.openNextSiblingOf(cur.modify(), next, boxOffset);
           return this.processShadowContent(cur);
         }
       }

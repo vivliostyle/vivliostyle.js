@@ -101,6 +101,19 @@ export function openSiblingOf(
   return nodeContext;
 }
 
+export function openNextSiblingOf<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  sourceNode: Node,
+  boxOffset?: number,
+): T {
+  if (boxOffset !== undefined) {
+    nodeContext.boxOffset = boxOffset;
+  }
+  nodeContext.sourceNode = sourceNode;
+  nodeContext.resetView();
+  return nodeContext;
+}
+
 export function openAt(
   sourceNode: Node,
   parent: VtreeImpl.NodeContext | null,
