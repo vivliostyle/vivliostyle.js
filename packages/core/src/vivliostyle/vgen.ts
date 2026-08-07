@@ -791,6 +791,29 @@ export class ViewFactory
     }
     const verticalParent = vertical;
     vertical = CssCascade.isVertical(cascMap, context, vertical);
+    // When writing-mode is propagated from the body element to the root
+    // element as a used value (CSS Writing Modes spec), the root element's
+    // used writing mode is the propagated one although its computed style is
+    // unchanged. Return the used value verticality for the root so that the
+    // body element is not treated as a writing-mode change (which would
+    // cause the vertical-in-horizontal treatment (Issue #1264), e.g.,
+    // `inline-size: auto` becoming `max-content`). (Issue #1122 follow-up)
+    let usedVertical = vertical;
+    if (isRoot && !vertical) {
+      const rootWritingModeCasc = this.styler.rootStyle[
+        "writing-mode"
+      ] as CssCascade.CascadeValue;
+      if (
+        rootWritingModeCasc &&
+        this.styler.bodyPropagatedStyle["writing-mode"] === rootWritingModeCasc
+      ) {
+        usedVertical = CssCascade.isVertical(
+          { "writing-mode": rootWritingModeCasc },
+          context,
+          vertical,
+        );
+      }
+    }
     const verticalChanged = !isRoot && vertical !== verticalParent;
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 
@@ -848,7 +871,7 @@ export class ViewFactory
       // Running elements
       computedStyle["position"] = Css.ident.fixed;
       computedStyle["visibility"] = Css.ident.hidden;
-      return vertical;
+      return usedVertical;
     }
 
     // Compute values of display, position and float
@@ -871,7 +894,7 @@ export class ViewFactory
         computedStyle[name] = displayValues[name];
       }
     });
-    return vertical;
+    return usedVertical;
   }
 
   private inheritFromSourceParent(
