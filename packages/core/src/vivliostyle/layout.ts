@@ -3484,23 +3484,40 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     };
   }
 
-  /**
-   * @return true if overflows
-   */
+  private matchesRepetitiveOverflowRecord(
+    nodeContext: Vtree.NodeContext,
+  ): boolean {
+    const recorded = this.nodeContextOverflowingDueToRepetitiveElements;
+    return (
+      !!recorded &&
+      recorded.sourceNode === nodeContext.sourceNode &&
+      recorded.after === nodeContext.after &&
+      recorded.boxOffset === nodeContext.boxOffset
+    );
+  }
+
   checkOverflowAndSaveEdge(
     nodeContext: Vtree.NodeContext | null,
     trailingEdgeContexts: Vtree.NodeContext[] | null,
-  ): boolean {
+  ): Layout.OverflowCheckResult {
     if (!nodeContext) {
-      return false;
+      return { overflown: false, recordedRepetitiveOverflow: false };
     }
     for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
       if (LayoutHelper.isOutOfFlow(nc.viewNode)) {
-        return false;
+        return {
+          overflown: false,
+          recordedRepetitiveOverflow:
+            this.matchesRepetitiveOverflowRecord(nodeContext),
+        };
       }
     }
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
-      return false;
+      return {
+        overflown: false,
+        recordedRepetitiveOverflow:
+          this.matchesRepetitiveOverflowRecord(nodeContext),
+      };
     }
     const restoreInset = this.suppressOpenAncestorBlockEndInset(nodeContext);
     let edge = LayoutHelper.calculateEdge(
@@ -3533,8 +3550,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ? Math.min(edge, Math.max(marginEdge, footnoteEdge))
         : Math.max(edge, Math.min(marginEdge, footnoteEdge));
     }
+    const recordedRepetitiveOverflow =
+      this.matchesRepetitiveOverflowRecord(nodeContext);
     this.updateMaxReachedAfterEdge(edge);
-    return overflown;
+    return { overflown, recordedRepetitiveOverflow };
   }
 
   /**
@@ -3554,7 +3573,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
-    const overflown = this.checkOverflowAndSaveEdge(
+    const { overflown } = this.checkOverflowAndSaveEdge(
       nodeContext,
       trailingEdgeContexts,
     );

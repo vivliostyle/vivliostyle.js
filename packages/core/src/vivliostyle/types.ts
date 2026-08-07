@@ -124,6 +124,11 @@ export namespace Layout {
     nodeContext: Vtree.NodeContext;
   };
 
+  export type OverflowCheckResult = {
+    overflown: boolean;
+    recordedRepetitiveOverflow: boolean;
+  };
+
   /**
    * Potential breaking position inside CSS box (between lines).
    * @param checkPoints array of breaking points for
@@ -430,13 +435,10 @@ export namespace Layout {
      * Determines if a page break is acceptable at this position
      */
     isBreakable(flowPosition: Vtree.NodeContext): boolean;
-    /**
-     * @return true if overflows
-     */
     checkOverflowAndSaveEdge(
       nodeContext: Vtree.NodeContext | null,
       trailingEdgeContexts: Vtree.NodeContext[] | null,
-    ): boolean;
+    ): OverflowCheckResult;
     /**
      * Save a possible page break position on a CSS block edge. Check if it
      * overflows.
