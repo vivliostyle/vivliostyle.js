@@ -183,7 +183,7 @@ export class EdgeBreakPosition
     this.overflowIfRepetitiveElementsDropped = column.isOverflown(
       edge + (column.vertical ? -1 : 1) * offsets.minimum,
     );
-    this.overflows = this.position.overflow = column.isOverflown(
+    this.overflows = column.isOverflown(
       edge + (column.vertical ? -1 : 1) * offsets.current,
     );
   }
