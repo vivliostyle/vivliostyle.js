@@ -2934,14 +2934,36 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return nodeContext;
   }
 
-  resolveTextNodeBreaker(nodeContext: Vtree.NodeContext): TextNodeBreaker {
+  resolveTextNodeBreaker(
+    nodeContext: Vtree.NodeContext,
+  ): Layout.TextNodeBreaker {
     const hooks: Plugin.ResolveTextNodeBreakerHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
     );
-    return hooks.reduce(
-      (prev, hook) => hook(nodeContext) || prev,
-      TextNodeBreaker.instance,
-    );
+    const resolved = hooks.reduce((prev, hook) => {
+      const breaker = hook(
+        LegacyPluginSurface.asLegacyNodeContext(
+          Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
+          nodeContext,
+        ),
+      );
+      return breaker
+        ? LegacyPluginSurface.adaptLegacyTextNodeBreaker(hook, breaker)
+        : prev;
+    }, TextNodeBreaker.instance);
+    if (
+      LegacyPluginSurface.legacySurfaceActive(
+        Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
+      )
+    ) {
+      LegacyPluginSurface.normalizeLegacyNodeContext(
+        LegacyPluginSurface.asLegacyNodeContext(
+          Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
+          nodeContext,
+        ),
+      );
+    }
+    return resolved;
   }
 
   /**
