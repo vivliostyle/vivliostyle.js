@@ -2810,6 +2810,9 @@ export class ViewFactory
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
+    if (hooks.length === 0) {
+      return nodeContext;
+    }
     const legacyNodeContext = LegacyPluginSurface.asLegacyRenderContext(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
       nodeContext,

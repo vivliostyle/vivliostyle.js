@@ -206,6 +206,8 @@ export type PaginationProgressHook = (p1: {
 
 const hooks = {};
 
+const noRegisteredHooks = Object.freeze([]) as ((...p1) => any)[];
+
 /**
  * Register a function to a hook with the specified name.
  * The registered function is called at appropriate timings by the core code.
@@ -278,7 +280,7 @@ export function removeHook(name: string, fn: (...p1) => any): void {
  */
 export function getHooksForName(name: string): ((...p1) => any)[] {
   const hooksForName = hooks[name];
-  return hooksForName || [];
+  return hooksForName || noRegisteredHooks;
 }
 
 /**
