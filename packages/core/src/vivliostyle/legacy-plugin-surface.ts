@@ -29,7 +29,14 @@ import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
 import * as Plugin from "./plugin";
-import { Layout, PageFloats, Selectors, Vtree } from "./types";
+import * as Task from "./task";
+import {
+  FragmentLayoutConstraintType,
+  Layout,
+  PageFloats,
+  Selectors,
+  Vtree,
+} from "./types";
 
 /**
  * @deprecated Flat mutable view of a node context. Use `Vtree.NodeContext`.
@@ -357,6 +364,15 @@ function decorated(nodeContext: Vtree.NodeContext): LegacyNodeContext {
   return legacyViewOf(nodeContext);
 }
 
+function decoratedAs<T>(nodeContext: Vtree.NodeContext): T {
+  decorate(nodeContext);
+  return nodeContext as unknown as T;
+}
+
+function decoratedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
+  return nodeContext === null ? null : decoratedAs<T>(nodeContext);
+}
+
 /**
  * @deprecated Hand a node context to an external hook under the legacy
  * declaration. The value itself is returned so that plugin writes reach the
@@ -380,6 +396,780 @@ export function asLegacyNodeContextOrNull(
   nodeContext: Vtree.NodeContext | null,
 ): LegacyNodeContext | null {
   return nodeContext === null ? null : asLegacyNodeContext(hook, nodeContext);
+}
+
+/**
+ * @deprecated Base-compatible layout context contract. `setCurrent` reported
+ * only whether children should be processed, and the caller kept using the
+ * node context it had passed in.
+ */
+export type LegacyLayoutContext = Omit<
+  Vtree.LayoutContext,
+  | "setCurrent"
+  | "clone"
+  | "nextInTree"
+  | "peelOff"
+  | "applyPseudoelementStyle"
+  | "processFragmentedBlockEdge"
+> & {
+  applyPseudoelementStyle(
+    nodeContext: LegacyNodeContext,
+    pseudoName: string,
+    target: Element,
+  ): void;
+  processFragmentedBlockEdge(nodeContext: LegacyNodeContext);
+  setCurrent(
+    nodeContext: LegacyNodeContext,
+    firstTime: boolean,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<boolean>;
+  clone(): LegacyLayoutContext;
+  nextInTree(
+    nodeContext: LegacyNodeContext,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<LegacyNodeContext | null>;
+  peelOff(
+    nodeContext: LegacyChildNodeContext,
+    nodeOffset: number,
+  ): Task.Result<LegacyNodeContext>;
+};
+
+export interface LegacyFragmentLayoutConstraint {
+  flagmentLayoutConstraintType: FragmentLayoutConstraintType;
+  allowLayout(
+    nodeContext: LegacyNodeContext | null,
+    overflownNodeContext: LegacyNodeContext | null,
+    column: LegacyColumn,
+  ): boolean;
+  nextCandidate(nodeContext: LegacyNodeContext | null): boolean;
+  postLayout(
+    allowed: boolean,
+    positionAfter: LegacyNodeContext | null,
+    initialPosition: LegacyNodeContext | null,
+    column: LegacyColumn,
+  );
+  finishBreak(
+    nodeContext: LegacyNodeContext | null,
+    column: LegacyColumn,
+  ): Task.Result<boolean>;
+  equalsTo(constraint: LegacyFragmentLayoutConstraint): boolean;
+  getPriorityOfFinishBreak(): number;
+}
+
+export interface LegacyElementsOffset {
+  calculateOffset(nodeContext: LegacyNodeContext | null): number;
+  calculateMinimumOffset(nodeContext: LegacyNodeContext | null): number;
+}
+
+/**
+ * @deprecated Base-compatible column contract. The members whose result type
+ * changed are served by a projection, so the view is not the column and an
+ * assignment to such a member stays inside the view.
+ */
+export type LegacyColumn = Omit<
+  Layout.Column,
+  | "checkOverflowAndSaveEdge"
+  | "applyClearance"
+  | "processLineStyling"
+  | "layoutContext"
+  | "nodeContextOverflowingDueToRepetitiveElements"
+  | "pseudoParent"
+  | "asFloatNodeContext"
+  | "openAllViews"
+  | "maybePeelOff"
+  | "buildViewToNextBlockEdge"
+  | "nextInTree"
+  | "buildDeepElementView"
+  | "layoutUnbreakable"
+  | "layoutFloat"
+  | "setFloatAnchorViewNode"
+  | "layoutPageFloat"
+  | "layoutBreakableBlock"
+  | "findEndOfLine"
+  | "findAcceptableBreakInside"
+  | "findBoxBreakPosition"
+  | "findFirstOverflowingEdgeAndCheckPoint"
+  | "findEdgeBreakPosition"
+  | "findAcceptableBreakPosition"
+  | "doFinishBreak"
+  | "skipEdges"
+  | "skipTailEdges"
+  | "layoutFloatOrFootnote"
+  | "layoutNext"
+  | "doLayout"
+  | "stopByOverflow"
+  | "calculateEdge"
+  | "resolveFloatReferenceFromColumnSpan"
+  | "isLoneImage"
+  | "getTrailingMarginEdgeAdjustment"
+  | "postLayoutBlock"
+  | "resolveTextNodeBreaker"
+  | "findLinePositions"
+  | "calculateClonedPaddingBorder"
+  | "getAfterEdgeOfBlockContainer"
+  | "finishBreak"
+  | "isBreakable"
+  | "checkOverflowAndSaveEdgeAndBreakPosition"
+  | "clearOverflownViewNodes"
+  | "saveEdgeBreakPosition"
+  | "saveBoxBreakPosition"
+  | "doFinishBreakOfFragmentLayoutConstraints"
+  | "fragmentLayoutConstraints"
+  | "collectElementsOffset"
+> & {
+  fragmentLayoutConstraints: LegacyFragmentLayoutConstraint[];
+  collectElementsOffset(): LegacyElementsOffset[];
+  stopByOverflow(nodeContext: LegacyNodeContext): boolean;
+  calculateEdge(
+    nodeContext: LegacyNodeContext | null,
+    checkPoints: LegacyRenderedNodeContext[],
+    index: number,
+    boxOffset: number,
+  ): number;
+  resolveFloatReferenceFromColumnSpan(
+    floatReference: PageFloats.FloatReference,
+    columnSpan: Css.Val | null,
+    nodeContext: LegacyNodeContext,
+  ): Task.Result<PageFloats.FloatReference>;
+  isLoneImage(checkPoints: LegacyRenderedNodeContext[]): boolean;
+  getTrailingMarginEdgeAdjustment(
+    trailingEdgeContexts: LegacyNodeContext[],
+  ): number;
+  postLayoutBlock(
+    nodeContext: LegacyNodeContext | null,
+    checkPoints: LegacyRenderedNodeContext[],
+  ): void;
+  resolveTextNodeBreaker(nodeContext: LegacyNodeContext): LegacyTextNodeBreaker;
+  findLinePositions(checkPoints: LegacyRenderedNodeContext[]): number[];
+  calculateClonedPaddingBorder(nodeContext: LegacyNodeContext): number;
+  getAfterEdgeOfBlockContainer(nodeContext: LegacyNodeContext): number;
+  finishBreak(
+    nodeContext: LegacyNodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean,
+  ): Task.Result<boolean>;
+  isBreakable(flowPosition: LegacyNodeContext): boolean;
+  checkOverflowAndSaveEdgeAndBreakPosition(
+    nodeContext: LegacyNodeContext | null,
+    trailingEdgeContexts: LegacyNodeContext[] | null,
+    saveEvenOverflown: boolean,
+    breakAtTheEdge: string | null,
+  ): boolean;
+  clearOverflownViewNodes(
+    nodeContext: LegacyNodeContext | null,
+    removeSelf: boolean,
+  ): void;
+  saveEdgeBreakPosition(
+    position: LegacyNodeContext,
+    breakAtEdge: string | null,
+    overflows: boolean,
+  ): void;
+  saveBoxBreakPosition(checkPoints: LegacyRenderedNodeContext[]): void;
+  doFinishBreakOfFragmentLayoutConstraints(
+    nodeContext: LegacyNodeContext,
+  ): Task.Result<boolean>;
+  checkOverflowAndSaveEdge(
+    nodeContext: LegacyNodeContext | null,
+    trailingEdgeContexts: LegacyNodeContext[] | null,
+  ): boolean;
+  applyClearance(nodeContext: LegacyRenderedNodeContext): boolean;
+  processLineStyling(
+    nodeContext: LegacyNodeContext,
+    resNodeContext: LegacyNodeContext | null,
+    checkPoints: LegacyRenderedNodeContext[],
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutContext: LegacyLayoutContext;
+  nodeContextOverflowingDueToRepetitiveElements: LegacyNodeContext | null;
+  pseudoParent: LegacyColumn | null;
+  asFloatNodeContext(
+    nodeContext: LegacyNodeContext,
+  ): LegacyFloatNodeContext | null;
+  openAllViews(position: Vtree.NodePosition): Task.Result<LegacyNodeContext>;
+  maybePeelOff(
+    position: LegacyNodeContext,
+    count: number,
+  ): Task.Result<LegacyNodeContext>;
+  buildViewToNextBlockEdge(
+    position: LegacyNodeContext | null,
+    checkPoints: LegacyRenderedNodeContext[],
+  ): Task.Result<LegacyNodeContext | null>;
+  nextInTree(
+    position: LegacyNodeContext,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<LegacyNodeContext | null>;
+  buildDeepElementView(
+    position: LegacyNodeContext | null,
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutUnbreakable(
+    nodeContextIn: LegacyNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutFloat(
+    nodeContext: LegacyRenderedNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  setFloatAnchorViewNode(
+    nodeContext: LegacyRenderedNodeContext,
+  ): LegacyRenderedNodeContext;
+  layoutPageFloat(
+    nodeContext: LegacyFloatNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutBreakableBlock(
+    nodeContext: LegacyNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  findEndOfLine(
+    linePosition: number,
+    checkPoints: LegacyRenderedNodeContext[],
+    isUpdateMaxReachedAfterEdge: boolean,
+  ): {
+    nodeContext: LegacyRenderedNodeContext;
+    index: number;
+    checkPointIndex: number;
+  };
+  findAcceptableBreakInside(
+    checkPoints: LegacyRenderedNodeContext[],
+    edgePosition: number,
+    force: boolean,
+  ): LegacyNodeContext | null;
+  findBoxBreakPosition(
+    bp: Layout.BoxBreakPosition,
+    force: boolean,
+  ): LegacyNodeContext | null;
+  findFirstOverflowingEdgeAndCheckPoint(
+    checkPoints: LegacyRenderedNodeContext[],
+  ): {
+    edge: number;
+    checkPoint: LegacyRenderedNodeContext | null;
+  };
+  findEdgeBreakPosition(bp: Layout.EdgeBreakPosition): LegacyNodeContext;
+  findAcceptableBreakPosition(): {
+    breakPosition: Layout.BreakPosition;
+    nodeContext: LegacyNodeContext;
+  } | null;
+  doFinishBreak(
+    nodeContext: LegacyNodeContext | null,
+    overflownNodeContext: LegacyNodeContext | null,
+    initialNodeContext: LegacyNodeContext | null,
+    initialComputedBlockSize: number,
+  ): Task.Result<LegacyNodeContext | null>;
+  skipEdges(
+    nodeContext: LegacyNodeContext,
+    leadingEdge: boolean,
+    forcedBreakValue: string | null,
+  ): Task.Result<LegacyNodeContext | null>;
+  skipTailEdges(
+    nodeContext: LegacyNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutFloatOrFootnote(
+    nodeContext: LegacyFloatNodeContext,
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutNext(
+    nodeContext: LegacyNodeContext,
+    leadingEdge: boolean,
+    forcedBreakValue?: string | null,
+  ): Task.Result<LegacyNodeContext>;
+  doLayout(
+    nodeContext: LegacyNodeContext | null,
+    leadingEdge: boolean,
+    breakAfter?: string | null,
+  ): Task.Result<{
+    nodeContext: LegacyNodeContext | null;
+    overflownNodeContext: LegacyNodeContext | null;
+  }>;
+};
+
+type LegacyProjections = { [name: string]: () => unknown };
+
+function projectionsOf(members: LegacyProjections): LegacyProjections {
+  return Object.assign(Object.create(null) as LegacyProjections, members);
+}
+
+type LegacyMember = (...args: unknown[]) => unknown;
+
+function retagLegacyArgument(value: unknown): void {
+  if (
+    value &&
+    typeof value === "object" &&
+    Object.getPrototypeOf(value) === legacyPrototype
+  ) {
+    normalizeLegacyNodeContext(value as unknown as LegacyNodeContext);
+  }
+}
+
+function retagLegacyArguments(args: unknown[]): void {
+  for (const arg of args) {
+    retagLegacyArgument(arg);
+    if (Array.isArray(arg)) {
+      for (const item of arg) {
+        retagLegacyArgument(item);
+      }
+    }
+  }
+}
+
+function retaggingLegacyArguments(member: LegacyMember): LegacyMember {
+  return function (this: unknown, ...args: unknown[]): unknown {
+    retagLegacyArguments(args);
+    return member.apply(this, args);
+  };
+}
+
+function retaggingMemberOf(member: unknown): unknown {
+  return typeof member === "function"
+    ? retaggingLegacyArguments(member as LegacyMember)
+    : member;
+}
+
+function projectedMemberOf(
+  target: object,
+  bound: Map<string | symbol, unknown>,
+  overrides: Map<string | symbol, unknown>,
+  projections: LegacyProjections,
+  property: string | symbol,
+): unknown {
+  if (overrides.has(property)) {
+    return overrides.get(property);
+  }
+  const projection =
+    typeof property === "string" ? projections[property] : undefined;
+  if (projection) {
+    return retaggingMemberOf(projection());
+  }
+  const cached = bound.get(property);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const member = Reflect.get(target, property, target);
+  if (typeof member !== "function") {
+    return member;
+  }
+  // The view must not become the receiver of core methods: a core method that
+  // reaches another one through `this` would otherwise read the projection.
+  const boundMember = retaggingLegacyArguments(member.bind(target));
+  bound.set(property, boundMember);
+  return boundMember;
+}
+
+function legacyViewOfObject<T extends object>(
+  target: T,
+  members: LegacyProjections,
+): object {
+  const projections = projectionsOf(members);
+  const bound = new Map<string | symbol, unknown>();
+  const overrides = new Map<string | symbol, unknown>();
+  return new Proxy(target, {
+    get: (t, property) =>
+      projectedMemberOf(t, bound, overrides, projections, property),
+    set: (t, property, value) => {
+      bound.delete(property);
+      if (typeof property === "string" && projections[property]) {
+        overrides.set(property, value);
+        return true;
+      }
+      return Reflect.set(t, property, value, t);
+    },
+  });
+}
+
+const legacyLayoutContexts = new WeakMap<
+  Vtree.LayoutContext,
+  LegacyLayoutContext
+>();
+
+/**
+ * @deprecated Serve a layout context under the base contract. The members whose
+ * result type changed are served by a projection, so the view is not the layout
+ * context and an assignment to such a member stays inside the view.
+ */
+export function asLegacyLayoutContext(
+  layoutContext: Vtree.LayoutContext,
+): LegacyLayoutContext {
+  const cached = legacyLayoutContexts.get(layoutContext);
+  if (cached) {
+    return cached;
+  }
+  const projected = legacyViewOfObject(layoutContext, {
+    setCurrent:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        firstTime: boolean,
+        atUnforcedBreak?: boolean,
+      ) =>
+        layoutContext
+          .setCurrent(nodeContext, firstTime, atUnforcedBreak)
+          .thenAsync((result) => Task.newResult(result.processChildren)),
+    clone: () => () => asLegacyLayoutContext(layoutContext.clone()),
+    nextInTree:
+      () => (nodeContext: Vtree.NodeContext, atUnforcedBreak?: boolean) =>
+        layoutContext
+          .nextInTree(nodeContext, atUnforcedBreak)
+          .thenAsync((result) =>
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          ),
+    peelOff: () => (nodeContext: Vtree.ChildNodeContext, nodeOffset: number) =>
+      layoutContext
+        .peelOff(nodeContext, nodeOffset)
+        .thenAsync((result) =>
+          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+        ),
+  });
+  // Runtime fact outside the type system: the proxy answers every member of
+  // the base contract, projecting the ones whose result type changed.
+  const view = projected as LegacyLayoutContext;
+  legacyLayoutContexts.set(layoutContext, view);
+  return view;
+}
+
+const legacyColumns = new WeakMap<Layout.Column, LegacyColumn>();
+
+const legacyTextNodeBreakers = new WeakMap<
+  Layout.TextNodeBreaker,
+  LegacyTextNodeBreaker
+>();
+
+const coreTextNodeBreakers = new WeakMap<
+  LegacyTextNodeBreaker,
+  Layout.TextNodeBreaker
+>();
+
+const legacyOfAdaptedTextNodeBreakers = new WeakMap<
+  Layout.TextNodeBreaker,
+  LegacyTextNodeBreaker
+>();
+
+function legacyTextNodeBreakerViewOf(
+  breaker: Layout.TextNodeBreaker,
+): LegacyTextNodeBreaker {
+  const legacy = legacyOfAdaptedTextNodeBreakers.get(breaker);
+  if (legacy) {
+    return legacy;
+  }
+  const cached = legacyTextNodeBreakers.get(breaker);
+  if (cached) {
+    return cached;
+  }
+  const view: LegacyTextNodeBreaker = {
+    breakTextNode(
+      textNode: Text,
+      nodeContext: LegacyNodeContext,
+      low: number,
+      checkPoints: LegacyRenderedNodeContext[],
+      checkpointIndex: number,
+      force: boolean,
+    ): LegacyNodeContext {
+      retagLegacyArguments([nodeContext, checkPoints]);
+      return decoratedAs<LegacyNodeContext>(
+        breaker.breakTextNode(
+          textNode,
+          coreOf(nodeContext),
+          low,
+          checkPoints as unknown as Vtree.RenderedNodeContext[],
+          checkpointIndex,
+          force,
+        ),
+      );
+    },
+    breakAfterSoftHyphen(
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: LegacyNodeContext,
+    ): number {
+      retagLegacyArguments([nodeContext]);
+      return breaker.breakAfterSoftHyphen(
+        textNode,
+        text,
+        viewIndex,
+        coreOf(nodeContext),
+      );
+    },
+    breakAfterOtherCharacter(
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: LegacyNodeContext,
+    ): number {
+      retagLegacyArguments([nodeContext]);
+      return breaker.breakAfterOtherCharacter(
+        textNode,
+        text,
+        viewIndex,
+        coreOf(nodeContext),
+      );
+    },
+    updateNodeContext(
+      nodeContext: LegacyNodeContext,
+      viewIndex: number,
+      textNode: Text,
+    ): LegacyNodeContext {
+      retagLegacyArguments([nodeContext]);
+      return decoratedAs<LegacyNodeContext>(
+        breaker.updateNodeContext(coreOf(nodeContext), viewIndex, textNode),
+      );
+    },
+  };
+  legacyTextNodeBreakers.set(breaker, view);
+  coreTextNodeBreakers.set(view, breaker);
+  return view;
+}
+
+export function asLegacyColumn(
+  hook: (...p1) => any,
+  column: Layout.Column,
+): LegacyColumn {
+  if (Plugin.isCoreHook(hook)) {
+    return column as unknown as LegacyColumn;
+  }
+  const cached = legacyColumns.get(column);
+  if (cached) {
+    return cached;
+  }
+  const projected = legacyViewOfObject(column, {
+    checkOverflowAndSaveEdge:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext | null,
+        trailingEdgeContexts: Vtree.NodeContext[] | null,
+      ) =>
+        column.checkOverflowAndSaveEdge(nodeContext, trailingEdgeContexts)
+          .overflown,
+    applyClearance: () => (nodeContext: Vtree.RenderedNodeContext) => {
+      const spacer = column.applyClearance(nodeContext);
+      if (spacer) {
+        (
+          nodeContext as unknown as { clearSpacer: Element | null }
+        ).clearSpacer = spacer;
+      }
+      return spacer !== null;
+    },
+    processLineStyling:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        resNodeContext: Vtree.NodeContext | null,
+        checkPoints: Vtree.RenderedNodeContext[],
+      ) =>
+        column
+          .processLineStyling(nodeContext, resNodeContext, checkPoints)
+          .thenAsync((result) => {
+            checkPoints.splice(0, checkPoints.length, ...result.checkPoints);
+            decoratedCheckPoints(checkPoints);
+            return Task.newResult(
+              decoratedOrNull<LegacyNodeContext>(result.nodeContext),
+            );
+          }),
+    layoutContext: () => asLegacyLayoutContext(column.layoutContext),
+    resolveTextNodeBreaker: () => (nodeContext: Vtree.NodeContext) =>
+      legacyTextNodeBreakerViewOf(column.resolveTextNodeBreaker(nodeContext)),
+    nodeContextOverflowingDueToRepetitiveElements: () =>
+      decoratedOrNull<LegacyNodeContext>(
+        column.nodeContextOverflowingDueToRepetitiveElements,
+      ),
+    pseudoParent: () =>
+      column.pseudoParent === null
+        ? null
+        : asLegacyColumn(hook, column.pseudoParent),
+    asFloatNodeContext: () => (nodeContext: Vtree.NodeContext) =>
+      decoratedOrNull<LegacyFloatNodeContext>(
+        column.asFloatNodeContext(nodeContext),
+      ),
+    openAllViews: () => (position: Vtree.NodePosition) =>
+      column
+        .openAllViews(position)
+        .thenAsync((result) =>
+          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+        ),
+    maybePeelOff: () => (position: Vtree.NodeContext, count: number) =>
+      column
+        .maybePeelOff(position, count)
+        .thenAsync((result) =>
+          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+        ),
+    buildViewToNextBlockEdge:
+      () =>
+      (
+        position: Vtree.NodeContext | null,
+        checkPoints: Vtree.RenderedNodeContext[],
+      ) =>
+        column
+          .buildViewToNextBlockEdge(position, checkPoints)
+          .thenAsync((result) => {
+            decoratedCheckPoints(checkPoints);
+            return Task.newResult(decoratedOrNull<LegacyNodeContext>(result));
+          }),
+    nextInTree:
+      () => (position: Vtree.NodeContext, atUnforcedBreak?: boolean) =>
+        column
+          .nextInTree(position, atUnforcedBreak)
+          .thenAsync((result) =>
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          ),
+    buildDeepElementView: () => (position: Vtree.NodeContext | null) =>
+      column
+        .buildDeepElementView(position)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    layoutUnbreakable: () => (nodeContextIn: Vtree.NodeContext) =>
+      column
+        .layoutUnbreakable(nodeContextIn)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    layoutFloat: () => (nodeContext: Vtree.RenderedNodeContext) =>
+      column
+        .layoutFloat(nodeContext)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    setFloatAnchorViewNode: () => (nodeContext: Vtree.RenderedNodeContext) =>
+      decoratedAs<LegacyRenderedNodeContext>(
+        column.setFloatAnchorViewNode(nodeContext),
+      ),
+    layoutPageFloat: () => (nodeContext: Vtree.FloatNodeContext) =>
+      column
+        .layoutPageFloat(nodeContext)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    layoutBreakableBlock: () => (nodeContext: Vtree.NodeContext) =>
+      column
+        .layoutBreakableBlock(nodeContext)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    findEndOfLine:
+      () =>
+      (
+        linePosition: number,
+        checkPoints: Vtree.RenderedNodeContext[],
+        isUpdateMaxReachedAfterEdge: boolean,
+      ) => {
+        const result = column.findEndOfLine(
+          linePosition,
+          checkPoints,
+          isUpdateMaxReachedAfterEdge,
+        );
+        return {
+          ...result,
+          nodeContext: decoratedAs<LegacyRenderedNodeContext>(
+            result.nodeContext,
+          ),
+        };
+      },
+    findAcceptableBreakInside:
+      () =>
+      (
+        checkPoints: Vtree.RenderedNodeContext[],
+        edgePosition: number,
+        force: boolean,
+      ) =>
+        decoratedOrNull<LegacyNodeContext>(
+          column.findAcceptableBreakInside(checkPoints, edgePosition, force),
+        ),
+    findBoxBreakPosition: () => (bp: Layout.BoxBreakPosition, force: boolean) =>
+      decoratedOrNull<LegacyNodeContext>(
+        column.findBoxBreakPosition(bp, force),
+      ),
+    findFirstOverflowingEdgeAndCheckPoint:
+      () => (checkPoints: Vtree.RenderedNodeContext[]) => {
+        const result =
+          column.findFirstOverflowingEdgeAndCheckPoint(checkPoints);
+        return {
+          ...result,
+          checkPoint: decoratedOrNull<LegacyRenderedNodeContext>(
+            result.checkPoint,
+          ),
+        };
+      },
+    findEdgeBreakPosition: () => (bp: Layout.EdgeBreakPosition) =>
+      decoratedAs<LegacyNodeContext>(column.findEdgeBreakPosition(bp)),
+    findAcceptableBreakPosition: () => () => {
+      const result = column.findAcceptableBreakPosition();
+      return result === null
+        ? null
+        : {
+            ...result,
+            nodeContext: decoratedAs<LegacyNodeContext>(result.nodeContext),
+          };
+    },
+    doFinishBreak:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext | null,
+        overflownNodeContext: Vtree.NodeContext | null,
+        initialNodeContext: Vtree.NodeContext | null,
+        initialComputedBlockSize: number,
+      ) =>
+        column
+          .doFinishBreak(
+            nodeContext,
+            overflownNodeContext,
+            initialNodeContext,
+            initialComputedBlockSize,
+          )
+          .thenAsync((result) =>
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          ),
+    skipEdges:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        leadingEdge: boolean,
+        forcedBreakValue: string | null,
+      ) =>
+        column
+          .skipEdges(nodeContext, leadingEdge, forcedBreakValue)
+          .thenAsync((result) =>
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          ),
+    skipTailEdges: () => (nodeContext: Vtree.NodeContext) =>
+      column
+        .skipTailEdges(nodeContext)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    layoutFloatOrFootnote: () => (nodeContext: Vtree.FloatNodeContext) =>
+      column
+        .layoutFloatOrFootnote(nodeContext)
+        .thenAsync((result) =>
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+        ),
+    layoutNext:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        leadingEdge: boolean,
+        forcedBreakValue?: string | null,
+      ) =>
+        column
+          .layoutNext(nodeContext, leadingEdge, forcedBreakValue)
+          .thenAsync((result) =>
+            Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+          ),
+    doLayout:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext | null,
+        leadingEdge: boolean,
+        breakAfter?: string | null,
+      ) =>
+        column
+          .doLayout(nodeContext, leadingEdge, breakAfter)
+          .thenAsync((result) =>
+            Task.newResult({
+              nodeContext: decoratedOrNull<LegacyNodeContext>(
+                result.nodeContext,
+              ),
+              overflownNodeContext: decoratedOrNull<LegacyNodeContext>(
+                result.overflownNodeContext,
+              ),
+            }),
+          ),
+  });
+  // Runtime fact outside the type system: see asLegacyLayoutContext.
+  const view = projected as LegacyColumn;
+  legacyColumns.set(column, view);
+  return view;
 }
 
 /**
@@ -453,6 +1243,10 @@ export function adaptLegacyTextNodeBreaker(
 ): Layout.TextNodeBreaker {
   if (Plugin.isCoreHook(hook)) {
     return legacy as unknown as Layout.TextNodeBreaker;
+  }
+  const core = coreTextNodeBreakers.get(legacy);
+  if (core) {
+    return core;
   }
   const cached = adaptedTextNodeBreakers.get(legacy);
   if (cached) {
@@ -531,6 +1325,7 @@ export function adaptLegacyTextNodeBreaker(
     },
   };
   adaptedTextNodeBreakers.set(legacy, adapted);
+  legacyOfAdaptedTextNodeBreakers.set(adapted, legacy);
   return adapted;
 }
 

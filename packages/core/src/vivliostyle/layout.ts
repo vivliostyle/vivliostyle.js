@@ -2779,8 +2779,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const hooks: Plugin.PostLayoutBlockHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
     );
-    hooks.forEach((hook) => {
-      hook(
+    for (let i = 0; i < hooks.length; i++) {
+      hooks[i](
         LegacyPluginSurface.asLegacyNodeContextOrNull(
           Plugin.HOOKS.POST_LAYOUT_BLOCK,
           nodeContext,
@@ -2789,9 +2789,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           Plugin.HOOKS.POST_LAYOUT_BLOCK,
           checkPoints,
         ),
-        this,
+        LegacyPluginSurface.asLegacyColumn(hooks[i], this),
       );
-    });
+    }
   }
 
   findEndOfLine(
