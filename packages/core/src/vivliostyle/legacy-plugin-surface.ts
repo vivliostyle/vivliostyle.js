@@ -21,6 +21,7 @@
  * against the mutable class-based `Vtree.NodeContext` keeps compiling and
  * running. Core code must use `Vtree.NodeContext` and `node-context.ts`.
  */
+import * as Break from "./break";
 import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
@@ -365,11 +366,126 @@ function decorate(nodeContext: Vtree.NodeContext): void {
     // The core builds node contexts as plain object literals, so the legacy
     // prototype cannot shadow any own field of the value.
     Object.setPrototypeOf(nc, legacyPrototype);
+    reportSuppressedBreaks(nc);
     if (nc.shadowSibling) {
       decorate(nc.shadowSibling);
     }
     if (nc.blockContainer) {
       decorate(nc.blockContainer);
+    }
+  }
+}
+
+function reportSuppressedBreaks(nodeContext: Vtree.NodeContext): void {
+  // Suppression used to null the field itself; the core now composes it with
+  // the registry, so writing the composed value back is a no-op for the core
+  // and restores what a plugin used to read.
+  const writable = nodeContext as unknown as {
+    breakBefore: string | null;
+    breakAfter: string | null;
+  };
+  writable.breakBefore = Break.effectiveBreakBefore(nodeContext);
+  writable.breakAfter = Break.effectiveBreakAfter(nodeContext);
+}
+
+const RENDER_FIELDS: readonly string[] = [
+  "nodeShadow",
+  "containingBlockForAbsolute",
+  "flexContainer",
+  "inline",
+  "breakPenalty",
+  "clearSide",
+  "floatReference",
+  "floatMinWrapBlock",
+  "columnSpan",
+  "breakAfter",
+  "pageType",
+  "captionSide",
+  "inlineBorderSpacing",
+  "blockBorderSpacing",
+  "footnotePolicy",
+  "firstPseudo",
+  "afterIfContinues",
+  "whitespace",
+  "hyphenateCharacter",
+  "breakWord",
+  "repeatOnBreak",
+  "lang",
+  "vertical",
+  "direction",
+  "inheritedProps",
+  "establishesBFC",
+  "display",
+  "floatSide",
+  "breakBefore",
+  "formattingContext",
+];
+
+type RenderFields = { [field: string]: unknown };
+
+/**
+ * @deprecated Hand out a node context whose rendered style is the draft the
+ * core has built so far, which is what the value carried when it was mutated
+ * in place. Falls back to the value the core hands today while no external
+ * hook is registered.
+ */
+export function asLegacyRenderContext(
+  hook: string,
+  nodeContext: Vtree.NodeContext,
+  progress: Vtree.NodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+): LegacyNodeContext {
+  if (!legacySurfaceActive(hook)) {
+    return legacyViewOf(progress);
+  }
+  // Runtime fact outside the type system: the draft holds the rendered style
+  // of this very position, so overlaying it cannot contradict the variant.
+  const overlaid = {
+    ...progress,
+    ...rendered,
+  } as unknown as Vtree.NodeContext;
+  if (retained.has(nodeContext)) {
+    retained.add(overlaid);
+  }
+  return decorated(overlaid);
+}
+
+/**
+ * @deprecated Snapshot of the rendered style fields before a hook runs.
+ */
+export function captureRenderFields(
+  hook: string,
+  nodeContext: LegacyNodeContext,
+): RenderFields | null {
+  if (!legacySurfaceActive(hook)) {
+    return null;
+  }
+  const source = nodeContext as unknown as RenderFields;
+  const snapshot: RenderFields = {};
+  for (const field of RENDER_FIELDS) {
+    snapshot[field] = source[field];
+  }
+  return snapshot;
+}
+
+/**
+ * @deprecated Carry the fields a hook wrote into the draft the core keeps.
+ * Only the fields the hook changed are written, so what the core put in the
+ * draft between the seed and the hook survives untouched.
+ */
+export function applyLegacyRenderWrites(
+  before: RenderFields | null,
+  nodeContext: LegacyNodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+): void {
+  if (!before) {
+    return;
+  }
+  const source = nodeContext as unknown as RenderFields;
+  const draft = rendered as unknown as RenderFields;
+  for (const field of RENDER_FIELDS) {
+    if (source[field] !== before[field]) {
+      draft[field] = source[field];
     }
   }
 }

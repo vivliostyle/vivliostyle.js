@@ -1174,12 +1174,15 @@ export class ViewFactory
       Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     );
     const inProgress = NodeContext.elementRenderProgress(nodeContext, rendered);
+    const legacyInProgress = LegacyPluginSurface.asLegacyRenderContext(
+      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+      nodeContext,
+      inProgress,
+      rendered,
+    );
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
-        LegacyPluginSurface.asLegacyNodeContext(
-          Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-          inProgress,
-        ),
+        legacyInProgress,
         firstTime,
         display,
         position,
@@ -2330,10 +2333,7 @@ export class ViewFactory
           this.page.fetchers.push(Net.loadElement(result));
         }
 
-        this.preprocessElementStyle(
-          NodeContext.elementRenderProgress(nodeContext, rendered),
-          computedStyle,
-        );
+        this.preprocessElementStyle(nodeContext, computedStyle, rendered);
         this.applyComputedStyles(result, computedStyle);
 
         if (rendered.inline) {
@@ -2740,19 +2740,29 @@ export class ViewFactory
   private preprocessElementStyle(
     nodeContext: Vtree.NodeContext,
     computedStyle: { [key: string]: Css.Val },
+    rendered: NodeContext.ElementRenderDraft,
   ) {
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
+    const legacyNodeContext = LegacyPluginSurface.asLegacyRenderContext(
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+      nodeContext,
+      NodeContext.elementRenderProgress(nodeContext, rendered),
+      rendered,
+    );
+    const beforeHooks = LegacyPluginSurface.captureRenderFields(
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+      legacyNodeContext,
+    );
     hooks.forEach((hook) => {
-      hook(
-        LegacyPluginSurface.asLegacyNodeContext(
-          Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
-          nodeContext,
-        ),
-        computedStyle,
-      );
+      hook(legacyNodeContext, computedStyle);
     });
+    LegacyPluginSurface.applyLegacyRenderWrites(
+      beforeHooks,
+      legacyNodeContext,
+      rendered,
+    );
   }
 
   private findAndProcessRepeatingElements(
