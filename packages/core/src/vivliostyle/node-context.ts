@@ -276,17 +276,8 @@ export function openFromStep( // eslint-disable-line no-redeclare
 export function openRootFromStep(
   step: Vtree.RootNodePositionStep,
   flowRootFormattingContext: Vtree.FormattingContext,
-): Vtree.OpenNodeContext;
-export function openRootFromStep( // eslint-disable-line no-redeclare
-  step: Vtree.RootNodePositionStep,
-  flowRootFormattingContext: Vtree.FormattingContext,
   head?: PositionHead,
-): Vtree.NodeContext;
-export function openRootFromStep( // eslint-disable-line no-redeclare
-  step: Vtree.RootNodePositionStep,
-  flowRootFormattingContext: Vtree.FormattingContext,
-  head?: PositionHead,
-): Vtree.NodeContext {
+): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
   const opened = withNodePositionStep(
     openCore(
       step.node,
@@ -427,12 +418,6 @@ export function elementRenderProgress<T extends Vtree.NodeContext>(
 }
 
 export function viewless(
-  nodeContext: Vtree.BeforeEdgeNodeContext,
-): Vtree.OpenNodeContext;
-export function viewless( // eslint-disable-line no-redeclare
-  nodeContext: Vtree.NodeContext,
-): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext;
-export function viewless( // eslint-disable-line no-redeclare
   nodeContext: Vtree.NodeContext,
 ): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
   switch (nodeContext.kind) {
@@ -459,14 +444,6 @@ export function viewless( // eslint-disable-line no-redeclare
 }
 
 export function viewlessRender(
-  nodeContext: Vtree.BeforeEdgeNodeContext,
-  result: ElementRenderResult,
-): Vtree.OpenNodeContext;
-export function viewlessRender( // eslint-disable-line no-redeclare
-  nodeContext: Vtree.NodeContext,
-  result: ElementRenderResult,
-): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext;
-export function viewlessRender( // eslint-disable-line no-redeclare
   nodeContext: Vtree.NodeContext,
   result: ElementRenderResult,
 ): Vtree.OpenNodeContext | Vtree.AfterNoneNodeContext {
@@ -487,16 +464,6 @@ export function viewlessRender( // eslint-disable-line no-redeclare
 }
 
 export function renderedElement(
-  nodeContext: Vtree.BeforeEdgeNodeContext,
-  viewNode: Element,
-  result: ElementRenderResult,
-): Vtree.BeforeElementNodeContext;
-export function renderedElement( // eslint-disable-line no-redeclare
-  nodeContext: Vtree.NodeContext,
-  viewNode: Element,
-  result: ElementRenderResult,
-): Vtree.ElementNodeContext;
-export function renderedElement( // eslint-disable-line no-redeclare
   nodeContext: Vtree.NodeContext,
   viewNode: Element,
   result: ElementRenderResult,
@@ -508,16 +475,6 @@ export function renderedElement( // eslint-disable-line no-redeclare
 }
 
 export function renderedText(
-  nodeContext: Vtree.OpenNodeContext & Vtree.ChildNodeContext,
-  viewNode: Text,
-  preprocessedTextContent: Diff.Change[],
-): Vtree.BeforeTextNodeContext;
-export function renderedText( // eslint-disable-line no-redeclare
-  nodeContext: ViewlessChildNodeContext,
-  viewNode: Text,
-  preprocessedTextContent: Diff.Change[],
-): Vtree.TextNodeContext;
-export function renderedText( // eslint-disable-line no-redeclare
   nodeContext: ViewlessChildNodeContext,
   viewNode: Text,
   preprocessedTextContent: Diff.Change[],
