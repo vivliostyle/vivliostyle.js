@@ -2791,6 +2791,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ),
         LegacyPluginSurface.asLegacyColumn(hooks[i], this),
       );
+      LegacyPluginSurface.retagLegacyNodeContext(
+        Plugin.HOOKS.POST_LAYOUT_BLOCK,
+        nodeContext,
+      );
+      LegacyPluginSurface.retagLegacyNodeContexts(
+        Plugin.HOOKS.POST_LAYOUT_BLOCK,
+        checkPoints,
+      );
     }
   }
 
@@ -2951,18 +2959,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ? LegacyPluginSurface.adaptLegacyTextNodeBreaker(hook, breaker)
         : prev;
     }, TextNodeBreaker.instance);
-    if (
-      LegacyPluginSurface.legacySurfaceActive(
-        Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
-      )
-    ) {
-      LegacyPluginSurface.normalizeLegacyNodeContext(
-        LegacyPluginSurface.asLegacyNodeContext(
-          Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
-          nodeContext,
-        ),
-      );
-    }
+    LegacyPluginSurface.retagLegacyNodeContext(
+      Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
+      nodeContext,
+    );
     return resolved;
   }
 

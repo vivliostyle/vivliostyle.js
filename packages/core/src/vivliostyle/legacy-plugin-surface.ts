@@ -1610,6 +1610,17 @@ function retagLegacyValue(nodeContext: LegacyNodeContext): void {
 
 const handedOut = new Set<Vtree.NodeContext>();
 
+function retagHandedOut(): void {
+  if (handedOut.size === 0) {
+    return;
+  }
+  const served = [...handedOut];
+  handedOut.clear();
+  for (const nodeContext of served) {
+    retagLegacyValue(legacyViewOf(nodeContext));
+  }
+}
+
 /**
  * @deprecated Give a value coming back from a legacy implementation the
  * discriminant its own fields imply, and hand it to the core as itself.
@@ -1617,11 +1628,35 @@ const handedOut = new Set<Vtree.NodeContext>();
 export function normalizeLegacyNodeContext(
   nodeContext: LegacyNodeContext | null | undefined,
 ): Vtree.NodeContext | null {
+  retagHandedOut();
   if (!nodeContext) {
     return null;
   }
   retagLegacyValue(nodeContext);
   return coreOf(nodeContext);
+}
+
+export function retagLegacyNodeContext(
+  hook: string,
+  nodeContext: Vtree.NodeContext | null,
+): void {
+  retagHandedOut();
+  if (nodeContext && legacySurfaceActive(hook)) {
+    retagLegacyValue(legacyViewOf(nodeContext));
+  }
+}
+
+export function retagLegacyNodeContexts(
+  hook: string,
+  checkPoints: Vtree.RenderedNodeContext[],
+): void {
+  retagHandedOut();
+  if (!legacySurfaceActive(hook)) {
+    return;
+  }
+  for (const checkPoint of checkPoints) {
+    retagLegacyValue(legacyViewOf(checkPoint));
+  }
 }
 
 const adaptedTextNodeBreakers = new WeakMap<

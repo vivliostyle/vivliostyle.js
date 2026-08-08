@@ -2959,6 +2959,10 @@ export class ViewFactory
         });
       })
       .then(() => {
+        LegacyPluginSurface.retagLegacyNodeContext(
+          Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
+          nodeContext,
+        );
         frame.finish(Diff.diffChars(originl, textContent));
       });
     return frame.result();
