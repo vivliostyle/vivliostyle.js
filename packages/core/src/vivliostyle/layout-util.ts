@@ -18,6 +18,7 @@
  * @fileoverview LayoutUtil - Utilities related to layout.
  */
 import * as Break from "./break";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as NodeContext from "./node-context";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
@@ -338,6 +339,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   override startNonInlineElementNode(
     state: RenderedActiveLayoutIteratorState,
   ): void | Task.Result<boolean> {
+    LegacyPluginSurface.noteRetained(state.nodeContext);
     state.leadingEdgeContexts.push(state.nodeContext);
     state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
       state.breakAtTheEdge,
@@ -371,6 +373,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     return cont.thenAsync(() => {
       if (!state.break) {
         state.onStartEdges = false;
+        LegacyPluginSurface.noteRetained(state.nodeContext);
         state.lastAfterNodeContext = state.nodeContext;
         state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
           state.breakAtTheEdge,

@@ -725,6 +725,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // Prevent breaking inside SVG etc. (Issue #1406)
           renderedPos.viewNode.parentElement?.namespaceURI === Base.NS.XHTML
         ) {
+          LegacyPluginSurface.noteRetained(renderedPos);
           checkPoints.push(renderedPos);
 
           // Prevent performance degradation when the text block is very large.
@@ -762,6 +763,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               renderedPeeled &&
               !LayoutHelper.isSpecialNodeContext(renderedPeeled)
             ) {
+              LegacyPluginSurface.noteRetained(renderedPeeled);
               checkPoints.push(renderedPeeled);
             }
           }
@@ -853,6 +855,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           renderedPos.inline &&
           !LayoutHelper.isSpecialNodeContext(renderedPos)
         ) {
+          LegacyPluginSurface.noteRetained(renderedPos);
           checkPoints.push(renderedPos);
         } else {
           if (checkPoints.length > 0) {
@@ -878,6 +881,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               renderedPeeled &&
               !LayoutHelper.isSpecialNodeContext(renderedPeeled)
             ) {
+              LegacyPluginSurface.noteRetained(renderedPeeled);
               checkPoints.push(renderedPeeled);
             }
           }
@@ -2297,6 +2301,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       columnContext.container.width < regionContext.container.width;
     if (isRegionWider && floatReference === PageFloats.FloatReference.COLUMN) {
       if (columnSpan === Css.ident.auto) {
+        LegacyPluginSurface.noteRetained(nodeContext);
         this.buildDeepElementView(nodeContext).then((position) => {
           const element = position.viewNode as Element;
           let inlineSize = Sizing.getSize(this.clientLayout, element, [
@@ -3256,6 +3261,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       blockParent = blockParent.parent;
     } while (blockParent && blockParent.inline);
     if (blockParent) {
+      LegacyPluginSurface.noteRetained(blockParent);
       blockParent = NodeContext.afterEdgeOf(blockParent);
       return LayoutHelper.calculateEdge(
         blockParent,
@@ -4129,6 +4135,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   this.followWalkedContext(nodeContext, cleared);
                   nodeContext = cleared;
                   if (leadingEdge && this.breakPositions.length === 0) {
+                    LegacyPluginSurface.noteRetained(nodeContext);
                     this.saveEdgeBreakPosition(
                       nodeContext,
                       breakAtTheEdge,
@@ -4157,6 +4164,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     // break opportunity above. (Issue #1786)
                     (!leadingEdge && leadingEdgeContexts.length === 0))
               ) {
+                LegacyPluginSurface.noteRetained(nodeContext);
                 this.saveEdgeBreakPosition(nodeContext, breakAtTheEdge, false);
               }
               if (
@@ -4176,6 +4184,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               ) {
                 // new formatting context, or float or flex container,
                 // or empty block box (unbreakable)
+                LegacyPluginSurface.noteRetained(rendered);
                 leadingEdgeContexts.push(rendered);
                 setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
                 suppressWeakerLeadingColumnBreaks(nodeContext);
@@ -4232,6 +4241,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 element.getAttribute("data-math-typeset") === "true"
               ) {
                 onStartEdges = false;
+                LegacyPluginSurface.noteRetained(elementContext);
                 lastAfterNodeContext = elementContext;
                 trailingEdgeContexts.push(lastAfterNodeContext);
                 breakAtTheEdge = null;
@@ -4299,6 +4309,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               // which are positioned in normal flow and are needed for
               // break position tracking. (Issue #1790)
               if (!LayoutHelper.isCssOutOfFlow(elementContext.viewNode)) {
+                LegacyPluginSurface.noteRetained(elementContext);
                 lastAfterNodeContext = elementContext;
                 trailingEdgeContexts.push(lastAfterNodeContext);
               }
@@ -4318,6 +4329,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
             } else {
               // Leading edge
+              LegacyPluginSurface.noteRetained(elementContext);
               leadingEdgeContexts.push(elementContext);
               setBreakAtTheEdge(Break.effectiveBreakBefore(nodeContext));
               suppressWeakerLeadingColumnBreaks(nodeContext);
@@ -4434,6 +4446,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     initialNodeContext: Vtree.NodeContext,
   ): Task.Result<Vtree.NodeContext | null> {
     let nodeContext: Vtree.NodeContext | null = initialNodeContext;
+    LegacyPluginSurface.noteRetained(nodeContext);
     let resultNodeContext: Vtree.NodeContext | null = nodeContext;
     const frame: Task.Frame<Vtree.NodeContext | null> =
       Task.newFrame("skipEdges");
@@ -4746,6 +4759,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     breakAtEdge: string | null,
     overflows: boolean,
   ): void {
+    LegacyPluginSurface.noteRetained(position);
     const copy = position;
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
       position.formattingContext,
@@ -4834,6 +4848,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         replaceWalkedContextListener,
       );
       if (nodeContext.viewNode) {
+        LegacyPluginSurface.noteRetained(nodeContext);
         this.initialNodeContext = nodeContext;
       } else {
         const nextInTreeListener = (evt) => {
@@ -5128,6 +5143,7 @@ export class PseudoColumn {
       return Column.prototype.openAllViews
         .call(this, position)
         .thenAsync((result) => {
+          LegacyPluginSurface.noteRetained(result);
           pseudoColumn.startNodeContexts.push(result);
           return Task.newResult(result);
         });
@@ -5145,6 +5161,7 @@ export class PseudoColumn {
   }
   findAcceptableBreakPosition(): Layout.BreakPositionAndNodeContext {
     const p = this.column.findAcceptableBreakPosition();
+    LegacyPluginSurface.noteRetained(this.startNodeContexts[0]);
     const startNodeContext = this.startNodeContexts[0];
     const bp = new BreakPosition.EdgeBreakPosition(
       startNodeContext,

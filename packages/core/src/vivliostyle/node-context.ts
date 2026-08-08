@@ -17,6 +17,7 @@
  * @fileoverview NodeContext - Construction of node contexts.
  */
 import * as Diff from "./diff";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as PseudoElement from "./pseudo-element";
 import * as VtreeImpl from "./vtree";
 import { PageFloats, Vtree } from "./types";
@@ -240,6 +241,13 @@ export function openAt(
   return withShadowPlacement(positioned, placement);
 }
 
+function retainedParent(
+  parent: Vtree.ParentNodeContext,
+): Vtree.ParentNodeContext {
+  LegacyPluginSurface.noteRetained(parent);
+  return parent;
+}
+
 export function openFromStep(
   step: Vtree.NodePositionStep,
   parent: Vtree.ParentNodeContext,
@@ -267,7 +275,7 @@ export function openFromStep( // eslint-disable-line no-redeclare
   const chained: Vtree.OpenNodeContext = {
     ...opened,
     shadowSibling: step.shadowSibling
-      ? openFromStep(step.shadowSibling, parent)
+      ? openFromStep(step.shadowSibling, retainedParent(parent))
       : null,
   };
   return head ? withPositionHead(chained, head) : chained;

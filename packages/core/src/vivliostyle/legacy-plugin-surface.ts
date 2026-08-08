@@ -169,6 +169,18 @@ export const CORE_HOOK_COUNTS: { readonly [name: string]: number } = {
 };
 
 /**
+ * @deprecated The hooks whose payload carries a node context, in the order the
+ * gate consults them.
+ */
+export const NODE_CONTEXT_HOOKS: readonly string[] = [
+  Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+  Plugin.HOOKS.POST_LAYOUT_BLOCK,
+  Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
+  Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+  Plugin.HOOKS.RESOLVE_TEXT_NODE_BREAKER,
+];
+
+/**
  * @deprecated True when the named hook carries registrations the core did not
  * make. The legacy view is built only then.
  */
@@ -176,10 +188,43 @@ export function legacySurfaceActive(hook: string): boolean {
   return Plugin.getHooksForName(hook).length > CORE_HOOK_COUNTS[hook];
 }
 
-function coreOf(nodeContext: LegacyNodeContext): Vtree.NodeContext {
+function anyLegacySurfaceActive(): boolean {
+  for (const hook of NODE_CONTEXT_HOOKS) {
+    if (legacySurfaceActive(hook)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const retained = new WeakSet<Vtree.NodeContext>();
+
+function markRetained(nodeContext: Vtree.NodeContext): void {
+  for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
+    if (retained.has(nc)) {
+      return;
+    }
+    retained.add(nc);
+  }
+}
+
+/**
+ * @deprecated Record, for the plugin boundary alone, that the core keeps this
+ * position, which is what `NodeContext.copy()` marked on the value and its
+ * ancestors. It states nothing in the type world: the core keeps its own
+ * bindings and this call yields no value. Does nothing while no external hook
+ * is registered.
+ */
+export function noteRetained(nodeContext: Vtree.NodeContext): void {
+  if (anyLegacySurfaceActive()) {
+    markRetained(nodeContext);
+  }
+}
+
+function coreOf(nodeContext: unknown): Vtree.NodeContext {
   // Runtime fact outside the type system: the legacy view is the core's own
   // node context value, handed out under a flat mutable declaration.
-  return nodeContext as unknown as Vtree.NodeContext;
+  return nodeContext as Vtree.NodeContext;
 }
 
 function legacyViewOf(nodeContext: Vtree.NodeContext): LegacyNodeContext {
@@ -216,12 +261,12 @@ function cloneCoreItem<T extends Vtree.NodeContext>(nodeContext: T): T {
 
 class LegacyNodeContextMethods {
   get shared(): boolean {
-    return true;
+    return retained.has(coreOf(this));
   }
 
   set shared(ignored: boolean) {
-    // The value world has no copy-on-write bit; the boundary value is always
-    // the one the core has already handed to a holder.
+    // The bit is derived from the core's retention of the value, so there is
+    // nothing an assignment could establish.
   }
 
   resetView(this: LegacyNodeContext): void {
@@ -265,10 +310,12 @@ class LegacyNodeContextMethods {
   }
 
   modify(this: LegacyNodeContext): LegacyNodeContext {
-    return decorated(cloneCoreItem(coreOf(this)));
+    const core = coreOf(this);
+    return retained.has(core) ? decorated(cloneCoreItem(core)) : this;
   }
 
   copy(this: LegacyNodeContext): LegacyNodeContext {
+    markRetained(coreOf(this));
     return this;
   }
 

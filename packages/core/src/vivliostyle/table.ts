@@ -23,6 +23,7 @@ import * as Break from "./break";
 import * as BreakPosition from "./break-position";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as LayoutProcessor from "./layout-processor";
 import * as LayoutRetryers from "./layout-retryers";
 import * as LayoutUtil from "./layout-util";
@@ -1401,6 +1402,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       state.break = true;
       return Task.newResult(true);
     }
+    LegacyPluginSurface.noteRetained(nodeContext);
     const afterNodeContext = NodeContext.afterEdgeOf(nodeContext);
     state.nodeContext = afterNodeContext;
     const frame = Task.newFrame<boolean>("startTableCell");
@@ -1492,6 +1494,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     if (display === "table-row") {
       this.inRow = false;
       if (!this.inHeader && !this.inFooter) {
+        LegacyPluginSurface.noteRetained(nodeContext);
         const beforeNodeContext = NodeContext.beforeEdgeOf(nodeContext);
         const bp = new InsideTableRowBreakPosition(
           this.currentRowIndex,
@@ -1795,6 +1798,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const frame = Task.newFrame<Vtree.NodeContext | null>(
       "TableLayoutProcessor.doInitialLayout",
     );
+    LegacyPluginSurface.noteRetained(nodeContext);
     const initialNodeContext = nodeContext;
     this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
       const tableElement = nodeContextAfter.viewNode as Element;
