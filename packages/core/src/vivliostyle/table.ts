@@ -2774,12 +2774,12 @@ function resolveLayoutProcessor(
   return null;
 }
 
-Plugin.registerHook(
+Plugin.registerCoreHook(
   Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
   resolveFormattingContextHook,
 );
 
-Plugin.registerHook(
+Plugin.registerCoreHook(
   Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
   resolveLayoutProcessor,
 );

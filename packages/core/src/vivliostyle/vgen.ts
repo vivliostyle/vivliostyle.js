@@ -33,6 +33,7 @@ import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as LayoutHelper from "./layout-helper";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Net from "./net";
@@ -1213,7 +1214,10 @@ export class ViewFactory
     const inProgress = NodeContext.elementRenderProgress(nodeContext, rendered);
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
-        inProgress,
+        LegacyPluginSurface.asLegacyNodeContext(
+          Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+          inProgress,
+        ),
         firstTime,
         display,
         position,
@@ -2774,7 +2778,13 @@ export class ViewFactory
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
     hooks.forEach((hook) => {
-      hook(nodeContext, computedStyle);
+      hook(
+        LegacyPluginSurface.asLegacyNodeContext(
+          Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+          nodeContext,
+        ),
+        computedStyle,
+      );
     });
   }
 
@@ -2893,12 +2903,16 @@ export class ViewFactory
         if (index >= hooks.length) {
           return Task.newResult(false);
         }
-        return hooks[index++](nodeContext, textContent).thenAsync(
-          (processedText) => {
-            textContent = processedText;
-            return Task.newResult(true);
-          },
-        );
+        return hooks[index++](
+          LegacyPluginSurface.asLegacyNodeContext(
+            Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
+            nodeContext,
+          ),
+          textContent,
+        ).thenAsync((processedText) => {
+          textContent = processedText;
+          return Task.newResult(true);
+        });
       })
       .then(() => {
         frame.finish(Diff.diffChars(originl, textContent));

@@ -1191,15 +1191,15 @@ class TextSpacingPolyfill {
   }
 
   registerHooks() {
-    Plugin.registerHook(
+    Plugin.registerCoreHook(
       Plugin.HOOKS.POLYFILLED_INHERITED_PROPS,
       this.getPolyfilledInheritedProps.bind(this),
     );
-    Plugin.registerHook(
+    Plugin.registerCoreHook(
       Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
       this.preprocessSingleDocument.bind(this),
     );
-    Plugin.registerHook(
+    Plugin.registerCoreHook(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
       this.postLayoutBlock.bind(this),
       true, // text-spacing must be processed before others (Issue #1105)

@@ -23,6 +23,10 @@ import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Task from "./task";
 import { Layout, Vtree } from "./types";
+import type {
+  LegacyNodeContext,
+  LegacyRenderedNodeContext,
+} from "./legacy-plugin-surface";
 
 /**
  * Type of implemented hooks.
@@ -152,12 +156,12 @@ export enum HOOKS {
 export type PreProcessSingleDocumentHook = (p1: Document) => any;
 
 export type PreProcessTextContentHook = (
-  p1: Vtree.NodeContext,
+  p1: LegacyNodeContext,
   p2: string,
 ) => Task.Result<string>;
 
 export type PreProcessElementStyleHook = (
-  p1: Vtree.NodeContext,
+  p1: LegacyNodeContext,
   p2: object,
 ) => void;
 
@@ -173,7 +177,7 @@ export type ResolveTextNodeBreakerHook = (
 ) => Layout.TextNodeBreaker;
 
 export type ResolveFormattingContextHook = (
-  p1: Vtree.NodeContext,
+  p1: LegacyNodeContext,
   p2: boolean,
   p3: Css.Val | null | undefined,
   p4: Css.Ident | null | undefined,
@@ -186,8 +190,8 @@ export type ResolveLayoutProcessorHook = (
 ) => LayoutProcessor.LayoutProcessor;
 
 export type PostLayoutBlockHook = (
-  p1: Vtree.NodeContext | null,
-  p2: Vtree.RenderedNodeContext[],
+  p1: LegacyNodeContext | null,
+  p2: LegacyRenderedNodeContext[],
   p3: Layout.Column,
 ) => void;
 
@@ -227,6 +231,21 @@ export function registerHook(
       hooksForName.push(fn);
     }
   }
+}
+
+const coreHooks = new WeakSet<(...p1) => any>();
+
+export function registerCoreHook(
+  name: string,
+  fn: (...p1) => any,
+  atFirst?: boolean,
+): void {
+  coreHooks.add(fn);
+  registerHook(name, fn, atFirst);
+}
+
+export function isCoreHook(fn: (...p1) => any): boolean {
+  return coreHooks.has(fn);
 }
 
 /**

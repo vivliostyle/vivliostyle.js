@@ -233,17 +233,20 @@ export const blockLayoutProcessor = new BlockLayoutProcessor();
 export const isInstanceOfBlockFormattingContext =
   LayoutProcessor.isInstanceOfBlockFormattingContext;
 
-Plugin.registerHook(Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT, (nodeContext) => {
-  const parent = nodeContext.parent;
-  if (!parent || nodeContext.formattingContext !== parent.formattingContext) {
-    return null;
-  }
-  return nodeContext.establishesBFC
-    ? new BlockFormattingContext(parent.formattingContext)
-    : null;
-});
+Plugin.registerCoreHook(
+  Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+  (nodeContext) => {
+    const parent = nodeContext.parent;
+    if (!parent || nodeContext.formattingContext !== parent.formattingContext) {
+      return null;
+    }
+    return nodeContext.establishesBFC
+      ? new BlockFormattingContext(parent.formattingContext)
+      : null;
+  },
+);
 
-Plugin.registerHook(
+Plugin.registerCoreHook(
   Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
   (formattingContext) => {
     if (formattingContext instanceof BlockFormattingContext) {

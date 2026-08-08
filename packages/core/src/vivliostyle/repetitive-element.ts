@@ -1129,7 +1129,7 @@ function getRepetitiveElementsOwnerFormattingContext(
 
 const repetitiveLayoutProcessor = new RepetitiveElementsOwnerLayoutProcessor();
 
-Plugin.registerHook(
+Plugin.registerCoreHook(
   Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
   (formattingContext) => {
     if (

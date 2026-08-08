@@ -425,7 +425,7 @@ function markReferencedFootnoteElements(document: Document): void {
   }
 }
 
-Plugin.registerHook(
+Plugin.registerCoreHook(
   Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
   markReferencedFootnoteElements,
 );

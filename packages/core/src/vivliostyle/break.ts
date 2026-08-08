@@ -347,4 +347,4 @@ export function reportEffectiveBreakAfter(
   return effective;
 }
 
-Plugin.registerHook("SIMPLE_PROPERTY", convertPageBreakAliases);
+Plugin.registerCoreHook("SIMPLE_PROPERTY", convertPageBreakAliases);

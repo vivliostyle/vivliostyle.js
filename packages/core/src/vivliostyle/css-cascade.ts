@@ -3030,7 +3030,7 @@ function asLeaderNodeContext(
  * @param checkPoints
  * @param column
  */
-const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
+const postLayoutBlockLeader = (
   nodeContext: Vtree.NodeContext,
   checkPoints: Vtree.RenderedNodeContext[],
   column: Layout.Column,
@@ -3301,7 +3301,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
   }
 };
 
-Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
+Plugin.registerCoreHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
 
 export function roman(num: number): string {
   if (num <= 0 || num != Math.round(num) || num > 3999) {
