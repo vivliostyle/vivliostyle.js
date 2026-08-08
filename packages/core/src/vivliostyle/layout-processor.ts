@@ -18,6 +18,7 @@
  */
 import * as BreakPosition from "./break-position";
 import * as LayoutHelper from "./layout-helper";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as Plugin from "./plugin";
 import * as Task from "./task";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
@@ -126,6 +127,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     overflows: boolean,
     columnBlockSize: number,
   ): Layout.BreakPosition {
+    LegacyPluginSurface.noteRetained(position);
     return new BreakPosition.EdgeBreakPosition(
       position,
       breakOnEdge,

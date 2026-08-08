@@ -184,8 +184,13 @@ export default [
 
     ignores: [
       "src/vivliostyle/legacy-plugin-surface.ts",
+      "src/vivliostyle/layout-processor.ts",
+      "src/vivliostyle/layout-retryers.ts",
+      "src/vivliostyle/layout-util.ts",
       "src/vivliostyle/layout.ts",
+      "src/vivliostyle/node-context.ts",
       "src/vivliostyle/plugin.ts",
+      "src/vivliostyle/table.ts",
       "src/vivliostyle/vgen.ts",
     ],
 
@@ -197,7 +202,7 @@ export default [
             {
               group: ["./legacy-plugin-surface", "**/legacy-plugin-surface"],
               message:
-                "legacy-plugin-surface is the deprecated plugin compatibility layer; only the hook boundaries in vgen.ts, layout.ts and plugin.ts may import it.",
+                "legacy-plugin-surface is the deprecated plugin compatibility layer; only the hook boundaries (vgen.ts, layout.ts, plugin.ts) and the node context retention sites (layout.ts, layout-processor.ts, layout-retryers.ts, layout-util.ts, table.ts, node-context.ts) may import it.",
             },
           ],
         },

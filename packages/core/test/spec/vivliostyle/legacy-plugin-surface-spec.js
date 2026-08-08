@@ -69,6 +69,27 @@ describe("legacy-plugin-surface", function () {
     });
   });
 
+  describe("noteRetained", function () {
+    it("marks the value while no external hook is registered", function () {
+      var nodeContext = openTextNodeContext();
+      var legacy = vivliostyle_legacy.asLegacyNodeContext(
+        "PREPROCESS_TEXT_CONTENT",
+        nodeContext,
+      );
+      vivliostyle_legacy.noteRetained(nodeContext);
+      var external = function () {};
+      vivliostyle_plugin.registerHook("PREPROCESS_TEXT_CONTENT", external);
+      expect(
+        vivliostyle_legacy.asLegacyNodeContext(
+          "PREPROCESS_TEXT_CONTENT",
+          nodeContext,
+        ).shared,
+      ).toBe(true);
+      vivliostyle_plugin.removeHook("PREPROCESS_TEXT_CONTENT", external);
+      expect(legacy.sourceNode).toBe(nodeContext.sourceNode);
+    });
+  });
+
   describe("legacySurfaceActive", function () {
     it("is false while only the core has registered", function () {
       hookNames.forEach(function (name) {
@@ -121,7 +142,6 @@ describe("legacy-plugin-surface", function () {
         hookName,
         openTextNodeContext(),
       );
-      expect(legacy.shared).toBe(true);
       expect(legacy.copy()).toBe(legacy);
       expect(legacy.isInsideBFC()).toBe(false);
       expect(legacy.getContainingBlockForAbsolute()).toBe(null);
@@ -130,18 +150,49 @@ describe("legacy-plugin-surface", function () {
       expect(legacy.belongsTo(legacy.formattingContext)).toBe(false);
     });
 
-    it("modifies into a separate value carrying the same position", function () {
+    it("reports shared from the core's retention of the value", function () {
+      var nodeContext = openTextNodeContext();
+      var legacy = vivliostyle_legacy.asLegacyNodeContext(
+        hookName,
+        nodeContext,
+      );
+      expect(legacy.shared).toBe(false);
+      expect(vivliostyle_legacy.noteRetained(nodeContext)).toBeUndefined();
+      expect(legacy.shared).toBe(true);
+    });
+
+    it("marks the value on copy, as the class did", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
         openTextNodeContext(),
       );
+      expect(legacy.shared).toBe(false);
+      expect(legacy.copy()).toBe(legacy);
+      expect(legacy.shared).toBe(true);
+    });
+
+    it("modifies in place while the core does not keep the value", function () {
+      var legacy = vivliostyle_legacy.asLegacyNodeContext(
+        hookName,
+        openTextNodeContext(),
+      );
+      expect(legacy.modify()).toBe(legacy);
+    });
+
+    it("modifies into a separate value once the core keeps it", function () {
+      var nodeContext = openTextNodeContext();
+      var legacy = vivliostyle_legacy.asLegacyNodeContext(
+        hookName,
+        nodeContext,
+      );
+      vivliostyle_legacy.noteRetained(nodeContext);
       legacy.display = "block";
       var modified = legacy.modify();
       expect(modified).not.toBe(legacy);
       expect(modified.sourceNode).toBe(legacy.sourceNode);
       expect(modified.boxOffset).toBe(legacy.boxOffset);
       expect(modified.display).toBe("block");
-      expect(modified.shared).toBe(true);
+      expect(modified.shared).toBe(false);
       modified.display = "inline";
       expect(legacy.display).toBe("block");
     });

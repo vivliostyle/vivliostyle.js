@@ -17,6 +17,7 @@
  * @fileoverview LayoutRetryers - Definitions of LayoutRetryer.
  */
 import * as Asserts from "./asserts";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as Task from "./task";
 import { Layout, Vtree } from "./types";
 
@@ -91,6 +92,7 @@ export abstract class AbstractLayoutRetryer {
   }
 
   saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
+    LegacyPluginSurface.noteRetained(nodeContext);
     this.initialPosition = nodeContext;
     this.initialBreakPositions = ([] as Layout.BreakPosition[]).concat(
       column.breakPositions,

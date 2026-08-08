@@ -167,10 +167,31 @@ export function legacySurfaceActive(hook: string): boolean {
   return Plugin.getHooksForName(hook).some((fn) => !Plugin.isCoreHook(fn));
 }
 
-function coreOf(nodeContext: LegacyNodeContext): Vtree.NodeContext {
+const retained = new WeakSet<Vtree.NodeContext>();
+
+function markRetained(nodeContext: Vtree.NodeContext): void {
+  for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
+    if (retained.has(nc)) {
+      return;
+    }
+    retained.add(nc);
+  }
+}
+
+/**
+ * @deprecated Record, for the plugin boundary alone, that the core keeps this
+ * position, which is what `NodeContext.copy()` marked on the value and its
+ * ancestors. It states nothing in the type world: the core keeps its own
+ * bindings and this call yields no value.
+ */
+export function noteRetained(nodeContext: Vtree.NodeContext): void {
+  markRetained(nodeContext);
+}
+
+function coreOf(nodeContext: unknown): Vtree.NodeContext {
   // Runtime fact outside the type system: the legacy view is the core's own
   // node context value, handed out under a flat mutable declaration.
-  return nodeContext as unknown as Vtree.NodeContext;
+  return nodeContext as Vtree.NodeContext;
 }
 
 function legacyViewOf(nodeContext: Vtree.NodeContext): LegacyNodeContext {
@@ -207,12 +228,16 @@ function cloneCoreItem<T extends Vtree.NodeContext>(nodeContext: T): T {
 
 class LegacyNodeContextMethods {
   get shared(): boolean {
-    return true;
+    return retained.has(coreOf(this));
   }
 
-  set shared(ignored: boolean) {
-    // The value world has no copy-on-write bit; the boundary value is always
-    // the one the core has already handed to a holder.
+  set shared(value: boolean) {
+    const core = coreOf(this);
+    if (value) {
+      retained.add(core);
+    } else {
+      retained.delete(core);
+    }
   }
 
   resetView(this: LegacyNodeContext): void {
@@ -256,10 +281,12 @@ class LegacyNodeContextMethods {
   }
 
   modify(this: LegacyNodeContext): LegacyNodeContext {
-    return decorated(cloneCoreItem(coreOf(this)));
+    const core = coreOf(this);
+    return retained.has(core) ? decorated(cloneCoreItem(core)) : this;
   }
 
   copy(this: LegacyNodeContext): LegacyNodeContext {
+    markRetained(coreOf(this));
     return this;
   }
 
