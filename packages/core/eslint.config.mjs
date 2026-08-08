@@ -200,11 +200,117 @@ export default [
         {
           patterns: [
             {
-              group: ["./legacy-plugin-surface", "**/legacy-plugin-surface"],
+              group: [
+                "./legacy-plugin-surface",
+                "**/legacy-plugin-surface",
+                "./legacy-plugin-surface.*",
+                "**/legacy-plugin-surface.*",
+              ],
               message:
                 "legacy-plugin-surface is the deprecated plugin compatibility layer; only the hook boundaries (vgen.ts, layout.ts, plugin.ts) and the node context retention sites (layout.ts, layout-processor.ts, layout-retryers.ts, layout-util.ts, table.ts, node-context.ts) may import it.",
             },
           ],
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "ImportExpression[source.value=/legacy-plugin-surface/]",
+          message:
+            "legacy-plugin-surface is the deprecated plugin compatibility layer; a dynamic import reaches it just as a static one does, and only the hook boundaries (vgen.ts, layout.ts, plugin.ts) and the node context retention sites (layout.ts, layout-processor.ts, layout-retryers.ts, layout-util.ts, table.ts, node-context.ts) may import it.",
+        },
+      ],
+    },
+  },
+  {
+    files: [
+      "src/vivliostyle/layout-retryers.ts",
+      "src/vivliostyle/layout-util.ts",
+      "src/vivliostyle/node-context.ts",
+      "src/vivliostyle/table.ts",
+    ],
+
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.name='LegacyPluginSurface'][property.name!='noteRetained']",
+          message:
+            "A node context retention site records retained positions and nothing else; LegacyPluginSurface.noteRetained is the only member it may reach. The rest of the compatibility layer belongs to the hook boundaries (vgen.ts, layout.ts, plugin.ts).",
+        },
+        {
+          selector:
+            "ImportDeclaration[source.value=/legacy-plugin-surface/] ImportSpecifier[imported.name!='noteRetained']",
+          message:
+            "A node context retention site records retained positions and nothing else; noteRetained is the only name it may import from legacy-plugin-surface. The rest of the compatibility layer belongs to the hook boundaries (vgen.ts, layout.ts, plugin.ts).",
+        },
+        {
+          selector:
+            "ImportDeclaration[source.value=/legacy-plugin-surface/] ImportNamespaceSpecifier[local.name!='LegacyPluginSurface']",
+          message:
+            "A node context retention site imports legacy-plugin-surface as LegacyPluginSurface so that the member restriction applies to every use of it.",
+        },
+        {
+          selector:
+            "Identifier[name='LegacyPluginSurface']:not(MemberExpression > .object):not(ImportNamespaceSpecifier > .local)",
+          message:
+            "A node context retention site reaches LegacyPluginSurface.noteRetained through the namespace itself; every other reference to the namespace, whether it binds it to another name, casts it, wraps it in an expression or passes it on, puts the rest of the compatibility layer out of the member restriction's reach.",
+        },
+        {
+          selector: "ImportExpression[source.value=/legacy-plugin-surface/]",
+          message:
+            "A node context retention site imports legacy-plugin-surface statically as LegacyPluginSurface; a dynamic import hands back the whole namespace under a name the member restriction cannot reach.",
+        },
+        {
+          selector:
+            ":matches(ExportAllDeclaration, ExportNamedDeclaration)[source.value=/legacy-plugin-surface/]",
+          message:
+            "A node context retention site keeps legacy-plugin-surface to itself; re-exporting it hands the whole compatibility layer to the files the import restriction covers.",
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/vivliostyle/layout-processor.ts"],
+
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "MemberExpression[object.name='LegacyPluginSurface'][property.name!='noteRetained'][property.name!='adaptLegacyLayoutProcessor']",
+          message:
+            "layout-processor.ts reaches LegacyPluginSurface.noteRetained to record a retained position and LegacyPluginSurface.adaptLegacyLayoutProcessor at the RESOLVE_LAYOUT_PROCESSOR boundary; the rest of the compatibility layer belongs to the hook boundaries (vgen.ts, layout.ts, plugin.ts).",
+        },
+        {
+          selector:
+            "ImportDeclaration[source.value=/legacy-plugin-surface/] ImportSpecifier[imported.name!='noteRetained'][imported.name!='adaptLegacyLayoutProcessor']",
+          message:
+            "layout-processor.ts imports noteRetained and adaptLegacyLayoutProcessor from legacy-plugin-surface and nothing else; the rest of the compatibility layer belongs to the hook boundaries (vgen.ts, layout.ts, plugin.ts).",
+        },
+        {
+          selector:
+            "ImportDeclaration[source.value=/legacy-plugin-surface/] ImportNamespaceSpecifier[local.name!='LegacyPluginSurface']",
+          message:
+            "layout-processor.ts imports legacy-plugin-surface as LegacyPluginSurface so that the member restriction applies to every use of it.",
+        },
+        {
+          selector:
+            "Identifier[name='LegacyPluginSurface']:not(MemberExpression > .object):not(ImportNamespaceSpecifier > .local)",
+          message:
+            "layout-processor.ts reaches LegacyPluginSurface through the namespace itself; every other reference to the namespace, whether it binds it to another name, casts it, wraps it in an expression or passes it on, puts the rest of the compatibility layer out of the member restriction's reach.",
+        },
+        {
+          selector: "ImportExpression[source.value=/legacy-plugin-surface/]",
+          message:
+            "layout-processor.ts imports legacy-plugin-surface statically as LegacyPluginSurface; a dynamic import hands back the whole namespace under a name the member restriction cannot reach.",
+        },
+        {
+          selector:
+            ":matches(ExportAllDeclaration, ExportNamedDeclaration)[source.value=/legacy-plugin-surface/]",
+          message:
+            "layout-processor.ts keeps legacy-plugin-surface to itself; re-exporting it hands the whole compatibility layer to the files the import restriction covers.",
         },
       ],
     },
