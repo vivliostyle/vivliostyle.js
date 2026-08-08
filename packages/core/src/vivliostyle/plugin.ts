@@ -19,12 +19,12 @@
  */
 import * as Base from "./base";
 import * as Css from "./css";
-import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Task from "./task";
 import { Layout, Vtree } from "./types";
 import type {
   LegacyColumn,
+  LegacyLayoutProcessor,
   LegacyNodeContext,
   LegacyRenderedNodeContext,
   LegacyTextNodeBreaker,
@@ -189,7 +189,7 @@ export type ResolveFormattingContextHook = (
 
 export type ResolveLayoutProcessorHook = (
   p1: Vtree.FormattingContext,
-) => LayoutProcessor.LayoutProcessor;
+) => LegacyLayoutProcessor;
 
 export type PostLayoutBlockHook = (
   p1: LegacyNodeContext | null,

@@ -94,7 +94,10 @@ export class LayoutProcessorResolver {
     for (let i = 0; i < hooks.length; i++) {
       const processor = hooks[i](formattingContext);
       if (processor) {
-        return processor;
+        return LegacyPluginSurface.adaptLegacyLayoutProcessor(
+          hooks[i],
+          processor,
+        );
       }
     }
     throw new Error(

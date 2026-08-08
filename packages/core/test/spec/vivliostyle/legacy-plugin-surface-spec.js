@@ -31,6 +31,7 @@ describe("legacy-plugin-surface", function () {
     "PREPROCESS_ELEMENT_STYLE",
     "RESOLVE_FORMATTING_CONTEXT",
     "RESOLVE_TEXT_NODE_BREAKER",
+    "RESOLVE_LAYOUT_PROCESSOR",
     "POST_LAYOUT_BLOCK",
   ];
 

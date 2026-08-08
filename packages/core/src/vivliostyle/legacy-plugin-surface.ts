@@ -26,6 +26,7 @@
  * must use `Vtree.NodeContext` and `node-context.ts`.
  */
 import * as Break from "./break";
+import * as BreakPosition from "./break-position";
 import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
@@ -38,6 +39,7 @@ import {
   Selectors,
   Vtree,
 } from "./types";
+import type { LayoutProcessor } from "./layout-processor";
 
 /**
  * @deprecated Flat mutable view of a node context. Use `Vtree.NodeContext`.
@@ -535,6 +537,15 @@ function decoratedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
   return nodeContext === null ? null : decoratedAs<T>(nodeContext);
 }
 
+function retaggedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
+  const legacy = decoratedOrNull<LegacyNodeContext>(nodeContext);
+  if (legacy) {
+    retagLegacyValue(legacy);
+    handedOut.add(nodeContext);
+  }
+  return legacy as T | null;
+}
+
 /**
  * @deprecated Hand a node context to an external hook under the legacy
  * declaration. The value itself is returned so that plugin writes reach the
@@ -676,9 +687,11 @@ export type LegacyColumn = Omit<
   | "saveEdgeBreakPosition"
   | "saveBoxBreakPosition"
   | "doFinishBreakOfFragmentLayoutConstraints"
+  | "breakPositions"
   | "fragmentLayoutConstraints"
   | "collectElementsOffset"
 > & {
+  breakPositions: LegacyBreakPosition[];
   fragmentLayoutConstraints: LegacyFragmentLayoutConstraint[];
   collectElementsOffset(): LegacyElementsOffset[];
   stopByOverflow(nodeContext: LegacyNodeContext): boolean;
@@ -803,7 +816,7 @@ export type LegacyColumn = Omit<
   };
   findEdgeBreakPosition(bp: Layout.EdgeBreakPosition): LegacyNodeContext;
   findAcceptableBreakPosition(): {
-    breakPosition: Layout.BreakPosition;
+    breakPosition: LegacyBreakPosition;
     nodeContext: LegacyNodeContext;
   } | null;
   doFinishBreak(
@@ -852,7 +865,7 @@ function retagLegacyArgument(value: unknown): void {
     typeof value === "object" &&
     Object.getPrototypeOf(value) === legacyPrototype
   ) {
-    normalizeLegacyNodeContext(value as unknown as LegacyNodeContext);
+    retagLegacyValue(value as unknown as LegacyNodeContext);
   }
 }
 
@@ -885,6 +898,7 @@ function projectedMemberOf(
   bound: Map<string | symbol, unknown>,
   overrides: Map<string | symbol, unknown>,
   projections: LegacyProjections,
+  fields: LegacyProjections,
   property: string | symbol,
 ): unknown {
   if (overrides.has(property)) {
@@ -894,6 +908,10 @@ function projectedMemberOf(
     typeof property === "string" ? projections[property] : undefined;
   if (projection) {
     return retaggingMemberOf(projection());
+  }
+  const field = typeof property === "string" ? fields[property] : undefined;
+  if (field) {
+    return field();
   }
   const cached = bound.get(property);
   if (cached !== undefined) {
@@ -913,13 +931,15 @@ function projectedMemberOf(
 function legacyViewOfObject<T extends object>(
   target: T,
   members: LegacyProjections,
+  decoratedFields?: LegacyProjections,
 ): object {
   const projections = projectionsOf(members);
+  const fields = projectionsOf(decoratedFields ?? {});
   const bound = new Map<string | symbol, unknown>();
   const overrides = new Map<string | symbol, unknown>();
   return new Proxy(target, {
     get: (t, property) =>
-      projectedMemberOf(t, bound, overrides, projections, property),
+      projectedMemberOf(t, bound, overrides, projections, fields, property),
     set: (t, property, value) => {
       bound.delete(property);
       if (typeof property === "string" && projections[property]) {
@@ -985,6 +1005,92 @@ export function asLegacyLayoutContext(
 }
 
 const legacyColumns = new WeakMap<Layout.Column, LegacyColumn>();
+
+const columnTargets = new WeakMap<object, Layout.Column>();
+
+function coreColumnOf(column: LegacyColumn): Layout.Column {
+  return columnTargets.get(column) ?? (column as unknown as Layout.Column);
+}
+
+const legacyBreakPositions = new WeakMap<
+  Layout.BreakPosition,
+  LegacyBreakPosition
+>();
+
+const coreBreakPositions = new WeakMap<
+  LegacyBreakPosition,
+  Layout.BreakPosition
+>();
+
+const legacyOfAdaptedBreakPositions = new WeakMap<
+  Layout.BreakPosition,
+  LegacyBreakPosition
+>();
+
+function legacyBreakPositionViewOf(
+  breakPosition: Layout.BreakPosition,
+): LegacyBreakPosition {
+  const legacy = legacyOfAdaptedBreakPositions.get(breakPosition);
+  if (legacy) {
+    return legacy;
+  }
+  const cached = legacyBreakPositions.get(breakPosition);
+  if (cached) {
+    return cached;
+  }
+  const projected = legacyViewOfObject(
+    breakPosition,
+    {
+      findAcceptableBreak: () => (column: LegacyColumn, penalty: number) =>
+        decoratedOrNull<LegacyNodeContext>(
+          breakPosition.findAcceptableBreak(coreColumnOf(column), penalty),
+        ),
+      calculateOffset: () => (column: LegacyColumn) =>
+        breakPosition.calculateOffset(coreColumnOf(column)),
+      breakPositionChosen: () => (column: LegacyColumn) =>
+        breakPosition.breakPositionChosen(coreColumnOf(column)),
+      getNodeContext: () => {
+        const getNodeContext = (
+          breakPosition as Partial<Layout.AbstractBreakPosition>
+        ).getNodeContext;
+        return getNodeContext
+          ? () =>
+              decoratedOrNull<LegacyNodeContext>(
+                getNodeContext.call(breakPosition),
+              )
+          : undefined;
+      },
+    },
+    {
+      position: () =>
+        retaggedOrNull<LegacyNodeContext>(
+          (breakPosition as Partial<Layout.EdgeBreakPosition>).position ?? null,
+        ),
+      breakNodeContext: () =>
+        retaggedOrNull<LegacyNodeContext>(
+          (breakPosition as Partial<Layout.BoxBreakPosition>)
+            .breakNodeContext ?? null,
+        ),
+      checkPoints: () => {
+        const checkPoints = (breakPosition as Partial<Layout.BoxBreakPosition>)
+          .checkPoints;
+        return checkPoints === undefined
+          ? undefined
+          : retaggedCheckPoints(checkPoints);
+      },
+    },
+  );
+  const view = projected as LegacyBreakPosition;
+  legacyBreakPositions.set(breakPosition, view);
+  coreBreakPositions.set(view, breakPosition);
+  return view;
+}
+
+function coreBreakPositionOf(
+  breakPosition: LegacyBreakPosition,
+): Layout.BreakPosition {
+  return adaptLegacyBreakPosition(breakPosition);
+}
 
 const legacyTextNodeBreakers = new WeakMap<
   Layout.TextNodeBreaker,
@@ -1077,6 +1183,52 @@ function legacyTextNodeBreakerViewOf(
   return view;
 }
 
+const legacyBreakPositionLists = new WeakMap<
+  Layout.BreakPosition[],
+  LegacyBreakPosition[]
+>();
+
+function arrayIndexOf(property: string | symbol): number | null {
+  if (typeof property !== "string") {
+    return null;
+  }
+  const index = Number(property);
+  return Number.isInteger(index) && index >= 0 && String(index) === property
+    ? index
+    : null;
+}
+
+function legacyBreakPositionsViewOf(
+  breakPositions: Layout.BreakPosition[],
+): LegacyBreakPosition[] {
+  const cached = legacyBreakPositionLists.get(breakPositions);
+  if (cached) {
+    return cached;
+  }
+  const projected = new Proxy(breakPositions, {
+    get: (target, property) => {
+      const index = arrayIndexOf(property);
+      if (index === null) {
+        return Reflect.get(target, property, target);
+      }
+      const breakPosition = target[index];
+      return breakPosition === undefined
+        ? breakPosition
+        : legacyBreakPositionViewOf(breakPosition);
+    },
+    set: (target, property, value) => {
+      const index = arrayIndexOf(property);
+      if (index === null || !value) {
+        return Reflect.set(target, property, value, target);
+      }
+      return Reflect.set(target, property, coreBreakPositionOf(value), target);
+    },
+  });
+  const view = projected as unknown as LegacyBreakPosition[];
+  legacyBreakPositionLists.set(breakPositions, view);
+  return view;
+}
+
 export function asLegacyColumn(
   hook: (...p1) => any,
   column: Layout.Column,
@@ -1084,6 +1236,10 @@ export function asLegacyColumn(
   if (Plugin.isCoreHook(hook)) {
     return column as unknown as LegacyColumn;
   }
+  return legacyColumnViewOf(column);
+}
+
+function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
   const cached = legacyColumns.get(column);
   if (cached) {
     return cached;
@@ -1123,16 +1279,17 @@ export function asLegacyColumn(
             );
           }),
     layoutContext: () => asLegacyLayoutContext(column.layoutContext),
+    breakPositions: () => legacyBreakPositionsViewOf(column.breakPositions),
     resolveTextNodeBreaker: () => (nodeContext: Vtree.NodeContext) =>
       legacyTextNodeBreakerViewOf(column.resolveTextNodeBreaker(nodeContext)),
     nodeContextOverflowingDueToRepetitiveElements: () =>
-      decoratedOrNull<LegacyNodeContext>(
+      retaggedOrNull<LegacyNodeContext>(
         column.nodeContextOverflowingDueToRepetitiveElements,
       ),
     pseudoParent: () =>
       column.pseudoParent === null
         ? null
-        : asLegacyColumn(hook, column.pseudoParent),
+        : legacyColumnViewOf(column.pseudoParent),
     asFloatNodeContext: () => (nodeContext: Vtree.NodeContext) =>
       decoratedOrNull<LegacyFloatNodeContext>(
         column.asFloatNodeContext(nodeContext),
@@ -1231,9 +1388,12 @@ export function asLegacyColumn(
         decoratedOrNull<LegacyNodeContext>(
           column.findAcceptableBreakInside(checkPoints, edgePosition, force),
         ),
-    findBoxBreakPosition: () => (bp: Layout.BoxBreakPosition, force: boolean) =>
+    findBoxBreakPosition: () => (bp: LegacyBreakPosition, force: boolean) =>
       decoratedOrNull<LegacyNodeContext>(
-        column.findBoxBreakPosition(bp, force),
+        column.findBoxBreakPosition(
+          coreBreakPositionOf(bp) as Layout.BoxBreakPosition,
+          force,
+        ),
       ),
     findFirstOverflowingEdgeAndCheckPoint:
       () => (checkPoints: Vtree.RenderedNodeContext[]) => {
@@ -1246,14 +1406,18 @@ export function asLegacyColumn(
           ),
         };
       },
-    findEdgeBreakPosition: () => (bp: Layout.EdgeBreakPosition) =>
-      decoratedAs<LegacyNodeContext>(column.findEdgeBreakPosition(bp)),
+    findEdgeBreakPosition: () => (bp: LegacyBreakPosition) =>
+      decoratedAs<LegacyNodeContext>(
+        column.findEdgeBreakPosition(
+          coreBreakPositionOf(bp) as Layout.EdgeBreakPosition,
+        ),
+      ),
     findAcceptableBreakPosition: () => () => {
       const result = column.findAcceptableBreakPosition();
       return result === null
         ? null
         : {
-            ...result,
+            breakPosition: legacyBreakPositionViewOf(result.breakPosition),
             nodeContext: decoratedAs<LegacyNodeContext>(result.nodeContext),
           };
     },
@@ -1334,6 +1498,7 @@ export function asLegacyColumn(
   // Runtime fact outside the type system: see asLegacyLayoutContext.
   const view = projected as LegacyColumn;
   legacyColumns.set(column, view);
+  columnTargets.set(view, column);
   return view;
 }
 
@@ -1369,6 +1534,51 @@ export interface LegacyTextNodeBreaker {
   ): LegacyNodeContext;
 }
 
+export interface LegacyBreakPosition {
+  findAcceptableBreak(
+    column: LegacyColumn,
+    penalty: number,
+  ): LegacyNodeContext | null;
+  getMinBreakPenalty(): number;
+  calculateOffset(column: LegacyColumn): { current: number; minimum: number };
+  breakPositionChosen(column: LegacyColumn): void;
+  getNodeContext?(): LegacyNodeContext | null;
+  position?: LegacyNodeContext;
+  breakNodeContext?: LegacyNodeContext | null;
+  checkPoints?: LegacyRenderedNodeContext[];
+}
+
+export interface LegacyLayoutProcessor {
+  layout(
+    nodeContext: LegacyNodeContext,
+    column: LegacyColumn,
+    leadingEdge: boolean,
+  ): Task.Result<LegacyNodeContext | null>;
+  createEdgeBreakPosition(
+    position: LegacyNodeContext,
+    breakOnEdge: string | null,
+    overflows: boolean,
+    columnBlockSize: number,
+  ): LegacyBreakPosition;
+  startNonInlineElementNode(nodeContext: LegacyNodeContext): boolean;
+  afterNonInlineElementNode(
+    nodeContext: LegacyNodeContext,
+    stopAtOverflow: boolean,
+  ): boolean;
+  finishBreak(
+    column: LegacyColumn,
+    nodeContext: LegacyNodeContext,
+    forceRemoveSelf: boolean,
+    endOfColumn: boolean,
+  ): Task.Result<boolean>;
+  clearOverflownViewNodes(
+    column: LegacyColumn,
+    parentNodeContext: LegacyNodeContext | null,
+    nodeContext: LegacyNodeContext,
+    removeSelf: boolean,
+  );
+}
+
 function kindOfLegacy(nodeContext: LegacyNodeContext): Vtree.NodeContextKind {
   const viewNode = nodeContext.viewNode;
   if (viewNode === null) {
@@ -1380,6 +1590,12 @@ function kindOfLegacy(nodeContext: LegacyNodeContext): Vtree.NodeContextKind {
   return nodeContext.after ? "after-text" : "text";
 }
 
+function retagLegacyValue(nodeContext: LegacyNodeContext): void {
+  setLegacyKind(nodeContext, kindOfLegacy(nodeContext));
+}
+
+const handedOut = new Set<Vtree.NodeContext>();
+
 /**
  * @deprecated Give a value coming back from a legacy implementation the
  * discriminant its own fields imply, and hand it to the core as itself.
@@ -1390,7 +1606,7 @@ export function normalizeLegacyNodeContext(
   if (!nodeContext) {
     return null;
   }
-  setLegacyKind(nodeContext, kindOfLegacy(nodeContext));
+  retagLegacyValue(nodeContext);
   return coreOf(nodeContext);
 }
 
@@ -1494,6 +1710,155 @@ export function adaptLegacyTextNodeBreaker(
   return adapted;
 }
 
+const adaptedBreakPositions = new WeakMap<
+  LegacyBreakPosition,
+  Layout.BreakPosition
+>();
+
+function adaptLegacyBreakPosition(
+  legacy: LegacyBreakPosition,
+): Layout.BreakPosition {
+  const core = coreBreakPositions.get(legacy);
+  if (core) {
+    return core;
+  }
+  const cached = adaptedBreakPositions.get(legacy);
+  if (cached) {
+    return cached;
+  }
+  const adapted: Layout.BreakPosition = {
+    findAcceptableBreak(
+      column: Layout.Column,
+      penalty: number,
+    ): Vtree.NodeContext | null {
+      return normalizeLegacyNodeContext(
+        legacy.findAcceptableBreak(legacyColumnViewOf(column), penalty),
+      );
+    },
+    getMinBreakPenalty(): number {
+      return legacy.getMinBreakPenalty();
+    },
+    calculateOffset(column: Layout.Column): {
+      current: number;
+      minimum: number;
+    } {
+      return legacy.calculateOffset(legacyColumnViewOf(column));
+    },
+    breakPositionChosen(column: Layout.Column): void {
+      legacy.breakPositionChosen(legacyColumnViewOf(column));
+    },
+  };
+  adaptedBreakPositions.set(legacy, adapted);
+  legacyOfAdaptedBreakPositions.set(adapted, legacy);
+  return adapted;
+}
+
+const adaptedLayoutProcessors = new WeakMap<
+  LegacyLayoutProcessor,
+  LayoutProcessor
+>();
+
+export function adaptLegacyLayoutProcessor(
+  hook: (...p1) => any,
+  legacy: LegacyLayoutProcessor,
+): LayoutProcessor {
+  if (Plugin.isCoreHook(hook)) {
+    return legacy as unknown as LayoutProcessor;
+  }
+  const cached = adaptedLayoutProcessors.get(legacy);
+  if (cached) {
+    return cached;
+  }
+  const adapted: LayoutProcessor = {
+    layout(
+      nodeContext: Vtree.NodeContext,
+      column: Layout.Column,
+      leadingEdge: boolean,
+    ): Task.Result<Vtree.NodeContext | null> {
+      const legacyNodeContext = decorated(nodeContext);
+      return legacy
+        .layout(legacyNodeContext, legacyColumnViewOf(column), leadingEdge)
+        .thenAsync((result) => {
+          normalizeLegacyNodeContext(legacyNodeContext);
+          return Task.newResult(normalizeLegacyNodeContext(result));
+        });
+    },
+    createEdgeBreakPosition(
+      position: Vtree.NodeContext,
+      breakOnEdge: string | null,
+      overflows: boolean,
+      columnBlockSize: number,
+    ): Layout.BreakPosition {
+      const legacyPosition = decorated(position);
+      const breakPosition = legacy.createEdgeBreakPosition(
+        legacyPosition,
+        breakOnEdge,
+        overflows,
+        columnBlockSize,
+      );
+      normalizeLegacyNodeContext(legacyPosition);
+      return adaptLegacyBreakPosition(breakPosition);
+    },
+    startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
+      const legacyNodeContext = decorated(nodeContext);
+      const skipped = legacy.startNonInlineElementNode(legacyNodeContext);
+      normalizeLegacyNodeContext(legacyNodeContext);
+      return skipped;
+    },
+    afterNonInlineElementNode(
+      nodeContext: Vtree.NodeContext,
+      stopAtOverflow: boolean,
+    ): boolean {
+      const legacyNodeContext = decorated(nodeContext);
+      const skipped = legacy.afterNonInlineElementNode(
+        legacyNodeContext,
+        stopAtOverflow,
+      );
+      normalizeLegacyNodeContext(legacyNodeContext);
+      return skipped;
+    },
+    finishBreak(
+      column: Layout.Column,
+      nodeContext: Vtree.NodeContext,
+      forceRemoveSelf: boolean,
+      endOfColumn: boolean,
+    ): Task.Result<boolean> {
+      const legacyNodeContext = decorated(nodeContext);
+      return legacy
+        .finishBreak(
+          legacyColumnViewOf(column),
+          legacyNodeContext,
+          forceRemoveSelf,
+          endOfColumn,
+        )
+        .thenAsync((result) => {
+          normalizeLegacyNodeContext(legacyNodeContext);
+          return Task.newResult(result);
+        });
+    },
+    clearOverflownViewNodes(
+      column: Layout.Column,
+      parentNodeContext: Vtree.NodeContext | null,
+      nodeContext: Vtree.NodeContext,
+      removeSelf: boolean,
+    ) {
+      const legacyParentNodeContext =
+        parentNodeContext === null ? null : decorated(parentNodeContext);
+      const legacyNodeContext = decorated(nodeContext);
+      legacy.clearOverflownViewNodes(
+        legacyColumnViewOf(column),
+        legacyParentNodeContext,
+        legacyNodeContext,
+        removeSelf,
+      );
+      normalizeLegacyNodeContext(legacyParentNodeContext);
+      normalizeLegacyNodeContext(legacyNodeContext);
+    },
+  };
+  adaptedLayoutProcessors.set(legacy, adapted);
+  return adapted;
+}
+
 function decoratedCheckPoints(
   checkPoints: Vtree.RenderedNodeContext[],
 ): LegacyRenderedNodeContext[] {
@@ -1502,6 +1867,17 @@ function decoratedCheckPoints(
   }
   // Same array, same elements: see coreOf.
   return checkPoints as unknown as LegacyRenderedNodeContext[];
+}
+
+function retaggedCheckPoints(
+  checkPoints: Vtree.RenderedNodeContext[],
+): LegacyRenderedNodeContext[] {
+  const legacy = decoratedCheckPoints(checkPoints);
+  for (const checkPoint of legacy) {
+    retagLegacyValue(checkPoint);
+    handedOut.add(coreOf(checkPoint));
+  }
+  return legacy;
 }
 
 /**
