@@ -68,6 +68,44 @@ describe("legacy-plugin-surface", function () {
       expect(vivliostyle_plugin.isCoreHook(registered[1])).toBe(true);
       vivliostyle_plugin.removeHook(name, external);
     });
+
+    it("adapts the results of a processor hook registered at the first", function () {
+      var external = function () {};
+      var name = "RESOLVE_LAYOUT_PROCESSOR";
+      vivliostyle_plugin.registerHook(name, external, true);
+      var registered = vivliostyle_plugin.getHooksForName(name);
+      var legacyProcessor = {};
+      var formattingContext = { isFirstTime: function () {} };
+      expect(
+        vivliostyle_legacy.adaptLegacyLayoutProcessor(
+          registered[0],
+          legacyProcessor,
+        ),
+      ).not.toBe(legacyProcessor);
+      expect(
+        vivliostyle_legacy.adaptLegacyLayoutProcessor(
+          registered[1],
+          legacyProcessor,
+        ),
+      ).toBe(legacyProcessor);
+      vivliostyle_plugin.removeHook(name, external);
+      vivliostyle_plugin.registerHook(
+        "RESOLVE_FORMATTING_CONTEXT",
+        external,
+        true,
+      );
+      var formattingHooks = vivliostyle_plugin.getHooksForName(
+        "RESOLVE_FORMATTING_CONTEXT",
+      );
+      vivliostyle_legacy.adaptLegacyFormattingContext(
+        formattingHooks[0],
+        formattingContext,
+      );
+      expect(
+        Object.prototype.hasOwnProperty.call(formattingContext, "isFirstTime"),
+      ).toBe(true);
+      vivliostyle_plugin.removeHook("RESOLVE_FORMATTING_CONTEXT", external);
+    });
   });
 
   describe("noteRetained", function () {

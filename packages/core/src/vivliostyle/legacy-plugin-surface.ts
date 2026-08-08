@@ -459,6 +459,7 @@ export function captureRenderFields(
 }
 
 export function applyLegacyRenderWrites(
+  hooks: readonly ((...p1) => any)[],
   before: RenderFields | null,
   nodeContext: LegacyNodeContext,
   rendered: NodeContext.ElementRenderDraft,
@@ -466,11 +467,16 @@ export function applyLegacyRenderWrites(
   if (!before) {
     return {};
   }
+  const adapts = hooks.some((hook) => !Plugin.isCoreHook(hook));
   const source = nodeContext as unknown as RenderFields;
   const draft = rendered as unknown as RenderFields;
   for (const field of renderFieldsOf()) {
     if (source[field] !== before[field]) {
-      draft[field] = source[field];
+      const written = source[field];
+      draft[field] =
+        field === "formattingContext" && written && adapts
+          ? adaptFormattingContext(written as Vtree.FormattingContext)
+          : written;
     }
   }
   const written: RenderFields = {};
@@ -1548,6 +1554,14 @@ export interface LegacyBreakPosition {
   checkPoints?: LegacyRenderedNodeContext[];
 }
 
+export interface LegacyFormattingContext extends Omit<
+  Vtree.FormattingContext,
+  "isFirstTime" | "getParent"
+> {
+  isFirstTime(nodeContext: LegacyNodeContext, firstTime: boolean): boolean;
+  getParent(): LegacyFormattingContext | null;
+}
+
 export interface LegacyLayoutProcessor {
   layout(
     nodeContext: LegacyNodeContext,
@@ -1751,6 +1765,88 @@ function adaptLegacyBreakPosition(
   adaptedBreakPositions.set(legacy, adapted);
   legacyOfAdaptedBreakPositions.set(adapted, legacy);
   return adapted;
+}
+
+const adaptedFormattingContexts = new WeakSet<Vtree.FormattingContext>();
+
+function acceptsFirstTimeReplacement(
+  formattingContext: Vtree.FormattingContext,
+): boolean {
+  const target = formattingContext as unknown as object;
+  for (
+    let owner: object | null = target;
+    owner;
+    owner = Object.getPrototypeOf(owner)
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(owner, "isFirstTime");
+    if (!descriptor) {
+      continue;
+    }
+    if (descriptor.writable !== true) {
+      return false;
+    }
+    return owner === target || Object.isExtensible(target);
+  }
+  return Object.isExtensible(target);
+}
+
+function adaptFormattingContext(
+  formattingContext: Vtree.FormattingContext,
+): Vtree.FormattingContext {
+  if (
+    adaptedFormattingContexts.has(formattingContext) ||
+    !acceptsFirstTimeReplacement(formattingContext)
+  ) {
+    return formattingContext;
+  }
+  adaptedFormattingContexts.add(formattingContext);
+  const isFirstTime = formattingContext.isFirstTime;
+  formattingContext.isFirstTime = (
+    nodeContext: Vtree.NodeContext,
+    firstTime: boolean,
+  ): boolean => {
+    decorate(nodeContext);
+    return isFirstTime.call(formattingContext, nodeContext, firstTime);
+  };
+  return formattingContext;
+}
+
+export function adaptLegacyFormattingContext(
+  hook: (...p1) => any,
+  formattingContext: LegacyFormattingContext,
+): Vtree.FormattingContext {
+  const core = formattingContext as unknown as Vtree.FormattingContext;
+  return Plugin.isCoreHook(hook) ? core : adaptFormattingContext(core);
+}
+
+export function legacyFirstTime(
+  formattingContext: Vtree.FormattingContext,
+  nodeContext: Vtree.NodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+  firstTime: boolean,
+): { firstTime: boolean; nodeContext: Vtree.NodeContext } {
+  const hook = Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT;
+  const legacy = asLegacyRenderContext(
+    hook,
+    nodeContext,
+    NodeContext.elementRenderProgress(nodeContext, rendered),
+    rendered,
+  );
+  const before = captureRenderFields(hook, legacy);
+  const resolved = formattingContext.isFirstTime(coreOf(legacy), firstTime);
+  normalizeLegacyNodeContext(legacy);
+  return {
+    firstTime: resolved,
+    nodeContext: withLegacyContextWrites(
+      nodeContext,
+      applyLegacyRenderWrites(
+        Plugin.getHooksForName(hook),
+        before,
+        legacy,
+        rendered,
+      ),
+    ),
+  };
 }
 
 const adaptedLayoutProcessors = new WeakMap<

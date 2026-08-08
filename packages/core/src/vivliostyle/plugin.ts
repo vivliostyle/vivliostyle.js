@@ -24,6 +24,7 @@ import * as Task from "./task";
 import { Layout, Vtree } from "./types";
 import type {
   LegacyColumn,
+  LegacyFormattingContext,
   LegacyLayoutProcessor,
   LegacyNodeContext,
   LegacyRenderedNodeContext,
@@ -185,7 +186,7 @@ export type ResolveFormattingContextHook = (
   p4: Css.Ident | null | undefined,
   p5: Css.Val | null | undefined,
   p6: boolean,
-) => Vtree.FormattingContext;
+) => LegacyFormattingContext;
 
 export type ResolveLayoutProcessorHook = (
   p1: Vtree.FormattingContext,

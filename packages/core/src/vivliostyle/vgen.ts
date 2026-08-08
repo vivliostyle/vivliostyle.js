@@ -1233,11 +1233,16 @@ export class ViewFactory
       );
       if (formattingContext) {
         const resolvedWrites = LegacyPluginSurface.applyLegacyRenderWrites(
+          hooks.slice(0, i + 1),
           beforeHooks,
           legacyInProgress,
           rendered,
         );
-        rendered.formattingContext = formattingContext;
+        rendered.formattingContext =
+          LegacyPluginSurface.adaptLegacyFormattingContext(
+            hooks[i],
+            formattingContext,
+          );
         return LegacyPluginSurface.withLegacyContextWrites(
           nodeContext,
           resolvedWrites,
@@ -1245,6 +1250,7 @@ export class ViewFactory
       }
     }
     const writes = LegacyPluginSurface.applyLegacyRenderWrites(
+      hooks,
       beforeHooks,
       legacyInProgress,
       rendered,
@@ -1864,10 +1870,14 @@ export class ViewFactory
         isRoot,
       );
       if (nodeContext.parent) {
-        firstTime = nodeContext.parent.formattingContext.isFirstTime(
-          NodeContext.elementRenderProgress(nodeContext, rendered),
+        const resolved = LegacyPluginSurface.legacyFirstTime(
+          nodeContext.parent.formattingContext,
+          nodeContext,
+          rendered,
           firstTime,
         );
+        firstTime = resolved.firstTime;
+        nodeContext = resolved.nodeContext;
       }
       if (!rendered.inline) {
         rendered.repeatOnBreak = this.processRepeatOnBreak(computedStyle);
@@ -2814,6 +2824,7 @@ export class ViewFactory
       hook(legacyNodeContext, computedStyle);
     });
     const writes = LegacyPluginSurface.applyLegacyRenderWrites(
+      hooks,
       beforeHooks,
       legacyNodeContext,
       rendered,
