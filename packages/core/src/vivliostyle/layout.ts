@@ -2766,7 +2766,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           Plugin.HOOKS.POST_LAYOUT_BLOCK,
           checkPoints,
         ),
-        this,
+        LegacyPluginSurface.asLegacyColumn(
+          Plugin.HOOKS.POST_LAYOUT_BLOCK,
+          this,
+        ),
       );
     });
   }

@@ -25,6 +25,7 @@ import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
 import * as Plugin from "./plugin";
+import * as Task from "./task";
 import { Layout, PageFloats, Selectors, Vtree } from "./types";
 
 /**
@@ -401,6 +402,164 @@ export function asLegacyNodeContextOrNull(
   nodeContext: Vtree.NodeContext | null,
 ): LegacyNodeContext | null {
   return nodeContext === null ? null : asLegacyNodeContext(hook, nodeContext);
+}
+
+/**
+ * @deprecated Base-compatible layout context contract. `setCurrent` reported
+ * only whether children should be processed, and the caller kept using the
+ * node context it had passed in.
+ */
+export type LegacyLayoutContext = Omit<Vtree.LayoutContext, "setCurrent"> & {
+  setCurrent(
+    nodeContext: LegacyNodeContext,
+    firstTime: boolean,
+    atUnforcedBreak?: boolean,
+  ): Task.Result<boolean>;
+};
+
+/**
+ * @deprecated Base-compatible column contract.
+ */
+export type LegacyColumn = Omit<
+  Layout.Column,
+  | "checkOverflowAndSaveEdge"
+  | "applyClearance"
+  | "processLineStyling"
+  | "layoutContext"
+> & {
+  checkOverflowAndSaveEdge(
+    nodeContext: LegacyNodeContext | null,
+    trailingEdgeContexts: LegacyNodeContext[] | null,
+  ): boolean;
+  applyClearance(nodeContext: LegacyRenderedNodeContext): boolean;
+  processLineStyling(
+    nodeContext: LegacyNodeContext,
+    resNodeContext: LegacyNodeContext | null,
+    checkPoints: LegacyRenderedNodeContext[],
+  ): Task.Result<LegacyNodeContext | null>;
+  layoutContext: LegacyLayoutContext;
+};
+
+type LegacyProjections = { [name: string]: () => unknown };
+
+function projectedMemberOf(
+  target: object,
+  bound: Map<string | symbol, unknown>,
+  projections: LegacyProjections,
+  property: string | symbol,
+): unknown {
+  const projection =
+    typeof property === "string" ? projections[property] : undefined;
+  if (projection) {
+    return projection();
+  }
+  const cached = bound.get(property);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const member = Reflect.get(target, property, target);
+  if (typeof member !== "function") {
+    return member;
+  }
+  // The view must not become the receiver of core methods: a core method that
+  // reaches another one through `this` would otherwise read the projection.
+  const boundMember = member.bind(target);
+  bound.set(property, boundMember);
+  return boundMember;
+}
+
+function legacyViewOfObject<T extends object>(
+  target: T,
+  projections: LegacyProjections,
+): object {
+  const bound = new Map<string | symbol, unknown>();
+  return new Proxy(target, {
+    get: (t, property) => projectedMemberOf(t, bound, projections, property),
+    set: (t, property, value) => Reflect.set(t, property, value, t),
+  });
+}
+
+const legacyLayoutContexts = new WeakMap<
+  Vtree.LayoutContext,
+  LegacyLayoutContext
+>();
+
+/**
+ * @deprecated Serve a layout context under the base contract.
+ */
+export function asLegacyLayoutContext(
+  layoutContext: Vtree.LayoutContext,
+): LegacyLayoutContext {
+  const cached = legacyLayoutContexts.get(layoutContext);
+  if (cached) {
+    return cached;
+  }
+  const projected = legacyViewOfObject(layoutContext, {
+    setCurrent:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        firstTime: boolean,
+        atUnforcedBreak?: boolean,
+      ) =>
+        layoutContext
+          .setCurrent(nodeContext, firstTime, atUnforcedBreak)
+          .thenAsync((result) => Task.newResult(result.processChildren)),
+  });
+  // Runtime fact outside the type system: the proxy answers every member of
+  // the base contract, projecting the ones whose result type changed.
+  const view = projected as LegacyLayoutContext;
+  legacyLayoutContexts.set(layoutContext, view);
+  return view;
+}
+
+const legacyColumns = new WeakMap<Layout.Column, LegacyColumn>();
+
+/**
+ * @deprecated Serve a column under the base contract. While no external hook
+ * is registered the column itself is handed over: the core's own hooks read
+ * only members the two contracts share.
+ */
+export function asLegacyColumn(
+  hook: string,
+  column: Layout.Column,
+): LegacyColumn {
+  if (!legacySurfaceActive(hook)) {
+    // Runtime fact outside the type system: no reader of the base contract
+    // exists, so no projection is needed.
+    return column as unknown as LegacyColumn;
+  }
+  const cached = legacyColumns.get(column);
+  if (cached) {
+    return cached;
+  }
+  const projected = legacyViewOfObject(column, {
+    checkOverflowAndSaveEdge:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext | null,
+        trailingEdgeContexts: Vtree.NodeContext[] | null,
+      ) =>
+        column.checkOverflowAndSaveEdge(nodeContext, trailingEdgeContexts)
+          .overflown,
+    applyClearance: () => (nodeContext: Vtree.RenderedNodeContext) =>
+      column.applyClearance(nodeContext) !== null,
+    processLineStyling:
+      () =>
+      (
+        nodeContext: Vtree.NodeContext,
+        resNodeContext: Vtree.NodeContext | null,
+        checkPoints: Vtree.RenderedNodeContext[],
+      ) =>
+        column
+          .processLineStyling(nodeContext, resNodeContext, checkPoints)
+          .thenAsync((result) => Task.newResult(result.nodeContext)),
+    layoutContext: () => asLegacyLayoutContext(column.layoutContext),
+  });
+  // Runtime fact outside the type system: see asLegacyLayoutContext.
+  const view = projected as LegacyColumn;
+  legacyColumns.set(column, view);
+  return view;
 }
 
 /**

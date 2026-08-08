@@ -24,6 +24,7 @@ import * as Logging from "./logging";
 import * as Task from "./task";
 import { Layout, Vtree } from "./types";
 import type {
+  LegacyColumn,
   LegacyNodeContext,
   LegacyRenderedNodeContext,
   LegacyTextNodeBreaker,
@@ -193,7 +194,7 @@ export type ResolveLayoutProcessorHook = (
 export type PostLayoutBlockHook = (
   p1: LegacyNodeContext | null,
   p2: LegacyRenderedNodeContext[],
-  p3: Layout.Column,
+  p3: LegacyColumn,
 ) => void;
 
 export type PaginationProgressHook = (p1: {
