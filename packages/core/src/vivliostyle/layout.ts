@@ -35,6 +35,7 @@ import * as Css from "./css";
 import * as GeometryUtil from "./geometry-util";
 import * as LayoutHelper from "./layout-helper";
 import * as LayoutProcessor from "./layout-processor";
+import * as LegacyPluginSurface from "./legacy-plugin-surface";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as Matchers from "./matchers";
@@ -2751,7 +2752,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
     );
     hooks.forEach((hook) => {
-      hook(nodeContext, checkPoints, this);
+      hook(
+        LegacyPluginSurface.asLegacyNodeContextOrNull(
+          Plugin.HOOKS.POST_LAYOUT_BLOCK,
+          nodeContext,
+        ),
+        LegacyPluginSurface.asLegacyRenderedNodeContexts(
+          Plugin.HOOKS.POST_LAYOUT_BLOCK,
+          checkPoints,
+        ),
+        this,
+      );
     });
   }
 

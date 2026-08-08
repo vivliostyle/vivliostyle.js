@@ -734,7 +734,7 @@ export function positionChainOf<T extends Vtree.NodeContext>(
   };
 }
 
-function toNodePositionStep(
+export function toNodePositionStep(
   nodeContext: Vtree.NodeContext,
 ): Vtree.NodePositionStep {
   return {

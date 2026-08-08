@@ -179,4 +179,29 @@ export default [
       "prettier/prettier": "warn",
     },
   },
+  {
+    files: ["src/**/*.ts"],
+
+    ignores: [
+      "src/vivliostyle/legacy-plugin-surface.ts",
+      "src/vivliostyle/layout.ts",
+      "src/vivliostyle/plugin.ts",
+      "src/vivliostyle/vgen.ts",
+    ],
+
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["./legacy-plugin-surface", "**/legacy-plugin-surface"],
+              message:
+                "legacy-plugin-surface is the deprecated plugin compatibility layer; only the hook boundaries in vgen.ts, layout.ts and plugin.ts may import it.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
