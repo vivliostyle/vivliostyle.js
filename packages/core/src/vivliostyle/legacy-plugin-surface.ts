@@ -25,7 +25,7 @@ import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
 import * as Plugin from "./plugin";
-import { PageFloats, Selectors, Vtree } from "./types";
+import { Layout, PageFloats, Selectors, Vtree } from "./types";
 
 /**
  * @deprecated Flat mutable view of a node context. Use `Vtree.NodeContext`.
@@ -404,6 +404,151 @@ export function asLegacyNodeContextOrNull(
 }
 
 /**
+ * @deprecated Base-compatible text node breaker contract. Implementations are
+ * handed to the core through `adaptLegacyTextNodeBreaker`.
+ */
+export interface LegacyTextNodeBreaker {
+  breakTextNode(
+    textNode: Text,
+    nodeContext: LegacyNodeContext,
+    low: number,
+    checkPoints: LegacyRenderedNodeContext[],
+    checkpointIndex: number,
+    force: boolean,
+  ): LegacyNodeContext;
+  breakAfterSoftHyphen(
+    textNode: Text,
+    text: string,
+    viewIndex: number,
+    nodeContext: LegacyNodeContext,
+  ): number;
+  breakAfterOtherCharacter(
+    textNode: Text,
+    text: string,
+    viewIndex: number,
+    nodeContext: LegacyNodeContext,
+  ): number;
+  updateNodeContext(
+    nodeContext: LegacyNodeContext,
+    viewIndex: number,
+    textNode: Text,
+  ): LegacyNodeContext;
+}
+
+function kindOfLegacy(nodeContext: LegacyNodeContext): Vtree.NodeContextKind {
+  const viewNode = nodeContext.viewNode;
+  if (viewNode === null) {
+    return nodeContext.after ? "after-none" : "open";
+  }
+  if (viewNode.nodeType === 1) {
+    return nodeContext.after ? "after-element" : "element";
+  }
+  return nodeContext.after ? "after-text" : "text";
+}
+
+/**
+ * @deprecated Give a value coming back from a legacy implementation the
+ * discriminant its own fields imply, and hand it to the core as itself.
+ */
+export function normalizeLegacyNodeContext(
+  nodeContext: LegacyNodeContext,
+): Vtree.NodeContext {
+  setLegacyKind(nodeContext, kindOfLegacy(nodeContext));
+  return coreOf(nodeContext);
+}
+
+const adaptedTextNodeBreakers = new WeakMap<
+  LegacyTextNodeBreaker,
+  Layout.TextNodeBreaker
+>();
+
+/**
+ * @deprecated Serve a legacy text node breaker under the current contract.
+ * `breakAfterSoftHyphen` returned only the view index, and the caller kept
+ * using the node context it had passed in, so that value is what the bridge
+ * reports back.
+ */
+export function adaptLegacyTextNodeBreaker(
+  legacy: LegacyTextNodeBreaker,
+): Layout.TextNodeBreaker {
+  const cached = adaptedTextNodeBreakers.get(legacy);
+  if (cached) {
+    return cached;
+  }
+  const adapted: Layout.TextNodeBreaker = {
+    breakTextNode(
+      textNode: Text,
+      nodeContext: Vtree.NodeContext,
+      low: number,
+      checkPoints: Vtree.RenderedNodeContext[],
+      checkpointIndex: number,
+      force: boolean,
+    ): Vtree.NodeContext {
+      return normalizeLegacyNodeContext(
+        legacy.breakTextNode(
+          textNode,
+          decorated(nodeContext),
+          low,
+          decoratedCheckPoints(checkPoints),
+          checkpointIndex,
+          force,
+        ),
+      );
+    },
+    breakAfterSoftHyphen(
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: Vtree.NodeContext,
+    ): { viewIndex: number; nodeContext: Vtree.NodeContext } {
+      return {
+        viewIndex: legacy.breakAfterSoftHyphen(
+          textNode,
+          text,
+          viewIndex,
+          decorated(nodeContext),
+        ),
+        nodeContext,
+      };
+    },
+    breakAfterOtherCharacter(
+      textNode: Text,
+      text: string,
+      viewIndex: number,
+      nodeContext: Vtree.NodeContext,
+    ): number {
+      return legacy.breakAfterOtherCharacter(
+        textNode,
+        text,
+        viewIndex,
+        decorated(nodeContext),
+      );
+    },
+    updateNodeContext(
+      nodeContext: Vtree.NodeContext,
+      viewIndex: number,
+      textNode: Text,
+    ): Vtree.NodeContext {
+      return normalizeLegacyNodeContext(
+        legacy.updateNodeContext(decorated(nodeContext), viewIndex, textNode),
+      );
+    },
+  };
+  adaptedTextNodeBreakers.set(legacy, adapted);
+  return adapted;
+}
+
+function decoratedCheckPoints(
+  checkPoints: Vtree.RenderedNodeContext[],
+): LegacyRenderedNodeContext[] {
+  for (const checkPoint of checkPoints) {
+    decorate(checkPoint);
+  }
+  // Same array, same elements: see coreOf.
+  return checkPoints as unknown as LegacyRenderedNodeContext[];
+}
+
+/**
  * @deprecated `asLegacyNodeContext` for checkpoint arrays. The array itself is
  * returned so that its identity and its elements' identities are preserved.
  */
@@ -411,11 +556,9 @@ export function asLegacyRenderedNodeContexts(
   hook: string,
   checkPoints: Vtree.RenderedNodeContext[],
 ): LegacyRenderedNodeContext[] {
-  if (legacySurfaceActive(hook)) {
-    for (const checkPoint of checkPoints) {
-      decorate(checkPoint);
-    }
+  if (!legacySurfaceActive(hook)) {
+    // Same array, same elements: see coreOf.
+    return checkPoints as unknown as LegacyRenderedNodeContext[];
   }
-  // Same array, same elements: see coreOf.
-  return checkPoints as unknown as LegacyRenderedNodeContext[];
+  return decoratedCheckPoints(checkPoints);
 }

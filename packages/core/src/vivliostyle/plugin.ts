@@ -26,6 +26,7 @@ import { Layout, Vtree } from "./types";
 import type {
   LegacyNodeContext,
   LegacyRenderedNodeContext,
+  LegacyTextNodeBreaker,
 } from "./legacy-plugin-surface";
 
 /**
@@ -173,8 +174,8 @@ export type ConfigurationHook = (p1: Base.JSON) => {
 };
 
 export type ResolveTextNodeBreakerHook = (
-  p1: Vtree.NodeContext,
-) => Layout.TextNodeBreaker;
+  p1: LegacyNodeContext,
+) => LegacyTextNodeBreaker;
 
 export type ResolveFormattingContextHook = (
   p1: LegacyNodeContext,
