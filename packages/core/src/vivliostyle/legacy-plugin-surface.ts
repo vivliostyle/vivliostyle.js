@@ -25,6 +25,7 @@
  * for, and an assignment to a projected member stays inside the view. Core code
  * must use `Vtree.NodeContext` and `node-context.ts`.
  */
+import * as Break from "./break";
 import * as Css from "./css";
 import * as Diff from "./diff";
 import * as NodeContext from "./node-context";
@@ -345,18 +346,179 @@ function isDecorated(nodeContext: Vtree.NodeContext): boolean {
 
 function decorate(nodeContext: Vtree.NodeContext): void {
   for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
+    reportSuppressedBreaks(nc);
     if (!isDecorated(nc)) {
       // The core builds node contexts as plain object literals, so the legacy
       // prototype cannot shadow any own field of the value.
       Object.setPrototypeOf(nc, legacyPrototype);
     }
-    if (nc.shadowSibling && !isDecorated(nc.shadowSibling)) {
-      decorate(nc.shadowSibling);
+    if (nc.shadowSibling) {
+      reportSuppressedBreaks(nc.shadowSibling);
+      if (!isDecorated(nc.shadowSibling)) {
+        decorate(nc.shadowSibling);
+      }
     }
     if (nc.blockContainer && !isDecorated(nc.blockContainer)) {
       decorate(nc.blockContainer);
     }
   }
+}
+
+function reportSuppressedBreaks(nodeContext: Vtree.NodeContext): void {
+  // Suppression used to null the field itself; the core now composes it with
+  // the registry, so writing the composed value back is a no-op for the core
+  // and restores what a plugin used to read.
+  const writable = nodeContext as unknown as {
+    breakBefore: string | null;
+    breakAfter: string | null;
+  };
+  writable.breakBefore = Break.reportEffectiveBreakBefore(nodeContext);
+  writable.breakAfter = Break.reportEffectiveBreakAfter(nodeContext);
+}
+
+let renderFields: readonly string[] | null = null;
+
+function renderFieldsOf(): readonly string[] {
+  if (!renderFields) {
+    renderFields = Object.keys(
+      NodeContext.elementRenderResultOf({} as unknown as Vtree.NodeContext),
+    );
+  }
+  return renderFields;
+}
+
+const CONTEXT_FIELDS: readonly string[] = [
+  "offsetInNode",
+  "after",
+  "shadowType",
+  "shadowContext",
+  "shadowSibling",
+  "overflow",
+  "viewNode",
+  "clearSpacer",
+  "preprocessedTextContent",
+  "pluginProps",
+  "fragmentIndex",
+  "sourceNode",
+  "parent",
+  "blockContainer",
+  "boxOffset",
+];
+
+type RenderFields = { [field: string]: unknown };
+
+export type LegacyContextWrites = { readonly [field: string]: unknown };
+
+const retainedWrites = new WeakSet<LegacyContextWrites>();
+
+/**
+ * @deprecated Hand out a node context whose rendered style is the draft the
+ * core has built so far, which is what the value carried when it was mutated
+ * in place. Falls back to the value the core hands today while no external
+ * hook is registered.
+ */
+export function asLegacyRenderContext(
+  hook: string,
+  nodeContext: Vtree.NodeContext,
+  progress: Vtree.NodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+): LegacyNodeContext {
+  if (!legacySurfaceActive(hook)) {
+    return legacyViewOf(progress);
+  }
+  // Runtime fact outside the type system: the draft holds the rendered style
+  // of this very position, so overlaying it cannot contradict the variant.
+  const overlaid = {
+    ...progress,
+    ...rendered,
+  } as unknown as Vtree.NodeContext;
+  if (retained.has(nodeContext)) {
+    retained.add(overlaid);
+  }
+  return decorated(overlaid);
+}
+
+export function captureRenderFields(
+  hook: string,
+  nodeContext: LegacyNodeContext,
+): RenderFields | null {
+  if (!legacySurfaceActive(hook)) {
+    return null;
+  }
+  const source = nodeContext as unknown as RenderFields;
+  const snapshot: RenderFields = {};
+  for (const field of renderFieldsOf()) {
+    snapshot[field] = source[field];
+  }
+  for (const field of CONTEXT_FIELDS) {
+    snapshot[field] = source[field];
+  }
+  return snapshot;
+}
+
+export function applyLegacyRenderWrites(
+  before: RenderFields | null,
+  nodeContext: LegacyNodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+): LegacyContextWrites {
+  if (!before) {
+    return {};
+  }
+  const source = nodeContext as unknown as RenderFields;
+  const draft = rendered as unknown as RenderFields;
+  for (const field of renderFieldsOf()) {
+    if (source[field] !== before[field]) {
+      draft[field] = source[field];
+    }
+  }
+  const written: RenderFields = {};
+  for (const field of CONTEXT_FIELDS) {
+    if (source[field] !== before[field]) {
+      written[field] = source[field];
+    }
+  }
+  if (retained.has(coreOf(nodeContext))) {
+    retainedWrites.add(written);
+  }
+  return written;
+}
+
+export function withLegacyContextWrites<T extends Vtree.NodeContext>(
+  nodeContext: T,
+  writes: LegacyContextWrites,
+): T {
+  const claimed = retainedWrites.has(writes);
+  if (Object.keys(writes).length === 0) {
+    if (claimed) {
+      retained.add(nodeContext);
+    }
+    return nodeContext;
+  }
+  const composed = { ...nodeContext, ...writes } as unknown as T;
+  if (claimed) {
+    retained.add(composed);
+  }
+  if ("after" in writes || "viewNode" in writes) {
+    normalizeLegacyNodeContext(legacyViewOf(composed));
+  }
+  return composed;
+}
+
+function applyRenderedNodeContext(
+  nodeContext: Vtree.NodeContext,
+  rendered: Vtree.NodeContext,
+): void {
+  if (rendered !== nodeContext) {
+    const target = nodeContext as unknown as RenderFields;
+    const source = rendered as unknown as RenderFields;
+    for (const field of renderFieldsOf()) {
+      target[field] = source[field];
+    }
+    for (const field of CONTEXT_FIELDS) {
+      target[field] = source[field];
+    }
+  }
+  normalizeLegacyNodeContext(decorated(nodeContext));
 }
 
 function decorated(nodeContext: Vtree.NodeContext): LegacyNodeContext {
@@ -796,7 +958,10 @@ export function asLegacyLayoutContext(
       ) =>
         layoutContext
           .setCurrent(nodeContext, firstTime, atUnforcedBreak)
-          .thenAsync((result) => Task.newResult(result.processChildren)),
+          .thenAsync((result) => {
+            applyRenderedNodeContext(nodeContext, result.nodeContext);
+            return Task.newResult(result.processChildren);
+          }),
     clone: () => () => asLegacyLayoutContext(layoutContext.clone()),
     nextInTree:
       () => (nodeContext: Vtree.NodeContext, atUnforcedBreak?: boolean) =>

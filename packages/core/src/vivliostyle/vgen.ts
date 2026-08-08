@@ -1207,17 +1207,24 @@ export class ViewFactory
     position: Css.Ident | null | undefined,
     float: Css.Val | null | undefined,
     isRoot: boolean,
-  ) {
+  ): Vtree.NodeContext {
     const hooks: Plugin.ResolveFormattingContextHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
     );
     const inProgress = NodeContext.elementRenderProgress(nodeContext, rendered);
+    const legacyInProgress = LegacyPluginSurface.asLegacyRenderContext(
+      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+      nodeContext,
+      inProgress,
+      rendered,
+    );
+    const beforeHooks = LegacyPluginSurface.captureRenderFields(
+      Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+      legacyInProgress,
+    );
     for (let i = 0; i < hooks.length; i++) {
       const formattingContext = hooks[i](
-        LegacyPluginSurface.asLegacyNodeContext(
-          Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
-          inProgress,
-        ),
+        legacyInProgress,
         firstTime,
         display,
         position,
@@ -1225,10 +1232,24 @@ export class ViewFactory
         isRoot,
       );
       if (formattingContext) {
+        const resolvedWrites = LegacyPluginSurface.applyLegacyRenderWrites(
+          beforeHooks,
+          legacyInProgress,
+          rendered,
+        );
         rendered.formattingContext = formattingContext;
-        return;
+        return LegacyPluginSurface.withLegacyContextWrites(
+          nodeContext,
+          resolvedWrites,
+        );
       }
     }
+    const writes = LegacyPluginSurface.applyLegacyRenderWrites(
+      beforeHooks,
+      legacyInProgress,
+      rendered,
+    );
+    return LegacyPluginSurface.withLegacyContextWrites(nodeContext, writes);
   }
 
   /**
@@ -1833,7 +1854,7 @@ export class ViewFactory
       }
 
       // Resolve formatting context
-      this.resolveFormattingContext(
+      nodeContext = this.resolveFormattingContext(
         nodeContext,
         rendered,
         firstTime,
@@ -2363,9 +2384,10 @@ export class ViewFactory
           this.page.fetchers.push(Net.loadElement(result));
         }
 
-        this.preprocessElementStyle(
-          NodeContext.elementRenderProgress(nodeContext, rendered),
+        nodeContext = this.preprocessElementStyle(
+          nodeContext,
           computedStyle,
+          rendered,
         );
         this.applyComputedStyles(result, computedStyle);
 
@@ -2773,19 +2795,30 @@ export class ViewFactory
   private preprocessElementStyle(
     nodeContext: Vtree.NodeContext,
     computedStyle: { [key: string]: Css.Val },
-  ) {
+    rendered: NodeContext.ElementRenderDraft,
+  ): Vtree.NodeContext {
     const hooks: Plugin.PreProcessElementStyleHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
     );
+    const legacyNodeContext = LegacyPluginSurface.asLegacyRenderContext(
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+      nodeContext,
+      NodeContext.elementRenderProgress(nodeContext, rendered),
+      rendered,
+    );
+    const beforeHooks = LegacyPluginSurface.captureRenderFields(
+      Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+      legacyNodeContext,
+    );
     hooks.forEach((hook) => {
-      hook(
-        LegacyPluginSurface.asLegacyNodeContext(
-          Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
-          nodeContext,
-        ),
-        computedStyle,
-      );
+      hook(legacyNodeContext, computedStyle);
     });
+    const writes = LegacyPluginSurface.applyLegacyRenderWrites(
+      beforeHooks,
+      legacyNodeContext,
+      rendered,
+    );
+    return LegacyPluginSurface.withLegacyContextWrites(nodeContext, writes);
   }
 
   private findAndProcessRepeatingElements(
