@@ -5219,7 +5219,6 @@ export const pseudoNames = [
 export enum ParseState {
   TOP,
   SELECTOR,
-  RULE,
 }
 
 //------------- parsing ------------
@@ -5289,14 +5288,12 @@ export class CascadeParserHandler
   elementStyle: ElementStyle = {};
   /** Identity of the declaration block being parsed, for `revert-rule`. */
   ruleId: number = 0;
-  conditionCount: number = 0;
   pseudoelement: string | null = null;
   footnoteContent: boolean = false;
   cascade: Cascade;
   layer: CascadeLayer | null;
   state: ParseState;
   viewConditionId: string | null = null;
-  insideSelectorRule: ParseState | undefined;
   invalid: boolean = false; // for `@supports selector()` check
 
   constructor(
@@ -5627,7 +5624,7 @@ export class CascadeParserHandler
     }
     this.specificity += 256;
     value = value || "";
-    let action;
+    let action: ChainedAction;
     switch (op) {
       case TokenType.EOF:
         action = new CheckAttributePresentAction(ns, name);
@@ -5831,11 +5828,6 @@ export class CascadeParserHandler
     if (this.state == ParseState.SELECTOR) {
       this.state = ParseState.TOP;
     }
-  }
-
-  override endRule(): void {
-    super.endRule();
-    this.insideSelectorRule = ParseState.TOP;
   }
 
   finishChain(): void {
