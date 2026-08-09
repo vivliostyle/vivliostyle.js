@@ -5286,7 +5286,7 @@ export class CascadeParserHandler
   selectorListVoided: boolean = false;
   private pendingChained: CascadeAction[] = [];
   specificity: number = 0;
-  elementStyle: ElementStyle | null = null;
+  elementStyle: ElementStyle = {};
   /** Identity of the declaration block being parsed, for `revert-rule`. */
   ruleId: number = 0;
   conditionCount: number = 0;
@@ -5795,7 +5795,7 @@ export class CascadeParserHandler
       return;
     }
     this.state = ParseState.SELECTOR;
-    this.elementStyle = {} as ElementStyle;
+    this.elementStyle = {};
     this.ruleId = nextRuleId();
     this.pseudoelement = null;
     this.viewConditionId = null;
