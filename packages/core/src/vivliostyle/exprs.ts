@@ -813,7 +813,7 @@ export class Negate extends Prefix {
   }
 
   override evalPrefix(val: Result): Result {
-    return -val;
+    return -Number(val);
   }
 }
 
@@ -885,7 +885,9 @@ export class Lt extends Comparison {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return lhs < rhs;
+    return typeof lhs === "string" && typeof rhs === "string"
+      ? lhs < rhs
+      : Number(lhs) < Number(rhs);
   }
 }
 
@@ -899,7 +901,9 @@ export class Le extends Comparison {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return lhs <= rhs;
+    return typeof lhs === "string" && typeof rhs === "string"
+      ? lhs <= rhs
+      : Number(lhs) <= Number(rhs);
   }
 }
 
@@ -913,7 +917,9 @@ export class Gt extends Comparison {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return lhs > rhs;
+    return typeof lhs === "string" && typeof rhs === "string"
+      ? lhs > rhs
+      : Number(lhs) > Number(rhs);
   }
 }
 
@@ -927,7 +933,9 @@ export class Ge extends Comparison {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return lhs >= rhs;
+    return typeof lhs === "string" && typeof rhs === "string"
+      ? lhs >= rhs
+      : Number(lhs) >= Number(rhs);
   }
 }
 
@@ -969,7 +977,9 @@ export class Add extends Additive {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return (lhs as any) + rhs;
+    return typeof lhs === "string" || typeof rhs === "string"
+      ? `${lhs}${rhs}`
+      : Number(lhs) + Number(rhs);
   }
 }
 
@@ -983,7 +993,7 @@ export class Subtract extends Additive {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return (lhs as any) - (rhs as any);
+    return Number(lhs) - Number(rhs);
   }
 }
 
@@ -997,7 +1007,7 @@ export class Multiply extends Multiplicative {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return (lhs as any) * (rhs as any);
+    return Number(lhs) * Number(rhs);
   }
 }
 
@@ -1011,7 +1021,7 @@ export class Divide extends Multiplicative {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return (lhs as any) / (rhs as any);
+    return Number(lhs) / Number(rhs);
   }
 }
 
@@ -1025,7 +1035,7 @@ export class Modulo extends Multiplicative {
   }
 
   override evalInfix(lhs: Result, rhs: Result): Result {
-    return (lhs as any) % (rhs as any);
+    return Number(lhs) % Number(rhs);
   }
 }
 
