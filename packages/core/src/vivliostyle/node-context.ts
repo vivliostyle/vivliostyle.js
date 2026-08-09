@@ -62,7 +62,7 @@ function derivedFromParent(parent: Vtree.ParentNodeContext | null): Pick<
 }
 
 export function derived<T extends Vtree.NodeContext>(nodeContext: T): T {
-  return { ...nodeContext, ...derivedFromParent(nodeContext.parent) };
+  return { ...nodeContext };
 }
 
 function openCore<P extends Vtree.ParentNodeContext | null>(
@@ -192,6 +192,7 @@ export function openNextSiblingOf<T extends Vtree.NodeContext>(
   const parent = nodeContext.parent;
   return {
     ...nodeContext,
+    ...derivedFromParent(parent),
     ...unstyled,
     kind: "open",
     after: false,

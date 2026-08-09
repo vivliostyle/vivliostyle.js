@@ -234,20 +234,46 @@ describe("node-context", function () {
     });
   });
 
+  describe("derived", function () {
+    it("preserves the fields of the source value", function () {
+      var source = elementNodeContext();
+      source.lang = "ja";
+      source.direction = "rtl";
+      source.inheritedProps = { widows: 3 };
+      var derived = vivliostyle_node_context.derived(source);
+      expect(derived).not.toBe(source);
+      expect(derived.lang).toBe(source.lang);
+      expect(derived.direction).toBe(source.direction);
+      expect(derived.inheritedProps).toBe(source.inheritedProps);
+    });
+  });
+
   describe("openNextSiblingOf", function () {
-    it("keeps the inherited fields the previous sibling carried", function () {
-      var element = elementNodeContext();
+    it("resets inherited fields from the parent", function () {
+      var parent = elementNodeContext();
+      parent.direction = "rtl";
+      parent.inheritedProps = { widows: 3 };
+      var opened = vivliostyle_node_context.openChildOf(
+        document.createElement("div"),
+        parent,
+        1,
+      );
+      var element = vivliostyle_node_context.renderedElement(
+        opened,
+        document.createElement("div"),
+        vivliostyle_node_context.elementRenderResultOf(opened),
+      );
       element.lang = "ja";
-      element.direction = "rtl";
-      element.inheritedProps = { widows: 3 };
+      element.direction = "ltr";
+      element.inheritedProps = { widows: 5 };
       var next = vivliostyle_node_context.openNextSiblingOf(
         element,
         document.createTextNode("text"),
         7,
       );
-      expect(next.lang).toBe("ja");
+      expect(next.lang).toBe(null);
       expect(next.direction).toBe("rtl");
-      expect(next.inheritedProps).toBe(element.inheritedProps);
+      expect(next.inheritedProps).toBe(parent.inheritedProps);
     });
 
     it("opens the sibling on the view the previous one held", function () {
