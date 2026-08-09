@@ -3865,8 +3865,7 @@ export class ViewFactory
       return;
     }
     const computedStyle: { [key: string]: Css.Val } = {};
-    const writable = nodeContext as unknown as { vertical: boolean };
-    writable.vertical = this.computeStyle(
+    this.computeStyle(
       nodeContext.vertical,
       nodeContext.direction === "rtl",
       elementStyle,
