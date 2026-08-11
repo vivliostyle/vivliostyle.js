@@ -236,7 +236,10 @@ export class LayoutIterator {
 }
 
 export class EdgeSkipper extends LayoutIteratorStrategy {
-  constructor(protected readonly leadingEdge?: boolean) {
+  constructor(
+    protected readonly breakSuppressionStore: Break.BreakSuppressionStore,
+    protected readonly leadingEdge?: boolean,
+  ) {
     super();
   }
 
@@ -343,7 +346,7 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
     state.leadingEdgeContexts.push(state.nodeContext);
     state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
       state.breakAtTheEdge,
-      Break.effectiveBreakBefore(state.nodeContext),
+      Break.effectiveBreakBefore(this.breakSuppressionStore, state.nodeContext),
     );
     state.onStartEdges = true;
     return this.startNonInlineBox(state);
@@ -377,7 +380,10 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
         state.lastAfterNodeContext = state.nodeContext;
         state.breakAtTheEdge = Break.resolveEffectiveBreakValue(
           state.breakAtTheEdge,
-          Break.effectiveBreakAfter(state.nodeContext),
+          Break.effectiveBreakAfter(
+            this.breakSuppressionStore,
+            state.nodeContext,
+          ),
         );
       }
       return Task.newResult(true);

@@ -182,55 +182,89 @@ describe("node-context", function () {
   });
 
   describe("continuation", function () {
+    var store;
+
+    beforeEach(function () {
+      store = {
+        continuationOfSlot: new WeakMap(),
+        slotOfContinuation: new WeakMap(),
+      };
+    });
+
     it("keeps the continuation of each slot apart", function () {
       var oneSlot = openedAt(false);
       var otherSlot = openedAt(false);
       var one = vivliostyle_node_context.derived(oneSlot);
       var other = vivliostyle_node_context.derived(otherSlot);
-      vivliostyle_node_context.resumeContinuation(oneSlot, one);
-      vivliostyle_node_context.resumeContinuation(otherSlot, other);
+      vivliostyle_node_context.resumeContinuation(store, oneSlot, one);
+      vivliostyle_node_context.resumeContinuation(store, otherSlot, other);
       var moved = vivliostyle_node_context.derived(one);
-      vivliostyle_node_context.followContinuation(one, moved);
-      expect(vivliostyle_node_context.latestContinuation(oneSlot)).toBe(moved);
-      expect(vivliostyle_node_context.latestContinuation(otherSlot)).toBe(
-        other,
+      vivliostyle_node_context.followContinuation(store, one, moved);
+      expect(vivliostyle_node_context.latestContinuation(store, oneSlot)).toBe(
+        moved,
+      );
+      expect(
+        vivliostyle_node_context.latestContinuation(store, otherSlot),
+      ).toBe(other);
+    });
+
+    it("keeps another document layout at the original slot", function () {
+      var slot = openedAt(false);
+      var resumed = vivliostyle_node_context.derived(slot);
+      var other = {
+        continuationOfSlot: new WeakMap(),
+        slotOfContinuation: new WeakMap(),
+      };
+      vivliostyle_node_context.resumeContinuation(store, slot, resumed);
+      expect(vivliostyle_node_context.latestContinuation(other, slot)).toBe(
+        slot,
       );
     });
 
     it("releases the value a slot no longer continues at", function () {
       var slot = openedAt(false);
       var first = vivliostyle_node_context.derived(slot);
-      vivliostyle_node_context.resumeContinuation(slot, first);
+      vivliostyle_node_context.resumeContinuation(store, slot, first);
       var second = vivliostyle_node_context.derived(slot);
-      vivliostyle_node_context.resumeContinuation(slot, second);
-      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
+      vivliostyle_node_context.resumeContinuation(store, slot, second);
+      expect(vivliostyle_node_context.latestContinuation(store, slot)).toBe(
+        second,
+      );
       var moved = vivliostyle_node_context.derived(first);
-      vivliostyle_node_context.followContinuation(first, moved);
-      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
+      vivliostyle_node_context.followContinuation(store, first, moved);
+      expect(vivliostyle_node_context.latestContinuation(store, slot)).toBe(
+        second,
+      );
     });
 
     it("lets a released value carry the continuation of another slot", function () {
       var slot = openedAt(false);
       var first = vivliostyle_node_context.derived(slot);
-      vivliostyle_node_context.resumeContinuation(slot, first);
+      vivliostyle_node_context.resumeContinuation(store, slot, first);
       var second = vivliostyle_node_context.derived(slot);
-      vivliostyle_node_context.resumeContinuation(slot, second);
+      vivliostyle_node_context.resumeContinuation(store, slot, second);
       var otherSlot = openedAt(false);
-      vivliostyle_node_context.resumeContinuation(otherSlot, first);
+      vivliostyle_node_context.resumeContinuation(store, otherSlot, first);
       var moved = vivliostyle_node_context.derived(first);
-      vivliostyle_node_context.followContinuation(first, moved);
-      expect(vivliostyle_node_context.latestContinuation(otherSlot)).toBe(
-        moved,
+      vivliostyle_node_context.followContinuation(store, first, moved);
+      expect(
+        vivliostyle_node_context.latestContinuation(store, otherSlot),
+      ).toBe(moved);
+      expect(vivliostyle_node_context.latestContinuation(store, slot)).toBe(
+        second,
       );
-      expect(vivliostyle_node_context.latestContinuation(slot)).toBe(second);
     });
 
     it("leaves a value no slot continues at alone", function () {
       var value = openedAt(false);
       var next = vivliostyle_node_context.derived(value);
-      vivliostyle_node_context.followContinuation(value, next);
-      expect(vivliostyle_node_context.latestContinuation(value)).toBe(value);
-      expect(vivliostyle_node_context.latestContinuation(next)).toBe(next);
+      vivliostyle_node_context.followContinuation(store, value, next);
+      expect(vivliostyle_node_context.latestContinuation(store, value)).toBe(
+        value,
+      );
+      expect(vivliostyle_node_context.latestContinuation(store, next)).toBe(
+        next,
+      );
     });
   });
 

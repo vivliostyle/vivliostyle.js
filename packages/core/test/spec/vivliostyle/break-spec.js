@@ -130,6 +130,14 @@ describe("break", function () {
   });
 
   describe("column break suppression", function () {
+    var store;
+
+    beforeEach(function () {
+      store = {
+        breakSuppressionByViewNode: new WeakMap(),
+      };
+    });
+
     function elementNodeContext(viewNode, overrides) {
       var opened = vivliostyle_node_context.openAt(
         document.createElement("div"),
@@ -158,11 +166,27 @@ describe("break", function () {
       var nodeContext = elementNodeContext(viewNode, {
         breakBefore: "column",
       });
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(
+      expect(vivliostyle_break.effectiveBreakBefore(store, nodeContext)).toBe(
         "column",
       );
-      vivliostyle_break.suppressColumnBreakBefore(viewNode);
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(null);
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakBefore(store, nodeContext)).toBe(
+        null,
+      );
+    });
+
+    it("keeps another document layout unsuppressed", function () {
+      var viewNode = document.createElement("div");
+      var nodeContext = elementNodeContext(viewNode, {
+        breakBefore: "column",
+      });
+      var other = {
+        breakSuppressionByViewNode: new WeakMap(),
+      };
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakBefore(other, nodeContext)).toBe(
+        "column",
+      );
     });
 
     it("keeps the suppression a fresh column break before assignment cannot lift", function () {
@@ -170,23 +194,31 @@ describe("break", function () {
       var nodeContext = elementNodeContext(viewNode, {
         breakBefore: "column",
       });
-      vivliostyle_break.suppressColumnBreakBefore(viewNode);
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
       var reassigned = vivliostyle_node_context.setBreakBefore(
         nodeContext,
         "column",
       );
-      expect(vivliostyle_break.effectiveBreakBefore(reassigned)).toBe(null);
-      vivliostyle_break.unsuppressColumnBreakBefore(viewNode);
-      expect(vivliostyle_break.effectiveBreakBefore(reassigned)).toBe("column");
+      expect(vivliostyle_break.effectiveBreakBefore(store, reassigned)).toBe(
+        null,
+      );
+      vivliostyle_break.unsuppressColumnBreakBefore(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakBefore(store, reassigned)).toBe(
+        "column",
+      );
     });
 
     it("lifts the column break after suppression of a view node", function () {
       var viewNode = document.createElement("div");
       var nodeContext = elementNodeContext(viewNode, { breakAfter: "column" });
-      vivliostyle_break.suppressColumnBreakAfter(viewNode);
-      expect(vivliostyle_break.effectiveBreakAfter(nodeContext)).toBe(null);
-      vivliostyle_break.unsuppressColumnBreakAfter(viewNode);
-      expect(vivliostyle_break.effectiveBreakAfter(nodeContext)).toBe("column");
+      vivliostyle_break.suppressColumnBreakAfter(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakAfter(store, nodeContext)).toBe(
+        null,
+      );
+      vivliostyle_break.unsuppressColumnBreakAfter(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakAfter(store, nodeContext)).toBe(
+        "column",
+      );
     });
 
     it("keeps the suppression of the other view nodes", function () {
@@ -196,13 +228,15 @@ describe("break", function () {
         breakBefore: "column",
       });
       var keptContext = elementNodeContext(kept, { breakBefore: "column" });
-      vivliostyle_break.suppressColumnBreakBefore(lifted);
-      vivliostyle_break.suppressColumnBreakBefore(kept);
-      vivliostyle_break.unsuppressColumnBreakBefore(lifted);
-      expect(vivliostyle_break.effectiveBreakBefore(liftedContext)).toBe(
+      vivliostyle_break.suppressColumnBreakBefore(store, lifted);
+      vivliostyle_break.suppressColumnBreakBefore(store, kept);
+      vivliostyle_break.unsuppressColumnBreakBefore(store, lifted);
+      expect(vivliostyle_break.effectiveBreakBefore(store, liftedContext)).toBe(
         "column",
       );
-      expect(vivliostyle_break.effectiveBreakBefore(keptContext)).toBe(null);
+      expect(vivliostyle_break.effectiveBreakBefore(store, keptContext)).toBe(
+        null,
+      );
     });
 
     it("keeps the raw column break recoverable after reporting it", function () {
@@ -211,20 +245,26 @@ describe("break", function () {
         breakBefore: "column",
         breakAfter: "column",
       });
-      vivliostyle_break.suppressColumnBreakBefore(viewNode);
-      vivliostyle_break.suppressColumnBreakAfter(viewNode);
-      nodeContext.breakBefore =
-        vivliostyle_break.reportEffectiveBreakBefore(nodeContext);
-      nodeContext.breakAfter =
-        vivliostyle_break.reportEffectiveBreakAfter(nodeContext);
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
+      vivliostyle_break.suppressColumnBreakAfter(store, viewNode);
+      nodeContext.breakBefore = vivliostyle_break.reportEffectiveBreakBefore(
+        store,
+        nodeContext,
+      );
+      nodeContext.breakAfter = vivliostyle_break.reportEffectiveBreakAfter(
+        store,
+        nodeContext,
+      );
       expect(nodeContext.breakBefore).toBe(null);
       expect(nodeContext.breakAfter).toBe(null);
-      vivliostyle_break.unsuppressColumnBreakBefore(viewNode);
-      vivliostyle_break.unsuppressColumnBreakAfter(viewNode);
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(
+      vivliostyle_break.unsuppressColumnBreakBefore(store, viewNode);
+      vivliostyle_break.unsuppressColumnBreakAfter(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakBefore(store, nodeContext)).toBe(
         "column",
       );
-      expect(vivliostyle_break.effectiveBreakAfter(nodeContext)).toBe("column");
+      expect(vivliostyle_break.effectiveBreakAfter(store, nodeContext)).toBe(
+        "column",
+      );
     });
 
     it("forgets the report once the value carries a break of its own", function () {
@@ -232,15 +272,19 @@ describe("break", function () {
       var nodeContext = elementNodeContext(viewNode, {
         breakBefore: "column",
       });
-      vivliostyle_break.suppressColumnBreakBefore(viewNode);
-      nodeContext.breakBefore =
-        vivliostyle_break.reportEffectiveBreakBefore(nodeContext);
-      nodeContext.breakBefore = "page";
-      expect(vivliostyle_break.reportEffectiveBreakBefore(nodeContext)).toBe(
-        "page",
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
+      nodeContext.breakBefore = vivliostyle_break.reportEffectiveBreakBefore(
+        store,
+        nodeContext,
       );
+      nodeContext.breakBefore = "page";
+      expect(
+        vivliostyle_break.reportEffectiveBreakBefore(store, nodeContext),
+      ).toBe("page");
       nodeContext.breakBefore = null;
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(null);
+      expect(vivliostyle_break.effectiveBreakBefore(store, nodeContext)).toBe(
+        null,
+      );
     });
 
     it("reports the break of a value no suppression masks", function () {
@@ -248,12 +292,12 @@ describe("break", function () {
       var nodeContext = elementNodeContext(viewNode, {
         breakBefore: "column",
       });
-      expect(vivliostyle_break.reportEffectiveBreakBefore(nodeContext)).toBe(
-        "column",
-      );
-      expect(vivliostyle_break.reportEffectiveBreakAfter(nodeContext)).toBe(
-        null,
-      );
+      expect(
+        vivliostyle_break.reportEffectiveBreakBefore(store, nodeContext),
+      ).toBe("column");
+      expect(
+        vivliostyle_break.reportEffectiveBreakAfter(store, nodeContext),
+      ).toBe(null);
     });
 
     it("keeps the two directions of one view node apart", function () {
@@ -262,13 +306,15 @@ describe("break", function () {
         breakBefore: "column",
         breakAfter: "column",
       });
-      vivliostyle_break.suppressColumnBreakBefore(viewNode);
-      vivliostyle_break.suppressColumnBreakAfter(viewNode);
-      vivliostyle_break.unsuppressColumnBreakBefore(viewNode);
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(
+      vivliostyle_break.suppressColumnBreakBefore(store, viewNode);
+      vivliostyle_break.suppressColumnBreakAfter(store, viewNode);
+      vivliostyle_break.unsuppressColumnBreakBefore(store, viewNode);
+      expect(vivliostyle_break.effectiveBreakBefore(store, nodeContext)).toBe(
         "column",
       );
-      expect(vivliostyle_break.effectiveBreakAfter(nodeContext)).toBe(null);
+      expect(vivliostyle_break.effectiveBreakAfter(store, nodeContext)).toBe(
+        null,
+      );
     });
   });
 });

@@ -22,6 +22,11 @@ import * as PseudoElement from "./pseudo-element";
 import * as VtreeImpl from "./vtree";
 import { PageFloats, Vtree } from "./types";
 
+export type ContinuationStore = Readonly<{
+  continuationOfSlot: WeakMap<Vtree.NodeContext, Vtree.NodeContext>;
+  slotOfContinuation: WeakMap<Vtree.NodeContext, Vtree.NodeContext>;
+}>;
+
 export type ShadowPlacement = {
   shadowType: Vtree.ShadowType;
   shadowContext: Vtree.ShadowContext | null;
@@ -665,45 +670,38 @@ export function setPreprocessedTextContent<T extends Vtree.NodeContext>(
   return { ...nodeContext, preprocessedTextContent };
 }
 
-type ContinuationHolder = { current: Vtree.NodeContext };
-
-const continuationOfSlot = new WeakMap<Vtree.NodeContext, ContinuationHolder>();
-const continuationAtValue = new WeakMap<
-  Vtree.NodeContext,
-  ContinuationHolder
->();
-
-export function latestContinuation(slot: Vtree.NodeContext): Vtree.NodeContext {
-  return continuationOfSlot.get(slot)?.current ?? slot;
+export function latestContinuation(
+  store: ContinuationStore,
+  slot: Vtree.NodeContext,
+): Vtree.NodeContext {
+  return store.continuationOfSlot.get(slot) ?? slot;
 }
 
 export function resumeContinuation(
+  store: ContinuationStore,
   slot: Vtree.NodeContext,
   resumed: Vtree.NodeContext,
 ): void {
-  const holder = continuationOfSlot.get(slot);
-  if (holder) {
-    continuationAtValue.delete(holder.current);
-    holder.current = resumed;
-    continuationAtValue.set(resumed, holder);
-    return;
+  const current = store.continuationOfSlot.get(slot);
+  if (current) {
+    store.slotOfContinuation.delete(current);
   }
-  const started = { current: resumed };
-  continuationOfSlot.set(slot, started);
-  continuationAtValue.set(resumed, started);
+  store.continuationOfSlot.set(slot, resumed);
+  store.slotOfContinuation.set(resumed, slot);
 }
 
 export function followContinuation(
+  store: ContinuationStore,
   previous: Vtree.NodeContext,
   next: Vtree.NodeContext,
 ): void {
-  const holder = continuationAtValue.get(previous);
-  if (!holder) {
+  const slot = store.slotOfContinuation.get(previous);
+  if (!slot) {
     return;
   }
-  continuationAtValue.delete(previous);
-  holder.current = next;
-  continuationAtValue.set(next, holder);
+  store.slotOfContinuation.delete(previous);
+  store.continuationOfSlot.set(slot, next);
+  store.slotOfContinuation.set(next, slot);
 }
 
 export function positionChainOf<T extends Vtree.NodeContext>(
@@ -723,6 +721,7 @@ export function positionChainOf<T extends Vtree.NodeContext>(
 
 export function toNodePositionStep(
   nodeContext: Vtree.NodeContext,
+  continuationStore?: ContinuationStore,
 ): Vtree.NodePositionStep {
   return {
     node: nodeContext.sourceNode,
@@ -730,7 +729,12 @@ export function toNodePositionStep(
     shadowContext: nodeContext.shadowContext,
     nodeShadow: nodeContext.nodeShadow,
     shadowSibling: nodeContext.shadowSibling
-      ? toNodePositionStep(latestContinuation(nodeContext.shadowSibling))
+      ? toNodePositionStep(
+          continuationStore
+            ? latestContinuation(continuationStore, nodeContext.shadowSibling)
+            : nodeContext.shadowSibling,
+          continuationStore,
+        )
       : null,
     formattingContext: nodeContext.formattingContext,
 
@@ -743,15 +747,17 @@ export function toNodePositionStep(
 
 function toRootNodePositionStep(
   root: Vtree.RootNodeContext,
+  continuationStore?: ContinuationStore,
 ): Vtree.RootNodePositionStep {
   return {
-    ...toNodePositionStep(root),
+    ...toNodePositionStep(root, continuationStore),
     shadowSibling: root.shadowSibling,
   };
 }
 
 export function toNodePosition(
   nodeContext: Vtree.NodeContext,
+  continuationStore?: ContinuationStore,
 ): Vtree.NodePosition {
   // Fix for issue #703
   // A float or footnote context inside a pseudo-element shadow is always a
@@ -774,7 +780,7 @@ export function toNodePosition(
     // We need fully "peeled" path, so don't record first-XXX pseudoelement
     // containers
     if (!nc.firstPseudo || parent.firstPseudo === nc.firstPseudo) {
-      steps.push(toNodePositionStep(nc));
+      steps.push(toNodePositionStep(nc, continuationStore));
     }
     nc = parent;
   }
@@ -785,7 +791,13 @@ export function toNodePosition(
       )
     : nodeContext.offsetInNode;
   return {
-    steps: [...steps, toRootNodePositionStep(VtreeImpl.asRootNodeContext(nc))],
+    steps: [
+      ...steps,
+      toRootNodePositionStep(
+        VtreeImpl.asRootNodeContext(nc),
+        continuationStore,
+      ),
+    ],
     offsetInNode: actualOffsetInNode,
     after: nodeContext.after,
     preprocessedTextContent: nodeContext.preprocessedTextContent,

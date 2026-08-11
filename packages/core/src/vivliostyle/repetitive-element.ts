@@ -745,7 +745,7 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
     public readonly formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
     public readonly column: LayoutType.Column,
   ) {
-    super();
+    super(column.layoutContext.breakSuppressionStore);
   }
 
   override startNonInlineElementNode(
@@ -823,7 +823,7 @@ export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
     public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
     public readonly column: LayoutType.Column,
   ) {
-    super();
+    super(column.layoutContext.breakSuppressionStore);
   }
 }
 

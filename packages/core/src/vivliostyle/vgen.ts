@@ -206,6 +206,8 @@ export class ViewFactory
 
   constructor(
     public readonly flowName: string,
+    public readonly breakSuppressionStore: Break.BreakSuppressionStore,
+    public readonly continuationStore: NodeContext.ContinuationStore,
     public readonly context: Exprs.Context,
     public readonly viewport: Viewport,
     public readonly styler: CssStyler.Styler,
@@ -237,6 +239,8 @@ export class ViewFactory
   clone(): Vtree.LayoutContext {
     return new ViewFactory(
       this.flowName,
+      this.breakSuppressionStore,
+      this.continuationStore,
       this.context,
       this.viewport,
       this.styler,
@@ -1214,6 +1218,7 @@ export class ViewFactory
     const inProgress = NodeContext.elementRenderProgress(nodeContext, rendered);
     const legacyInProgress = LegacyPluginSurface.asLegacyRenderContext(
       Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT,
+      this,
       nodeContext,
       inProgress,
       rendered,
@@ -1871,6 +1876,7 @@ export class ViewFactory
       );
       if (nodeContext.parent) {
         const resolved = LegacyPluginSurface.legacyFirstTime(
+          this,
           nodeContext.parent.formattingContext,
           nodeContext,
           rendered,
@@ -2550,7 +2556,10 @@ export class ViewFactory
       nc && !nc.after;
       nc = nc.parent
     ) {
-      const breakBefore = Break.effectiveBreakBefore(nc);
+      const breakBefore = Break.effectiveBreakBefore(
+        this.breakSuppressionStore,
+        nc,
+      );
       if (Break.isForcedBreakValue(breakBefore)) {
         return breakBefore; // forced break
       }
@@ -2815,6 +2824,7 @@ export class ViewFactory
     }
     const legacyNodeContext = LegacyPluginSurface.asLegacyRenderContext(
       Plugin.HOOKS.PREPROCESS_ELEMENT_STYLE,
+      this,
       nodeContext,
       NodeContext.elementRenderProgress(nodeContext, rendered),
       rendered,
@@ -2953,6 +2963,7 @@ export class ViewFactory
         return hooks[index++](
           LegacyPluginSurface.asLegacyNodeContext(
             Plugin.HOOKS.PREPROCESS_TEXT_CONTENT,
+            this,
             nodeContext,
           ),
           textContent,
@@ -3126,10 +3137,12 @@ export class ViewFactory
     if (nextPos === null) {
       nextPos = NodeContext.afterEdgeOf(pos.parent);
     }
-    const resumed = slot ? NodeContext.latestContinuation(slot) : nextPos;
+    const resumed = slot
+      ? NodeContext.latestContinuation(this.continuationStore, slot)
+      : nextPos;
     const positioned = NodeContext.setBoxOffset(resumed, boxOffset);
     if (slot) {
-      NodeContext.resumeContinuation(slot, positioned);
+      NodeContext.resumeContinuation(this.continuationStore, slot, positioned);
     }
     this.replaceWalkedContext(resumed, positioned);
     return positioned;
@@ -3141,7 +3154,11 @@ export class ViewFactory
     cursorAdvance = false,
   ): void {
     if (!cursorAdvance) {
-      NodeContext.followContinuation(previousNodeContext, nodeContext);
+      NodeContext.followContinuation(
+        this.continuationStore,
+        previousNodeContext,
+        nodeContext,
+      );
     }
     this.dispatchEvent({
       type: "replaceWalkedContext",
@@ -3179,12 +3196,19 @@ export class ViewFactory
       if (cur.shadowSibling) {
         // our next position is the element after shadow:content in the parent
         // shadow tree
-        const resumed = NodeContext.latestContinuation(cur.shadowSibling);
+        const resumed = NodeContext.latestContinuation(
+          this.continuationStore,
+          cur.shadowSibling,
+        );
         const advanced = NodeContext.setBoxOffset(
           NodeContext.derived(resumed),
           boxOffset,
         );
-        NodeContext.resumeContinuation(cur.shadowSibling, advanced);
+        NodeContext.resumeContinuation(
+          this.continuationStore,
+          cur.shadowSibling,
+          advanced,
+        );
         return advanced;
       }
 

@@ -177,14 +177,62 @@ export function legacySurfaceActive(hook: string): boolean {
   return Plugin.getHooksForName(hook).some((fn) => !Plugin.isCoreHook(fn));
 }
 
-const retained = new WeakSet<Vtree.NodeContext>();
+type LegacyContextStores = Pick<
+  Vtree.LayoutContext,
+  "breakSuppressionStore" | "continuationStore"
+>;
+
+type LegacyContextMetadata = Readonly<{
+  retained?: true;
+  stores?: LegacyContextStores;
+}>;
+
+const legacyContextMetadata = new WeakMap<
+  Vtree.NodeContext,
+  LegacyContextMetadata
+>();
+
+function isRetained(nodeContext: Vtree.NodeContext): boolean {
+  return legacyContextMetadata.get(nodeContext)?.retained === true;
+}
+
+function setRetained(nodeContext: Vtree.NodeContext, retained: boolean): void {
+  const metadata = legacyContextMetadata.get(nodeContext);
+  if (!retained && !metadata?.stores) {
+    legacyContextMetadata.delete(nodeContext);
+    return;
+  }
+  legacyContextMetadata.set(nodeContext, {
+    ...metadata,
+    retained: retained ? true : undefined,
+  });
+}
+
+function associateContextStores(
+  nodeContext: Vtree.NodeContext,
+  stores: LegacyContextStores,
+): void {
+  legacyContextMetadata.set(nodeContext, {
+    ...legacyContextMetadata.get(nodeContext),
+    stores: {
+      breakSuppressionStore: stores.breakSuppressionStore,
+      continuationStore: stores.continuationStore,
+    },
+  });
+}
+
+function contextStoresOf(
+  nodeContext: Vtree.NodeContext,
+): LegacyContextStores | undefined {
+  return legacyContextMetadata.get(nodeContext)?.stores;
+}
 
 function markRetained(nodeContext: Vtree.NodeContext): void {
   for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
-    if (retained.has(nc)) {
+    if (isRetained(nc)) {
       return;
     }
-    retained.add(nc);
+    setRetained(nc, true);
   }
 }
 
@@ -238,15 +286,15 @@ function cloneCoreItem<T extends Vtree.NodeContext>(nodeContext: T): T {
 
 class LegacyNodeContextMethods {
   get shared(): boolean {
-    return retained.has(coreOf(this));
+    return isRetained(coreOf(this));
   }
 
   set shared(value: boolean) {
     const core = coreOf(this);
     if (value) {
-      retained.add(core);
+      setRetained(core, true);
     } else {
-      retained.delete(core);
+      setRetained(core, false);
     }
   }
 
@@ -292,7 +340,9 @@ class LegacyNodeContextMethods {
 
   modify(this: LegacyNodeContext): LegacyNodeContext {
     const core = coreOf(this);
-    return retained.has(core) ? decorated(cloneCoreItem(core)) : this;
+    return isRetained(core)
+      ? decorated(cloneCoreItem(core), contextStoresOf(core))
+      : this;
   }
 
   copy(this: LegacyNodeContext): LegacyNodeContext {
@@ -306,15 +356,23 @@ class LegacyNodeContextMethods {
       const writable = nc as unknown as { pluginProps: Vtree.PluginProps };
       writable.pluginProps = { ...nc.pluginProps };
     }
-    return decorated(chain);
+    return decorated(chain, contextStoresOf(coreOf(this)));
   }
 
   toNodePositionStep(this: LegacyNodeContext): Vtree.NodePositionStep {
-    return NodeContext.toNodePositionStep(coreOf(this));
+    const core = coreOf(this);
+    return NodeContext.toNodePositionStep(
+      core,
+      contextStoresOf(core)?.continuationStore,
+    );
   }
 
   toNodePosition(this: LegacyNodeContext): Vtree.NodePosition {
-    return NodeContext.toNodePosition(coreOf(this));
+    const core = coreOf(this);
+    return NodeContext.toNodePosition(
+      core,
+      contextStoresOf(core)?.continuationStore,
+    );
   }
 
   isInsideBFC(this: LegacyNodeContext): boolean {
@@ -328,7 +386,7 @@ class LegacyNodeContextMethods {
     if (!container) {
       return null;
     }
-    decorate(container);
+    decorate(container, contextStoresOf(coreOf(this)));
     return legacyElementViewOf(container);
   }
 
@@ -346,27 +404,39 @@ function isDecorated(nodeContext: Vtree.NodeContext): boolean {
   return Object.getPrototypeOf(nodeContext) === legacyPrototype;
 }
 
-function decorate(nodeContext: Vtree.NodeContext): void {
+function decorate(
+  nodeContext: Vtree.NodeContext,
+  stores?: LegacyContextStores,
+  visited: WeakSet<Vtree.NodeContext> = new WeakSet(),
+): void {
   for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
-    reportSuppressedBreaks(nc);
+    if (visited.has(nc)) {
+      continue;
+    }
+    visited.add(nc);
+    const associatedStores = stores ?? contextStoresOf(nc);
+    if (associatedStores) {
+      associateContextStores(nc, associatedStores);
+      reportSuppressedBreaks(associatedStores.breakSuppressionStore, nc);
+    }
     if (!isDecorated(nc)) {
       // The core builds node contexts as plain object literals, so the legacy
       // prototype cannot shadow any own field of the value.
       Object.setPrototypeOf(nc, legacyPrototype);
     }
     if (nc.shadowSibling) {
-      reportSuppressedBreaks(nc.shadowSibling);
-      if (!isDecorated(nc.shadowSibling)) {
-        decorate(nc.shadowSibling);
-      }
+      decorate(nc.shadowSibling, associatedStores, visited);
     }
-    if (nc.blockContainer && !isDecorated(nc.blockContainer)) {
-      decorate(nc.blockContainer);
+    if (nc.blockContainer) {
+      decorate(nc.blockContainer, associatedStores, visited);
     }
   }
 }
 
-function reportSuppressedBreaks(nodeContext: Vtree.NodeContext): void {
+function reportSuppressedBreaks(
+  breakSuppressionStore: Break.BreakSuppressionStore,
+  nodeContext: Vtree.NodeContext,
+): void {
   // Suppression used to null the field itself; the core now composes it with
   // the registry, so writing the composed value back is a no-op for the core
   // and restores what a plugin used to read.
@@ -374,8 +444,14 @@ function reportSuppressedBreaks(nodeContext: Vtree.NodeContext): void {
     breakBefore: string | null;
     breakAfter: string | null;
   };
-  writable.breakBefore = Break.reportEffectiveBreakBefore(nodeContext);
-  writable.breakAfter = Break.reportEffectiveBreakAfter(nodeContext);
+  writable.breakBefore = Break.reportEffectiveBreakBefore(
+    breakSuppressionStore,
+    nodeContext,
+  );
+  writable.breakAfter = Break.reportEffectiveBreakAfter(
+    breakSuppressionStore,
+    nodeContext,
+  );
 }
 
 let renderFields: readonly string[] | null = null;
@@ -407,11 +483,69 @@ const CONTEXT_FIELDS: readonly string[] = [
   "boxOffset",
 ];
 
-type RenderFields = { [field: string]: unknown };
+const formattingContextsSnapshot = Symbol();
+
+type FormattingContextSnapshot = Readonly<{
+  formattingContext: Vtree.FormattingContext;
+  isFirstTime: Vtree.FormattingContext["isFirstTime"];
+}>;
+
+type RenderFields = {
+  [field: string]: unknown;
+  [formattingContextsSnapshot]?: ReadonlyMap<
+    Vtree.NodeContext,
+    FormattingContextSnapshot
+  >;
+};
+
+function formattingContextSnapshotsByNodeOf(
+  nodeContext: Vtree.NodeContext,
+): ReadonlyMap<Vtree.NodeContext, FormattingContextSnapshot> {
+  const contexts = new Map<Vtree.NodeContext, FormattingContextSnapshot>();
+  const pending = [nodeContext];
+  const visited = new WeakSet<Vtree.NodeContext>();
+  while (pending.length > 0) {
+    const current = pending.pop()!;
+    if (visited.has(current)) {
+      continue;
+    }
+    visited.add(current);
+    contexts.set(current, {
+      formattingContext: current.formattingContext,
+      isFirstTime: current.formattingContext.isFirstTime,
+    });
+    if (current.parent) {
+      pending.push(current.parent);
+    }
+    if (current.shadowSibling) {
+      pending.push(current.shadowSibling);
+    }
+    if (current.blockContainer) {
+      pending.push(current.blockContainer);
+    }
+  }
+  return contexts;
+}
 
 export type LegacyContextWrites = { readonly [field: string]: unknown };
 
 const retainedWrites = new WeakSet<LegacyContextWrites>();
+
+function legacyRenderContext(
+  stores: LegacyContextStores,
+  nodeContext: Vtree.NodeContext,
+  progress: Vtree.NodeContext,
+  rendered: NodeContext.ElementRenderDraft,
+): LegacyNodeContext {
+  const overlaid = {
+    ...progress,
+    ...rendered,
+  } as unknown as Vtree.NodeContext;
+  if (isRetained(nodeContext)) {
+    setRetained(overlaid, true);
+  }
+  return decorated(overlaid, stores);
+}
 
 /**
  * @deprecated Hand out a node context whose rendered style is the draft the
@@ -421,6 +555,7 @@ const retainedWrites = new WeakSet<LegacyContextWrites>();
  */
 export function asLegacyRenderContext(
   hook: string,
+  stores: LegacyContextStores,
   nodeContext: Vtree.NodeContext,
   progress: Vtree.NodeContext,
   rendered: NodeContext.ElementRenderDraft,
@@ -428,16 +563,60 @@ export function asLegacyRenderContext(
   if (!legacySurfaceActive(hook)) {
     return legacyViewOf(progress);
   }
-  // Runtime fact outside the type system: the draft holds the rendered style
-  // of this very position, so overlaying it cannot contradict the variant.
-  const overlaid = {
-    ...progress,
-    ...rendered,
-  } as unknown as Vtree.NodeContext;
-  if (retained.has(nodeContext)) {
-    retained.add(overlaid);
+  return legacyRenderContext(stores, nodeContext, progress, rendered);
+}
+
+function snapshotRenderFields(nodeContext: LegacyNodeContext): RenderFields {
+  const source = nodeContext as unknown as RenderFields;
+  const snapshot: RenderFields = {};
+  for (const field of renderFieldsOf()) {
+    snapshot[field] = source[field];
   }
-  return decorated(overlaid);
+  for (const field of CONTEXT_FIELDS) {
+    snapshot[field] = source[field];
+  }
+  snapshot[formattingContextsSnapshot] = formattingContextSnapshotsByNodeOf(
+    coreOf(nodeContext),
+  );
+  return snapshot;
+}
+
+function adaptWrittenFormattingContexts(
+  before: RenderFields,
+  nodeContext: Vtree.NodeContext,
+): void {
+  const previous = before[formattingContextsSnapshot] ?? new Map();
+  const current = formattingContextSnapshotsByNodeOf(nodeContext);
+  const checked = new WeakSet<Vtree.NodeContext>();
+  for (const [contextNode, snapshot] of previous) {
+    checked.add(contextNode);
+    if (
+      contextNode.formattingContext !== snapshot.formattingContext ||
+      contextNode.formattingContext.isFirstTime !== snapshot.isFirstTime
+    ) {
+      (
+        contextNode as unknown as {
+          formattingContext: Vtree.FormattingContext;
+        }
+      ).formattingContext = adaptFormattingContext(
+        contextNode.formattingContext,
+      );
+    }
+  }
+  for (const [contextNode, snapshot] of current) {
+    const previousSnapshot = previous.get(contextNode);
+    if (
+      !checked.has(contextNode) ||
+      previousSnapshot?.formattingContext !== snapshot.formattingContext ||
+      previousSnapshot.isFirstTime !== snapshot.isFirstTime
+    ) {
+      (
+        contextNode as unknown as {
+          formattingContext: Vtree.FormattingContext;
+        }
+      ).formattingContext = adaptFormattingContext(snapshot.formattingContext);
+    }
+  }
 }
 
 export function captureRenderFields(
@@ -447,15 +626,7 @@ export function captureRenderFields(
   if (!legacySurfaceActive(hook)) {
     return null;
   }
-  const source = nodeContext as unknown as RenderFields;
-  const snapshot: RenderFields = {};
-  for (const field of renderFieldsOf()) {
-    snapshot[field] = source[field];
-  }
-  for (const field of CONTEXT_FIELDS) {
-    snapshot[field] = source[field];
-  }
-  return snapshot;
+  return snapshotRenderFields(nodeContext);
 }
 
 export function applyLegacyRenderWrites(
@@ -463,13 +634,19 @@ export function applyLegacyRenderWrites(
   before: RenderFields | null,
   nodeContext: LegacyNodeContext,
   rendered: NodeContext.ElementRenderDraft,
+  adaptsFormattingContextWrites: boolean = false,
 ): LegacyContextWrites {
   if (!before) {
     return {};
   }
-  const adapts = hooks.some((hook) => !Plugin.isCoreHook(hook));
+  const adapts =
+    adaptsFormattingContextWrites ||
+    hooks.some((hook) => !Plugin.isCoreHook(hook));
   const source = nodeContext as unknown as RenderFields;
   const draft = rendered as unknown as RenderFields;
+  if (adapts) {
+    adaptWrittenFormattingContexts(before, coreOf(nodeContext));
+  }
   for (const field of renderFieldsOf()) {
     if (source[field] !== before[field]) {
       const written = source[field];
@@ -485,7 +662,7 @@ export function applyLegacyRenderWrites(
       written[field] = source[field];
     }
   }
-  if (retained.has(coreOf(nodeContext))) {
+  if (isRetained(coreOf(nodeContext))) {
     retainedWrites.add(written);
   }
   return written;
@@ -498,13 +675,17 @@ export function withLegacyContextWrites<T extends Vtree.NodeContext>(
   const claimed = retainedWrites.has(writes);
   if (Object.keys(writes).length === 0) {
     if (claimed) {
-      retained.add(nodeContext);
+      setRetained(nodeContext, true);
     }
     return nodeContext;
   }
   const composed = { ...nodeContext, ...writes } as unknown as T;
+  const stores = contextStoresOf(nodeContext);
+  if (stores) {
+    associateContextStores(composed, stores);
+  }
   if (claimed) {
-    retained.add(composed);
+    setRetained(composed, true);
   }
   if ("after" in writes || "viewNode" in writes) {
     normalizeLegacyNodeContext(legacyViewOf(composed));
@@ -513,6 +694,7 @@ export function withLegacyContextWrites<T extends Vtree.NodeContext>(
 }
 
 function applyRenderedNodeContext(
+  stores: LegacyContextStores,
   nodeContext: Vtree.NodeContext,
   rendered: Vtree.NodeContext,
 ): void {
@@ -526,25 +708,37 @@ function applyRenderedNodeContext(
       target[field] = source[field];
     }
   }
-  normalizeLegacyNodeContext(decorated(nodeContext));
+  normalizeLegacyNodeContext(decorated(nodeContext, stores));
 }
 
-function decorated(nodeContext: Vtree.NodeContext): LegacyNodeContext {
-  decorate(nodeContext);
+function decorated(
+  nodeContext: Vtree.NodeContext,
+  stores?: LegacyContextStores,
+): LegacyNodeContext {
+  decorate(nodeContext, stores);
   return legacyViewOf(nodeContext);
 }
 
-function decoratedAs<T>(nodeContext: Vtree.NodeContext): T {
-  decorate(nodeContext);
+function decoratedAs<T>(
+  nodeContext: Vtree.NodeContext,
+  stores?: LegacyContextStores,
+): T {
+  decorate(nodeContext, stores);
   return nodeContext as unknown as T;
 }
 
-function decoratedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
-  return nodeContext === null ? null : decoratedAs<T>(nodeContext);
+function decoratedOrNull<T>(
+  nodeContext: Vtree.NodeContext | null,
+  stores?: LegacyContextStores,
+): T | null {
+  return nodeContext === null ? null : decoratedAs<T>(nodeContext, stores);
 }
 
-function retaggedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
-  const legacy = decoratedOrNull<LegacyNodeContext>(nodeContext);
+function retaggedOrNull<T>(
+  nodeContext: Vtree.NodeContext | null,
+  stores?: LegacyContextStores,
+): T | null {
+  const legacy = decoratedOrNull<LegacyNodeContext>(nodeContext, stores);
   if (legacy) {
     retagLegacyValue(legacy);
     handedOut.add(nodeContext);
@@ -559,10 +753,11 @@ function retaggedOrNull<T>(nodeContext: Vtree.NodeContext | null): T | null {
  */
 export function asLegacyNodeContext(
   hook: string,
+  stores: LegacyContextStores,
   nodeContext: Vtree.NodeContext,
 ): LegacyNodeContext {
   if (legacySurfaceActive(hook)) {
-    decorate(nodeContext);
+    decorate(nodeContext, stores);
   }
   return legacyViewOf(nodeContext);
 }
@@ -572,9 +767,12 @@ export function asLegacyNodeContext(
  */
 export function asLegacyNodeContextOrNull(
   hook: string,
+  stores: LegacyContextStores,
   nodeContext: Vtree.NodeContext | null,
 ): LegacyNodeContext | null {
-  return nodeContext === null ? null : asLegacyNodeContext(hook, nodeContext);
+  return nodeContext === null
+    ? null
+    : asLegacyNodeContext(hook, stores, nodeContext);
 }
 
 /**
@@ -985,7 +1183,11 @@ export function asLegacyLayoutContext(
         layoutContext
           .setCurrent(nodeContext, firstTime, atUnforcedBreak)
           .thenAsync((result) => {
-            applyRenderedNodeContext(nodeContext, result.nodeContext);
+            applyRenderedNodeContext(
+              layoutContext,
+              nodeContext,
+              result.nodeContext,
+            );
             return Task.newResult(result.processChildren);
           }),
     clone: () => () => asLegacyLayoutContext(layoutContext.clone()),
@@ -994,13 +1196,15 @@ export function asLegacyLayoutContext(
         layoutContext
           .nextInTree(nodeContext, atUnforcedBreak)
           .thenAsync((result) =>
-            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+            Task.newResult(
+              decoratedOrNull<LegacyNodeContext>(result, layoutContext),
+            ),
           ),
     peelOff: () => (nodeContext: Vtree.ChildNodeContext, nodeOffset: number) =>
       layoutContext
         .peelOff(nodeContext, nodeOffset)
         .thenAsync((result) =>
-          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+          Task.newResult(decoratedAs<LegacyNodeContext>(result, layoutContext)),
         ),
   });
   // Runtime fact outside the type system: the proxy answers every member of
@@ -1035,6 +1239,7 @@ const legacyOfAdaptedBreakPositions = new WeakMap<
 
 function legacyBreakPositionViewOf(
   breakPosition: Layout.BreakPosition,
+  stores: LegacyContextStores,
 ): LegacyBreakPosition {
   const legacy = legacyOfAdaptedBreakPositions.get(breakPosition);
   if (legacy) {
@@ -1050,6 +1255,7 @@ function legacyBreakPositionViewOf(
       findAcceptableBreak: () => (column: LegacyColumn, penalty: number) =>
         decoratedOrNull<LegacyNodeContext>(
           breakPosition.findAcceptableBreak(coreColumnOf(column), penalty),
+          stores,
         ),
       calculateOffset: () => (column: LegacyColumn) =>
         breakPosition.calculateOffset(coreColumnOf(column)),
@@ -1063,6 +1269,7 @@ function legacyBreakPositionViewOf(
           ? () =>
               decoratedOrNull<LegacyNodeContext>(
                 getNodeContext.call(breakPosition),
+                stores,
               )
           : undefined;
       },
@@ -1071,18 +1278,20 @@ function legacyBreakPositionViewOf(
       position: () =>
         retaggedOrNull<LegacyNodeContext>(
           (breakPosition as Partial<Layout.EdgeBreakPosition>).position ?? null,
+          stores,
         ),
       breakNodeContext: () =>
         retaggedOrNull<LegacyNodeContext>(
           (breakPosition as Partial<Layout.BoxBreakPosition>)
             .breakNodeContext ?? null,
+          stores,
         ),
       checkPoints: () => {
         const checkPoints = (breakPosition as Partial<Layout.BoxBreakPosition>)
           .checkPoints;
         return checkPoints === undefined
           ? undefined
-          : retaggedCheckPoints(checkPoints);
+          : retaggedCheckPoints(checkPoints, stores);
       },
     },
   );
@@ -1143,6 +1352,7 @@ function legacyTextNodeBreakerViewOf(
           checkpointIndex,
           force,
         ),
+        contextStoresOf(coreOf(nodeContext)),
       );
     },
     breakAfterSoftHyphen(
@@ -1181,6 +1391,7 @@ function legacyTextNodeBreakerViewOf(
       retagLegacyArguments([nodeContext]);
       return decoratedAs<LegacyNodeContext>(
         breaker.updateNodeContext(coreOf(nodeContext), viewIndex, textNode),
+        contextStoresOf(coreOf(nodeContext)),
       );
     },
   };
@@ -1206,6 +1417,7 @@ function arrayIndexOf(property: string | symbol): number | null {
 
 function legacyBreakPositionsViewOf(
   breakPositions: Layout.BreakPosition[],
+  stores: LegacyContextStores,
 ): LegacyBreakPosition[] {
   const cached = legacyBreakPositionLists.get(breakPositions);
   if (cached) {
@@ -1220,7 +1432,7 @@ function legacyBreakPositionsViewOf(
       const breakPosition = target[index];
       return breakPosition === undefined
         ? breakPosition
-        : legacyBreakPositionViewOf(breakPosition);
+        : legacyBreakPositionViewOf(breakPosition, stores);
     },
     set: (target, property, value) => {
       const index = arrayIndexOf(property);
@@ -1250,6 +1462,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
   if (cached) {
     return cached;
   }
+  const stores = column.layoutContext;
   const projected = legacyViewOfObject(column, {
     checkOverflowAndSaveEdge:
       () =>
@@ -1279,18 +1492,24 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
           .processLineStyling(nodeContext, resNodeContext, checkPoints)
           .thenAsync((result) => {
             checkPoints.splice(0, checkPoints.length, ...result.checkPoints);
-            decoratedCheckPoints(checkPoints);
+            decoratedCheckPoints(checkPoints, stores);
             return Task.newResult(
-              decoratedOrNull<LegacyNodeContext>(result.nodeContext),
+              decoratedOrNull<LegacyNodeContext>(result.nodeContext, stores),
             );
           }),
     layoutContext: () => asLegacyLayoutContext(column.layoutContext),
-    breakPositions: () => legacyBreakPositionsViewOf(column.breakPositions),
-    resolveTextNodeBreaker: () => (nodeContext: Vtree.NodeContext) =>
-      legacyTextNodeBreakerViewOf(column.resolveTextNodeBreaker(nodeContext)),
+    breakPositions: () =>
+      legacyBreakPositionsViewOf(column.breakPositions, stores),
+    resolveTextNodeBreaker: () => (nodeContext: Vtree.NodeContext) => {
+      decorate(nodeContext, stores);
+      return legacyTextNodeBreakerViewOf(
+        column.resolveTextNodeBreaker(nodeContext),
+      );
+    },
     nodeContextOverflowingDueToRepetitiveElements: () =>
       retaggedOrNull<LegacyNodeContext>(
         column.nodeContextOverflowingDueToRepetitiveElements,
+        stores,
       ),
     pseudoParent: () =>
       column.pseudoParent === null
@@ -1299,18 +1518,19 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
     asFloatNodeContext: () => (nodeContext: Vtree.NodeContext) =>
       decoratedOrNull<LegacyFloatNodeContext>(
         column.asFloatNodeContext(nodeContext),
+        stores,
       ),
     openAllViews: () => (position: Vtree.NodePosition) =>
       column
         .openAllViews(position)
         .thenAsync((result) =>
-          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+          Task.newResult(decoratedAs<LegacyNodeContext>(result, stores)),
         ),
     maybePeelOff: () => (position: Vtree.NodeContext, count: number) =>
       column
         .maybePeelOff(position, count)
         .thenAsync((result) =>
-          Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+          Task.newResult(decoratedAs<LegacyNodeContext>(result, stores)),
         ),
     buildViewToNextBlockEdge:
       () =>
@@ -1321,49 +1541,52 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
         column
           .buildViewToNextBlockEdge(position, checkPoints)
           .thenAsync((result) => {
-            decoratedCheckPoints(checkPoints);
-            return Task.newResult(decoratedOrNull<LegacyNodeContext>(result));
+            decoratedCheckPoints(checkPoints, stores);
+            return Task.newResult(
+              decoratedOrNull<LegacyNodeContext>(result, stores),
+            );
           }),
     nextInTree:
       () => (position: Vtree.NodeContext, atUnforcedBreak?: boolean) =>
         column
           .nextInTree(position, atUnforcedBreak)
           .thenAsync((result) =>
-            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
           ),
     buildDeepElementView: () => (position: Vtree.NodeContext | null) =>
       column
         .buildDeepElementView(position)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     layoutUnbreakable: () => (nodeContextIn: Vtree.NodeContext) =>
       column
         .layoutUnbreakable(nodeContextIn)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     layoutFloat: () => (nodeContext: Vtree.RenderedNodeContext) =>
       column
         .layoutFloat(nodeContext)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     setFloatAnchorViewNode: () => (nodeContext: Vtree.RenderedNodeContext) =>
       decoratedAs<LegacyRenderedNodeContext>(
         column.setFloatAnchorViewNode(nodeContext),
+        stores,
       ),
     layoutPageFloat: () => (nodeContext: Vtree.FloatNodeContext) =>
       column
         .layoutPageFloat(nodeContext)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     layoutBreakableBlock: () => (nodeContext: Vtree.NodeContext) =>
       column
         .layoutBreakableBlock(nodeContext)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     findEndOfLine:
       () =>
@@ -1381,6 +1604,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
           ...result,
           nodeContext: decoratedAs<LegacyRenderedNodeContext>(
             result.nodeContext,
+            stores,
           ),
         };
       },
@@ -1393,6 +1617,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
       ) =>
         decoratedOrNull<LegacyNodeContext>(
           column.findAcceptableBreakInside(checkPoints, edgePosition, force),
+          stores,
         ),
     findBoxBreakPosition: () => (bp: LegacyBreakPosition, force: boolean) =>
       decoratedOrNull<LegacyNodeContext>(
@@ -1400,6 +1625,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
           coreBreakPositionOf(bp) as Layout.BoxBreakPosition,
           force,
         ),
+        stores,
       ),
     findFirstOverflowingEdgeAndCheckPoint:
       () => (checkPoints: Vtree.RenderedNodeContext[]) => {
@@ -1409,6 +1635,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
           ...result,
           checkPoint: decoratedOrNull<LegacyRenderedNodeContext>(
             result.checkPoint,
+            stores,
           ),
         };
       },
@@ -1417,14 +1644,21 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
         column.findEdgeBreakPosition(
           coreBreakPositionOf(bp) as Layout.EdgeBreakPosition,
         ),
+        stores,
       ),
     findAcceptableBreakPosition: () => () => {
       const result = column.findAcceptableBreakPosition();
       return result === null
         ? null
         : {
-            breakPosition: legacyBreakPositionViewOf(result.breakPosition),
-            nodeContext: decoratedAs<LegacyNodeContext>(result.nodeContext),
+            breakPosition: legacyBreakPositionViewOf(
+              result.breakPosition,
+              stores,
+            ),
+            nodeContext: decoratedAs<LegacyNodeContext>(
+              result.nodeContext,
+              stores,
+            ),
           };
     },
     doFinishBreak:
@@ -1443,7 +1677,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
             initialComputedBlockSize,
           )
           .thenAsync((result) =>
-            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
           ),
     skipEdges:
       () =>
@@ -1455,19 +1689,19 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
         column
           .skipEdges(nodeContext, leadingEdge, forcedBreakValue)
           .thenAsync((result) =>
-            Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+            Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
           ),
     skipTailEdges: () => (nodeContext: Vtree.NodeContext) =>
       column
         .skipTailEdges(nodeContext)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     layoutFloatOrFootnote: () => (nodeContext: Vtree.FloatNodeContext) =>
       column
         .layoutFloatOrFootnote(nodeContext)
         .thenAsync((result) =>
-          Task.newResult(decoratedOrNull<LegacyNodeContext>(result)),
+          Task.newResult(decoratedOrNull<LegacyNodeContext>(result, stores)),
         ),
     layoutNext:
       () =>
@@ -1479,7 +1713,7 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
         column
           .layoutNext(nodeContext, leadingEdge, forcedBreakValue)
           .thenAsync((result) =>
-            Task.newResult(decoratedAs<LegacyNodeContext>(result)),
+            Task.newResult(decoratedAs<LegacyNodeContext>(result, stores)),
           ),
     doLayout:
       () =>
@@ -1494,9 +1728,11 @@ function legacyColumnViewOf(column: Layout.Column): LegacyColumn {
             Task.newResult({
               nodeContext: decoratedOrNull<LegacyNodeContext>(
                 result.nodeContext,
+                stores,
               ),
               overflownNodeContext: decoratedOrNull<LegacyNodeContext>(
                 result.overflownNodeContext,
+                stores,
               ),
             }),
           ),
@@ -1605,6 +1841,11 @@ function kindOfLegacy(nodeContext: LegacyNodeContext): Vtree.NodeContextKind {
 }
 
 function retagLegacyValue(nodeContext: LegacyNodeContext): void {
+  for (const { formattingContext } of formattingContextSnapshotsByNodeOf(
+    coreOf(nodeContext),
+  ).values()) {
+    adaptFormattingContext(formattingContext);
+  }
   setLegacyKind(nodeContext, kindOfLegacy(nodeContext));
 }
 
@@ -1661,7 +1902,7 @@ export function retagLegacyNodeContexts(
 
 const adaptedTextNodeBreakers = new WeakMap<
   LegacyTextNodeBreaker,
-  Layout.TextNodeBreaker
+  WeakMap<LegacyContextStores, Layout.TextNodeBreaker>
 >();
 
 /**
@@ -1670,6 +1911,7 @@ const adaptedTextNodeBreakers = new WeakMap<
 export function adaptLegacyTextNodeBreaker(
   hook: (...p1) => any,
   legacy: LegacyTextNodeBreaker,
+  stores: LegacyContextStores,
 ): Layout.TextNodeBreaker {
   if (Plugin.isCoreHook(hook)) {
     return legacy as unknown as Layout.TextNodeBreaker;
@@ -1678,7 +1920,12 @@ export function adaptLegacyTextNodeBreaker(
   if (core) {
     return core;
   }
-  const cached = adaptedTextNodeBreakers.get(legacy);
+  let adapters = adaptedTextNodeBreakers.get(legacy);
+  if (!adapters) {
+    adapters = new WeakMap();
+    adaptedTextNodeBreakers.set(legacy, adapters);
+  }
+  const cached = adapters.get(stores);
   if (cached) {
     return cached;
   }
@@ -1691,8 +1938,8 @@ export function adaptLegacyTextNodeBreaker(
       checkpointIndex: number,
       force: boolean,
     ): Vtree.NodeContext {
-      const legacyNodeContext = decorated(nodeContext);
-      const legacyCheckPoints = decoratedCheckPoints(checkPoints);
+      const legacyNodeContext = decorated(nodeContext, stores);
+      const legacyCheckPoints = decoratedCheckPoints(checkPoints, stores);
       const broken = legacy.breakTextNode(
         textNode,
         legacyNodeContext,
@@ -1713,7 +1960,7 @@ export function adaptLegacyTextNodeBreaker(
       viewIndex: number,
       nodeContext: Vtree.NodeContext,
     ): number {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       const broken = legacy.breakAfterSoftHyphen(
         textNode,
         text,
@@ -1729,7 +1976,7 @@ export function adaptLegacyTextNodeBreaker(
       viewIndex: number,
       nodeContext: Vtree.NodeContext,
     ): number {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       const broken = legacy.breakAfterOtherCharacter(
         textNode,
         text,
@@ -1744,7 +1991,7 @@ export function adaptLegacyTextNodeBreaker(
       viewIndex: number,
       textNode: Text,
     ): Vtree.NodeContext {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       const updated = legacy.updateNodeContext(
         legacyNodeContext,
         viewIndex,
@@ -1754,7 +2001,7 @@ export function adaptLegacyTextNodeBreaker(
       return normalizeLegacyNodeContext(updated)!;
     },
   };
-  adaptedTextNodeBreakers.set(legacy, adapted);
+  adapters.set(stores, adapted);
   legacyOfAdaptedTextNodeBreakers.set(adapted, legacy);
   return adapted;
 }
@@ -1802,7 +2049,7 @@ function adaptLegacyBreakPosition(
   return adapted;
 }
 
-const adaptedFormattingContexts = new WeakSet<Vtree.FormattingContext>();
+const legacyFormattingContexts = new WeakSet<Vtree.FormattingContext>();
 
 function acceptsFirstTimeReplacement(
   formattingContext: Vtree.FormattingContext,
@@ -1828,13 +2075,13 @@ function acceptsFirstTimeReplacement(
 function adaptFormattingContext(
   formattingContext: Vtree.FormattingContext,
 ): Vtree.FormattingContext {
-  if (
-    adaptedFormattingContexts.has(formattingContext) ||
-    !acceptsFirstTimeReplacement(formattingContext)
-  ) {
+  if (legacyFormattingContexts.has(formattingContext)) {
     return formattingContext;
   }
-  adaptedFormattingContexts.add(formattingContext);
+  legacyFormattingContexts.add(formattingContext);
+  if (!acceptsFirstTimeReplacement(formattingContext)) {
+    return formattingContext;
+  }
   const isFirstTime = formattingContext.isFirstTime;
   formattingContext.isFirstTime = (
     nodeContext: Vtree.NodeContext,
@@ -1855,19 +2102,22 @@ export function adaptLegacyFormattingContext(
 }
 
 export function legacyFirstTime(
+  stores: LegacyContextStores,
   formattingContext: Vtree.FormattingContext,
   nodeContext: Vtree.NodeContext,
   rendered: NodeContext.ElementRenderDraft,
   firstTime: boolean,
 ): { firstTime: boolean; nodeContext: Vtree.NodeContext } {
   const hook = Plugin.HOOKS.RESOLVE_FORMATTING_CONTEXT;
-  const legacy = asLegacyRenderContext(
-    hook,
-    nodeContext,
-    NodeContext.elementRenderProgress(nodeContext, rendered),
-    rendered,
-  );
-  const before = captureRenderFields(hook, legacy);
+  const progress = NodeContext.elementRenderProgress(nodeContext, rendered);
+  const legacyFormattingContext =
+    legacyFormattingContexts.has(formattingContext);
+  const legacy = legacyFormattingContext
+    ? legacyRenderContext(stores, nodeContext, progress, rendered)
+    : asLegacyRenderContext(hook, stores, nodeContext, progress, rendered);
+  const before = legacyFormattingContext
+    ? snapshotRenderFields(legacy)
+    : captureRenderFields(hook, legacy);
   const resolved = formattingContext.isFirstTime(coreOf(legacy), firstTime);
   normalizeLegacyNodeContext(legacy);
   return {
@@ -1879,6 +2129,7 @@ export function legacyFirstTime(
         before,
         legacy,
         rendered,
+        legacyFormattingContext,
       ),
     ),
   };
@@ -1886,17 +2137,23 @@ export function legacyFirstTime(
 
 const adaptedLayoutProcessors = new WeakMap<
   LegacyLayoutProcessor,
-  LayoutProcessor
+  WeakMap<LegacyContextStores, LayoutProcessor>
 >();
 
 export function adaptLegacyLayoutProcessor(
   hook: (...p1) => any,
   legacy: LegacyLayoutProcessor,
+  stores: LegacyContextStores,
 ): LayoutProcessor {
   if (Plugin.isCoreHook(hook)) {
     return legacy as unknown as LayoutProcessor;
   }
-  const cached = adaptedLayoutProcessors.get(legacy);
+  let adapters = adaptedLayoutProcessors.get(legacy);
+  if (!adapters) {
+    adapters = new WeakMap();
+    adaptedLayoutProcessors.set(legacy, adapters);
+  }
+  const cached = adapters.get(stores);
   if (cached) {
     return cached;
   }
@@ -1906,7 +2163,7 @@ export function adaptLegacyLayoutProcessor(
       column: Layout.Column,
       leadingEdge: boolean,
     ): Task.Result<Vtree.NodeContext | null> {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       return legacy
         .layout(legacyNodeContext, legacyColumnViewOf(column), leadingEdge)
         .thenAsync((result) => {
@@ -1920,7 +2177,7 @@ export function adaptLegacyLayoutProcessor(
       overflows: boolean,
       columnBlockSize: number,
     ): Layout.BreakPosition {
-      const legacyPosition = decorated(position);
+      const legacyPosition = decorated(position, stores);
       const breakPosition = legacy.createEdgeBreakPosition(
         legacyPosition,
         breakOnEdge,
@@ -1931,7 +2188,7 @@ export function adaptLegacyLayoutProcessor(
       return adaptLegacyBreakPosition(breakPosition);
     },
     startNonInlineElementNode(nodeContext: Vtree.NodeContext): boolean {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       const skipped = legacy.startNonInlineElementNode(legacyNodeContext);
       normalizeLegacyNodeContext(legacyNodeContext);
       return skipped;
@@ -1940,7 +2197,7 @@ export function adaptLegacyLayoutProcessor(
       nodeContext: Vtree.NodeContext,
       stopAtOverflow: boolean,
     ): boolean {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       const skipped = legacy.afterNonInlineElementNode(
         legacyNodeContext,
         stopAtOverflow,
@@ -1954,7 +2211,7 @@ export function adaptLegacyLayoutProcessor(
       forceRemoveSelf: boolean,
       endOfColumn: boolean,
     ): Task.Result<boolean> {
-      const legacyNodeContext = decorated(nodeContext);
+      const legacyNodeContext = decorated(nodeContext, stores);
       return legacy
         .finishBreak(
           legacyColumnViewOf(column),
@@ -1974,8 +2231,10 @@ export function adaptLegacyLayoutProcessor(
       removeSelf: boolean,
     ) {
       const legacyParentNodeContext =
-        parentNodeContext === null ? null : decorated(parentNodeContext);
-      const legacyNodeContext = decorated(nodeContext);
+        parentNodeContext === null
+          ? null
+          : decorated(parentNodeContext, stores);
+      const legacyNodeContext = decorated(nodeContext, stores);
       legacy.clearOverflownViewNodes(
         legacyColumnViewOf(column),
         legacyParentNodeContext,
@@ -1986,15 +2245,16 @@ export function adaptLegacyLayoutProcessor(
       normalizeLegacyNodeContext(legacyNodeContext);
     },
   };
-  adaptedLayoutProcessors.set(legacy, adapted);
+  adapters.set(stores, adapted);
   return adapted;
 }
 
 function decoratedCheckPoints(
   checkPoints: Vtree.RenderedNodeContext[],
+  stores?: LegacyContextStores,
 ): LegacyRenderedNodeContext[] {
   for (const checkPoint of checkPoints) {
-    decorate(checkPoint);
+    decorate(checkPoint, stores);
   }
   // Same array, same elements: see coreOf.
   return checkPoints as unknown as LegacyRenderedNodeContext[];
@@ -2002,8 +2262,9 @@ function decoratedCheckPoints(
 
 function retaggedCheckPoints(
   checkPoints: Vtree.RenderedNodeContext[],
+  stores?: LegacyContextStores,
 ): LegacyRenderedNodeContext[] {
-  const legacy = decoratedCheckPoints(checkPoints);
+  const legacy = decoratedCheckPoints(checkPoints, stores);
   for (const checkPoint of legacy) {
     retagLegacyValue(checkPoint);
     handedOut.add(coreOf(checkPoint));
@@ -2017,11 +2278,12 @@ function retaggedCheckPoints(
  */
 export function asLegacyRenderedNodeContexts(
   hook: string,
+  stores: LegacyContextStores,
   checkPoints: Vtree.RenderedNodeContext[],
 ): LegacyRenderedNodeContext[] {
   if (!legacySurfaceActive(hook)) {
     // Same array, same elements: see coreOf.
     return checkPoints as unknown as LegacyRenderedNodeContext[];
   }
-  return decoratedCheckPoints(checkPoints);
+  return decoratedCheckPoints(checkPoints, stores);
 }

@@ -21,6 +21,15 @@ import * as Css from "./css";
 import * as Plugin from "./plugin";
 import { Vtree } from "./types";
 
+export type BreakSuppression = Readonly<{
+  before: boolean;
+  after: boolean;
+}>;
+
+export type BreakSuppressionStore = Readonly<{
+  breakSuppressionByViewNode: WeakMap<Element | Text, BreakSuppression>;
+}>;
+
 /**
  * Check if style="box-decoration-break: clone" is set
  */
@@ -261,23 +270,62 @@ export function breakValueToStartBreakType(breakValue: string | null): string {
     : "auto";
 }
 
-const suppressedColumnBreakBefore = new WeakSet<Element | Text>();
-const suppressedColumnBreakAfter = new WeakSet<Element | Text>();
-
-export function suppressColumnBreakBefore(viewNode: Element | Text): void {
-  suppressedColumnBreakBefore.add(viewNode);
+function updateBreakSuppression(
+  store: BreakSuppressionStore,
+  viewNode: Element | Text,
+  transform: (suppression: BreakSuppression) => BreakSuppression,
+): void {
+  const suppression = transform(
+    store.breakSuppressionByViewNode.get(viewNode) ?? {
+      before: false,
+      after: false,
+    },
+  );
+  if (suppression.before || suppression.after) {
+    store.breakSuppressionByViewNode.set(viewNode, suppression);
+  } else {
+    store.breakSuppressionByViewNode.delete(viewNode);
+  }
 }
 
-export function suppressColumnBreakAfter(viewNode: Element | Text): void {
-  suppressedColumnBreakAfter.add(viewNode);
+export function suppressColumnBreakBefore(
+  store: BreakSuppressionStore,
+  viewNode: Element | Text,
+): void {
+  updateBreakSuppression(store, viewNode, (suppression) => ({
+    ...suppression,
+    before: true,
+  }));
 }
 
-export function unsuppressColumnBreakBefore(viewNode: Element | Text): void {
-  suppressedColumnBreakBefore.delete(viewNode);
+export function suppressColumnBreakAfter(
+  store: BreakSuppressionStore,
+  viewNode: Element | Text,
+): void {
+  updateBreakSuppression(store, viewNode, (suppression) => ({
+    ...suppression,
+    after: true,
+  }));
 }
 
-export function unsuppressColumnBreakAfter(viewNode: Element | Text): void {
-  suppressedColumnBreakAfter.delete(viewNode);
+export function unsuppressColumnBreakBefore(
+  store: BreakSuppressionStore,
+  viewNode: Element | Text,
+): void {
+  updateBreakSuppression(store, viewNode, (suppression) => ({
+    ...suppression,
+    before: false,
+  }));
+}
+
+export function unsuppressColumnBreakAfter(
+  store: BreakSuppressionStore,
+  viewNode: Element | Text,
+): void {
+  updateBreakSuppression(store, viewNode, (suppression) => ({
+    ...suppression,
+    after: false,
+  }));
 }
 
 const reportedBreakBefore = new WeakMap<Vtree.NodeContext, string>();
@@ -298,34 +346,37 @@ function rawBreakAfter(nodeContext: Vtree.NodeContext): string | null {
 }
 
 export function effectiveBreakBefore(
+  store: BreakSuppressionStore,
   nodeContext: Vtree.NodeContext,
 ): string | null {
   const viewNode = nodeContext.viewNode;
   const breakBefore = rawBreakBefore(nodeContext);
   return viewNode !== null &&
     breakBefore === "column" &&
-    suppressedColumnBreakBefore.has(viewNode)
+    store.breakSuppressionByViewNode.get(viewNode)?.before === true
     ? null
     : breakBefore;
 }
 
 export function effectiveBreakAfter(
+  store: BreakSuppressionStore,
   nodeContext: Vtree.NodeContext,
 ): string | null {
   const viewNode = nodeContext.viewNode;
   const breakAfter = rawBreakAfter(nodeContext);
   return viewNode !== null &&
     breakAfter === "column" &&
-    suppressedColumnBreakAfter.has(viewNode)
+    store.breakSuppressionByViewNode.get(viewNode)?.after === true
     ? null
     : breakAfter;
 }
 
 export function reportEffectiveBreakBefore(
+  store: BreakSuppressionStore,
   nodeContext: Vtree.NodeContext,
 ): string | null {
   const breakBefore = rawBreakBefore(nodeContext);
-  const effective = effectiveBreakBefore(nodeContext);
+  const effective = effectiveBreakBefore(store, nodeContext);
   if (effective === breakBefore) {
     reportedBreakBefore.delete(nodeContext);
   } else {
@@ -335,10 +386,11 @@ export function reportEffectiveBreakBefore(
 }
 
 export function reportEffectiveBreakAfter(
+  store: BreakSuppressionStore,
   nodeContext: Vtree.NodeContext,
 ): string | null {
   const breakAfter = rawBreakAfter(nodeContext);
-  const effective = effectiveBreakAfter(nodeContext);
+  const effective = effectiveBreakAfter(store, nodeContext);
   if (effective === breakAfter) {
     reportedBreakAfter.delete(nodeContext);
   } else {

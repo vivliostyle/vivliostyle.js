@@ -39,6 +39,7 @@ export class Footnote extends PageFloats.PageFloat {
     public readonly footnotePolicy: Css.Ident | null,
     floatMinWrapBlock: Css.Numeric | null,
     public readonly policyAnchorNode: Node,
+    public readonly continuationStore: NodeContext.ContinuationStore,
   ) {
     super(
       nodePosition,
@@ -284,7 +285,10 @@ export class LineFootnotePolicyLayoutConstraint
         );
       }
     }
-    const nodePosition = NodeContext.toNodePosition(nodeContext);
+    const nodePosition = NodeContext.toNodePosition(
+      nodeContext,
+      this.footnote.continuationStore,
+    );
     return !Vtree.isSameNodePosition(nodePosition, this.footnote.nodePosition);
   }
 }
@@ -329,7 +333,10 @@ export class FootnoteLayoutStrategy
       floatReference = PageFloats.FloatReference.PAGE;
     }
 
-    const nodePosition = NodeContext.toNodePosition(nodeContext);
+    const nodePosition = NodeContext.toNodePosition(
+      nodeContext,
+      column.layoutContext.continuationStore,
+    );
     Asserts.assert(pageFloatLayoutContext.flowName);
     let policyAnchorNode: Node = nodeContext.sourceNode;
     const shadowOwner = nodeContext.shadowContext?.owner;
@@ -350,6 +357,7 @@ export class FootnoteLayoutStrategy
       nodeContext.footnotePolicy,
       nodeContext.floatMinWrapBlock,
       policyAnchorNode,
+      column.layoutContext.continuationStore,
     );
     float.insidePageFloatArea = insidePageFloat;
     if (insidePageFloat) {

@@ -843,7 +843,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     public readonly formattingContext: TableFormattingContext,
     public readonly column: Layout.Column,
   ) {
-    super();
+    super(column.layoutContext.breakSuppressionStore);
   }
 
   override startNonInlineElementNode(
@@ -896,7 +896,10 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             new TableRow(this.rowIndex, nodeContext.sourceNode),
           );
           // Capture row's own breakBefore for forced break detection
-          const rowBreakBefore = Break.effectiveBreakBefore(nodeContext);
+          const rowBreakBefore = Break.effectiveBreakBefore(
+            this.column.layoutContext.breakSuppressionStore,
+            nodeContext,
+          );
           if (rowBreakBefore) {
             formattingContext.rows[this.rowIndex].breakBefore = rowBreakBefore;
           }
@@ -944,7 +947,10 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             this.inRow = false;
             // Capture row's own breakAfter for forced break detection
             const row = formattingContext.rows[this.rowIndex];
-            const rowBreakAfter = Break.effectiveBreakAfter(nodeContext);
+            const rowBreakAfter = Break.effectiveBreakAfter(
+              this.column.layoutContext.breakSuppressionStore,
+              nodeContext,
+            );
             if (row && rowBreakAfter) {
               row.breakAfter = Break.resolveEffectiveBreakValue(
                 row.breakAfter,
@@ -967,14 +973,20 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             // Propagate cell break values to the row for forced break detection
             const cellRow = formattingContext.rows[this.rowIndex];
             if (cellRow) {
-              const cellBreakBefore = Break.effectiveBreakBefore(nodeContext);
+              const cellBreakBefore = Break.effectiveBreakBefore(
+                this.column.layoutContext.breakSuppressionStore,
+                nodeContext,
+              );
               if (cellBreakBefore) {
                 cellRow.breakBefore = Break.resolveEffectiveBreakValue(
                   cellRow.breakBefore,
                   cellBreakBefore,
                 );
               }
-              const cellBreakAfter = Break.effectiveBreakAfter(nodeContext);
+              const cellBreakAfter = Break.effectiveBreakAfter(
+                this.column.layoutContext.breakSuppressionStore,
+                nodeContext,
+              );
               if (cellBreakAfter) {
                 cellRow.breakAfter = Break.resolveEffectiveBreakValue(
                   cellRow.breakAfter,
@@ -1046,7 +1058,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     public readonly formattingContext: TableFormattingContext,
     public readonly column: Layout.Column,
   ) {
-    super(true);
+    super(column.layoutContext.breakSuppressionStore, true);
     this.originalStopAtOverflow = column.stopAtOverflow;
     column.stopAtOverflow = false;
   }
@@ -2097,10 +2109,15 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
             const breakNodeContext =
               cellFragment.findAcceptableBreakPosition().nodeContext;
             const cellNodeContext = cellFragment.cellNodeContext;
-            const cellNodePosition =
-              NodeContext.toNodePosition(cellNodeContext);
+            const cellNodePosition = NodeContext.toNodePosition(
+              cellNodeContext,
+              column.layoutContext.continuationStore,
+            );
             const breakChunkPosition = new VtreeImpl.ChunkPosition(
-              NodeContext.toNodePosition(breakNodeContext),
+              NodeContext.toNodePosition(
+                breakNodeContext,
+                column.layoutContext.continuationStore,
+              ),
             );
             formattingContext.cellBreakPositions.push({
               cellNodePosition,

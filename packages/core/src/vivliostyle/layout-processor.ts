@@ -87,7 +87,10 @@ export class LayoutProcessorResolver {
   /**
    * Find LayoutProcessor corresponding to given formatting context.
    */
-  find(formattingContext: Vtree.FormattingContext): LayoutProcessor {
+  find(
+    formattingContext: Vtree.FormattingContext,
+    layoutContext: Vtree.LayoutContext,
+  ): LayoutProcessor {
     const hooks: Plugin.ResolveLayoutProcessorHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.RESOLVE_LAYOUT_PROCESSOR,
     );
@@ -97,6 +100,7 @@ export class LayoutProcessorResolver {
         return LegacyPluginSurface.adaptLegacyLayoutProcessor(
           hooks[i],
           processor,
+          layoutContext,
         );
       }
     }

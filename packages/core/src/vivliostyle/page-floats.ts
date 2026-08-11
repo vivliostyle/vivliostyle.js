@@ -2760,7 +2760,10 @@ export class NormalPageFloatLayoutStrategy implements PageFloatLayoutStrategy {
   ): Task.Result<PageFloat> {
     let floatReference = nodeContext.floatReference;
     const floatSide = nodeContext.floatSide;
-    const nodePosition = NodeContext.toNodePosition(nodeContext);
+    const nodePosition = NodeContext.toNodePosition(
+      nodeContext,
+      column.layoutContext.continuationStore,
+    );
     const insidePageFloat = !!pageFloatLayoutContext.generatingNodePosition;
     return column
       .resolveFloatReferenceFromColumnSpan(

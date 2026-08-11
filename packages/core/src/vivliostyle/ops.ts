@@ -45,6 +45,7 @@ import * as Layout from "./layout";
 import * as LayoutProcessor from "./layout-processor";
 import * as Logging from "./logging";
 import * as Net from "./net";
+import * as NodeContext from "./node-context";
 import * as PageFloats from "./page-floats";
 import * as CssPage from "./css-page";
 import * as Plugin from "./plugin";
@@ -286,6 +287,13 @@ export class StyleInstance
     PageMaster.InstanceHolder,
     Vgen.StylerProducer
 {
+  public readonly breakSuppressionStore: Break.BreakSuppressionStore = {
+    breakSuppressionByViewNode: new WeakMap(),
+  };
+  public readonly continuationStore: NodeContext.ContinuationStore = {
+    continuationOfSlot: new WeakMap(),
+    slotOfContinuation: new WeakMap(),
+  };
   lang: string | null;
   primaryFlows = { body: true } as { [key: string]: boolean };
   rootPageBoxInstance: PageMaster.RootPageBoxInstance;
@@ -2364,6 +2372,8 @@ export class StyleInstance
     );
     const layoutContext = new Vgen.ViewFactory(
       flowNameStr,
+      this.breakSuppressionStore,
+      this.continuationStore,
       this,
       this.viewport,
       this.styler,

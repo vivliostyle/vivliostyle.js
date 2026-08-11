@@ -63,6 +63,9 @@ describe("break-position", function () {
 
   function stubColumn() {
     return {
+      edgeOverflowStore: {
+        edgeOverflowByViewNode: new WeakMap(),
+      },
       overflows: false,
       vertical: false,
       isOverflown: function () {
@@ -74,6 +77,12 @@ describe("break-position", function () {
       findEdgeBreakPosition: function (breakPosition) {
         return breakPosition.position;
       },
+    };
+  }
+
+  function beginLayoutPass(target) {
+    target.edgeOverflowStore = {
+      edgeOverflowByViewNode: new WeakMap(),
     };
   }
 
@@ -170,7 +179,7 @@ describe("break-position", function () {
       expect(
         vivliostyle_break_position.effectiveOverflow(column, position),
       ).toBe(true);
-      vivliostyle_break_position.beginLayoutPass(column);
+      beginLayoutPass(column);
       expect(
         vivliostyle_break_position.effectiveOverflow(column, position),
       ).toBe(false);
@@ -181,7 +190,7 @@ describe("break-position", function () {
         beforeEdgeOf(document.createElement("div")),
         true,
       );
-      vivliostyle_break_position.beginLayoutPass(column);
+      beginLayoutPass(column);
       expect(
         vivliostyle_break_position.effectiveOverflow(column, position),
       ).toBe(true);
@@ -191,7 +200,7 @@ describe("break-position", function () {
       var viewNode = document.createElement("div");
       var position = beforeEdgeOf(viewNode);
       edgeBreakPosition(position).findAcceptableBreak(overflowing(), 10);
-      vivliostyle_break_position.beginLayoutPass(column);
+      beginLayoutPass(column);
       var reached = beforeEdgeOf(viewNode);
       edgeBreakPosition(reached).findAcceptableBreak(overflowing(), 10);
       expect(
@@ -255,7 +264,7 @@ describe("break-position", function () {
     it("keeps the record a nested column's layout pass leaves alone", function () {
       var position = beforeEdgeOf(document.createElement("div"));
       edgeBreakPosition(position).findAcceptableBreak(overflowing(), 10);
-      vivliostyle_break_position.beginLayoutPass(Object.create(column));
+      beginLayoutPass(Object.create(column));
       expect(
         vivliostyle_break_position.effectiveOverflow(column, position),
       ).toBe(true);

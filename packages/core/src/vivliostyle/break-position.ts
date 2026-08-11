@@ -26,42 +26,14 @@ import { Layout, RepetitiveElement, Vtree } from "./types";
  */
 export type BreakPosition = Layout.BreakPosition;
 
-type LayoutPass = Record<string, never>;
+export type EdgeOverflow = Readonly<{
+  before: ReadonlyMap<number, boolean>;
+  after: ReadonlyMap<number, boolean>;
+}>;
 
-type EdgeOverflow = {
-  pass: LayoutPass;
-  before: Map<number, boolean>;
-  after: Map<number, boolean>;
-};
-
-const edgeOverflown = new WeakMap<Element | Text, EdgeOverflow>();
-
-const layoutPassOfColumn = new WeakMap<Layout.Column, LayoutPass>();
-
-function layoutPassOf(column: Layout.Column): LayoutPass {
-  let pass = layoutPassOfColumn.get(column);
-  if (!pass) {
-    pass = {};
-    layoutPassOfColumn.set(column, pass);
-  }
-  return pass;
-}
-
-export function beginLayoutPass(column: Layout.Column): void {
-  layoutPassOfColumn.set(column, {});
-}
-
-function edgesAt(
-  column: Layout.Column,
-  nodeContext: Vtree.NodeContext,
-): Map<number, boolean> | null {
-  const viewNode = nodeContext.viewNode;
-  const edges = viewNode === null ? undefined : edgeOverflown.get(viewNode);
-  if (!edges || edges.pass !== layoutPassOf(column)) {
-    return null;
-  }
-  return nodeContext.after ? edges.after : edges.before;
-}
+export type EdgeOverflowStore = Readonly<{
+  edgeOverflowByViewNode: WeakMap<Element | Text, EdgeOverflow>;
+}>;
 
 export function recordEdgeOverflow(
   column: Layout.Column,
@@ -72,26 +44,34 @@ export function recordEdgeOverflow(
   if (!viewNode) {
     return;
   }
-  let edges = edgesAt(column, nodeContext);
-  if (!edges) {
-    const created = {
-      pass: layoutPassOf(column),
-      before: new Map<number, boolean>(),
-      after: new Map<number, boolean>(),
-    };
-    edgeOverflown.set(viewNode, created);
-    edges = nodeContext.after ? created.after : created.before;
-  }
-  edges.set(nodeContext.boxOffset, overflows);
+  const edgeOverflowByViewNode =
+    column.edgeOverflowStore.edgeOverflowByViewNode;
+  const edgeOverflow = edgeOverflowByViewNode.get(viewNode) ?? {
+    before: new Map<number, boolean>(),
+    after: new Map<number, boolean>(),
+  };
+  const updated = new Map(
+    nodeContext.after ? edgeOverflow.after : edgeOverflow.before,
+  );
+  updated.set(nodeContext.boxOffset, overflows);
+  edgeOverflowByViewNode.set(
+    viewNode,
+    nodeContext.after
+      ? { ...edgeOverflow, after: updated }
+      : { ...edgeOverflow, before: updated },
+  );
 }
 
 export function effectiveOverflow(
   column: Layout.Column,
   nodeContext: Vtree.NodeContext,
 ): boolean {
-  const edges = edgesAt(column, nodeContext);
-  const recorded = edges ? edges.get(nodeContext.boxOffset) : undefined;
-  return nodeContext.overflow || recorded === true;
+  const viewNode = nodeContext.viewNode;
+  const edgeOverflow = viewNode
+    ? column.edgeOverflowStore.edgeOverflowByViewNode.get(viewNode)
+    : undefined;
+  const edges = nodeContext.after ? edgeOverflow?.after : edgeOverflow?.before;
+  return nodeContext.overflow || edges?.get(nodeContext.boxOffset) === true;
 }
 
 export abstract class AbstractBreakPosition

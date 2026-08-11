@@ -30,6 +30,24 @@ import "../../../src/vivliostyle";
 describe("legacy-plugin-surface", function () {
   "use strict";
 
+  var breakStore;
+  var continuationStore;
+  var stores;
+
+  beforeEach(function () {
+    breakStore = {
+      breakSuppressionByViewNode: new WeakMap(),
+    };
+    continuationStore = {
+      continuationOfSlot: new WeakMap(),
+      slotOfContinuation: new WeakMap(),
+    };
+    stores = {
+      breakSuppressionStore: breakStore,
+      continuationStore: continuationStore,
+    };
+  });
+
   var hookNames = [
     "PREPROCESS_TEXT_CONTENT",
     "PREPROCESS_ELEMENT_STYLE",
@@ -86,6 +104,8 @@ describe("legacy-plugin-surface", function () {
 
   function stubLayoutContext() {
     var layoutContext = {
+      breakSuppressionStore: breakStore,
+      continuationStore: continuationStore,
       calls: [],
       cloned: null,
       rendered: null,
@@ -155,6 +175,9 @@ describe("legacy-plugin-surface", function () {
 
   function stubColumn() {
     var column = {
+      edgeOverflowStore: {
+        edgeOverflowByViewNode: new WeakMap(),
+      },
       calls: [],
       overflown: true,
       clearance: document.createElement("div"),
@@ -373,12 +396,14 @@ describe("legacy-plugin-surface", function () {
         vivliostyle_legacy.adaptLegacyLayoutProcessor(
           registered[0],
           legacyProcessor,
+          stores,
         ),
       ).not.toBe(legacyProcessor);
       expect(
         vivliostyle_legacy.adaptLegacyLayoutProcessor(
           registered[1],
           legacyProcessor,
+          stores,
         ),
       ).toBe(legacyProcessor);
       vivliostyle_plugin.removeHook(name, external);
@@ -406,6 +431,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         "PREPROCESS_TEXT_CONTENT",
+        stores,
         nodeContext,
       );
       vivliostyle_legacy.noteRetained(nodeContext);
@@ -414,6 +440,7 @@ describe("legacy-plugin-surface", function () {
       expect(
         vivliostyle_legacy.asLegacyNodeContext(
           "PREPROCESS_TEXT_CONTENT",
+          stores,
           nodeContext,
         ).shared,
       ).toBe(true);
@@ -465,13 +492,14 @@ describe("legacy-plugin-surface", function () {
     it("hands out the value itself", function () {
       var nodeContext = openTextNodeContext();
       expect(
-        vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext),
+        vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext),
       ).toBe(nodeContext);
     });
 
     it("restores the removed members", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         openTextNodeContext(),
       );
       expect(legacy.copy()).toBe(legacy);
@@ -482,21 +510,45 @@ describe("legacy-plugin-surface", function () {
       expect(legacy.belongsTo(legacy.formattingContext)).toBe(false);
     });
 
+    it("resolves a shadow sibling to its latest continuation", function () {
+      var parent = elementNodeContext();
+      var nodeContext = childNodeContext(parent);
+      var slot = openTextNodeContext();
+      var resumed = openTextNodeContext();
+      nodeContext.shadowSibling = slot;
+      vivliostyle_node_context.resumeContinuation(
+        continuationStore,
+        slot,
+        resumed,
+      );
+      var legacy = vivliostyle_legacy.asLegacyNodeContext(
+        hookName,
+        stores,
+        nodeContext,
+      );
+      expect(legacy.toNodePositionStep().shadowSibling.node).toBe(
+        resumed.sourceNode,
+      );
+      expect(legacy.toNodePosition().steps[0].shadowSibling.node).toBe(
+        resumed.sourceNode,
+      );
+    });
+
     it("decorates a shadow sibling a decorated value gains later", function () {
       var nodeContext = openTextNodeContext();
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       var sibling = openTextNodeContext();
       nodeContext.shadowSibling = sibling;
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(typeof sibling.copy).toBe("function");
     });
 
     it("decorates a block container a decorated value gains later", function () {
       var nodeContext = openTextNodeContext();
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       var container = elementNodeContext();
       nodeContext.blockContainer = container;
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(typeof container.copy).toBe("function");
     });
 
@@ -505,7 +557,7 @@ describe("legacy-plugin-surface", function () {
       var second = openTextNodeContext();
       first.shadowSibling = second;
       second.shadowSibling = first;
-      vivliostyle_legacy.asLegacyNodeContext(hookName, first);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, first);
       expect(typeof first.copy).toBe("function");
       expect(typeof second.copy).toBe("function");
     });
@@ -514,6 +566,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       expect(legacy.shared).toBe(false);
@@ -524,6 +577,7 @@ describe("legacy-plugin-surface", function () {
     it("marks the value on copy, as the class did", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         openTextNodeContext(),
       );
       expect(legacy.shared).toBe(false);
@@ -534,6 +588,7 @@ describe("legacy-plugin-surface", function () {
     it("modifies in place while the core does not keep the value", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         openTextNodeContext(),
       );
       expect(legacy.modify()).toBe(legacy);
@@ -543,6 +598,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       vivliostyle_legacy.noteRetained(nodeContext);
@@ -561,6 +617,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       legacy.overflow = true;
@@ -571,6 +628,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       legacy.after = true;
@@ -586,6 +644,7 @@ describe("legacy-plugin-surface", function () {
       var parent = elementNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         childNodeContext(parent),
       );
       expect(legacy.parent.shared).toBe(false);
@@ -598,6 +657,7 @@ describe("legacy-plugin-surface", function () {
       var parent = elementNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         childNodeContext(parent),
       );
       legacy.shared = true;
@@ -609,6 +669,7 @@ describe("legacy-plugin-surface", function () {
       var parent = elementNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         childNodeContext(parent),
       );
       legacy.copy();
@@ -620,6 +681,7 @@ describe("legacy-plugin-surface", function () {
     it("keeps shared off the value's own fields", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         openTextNodeContext(),
       );
       legacy.copy();
@@ -635,6 +697,7 @@ describe("legacy-plugin-surface", function () {
       var parent = elementNodeContext();
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         childNodeContext(parent),
       );
       legacy.pluginProps.mark = "self";
@@ -657,14 +720,21 @@ describe("legacy-plugin-surface", function () {
       });
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       expect(legacy.breakBefore).toBe("column");
       expect(legacy.breakAfter).toBe("column");
-      vivliostyle_break.suppressColumnBreakBefore(nodeContext.viewNode);
-      vivliostyle_break.suppressColumnBreakAfter(nodeContext.viewNode);
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      vivliostyle_break.suppressColumnBreakAfter(
+        breakStore,
+        nodeContext.viewNode,
+      );
       expect(legacy.breakBefore).toBe("column");
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(legacy.breakBefore).toBe(null);
       expect(legacy.breakAfter).toBe(null);
     });
@@ -679,11 +749,11 @@ describe("legacy-plugin-surface", function () {
         breakAfter: "column",
       });
       nodeContext.shadowSibling = sibling;
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(sibling.breakBefore).toBe("column");
-      vivliostyle_break.suppressColumnBreakBefore(sibling.viewNode);
-      vivliostyle_break.suppressColumnBreakAfter(sibling.viewNode);
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_break.suppressColumnBreakBefore(breakStore, sibling.viewNode);
+      vivliostyle_break.suppressColumnBreakAfter(breakStore, sibling.viewNode);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(sibling.breakBefore).toBe(null);
       expect(sibling.breakAfter).toBe(null);
     });
@@ -693,22 +763,37 @@ describe("legacy-plugin-surface", function () {
         breakBefore: "column",
         breakAfter: "column",
       });
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
-      vivliostyle_break.suppressColumnBreakBefore(nodeContext.viewNode);
-      vivliostyle_break.suppressColumnBreakAfter(nodeContext.viewNode);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      vivliostyle_break.suppressColumnBreakAfter(
+        breakStore,
+        nodeContext.viewNode,
+      );
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
       expect(legacy.breakBefore).toBe(null);
       expect(legacy.breakAfter).toBe(null);
-      vivliostyle_break.unsuppressColumnBreakBefore(nodeContext.viewNode);
-      vivliostyle_break.unsuppressColumnBreakAfter(nodeContext.viewNode);
-      expect(vivliostyle_break.effectiveBreakBefore(nodeContext)).toBe(
-        "column",
+      vivliostyle_break.unsuppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
       );
-      expect(vivliostyle_break.effectiveBreakAfter(nodeContext)).toBe("column");
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_break.unsuppressColumnBreakAfter(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      expect(
+        vivliostyle_break.effectiveBreakBefore(breakStore, nodeContext),
+      ).toBe("column");
+      expect(
+        vivliostyle_break.effectiveBreakAfter(breakStore, nodeContext),
+      ).toBe("column");
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(legacy.breakBefore).toBe("column");
       expect(legacy.breakAfter).toBe("column");
     });
@@ -717,20 +802,25 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = elementNodeContext({ breakBefore: "column" });
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         nodeContext,
       );
-      vivliostyle_break.suppressColumnBreakBefore(nodeContext.viewNode);
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(legacy.breakBefore).toBe(null);
       legacy.breakBefore = "column";
       expect(legacy.breakBefore).toBe("column");
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(legacy.breakBefore).toBe(null);
     });
 
     it("restores every unstyled field on resetView", function () {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         elementNodeContext(),
       );
       var written = {
@@ -765,7 +855,7 @@ describe("legacy-plugin-surface", function () {
         shadowSibling: sibling,
         blockContainer: container,
       };
-      vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext);
+      vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext);
       expect(typeof sibling.copy).toBe("function");
       expect(typeof container.copy).toBe("function");
     });
@@ -777,6 +867,7 @@ describe("legacy-plugin-surface", function () {
       expect(
         typeof vivliostyle_legacy.asLegacyNodeContext(
           "POST_LAYOUT_BLOCK",
+          stores,
           plain,
         ).copy,
       ).toBe("undefined");
@@ -784,6 +875,7 @@ describe("legacy-plugin-surface", function () {
       expect(
         typeof vivliostyle_legacy.asLegacyNodeContext(
           "POST_LAYOUT_BLOCK",
+          stores,
           decorated,
         ).copy,
       ).toBe("function");
@@ -806,6 +898,7 @@ describe("legacy-plugin-surface", function () {
     function retagged(viewNode, after) {
       var legacy = vivliostyle_legacy.asLegacyNodeContext(
         hookName,
+        stores,
         openTextNodeContext(),
       );
       legacy.viewNode = viewNode;
@@ -834,7 +927,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       expect(
         vivliostyle_legacy.normalizeLegacyNodeContext(
-          vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext),
+          vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext),
         ),
       ).toBe(nodeContext);
     });
@@ -954,6 +1047,7 @@ describe("legacy-plugin-surface", function () {
         var nodeContext = elementNodeContext();
         var legacy = vivliostyle_legacy.asLegacyNodeContextOrNull(
           hookName,
+          stores,
           nodeContext,
         );
         expect(legacy).toBe(nodeContext);
@@ -964,7 +1058,7 @@ describe("legacy-plugin-surface", function () {
 
       it("accepts a missing value", function () {
         expect(
-          vivliostyle_legacy.asLegacyNodeContextOrNull(hookName, null),
+          vivliostyle_legacy.asLegacyNodeContextOrNull(hookName, stores, null),
         ).toBe(null);
         expect(
           vivliostyle_legacy.retagLegacyNodeContext(hookName, null),
@@ -975,6 +1069,7 @@ describe("legacy-plugin-surface", function () {
         var checkPoints = [elementNodeContext(), elementNodeContext()];
         var legacy = vivliostyle_legacy.asLegacyRenderedNodeContexts(
           hookName,
+          stores,
           checkPoints,
         );
         expect(legacy).toBe(checkPoints);
@@ -1008,6 +1103,7 @@ describe("legacy-plugin-surface", function () {
     function renderContextOf(nodeContext, rendered) {
       return vivliostyle_legacy.asLegacyRenderContext(
         hookName,
+        stores,
         nodeContext,
         vivliostyle_node_context.elementRenderProgress(nodeContext, rendered),
         rendered,
@@ -1240,7 +1336,8 @@ describe("legacy-plugin-surface", function () {
         );
         expect(composed).not.toBe(nodeContext);
         expect(
-          vivliostyle_legacy.asLegacyNodeContext(hookName, composed).shared,
+          vivliostyle_legacy.asLegacyNodeContext(hookName, stores, composed)
+            .shared,
         ).toBe(true);
       });
 
@@ -1262,7 +1359,8 @@ describe("legacy-plugin-surface", function () {
           vivliostyle_legacy.withLegacyContextWrites(nodeContext, writes),
         ).toBe(nodeContext);
         expect(
-          vivliostyle_legacy.asLegacyNodeContext(hookName, nodeContext).shared,
+          vivliostyle_legacy.asLegacyNodeContext(hookName, stores, nodeContext)
+            .shared,
         ).toBe(true);
       });
 
@@ -1283,7 +1381,8 @@ describe("legacy-plugin-surface", function () {
           ),
         );
         expect(
-          vivliostyle_legacy.asLegacyNodeContext(hookName, composed).shared,
+          vivliostyle_legacy.asLegacyNodeContext(hookName, stores, composed)
+            .shared,
         ).toBe(false);
       });
 
@@ -1351,6 +1450,7 @@ describe("legacy-plugin-surface", function () {
         expect(
           vivliostyle_legacy.asLegacyRenderContext(
             hookName,
+            stores,
             nodeContext,
             progress,
             rendered,
@@ -1443,6 +1543,22 @@ describe("legacy-plugin-surface", function () {
       expect(column.calls[0][3]).toBe(checkPoints);
     });
 
+    it("reports suppression on a node context returned by the column", function () {
+      var column = stubColumn();
+      var view = vivliostyle_legacy.asLegacyColumn(externalHook, column);
+      var nodeContext = elementNodeContext({ breakBefore: "column" });
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      column.skipEdges = function () {
+        return vivliostyle_task.newResult(nodeContext);
+      };
+      expect(view.skipEdges(nodeContext, true, null).get().breakBefore).toBe(
+        null,
+      );
+    });
+
     it("serves the column's layout context through its legacy view", function () {
       var column = stubColumn();
       var view = vivliostyle_legacy.asLegacyColumn(externalHook, column);
@@ -1528,6 +1644,25 @@ describe("legacy-plugin-surface", function () {
       expect(position.kind).toBe("element");
       vivliostyle_legacy.retagLegacyNodeContexts("POST_LAYOUT_BLOCK", []);
       expect(position.kind).toBe("after-element");
+    });
+
+    it("reports suppression on a break position", function () {
+      var column = stubColumn();
+      var view = vivliostyle_legacy.asLegacyColumn(externalHook, column);
+      var position = elementNodeContext({ breakBefore: "column" });
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        position.viewNode,
+      );
+      column.breakPositions.push(
+        new vivliostyle_break_position.EdgeBreakPosition(
+          position,
+          null,
+          false,
+          0,
+        ),
+      );
+      expect(view.breakPositions[0].position.breakBefore).toBe(null);
     });
 
     it("serves the pseudo parent through its own legacy view", function () {
@@ -1765,10 +1900,12 @@ describe("legacy-plugin-surface", function () {
       vivliostyle_plugin.registerHook("POST_LAYOUT_BLOCK", externalHook);
       var nodeContext = vivliostyle_legacy.asLegacyNodeContext(
         "POST_LAYOUT_BLOCK",
+        stores,
         openTextNodeContext(),
       );
       var checkPoints = vivliostyle_legacy.asLegacyRenderedNodeContexts(
         "POST_LAYOUT_BLOCK",
+        stores,
         [elementNodeContext()],
       );
       vivliostyle_plugin.removeHook("POST_LAYOUT_BLOCK", externalHook);
@@ -2349,20 +2486,51 @@ describe("legacy-plugin-surface", function () {
 
     it("hands a breaker the core resolved back as itself", function () {
       expect(
-        vivliostyle_legacy.adaptLegacyTextNodeBreaker(coreHook, legacyBreaker),
+        vivliostyle_legacy.adaptLegacyTextNodeBreaker(
+          coreHook,
+          legacyBreaker,
+          stores,
+        ),
       ).toBe(legacyBreaker);
     });
 
-    it("serves one adapter per legacy implementation", function () {
+    it("serves one adapter per legacy implementation and context stores", function () {
       expect(
         vivliostyle_legacy.adaptLegacyTextNodeBreaker(
           externalHook,
           legacyBreaker,
+          stores,
         ),
       ).toBe(
         vivliostyle_legacy.adaptLegacyTextNodeBreaker(
           externalHook,
           legacyBreaker,
+          stores,
+        ),
+      );
+    });
+
+    it("keeps adapters for distinct context states apart", function () {
+      var otherContextState = {
+        breakSuppressionStore: {
+          breakSuppressionByViewNode: new WeakMap(),
+        },
+        continuationStore: {
+          continuationOfSlot: new WeakMap(),
+          slotOfContinuation: new WeakMap(),
+        },
+      };
+      expect(
+        vivliostyle_legacy.adaptLegacyTextNodeBreaker(
+          externalHook,
+          legacyBreaker,
+          stores,
+        ),
+      ).not.toBe(
+        vivliostyle_legacy.adaptLegacyTextNodeBreaker(
+          externalHook,
+          legacyBreaker,
+          otherContextState,
         ),
       );
     });
@@ -2371,7 +2539,7 @@ describe("legacy-plugin-surface", function () {
       var nodeContext = openTextNodeContext();
       var checkPoints = [elementNodeContext()];
       var result = vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .breakTextNode(textNode, nodeContext, 2, checkPoints, 0, true);
       expect(calls[0].nodeContext).toBe(nodeContext);
       expect(typeof calls[0].nodeContext.copy).toBe("function");
@@ -2386,17 +2554,29 @@ describe("legacy-plugin-surface", function () {
     it("reports the soft hyphen index the legacy breaker returned", function () {
       var nodeContext = openTextNodeContext();
       var result = vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .breakAfterSoftHyphen(textNode, "legacy", 4, nodeContext);
       expect(result).toBe(5);
       expect(typeof calls[0].nodeContext.copy).toBe("function");
+    });
+
+    it("reports suppression to the legacy breaker", function () {
+      var nodeContext = elementNodeContext({ breakBefore: "column" });
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      vivliostyle_legacy
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
+        .breakAfterSoftHyphen(textNode, "legacy", 4, nodeContext);
+      expect(calls[0].nodeContext.breakBefore).toBe(null);
     });
 
     it("reports the index of a break after another character", function () {
       var nodeContext = openTextNodeContext();
       expect(
         vivliostyle_legacy
-          .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+          .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
           .breakAfterOtherCharacter(textNode, "legacy", 4, nodeContext),
       ).toBe(3);
       expect(typeof calls[0].nodeContext.copy).toBe("function");
@@ -2405,7 +2585,7 @@ describe("legacy-plugin-surface", function () {
     it("retags the value updateNodeContext hands back", function () {
       var nodeContext = openTextNodeContext();
       var result = vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .updateNodeContext(nodeContext, 2, textNode);
       expect(typeof calls[0].nodeContext.copy).toBe("function");
       expect(result).toBe(nodeContext);
@@ -2421,7 +2601,7 @@ describe("legacy-plugin-surface", function () {
         return ctx;
       };
       vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .breakTextNode(textNode, nodeContext, 2, checkPoints, 0, true);
       expect(checkPoints[0].kind).toBe("after-element");
     });
@@ -2438,7 +2618,7 @@ describe("legacy-plugin-surface", function () {
         return viewIndex;
       };
       var result = vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .breakAfterSoftHyphen(textNode, "legacy", 4, nodeContext);
       expect(result).toBe(4);
       expect(nodeContext.kind).toBe("text");
@@ -2456,7 +2636,7 @@ describe("legacy-plugin-surface", function () {
         return viewIndex;
       };
       vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .breakAfterOtherCharacter(textNode, "legacy", 4, nodeContext);
       expect(nodeContext.kind).toBe("after-none");
     });
@@ -2468,6 +2648,7 @@ describe("legacy-plugin-surface", function () {
       var adapted = vivliostyle_legacy.adaptLegacyTextNodeBreaker(
         externalHook,
         legacyBreaker,
+        stores,
       );
       column.resolveTextNodeBreaker = function () {
         return adapted;
@@ -2504,6 +2685,7 @@ describe("legacy-plugin-surface", function () {
         vivliostyle_legacy.adaptLegacyTextNodeBreaker(
           externalHook,
           breakerView,
+          stores,
         ),
       ).toBe(coreBreaker);
     });
@@ -2516,7 +2698,7 @@ describe("legacy-plugin-surface", function () {
         return replacement;
       };
       var result = vivliostyle_legacy
-        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker)
+        .adaptLegacyTextNodeBreaker(externalHook, legacyBreaker, stores)
         .updateNodeContext(nodeContext, 2, textNode);
       expect(result).toBe(replacement);
       expect(nodeContext.kind).toBe("text");
@@ -2633,29 +2815,57 @@ describe("legacy-plugin-surface", function () {
         vivliostyle_legacy.adaptLegacyLayoutProcessor(
           coreHook,
           legacyProcessor,
+          stores,
         ),
       ).toBe(legacyProcessor);
     });
 
-    it("serves one adapter per legacy processor", function () {
+    it("serves one adapter per legacy processor and context stores", function () {
       var adapted = vivliostyle_legacy.adaptLegacyLayoutProcessor(
         externalHook,
         legacyProcessor,
+        stores,
       );
       expect(adapted).not.toBe(legacyProcessor);
       expect(
         vivliostyle_legacy.adaptLegacyLayoutProcessor(
           externalHook,
           legacyProcessor,
+          stores,
         ),
       ).toBe(adapted);
+    });
+
+    it("keeps processor adapters for distinct context states apart", function () {
+      var otherContextState = {
+        breakSuppressionStore: {
+          breakSuppressionByViewNode: new WeakMap(),
+        },
+        continuationStore: {
+          continuationOfSlot: new WeakMap(),
+          slotOfContinuation: new WeakMap(),
+        },
+      };
+      expect(
+        vivliostyle_legacy.adaptLegacyLayoutProcessor(
+          externalHook,
+          legacyProcessor,
+          stores,
+        ),
+      ).not.toBe(
+        vivliostyle_legacy.adaptLegacyLayoutProcessor(
+          externalHook,
+          legacyProcessor,
+          otherContextState,
+        ),
+      );
     });
 
     it("hands layout the node context and the column as legacy views", function () {
       var nodeContext = openTextNodeContext();
       var column = stubColumn();
       var result = vivliostyle_legacy
-        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor)
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
         .layout(nodeContext, column, true);
       expect(calls[0].nodeContext).toBe(nodeContext);
       expect(typeof calls[0].nodeContext.copy).toBe("function");
@@ -2665,11 +2875,24 @@ describe("legacy-plugin-surface", function () {
       expect(result.get().kind).toBe("after-none");
     });
 
+    it("reports suppression to the legacy processor", function () {
+      var nodeContext = elementNodeContext({ breakBefore: "column" });
+      var column = stubColumn();
+      vivliostyle_break.suppressColumnBreakBefore(
+        breakStore,
+        nodeContext.viewNode,
+      );
+      vivliostyle_legacy
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
+        .startNonInlineElementNode(nodeContext);
+      expect(calls[0].nodeContext.breakBefore).toBe(null);
+    });
+
     it("wraps the break position the processor creates", function () {
       var position = openTextNodeContext();
       var column = stubColumn();
       var adapted = vivliostyle_legacy
-        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor)
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
         .createEdgeBreakPosition(position, "column", true, 120);
       expect(adapted).not.toBe(breakPosition);
       expect(calls[0].nodeContext).toBe(position);
@@ -2705,7 +2928,7 @@ describe("legacy-plugin-surface", function () {
         return core;
       };
       var created = vivliostyle_legacy
-        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor)
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
         .createEdgeBreakPosition(position, "column", true, 120);
       expect(created).not.toBe(core);
       column.breakPositions = [created];
@@ -2715,7 +2938,7 @@ describe("legacy-plugin-surface", function () {
     it("adapts a break position a legacy processor created only once", function () {
       var position = elementNodeContext();
       var adapted = vivliostyle_legacy
-        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor)
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
         .createEdgeBreakPosition(position, "column", true, 120);
       expect(adapted).not.toBe(breakPosition);
       var column = stubColumn();
@@ -2733,6 +2956,7 @@ describe("legacy-plugin-surface", function () {
       var adapted = vivliostyle_legacy.adaptLegacyLayoutProcessor(
         externalHook,
         legacyProcessor,
+        stores,
       );
       expect(adapted.startNonInlineElementNode(nodeContext)).toBe(true);
       expect(adapted.afterNonInlineElementNode(nodeContext, true)).toBe(false);
@@ -2764,7 +2988,7 @@ describe("legacy-plugin-surface", function () {
         return vivliostyle_task.newResult(null);
       };
       var result = vivliostyle_legacy
-        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor)
+        .adaptLegacyLayoutProcessor(externalHook, legacyProcessor, stores)
         .layout(nodeContext, column, true);
       expect(result.get()).toBe(null);
       expect(nodeContext.kind).toBe("after-none");
@@ -2798,6 +3022,7 @@ describe("legacy-plugin-surface", function () {
       var adapted = vivliostyle_legacy.adaptLegacyLayoutProcessor(
         externalHook,
         legacyProcessor,
+        stores,
       );
       adapted.createEdgeBreakPosition(position, "column", true, 120);
       expect(position.kind).toBe("after-none");
@@ -2968,6 +3193,7 @@ describe("legacy-plugin-surface", function () {
 
     function firstTimeOf(formattingContext, nodeContext, firstTime) {
       return vivliostyle_legacy.legacyFirstTime(
+        stores,
         formattingContext,
         nodeContext,
         vivliostyle_node_context.elementRenderResultOf(nodeContext),
@@ -2991,6 +3217,7 @@ describe("legacy-plugin-surface", function () {
         rendered.display = "block";
         var seen = [];
         var resolved = vivliostyle_legacy.legacyFirstTime(
+          stores,
           {
             isFirstTime: function (ctx, firstTime) {
               seen.push(ctx);
@@ -3012,6 +3239,7 @@ describe("legacy-plugin-surface", function () {
         var rendered =
           vivliostyle_node_context.elementRenderResultOf(nodeContext);
         var resolved = vivliostyle_legacy.legacyFirstTime(
+          stores,
           {
             isFirstTime: function (ctx, firstTime) {
               ctx.floatSide = "left";
@@ -3044,6 +3272,233 @@ describe("legacy-plugin-surface", function () {
         expect(resolved.nodeContext.kind).toBe("after-element");
         expect(nodeContext.kind).toBe("element");
       });
+    });
+
+    it("carries stores into a formatting context installed by an element style hook", function () {
+      var styleHook = function () {};
+      vivliostyle_plugin.registerHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      try {
+        var openedParent = elementNodeContext();
+        var rendered =
+          vivliostyle_node_context.elementRenderResultOf(openedParent);
+        var legacy = vivliostyle_legacy.asLegacyRenderContext(
+          "PREPROCESS_ELEMENT_STYLE",
+          stores,
+          openedParent,
+          vivliostyle_node_context.elementRenderProgress(
+            openedParent,
+            rendered,
+          ),
+          rendered,
+        );
+        var before = vivliostyle_legacy.captureRenderFields(
+          "PREPROCESS_ELEMENT_STYLE",
+          legacy,
+        );
+        var seen;
+        var seenBreakPenalty;
+        var replacementSawCopy;
+        var replacement =
+          new vivliostyle_layout_processor.BlockFormattingContext(null);
+        replacement.isFirstTime = function (ctx, firstTime) {
+          replacementSawCopy = typeof ctx.copy;
+          return firstTime;
+        };
+        legacy.formattingContext = {
+          isFirstTime: function (ctx, firstTime) {
+            seen = ctx.toNodePosition().steps[0].shadowSibling.node;
+            seenBreakPenalty = ctx.breakPenalty;
+            ctx.breakPenalty = 11;
+            ctx.fragmentIndex = 7;
+            ctx.parent.formattingContext = replacement;
+            return firstTime;
+          },
+        };
+        vivliostyle_legacy.applyLegacyRenderWrites(
+          [styleHook],
+          before,
+          legacy,
+          rendered,
+        );
+        var parent = vivliostyle_node_context.renderedElement(
+          openedParent,
+          document.createElement("div"),
+          rendered,
+        );
+        var child = childNodeContext(parent);
+        var slot = openTextNodeContext();
+        var resumed = openTextNodeContext();
+        child.shadowSibling = slot;
+        vivliostyle_node_context.resumeContinuation(
+          continuationStore,
+          slot,
+          resumed,
+        );
+        var childRendered =
+          vivliostyle_node_context.elementRenderResultOf(child);
+        childRendered.breakPenalty = 5;
+        childRendered.formattingContext =
+          new vivliostyle_layout_processor.BlockFormattingContext(
+            parent.formattingContext,
+          );
+        var resolved = vivliostyle_legacy.legacyFirstTime(
+          stores,
+          parent.formattingContext,
+          child,
+          childRendered,
+          true,
+        );
+        expect(seen).toBe(resumed.sourceNode);
+        expect(seenBreakPenalty).toBe(5);
+        expect(childRendered.breakPenalty).toBe(11);
+        expect(resolved.nodeContext.fragmentIndex).toBe(7);
+        var sibling = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          2,
+        );
+        firstTimeOf(parent.formattingContext, sibling, true);
+        expect(replacementSawCopy).toBe("function");
+      } finally {
+        vivliostyle_plugin.removeHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      }
+    });
+
+    it("adapts a formatting context written through the parent", function () {
+      var styleHook = function () {};
+      vivliostyle_plugin.registerHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      try {
+        var parent = elementNodeContext();
+        var openedChild = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          1,
+        );
+        var rendered =
+          vivliostyle_node_context.elementRenderResultOf(openedChild);
+        var legacy = vivliostyle_legacy.asLegacyRenderContext(
+          "PREPROCESS_ELEMENT_STYLE",
+          stores,
+          openedChild,
+          vivliostyle_node_context.elementRenderProgress(openedChild, rendered),
+          rendered,
+        );
+        var before = vivliostyle_legacy.captureRenderFields(
+          "PREPROCESS_ELEMENT_STYLE",
+          legacy,
+        );
+        var seenCopy;
+        var formattingContext =
+          new vivliostyle_layout_processor.BlockFormattingContext(null);
+        formattingContext.isFirstTime = function (ctx, firstTime) {
+          seenCopy = typeof ctx.copy;
+          ctx.fragmentIndex = 7;
+          return firstTime;
+        };
+        legacy.parent.formattingContext = formattingContext;
+        vivliostyle_legacy.applyLegacyRenderWrites(
+          [styleHook],
+          before,
+          legacy,
+          rendered,
+        );
+        var sibling = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          2,
+        );
+        var resolved = firstTimeOf(parent.formattingContext, sibling, true);
+        expect(seenCopy).toBe("function");
+        expect(resolved.nodeContext.fragmentIndex).toBe(7);
+      } finally {
+        vivliostyle_plugin.removeHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      }
+    });
+
+    it("adapts an isFirstTime replacement written through the parent", function () {
+      var styleHook = function () {};
+      vivliostyle_plugin.registerHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      try {
+        var parent = elementNodeContext();
+        var openedChild = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          1,
+        );
+        var rendered =
+          vivliostyle_node_context.elementRenderResultOf(openedChild);
+        var legacy = vivliostyle_legacy.asLegacyRenderContext(
+          "PREPROCESS_ELEMENT_STYLE",
+          stores,
+          openedChild,
+          vivliostyle_node_context.elementRenderProgress(openedChild, rendered),
+          rendered,
+        );
+        var before = vivliostyle_legacy.captureRenderFields(
+          "PREPROCESS_ELEMENT_STYLE",
+          legacy,
+        );
+        var seenCopy;
+        legacy.parent.formattingContext.isFirstTime = function (
+          ctx,
+          firstTime,
+        ) {
+          seenCopy = typeof ctx.copy;
+          ctx.fragmentIndex = 7;
+          return firstTime;
+        };
+        vivliostyle_legacy.applyLegacyRenderWrites(
+          [styleHook],
+          before,
+          legacy,
+          rendered,
+        );
+        var sibling = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          2,
+        );
+        var resolved = firstTimeOf(parent.formattingContext, sibling, true);
+        expect(seenCopy).toBe("function");
+        expect(resolved.nodeContext.fragmentIndex).toBe(7);
+      } finally {
+        vivliostyle_plugin.removeHook("PREPROCESS_ELEMENT_STYLE", styleHook);
+      }
+    });
+
+    it("adapts a formatting context returned from a text preprocessing hook", function () {
+      var textHook = function () {};
+      vivliostyle_plugin.registerHook("PREPROCESS_TEXT_CONTENT", textHook);
+      try {
+        var parent = elementNodeContext();
+        var child = childNodeContext(parent);
+        var legacy = vivliostyle_legacy.asLegacyNodeContext(
+          "PREPROCESS_TEXT_CONTENT",
+          stores,
+          child,
+        );
+        var seenCopy;
+        var formattingContext =
+          new vivliostyle_layout_processor.BlockFormattingContext(null);
+        formattingContext.isFirstTime = function (ctx, firstTime) {
+          seenCopy = typeof ctx.copy;
+          return firstTime;
+        };
+        legacy.parent.formattingContext = formattingContext;
+        vivliostyle_legacy.retagLegacyNodeContext(
+          "PREPROCESS_TEXT_CONTENT",
+          legacy,
+        );
+        var sibling = vivliostyle_node_context.openChildOf(
+          document.createElement("span"),
+          parent,
+          2,
+        );
+        firstTimeOf(parent.formattingContext, sibling, true);
+        expect(seenCopy).toBe("function");
+      } finally {
+        vivliostyle_plugin.removeHook("PREPROCESS_TEXT_CONTENT", textHook);
+      }
     });
 
     it("hands the core value on while no external hook is registered", function () {

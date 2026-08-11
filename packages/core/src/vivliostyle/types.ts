@@ -23,6 +23,9 @@ import * as Exprs from "./exprs";
 import * as GeometryUtil from "./geometry-util";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
+import type { BreakSuppressionStore } from "./break";
+import type { EdgeOverflowStore } from "./break-position";
+import type { ContinuationStore } from "./node-context";
 
 export type FormattingContextType =
   "Block" | "RepetitiveElementsOwner" | "Table";
@@ -196,6 +199,7 @@ export namespace Layout {
     blockDistanceToBlockEndFloats: number;
     lastLineStride: number;
     computedBlockSize: number;
+    edgeOverflowStore: EdgeOverflowStore;
 
     layoutContext: Vtree.LayoutContext;
     clientLayout: Vtree.ClientLayout;
@@ -1072,6 +1076,8 @@ export namespace Vtree {
    * Styling, creating a single node's view, etc.
    */
   export interface LayoutContext {
+    readonly breakSuppressionStore: BreakSuppressionStore;
+    readonly continuationStore: ContinuationStore;
     /**
      * Creates a functionally equivalent, but uninitialized layout context,
      * suitable for building a separate column.
