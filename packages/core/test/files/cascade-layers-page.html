@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #977: CSS Cascade Layers combined with @page rules -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Cascade Layers: @page</title>
+    <style>
+      @layer base, theme;
+
+      /* The `theme` layer wins over `base` even though `base` comes later
+         in the source and uses a more specific page selector. */
+      @layer theme {
+        @page {
+          size: 150mm 100mm;
+          margin: 15mm;
+          background: #eef7ee;
+
+          @top-center {
+            content: "theme header";
+            color: green;
+          }
+        }
+      }
+
+      @layer base {
+        @page :first {
+          size: 200mm 150mm;
+          margin: 5mm;
+          background: #fdd;
+
+          @top-center {
+            content: "base header";
+            color: red;
+          }
+        }
+      }
+
+      /* Unlayered @page declarations win over any layer. */
+      @page {
+        border: 1pt solid green;
+      }
+      @layer theme {
+        @page {
+          border: 3pt dashed red;
+        }
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cascade Layers and @page</h1>
+    <ul>
+      <li>The page must be 150mm &times; 100mm with a 15mm margin.</li>
+      <li>The page background must be pale green, not pink.</li>
+      <li>The top-center margin box must read &ldquo;theme header&rdquo; in green.</li>
+      <li>The page border must be a green solid 1pt line.</li>
+    </ul>
+  </body>
+</html>

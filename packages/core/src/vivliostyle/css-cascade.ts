@@ -268,10 +268,111 @@ const couplingMapRightPage = buildCouplingMap(
   {},
 );
 
+/**
+ * A cascade layer (CSS `@layer`, css-cascade-5 §6.4).
+ *
+ * `order` is (re)assigned by {@link CascadeLayerTree} whenever a layer is added
+ * so that it always reflects the current layer ordering; a larger value means
+ * a higher precedence for normal declarations.
+ */
+export class CascadeLayer {
+  order: number = 0;
+  readonly children: CascadeLayer[] = [];
+
+  constructor(
+    public readonly name: string | null,
+    public readonly parent: CascadeLayer | null,
+  ) {}
+}
+
+/**
+ * The layer tree of one cascade origin. Layers are ordered by a post-order
+ * traversal, because the declarations directly contained in a layer form an
+ * implicit final sub-layer of it.
+ */
+export class CascadeLayerTree {
+  readonly root = new CascadeLayer(null, null);
+
+  /**
+   * @param nameList `null` for an anonymous layer, otherwise the dot-separated
+   *     `<layer-name>` split into its parts.
+   */
+  register(
+    parent: CascadeLayer | null,
+    nameList: string[] | null,
+  ): CascadeLayer {
+    let layer = parent ?? this.root;
+    if (nameList) {
+      for (const name of nameList) {
+        let child = layer.children.find((c) => c.name === name);
+        if (!child) {
+          child = new CascadeLayer(name, layer);
+          layer.children.push(child);
+        }
+        layer = child;
+      }
+    } else {
+      const child = new CascadeLayer(null, layer);
+      layer.children.push(child);
+      layer = child;
+    }
+    this.renumber();
+    return layer;
+  }
+
+  private renumber(): void {
+    let order = 0;
+    const visit = (layer: CascadeLayer): void => {
+      for (const child of layer.children) {
+        visit(child);
+      }
+      layer.order = order++;
+    };
+    for (const child of this.root.children) {
+      visit(child);
+    }
+  }
+}
+
+/**
+ * Size of the range of `CascadeValue.priority` values assigned to one cascade
+ * origin (see the `SPECIFICITY_*` constants in css-parser).
+ */
+const ORIGIN_UNIT = 0x1000000;
+
+/**
+ * The lowest origin bucket that holds `!important` declarations, for which the
+ * layer order is reversed.
+ */
+const FIRST_IMPORTANT_ORIGIN = 4;
+
+/**
+ * Compares two cascaded values. Cascade layers are sorted between the origin
+ * and the selector specificity, and unlayered declarations act as a final
+ * layer (css-cascade-5 §6.4.2).
+ */
+export function comparePriority(a: CascadeValue, b: CascadeValue): number {
+  const originA = Math.floor(a.priority / ORIGIN_UNIT);
+  const originB = Math.floor(b.priority / ORIGIN_UNIT);
+  if (originA !== originB) {
+    return originA - originB;
+  }
+  if (a.layer !== b.layer) {
+    const orderA = a.layer ? a.layer.order : Infinity;
+    const orderB = b.layer ? b.layer.order : Infinity;
+    if (orderA !== orderB) {
+      const higher = orderA > orderB ? 1 : -1;
+      return originA >= FIRST_IMPORTANT_ORIGIN ? -higher : higher;
+    }
+  }
+  return a.priority - b.priority;
+}
+
 export class CascadeValue implements CssCascade.CascadeValue {
   constructor(
     public readonly value: Css.Val,
     public readonly priority: number,
+    public readonly layer: CascadeLayer | null = null,
   ) {}
 
   getBaseValue(): CascadeValue {
@@ -283,14 +384,18 @@ export class CascadeValue implements CssCascade.CascadeValue {
     if (value === this.value) {
       return this;
     }
-    return new CascadeValue(value, this.priority);
+    return new CascadeValue(value, this.priority, this.layer);
   }
 
   increaseSpecificity(specificity: number): CascadeValue {
     if (specificity == 0) {
       return this;
     }
-    return new CascadeValue(this.value, this.priority + specificity);
+    return new CascadeValue(
+      this.value,
+      this.priority + specificity,
+      this.layer,
+    );
   }
 
   evaluate(
@@ -325,12 +430,13 @@ export class ConditionalCascadeValue extends CascadeValue {
     value: Css.Val,
     priority: number,
     public readonly condition: Exprs.Val,
+    layer: CascadeLayer | null = null,
   ) {
-    super(value, priority);
+    super(value, priority, layer);
   }
 
   override getBaseValue(): CascadeValue {
-    return new CascadeValue(this.value, this.priority);
+    return new CascadeValue(this.value, this.priority, this.layer);
   }
 
   override filterValue(visitor: Css.Visitor): CascadeValue {
@@ -338,7 +444,12 @@ export class ConditionalCascadeValue extends CascadeValue {
     if (value === this.value) {
       return this;
     }
-    return new ConditionalCascadeValue(value, this.priority, this.condition);
+    return new ConditionalCascadeValue(
+      value,
+      this.priority,
+      this.condition,
+      this.layer,
+    );
   }
 
   override increaseSpecificity(specificity: number): CascadeValue {
@@ -349,6 +460,7 @@ export class ConditionalCascadeValue extends CascadeValue {
       this.value,
       this.priority + specificity,
       this.condition,
+      this.layer,
     );
   }
 
@@ -371,7 +483,7 @@ export function cascadeValues(
   tv: CascadeValue,
   av: CascadeValue,
 ): CascadeValue {
-  if ((!tv || av.priority >= tv.priority) && av.isEnabled(context)) {
+  if ((!tv || comparePriority(av, tv) >= 0) && av.isEnabled(context)) {
     return av.getBaseValue();
   }
   return tv;
@@ -395,7 +507,7 @@ export function setPropCascadeValue(
     delete style[name];
   } else {
     const tv = style[name] as CascadeValue;
-    if (!tv || value.priority >= tv.priority) {
+    if (!tv || comparePriority(value, tv) >= 0) {
       if (context) {
         if (value.isEnabled(context)) {
           style[name] = value.getBaseValue();
@@ -647,7 +759,7 @@ export function mergeIn(
       const propListLH = validatorSet?.getShorthand(prop, av.value)?.propList;
       if (propListLH) {
         for (const propLH of propListLH) {
-          const avLH = new CascadeValue(Css.empty, av.priority);
+          const avLH = new CascadeValue(Css.empty, av.priority, av.layer);
           setPropCascadeValue(target, propLH, avLH, context);
         }
       }
@@ -3359,6 +3471,7 @@ export class Cascade {
   ids: ActionTable = {};
   pagetypes: ActionTable = {};
   order: number = 0;
+  readonly layerTrees: { [flavor: string]: CascadeLayerTree } = {};
 
   clone(): Cascade {
     const r = new Cascade();
@@ -3373,7 +3486,23 @@ export class Cascade {
     copyTable(this.ids, r.ids);
     copyTable(this.pagetypes, r.pagetypes);
     r.order = this.order;
+    for (const f in this.layerTrees) {
+      r.layerTrees[f] = this.layerTrees[f];
+    }
     return r;
+  }
+
+  /**
+   * Returns the cascade layer for a `@layer` rule of the given origin.
+   * @param nameList `null` for an anonymous layer.
+   */
+  registerLayer(
+    flavor: string,
+    parent: CascadeLayer | null,
+    nameList: string[] | null,
+  ): CascadeLayer {
+    const tree = (this.layerTrees[flavor] ??= new CascadeLayerTree());
+    return tree.register(parent, nameList);
   }
 
   insertInTable(table: ActionTable, key: string, action: CascadeAction): void {
@@ -4445,7 +4574,11 @@ export class CascadeInstance {
         elementStyle[propName] =
           validatedValue === filtered.value
             ? filtered
-            : new CascadeValue(validatedValue, filtered.priority);
+            : new CascadeValue(
+                validatedValue,
+                filtered.priority,
+                cascVal.layer,
+              );
       }
     }
   }
@@ -4521,7 +4654,11 @@ export class CascadeInstance {
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
-              const avLH = new CascadeValue(value, cascVal.priority);
+              const avLH = new CascadeValue(
+                value,
+                cascVal.priority,
+                cascVal.layer,
+              );
               const tvLH = getProp(elementStyle, nameLH);
               setProp(propsLH, nameLH, cascadeValues(this.context, tvLH, avLH));
             }
@@ -4545,6 +4682,7 @@ export class CascadeInstance {
                       this.validatorSet.defaultValues[nameLH] ??
                       Css.ident.initial,
                     cascVal.priority,
+                    cascVal.layer,
                   );
                   const tvLH = getProp(elementStyle, nameLH);
                   setProp(
@@ -4558,7 +4696,11 @@ export class CascadeInstance {
             }
           }
         } else {
-          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+          elementStyle[name] = new CascadeValue(
+            value,
+            cascVal.priority,
+            cascVal.layer,
+          );
         }
       }
       if (propsLH[name]) {
@@ -4622,7 +4764,11 @@ export class CascadeInstance {
         const cascVal = getProp(elementStyle, name);
         const value = cascVal.value.visit(visitor);
         if (value !== cascVal.value) {
-          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+          elementStyle[name] = new CascadeValue(
+            value,
+            cascVal.priority,
+            cascVal.layer,
+          );
         }
       }
     }
@@ -4666,7 +4812,11 @@ export class CascadeInstance {
           if (visitor.hadDeviceCmyk()) {
             visitor.recordConversion(pseudoPrefix + name, originalValue);
           }
-          elementStyle[name] = new CascadeValue(value, cascVal.priority);
+          elementStyle[name] = new CascadeValue(
+            value,
+            cascVal.priority,
+            cascVal.layer,
+          );
         }
       }
     }
@@ -4855,6 +5005,7 @@ export class CascadeParserHandler
   pseudoelement: string | null = null;
   footnoteContent: boolean = false;
   cascade: Cascade;
+  layer: CascadeLayer | null;
   state: ParseState;
   viewConditionId: string | null = null;
   insideSelectorRule: ParseState | undefined;
@@ -4871,7 +5022,14 @@ export class CascadeParserHandler
   ) {
     super(scope, owner, delegation);
     this.cascade = parent ? parent.cascade : new Cascade();
+    this.layer = parent ? parent.layer : null;
     this.state = ParseState.TOP;
+  }
+
+  override layerStatementRule(nameLists: string[][]): void {
+    for (const nameList of nameLists) {
+      this.cascade.registerLayer(this.flavor, this.layer, nameList);
+    }
   }
 
   protected insertNonPrimary(action: CascadeAction): void {
@@ -5494,8 +5652,8 @@ export class CascadeParserHandler
       : this.getBaseSpecificity();
     const priority = specificity + this.cascade.nextOrder();
     const cascval = this.condition
-      ? new ConditionalCascadeValue(value, priority, this.condition)
-      : new CascadeValue(value, priority);
+      ? new ConditionalCascadeValue(value, priority, this.condition, this.layer)
+      : new CascadeValue(value, priority, this.layer);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
@@ -6148,13 +6306,13 @@ export const convertToPhysical = <T>(
     let targetName: string;
     if (coupledName) {
       let coupledCascVal = src[coupledName];
-      if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
+      if (coupledCascVal && comparePriority(coupledCascVal, cascVal) > 0) {
         continue;
       }
       if (coupledName1 && coupledName2 && coupledName1 !== coupledName2) {
         coupledName = coupledName2;
         coupledCascVal = src[coupledName];
-        if (coupledCascVal && coupledCascVal.priority > cascVal.priority) {
+        if (coupledCascVal && comparePriority(coupledCascVal, cascVal) > 0) {
           continue;
         }
       }
@@ -6175,6 +6333,7 @@ export const convertToPhysical = <T>(
             ? Css.ident.right
             : Css.ident.left,
           cascVal.priority,
+          cascVal.layer,
         );
       }
     }

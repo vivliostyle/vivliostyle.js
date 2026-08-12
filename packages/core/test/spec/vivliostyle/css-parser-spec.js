@@ -1480,5 +1480,138 @@ describe("css-parser", function () {
         });
       });
     });
+
+    describe("@layer parsing", function () {
+      beforeEach(function () {
+        spyOn(handler, "startLayerRule");
+        spyOn(handler, "layerStatementRule");
+      });
+
+      it("parses an anonymous layer block", function (done) {
+        parse(done, "@layer { a { color: red } }", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(null);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("parses a named layer block", function (done) {
+        parse(done, "@layer A { }", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(["A"]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("parses a layer name with sub-layers", function (done) {
+        parse(done, "@layer A.B.C { }", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(["A", "B", "C"]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("parses the statement form", function (done) {
+        parse(done, "@layer A, B.C, D;", function () {
+          expect(handler.layerStatementRule).toHaveBeenCalledWith([
+            ["A"],
+            ["B", "C"],
+            ["D"],
+          ]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("rejects @layer without a name or block", function (done) {
+        parse(done, "@layer;", function () {
+          expect(handler.startLayerRule).not.toHaveBeenCalled();
+          expect(handler.layerStatementRule).not.toHaveBeenCalled();
+          expect(handler.error).toHaveBeenCalled();
+        });
+      });
+
+      it("rejects a layer name with whitespace around the dot", function (done) {
+        parse(done, "@layer A . B { }", function () {
+          expect(handler.startLayerRule).not.toHaveBeenCalled();
+          expect(handler.error).toHaveBeenCalled();
+        });
+      });
+
+      it("rejects a block with multiple layer names", function (done) {
+        parse(done, "@layer A, B { }", function () {
+          expect(handler.startLayerRule).not.toHaveBeenCalled();
+          expect(handler.layerStatementRule).not.toHaveBeenCalled();
+          expect(handler.error).toHaveBeenCalled();
+        });
+      });
+
+      it("reports the statement form in a context where it is not allowed without skipping the rest", function (done) {
+        var slaveScope = new adapt_exprs.LexicalScope(null);
+        var dispatch = new adapt_cssparse.DispatchParserHandler(
+          slaveScope,
+          (owner) =>
+            new adapt_cssparse.SlaveParserHandler(slaveScope, owner, null),
+        );
+        spyOn(dispatch, "errorMsg");
+        var tokenizer = new adapt_csstok.Tokenizer("@layer A;", dispatch);
+
+        adapt_task.start(function () {
+          adapt_cssparse
+            .parseStylesheet(tokenizer, dispatch, null, null, null)
+            .then(function () {
+              expect(dispatch.errorMsg).toHaveBeenCalled();
+              // A skipping handler would never be taken back, swallowing
+              // everything that follows.
+              expect(dispatch.slave).toBe(dispatch.initialSlave);
+              done();
+            });
+          return adapt_task.newResult(true);
+        });
+      });
+    });
+
+    describe("@import with a cascade layer", function () {
+      // Imported through `data:` URLs so that the async import path in
+      // parseStylesheet() is actually taken.
+      var emptySheet = '"data:text/css,"';
+
+      beforeEach(function () {
+        spyOn(handler, "startLayerRule");
+      });
+
+      it("wraps an anonymous layer around the imported style sheet", function (done) {
+        parse(done, "@import " + emptySheet + " layer;", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(null);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("wraps a named layer around the imported style sheet", function (done) {
+        parse(done, "@import " + emptySheet + " layer(A.B);", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(["A", "B"]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("keeps the layer when the @import also has a media query", function (done) {
+        parse(done, "@import " + emptySheet + " layer(A) print;", function () {
+          expect(handler.startLayerRule).toHaveBeenCalledWith(["A"]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("does not carry the layer over to the next @import", function (done) {
+        var text =
+          "@import " + emptySheet + " layer(A); @import " + emptySheet + ";";
+        parse(done, text, function () {
+          expect(handler.startLayerRule.calls.allArgs()).toEqual([[["A"]]]);
+          expect(handler.error).not.toHaveBeenCalled();
+        });
+      });
+
+      it("rejects a layer name with whitespace around the dot", function (done) {
+        parse(done, "@import " + emptySheet + " layer(A . B);", function () {
+          expect(handler.startLayerRule).not.toHaveBeenCalled();
+          expect(handler.error).toHaveBeenCalled();
+        });
+      });
+    });
   });
 });

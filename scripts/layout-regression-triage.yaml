@@ -208,3 +208,51 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-font-size.html&zoom=1&spread=false
+- category: Cascade Layers
+  title: "Cascade layers (Issue #977)"
+  file: cascade-layers.html
+  decision: expected  # regression / expected / skip
+  notes: "New test file for Issue #977: canary has no CSS Cascade Layers support."
+  approvedViewer: git-feat-cascade-layers  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers.html&zoom=1&spread=false
+- category: Cascade Layers
+  title: "Cascade layers with !important (Issue #977)"
+  file: cascade-layers-important.html
+  decision: expected  # regression / expected / skip
+  notes: "New test file for Issue #977: canary has no CSS Cascade Layers support."
+  approvedViewer: git-feat-cascade-layers  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers-important.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers-important.html&zoom=1&spread=false
+- category: Cascade Layers
+  title: "Cascade layers with @page (Issue #977)"
+  file: cascade-layers-page.html
+  decision: expected  # regression / expected / skip
+  notes: "New test file for Issue #977: canary has no CSS Cascade Layers support."
+  approvedViewer: git-feat-cascade-layers  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers-page.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers-page.html&zoom=1&spread=false
+- category: Cascade Layers
+  title: "Cascade layers with @import (Issue #977)"
+  file: cascade-layers-import.html
+  decision: expected  # regression / expected / skip
+  notes: "New test file for Issue #977: canary has no CSS Cascade Layers support."
+  approvedViewer: git-feat-cascade-layers  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers-import.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers-import.html&zoom=1&spread=false

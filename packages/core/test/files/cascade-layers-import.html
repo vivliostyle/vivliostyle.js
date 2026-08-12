@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #977: CSS Cascade Layers with @import layer() -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Cascade Layers: @import</title>
+    <style>
+      @layer i6b, i6a;
+
+      @import url(cascade-layers/import-1.css) layer;
+      @import url(cascade-layers/import-2.css) layer(i2a);
+      @import url(cascade-layers/import-3.css);
+      @import url(cascade-layers/import-4.css) layer(i4);
+      @import url(cascade-layers/import-6.css) layer(i6a);
+
+      @page {
+        size: 210mm 100mm;
+        margin: 10mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        color: red;
+      }
+
+      /* I1: unlayered wins over an anonymous layer import */
+      .i1 {
+        color: green;
+      }
+
+      /* I2: a later layer wins over an imported named layer */
+      @layer i2b {
+        .i2 {
+          color: green;
+        }
+      }
+
+      /* I3: unlayered wins over a layer declared inside an unlayered import */
+      .i3 {
+        color: green;
+      }
+
+      /* I4: layer(i4) + `@layer inner` in the imported sheet gives `i4.inner` */
+      @layer i4.inner {
+        .i4 {
+          color: green;
+        }
+      }
+
+      /* I5: a layer declared after the import wins over `i4.inner` */
+      @layer i5after {
+        .i5 {
+          color: green;
+        }
+      }
+
+      /* I6: the leading @layer statement puts `i6a` after `i6b` */
+      @layer i6b {
+        .i6 {
+          color: red;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cascade Layers and @import</h1>
+    <p>All list items below must be green.</p>
+    <ol>
+      <li class="i1">I1 @import ... layer (anonymous)</li>
+      <li class="i2">I2 @import ... layer(name)</li>
+      <li class="i3">I3 @layer inside an unlayered import</li>
+      <li class="i4">I4 nested layer name from an imported sheet</li>
+      <li class="i5">I5 layer order across import boundaries</li>
+      <li class="i6">I6 @layer statement before @import</li>
+    </ol>
+  </body>
+</html>

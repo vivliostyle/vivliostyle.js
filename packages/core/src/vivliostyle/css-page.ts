@@ -3366,6 +3366,7 @@ export class PageParserHandler
         const result = new CssCascade.CascadeValue(
           cascVal.value,
           cascVal.priority + s.specificity,
+          cascVal.layer,
         );
         const selector = s.selectors ? s.selectors.join("") : "";
         let props = pageProps[selector];
@@ -3437,6 +3438,7 @@ export class PageParserHandler
           this.validatorSet,
           style,
           delegation,
+          this.layer,
         ),
     );
   }
@@ -3459,6 +3461,7 @@ export class PageParserHandler
           this.validatorSet,
           boxStyle,
           delegation,
+          this.layer,
         ),
     );
   }
@@ -3477,6 +3480,7 @@ export class PageMarginBoxParserHandler
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly boxStyle: CssCascade.ElementStyle,
     delegation: CssParser.Delegation,
+    public readonly layer: CssCascade.CascadeLayer | null = null,
   ) {
     super(scope, owner, delegation);
   }
@@ -3506,7 +3510,7 @@ export class PageMarginBoxParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
-    const cascval = new CssCascade.CascadeValue(value, specificity);
+    const cascval = new CssCascade.CascadeValue(value, specificity, this.layer);
     CssCascade.setProp(this.boxStyle, name, cascval);
   }
 }
@@ -3524,6 +3528,7 @@ export class PageFootnoteAreaParserHandler
     public readonly validatorSet: CssValidator.ValidatorSet,
     public readonly areaStyle: CssCascade.ElementStyle,
     delegation: CssParser.Delegation,
+    public readonly layer: CssCascade.CascadeLayer | null = null,
   ) {
     super(scope, owner, delegation);
   }
@@ -3553,7 +3558,7 @@ export class PageFootnoteAreaParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
-    const cascval = new CssCascade.CascadeValue(value, specificity);
+    const cascval = new CssCascade.CascadeValue(value, specificity, this.layer);
     CssCascade.setProp(this.areaStyle, name, cascval);
   }
 }

@@ -3408,6 +3408,24 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     );
   }
 
+  override startLayerRule(nameList: string[] | null): void {
+    const layer = this.cascade.registerLayer(this.flavor, this.layer, nameList);
+    this.owner.delegateTo((delegation) => {
+      const handler = new BaseParserHandler(
+        this.masterHandler,
+        this.owner,
+        this.scope,
+        this.validatorSet,
+        this.condition,
+        this,
+        this.regionId,
+        delegation,
+      );
+      handler.layer = layer;
+      return handler;
+    });
+  }
+
   override startDefineRule(): void {
     this.owner.delegateTo(
       (delegation) =>
@@ -3503,6 +3521,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
           this.masterHandler.validatorSet,
           style,
           delegation,
+          this.layer,
         ),
     );
   }
