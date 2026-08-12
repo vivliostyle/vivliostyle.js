@@ -29,7 +29,12 @@ const LEGACY_PSEUDO_ELEMENTS = new Set([
   "first-letter",
 ]);
 
-const SUPPORTED_GROUP_RULES = new Set(["media", "supports", "-epubx-when"]);
+const SUPPORTED_GROUP_RULES = new Set([
+  "media",
+  "supports",
+  "layer",
+  "-epubx-when",
+]);
 const DECLARATION_OR_BLOCK_TERMINATORS = new Set([";", "}"]);
 const RULE_HEADER_TERMINATORS = new Set(["{", ";", "}"]);
 const DECLARATION_START_TERMINATORS = new Set([";", "{", "}"]);

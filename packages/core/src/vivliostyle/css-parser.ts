@@ -150,6 +150,19 @@ export class ParserHandler implements CssTokenizer.TokenizerHandler {
     this.startWhenRule(expr);
   }
 
+  /**
+   * Block form of the `@layer` rule.
+   * @param nameList `null` for an anonymous layer, otherwise the parts of the
+   *     `<layer-name>`.
+   */
+  startLayerRule(nameList: string[] | null): void {}
+
+  /**
+   * Statement form of the `@layer` rule (`@layer a, b;`), which only declares
+   * the layer order.
+   */
+  layerStatementRule(nameLists: string[][]): void {}
+
   startFlowRule(flowName: string): void {}
 
   startPageTemplateRule(): void {}
@@ -375,6 +388,14 @@ export class DispatchParserHandler<
     this.slave.startWhenRule(expr);
   }
 
+  override startLayerRule(nameList: string[] | null): void {
+    this.slave.startLayerRule(nameList);
+  }
+
+  override layerStatementRule(nameLists: string[][]): void {
+    this.slave.layerStatementRule(nameLists);
+  }
+
   override startFlowRule(flowName: string): void {
     this.slave.startFlowRule(flowName);
   }
@@ -527,6 +548,16 @@ export class SlaveParserHandler extends SkippingParserHandler {
 
   override startWhenRule(expr: Css.Expr): void {
     this.reportAndSkip("E_CSS_UNEXPECTED_WHEN");
+  }
+
+  override startLayerRule(nameList: string[] | null): void {
+    this.reportAndSkip("E_CSS_UNEXPECTED_LAYER");
+  }
+
+  override layerStatementRule(nameLists: string[][]): void {
+    // Only reported: the statement form has no block, so a skipping handler
+    // would never be taken back.
+    this.report("E_CSS_UNEXPECTED_LAYER");
   }
 
   override startFlowRule(flowName: string): void {
@@ -838,6 +869,8 @@ export class Parser {
   importReady: boolean = false;
   importURL: string | null = null;
   importCondition: Css.Expr | null = null;
+  importHasLayer: boolean = false;
+  importLayerNames: string[] | null = null;
   errorBrackets: number[] = [];
   ruleStack: string[] = [];
   regionRule: boolean = false;
@@ -1132,6 +1165,30 @@ export class Parser {
     }
     valStack.push(val);
     return false;
+  }
+
+  /**
+   * Reads a `<layer-name>` (`<ident> [ '.' <ident> ]*`) at the current position
+   * and returns its parts, or null if there is none.
+   */
+  readLayerName(): string[] | null {
+    const tokenizer = this.tokenizer;
+    let token = tokenizer.token();
+    if (token.type !== TokenType.IDENT) {
+      return null;
+    }
+    const names = [token.text];
+    tokenizer.consume();
+    for (;;) {
+      token = tokenizer.token();
+      // A `.foo` after an ident is tokenized as a class token; the dot must not
+      // be separated from the preceding ident by whitespace.
+      if (token.type !== TokenType.CLASS || token.precededBySpace) {
+        return names;
+      }
+      names.push(token.text);
+      tokenizer.consume();
+    }
   }
 
   readSupportsTest(token: CssTokenizer.Token): Exprs.SupportsTest | null {
@@ -2404,6 +2461,31 @@ export class Parser {
                 tokenizer.consume();
                 token = tokenizer.token();
                 if (
+                  token.type == TokenType.IDENT &&
+                  token.text.toLowerCase() == "layer"
+                ) {
+                  this.importHasLayer = true;
+                  this.importLayerNames = null;
+                  tokenizer.consume();
+                  token = tokenizer.token();
+                } else if (
+                  token.type == TokenType.FUNC &&
+                  token.text.toLowerCase() == "layer"
+                ) {
+                  tokenizer.consume();
+                  const nameList = this.readLayerName();
+                  token = tokenizer.token();
+                  if (!nameList || token.type != TokenType.C_PAR) {
+                    handler.error("E_CSS_IMPORT_SYNTAX", token);
+                    this.actions = actionsError;
+                    continue;
+                  }
+                  this.importHasLayer = true;
+                  this.importLayerNames = nameList;
+                  tokenizer.consume();
+                  token = tokenizer.token();
+                }
+                if (
                   token.type == TokenType.SEMICOL ||
                   token.type == TokenType.EOF
                 ) {
@@ -2596,6 +2678,47 @@ export class Parser {
               this.actions = actionsExprVal;
               valStack.push("{");
               continue;
+            case "layer": {
+              tokenizer.consume();
+              token = tokenizer.token();
+              if (token.type == TokenType.O_BRC) {
+                // anonymous layer block
+                tokenizer.consume();
+                handler.startLayerRule(null);
+                this.ruleStack.push(text);
+                handler.startRuleBody();
+                continue;
+              }
+              const nameLists: string[][] = [];
+              for (;;) {
+                const nameList = this.readLayerName();
+                if (!nameList) {
+                  nameLists.length = 0;
+                  break;
+                }
+                nameLists.push(nameList);
+                if (tokenizer.token().type != TokenType.COMMA) {
+                  break;
+                }
+                tokenizer.consume();
+              }
+              if (nameLists.length > 0) {
+                token = tokenizer.token();
+                if (token.type == TokenType.SEMICOL) {
+                  tokenizer.consume();
+                  handler.layerStatementRule(nameLists);
+                  continue;
+                }
+                if (token.type == TokenType.O_BRC && nameLists.length == 1) {
+                  tokenizer.consume();
+                  handler.startLayerRule(nameLists[0]);
+                  this.ruleStack.push(text);
+                  handler.startRuleBody();
+                  continue;
+                }
+              }
+              break;
+            }
             case "-epubx-flow":
               if (
                 tokenizer.nthToken(1).type == TokenType.IDENT &&
@@ -2993,6 +3116,10 @@ function parseStylesheetInternal(
             parser.importURL as string,
             baseURL,
           );
+          if (parser.importHasLayer) {
+            handler.startLayerRule(parser.importLayerNames);
+            handler.startRuleBody();
+          }
           if (parser.importCondition) {
             handler.startMediaRule(parser.importCondition);
             handler.startRuleBody();
@@ -3004,9 +3131,14 @@ function parseStylesheetInternal(
             if (parser.importCondition) {
               handler.endRule();
             }
+            if (parser.importHasLayer) {
+              handler.endRule();
+            }
             parser.importReady = false;
             parser.importURL = null;
             parser.importCondition = null;
+            parser.importHasLayer = false;
+            parser.importLayerNames = null;
             innerFrame.finish(true);
           });
           return innerFrame.result();

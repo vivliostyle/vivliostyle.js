@@ -125,6 +125,12 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [@import](https://www.w3.org/TR/CSS2/cascade.html#at-import)
   - [Also in CSS Cascading and Inheritance 3](https://www.w3.org/TR/css-cascade-3/#at-import)
 
+### [CSS Cascading and Inheritance 5](https://www.w3.org/TR/css-cascade-5/)
+
+- [@layer](https://www.w3.org/TR/css-cascade-5/#layering)
+  - Both the block form (`@layer name { … }`, `@layer { … }`) and the statement form (`@layer a, b;`) are supported, as well as `@import … layer` / `@import … layer(name)`.
+  - Note: The `revert-layer` keyword is not supported yet.
+
 ### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 
 - [@namespace](https://www.w3.org/TR/css3-namespace/#declaration)

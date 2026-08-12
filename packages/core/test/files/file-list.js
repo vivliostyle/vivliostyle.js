@@ -312,6 +312,27 @@ module.exports = [
     ],
   },
   {
+    category: "Cascade Layers",
+    files: [
+      {
+        file: "cascade-layers.html",
+        title: "Cascade layers (Issue #977)",
+      },
+      {
+        file: "cascade-layers-important.html",
+        title: "Cascade layers with !important (Issue #977)",
+      },
+      {
+        file: "cascade-layers-page.html",
+        title: "Cascade layers with @page (Issue #977)",
+      },
+      {
+        file: "cascade-layers-import.html",
+        title: "Cascade layers with @import (Issue #977)",
+      },
+    ],
+  },
+  {
     category: "Spread inside/outside properties",
     files: [
       {

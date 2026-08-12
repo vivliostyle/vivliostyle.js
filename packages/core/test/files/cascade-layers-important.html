@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #977: CSS Cascade Layers with !important -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Cascade Layers: !important</title>
+    <style>
+      @page {
+        size: 210mm 150mm;
+        margin: 10mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        color: red;
+      }
+
+      /* A1 unlayered !important beats unlayered normal */
+      .a1 {
+        color: green !important;
+      }
+      .a1 {
+        color: red;
+      }
+
+      /* B1 layered !important beats unlayered normal */
+      @layer {
+        .b1 {
+          color: green !important;
+        }
+      }
+      .b1 {
+        color: red;
+      }
+
+      /* C1 same, with the layer coming last */
+      .c1 {
+        color: red;
+      }
+      @layer {
+        .c1 {
+          color: green !important;
+        }
+      }
+
+      /* D1 earlier layer wins for !important, and beats unlayered */
+      @layer {
+        .d1 {
+          color: green !important;
+        }
+      }
+      @layer {
+        .d1 {
+          color: red !important;
+        }
+      }
+      .d1 {
+        color: red !important;
+      }
+
+      /* D2 unlayered !important between two layers */
+      @layer {
+        .d2 {
+          color: green !important;
+        }
+      }
+      .d2 {
+        color: red !important;
+      }
+      @layer {
+        .d2 {
+          color: red !important;
+        }
+      }
+
+      /* D3 named layers reordered by a layer statement */
+      @layer d3a, d3b;
+      @layer d3b {
+        .d3 {
+          color: red !important;
+        }
+      }
+      @layer d3a {
+        .d3 {
+          color: green !important;
+        }
+      }
+      .d3 {
+        color: red !important;
+      }
+
+      /* E1 layer order beats specificity for !important */
+      @layer {
+        .e1 {
+          color: green !important;
+        }
+      }
+      @layer {
+        .e1 {
+          color: red !important;
+        }
+      }
+      li.e1#e1 {
+        color: red !important;
+      }
+
+      /* E2 layer order beats specificity inside layers too */
+      @layer {
+        .e2 {
+          color: green !important;
+        }
+      }
+      @layer {
+        li.e2#e2 {
+          color: red !important;
+        }
+      }
+      .e2 {
+        color: red !important;
+      }
+
+      /* F1 normal declaration in an earlier layer loses to a later layer */
+      @layer f1a {
+        .f1 {
+          color: red;
+        }
+      }
+      @layer f1b {
+        .f1 {
+          color: green;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CSS Cascade Layers: !important</h1>
+    <p>All list items below must be green.</p>
+    <ol>
+      <li class="a1">A1 unlayered !important</li>
+      <li class="b1">B1 layered !important, layer first</li>
+      <li class="c1">C1 layered !important, layer last</li>
+      <li class="d1">D1 first layer wins for !important</li>
+      <li class="d2">D2 layered !important beats unlayered !important</li>
+      <li class="d3">D3 layer statement order applies to !important</li>
+      <li class="e1" id="e1">E1 layer beats specificity (unlayered)</li>
+      <li class="e2" id="e2">E2 layer beats specificity (layered)</li>
+      <li class="f1">F1 normal declarations keep forward layer order</li>
+    </ol>
+  </body>
+</html>

@@ -125,6 +125,12 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [@import](https://www.w3.org/TR/CSS2/cascade.html#at-import)
   - [CSS Cascading and Inheritance 3 にも含まれます](https://www.w3.org/TR/css-cascade-3/#at-import)
 
+### [CSS Cascading and Inheritance 5](https://www.w3.org/TR/css-cascade-5/)
+
+- [@layer](https://www.w3.org/TR/css-cascade-5/#layering)
+  - ブロック形式 (`@layer name { … }`、`@layer { … }`) と文形式 (`@layer a, b;`)、および `@import … layer` / `@import … layer(name)` をサポートしています。
+  - 注意: `revert-layer` キーワードはまだサポートしていません。
+
 ### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 
 - [@namespace](https://www.w3.org/TR/css3-namespace/#declaration)
