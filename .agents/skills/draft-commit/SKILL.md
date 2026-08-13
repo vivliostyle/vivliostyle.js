@@ -22,12 +22,12 @@ Draft a commit message proposal in Markdown based on the current changes or the 
 - Do not execute `git commit` or any other git write operation.
 - If the available information is incomplete, state the assumptions briefly before the code block.
 - When the draft mentions program names, commands, file paths, code identifiers, or HTML/CSS syntax, use inline backticks appropriately.
-- End the commit message with one Git trailer that records AI assistance. Use `AI-Assisted-By: <AI tool name> / <model name and version>` when the tool and model are known. If only the tool is known, use `AI-Assisted-By: <AI tool name>`; if neither is known, use `AI-Assisted-By: AI assistance`. Never invent tool names, model names, or versions. The user may add or correct this information before creating the actual commit.
+- End the commit message with one Git trailer that records AI assistance, following [`AI_POLICY.md`](../../../AI_POLICY.md). Use `Assisted-by: AGENT_NAME:MODEL_VERSION` when the tool and model are known, with the model version written in lowercase, hyphen-separated words (no spaces). If only the tool is known, use `Assisted-by: AGENT_NAME`; if neither is known, use `Assisted-by: AI assistance`. Never invent tool names, model names, or versions. Do not add a `Co-authored-by:` trailer naming the AI. The user may add or correct this information before creating the actual commit.
 
 Example trailers:
 
 ```text
-AI-Assisted-By: GitHub Copilot Chat / GPT-5.6 Luna
+Assisted-by: GitHub Copilot Chat:gpt-5.6-luna
 ```
 
 ## Title Rules
@@ -61,7 +61,7 @@ Examples:
 3. Identify the user-visible fix or feature and express that in the title.
 4. Summarize the key implementation details in the body.
 5. If the work resolves a GitHub issue, append a final line like `Closes #1914`. Otherwise, add a related issue or PR reference when that context is relevant.
-6. Append the single `AI-Assisted-By` trailer after a blank line. Include the AI tool name, model name, and version only when known; use the appropriate fallback when some or all of this information is unavailable. The user may complete or correct this trailer before creating the actual commit.
+6. Append the single `Assisted-by` trailer after a blank line, in the `AGENT_NAME:MODEL_VERSION` format (model version in lowercase, hyphen-separated words). Include the AI tool name and model version only when known; use the appropriate fallback when some or all of this information is unavailable. The user may complete or correct this trailer before creating the actual commit.
 7. Return only the draft and any brief assumptions needed for review.
 
 ## Decision Rules
@@ -85,7 +85,8 @@ Before returning the draft, verify that:
 - Related issues or PRs are referenced when useful, and `Closes #...` is used only when the commit actually closes the issue.
 - Program names, commands, code identifiers, and HTML/CSS terms are wrapped in inline backticks where appropriate.
 - The issue-closing line is present only when the change actually closes a GitHub issue.
-- The commit ends with exactly one `AI-Assisted-By` Git trailer after a blank line.
+- The commit ends with exactly one `Assisted-by` Git trailer after a blank line, in the `AGENT_NAME:MODEL_VERSION` format (model version in lowercase, hyphen-separated words, no spaces).
 - The trailer uses the verified AI tool name and model information when available, and does not replace the commit body.
 - Missing AI tool or model information is acceptable in the draft because the user may add it before committing.
+- No `Co-authored-by:` trailer names the AI.
 - The response contains a draft only and does not perform `git commit`.
