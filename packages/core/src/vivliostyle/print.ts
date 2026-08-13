@@ -117,7 +117,7 @@ class VivliostylePrint {
           const message =
             payload.content.error?.toString() ??
             payload.content.messages.join("\n");
-          this.errorCallback(message);
+          this.errorCallback?.(message);
         });
       }
 
