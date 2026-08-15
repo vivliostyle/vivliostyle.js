@@ -34,6 +34,7 @@ Vivliostyle.js offers HTML+CSS typesetting and rich paged viewing with EPUB/Web 
   - [Bug Reports & Feature Requests](#bug-reports--feature-requests)
   - [Contributors ✨](#contributors-)
 - [Bronze Sponsor](#bronze-sponsor)
+- [Generative AI Policy](#generative-ai-policy)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -172,6 +173,10 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 ## Bronze Sponsor
 
 - <a href="https://github.com/hatena"><img src="https://avatars2.githubusercontent.com/u/14185?s=460&amp;v=4" title="hatena" width="80px" height="80px"></a>[Hatena Co., Ltd. ](https://github.com/hatena)
+
+## Generative AI Policy
+
+This project uses generative AI tools in its development and discloses that use in [AI_POLICY.md](AI_POLICY.md), the Vivliostyle organization's generative AI policy.
 
 ## License
 
