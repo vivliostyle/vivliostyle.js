@@ -20,8 +20,9 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
   - [CMYK カラー: `device-cmyk()`](https://www.w3.org/TR/css-color-5/#the-device-cmyk-notation)
     - ブラウザレンダリング用に内部的に `color(srgb ...)` に変換されます。Vivliostyle CLI との後処理によるCMYK出力を可能にします。[PR #1627](https://github.com/vivliostyle/vivliostyle.js/pull/1627) を参照
 - [属性参照: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
-  - `content` プロパティの値としてのみサポートします。
-  - 'string' 型と 'url' 型のみサポートします。
+  - `content` プロパティを含む、プロパティの値としてサポートします。
+  - `string`、`raw-string`、`url`、`number`、単位型、およびサポートされる CSS 値型を指定する `type(<...>)` 構文をサポートします。[PR #1975](https://github.com/vivliostyle/vivliostyle.js/pull/1975) を参照
+  - 型と単位の値は、`attr()` を使用するプロパティに対して検証されます。
 - [相互参照: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
   - `content` プロパティの値としてのみサポートします。
 - [`string()` 関数（名前付き文字列）](https://www.w3.org/TR/css-content-3/#string-function)
@@ -96,6 +97,14 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [`:nth-child(An+B of S)` 擬似クラス](https://www.w3.org/TR/selectors-4/#nth-child-pseudo)
 - [`:nth-last-child(An+B of S)` 擬似クラス](https://www.w3.org/TR/selectors-4/#nth-last-child-pseudo)
 
+### [CSS Nesting 1](https://www.w3.org/TR/css-nesting-1/)
+
+[PR #1889](https://github.com/vivliostyle/vivliostyle.js/pull/1889) を参照
+
+- 暗黙の子孫セレクタによるネストや `&` ネストセレクタを含む、ネストしたスタイルルール
+- ネストした [`@media`](https://www.w3.org/TR/css-conditional-3/#at-media)、[`@supports`](https://www.w3.org/TR/css-conditional-3/#at-supports)、[`@layer`](https://www.w3.org/TR/css-cascade-5/#layering)、`@-epubx-when` ルール。[PR #2109](https://github.com/vivliostyle/vivliostyle.js/pull/2109) を参照
+- ネストできるアットルールは、Vivliostyle がすでにサポートしているものに限られます
+
 ### [CSS Overflow 4](https://www.w3.org/TR/css-overflow-4/)
 
 - [`:nth-fragment()` 擬似要素](https://www.w3.org/TR/css-overflow-4/#fragment-pseudo-element)
@@ -109,6 +118,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [`::footnote-call` 擬似要素](https://www.w3.org/TR/css-gcpm-3/#the-footnote-call)
 - [`::footnote-marker` 擬似要素](https://www.w3.org/TR/css-gcpm-3/#the-footnote-marker)
   - [`list-style-position: outside`](https://www.w3.org/TR/css-gcpm-3/#footnote-marker-property) をサポートし、リストマーカーのようにマーカーを脚注本文の外側に配置できます。[PR #1706](https://github.com/vivliostyle/vivliostyle.js/pull/1706) を参照
+  - `role="doc-noteref"` / `role="doc-footnote"` または `epub:type="noteref"` / `epub:type="footnote"` で識別されるセマンティック脚注にも対応します。[PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887) を参照
 
 #### サポートされていないセレクタ
 
@@ -339,8 +349,10 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [position: running()（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#running-elements)
 - [footnote-display](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display)
   - [`block`、`inline`、`compact`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display) 値をサポートします。
+  - セマンティック脚注にも適用されます。[PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887) を参照
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
   - [`auto`、`line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) 値をサポートします。
+  - セマンティック脚注にも適用されます。[PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887) を参照
 
 参照:
 
