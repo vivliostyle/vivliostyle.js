@@ -20,8 +20,9 @@ In addition, essentially all CSS properties and values supported by the browser 
   - [CMYK Colors: `device-cmyk()`](https://www.w3.org/TR/css-color-5/#the-device-cmyk-notation)
     - Converted to `color(srgb ...)` internally for browser rendering. Enables CMYK output via post-processing with Vivliostyle CLI. See [PR #1627](https://github.com/vivliostyle/vivliostyle.js/pull/1627)
 - [Attribute references: `attr()`](https://www.w3.org/TR/css-values/#attr-notation)
-  - Only supported in values of `content` property.
-  - Only 'string' and 'url' types are supported.
+  - Supported in property values, including the `content` property.
+  - Supports `string`, `raw-string`, `url`, `number`, and unit types, as well as `type(<...>)` syntax for supported CSS value types. See [PR #1975](https://github.com/vivliostyle/vivliostyle.js/pull/1975)
+  - Type and unit values are validated against the property where `attr()` is used.
 - [Cross references: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
   - Only supported in values of `content` property.
 - [`string()` function (Named Strings)](https://www.w3.org/TR/css-content-3/#string-function)
@@ -96,6 +97,14 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [`:nth-child(An+B of S)` pseudo-class](https://www.w3.org/TR/selectors-4/#nth-child-pseudo)
 - [`:nth-last-child(An+B of S)` pseudo-class](https://www.w3.org/TR/selectors-4/#nth-last-child-pseudo)
 
+### [CSS Nesting 1](https://www.w3.org/TR/css-nesting-1/)
+
+See [PR #1889](https://github.com/vivliostyle/vivliostyle.js/pull/1889).
+
+- Nested style rules, including implicit descendant nesting and the `&` nesting selector
+- Nested [`@media`](https://www.w3.org/TR/css-conditional-3/#at-media), [`@supports`](https://www.w3.org/TR/css-conditional-3/#at-supports), [`@layer`](https://www.w3.org/TR/css-cascade-5/#layering), and `@-epubx-when` rules. See also [PR #2109](https://github.com/vivliostyle/vivliostyle.js/pull/2109)
+- Only at-rules already supported by Vivliostyle are supported when nested
+
 ### [CSS Overflow 4](https://www.w3.org/TR/css-overflow-4/)
 
 - [`:nth-fragment()` pseudo-element](https://www.w3.org/TR/css-overflow-4/#fragment-pseudo-element)
@@ -109,6 +118,7 @@ In addition, essentially all CSS properties and values supported by the browser 
 - [`::footnote-call` pseudo-element](https://www.w3.org/TR/css-gcpm-3/#the-footnote-call)
 - [`::footnote-marker` pseudo-element](https://www.w3.org/TR/css-gcpm-3/#the-footnote-marker)
   - Supports [`list-style-position: outside`](https://www.w3.org/TR/css-gcpm-3/#footnote-marker-property) for placing the marker outside the footnote body. See [PR #1706](https://github.com/vivliostyle/vivliostyle.js/pull/1706)
+  - Both pseudo-elements are also supported for semantic footnotes identified by `role="doc-noteref"` / `role="doc-footnote"` or `epub:type="noteref"` / `epub:type="footnote"`. See [PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887)
 
 #### Not supported selectors
 
@@ -339,8 +349,10 @@ See also: [At-rules in CSS Paged Media 3](#css-paged-media-3)
 - [position: running() (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-elements)
 - [footnote-display](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display)
   - Supports [`block`, `inline`, `compact`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-display) values.
+  - Also applies to semantic footnotes. See [PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887)
 - [footnote-policy](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy)
   - Supports [`auto`, `line`](https://www.w3.org/TR/css-gcpm-3/#propdef-footnote-policy) values.
+  - Also applies to semantic footnotes. See [PR #1887](https://github.com/vivliostyle/vivliostyle.js/pull/1887)
 
 See also:
 
