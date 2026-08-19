@@ -27,8 +27,6 @@ Atsushi Morimoto🌟
 NoBooking🌟
 <p><a href="https://github.com/vvakame"><img src="https://github.com/vvakame.png" title="vvakame" width="60" height="60" style="max-width:100%;"></a>
 vvakame🌟
-<p><a href="https://github.com/y-mikou"><img src="https://github.com/y-mikou.png" title="y-mikou" width="60" height="60" style="max-width:100%;"></a>
-y-mikou🌟
 <p><a href="https://github.com/u1f992"><img src="https://github.com/u1f992.png" title="u1f992" width="60" height="60" style="max-width:100%;"></a>
 u1f992🌟
 <p><a href="https://github.com/yamahige"><img src="https://github.com/yamahige.png" title="yamahige" width="60" height="60" style="max-width:100%;"></a>
@@ -54,6 +52,8 @@ udon-a🌹
 Satoshi KOJIMA🌟
 <p><a href="https://github.com/sarashino"><img src="https://github.com/sarashino.png" title="sarashino" width="60" height="60" style="max-width:100%;"></a>
 sarashino🌟
+<p><a href="https://github.com/y-mikou"><img src="https://github.com/y-mikou.png" title="y-mikou" width="60" height="60" style="max-width:100%;"></a>
+y-mikou🌟
 <p><a href="https://github.com/monaka"><img src="https://github.com/monaka.png" title="monaka" width="60" height="60" style="max-width:100%;"></a>
 monaka⭐️
 <p><a href="https://github.com/okuzawats"><img src="https://github.com/okuzawats.png" title="okuzawats" width="60" height="60" style="max-width:100%;"></a>
