@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2111: rollback keywords in @page rules and page-margin boxes -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>revert keywords in @page</title>
+    <style>
+      @page {
+        size: 210mm 200mm;
+        /* declared per side, so that the layered declarations below are not
+           shadowed by an unlayered `margin-top` */
+        margin-left: 10mm;
+        margin-right: 10mm;
+        margin-bottom: 10mm;
+      }
+
+      /* A. revert-layer in an @page rule rolls back to the previous layer */
+      @layer pagebase {
+        @page {
+          margin-top: 40mm;
+        }
+      }
+      @layer pagetheme {
+        @page {
+          margin-top: 5mm;
+          margin-top: revert-layer;
+        }
+      }
+
+      /* B. revert-rule in a page-margin box */
+      @page {
+        @top-center {
+          content: "This header must be green and 20pt";
+          color: green;
+          font-size: 20pt;
+        }
+      }
+      @page {
+        @top-center {
+          color: red;
+          color: revert-rule;
+          font-size: 8pt;
+          font-size: revert-rule;
+        }
+      }
+
+      /* C. revert in an @page rule rolls back to the user-agent style sheet,
+         whose print @page rule says `margin: 10%` */
+      @page :nth(2) {
+        margin-left: revert;
+        margin-right: revert;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        color: green;
+        margin: 0;
+      }
+
+      .newpage {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Rollback keywords in <code>@page</code></h1>
+    <p>
+      A. The top margin of this page must be 40mm (rolled back to the
+      <code>pagebase</code> layer), not 5mm.
+    </p>
+    <p>
+      B. The page header must be green and 20pt: both declarations of the
+      second <code>@top-center</code> rule roll their own rule back.
+    </p>
+    <p class="newpage">
+      C. The left and right margins of this second page must be 10% of the page
+      width (21mm), rolled back to the user-agent style sheet, while the top
+      margin is still 40mm.
+    </p>
+  </body>
+</html>

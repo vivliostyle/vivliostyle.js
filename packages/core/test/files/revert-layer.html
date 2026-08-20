@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2111: the `revert-layer` explicit defaulting keyword -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>revert-layer keyword</title>
+    <style>
+      @page {
+        size: 210mm 230mm;
+        margin: 10mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        /* red is the "not rolled back" colour, so anything that must not be
+           green has to say so */
+        color: red;
+      }
+      h1,
+      .intro {
+        color: black;
+      }
+      /* the items that must end up with an inherited colour sit inside a
+         green list item */
+      .green-parent {
+        color: green;
+      }
+
+      /* ---- A. Rolling back to the previous layer ---- */
+
+      @layer a1base {
+        .a1 {
+          color: green;
+        }
+      }
+      @layer a1theme {
+        .a1 {
+          color: revert-layer;
+        }
+      }
+
+      /* unlayered declarations are the implicit final layer, so reverting
+         one of them rolls back to the last explicit layer */
+      @layer a2 {
+        .a2 {
+          color: green;
+        }
+      }
+      .a2 {
+        color: revert-layer;
+      }
+
+      /* three layers: the rollback lands on the layer before the current one */
+      @layer a3a {
+        .a3 {
+          color: red;
+        }
+      }
+      @layer a3b {
+        .a3 {
+          color: green;
+        }
+      }
+      @layer a3c {
+        .a3 {
+          color: revert-layer;
+        }
+      }
+
+      /* a layer's own declarations form an implicit final sub-layer of it,
+         so reverting them rolls back to the nested layer */
+      @layer a4 {
+        @layer a4inner {
+          .a4 {
+            color: green;
+          }
+        }
+        .a4 {
+          color: revert-layer;
+        }
+      }
+
+      /* nothing before the first layer, so the origin itself is rolled back
+         and the inherited value applies */
+      @layer a5 {
+        .a5 {
+          color: revert-layer;
+        }
+      }
+
+      /* ---- B. The style attribute is rolled back on its own ---- */
+
+      /* the style attribute is not part of any layer of the author style
+         sheets, so reverting it lands on the author style sheets
+         (WPT css-cascade/revert-layer-009) */
+      .b1 {
+        color: green;
+      }
+
+      /* ...and it lands on whatever wins there, layers included */
+      @layer b2 {
+        .b2 {
+          color: red;
+        }
+      }
+      .b2 {
+        color: green;
+      }
+
+      /* ---- C. !important reverses the layer order, the rollback does not ---- */
+
+      /* an important revert-layer still rolls back to the *earlier* layer, so
+         the important declaration of the later layer goes with it
+         (WPT css-cascade/revert-layer-005) */
+      @layer c1a {
+        .c1 {
+          color: green;
+        }
+      }
+      @layer c1b {
+        .c1 {
+          color: red;
+          color: red !important;
+          color: revert-layer !important;
+        }
+      }
+      @layer c1c {
+        .c1 {
+          color: red !important;
+        }
+      }
+
+      /* nothing before the first layer, so even the later layer's important
+         declaration is rolled back and the inherited value applies */
+      @layer c2a {
+        .c2 {
+          color: revert-layer !important;
+        }
+      }
+      @layer c2b {
+        .c2 {
+          color: red !important;
+        }
+      }
+
+      /* an unlayered important declaration rolls back every layered and
+         unlayered declaration of the author style sheets */
+      @layer c3 {
+        .c3 {
+          color: green;
+        }
+      }
+      .c3 {
+        color: red;
+      }
+      .c3x {
+        color: revert-layer !important;
+      }
+
+      /* ---- D. `all` and custom properties ---- */
+
+      @layer d1base {
+        .d1 {
+          color: green;
+          font-style: italic;
+        }
+      }
+      @layer d1theme {
+        .d1 {
+          color: red;
+          font-style: normal;
+          all: revert-layer;
+        }
+      }
+
+      @layer d2base {
+        .d2 {
+          --c: green;
+        }
+      }
+      @layer d2theme {
+        .d2 {
+          --c: red;
+          --c: revert-layer;
+        }
+      }
+      .d2 {
+        color: var(--c);
+      }
+
+      /* ---- E. The rolled-back value reaches the layout engine ---- */
+
+      @layer e1base {
+        .e1 {
+          break-before: page;
+          color: green;
+        }
+      }
+      @layer e1theme {
+        .e1 {
+          break-before: auto;
+          break-before: revert-layer;
+        }
+      }
+
+      /* ---- F. Written in a var() fallback ---- */
+
+      /* the idiom for an optional design token: use the token if it is set,
+         otherwise defer to the earlier layer */
+      @layer f1base {
+        .f1 {
+          color: green;
+        }
+      }
+      @layer f1theme {
+        .f1 {
+          color: var(--f1-color, revert-layer);
+        }
+      }
+
+      /* ...and the token still wins when it is set */
+      @layer f2base {
+        .f2 {
+          color: red;
+        }
+      }
+      @layer f2theme {
+        .f2 {
+          --f2-color: green;
+          color: var(--f2-color, revert-layer);
+        }
+      }
+
+      /* the same from the style attribute */
+      .f3 {
+        color: green;
+      }
+
+      /* the declaration rolled back to uses var() itself */
+      .f4 {
+        --f4-color: green;
+      }
+      @layer f4base {
+        .f4 {
+          color: var(--f4-color);
+        }
+      }
+      @layer f4theme {
+        .f4 {
+          color: var(--none, revert-layer);
+        }
+      }
+
+      /* a keyword reaching the property through a custom property is *not* a
+         rollback: it is a token stream no property can use, so the
+         declaration is invalid and the inherited value applies */
+      @layer f5base {
+        .f5 {
+          color: green;
+        }
+      }
+      @layer f5theme {
+        .f5 {
+          --f5: var(--none, revert-layer);
+          color: var(--f5);
+        }
+      }
+
+      /* both pseudo-elements of one element roll back to a value that uses
+         var() itself, so each of them needs the second substitution pass */
+      .f7 {
+        --f7-color: green;
+      }
+      @layer f7base {
+        .f7::before {
+          content: "F7 ";
+          color: var(--f7-color);
+        }
+        .f7::after {
+          content: " (and its ::after)";
+          color: var(--f7-color);
+        }
+      }
+      @layer f7theme {
+        .f7::before {
+          color: var(--none, revert-layer);
+        }
+        .f7::after {
+          color: var(--none, revert-layer);
+        }
+      }
+      .f7 {
+        color: green;
+      }
+
+      /* a shorthand written as a var() fallback rolls back its longhands */
+      .f6 {
+        color: green;
+      }
+      @layer f6base {
+        .f6 {
+          margin-left: 40mm;
+        }
+      }
+      @layer f6theme {
+        .f6 {
+          margin: var(--none, revert-layer);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>The <code>revert-layer</code> keyword</h1>
+    <p class="intro">Every list item below must be green.</p>
+    <ol>
+      <li class="a1">A1 revert-layer rolls back to the previous layer</li>
+      <li class="a2">A2 revert-layer in an unlayered declaration</li>
+      <li class="a3">A3 the rollback lands on the layer before this one</li>
+      <li class="a4">A4 a layer's own rules roll back to its nested layer</li>
+      <li class="green-parent">
+        <span class="a5">A5 revert-layer before the first layer</span>
+      </li>
+      <li class="b1" style="color: red; color: revert-layer">
+        B1 revert-layer in the style attribute
+      </li>
+      <li class="b2" style="color: red; color: revert-layer">
+        B2 the style attribute rolls back to the author style sheets
+      </li>
+      <li class="c1">C1 important revert-layer goes to the earlier layer</li>
+      <li class="green-parent">
+        <span class="c2">C2 important revert-layer before the first layer</span>
+      </li>
+      <li class="c3 c3x">C3 unlayered important revert-layer</li>
+      <li class="d1">D1 all: revert-layer</li>
+      <li class="d2">D2 revert-layer on a custom property</li>
+      <li class="f1">F1 revert-layer as a var() fallback</li>
+      <li class="f2">F2 var() fallback, token set</li>
+      <li class="f3" style="color: red; color: var(--none, revert-layer)">
+        F3 var() fallback in the style attribute
+      </li>
+      <li class="f4">F4 rolled back onto a declaration that uses var()</li>
+      <li class="green-parent">
+        <span class="f5">F5 keyword through a custom property is not a rollback</span>
+      </li>
+      <li class="f7">both pseudo-elements roll back</li>
+    </ol>
+    <p class="f6">
+      F6 A shorthand written as a var() fallback rolls back its longhands: this
+      paragraph must be indented by 40mm.
+    </p>
+    <p class="e1">
+      E1 This paragraph must be green and must start a new page, because
+      <code>break-before: revert-layer</code> rolls back to the
+      <code>break-before: page</code> of the earlier layer.
+    </p>
+  </body>
+</html>

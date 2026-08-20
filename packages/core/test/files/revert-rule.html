@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2111: the `revert-rule` explicit defaulting keyword -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>revert-rule keyword</title>
+    <style>
+      @page {
+        size: 210mm 200mm;
+        margin: 10mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        /* red is the "not reverted" colour, so anything that must not be
+           green has to say so */
+        color: red;
+      }
+      h1,
+      .intro {
+        color: black;
+      }
+
+      /* ---- A. Rolling back the rule the keyword sits in ---- */
+
+      .a1 {
+        color: green;
+      }
+      .a1 {
+        color: red;
+        color: revert-rule;
+      }
+
+      /* the rollback target is decided by cascade order, not source order:
+         the lower-specificity rule that follows still wins over the one
+         above it */
+      .a2 {
+        color: red;
+      }
+      #a2 {
+        color: revert-rule;
+      }
+      li.a2.a2y {
+        color: green;
+      }
+
+      /* a rollback can land on another rollback */
+      .a3 {
+        color: green;
+      }
+      .a3x {
+        color: revert-rule;
+      }
+      #a3 {
+        color: revert-rule;
+      }
+
+      /* declarations caught in a cycle drop out of the cascade */
+      .a4 {
+        color: green;
+      }
+      #a4 {
+        color: revert-rule;
+      }
+      #a4.a4x {
+        color: revert-rule;
+      }
+
+      /* ---- B. Importance, layers and the other rollback keywords ---- */
+
+      .b1 {
+        color: green !important;
+      }
+      #b1 {
+        color: red !important;
+        color: revert-rule !important;
+      }
+
+      @layer b2a {
+        .b2 {
+          color: green;
+        }
+      }
+      @layer b2b {
+        .b2 {
+          color: red;
+          color: revert-rule;
+        }
+      }
+
+      /* revert-rule rolling back onto a revert-layer */
+      @layer b3a {
+        .b3 {
+          color: green;
+        }
+      }
+      @layer b3b {
+        .b3 {
+          color: revert-layer;
+        }
+      }
+      @layer b3c {
+        .b3 {
+          color: revert-rule;
+        }
+      }
+
+      /* ---- C. Custom properties and `all` ---- */
+
+      .c1 {
+        --c: green;
+      }
+      #c1 {
+        --c: red;
+        --c: revert-rule;
+      }
+      .c1 {
+        color: var(--c);
+      }
+
+      .c2 {
+        color: green;
+        font-style: italic;
+      }
+      #c2 {
+        color: red;
+        font-style: normal;
+        all: revert-rule;
+      }
+
+      /* revert-rule written in a var() fallback */
+      .c3 {
+        color: green;
+      }
+      #c3 {
+        color: red;
+        color: var(--c3-color, revert-rule);
+      }
+
+      /* ---- D. The rolled-back value reaches the layout engine ---- */
+
+      .d1 {
+        break-before: page;
+        color: green;
+      }
+      .d1 {
+        break-before: auto;
+        break-before: revert-rule;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>The <code>revert-rule</code> keyword</h1>
+    <p class="intro">Every list item below must be green.</p>
+    <ol>
+      <li class="a1">A1 revert-rule skips its own rule entirely</li>
+      <li class="a2 a2y" id="a2">A2 cascade order, not source order</li>
+      <li class="a3 a3x" id="a3">A3 a rollback landing on another rollback</li>
+      <li class="a4 a4x" id="a4">A4 declarations in a cycle drop out</li>
+      <li class="b1" id="b1">B1 revert-rule with !important</li>
+      <li class="b2">B2 revert-rule inside a cascade layer</li>
+      <li class="b3">B3 revert-rule rolling back onto a revert-layer</li>
+      <li class="c1" id="c1">C1 revert-rule on a custom property</li>
+      <li class="c2" id="c2">C2 all: revert-rule</li>
+      <li class="c3" id="c3">C3 revert-rule written in a var() fallback</li>
+    </ol>
+    <p class="d1">
+      D1 This paragraph must be green and must start a new page, because
+      <code>break-before: revert-rule</code> rolls back to the
+      <code>break-before: page</code> of the earlier rule.
+    </p>
+  </body>
+</html>

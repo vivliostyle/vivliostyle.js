@@ -1,8 +1,75 @@
-- id: "0045"
-  category: General
+- id: "0106"
+  category: Explicit Defaulting Keywords
+  title: "revert keyword (Issue #2111)"
+  file: revert.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test case for Issue #2111: `revert` is now resolved by Vivliostyle's own cascade instead of being handed to the browser, so the reverted values differ from canary.
+  approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0107"
+  category: Explicit Defaulting Keywords
+  title: "revert-layer keyword (Issue #2111)"
+  file: revert-layer.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test case for Issue #2111: `revert-layer` is now implemented, so it rolls back to the previous layer (including a `break-before: page`, hence the extra page) instead of being handed to the browser.
+  approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-layer.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-layer.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
+- id: "0108"
+  category: Explicit Defaulting Keywords
+  title: "revert-rule keyword (Issue #2111)"
+  file: revert-rule.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test case for Issue #2111: `revert-rule` is now implemented, so it rolls back to the previous rule (including a `break-before: page`, hence the extra page) instead of being handed to the browser.
+  approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-rule.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-rule.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
+- id: "0109"
+  category: Explicit Defaulting Keywords
+  title: "Rollback keywords in @page (Issue #2111)"
+  file: revert-page.html
+  type: error
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test case for Issue #2111: canary times out on `@page { margin-left: revert }`, which this change resolves in the cascade instead of forwarding the keyword to the browser.
+  approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-page.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-page.html&zoom=1&spread=false
+  errorSide: canary
+  errorName: TimeoutError
+  errorMessage: "Timeout (30000ms): waiting for viewer ready"
+- category: General
   title: "writing-mode on body not inherited by page context (Issue #1122)"
   file: writing-mode-body-page-context.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
     Fix for Issue #1122: writing-mode on body is propagated to the root as a used value only, so the page context
@@ -14,8 +81,6 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle-git-fix-issue1122-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/writing-mode-body-page-context.html&zoom=1&spread=false
-  diffPages:
-    - 1
 - category: General
   title: "Lowercase doctype must not cause parser error (Issue #2101)"
   file: lowercase-doctype
@@ -218,8 +283,7 @@
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers.html&zoom=1&spread=false
   baselineLabel: canary
-  baselineUrl: >-
-    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers.html&zoom=1&spread=false
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers.html&zoom=1&spread=false
 - category: Cascade Layers
   title: "Cascade layers with !important (Issue #977)"
   file: cascade-layers-important.html
@@ -275,8 +339,8 @@
   file: background-position-longhand-root.html
   decision: expected  # regression / expected / skip
   notes: >-
-    New test file for Issue #2116: canary drops `background-position-x`/`-y` specified on the body element, because
-    they are not part of the `background` shorthand grammar and so never reach the root background.
+    New test file for Issue #2116: canary drops `background-position-x`/`-y` specified on the body element, because they
+    are not part of the `background` shorthand grammar and so never reach the root background.
   approvedViewer: git-fix-issue2116  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-

@@ -6,7 +6,9 @@ In addition, essentially all CSS properties and values supported by the browser 
 
 ## Values
 
-- [CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`
+- [CSS-wide keywords](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`, `revert-layer`, `revert-rule`
+  - The [explicit defaulting keywords](https://www.w3.org/TR/css-cascade-5/#defaulting-keywords) that roll the cascade back are resolved by Vivliostyle's own cascade, so the value rolled back to is visible to the layout engine and to paged-media features. `revert` rolls back to the previous cascade origin, `revert-layer` to the layers before the current one, and `revert-rule` to the cascade without the current rule. They work in `@page` rules and page-margin boxes, with `all`, with custom properties, and written as a `var()` fallback. See [Issue #2111](https://github.com/vivliostyle/vivliostyle.js/issues/2111)
+  - Note: a rollback keyword reaching a property through a custom property (`--x: var(--y, revert-layer); color: var(--x)`) is not a rollback, matching browser behavior. Rolling back into a shadow tree (`:host`, `::slotted`) is not supported, because Vivliostyle's cascade does not implement Shadow DOM
 - [Length units](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `lh`, `rlh`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
 - Sizing keywords: [min-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-min-content), [max-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-max-content), [fit-content](https://www.w3.org/TR/css-sizing-4/#valdef-width-fit-content)
 - Color values
@@ -139,7 +141,7 @@ See [PR #1889](https://github.com/vivliostyle/vivliostyle.js/pull/1889).
 
 - [@layer](https://www.w3.org/TR/css-cascade-5/#layering)
   - Both the block form (`@layer name { … }`, `@layer { … }`) and the statement form (`@layer a, b;`) are supported, as well as `@import … layer` / `@import … layer(name)`.
-  - Note: The `revert-layer` keyword is not supported yet.
+  - The [`revert-layer` keyword](https://www.w3.org/TR/css-cascade-5/#valdef-all-revert-layer) is supported. See also [Values](#values)
 
 ### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 

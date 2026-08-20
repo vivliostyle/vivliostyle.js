@@ -342,6 +342,31 @@ module.exports = [
     ],
   },
   {
+    category: "Explicit Defaulting Keywords",
+    files: [
+      {
+        file: "revert.html",
+        title: "revert keyword (Issue #2111)",
+      },
+      {
+        file: "revert-layer.html",
+        title: "revert-layer keyword (Issue #2111)",
+      },
+      {
+        file: "revert-rule.html",
+        title: "revert-rule keyword (Issue #2111)",
+      },
+      {
+        file: "revert-page.html",
+        title: "Rollback keywords in @page (Issue #2111)",
+      },
+      {
+        file: "toc-hidden.html",
+        title: "hidden attribute in the table of contents (PR #1269)",
+      },
+    ],
+  },
+  {
     category: "Spread inside/outside properties",
     files: [
       {

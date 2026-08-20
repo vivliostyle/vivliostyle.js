@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2111 / PR #1269: the `hidden` attribute keeps an entry
+     out of the printed table of contents, but not out of the viewer's TOC menu -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>hidden in the table of contents</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 15mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hidden entries in the table of contents</h1>
+    <p>
+      The <code>hidden</code> table of contents below must not appear on this
+      page, but the viewer's TOC menu must list all three of its entries,
+      including the one whose <code>li</code> carries
+      <code>hidden</code> itself.
+    </p>
+    <nav role="doc-toc" hidden>
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#one">One</a></li>
+        <li hidden><a href="#two">Two (hidden entry)</a></li>
+        <li><a href="#three">Three</a></li>
+      </ol>
+    </nav>
+    <p hidden>
+      This paragraph carries the <code>hidden</code> attribute and must not be
+      rendered on the page.
+    </p>
+    <section id="one">
+      <h2>One</h2>
+      <p>First section.</p>
+    </section>
+    <section id="two">
+      <h2>Two</h2>
+      <p>Second section.</p>
+    </section>
+    <section id="three">
+      <h2>Three</h2>
+      <p>Third section.</p>
+    </section>
+  </body>
+</html>
