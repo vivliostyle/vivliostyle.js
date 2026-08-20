@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2110: cascade layer order for @font-face -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Cascade Layers: @font-face</title>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        margin: 15mm;
+      }
+
+      /* `theme` has higher priority than `vendor`, although every `vendor`
+         block below comes later in the source. */
+      @layer vendor, theme;
+
+      /* ---- A. Layer order from the @layer statement ---- */
+
+      @layer theme {
+        @font-face {
+          font-family: font-a;
+          src: local("Courier New"), local("DejaVu Sans Mono"), local("Liberation Mono");
+        }
+      }
+      @layer vendor {
+        @font-face {
+          font-family: font-a;
+          src: local("Georgia"), local("DejaVu Serif"), local("Liberation Serif");
+        }
+      }
+
+      /* ---- B. Unlayered definition beats any layer ---- */
+
+      @font-face {
+        font-family: font-b;
+        src: local("Courier New"), local("DejaVu Sans Mono"), local("Liberation Mono");
+      }
+      @layer theme {
+        @font-face {
+          font-family: font-b;
+          src: local("Georgia"), local("DejaVu Serif"), local("Liberation Serif");
+        }
+      }
+
+      body {
+        font: 12pt/1.6 Georgia, serif;
+        margin: 0;
+      }
+      .a {
+        font-family: font-a, Georgia, serif;
+      }
+      .b {
+        font-family: font-b, Georgia, serif;
+      }
+      .reference-mono {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .reference-serif {
+        font-family: Georgia, "Times New Roman", serif;
+      }
+      p {
+        margin: 0.4em 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cascade Layers and <code>@font-face</code></h1>
+    <p>The first two lines must be rendered with the monospaced font of the
+      reference line below them, not with the serif font.</p>
+    <p class="a">A The quick brown fox jumps over the lazy dog. (layer order
+      from <code>@layer vendor, theme;</code>)</p>
+    <p class="b">B The quick brown fox jumps over the lazy dog. (unlayered
+      definition beats the layered one after it)</p>
+    <hr />
+    <p class="reference-mono">Reference: The quick brown fox jumps over the lazy
+      dog. (monospaced &mdash; expected)</p>
+    <p class="reference-serif">Reference: The quick brown fox jumps over the lazy
+      dog. (serif &mdash; wrong)</p>
+  </body>
+</html>

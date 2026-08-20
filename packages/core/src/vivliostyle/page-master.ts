@@ -165,6 +165,7 @@ export class PageMaster<
     parent: RootPageBox,
     public readonly condition: Exprs.Val | null,
     public readonly specificity: number,
+    public readonly layer: CssCascade.CascadeLayer | null = null,
   ) {
     super(scope, name, pseudoName, classes, parent);
     // if PageMasterScope object is passed, use (share) it.
@@ -207,6 +208,7 @@ export class PageMaster<
       this.parent as RootPageBox,
       this.condition,
       this.specificity,
+      this.layer,
     );
     this.copySpecified(cloned);
     this.cloneChildren(cloned);
@@ -1922,6 +1924,16 @@ export const delayedProperties = ["transform", "transform-origin"];
 
 export const userAgentPageMasterPseudo = "background-host";
 
+/**
+ * What the cascade sorts a page box by. Only page masters carry an origin and
+ * a cascade layer; for anything else the comparison yields NaN and the
+ * document order decides.
+ */
+function cascadePriorityOf(pageBox: PageBox): CssCascade.CascadePriority {
+  const pageMaster = pageBox as PageMaster;
+  return { priority: pageMaster.specificity, layer: pageMaster.layer ?? null };
+}
+
 export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
   constructor(pageBox: RootPageBox) {
     super(null, pageBox);
@@ -1933,11 +1945,19 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
   ): void {
     super.applyCascadeAndInit(cascade, docElementStyle);
 
-    // Sort page masters using order and specificity.
+    // Sort page masters using origin, cascade layer, specificity and order.
+    // Page masters are a list tried in order: the first one whose conditions
+    // are met is used for the next page (EPUB Adaptive Layout 3.5). So the
+    // ties are broken by ascending index on purpose, keeping the "declared
+    // first, tried first" order that lets a general fallback page master be
+    // written last.
     const pageMasters = this.children;
     (pageMasters as PageMasterInstance[]).sort(
       (a, b) =>
-        (b.pageBox as any).specificity - (a.pageBox as any).specificity || // probably cause NaN
+        CssCascade.comparePriority(
+          cascadePriorityOf(b.pageBox),
+          cascadePriorityOf(a.pageBox),
+        ) || // NaN unless both are page masters
         a.pageBox.index - b.pageBox.index,
     );
   }

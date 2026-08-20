@@ -1718,6 +1718,13 @@ class EthiopicNumeric extends CounterStyle {
 export class CounterStyleStore {
   #store: CounterStyleStoreMap;
 
+  /**
+   * What the cascade sorted the currently winning definition of each name by,
+   * so that a definition parsed later cannot override one from a
+   * higher-priority origin or cascade layer (css-cascade-5 §6.4).
+   */
+  #winners: Map<string, CssCascade.CascadePriority> = new Map();
+
   constructor() {
     this.#store = new Map();
 
@@ -1755,14 +1762,30 @@ export class CounterStyleStore {
     );
   }
 
+  /**
+   * @param priority where the `@counter-style` rule sits in the cascade. When
+   *     omitted, the definition simply overrides the previous one.
+   */
   define(
     name: string,
     descriptors: CssCascade.ElementStyle,
+    priority?: CssCascade.CascadePriority,
   ): CounterStyle | null {
     if (!validateNameForDefinition(name)) {
       return null;
     }
     const counterStyle = CounterStyle.create(this.#store, descriptors);
+    const winner = priority && this.#winners.get(name);
+    if (winner && CssCascade.comparePriority(priority, winner) < 0) {
+      // A definition of the same name in a higher-priority origin or cascade
+      // layer has already won.
+      return counterStyle;
+    }
+    if (priority) {
+      this.#winners.set(name, priority);
+    } else {
+      this.#winners.delete(name);
+    }
     this.#store.set(name, counterStyle);
     return counterStyle;
   }
