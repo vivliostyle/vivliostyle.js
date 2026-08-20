@@ -65,10 +65,25 @@ import {
   UserAgentTocCss,
 } from "./assets";
 
+/**
+ * A `@font-face` rule. `priority` and `layer` are what the cascade sorts the
+ * rule by when several rules define the same font (css-cascade-5 §6.4).
+ */
 export type FontFace = {
   properties: CssCascade.ElementStyle;
   condition: Exprs.Val | null;
+  priority: number;
+  layer: CssCascade.CascadeLayer | null;
 };
+
+/**
+ * Sorts `@font-face` rules by cascade origin and layer, keeping the document
+ * order within a layer (`Array.prototype.sort` is stable). The browser lets the
+ * last matching rule win, so the winner of the cascade must be emitted last.
+ */
+export function sortFontFaces(fontFaces: FontFace[]): FontFace[] {
+  return [...fontFaces].sort(CssCascade.comparePriority);
+}
 
 class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
   constructor(
@@ -79,6 +94,7 @@ class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
     private readonly counterStyleName: string,
     private readonly counterStyles: CounterStyle.CounterStyleStore,
     delegation: CssParser.Delegation,
+    layer: CssCascade.CascadeLayer | null,
   ) {
     super(
       scope,
@@ -88,12 +104,18 @@ class CounterStyleParserHandler extends CssCascade.PropSetParserHandler {
       validatorSet,
       delegation,
       "counter-style",
+      layer,
     );
   }
 
   override endRule(): void {
     super.endRule();
-    if (!this.counterStyles.define(this.counterStyleName, this.elementStyle)) {
+    if (
+      !this.counterStyles.define(this.counterStyleName, this.elementStyle, {
+        priority: this.getBaseSpecificity(),
+        layer: this.layer,
+      })
+    ) {
       Logging.logger.warn(
         `E_CSS_COUNTER_STYLE_INVALID: @counter-style ${this.counterStyleName}`,
       );
@@ -3382,6 +3404,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
       this.masterHandler.rootBox,
       this.condition,
       this.owner.getBaseSpecificity(),
+      this.layer,
     );
     this.owner.delegateTo(
       (delegation) =>
@@ -3445,6 +3468,8 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
     this.masterHandler.fontFaces.push({
       properties,
       condition: this.condition,
+      priority: this.getBaseSpecificity(),
+      layer: this.layer,
     });
     this.owner.delegateTo(
       (delegation) =>
@@ -3456,6 +3481,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
           this.masterHandler.validatorSet,
           delegation,
           "font-face",
+          this.layer,
         ),
     );
   }
@@ -3471,6 +3497,7 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
           name,
           this.masterHandler.counterStyles,
           delegation,
+          this.layer,
         ),
     );
   }
@@ -3490,6 +3517,8 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
           style,
           this.masterHandler.validatorSet,
           delegation,
+          undefined,
+          this.layer,
         ),
     );
   }
@@ -3506,6 +3535,8 @@ export class BaseParserHandler extends CssCascade.CascadeParserHandler {
           viewportProps,
           this.masterHandler.validatorSet,
           delegation,
+          undefined,
+          this.layer,
         ),
     );
   }
@@ -3908,7 +3939,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   sph.pageScope,
                   cascade,
                   sph.rootBox,
-                  sph.fontFaces,
+                  sortFontFaces(sph.fontFaces),
                   sph.footnoteProps,
                   sph.flowProps,
                   sph.viewportProps,

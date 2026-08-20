@@ -358,6 +358,17 @@ export function nextRuleId(): number {
 }
 
 /**
+ * What the cascade sorts by, apart from the document order. Cascaded values
+ * are the usual case, but the name-defining at-rules (`@font-face`,
+ * `@counter-style`, `@-epubx-page-master`) are sorted the same way
+ * (css-cascade-5 §6.4).
+ */
+export interface CascadePriority {
+  readonly priority: number;
+  readonly layer: CascadeLayer | null;
+}
+
+/**
  * The cascade origin a cascaded value belongs to, disregarding `!important`:
  * 0 for the user-agent origin, 1 for the user origin and 2 for the author
  * origin, of which the style attribute is a part.
@@ -400,24 +411,27 @@ function layerSetOf(cascVal: CascadeValue): number {
  * The position of a cascaded value's layer in its origin. Unlayered
  * declarations act as the final layer (css-cascade-5 §6.4.2).
  */
-function layerOrderOf(cascVal: CascadeValue): number {
+function layerOrderOf(cascVal: CascadePriority): number {
   return cascVal.layer ? cascVal.layer.order : Infinity;
 }
 
 /**
- * Compares two cascaded values. Cascade layers are sorted between the origin
- * and the selector specificity, and unlayered declarations act as a final
- * layer (css-cascade-5 §6.4.2).
+ * Compares two cascaded values (or two name-defining at-rules). Cascade layers
+ * are sorted between the origin and the selector specificity, and unlayered
+ * declarations act as a final layer (css-cascade-5 §6.4.2).
  */
-export function comparePriority(a: CascadeValue, b: CascadeValue): number {
+export function comparePriority(
+  a: CascadePriority,
+  b: CascadePriority,
+): number {
   const originA = Math.floor(a.priority / ORIGIN_UNIT);
   const originB = Math.floor(b.priority / ORIGIN_UNIT);
   if (originA !== originB) {
     return originA - originB;
   }
   if (a.layer !== b.layer) {
-    const orderA = a.layer ? a.layer.order : Infinity;
-    const orderB = b.layer ? b.layer.order : Infinity;
+    const orderA = layerOrderOf(a);
+    const orderB = layerOrderOf(b);
     if (orderA !== orderB) {
       const higher = orderA > orderB ? 1 : -1;
       return originA >= FIRST_IMPORTANT_ORIGIN ? -higher : higher;
@@ -6288,6 +6302,7 @@ export class PropSetParserHandler
     public readonly validatorSet: CssValidator.ValidatorSet,
     delegation: CssParser.Delegation,
     public readonly ruleType?: string,
+    public readonly layer: CascadeLayer | null = null,
   ) {
     super(scope, owner, delegation);
     this.order = 0;
@@ -6334,10 +6349,10 @@ export class PropSetParserHandler
           value,
           specificity,
           this.condition,
-          null,
+          this.layer,
           this.ruleId,
         )
-      : new CascadeValue(value, specificity, null, this.ruleId);
+      : new CascadeValue(value, specificity, this.layer, this.ruleId);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2110: cascade layer order for @counter-style -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Cascade Layers: @counter-style</title>
+    <style>
+      @page {
+        size: 200mm 150mm;
+        margin: 15mm;
+      }
+
+      /* `theme` has higher priority than `vendor`, although every `vendor`
+         block below comes later in the source. */
+      @layer vendor, theme;
+
+      /* ---- A. Layer order from the @layer statement ---- */
+
+      @layer theme {
+        @counter-style a {
+          system: cyclic;
+          symbols: "\2714"; /* ✔ */
+        }
+      }
+      @layer vendor {
+        @counter-style a {
+          system: cyclic;
+          symbols: "\2718"; /* ✘ */
+        }
+      }
+
+      /* ---- B. Unlayered definition beats any layer ---- */
+
+      @counter-style b {
+        system: cyclic;
+        symbols: "\2714"; /* ✔ */
+      }
+      @layer theme {
+        @counter-style b {
+          system: cyclic;
+          symbols: "\2718"; /* ✘ */
+        }
+      }
+
+      /* ---- C. Nested layers ---- */
+
+      @layer theme.early, theme.late;
+
+      @layer theme.late {
+        @counter-style c {
+          system: cyclic;
+          symbols: "\2714"; /* ✔ */
+        }
+      }
+      @layer theme.early {
+        @counter-style c {
+          system: cyclic;
+          symbols: "\2718"; /* ✘ */
+        }
+      }
+
+      /* ---- D. `system: extends` follows the winning definition ---- */
+
+      @layer theme {
+        @counter-style d-base {
+          system: cyclic;
+          symbols: "\2714"; /* ✔ */
+        }
+      }
+      @layer vendor {
+        @counter-style d-base {
+          system: cyclic;
+          symbols: "\2718"; /* ✘ */
+        }
+      }
+      @counter-style d {
+        system: extends d-base;
+      }
+
+      body {
+        font: 12pt/1.6 Georgia, serif;
+        margin: 0;
+      }
+      ol {
+        padding-left: 2em;
+      }
+      li::marker {
+        color: green;
+      }
+      .a {
+        list-style-type: a;
+      }
+      .b {
+        list-style-type: b;
+      }
+      .c {
+        list-style-type: c;
+      }
+      .d {
+        list-style-type: d;
+      }
+      .e::before {
+        content: counter(dummy, a) " ";
+        color: green;
+      }
+      .e {
+        list-style-type: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cascade Layers and <code>@counter-style</code></h1>
+    <p>Every marker below must be ✔. A ✘ marker means that the wrong
+      <code>@counter-style</code> definition won.</p>
+    <ul>
+      <li class="a">A layer order from <code>@layer vendor, theme;</code></li>
+      <li class="b">B unlayered definition beats the layered one after it</li>
+      <li class="c">C nested layer <code>theme.late</code> beats
+        <code>theme.early</code></li>
+      <li class="d">D <code>system: extends</code> uses the winning definition</li>
+      <li class="e">E the same counter style in <code>content: counter()</code></li>
+    </ul>
+  </body>
+</html>

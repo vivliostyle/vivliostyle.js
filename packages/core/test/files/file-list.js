@@ -339,6 +339,14 @@ module.exports = [
         file: "cascade-layers-import.html",
         title: "Cascade layers with @import (Issue #977)",
       },
+      {
+        file: "cascade-layers-counter-style.html",
+        title: "Cascade layers with @counter-style (Issue #2110)",
+      },
+      {
+        file: "cascade-layers-font-face.html",
+        title: "Cascade layers with @font-face (Issue #2110)",
+      },
     ],
   },
   {
