@@ -159,6 +159,38 @@ describe("css-validator", function () {
       expect(validatorSet.expandBrowserShorthand).not.toHaveBeenCalled();
     });
 
+    it("looks properties up case-insensitively", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      spyOn(validatorSet, "expandBrowserShorthand").and.callThrough();
+
+      // CSS property names are ASCII case-insensitive, so a name that kept the
+      // author's casing must not fall through to browser expansion. (Issue #2116)
+      expect(
+        validatorSet.getShorthand("BACKGROUND-POSITION", "var(--pos)"),
+      ).toBeNull();
+      expect(
+        validatorSet.getShorthand("Border-Spacing", "var(--bs)"),
+      ).toBeNull();
+      expect(validatorSet.expandBrowserShorthand).not.toHaveBeenCalled();
+
+      // Vivliostyle's own shorthands are found regardless of casing too.
+      expect(validatorSet.getShorthand("MARGIN")).toBe(
+        validatorSet.getShorthand("margin"),
+      );
+    });
+
+    it("stores var() declarations of mixed-case properties under the lowercased name", function (done) {
+      parseCascade(
+        "div { BORDER-SPACING: var(--bs); }",
+        done,
+        function (cascade) {
+          expect(cascade.tags.div).toBeDefined();
+          expect(cascade.tags.div.style["border-spacing"]).toBeDefined();
+          expect(cascade.tags.div.style["BORDER-SPACING"]).toBeUndefined();
+        },
+      );
+    });
+
     it("does not cache a browser shorthand miss for unresolved var values", function () {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
       spyOn(validatorSet, "expandBrowserShorthand").and.callFake(
