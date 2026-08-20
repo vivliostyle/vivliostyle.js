@@ -2689,9 +2689,18 @@ export class ValidatorSet {
       return;
     }
     const px = this.prefixes[name];
+    // The rollback keywords (`revert`, `revert-layer` and `revert-rule`) are
+    // resolved by Vivliostyle's own cascade rather than handed to the browser,
+    // so whether this browser build happens to support the keyword must not
+    // decide whether the declaration is valid, nor how a shorthand expands.
+    // Probe the property with `unset` instead, which every browser accepts
+    // wherever a CSS-wide keyword is allowed.
+    const probeText = Css.isRollbackValue(value) ? "unset" : value.toString();
     if (!px || !px[prefix]) {
-      if (CSS.supports(origName, value.toString())) {
-        const shorthand = this.getShorthand(shorthandName, value)?.clone(scope);
+      if (CSS.supports(origName, probeText)) {
+        const shorthand = this.getShorthand(shorthandName, probeText)?.clone(
+          scope,
+        );
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             shorthand.propagateDefaultingValue(value, important, receiver);

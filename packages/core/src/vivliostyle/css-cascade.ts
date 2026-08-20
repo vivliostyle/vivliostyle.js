@@ -346,6 +346,64 @@ const ORIGIN_UNIT = 0x1000000;
  */
 const FIRST_IMPORTANT_ORIGIN = 4;
 
+let lastRuleId = 0;
+
+/**
+ * A fresh identity for one declaration block, so that `revert-rule` can tell
+ * the declarations of its own rule from the rest of the cascade. Zero is
+ * reserved for values the engine synthesizes outside of any rule.
+ */
+export function nextRuleId(): number {
+  return ++lastRuleId;
+}
+
+/**
+ * The cascade origin a cascaded value belongs to, disregarding `!important`:
+ * 0 for the user-agent origin, 1 for the user origin and 2 for the author
+ * origin, of which the style attribute is a part.
+ */
+function originOf(cascVal: CascadeValue): number {
+  switch (Math.floor(cascVal.priority / ORIGIN_UNIT)) {
+    case 0:
+      return 0; // user agent (shares one bucket with its !important side)
+    case 1:
+    case 6:
+      return 1; // user
+    default:
+      return 2; // author, including the style attribute
+  }
+}
+
+/**
+ * The set of declarations within which cascade layers are compared. Layers
+ * belong to one origin, and the element-attached styles (the `style`
+ * attribute) form a set of their own, so that `revert-layer` used there rolls
+ * back only the style attribute and lands on the author style sheets
+ * (css-cascade-5 §7.3.5, WPT css-cascade/revert-layer-009).
+ */
+function layerSetOf(cascVal: CascadeValue): number {
+  switch (Math.floor(cascVal.priority / ORIGIN_UNIT)) {
+    case 0:
+      return 0; // user agent
+    case 1:
+    case 6:
+      return 1; // user
+    case 3:
+    case 4:
+      return 3; // element-attached styles
+    default:
+      return 2; // author style sheets
+  }
+}
+
+/**
+ * The position of a cascaded value's layer in its origin. Unlayered
+ * declarations act as the final layer (css-cascade-5 §6.4.2).
+ */
+function layerOrderOf(cascVal: CascadeValue): number {
+  return cascVal.layer ? cascVal.layer.order : Infinity;
+}
+
 /**
  * Compares two cascaded values. Cascade layers are sorted between the origin
  * and the selector specificity, and unlayered declarations act as a final
@@ -373,18 +431,26 @@ export class CascadeValue implements CssCascade.CascadeValue {
     public readonly value: Css.Val,
     public readonly priority: number,
     public readonly layer: CascadeLayer | null = null,
+    public readonly ruleId: number = 0,
   ) {}
 
   getBaseValue(): CascadeValue {
     return this;
   }
 
-  filterValue(visitor: Css.Visitor): CascadeValue {
-    const value = this.value.visit(visitor);
+  /**
+   * A copy of this cascaded value carrying another CSS value, keeping
+   * everything the cascade sorts by (priority, layer and rule identity).
+   */
+  withValue(value: Css.Val): CascadeValue {
     if (value === this.value) {
       return this;
     }
-    return new CascadeValue(value, this.priority, this.layer);
+    return new CascadeValue(value, this.priority, this.layer, this.ruleId);
+  }
+
+  filterValue(visitor: Css.Visitor): CascadeValue {
+    return this.withValue(this.value.visit(visitor));
   }
 
   increaseSpecificity(specificity: number): CascadeValue {
@@ -395,6 +461,7 @@ export class CascadeValue implements CssCascade.CascadeValue {
       this.value,
       this.priority + specificity,
       this.layer,
+      this.ruleId,
     );
   }
 
@@ -431,16 +498,16 @@ export class ConditionalCascadeValue extends CascadeValue {
     priority: number,
     public readonly condition: Exprs.Val,
     layer: CascadeLayer | null = null,
+    ruleId: number = 0,
   ) {
-    super(value, priority, layer);
+    super(value, priority, layer, ruleId);
   }
 
   override getBaseValue(): CascadeValue {
-    return new CascadeValue(this.value, this.priority, this.layer);
+    return new CascadeValue(this.value, this.priority, this.layer, this.ruleId);
   }
 
-  override filterValue(visitor: Css.Visitor): CascadeValue {
-    const value = this.value.visit(visitor);
+  override withValue(value: Css.Val): CascadeValue {
     if (value === this.value) {
       return this;
     }
@@ -449,6 +516,7 @@ export class ConditionalCascadeValue extends CascadeValue {
       this.priority,
       this.condition,
       this.layer,
+      this.ruleId,
     );
   }
 
@@ -461,6 +529,7 @@ export class ConditionalCascadeValue extends CascadeValue {
       this.priority + specificity,
       this.condition,
       this.layer,
+      this.ruleId,
     );
   }
 
@@ -505,18 +574,224 @@ export function setPropCascadeValue(
   }
   if (!value) {
     delete style[name];
-  } else {
-    const tv = style[name] as CascadeValue;
-    if (!tv || comparePriority(value, tv) >= 0) {
-      if (context) {
-        if (value.isEnabled(context)) {
-          style[name] = value.getBaseValue();
+    return;
+  }
+  if (context && !value.isEnabled(context)) {
+    return;
+  }
+  recordCascadeHistory(style, name, value);
+  const tv = style[name] as CascadeValue;
+  if (!tv || comparePriority(value, tv) >= 0) {
+    style[name] = context ? value.getBaseValue() : value;
+  }
+}
+
+/**
+ * Property names for which a rollback keyword (`revert`, `revert-layer` or
+ * `revert-rule`) has been seen in any parsed style sheet. Resolving such a
+ * keyword is the only thing that needs to look below the winner of the
+ * cascade, so the declarations that lose are kept only for these properties.
+ */
+const rollbackDeclaredProps = new Set<string>();
+
+/**
+ * Called for every declaration as it is parsed, to note the properties whose
+ * cascade history has to be retained.
+ */
+export function noteRollbackDeclaration(
+  name: string,
+  value: Css.Val,
+  validatorSet?: CssValidator.ValidatorSet,
+): void {
+  if (Css.isRollbackValue(value)) {
+    rollbackDeclaredProps.add(name);
+    return;
+  }
+  if (!Css.containsRollbackValue(value)) {
+    return;
+  }
+  // A keyword that is not the whole value only survives validation inside a
+  // var() fallback, from where substitution can still make it the whole value
+  // — of this property, or of the longhands a shorthand expands into once the
+  // substituted value turns out to be a CSS-wide keyword.
+  rollbackDeclaredProps.add(name);
+  const propList = validatorSet?.getShorthand(name, value)?.propList;
+  if (propList) {
+    for (const nameLH of propList) {
+      rollbackDeclaredProps.add(nameLH);
+    }
+  }
+}
+
+/**
+ * The declarations that lost the cascade, for the properties in
+ * {@link rollbackDeclaredProps}. Held outside of the ElementStyle so that the
+ * code walking a style is not disturbed by an entry of a different shape, and
+ * dropped together with the style it belongs to.
+ */
+const cascadeHistories = new WeakMap<
+  ElementStyle,
+  { [name: string]: CascadeValue[] }
+>();
+
+function recordCascadeHistory(
+  style: ElementStyle,
+  name: string,
+  value: CascadeValue,
+): void {
+  if (!rollbackDeclaredProps.has(name) || value.value === Css.empty) {
+    // `Css.empty` only reserves a longhand slot for a shorthand declaration,
+    // so it is not something a rollback can land on.
+    return;
+  }
+  let history = cascadeHistories.get(style);
+  if (!history) {
+    history = {};
+    cascadeHistories.set(style, history);
+  }
+  let values = history[name];
+  if (!values) {
+    values = history[name] = [];
+    // The style may already hold a declaration that never passed through here,
+    // most notably the one from the `style` attribute.
+    const current = style[name] as CascadeValue;
+    if (current && current.value !== Css.empty) {
+      values.push(current);
+    }
+  }
+  values.push(value);
+}
+
+/**
+ * Whether `candidate` is one of the declarations that `reverting` rolls back,
+ * i.e. one of those the cascade has to be run without.
+ */
+function isRolledBackBy(
+  candidate: CascadeValue,
+  reverting: CascadeValue,
+): boolean {
+  switch (reverting.value) {
+    case Css.ident.revert_rule:
+      return candidate.ruleId === reverting.ruleId;
+    case Css.ident.revert_layer:
+      // `revert-layer` rolls back to the layers *before* the current one, so
+      // the current layer and every later one drop out — including the
+      // important declarations of later layers, which outrank the current
+      // layer for normal declarations but are rolled back all the same
+      // (WPT css-cascade/revert-layer-005).
+      return (
+        layerSetOf(candidate) === layerSetOf(reverting) &&
+        layerOrderOf(candidate) >= layerOrderOf(reverting)
+      );
+    default:
+      // `revert` rolls back to the earlier origin, so the current origin and
+      // every later one drop out: a user declaration reverts past the author
+      // origin as well (css-cascade-5 §7.3.4).
+      return originOf(candidate) >= originOf(reverting);
+  }
+}
+
+/**
+ * The value a rollback keyword resolves to: the winner of the cascade run
+ * again without the declarations the keyword rolls back. The value found may
+ * itself be a rollback keyword, in which case the rollback is applied again on
+ * top of the previous one; a cycle exhausts the candidates and ends up with no
+ * declaration at all.
+ */
+function resolveRollbackValue(
+  name: string,
+  reverting: CascadeValue,
+  candidates: CascadeValue[],
+): Css.Val {
+  let remaining = candidates;
+  while (Css.isRollbackValue(reverting.value)) {
+    // The reverting declaration itself always belongs to what it rolls back,
+    // so `remaining` strictly shrinks and this terminates.
+    remaining = remaining.filter((v) => !isRolledBackBy(v, reverting));
+    let winner: CascadeValue | null = null;
+    for (const candidate of remaining) {
+      if (!winner || comparePriority(candidate, winner) >= 0) {
+        winner = candidate;
+      }
+    }
+    if (!winner) {
+      // Nothing is left to roll back to, so the property is as if it had never
+      // been declared. For a custom property that is the guaranteed-invalid
+      // value, which this engine spells `initial`.
+      return Css.isCustomPropName(name) ? Css.ident.initial : Css.ident.unset;
+    }
+    reverting = winner;
+  }
+  return reverting.value;
+}
+
+/**
+ * Replace every rollback keyword that won the cascade with the declaration it
+ * rolls back to, so that neither the layout engine nor the `style` attribute
+ * of the generated element ever sees the keyword.
+ *
+ * This runs twice: once as soon as the cascade is settled, because the value
+ * rolled back to may itself be a shorthand or contain var(), and once more
+ * after var() substitution, because a keyword written in a var() fallback
+ * only becomes the whole value there.
+ *
+ * @param afterVarSubstitution whether this is the second pass. Custom
+ *     properties are left alone then: a custom property whose *substituted*
+ *     value happens to spell a rollback keyword is not a rollback, it is just
+ *     a token stream that no property can use (WPT-matching browser
+ *     behavior). This pass also discards the retained cascade history.
+ * @returns whether a value was rolled back to one that still contains var()
+ */
+export function resolveRollbackValues(
+  style: ElementStyle,
+  afterVarSubstitution: boolean = false,
+): boolean {
+  if (!rollbackDeclaredProps.size) {
+    return false;
+  }
+  const history = cascadeHistories.get(style);
+  let varSubstitutionNeeded = false;
+  for (const name in style) {
+    if (isMapName(name)) {
+      const styleMap = getStyleMap(style, name);
+      for (const key in styleMap) {
+        // Note: `||=` would short-circuit the recursion away once one of the
+        // sub-styles has asked for another var() pass.
+        if (resolveRollbackValues(styleMap[key], afterVarSubstitution)) {
+          varSubstitutionNeeded = true;
         }
-      } else {
-        style[name] = value;
+      }
+    } else if (name === "_viewConditionalStyles") {
+      for (const entry of getViewConditionalStyleMap(style)) {
+        if (resolveRollbackValues(entry.styles, afterVarSubstitution)) {
+          varSubstitutionNeeded = true;
+        }
+      }
+    } else if (isPropName(name)) {
+      const cascVal = getProp(style, name);
+      if (!cascVal || !Css.isRollbackValue(cascVal.value)) {
+        continue;
+      }
+      if (afterVarSubstitution && Css.isCustomPropName(name)) {
+        // A custom property whose *substituted* value happens to spell a
+        // rollback keyword is not a rollback: it is a token stream that no
+        // property can use, which is the guaranteed-invalid value.
+        style[name] = cascVal.withValue(Css.ident.initial);
+        continue;
+      }
+      const value = resolveRollbackValue(name, cascVal, history?.[name] ?? []);
+      style[name] = cascVal.withValue(value);
+      if (CssValidator.containsVar(value)) {
+        varSubstitutionNeeded = true;
       }
     }
   }
+  if (afterVarSubstitution) {
+    // The cascade for this style is over, so the declarations that lost it are
+    // of no further use.
+    cascadeHistories.delete(style);
+  }
+  return varSubstitutionNeeded;
 }
 
 export type ElementStyleMap = {
@@ -759,7 +1034,7 @@ export function mergeIn(
       const propListLH = validatorSet?.getShorthand(prop, av.value)?.propList;
       if (propListLH) {
         for (const propLH of propListLH) {
-          const avLH = new CascadeValue(Css.empty, av.priority, av.layer);
+          const avLH = av.withValue(Css.empty);
           setPropCascadeValue(target, propLH, avLH, context);
         }
       }
@@ -4101,6 +4376,13 @@ export class CascadeInstance {
     // Substitute var()
     this.applyVarFilter([baseStyle], element);
 
+    // Replace the rollback keywords that only became the whole value once
+    // var() had been substituted. A rollback can land on a declaration that
+    // uses var() itself, in which case one more substitution is needed.
+    if (resolveRollbackValues(baseStyle, true)) {
+      this.applyVarFilter([baseStyle], element);
+    }
+
     // Calculate calc()
     this.applyCalcFilter(baseStyle, this.context);
 
@@ -4517,7 +4799,7 @@ export class CascadeInstance {
         if (
           val === Css.ident.inherit ||
           val === Css.ident.unset ||
-          val === Css.ident.revert
+          Css.isRollbackValue(val)
         ) {
           continue;
         } else if (val === Css.ident.initial) {
@@ -4541,7 +4823,7 @@ export class CascadeInstance {
       if (
         val !== Css.ident.inherit &&
         val !== Css.ident.unset &&
-        val !== Css.ident.revert
+        !Css.isRollbackValue(val)
       ) {
         if (val === Css.ident.initial) {
           return this.validatorSet.defaultValues[propName] ?? null;
@@ -4571,14 +4853,7 @@ export class CascadeInstance {
           continue;
         }
         const validatedValue = visitor.validatePropertyValue(filtered.value);
-        elementStyle[propName] =
-          validatedValue === filtered.value
-            ? filtered
-            : new CascadeValue(
-                validatedValue,
-                filtered.priority,
-                cascVal.layer,
-              );
+        elementStyle[propName] = filtered.withValue(validatedValue);
       }
     }
   }
@@ -4654,11 +4929,7 @@ export class CascadeInstance {
         if (shorthand) {
           if (Css.isDefaultingValue(value)) {
             for (const nameLH of shorthand.propList) {
-              const avLH = new CascadeValue(
-                value,
-                cascVal.priority,
-                cascVal.layer,
-              );
+              const avLH = cascVal.withValue(value);
               const tvLH = getProp(elementStyle, nameLH);
               setProp(propsLH, nameLH, cascadeValues(this.context, tvLH, avLH));
             }
@@ -4677,12 +4948,10 @@ export class CascadeInstance {
               valueSH.visit(shorthand);
               if (!shorthand.error) {
                 for (const nameLH of shorthand.propList) {
-                  const avLH = new CascadeValue(
+                  const avLH = cascVal.withValue(
                     shorthand.values[nameLH] ??
                       this.validatorSet.defaultValues[nameLH] ??
                       Css.ident.initial,
-                    cascVal.priority,
-                    cascVal.layer,
                   );
                   const tvLH = getProp(elementStyle, nameLH);
                   setProp(
@@ -4696,11 +4965,7 @@ export class CascadeInstance {
             }
           }
         } else {
-          elementStyle[name] = new CascadeValue(
-            value,
-            cascVal.priority,
-            cascVal.layer,
-          );
+          elementStyle[name] = cascVal.withValue(value);
         }
       }
       if (propsLH[name]) {
@@ -4762,14 +5027,7 @@ export class CascadeInstance {
         }
       } else if (isPropName(name) && !Css.isCustomPropName(name)) {
         const cascVal = getProp(elementStyle, name);
-        const value = cascVal.value.visit(visitor);
-        if (value !== cascVal.value) {
-          elementStyle[name] = new CascadeValue(
-            value,
-            cascVal.priority,
-            cascVal.layer,
-          );
-        }
+        elementStyle[name] = cascVal.withValue(cascVal.value.visit(visitor));
       }
     }
   }
@@ -4812,11 +5070,7 @@ export class CascadeInstance {
           if (visitor.hadDeviceCmyk()) {
             visitor.recordConversion(pseudoPrefix + name, originalValue);
           }
-          elementStyle[name] = new CascadeValue(
-            value,
-            cascVal.priority,
-            cascVal.layer,
-          );
+          elementStyle[name] = cascVal.withValue(value);
         }
       }
     }
@@ -4870,6 +5124,10 @@ export class CascadeInstance {
     }
     this.isFirst = true;
     this.isRoot = false;
+
+    // The cascade is settled, so the rollback keywords can now be replaced by
+    // the declarations they roll back to.
+    resolveRollbackValues(cascadeInstance.currentStyle);
   }
 
   private pop(): void {
@@ -5001,6 +5259,8 @@ export class CascadeParserHandler
   private pendingChained: CascadeAction[] = [];
   specificity: number = 0;
   elementStyle: ElementStyle | null = null;
+  /** Identity of the declaration block being parsed, for `revert-rule`. */
+  ruleId: number = 0;
   conditionCount: number = 0;
   pseudoelement: string | null = null;
   footnoteContent: boolean = false;
@@ -5508,6 +5768,7 @@ export class CascadeParserHandler
     }
     this.state = ParseState.SELECTOR;
     this.elementStyle = {} as ElementStyle;
+    this.ruleId = nextRuleId();
     this.pseudoelement = null;
     this.viewConditionId = null;
     this.specificity = 0;
@@ -5651,9 +5912,16 @@ export class CascadeParserHandler
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
     const priority = specificity + this.cascade.nextOrder();
+    noteRollbackDeclaration(name, value, this.validatorSet);
     const cascval = this.condition
-      ? new ConditionalCascadeValue(value, priority, this.condition, this.layer)
-      : new CascadeValue(value, priority, this.layer);
+      ? new ConditionalCascadeValue(
+          value,
+          priority,
+          this.condition,
+          this.layer,
+          this.ruleId,
+        )
+      : new CascadeValue(value, priority, this.layer, this.ruleId);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 
@@ -6010,6 +6278,7 @@ export class PropSetParserHandler
   implements CssValidator.PropertyReceiver
 {
   order: number;
+  readonly ruleId: number = nextRuleId();
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -6059,9 +6328,16 @@ export class PropSetParserHandler
       : this.getBaseSpecificity();
     specificity += this.order;
     this.order += ORDER_INCREMENT;
+    noteRollbackDeclaration(name, value, this.validatorSet);
     const cascval = this.condition
-      ? new ConditionalCascadeValue(value, specificity, this.condition)
-      : new CascadeValue(value, specificity);
+      ? new ConditionalCascadeValue(
+          value,
+          specificity,
+          this.condition,
+          null,
+          this.ruleId,
+        )
+      : new CascadeValue(value, specificity, null, this.ruleId);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
@@ -6072,6 +6348,7 @@ export class PropertyParserHandler
 {
   elementStyle = {} as ElementStyle;
   order: number = 0;
+  readonly ruleId: number = nextRuleId();
 
   constructor(
     scope: Exprs.LexicalScope,
@@ -6111,7 +6388,8 @@ export class PropertyParserHandler
       : CssParser.SPECIFICITY_STYLE;
     specificity += this.order;
     this.order += ORDER_INCREMENT;
-    const cascval = new CascadeValue(value, specificity);
+    noteRollbackDeclaration(name, value, this.validatorSet);
+    const cascval = new CascadeValue(value, specificity, null, this.ruleId);
     setPropCascadeValue(this.elementStyle, name, cascval);
   }
 }
@@ -6169,8 +6447,8 @@ export function isVertical(
     if (
       writingMode &&
       writingMode !== Css.ident.inherit &&
-      writingMode !== Css.ident.revert &&
-      writingMode !== Css.ident.unset
+      writingMode !== Css.ident.unset &&
+      !Css.isRollbackValue(writingMode)
     ) {
       return writingMode === Css.ident.vertical_rl;
     }
@@ -6189,8 +6467,8 @@ export function isRtl(
     if (
       direction &&
       direction !== Css.ident.inherit &&
-      direction !== Css.ident.revert &&
-      direction !== Css.ident.unset
+      direction !== Css.ident.unset &&
+      !Css.isRollbackValue(direction)
     ) {
       return direction === Css.ident.rtl;
     }
@@ -6328,12 +6606,10 @@ export const convertToPhysical = <T>(
         (cascVal.value === Css.ident.inside ||
           cascVal.value === Css.ident.outside)
       ) {
-        cascVal = new CascadeValue(
+        cascVal = cascVal.withValue(
           leftPageSide === (cascVal.value === Css.ident.inside)
             ? Css.ident.right
             : Css.ident.left,
-          cascVal.priority,
-          cascVal.layer,
         );
       }
     }
@@ -6390,7 +6666,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
         if (
           val === Css.ident.inherit ||
           val === Css.ident.unset ||
-          val === Css.ident.revert
+          Css.isRollbackValue(val)
         ) {
           continue;
         }
@@ -6422,7 +6698,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       if (
         val === Css.ident.inherit ||
         val === Css.ident.unset ||
-        val === Css.ident.revert
+        Css.isRollbackValue(val)
       ) {
         continue;
       }
@@ -6540,7 +6816,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     if (
       val === Css.ident.inherit ||
       val === Css.ident.unset ||
-      val === Css.ident.revert
+      Css.isRollbackValue(val)
     ) {
       return { found: true, value: null, continueLookup: true };
     }

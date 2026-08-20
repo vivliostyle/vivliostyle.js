@@ -60,6 +60,7 @@ import { Layout as LayoutType, PageFloats as PageFloatsType } from "./types";
 import {
   UserAgentBaseCss,
   UserAgentCounterStylesCss,
+  UserAgentHiddenCss,
   UserAgentPageCss,
   UserAgentTocCss,
 } from "./assets";
@@ -453,6 +454,9 @@ export class StyleInstance
 
       // Substitute var() in @page
       this.styler.cascade.applyVarFilter([pageStyle], null);
+      if (CssCascade.resolveRollbackValues(pageStyle, true)) {
+        this.styler.cascade.applyVarFilter([pageStyle], null);
+      }
 
       // Calculate calc()
       this.styler.cascade.applyCalcFilter(pageStyle, this.styler.context);
@@ -3147,6 +3151,9 @@ export class StyleInstance
 
     // Substitute var()
     this.styler.cascade.applyVarFilter([cascadedPageStyle], null);
+    if (CssCascade.resolveRollbackValues(cascadedPageStyle, true)) {
+      this.styler.cascade.applyVarFilter([cascadedPageStyle], null);
+    }
 
     // Calculate calc()
     this.styler.cascade.applyCalcFilter(cascadedPageStyle, this.styler.context);
@@ -3783,6 +3790,15 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             media: null,
           });
         } else {
+          // The `hidden` attribute hides nothing in the TOC box, so this sheet
+          // is loaded only for the document itself (see PR #1269).
+          sources.push({
+            url: Base.resolveURL("user-agent-hidden.css", Base.resourceBaseURL),
+            text: UserAgentHiddenCss,
+            flavor: CssParser.StylesheetFlavor.USER_AGENT,
+            classes: null,
+            media: null,
+          });
           const elemList =
             xmldoc.document.querySelectorAll("style, link, meta");
           for (const elem of elemList) {

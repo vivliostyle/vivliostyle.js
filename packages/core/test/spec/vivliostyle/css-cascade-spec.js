@@ -2776,4 +2776,158 @@ describe("css-cascade", function () {
       expect(style["font-size"].value.toString()).toBe("50px");
     });
   });
+
+  describe("rollback keywords", function () {
+    beforeEach(function () {
+      // Every style sheet is parsed before the cascade runs, so the property
+      // is known to need its losing declarations kept before any of them is
+      // merged in.
+      adapt_csscasc.noteRollbackDeclaration("color", adapt_css.ident.revert);
+    });
+
+    function declare(style, value, priority, layer, ruleId) {
+      adapt_csscasc.setPropCascadeValue(
+        style,
+        "color",
+        new adapt_csscasc.CascadeValue(
+          value,
+          priority,
+          layer || null,
+          ruleId || 0,
+        ),
+      );
+    }
+
+    function resolved(style) {
+      adapt_csscasc.resolveRollbackValues(style);
+      return style.color.value;
+    }
+
+    var green = adapt_css.getName("green");
+    var red = adapt_css.getName("red");
+    var blue = adapt_css.getName("blue");
+
+    it("rolls an author declaration back to the user-agent origin", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_USER_AGENT);
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR);
+      declare(
+        style,
+        adapt_css.ident.revert,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 1,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("rolls a user declaration back past the author origin", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_USER_AGENT);
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR_IMPORTANT);
+      declare(
+        style,
+        adapt_css.ident.revert,
+        adapt_cssparse.SPECIFICITY_USER_IMPORTANT,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("becomes unset when there is nothing left to roll back to", function () {
+      var style = {};
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR);
+      declare(
+        style,
+        adapt_css.ident.revert,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 1,
+      );
+
+      expect(resolved(style)).toBe(adapt_css.ident.unset);
+    });
+
+    it("rolls revert-layer back to the previous layer", function () {
+      var tree = new adapt_csscasc.CascadeLayerTree();
+      var first = tree.register(null, ["first"]);
+      var second = tree.register(null, ["second"]);
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, first);
+      declare(
+        style,
+        adapt_css.ident.revert_layer,
+        adapt_cssparse.SPECIFICITY_AUTHOR,
+        second,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    // WPT css/css-cascade/revert-layer-005.html
+    it("rolls an important revert-layer back to the earlier layer, dropping the later layer's important declaration", function () {
+      var tree = new adapt_csscasc.CascadeLayerTree();
+      var a = tree.register(null, ["a"]);
+      var b = tree.register(null, ["b"]);
+      var c = tree.register(null, ["c"]);
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, a);
+      declare(
+        style,
+        adapt_css.ident.revert_layer,
+        adapt_cssparse.SPECIFICITY_AUTHOR_IMPORTANT,
+        b,
+      );
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR_IMPORTANT, c);
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    // WPT css/css-cascade/revert-layer-009.html
+    it("rolls revert-layer in the style attribute back to the author style sheets", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR);
+      declare(style, red, adapt_cssparse.SPECIFICITY_STYLE);
+      declare(
+        style,
+        adapt_css.ident.revert_layer,
+        adapt_cssparse.SPECIFICITY_STYLE + 1,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("skips every declaration of its own rule for revert-rule", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, null, 1);
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR + 1, null, 2);
+      declare(
+        style,
+        adapt_css.ident.revert_rule,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 2,
+        null,
+        2,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("takes declarations caught in a revert-rule cycle out of the cascade", function () {
+      var style = {};
+      declare(style, blue, adapt_cssparse.SPECIFICITY_AUTHOR, null, 1);
+      declare(
+        style,
+        adapt_css.ident.revert_rule,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 1,
+        null,
+        2,
+      );
+      declare(
+        style,
+        adapt_css.ident.revert_rule,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 2,
+        null,
+        3,
+      );
+
+      expect(resolved(style)).toBe(blue);
+    });
+  });
 });

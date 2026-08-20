@@ -1005,8 +1005,8 @@ export class ViewFactory
           value &&
           value !== Css.ident.inherit &&
           value !== Css.ident.unset &&
-          value !== Css.ident.revert &&
-          value !== Css.empty
+          value !== Css.empty &&
+          !Css.isRollbackValue(value)
         ) {
           blockedInheritedByCurrent.add(name);
         }

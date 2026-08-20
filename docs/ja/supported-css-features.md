@@ -6,7 +6,9 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 
 ## 値
 
-- [CSS 全体キーワード](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`
+- [CSS 全体キーワード](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`, `revert-layer`, `revert-rule`
+  - カスケードを巻き戻す[明示的デフォルト指定キーワード](https://www.w3.org/TR/css-cascade-5/#defaulting-keywords)は Vivliostyle 自身のカスケードで解決されるため、巻き戻した値がレイアウトエンジンやページ関連機能から見えます。`revert` は前のカスケードオリジンへ、`revert-layer` は現在より前のカスケードレイヤーへ、`revert-rule` は現在のルールを除いたカスケードへ巻き戻します。`@page` ルールとページマージンボックス、`all`、カスタムプロパティ、`var()` のフォールバックとしての記述でも動作します。[Issue #2111](https://github.com/vivliostyle/vivliostyle.js/issues/2111) を参照
+  - 注意: カスタムプロパティを経由して届いたキーワード (`--x: var(--y, revert-layer); color: var(--x)`) は巻き戻しとして扱われません（ブラウザの挙動に合わせています）。シャドウツリー (`:host`、`::slotted`) への巻き戻しは、Vivliostyle のカスケードが Shadow DOM を実装していないためサポートしません
 - [長さの単位](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `lh`, `rlh`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
 - サイジングキーワード: [min-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-min-content), [max-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-max-content), [fit-content](https://www.w3.org/TR/css-sizing-4/#valdef-width-fit-content)
 - カラー値
@@ -139,7 +141,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 
 - [@layer](https://www.w3.org/TR/css-cascade-5/#layering)
   - ブロック形式 (`@layer name { … }`、`@layer { … }`) と文形式 (`@layer a, b;`)、および `@import … layer` / `@import … layer(name)` をサポートしています。
-  - 注意: `revert-layer` キーワードはまだサポートしていません。
+  - [`revert-layer` キーワード](https://www.w3.org/TR/css-cascade-5/#valdef-all-revert-layer)をサポートしています。[値](#値)も参照してください。
 
 ### [CSS Namespaces 3](https://www.w3.org/TR/css3-namespace/)
 

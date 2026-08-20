@@ -3363,11 +3363,7 @@ export class PageParserHandler
       const noPageSelectorProps = pageProps[""];
       this.currentPageSelectors.forEach((s) => {
         // update specificity to reflect the specificity of the selector
-        const result = new CssCascade.CascadeValue(
-          cascVal.value,
-          cascVal.priority + s.specificity,
-          cascVal.layer,
-        );
+        const result = cascVal.increaseSpecificity(s.specificity);
         const selector = s.selectors ? s.selectors.join("") : "";
         let props = pageProps[selector];
         if (!props) {
@@ -3485,6 +3481,8 @@ export class PageMarginBoxParserHandler
     super(scope, owner, delegation);
   }
 
+  readonly ruleId: number = CssCascade.nextRuleId();
+
   override property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
@@ -3510,7 +3508,13 @@ export class PageMarginBoxParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
-    const cascval = new CssCascade.CascadeValue(value, specificity, this.layer);
+    CssCascade.noteRollbackDeclaration(name, value, this.validatorSet);
+    const cascval = new CssCascade.CascadeValue(
+      value,
+      specificity,
+      this.layer,
+      this.ruleId,
+    );
     CssCascade.setProp(this.boxStyle, name, cascval);
   }
 }
@@ -3533,6 +3537,8 @@ export class PageFootnoteAreaParserHandler
     super(scope, owner, delegation);
   }
 
+  readonly ruleId: number = CssCascade.nextRuleId();
+
   override property(name: string, value: Css.Val, important: boolean): void {
     this.validatorSet.validatePropertyAndHandleShorthand(
       name,
@@ -3558,7 +3564,13 @@ export class PageFootnoteAreaParserHandler
     const specificity = important
       ? this.getImportantSpecificity()
       : this.getBaseSpecificity();
-    const cascval = new CssCascade.CascadeValue(value, specificity, this.layer);
+    CssCascade.noteRollbackDeclaration(name, value, this.validatorSet);
+    const cascval = new CssCascade.CascadeValue(
+      value,
+      specificity,
+      this.layer,
+      this.ruleId,
+    );
     CssCascade.setProp(this.areaStyle, name, cascval);
   }
 }

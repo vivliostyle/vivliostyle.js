@@ -677,6 +677,8 @@ export const ident: { [key: string]: Ident } = {
   page: getName("page"),
   relative: getName("relative"),
   revert: getName("revert"),
+  revert_layer: getName("revert-layer"),
+  revert_rule: getName("revert-rule"),
   right: getName("right"),
   same: getName("same"),
   scale: getName("scale"),
@@ -721,9 +723,43 @@ export function isDefaultingValue(value: Val | null | undefined): boolean {
   return (
     value === ident.inherit ||
     value === ident.initial ||
-    value === ident.revert ||
-    value === ident.unset
+    value === ident.unset ||
+    isRollbackValue(value)
   );
+}
+
+/**
+ * Whether the value is one of the CSS-wide keywords that roll the cascade back
+ * to a declaration that lost (css-cascade-5 §7.3 Explicit Defaulting).
+ */
+export function isRollbackValue(value: Val | null | undefined): boolean {
+  return (
+    value === ident.revert ||
+    value === ident.revert_layer ||
+    value === ident.revert_rule
+  );
+}
+
+class RollbackValueVisitor extends Visitor {
+  found: boolean = false;
+
+  override visitIdent(ident: Ident): Val | null {
+    if (isRollbackValue(ident)) {
+      this.found = true;
+    }
+    return null;
+  }
+}
+
+/**
+ * Whether a rollback keyword appears anywhere inside the value. A keyword that
+ * is not the whole value only survives validation inside a var() fallback,
+ * where substitution can still leave it as the whole value.
+ */
+export function containsRollbackValue(value: Val): boolean {
+  const visitor = new RollbackValueVisitor();
+  value.visit(visitor);
+  return visitor.found;
 }
 
 /**

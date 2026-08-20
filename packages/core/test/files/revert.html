@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2111: the `revert` explicit defaulting keyword -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>revert keyword</title>
+    <style>
+      @page {
+        size: 210mm 200mm;
+        margin: 10mm;
+      }
+
+      body {
+        font: 12px/1.5 Georgia, serif;
+        color: green;
+      }
+
+      /* ---- A. revert rolls the whole author origin back ---- */
+
+      .a1 {
+        color: red;
+      }
+      .a1 {
+        color: revert;
+      }
+
+      /* revert ignores the layer it sits in and rolls back the origin */
+      @layer a2 {
+        .a2 {
+          color: red;
+        }
+      }
+      @layer a2b {
+        .a2 {
+          color: revert;
+        }
+      }
+
+      /* revert in an unlayered rule rolls back the layers too, which is
+         where it differs from revert-layer */
+      @layer a3 {
+        .a3 {
+          color: red;
+        }
+      }
+      .a3 {
+        color: revert;
+      }
+      .a3x {
+        color: red;
+      }
+      #a3x {
+        color: revert;
+      }
+
+      /* !important reverts within the author origin too */
+      .a4 {
+        color: red !important;
+      }
+      #a4 {
+        color: revert !important;
+      }
+
+      /* revert loses to a declaration that beats it in the cascade */
+      .a5 {
+        color: revert;
+      }
+      #a5 {
+        color: green;
+      }
+
+      /* ---- B. revert rolls back to the user-agent style sheet ---- */
+
+      /* the UA style sheet says `li { display: list-item }`, so the marker
+         must come back — and it must be Vivliostyle that puts it there */
+      ol.b1 > li {
+        display: block;
+      }
+      ol.b1 > li {
+        display: revert;
+      }
+
+      /* the UA style sheet says `b, strong { font-weight: bolder }` */
+      .b2 strong {
+        font-weight: normal;
+      }
+      .b2 strong {
+        font-weight: revert;
+      }
+
+      /* ---- C. revert with `all` and with custom properties ---- */
+
+      .c1 {
+        color: red;
+        font-style: italic;
+        all: revert;
+      }
+
+      .c2 {
+        --c: red;
+      }
+      .c2 {
+        --c: revert;
+      }
+      .c2 {
+        /* the reverted custom property is guaranteed-invalid, so the
+           fallback applies */
+        color: var(--c, green);
+      }
+
+      /* revert written in a var() fallback */
+      .c3 {
+        color: red;
+      }
+      .c3 {
+        color: var(--c3-color, revert);
+      }
+
+      /* ---- D. revert reaches the layout engine ---- */
+
+      @layer d1 {
+        .d1 {
+          break-before: page;
+        }
+      }
+      .d1 {
+        break-before: revert;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>The <code>revert</code> keyword</h1>
+    <p>Every list item below must be green.</p>
+    <ol>
+      <li class="a1">A1 revert with nothing below it inherits</li>
+      <li class="a2">A2 revert ignores layers and rolls back the origin</li>
+      <li class="a3">A3 revert rolls back the layers of its origin</li>
+      <li class="a3x" id="a3x">A3x revert rolls back a lower-specificity rule</li>
+      <li class="a4" id="a4">A4 revert with !important</li>
+      <li class="a5" id="a5">A5 revert loses to a stronger declaration</li>
+      <li class="c1">C1 all: revert</li>
+      <li class="c2">C2 revert on a custom property</li>
+      <li class="c3">C3 revert written in a var() fallback</li>
+      <li class="b2">
+        B2 revert to the UA font-weight: <strong>this must be bold</strong>
+      </li>
+    </ol>
+    <p>The list below must show its markers.</p>
+    <ol class="b1">
+      <li>B1 revert to the UA display: list-item</li>
+      <li>B1 second item</li>
+    </ol>
+    <p class="d1">
+      D1 <code>revert</code> rolls back the whole author origin, layers
+      included, so the <code>break-before: page</code> declared in a layer is
+      gone and this paragraph must stay on the same page as the list above.
+    </p>
+  </body>
+</html>
