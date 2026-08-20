@@ -648,6 +648,21 @@ export class Styler implements AbstractStyler {
         (backgroundImage && !Css.isDefaultingValue(backgroundImage))
       ) {
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
+        // background-position-x/-y are not part of the `background` shorthand
+        // grammar, so they are absent from backgroundProps. Move them only when
+        // the source style actually has them: transferPropsToRoot assigns a
+        // default for every property of the map, and a default axis value here
+        // would override the background-position moved just above.
+        for (const pname of [
+          "background-position-x",
+          "background-position-y",
+        ]) {
+          const cascval = elemStyle[pname];
+          if (cascval) {
+            this.rootStyle[pname] = cascval;
+            delete elemStyle[pname];
+          }
+        }
         this.rootBackgroundAssigned = true;
       }
     }

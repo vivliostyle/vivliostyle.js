@@ -2029,6 +2029,9 @@ export class ValidatorSet {
     if (Css.isCustomPropName(name)) {
       return null;
     }
+    // CSS property names are ASCII case-insensitive, and callers may pass a
+    // name that kept the author's casing, so normalize before every lookup.
+    name = name.toLowerCase();
     const shorthand = this.shorthands[name];
     if (shorthand) {
       if (
@@ -2038,6 +2041,13 @@ export class ValidatorSet {
         shorthand.refreshPropList();
       }
       return shorthand;
+    }
+    if (this.validators[name]) {
+      // Vivliostyle has its own validator for this property and looks it up by
+      // this name after the cascade, so it must not be split into the browser's
+      // longhands even when the browser treats it as a shorthand
+      // (e.g. `background-position` → `background-position-x`/`-y`).
+      return null;
     }
     if (this.browserShorthandMisses[name]) {
       return null;
@@ -2671,7 +2681,11 @@ export class ValidatorSet {
       // Register browser-supported shorthands before var() resolution so the
       // later cascade pass can still expand mixed shorthand/longhand usage.
       this.getShorthand(shorthandName, value);
-      receiver.simpleProperty(origName, value, important);
+      // Store the declaration under the name the rest of the engine looks up.
+      // The non-var path below stores the lowercased name for properties
+      // Vivliostyle validates itself, and consumers such as passPostProperties
+      // and transferPropsToRoot() look them up that way.
+      receiver.simpleProperty(shorthandName, value, important);
       return;
     }
     const px = this.prefixes[name];

@@ -2668,6 +2668,28 @@ describe("css-cascade", function () {
       expect(style["transition-property"].value).toBe(adapt_css.ident.initial);
       expect(style["transition-duration"].value).toBe(adapt_css.ident.initial);
     });
+
+    it("keeps var-substituted properties that Vivliostyle validates itself (Issue #2116)", function () {
+      var element = document.createElement("div");
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      var style = {
+        "--pos": createCascadeValue("15mm 12.6mm"),
+        "background-position": createCascadeValue("var(--pos)"),
+        overflow: createCascadeValue("var(--ov)"),
+        "--ov": createCascadeValue("hidden"),
+      };
+
+      applyVarFilter(style, element, null, validatorSet);
+
+      expect(style["background-position"]).toBeDefined();
+      expect(style["background-position"].value.toString()).toBe("15mm 12.6mm");
+      expect(style["background-position-x"]).toBeUndefined();
+      expect(style["background-position-y"]).toBeUndefined();
+      expect(style.overflow).toBeDefined();
+      expect(style.overflow.value.toString()).toBe("hidden");
+      expect(style["overflow-x"]).toBeUndefined();
+      expect(style["overflow-y"]).toBeUndefined();
+    });
   });
 
   describe("AttrValueFilterVisitor regression coverage", function () {

@@ -187,6 +187,15 @@ module.exports = [
       },
       { file: "math-sample.html", title: "MathJax" },
       { file: "background-shorthand.html", title: "Background shorthand" },
+      {
+        file: "background-position-var.html",
+        title: "background-position with var() (Issue #2116)",
+      },
+      {
+        file: "background-position-longhand-root.html",
+        title:
+          "background-position longhands on the root background (Issue #2116)",
+      },
       { file: "prefixed_properties.html", title: "Prefixed properties" },
       { file: "filter_property.html", title: "Filter property" },
       { file: "attr-type.html", title: "Typed attr() values (Issue #1485)" },
