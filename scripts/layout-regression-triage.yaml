@@ -1,72 +1,79 @@
-- id: "0106"
-  category: Explicit Defaulting Keywords
+- category: Cascade Layers
+  title: "Cascade layers with @counter-style (Issue #2110)"
+  file: cascade-layers-counter-style.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-feat-issue2110  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers-counter-style.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=http://localhost:3300/core/test/files/cascade-layers-counter-style.html&zoom=1&spread=false
+- category: Cascade Layers
+  title: "Cascade layers with @font-face (Issue #2110)"
+  file: cascade-layers-font-face.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-feat-issue2110  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/cascade-layers-font-face.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=http://localhost:3300/core/test/files/cascade-layers-font-face.html&zoom=1&spread=false
+- category: Explicit Defaulting Keywords
   title: "revert keyword (Issue #2111)"
   file: revert.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    New test case for Issue #2111: `revert` is now resolved by Vivliostyle's own cascade instead of being handed to the browser, so the reverted values differ from canary.
+    New test case for Issue #2111: `revert` is now resolved by Vivliostyle's own cascade instead of being handed to the
+    browser, so the reverted values differ from canary.
   approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0107"
-  category: Explicit Defaulting Keywords
+- category: Explicit Defaulting Keywords
   title: "revert-layer keyword (Issue #2111)"
   file: revert-layer.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    New test case for Issue #2111: `revert-layer` is now implemented, so it rolls back to the previous layer (including a `break-before: page`, hence the extra page) instead of being handed to the browser.
+    New test case for Issue #2111: `revert-layer` is now implemented, so it rolls back to the previous layer (including
+    a `break-before: page`, hence the extra page) instead of being handed to the browser.
   approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-layer.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-layer.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
-- id: "0108"
-  category: Explicit Defaulting Keywords
+- category: Explicit Defaulting Keywords
   title: "revert-rule keyword (Issue #2111)"
   file: revert-rule.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    New test case for Issue #2111: `revert-rule` is now implemented, so it rolls back to the previous rule (including a `break-before: page`, hence the extra page) instead of being handed to the browser.
+    New test case for Issue #2111: `revert-rule` is now implemented, so it rolls back to the previous rule (including a
+    `break-before: page`, hence the extra page) instead of being handed to the browser.
   approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-rule.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-rule.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
-- id: "0109"
-  category: Explicit Defaulting Keywords
+- category: Explicit Defaulting Keywords
   title: "Rollback keywords in @page (Issue #2111)"
   file: revert-page.html
-  type: error
   decision: expected  # regression / expected / skip
   notes: >-
-    New test case for Issue #2111: canary times out on `@page { margin-left: revert }`, which this change resolves in the cascade instead of forwarding the keyword to the browser.
+    New test case for Issue #2111: canary times out on `@page { margin-left: revert }`, which this change resolves in
+    the cascade instead of forwarding the keyword to the browser.
   approvedViewer: git-feat-issue2111  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/revert-page.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/revert-page.html&zoom=1&spread=false
-  errorSide: canary
-  errorName: TimeoutError
-  errorMessage: "Timeout (30000ms): waiting for viewer ready"
 - category: General
   title: "writing-mode on body not inherited by page context (Issue #1122)"
   file: writing-mode-body-page-context.html
