@@ -1824,6 +1824,13 @@ export const passPostProperties = [
   "background-image",
   "background-repeat",
   "background-position",
+  // The browser CSSOM treats background-position as a shorthand of these two.
+  // Vivliostyle keeps background-position whole (see ValidatorSet.getShorthand),
+  // so all three are propagated. They are listed after the shorthand so that an
+  // author overriding one axis after the shorthand wins, as in the usual
+  // `background-position: ...; background-position-x: ...` pattern.
+  "background-position-x",
+  "background-position-y",
   "background-clip",
   "background-origin",
   "background-size",

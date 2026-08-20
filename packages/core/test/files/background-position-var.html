@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2116: var() in background-position is dropped for @page / root backgrounds -->
+<html>
+  <head>
+    <title>background-position with var() (Issue #2116)</title>
+    <style>
+      :root {
+        --pos: 15mm 12.6mm;
+        --pos-x: 15mm;
+        --pos-y: 12.6mm;
+      }
+      @page {
+        size: 100mm 100mm;
+        margin: 15mm;
+        background-image: linear-gradient(#0057b8, #0057b8);
+        background-size: 30mm 5mm;
+        background-repeat: no-repeat;
+      }
+      /* Page 1: the position comes from a custom property. */
+      @page var-page {
+        background-position: var(--pos);
+      }
+      /* Page 2: the same position written literally, as the reference. */
+      @page literal-page {
+        background-position: 15mm 12.6mm;
+      }
+      /* Page 3: the same position through the axis longhands. */
+      @page xy-page {
+        background-position-x: var(--pos-x);
+        background-position-y: var(--pos-y);
+      }
+      body {
+        margin: 0;
+        font: 3mm/1.4 sans-serif;
+      }
+      section {
+        /* keep the text clear of the page background bar on every page */
+        padding-top: 5mm;
+      }
+      section:not(:last-of-type) {
+        break-after: page;
+      }
+      section.var-page {
+        page: var-page;
+      }
+      section.literal-page {
+        page: literal-page;
+      }
+      section.xy-page {
+        page: xy-page;
+      }
+      pre {
+        margin: 2mm 0;
+        font: 2.6mm/1.3 monospace;
+      }
+      .box {
+        height: 18mm;
+        border: 0.2mm solid #888;
+        background-image: linear-gradient(#c00, #c00);
+        background-size: 20mm 4mm;
+        background-repeat: no-repeat;
+      }
+      .box.var-pos {
+        background-position: var(--pos);
+      }
+      .box.literal-pos {
+        background-position: 15mm 12.6mm;
+      }
+      .box.xy-pos {
+        background-position-x: var(--pos-x);
+        background-position-y: var(--pos-y);
+      }
+      .note {
+        margin-top: 3mm;
+        font-size: 2.6mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="var-page">
+      <p><strong>Page 1 — shorthand with <code>var()</code></strong></p>
+      <pre>@page var-page {
+  background-position: var(--pos);
+}</pre>
+      <div class="box var-pos"></div>
+      <p class="note">
+        All three pages must render identically: the blue bar starts 15mm /
+        12.6mm from the top-left corner of the <em>page box</em> — page margins
+        included, so not the page area.
+      </p>
+    </section>
+    <section class="literal-page">
+      <p><strong>Page 2 — literal value (reference)</strong></p>
+      <pre>@page literal-page {
+  background-position: 15mm 12.6mm;
+}</pre>
+      <div class="box literal-pos"></div>
+      <p class="note">
+        All three pages must render identically: the blue bar starts 15mm /
+        12.6mm from the top-left corner of the <em>page box</em> — page margins
+        included, so not the page area.
+      </p>
+    </section>
+    <section class="xy-page">
+      <p><strong>Page 3 — axis longhands with <code>var()</code></strong></p>
+      <pre>@page xy-page {
+  background-position-x: var(--pos-x);
+  background-position-y: var(--pos-y);
+}</pre>
+      <div class="box xy-pos"></div>
+      <p class="note">
+        All three pages must render identically: the blue bar starts 15mm /
+        12.6mm from the top-left corner of the <em>page box</em> — page margins
+        included, so not the page area.
+      </p>
+    </section>
+  </body>
+</html>

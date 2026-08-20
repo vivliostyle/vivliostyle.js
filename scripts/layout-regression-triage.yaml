@@ -256,3 +256,31 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/cascade-layers-import.html&zoom=1&spread=false
+- category: General
+  title: "background-position with var() (Issue #2116)"
+  file: background-position-var.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test file for Issue #2116: canary drops `background-position: var(--pos)` on @page and the root because the
+    browser CSSOM expands it into background-position-x/-y, so it renders at 0% 0%.
+  approvedViewer: git-fix-issue2116  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/background-position-var.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/background-position-var.html&zoom=1&spread=false
+- category: General
+  title: "background-position longhands on the root background (Issue #2116)"
+  file: background-position-longhand-root.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test file for Issue #2116: canary drops `background-position-x`/`-y` specified on the body element, because
+    they are not part of the `background` shorthand grammar and so never reach the root background.
+  approvedViewer: git-fix-issue2116  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/background-position-longhand-root.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/background-position-longhand-root.html&zoom=1&spread=false

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2116: background-position-x/-y on the body element must reach the root background -->
+<html>
+  <head>
+    <title>background-position longhands on the root background (Issue #2116)</title>
+    <style>
+      :root {
+        --pos-x: 15mm;
+        --pos-y: 12.6mm;
+      }
+      @page {
+        size: 100mm 100mm;
+        margin: 15mm;
+      }
+      body {
+        margin: 0;
+        font: 3mm/1.4 sans-serif;
+        /* The body background is transferred to the root, so it becomes the
+           canvas background: painted over the whole page, but positioned
+           relative to the root element's box. */
+        background-image: linear-gradient(#0057b8, #0057b8);
+        background-size: 30mm 5mm;
+        background-repeat: no-repeat;
+        background-position-x: var(--pos-x);
+        background-position-y: var(--pos-y);
+      }
+      .content {
+        /* keep the text clear of the canvas background bar */
+        padding-top: 18mm;
+      }
+      pre {
+        margin: 2mm 0;
+        font: 2.6mm/1.3 monospace;
+      }
+      /* Same background-position-x as the canvas, for a left-edge comparison. */
+      .ref {
+        height: 6mm;
+        border: 0.2mm solid #888;
+        background-image: linear-gradient(#c00, #c00);
+        background-size: 20mm 4mm;
+        background-repeat: no-repeat;
+        background-position-x: var(--pos-x);
+        background-position-y: center;
+      }
+      .note {
+        margin-top: 3mm;
+        font-size: 2.6mm;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <p><strong>Root background, axis longhands</strong></p>
+      <pre>body {
+  background-position-x: var(--pos-x);
+  background-position-y: var(--pos-y);
+}</pre>
+      <div class="ref"></div>
+      <p class="note">
+        The body background becomes the canvas background: painted over the
+        whole page, but positioned relative to the root element's box — here the
+        page area. The blue bar's left edge must line up with the red bar's.
+      </p>
+    </div>
+  </body>
+</html>

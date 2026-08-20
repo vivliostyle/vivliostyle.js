@@ -2039,6 +2039,13 @@ export class ValidatorSet {
       }
       return shorthand;
     }
+    if (this.validators[name]) {
+      // Vivliostyle has its own validator for this property and looks it up by
+      // this name after the cascade, so it must not be split into the browser's
+      // longhands even when the browser treats it as a shorthand
+      // (e.g. `background-position` → `background-position-x`/`-y`).
+      return null;
+    }
     if (this.browserShorthandMisses[name]) {
       return null;
     }

@@ -140,9 +140,23 @@ describe("css-validator", function () {
       var validatorSet = adapt_cssvalid.baseValidatorSet();
       spyOn(validatorSet, "expandBrowserShorthand").and.callThrough();
 
-      expect(validatorSet.getShorthand("color", "red")).toBeNull();
-      expect(validatorSet.getShorthand("color", "blue")).toBeNull();
+      expect(validatorSet.getShorthand("accent-color", "red")).toBeNull();
+      expect(validatorSet.getShorthand("accent-color", "blue")).toBeNull();
       expect(validatorSet.expandBrowserShorthand).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not probe the browser for properties Vivliostyle validates itself", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      spyOn(validatorSet, "expandBrowserShorthand").and.callThrough();
+
+      // These are shorthands in the browser CSSOM, but Vivliostyle looks them
+      // up by their own name after the cascade. (Issue #2116)
+      expect(
+        validatorSet.getShorthand("background-position", "var(--pos)"),
+      ).toBeNull();
+      expect(validatorSet.getShorthand("overflow", "var(--ov)")).toBeNull();
+      expect(validatorSet.getShorthand("white-space", "var(--ws)")).toBeNull();
+      expect(validatorSet.expandBrowserShorthand).not.toHaveBeenCalled();
     });
 
     it("does not cache a browser shorthand miss for unresolved var values", function () {
