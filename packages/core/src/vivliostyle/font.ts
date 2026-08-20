@@ -68,6 +68,12 @@ export class Face {
   blobs: Blob[] = [];
   family: string | null;
 
+  /**
+   * The `<style>` element carrying this face's `@font-face` rule in the view
+   * document. Only the view faces made by {@link Mapper.initFont} have one.
+   */
+  styleElement: HTMLStyleElement | null = null;
+
   constructor(public readonly properties: { [key: string]: Css.Val }) {
     this.fontTraitKey = makeFontTraitKey(this.properties);
     this.src = this.properties["src"]
@@ -218,6 +224,7 @@ export class Mapper {
     const style = this.head.ownerDocument.createElement("style");
     style.textContent = viewFontFace.makeAtRule(src, fontBytes);
     this.head.appendChild(style);
+    viewFontFace.styleElement = style;
     Logging.logger.debug("Load font:", src);
     frame.finish(viewFontFace);
     return frame.result();
@@ -278,9 +285,28 @@ export class Mapper {
       }
       fetchers.push(this.loadFont(srcFace, documentFaces));
     }
-    return TaskUtil.waitForFetchers(fetchers).thenAsync(() =>
-      this.waitFontLoading(),
-    );
+    return TaskUtil.waitForFetchers(fetchers).thenAsync(() => {
+      this.reorderFontFaceRules(fetchers);
+      return this.waitFontLoading();
+    });
+  }
+
+  /**
+   * Puts the `@font-face` rules of the view document back in the order of the
+   * rules they came from, which the cascade has already sorted. A font that
+   * needs deobfuscation is added when its fetch completes, so the order the
+   * rules were added in is not the order they were declared in, and the
+   * browser lets the last of the matching rules win.
+   */
+  private reorderFontFaceRules(
+    fetchers: TaskUtil.Fetcher<Face | null>[],
+  ): void {
+    for (const fetcher of fetchers) {
+      const styleElement = fetcher.resource?.styleElement;
+      if (styleElement?.parentNode === this.head) {
+        this.head.appendChild(styleElement); // moves it to the end
+      }
+    }
   }
 
   waitFontLoading(): Task.Result<boolean> {

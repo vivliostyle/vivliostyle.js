@@ -1946,6 +1946,11 @@ export class RootPageBoxInstance extends PageBoxInstance<RootPageBox> {
     super.applyCascadeAndInit(cascade, docElementStyle);
 
     // Sort page masters using origin, cascade layer, specificity and order.
+    // Page masters are a list tried in order: the first one whose conditions
+    // are met is used for the next page (EPUB Adaptive Layout 3.5). So the
+    // ties are broken by ascending index on purpose, keeping the "declared
+    // first, tried first" order that lets a general fallback page master be
+    // written last.
     const pageMasters = this.children;
     (pageMasters as PageMasterInstance[]).sort(
       (a, b) =>
