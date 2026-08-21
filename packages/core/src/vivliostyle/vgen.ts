@@ -837,7 +837,7 @@ export class ViewFactory
         }
       }
       let value = cascVal.evaluate(context, name, percentRef, vertical);
-      if (name == "font-family") {
+      if (name == "font-family" || name == "--viv-marker-font-family") {
         value = this.docFaces.filterFontFamily(value);
       }
       return value;
