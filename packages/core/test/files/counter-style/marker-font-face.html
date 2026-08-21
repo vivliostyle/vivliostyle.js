@@ -2,9 +2,13 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Web font family on ::marker</title>
+    <title>Font family defined by @font-face on ::marker</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap");
+      @font-face {
+        font-family: "Archivo Black";
+        src: url("../fonts/ArchivoBlack/archivo-black-subset.woff2")
+          format("woff2");
+      }
 
       ol {
         font-size: 48px;
@@ -16,7 +20,7 @@
     </style>
   </head>
   <body>
-    <h1>Web font family on ::marker</h1>
+    <h1>Font family defined by @font-face on ::marker</h1>
     <ol>
       <li><span class="reference">1.</span> Marker and reference</li>
     </ol>

@@ -533,8 +533,8 @@ module.exports = [
         title: "::marker pseudo-element",
       },
       {
-        file: "counter-style/marker-web-font.html",
-        title: "Web font family on ::marker",
+        file: "counter-style/marker-font-face.html",
+        title: "Font family defined by @font-face on ::marker",
       },
       {
         file: "counter-style/marker-block-child.html",
