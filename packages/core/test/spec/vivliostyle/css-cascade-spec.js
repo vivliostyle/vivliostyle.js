@@ -2833,7 +2833,7 @@ describe("css-cascade", function () {
       expect(resolved(style)).toBe(green);
     });
 
-    it("becomes unset when there is nothing left to roll back to", function () {
+    it("is left to the browser when there is nothing left to roll back to", function () {
       var style = {};
       declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR);
       declare(
@@ -2842,7 +2842,36 @@ describe("css-cascade", function () {
         adapt_cssparse.SPECIFICITY_AUTHOR + 1,
       );
 
-      expect(resolved(style)).toBe(adapt_css.ident.unset);
+      expect(resolved(style)).toBe(adapt_css.ident.revert);
+    });
+
+    it("leaves revert-layer to the browser as revert when there is nothing left to roll back to", function () {
+      var tree = new adapt_csscasc.CascadeLayerTree();
+      var first = tree.register(null, ["first"]);
+      var style = {};
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR, first);
+      declare(
+        style,
+        adapt_css.ident.revert_layer,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 1,
+        first,
+      );
+
+      expect(resolved(style)).toBe(adapt_css.ident.revert);
+    });
+
+    it("leaves revert-rule to the browser as revert when there is nothing left to roll back to", function () {
+      var style = {};
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR, null, 1);
+      declare(
+        style,
+        adapt_css.ident.revert_rule,
+        adapt_cssparse.SPECIFICITY_AUTHOR + 1,
+        null,
+        1,
+      );
+
+      expect(resolved(style)).toBe(adapt_css.ident.revert);
     });
 
     it("rolls revert-layer back to the previous layer", function () {

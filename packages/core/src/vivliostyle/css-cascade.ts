@@ -729,10 +729,21 @@ function resolveRollbackValue(
       }
     }
     if (!winner) {
-      // Nothing is left to roll back to, so the property is as if it had never
-      // been declared. For a custom property that is the guaranteed-invalid
-      // value, which this engine spells `initial`.
-      return Css.isCustomPropName(name) ? Css.ident.initial : Css.ident.unset;
+      // Nothing is left in Vivliostyle's own cascade to roll back to. A custom
+      // property is then the guaranteed-invalid value, which this engine
+      // spells `initial`.
+      //
+      // Any other property is left as `revert` for the browser to resolve
+      // against its own user-agent style sheet, which knows the widget styles
+      // of `input`, `button` and the like that Vivliostyle's user-agent style
+      // sheet deliberately does not define. Resolving it here instead would
+      // mean `unset`, dropping the border of a form control that reverts
+      // (WPT css-ui/appearance-revert-001, compute-kind-widget-fallback-props-
+      // revert-001). `revert-layer` and `revert-rule` become `revert` too: the
+      // browser cascade of the generated document has neither the layers nor
+      // the rules they refer to, and the origin below all of them is the one
+      // being deferred to in either case.
+      return Css.isCustomPropName(name) ? Css.ident.initial : Css.ident.revert;
     }
     reverting = winner;
   }
