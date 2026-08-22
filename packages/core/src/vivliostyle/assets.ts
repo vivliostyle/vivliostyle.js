@@ -1098,6 +1098,7 @@ th {
   font-weight: bolder;
   text-align: center;
 }
+*[hidden],
 link,
 style,
 script {
@@ -1436,22 +1437,6 @@ epub|case[required-namespace::supported] ~ epub|default {
 }
 `;
 
-/**
- * user-agent-hidden.css
- *
- * The `hidden` attribute, kept out of `user-agent-base.css` so that it can be
- * left out when the document is rendered into the viewer's TOC box: an entry
- * hidden from the printed table of contents is still listed in the TOC menu
- * (see PR #1269).
- */
-export const UserAgentHiddenCss = `
-@namespace "http://www.w3.org/1999/xhtml";
-
-*[hidden] {
-  display: none;
-}
-`;
-
 /** user-agent-toc.css */
 export const UserAgentTocCss = `
 @namespace "http://www.w3.org/1999/xhtml";
@@ -1463,8 +1448,13 @@ export const UserAgentTocCss = `
   display: none;
 }
 
-/* Note: the hidden attribute does not hide anything here, because
-   user-agent-hidden.css is not loaded for the TOC box. */
+/* An entry hidden from the printed table of contents is still listed in the
+   viewer's TOC menu (see PR #1269). Nothing in Vivliostyle's own cascade is
+   left to roll back to here, so the keyword reaches the browser, which reverts
+   to the display of the element itself. */
+[hidden] {
+  display: revert;
+}
 
 [data-vivliostyle-role=doc-toc] li a {
   -adapt-behavior: toc-node-anchor;
