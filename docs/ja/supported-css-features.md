@@ -7,9 +7,8 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 ## 値
 
 - [CSS 全体キーワード](https://www.w3.org/TR/css-values/#common-keywords): `initial`, `inherit`, `unset`, `revert`, `revert-layer`, `revert-rule`
-  - カスケードを巻き戻す[明示的デフォルト指定キーワード](https://www.w3.org/TR/css-cascade-5/#defaulting-keywords)は Vivliostyle 自身のカスケードで解決されるため、巻き戻した値がレイアウトエンジンやページ関連機能から見えます。`revert` は前のカスケードオリジンへ、`revert-layer` は現在より前のカスケードレイヤーへ、`revert-rule` は現在のルールを除いたカスケードへ巻き戻します。`@page` ルールとページマージンボックス、`all`、カスタムプロパティ、`var()` のフォールバックとしての記述でも動作します。[Issue #2111](https://github.com/vivliostyle/vivliostyle.js/issues/2111) を参照
-  - Vivliostyle 自身のカスケードに巻き戻す先が残っていない場合は、`unset` として解決せずにキーワードを書かれたまま維持してブラウザに渡すため、巻き戻し先は Vivliostyle が扱っていないもの、すなわちブラウザのユーザーエージェントスタイルシートや属性によるプレゼンテーションヒントになります。これにより、Vivliostyle のユーザーエージェントスタイルシートがあえて定義していない `input` や `button` などのフォームコントロールのブラウザ既定のスタイルが保たれ、また Vivliostyle のカスケードが Shadow DOM を実装していなくてもシャドウツリー (`:host`、`::slotted`) への巻き戻しが動作します
-  - 注意: カスタムプロパティを経由して届いたキーワード (`--x: var(--y, revert-layer); color: var(--x)`) は巻き戻しとして扱われません（ブラウザの挙動に合わせています）
+  - カスケードを巻き戻す[明示的デフォルト指定キーワード](https://www.w3.org/TR/css-cascade-5/#defaulting-keywords)として、`revert` は前のカスケードオリジンへ、`revert-layer` は現在より前のカスケードレイヤーへ、`revert-rule` は現在のルールを除いたカスケードへ巻き戻します
+  - `@page` ルールとページマージンボックス、`all`、カスタムプロパティ、`var()` のフォールバックとしての記述でも動作します。[PR #2119](https://github.com/vivliostyle/vivliostyle.js/pull/2119), [PR #2123](https://github.com/vivliostyle/vivliostyle.js/pull/2123) を参照
 - [長さの単位](https://www.w3.org/TR/css-values/#lengths): `em`, `ex`, `ch`, `rem`, `lh`, `rlh`, `vw`, `vh`, `vmin, vmax`, `vi`, `vb`, `cm`, `mm`, `q`, `in`, `pc`, `pt`, `px`.
 - サイジングキーワード: [min-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-min-content), [max-content](https://www.w3.org/TR/css-sizing-3/#valdef-width-max-content), [fit-content](https://www.w3.org/TR/css-sizing-4/#valdef-width-fit-content)
 - カラー値
