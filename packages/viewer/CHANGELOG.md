@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.45.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.44.1...v2.45.0) (2026-08-22)
+
+**Note:** Version bump only for package @vivliostyle/viewer
+
 ## [2.44.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.44.0...v2.44.1) (2026-07-09)
 
 **Note:** Version bump only for package @vivliostyle/viewer
