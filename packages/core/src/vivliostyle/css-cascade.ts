@@ -729,10 +729,22 @@ function resolveRollbackValue(
       }
     }
     if (!winner) {
-      // Nothing is left to roll back to, so the property is as if it had never
-      // been declared. For a custom property that is the guaranteed-invalid
-      // value, which this engine spells `initial`.
-      return Css.isCustomPropName(name) ? Css.ident.initial : Css.ident.unset;
+      // Nothing is left in Vivliostyle's own cascade to roll back to. A custom
+      // property is then the guaranteed-invalid value, which this engine
+      // spells `initial`.
+      //
+      // Any other property keeps the keyword, so that the browser resolves it
+      // in the cascade of the generated document, where the declaration lands
+      // in the `style` attribute. What is left there below it is exactly what
+      // Vivliostyle does not model: the browser's own user-agent style sheet,
+      // which knows the widget styles of `input`, `button` and the like that
+      // Vivliostyle's user-agent style sheet deliberately does not define, and
+      // the presentational hints of attributes such as `width` or `hidden`,
+      // which are author-origin declarations below every author rule.
+      // Resolving the keyword here instead would mean `unset`, dropping the
+      // border of a form control that reverts (WPT css-ui/appearance-revert-001,
+      // compute-kind-widget-fallback-props-revert-001).
+      return Css.isCustomPropName(name) ? Css.ident.initial : reverting.value;
     }
     reverting = winner;
   }
@@ -741,8 +753,10 @@ function resolveRollbackValue(
 
 /**
  * Replace every rollback keyword that won the cascade with the declaration it
- * rolls back to, so that neither the layout engine nor the `style` attribute
- * of the generated element ever sees the keyword.
+ * rolls back to, so that the layout engine sees a real value instead of the
+ * keyword. When Vivliostyle's own cascade has nothing left to roll back to,
+ * the keyword survives on purpose and is handed to the browser through the
+ * `style` attribute of the generated element (see `resolveRollbackValue`).
  *
  * This runs twice: once as soon as the cascade is settled, because the value
  * rolled back to may itself be a shorthand or contain var(), and once more
