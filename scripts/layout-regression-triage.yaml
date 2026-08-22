@@ -1,3 +1,15 @@
+- category: Counter style and list-style
+  title: Font family defined by @font-face on ::marker
+  file: counter-style/marker-font-face.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-marker-font-face  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker-font-face.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker-font-face.html&zoom=1&spread=false
 - category: Cascade Layers
   title: "Cascade layers with @counter-style (Issue #2110)"
   file: cascade-layers-counter-style.html
