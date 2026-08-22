@@ -25,6 +25,25 @@ from typing import BinaryIO
 from fontTools.fontBuilder import FontBuilder
 from fontTools.misc.timeTools import timestampSinceEpoch
 from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.ttLib import TTFont
+
+
+def set_vertical_metrics(
+    font: TTFont, ascender: int, descender: int, line_gap: int
+) -> None:
+    hhea = font["hhea"]
+    hhea.ascent = ascender
+    hhea.descent = descender
+    hhea.lineGap = line_gap
+    os2 = font["OS/2"]
+    os2.version = 4
+    os2.sTypoAscender = ascender
+    os2.sTypoDescender = descender
+    os2.sTypoLineGap = line_gap
+    os2.usWinAscent = ascender
+    os2.usWinDescent = -descender
+    USE_TYPO_METRICS = 1 << 7
+    os2.fsSelection |= USE_TYPO_METRICS
 
 
 def build_woff2(space_advance: int, units_per_em: int, f: BinaryIO) -> None:
@@ -59,6 +78,29 @@ def build_woff2(space_advance: int, units_per_em: int, f: BinaryIO) -> None:
     fb.setupNameTable({})
     fb.setupOS2()
     fb.setupPost()
+
+    # FIXME: Workaround for the regression introduced by #2035.
+    # Give the font the metrics of Times, namely those of Liberation Serif, the
+    # standard substitute for "Times" on Linux.
+    # https://github.com/liberationfonts/liberation-fonts/releases/tag/2.1.5
+    # Without vertical metrics, underlines vanish. For overlines and
+    # line-throughs to behave like native spacing with an arbitrary font, the
+    # filler would need the same vertical metrics as that font; this problem
+    # predates #2035.
+    TIMES_UNITS_PER_EM = 2048
+
+    def times_metric(value: int) -> int:
+        return round(value * units_per_em / TIMES_UNITS_PER_EM)
+
+    TIMES_ASCENDER = 1825
+    TIMES_DESCENDER = -443
+    TIMES_LINE_GAP = 87
+    set_vertical_metrics(
+        fb.font,
+        times_metric(TIMES_ASCENDER),
+        times_metric(TIMES_DESCENDER),
+        times_metric(TIMES_LINE_GAP),
+    )
 
     # For deterministic output
     epoch = timestampSinceEpoch(0)

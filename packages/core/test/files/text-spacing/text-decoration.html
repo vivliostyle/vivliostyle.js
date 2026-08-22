@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Continuous text decorations across text-autospace</title>
+    <style>
+      .sample {
+        font-size: 48px;
+        text-decoration-color: cyan;
+        text-decoration-thickness: 0.2em;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+      }
+      .underline {
+        text-decoration-line: underline;
+      }
+      .overline {
+        text-decoration-line: overline;
+      }
+      .line-through {
+        text-decoration-line: line-through;
+      }
+      .letter-spacing {
+        letter-spacing: 0.25em;
+      }
+      .color-only {
+        text-decoration-color: red;
+      }
+      .wrap {
+        white-space: normal;
+      }
+      .inner u {
+        text-decoration: underline 0.2em magenta;
+        text-decoration-skip-ink: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Continuous text decorations across text-autospace</h1>
+
+    <h2>reference without decoration</h2>
+    <p class="sample">漢ABC漢123漢</p>
+
+    <h2>horizontal underline</h2>
+    <p class="sample underline">漢ABC漢123漢</p>
+
+    <h2>horizontal overline</h2>
+    <p class="sample overline">漢ABC漢123漢</p>
+
+    <h2>horizontal line-through</h2>
+    <p class="sample line-through">漢ABC漢123漢</p>
+
+    <h2>decoration only on the inner element (spacing stays outside)</h2>
+    <p class="sample inner">漢漢<u>ABC</u>漢漢</p>
+    <p class="sample inner">ABC<u>漢漢</u>ABC</p>
+
+    <h2>underline with letter-spacing</h2>
+    <p class="sample underline letter-spacing">漢ABC漢123漢</p>
+
+    <h2>vertical underline</h2>
+    <p class="sample vertical underline">漢ABC漢123漢</p>
+
+    <h2>vertical overline</h2>
+    <p class="sample vertical overline">漢ABC漢123漢</p>
+
+    <h2>vertical line-through</h2>
+    <p class="sample vertical line-through">漢ABC漢123漢</p>
+
+    <h2>vertical, decoration only on the inner element</h2>
+    <p class="sample vertical inner">漢漢<u>ABC</u>漢漢</p>
+    <p class="sample vertical inner">ABC<u>漢漢</u>ABC</p>
+
+    <h2>vertical, underline with letter-spacing</h2>
+    <p class="sample vertical underline letter-spacing">漢ABC漢123漢</p>
+  </body>
+</html>
