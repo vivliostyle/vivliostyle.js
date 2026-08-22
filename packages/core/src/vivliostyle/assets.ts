@@ -1551,7 +1551,7 @@ span.viv-anonymous-block {
 /* see #2034 */
 @font-face {
   font-family: "-viv-ts-sp";
-  src: url("data:font/woff2;base64,d09GMgABAAAAAADcAAoAAAAAAhwAAACWAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAoUNgE2AiQDDAsIAAQgBQYHLhuDAfivCuyG888wVNS8F/ZFrDP4HM9/f7Fz/327szNpE39MLJMEEwhM4rqEpw5WA/yHf662vHz4yq43QNDB8YgOIBcKMTAeaQjBDrH14HBRR74Oowl4tbBt3gYLxV0Fd2NjjGDXnS4ACk4ExYDAJc3tIYAgPOf4u3qBDwf8K4JaIACDfyIAgMIABFUBC6LutJhuZR3vCA==") format("woff2");
+  src: url("data:font/woff2;base64,d09GMgABAAAAAADsAAoAAAAAAhwAAACkAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAANAoUNgE2AiQDDAsIAAQgBQYHLhuDATAvDuxmH09wwcdQfVXDjoN4/uuenbvv/WombeKVxJoJmsgSDAIMQBNI2364+oJVIbt1VpdteYNucBxRTKkHHAAtsOCiG02Dh+ybQCFXG3XLx6aFAW6lt2nu/R/sYAIAJhgonJTgpE20Fsy1eGx9BUCBHYJCAxpAKsezAIKwvzuuv0MdwOvy2w0RlAHC9crGWiIAgIIGCEoJGCTsDC4sx/ZMAAA=") format("woff2");
 }
 viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {

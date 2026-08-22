@@ -602,6 +602,10 @@ module.exports = [
         file: "text-spacing/inherited-spacing-properties.html",
         title: "Text-spacing fillers with inherited spacing properties",
       },
+      {
+        file: "text-spacing/text-decoration.html",
+        title: "Continuous text decorations across text-autospace",
+      },
     ],
   },
   {
