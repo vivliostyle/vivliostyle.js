@@ -53,8 +53,6 @@ import {
   Vtree,
 } from "./types";
 
-export const isInstanceOfAfterIfContinuesLayoutConstraint =
-  Selectors.isInstanceOfAfterIfContinuesLayoutConstraint;
 export const registerFragmentIndex =
   Matchers.NthFragmentMatcher.registerFragmentIndex;
 export const clearFragmentIndices =
