@@ -1223,7 +1223,6 @@ export class ViewFactory
   private createElementView(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
     let needToProcessChildren = true;
     const frame: Task.Frame<boolean> = Task.newFrame("createElementView");
@@ -2364,7 +2363,6 @@ export class ViewFactory
 
             // Detect forced or unforced break at this point
             // to handle margin-break properly.
-            // Note: Do not use `atUnforcedBreak` which may be inaccurate.
             const breakType = this.getBreakTypeAt(nodeContext);
             const anyBreak = breakType !== null;
             const unforcedBreak = breakType === "auto";
@@ -2854,13 +2852,12 @@ export class ViewFactory
   createNodeView(
     nodeContext: Vtree.NodeContext,
     firstTime: boolean,
-    atUnforcedBreak: boolean,
   ): Task.Result<boolean> {
     const frame: Task.Frame<boolean> = Task.newFrame("createNodeView");
     let result: Task.Result<boolean>;
     let needToProcessChildren = true;
     if (nodeContext.sourceNode.nodeType == 1) {
-      result = this.createElementView(nodeContext, firstTime, atUnforcedBreak);
+      result = this.createElementView(nodeContext, firstTime);
     } else {
       if (nodeContext.sourceNode.nodeType == 8) {
         this.viewNode = null; // comment node
@@ -2925,7 +2922,7 @@ export class ViewFactory
     this.sourceNode = nodeContext.sourceNode;
     this.offsetInNode = nodeContext.offsetInNode;
     this.viewNode = null;
-    return this.createNodeView(nodeContext, firstTime, !!atUnforcedBreak);
+    return this.createNodeView(nodeContext, firstTime);
   }
 
   processShadowContent(pos: Vtree.ChildNodeContext): Vtree.NodeContext {
