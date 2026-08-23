@@ -891,19 +891,17 @@ let seqId = 0;
 export class URLMarksStore implements MarksStoreInterface {
   private markArray: MarkJson[] = [];
   private markKeyToArrayIndex: Map<string, number>;
-  public documentId = "";
 
   constructor() {
     this.markKeyToArrayIndex = new Map();
   }
 
-  async init(documentId: string): Promise<void> {
+  async init(_documentId: string): Promise<void> {
     const marksParam = urlParameters.getParameter("mark");
     marksParam.forEach((m) => {
       const mark = this.urlStringToMark(m);
       this.pushMarkInternal(mark, "doNotAddToUrl", "persist");
     });
-    this.documentId = documentId;
   }
 
   async persistMark(mark: MarkJson): Promise<string> {
