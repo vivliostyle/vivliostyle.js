@@ -84,13 +84,6 @@ export class Face {
   }
 
   /**
-   * Check if font traits are the same for two font faces
-   */
-  traitsEqual(other: Face): boolean {
-    return this.fontTraitKey == other.fontTraitKey;
-  }
-
-  /**
    * Create "at" font-face rule.
    */
   makeAtRule(src: string, fontBytes: Blob | null): string {
