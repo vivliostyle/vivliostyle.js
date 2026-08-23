@@ -37,10 +37,6 @@ export default class Logger {
     this.logLevel = LogLevel.Error;
   }
 
-  setLogLevel(logLevel: LogLevel): void {
-    this.logLevel = logLevel;
-  }
-
   debug(content: unknown): void {
     if (this.logLevel === LogLevel.Debug) {
       messageQueue.push({
