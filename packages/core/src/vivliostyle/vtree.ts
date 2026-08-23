@@ -107,7 +107,7 @@ export function makeListener(
       for (let k = 0; k < refs.length; k++) {
         try {
           actionFn(refs[k]);
-        } catch (err) {}
+        } catch {}
       }
     };
   }

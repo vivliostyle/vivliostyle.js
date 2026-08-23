@@ -2038,7 +2038,7 @@ export class ViewFactory
                     attributeValue = "not all";
                   }
                 }
-              } catch (e) {
+              } catch {
                 // If parsing fails, leave the attribute as-is.
               }
             }

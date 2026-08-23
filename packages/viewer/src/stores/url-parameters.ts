@@ -146,7 +146,7 @@ class URLParameterStore {
       this.localStorageKey = null;
       try {
         window.localStorage.removeItem(localStorageKey);
-      } catch (_e) {
+      } catch {
         // ignore
       }
     }
@@ -170,7 +170,7 @@ class URLParameterStore {
       }
       try {
         window.localStorage.setItem(this.localStorageKey, this.location.hash);
-      } catch (_e) {
+      } catch {
         // ignore
       }
     }
@@ -202,7 +202,7 @@ class URLParameterStore {
           this.location.hash = saved;
           return true;
         }
-      } catch (_e) {
+      } catch {
         // ignore
       }
     }

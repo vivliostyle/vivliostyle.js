@@ -2270,7 +2270,7 @@ function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
     spanStartRows = tbodyElement.querySelectorAll(
       ":scope>tr:has(>:empty):not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
     );
-  } catch (e) {
+  } catch {
     // Do nothing if the browser does not support `:has()` to avoid error.
     // (Workaround for issue #1509)
     return;

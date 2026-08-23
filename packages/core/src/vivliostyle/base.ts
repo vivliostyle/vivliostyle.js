@@ -535,7 +535,7 @@ export function getCSSProperty(
     return (elem as HTMLElement).style.getPropertyValue(
       propertyNames ? propertyNames[0] : prop,
     );
-  } catch (err) {}
+  } catch {}
   return opt_value || "";
 }
 

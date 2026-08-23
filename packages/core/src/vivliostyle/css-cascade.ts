@@ -2043,7 +2043,7 @@ export class MatchesRelationalAction extends MatchesAction {
           this.checkAppliedAction.apply(cascadeInstance);
           break;
         }
-      } catch (e) {}
+      } catch {}
     }
     const applied = this.checkAppliedAction.applied;
     this.checkAppliedAction.applied = false;
