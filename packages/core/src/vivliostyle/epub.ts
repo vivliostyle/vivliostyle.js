@@ -868,7 +868,6 @@ export class OPFDoc {
   spine: OPFItem[];
   itemMap: { [key: string]: OPFItem };
   itemMapByPath: { [key: string]: OPFItem };
-  uid: string | null = null;
   bindings: { [key: string]: string } = {};
   lang: string | null = null;
   epageCount: number = 0;
@@ -1081,7 +1080,6 @@ export class OPFDoc {
       itemMap,
       itemMapByPath,
     });
-    opf.uid = uid;
     opf.toc = toc;
     opf.cover = cover;
     opf.fallbackMap = fallbackMap;
