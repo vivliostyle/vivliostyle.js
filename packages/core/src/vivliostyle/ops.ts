@@ -437,7 +437,6 @@ export class StyleInstance
       this,
       counterListener,
       counterResolver,
-      this.lang,
       this.style.counterStyleStore,
       this.cmykStore,
       this.xmldoc.root,

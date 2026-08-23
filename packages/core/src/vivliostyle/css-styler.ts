@@ -523,7 +523,6 @@ export class Styler implements AbstractStyler {
       context,
       counterListener,
       counterResolver,
-      xmldoc.lang,
       counterStyleStore,
       cmykStore,
       this.root,
