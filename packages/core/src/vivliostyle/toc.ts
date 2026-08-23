@@ -97,7 +97,6 @@ export function findTocAnchorElements(doc: Document): Array<Element> {
 export class TOCView implements Vgen.CustomRendererFactory {
   pref: Exprs.Preferences;
   page: Vtree.Page | null = null;
-  instance: OPS.StyleInstance | null = null;
 
   constructor(
     public readonly store: OPS.OPSDocStore,
@@ -304,7 +303,6 @@ export class TOCView implements Vgen.CustomRendererFactory {
         null,
         null,
       ).then((instance) => {
-        this.instance = instance;
         instance.layoutNextPage(page, null).then(() => {
           this.setAutoHeight(elem, 2);
           frame.finish(page);
