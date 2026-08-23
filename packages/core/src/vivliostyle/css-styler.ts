@@ -473,7 +473,6 @@ export class StyleStore implements CssCascade.StyleReader {
 
 export class Styler implements AbstractStyler {
   root: Base.ChildElement;
-  cascadeHolder: CssCascade.Cascade;
   last: Base.RootBoundCursor | null;
   rootStyle = {} as CssCascade.ElementStyle;
   /**
@@ -518,7 +517,6 @@ export class Styler implements AbstractStyler {
     mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.root = xmldoc.root;
-    this.cascadeHolder = cascade;
     this.styles = new StyleStore(xmldoc);
     this.last = Base.RootBoundCursor.atRoot(this.root);
     this.cascade = cascade.createInstance(
