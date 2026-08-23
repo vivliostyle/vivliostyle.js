@@ -291,7 +291,7 @@ export class InsideTableRowBreakPosition
 
   override getMinBreakPenalty(): number {
     const formattingContext = this.formattingContext;
-    const row = formattingContext.getRowByIndex(this.rowIndex);
+    formattingContext.getRowByIndex(this.rowIndex);
     let penalty = this.beforeNodeContext.breakPenalty;
 
     const breakPositions = this.getAcceptableCellBreakPositions();
@@ -2609,9 +2609,7 @@ export class TableRowLayoutConstraint
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
   ): Task.Result<boolean> {
-    const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext,
-    );
+    getTableFormattingContext(this.nodeContext.formattingContext);
     const frame: Task.Frame<boolean> = Task.newFrame("finishBreak");
     const constraints = this.cellFragmentLayoutConstraints.reduce(
       (array, entry) =>

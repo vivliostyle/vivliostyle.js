@@ -877,9 +877,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext | null> {
-    const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-      nodeContext.formattingContext,
-    );
+    getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
     const frame = Task.newFrame<Vtree.NodeContext | null>(
       "BlockLayoutProcessor.doInitialLayout",
     );
