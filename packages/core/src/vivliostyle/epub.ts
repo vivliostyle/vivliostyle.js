@@ -864,7 +864,6 @@ function getPathFromURL(url: string, pubURL: string): string | null {
 
 export class OPFDoc {
   opfXML: XmlDoc.XMLDocHolder;
-  encXML: XmlDoc.XMLDocHolder | null = null;
   items: OPFItem[];
   spine: OPFItem[];
   itemMap: { [key: string]: OPFItem };
@@ -1082,7 +1081,6 @@ export class OPFDoc {
       itemMap,
       itemMapByPath,
     });
-    opf.encXML = encXML;
     opf.uid = uid;
     opf.toc = toc;
     opf.cover = cover;
