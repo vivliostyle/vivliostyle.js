@@ -248,28 +248,6 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   }
 
   /**
-   * @return Returns true if the node overflows the column.
-   */
-  saveEdgeAndProcessOverflow(
-    state: RenderedActiveLayoutIteratorState,
-    column: Layout.Column,
-  ): boolean {
-    const overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(
-      state.lastAfterNodeContext,
-      null,
-      true,
-      state.breakAtTheEdge,
-    );
-    if (overflow) {
-      state.nodeContext = (
-        state.lastAfterNodeContext || state.nodeContext
-      ).modify();
-      state.nodeContext.overflow = true;
-    }
-    return overflow;
-  }
-
-  /**
    * @returns Returns true if the layout constraint is violated.
    */
   processLayoutConstraint(
