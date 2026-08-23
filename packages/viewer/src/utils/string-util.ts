@@ -27,9 +27,6 @@ export default {
   percentEncodeAmpersandAndUnencodedPercent(str: string): string {
     return str.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
   },
-  percentEncodeAmpersandAndPercent(str: string): string {
-    return str.replace(/%/g, "%25").replace(/&/g, "%26");
-  },
   percentDecodeAmpersandAndPercent(str: string): string {
     return str.replace(/%26/g, "&").replace(/%25/g, "%");
   },
