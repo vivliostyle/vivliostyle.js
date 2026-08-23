@@ -1229,11 +1229,6 @@ export class CascadeAction {
   mergeWith(other: CascadeAction): CascadeAction {
     return new CompoundAction([this, other]);
   }
-
-  clone(): CascadeAction {
-    // Mutable actions will override
-    return this;
-  }
 }
 
 export class ConditionItemAction extends CascadeAction {
@@ -1262,10 +1257,6 @@ export class CompoundAction extends CascadeAction {
   override mergeWith(other: CascadeAction): CascadeAction {
     this.list.push(other);
     return this;
-  }
-
-  override clone(): CascadeAction {
-    return new CompoundAction(([] as CascadeAction[]).concat(this.list));
   }
 }
 
@@ -1948,12 +1939,6 @@ export class CheckAppliedAction extends CascadeAction {
 
   override apply(cascadeInstance: StyledCascadeInstance): void {
     this.applied = true;
-  }
-
-  override clone(): CascadeAction {
-    const cloned = new CheckAppliedAction();
-    cloned.applied = this.applied;
-    return cloned;
   }
 }
 
@@ -3727,12 +3712,6 @@ Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
  */
 export const ORDER_INCREMENT = 1 / 0x100000;
 
-export function copyTable(src: ActionTable, dst: ActionTable): void {
-  for (const n in src) {
-    dst[n] = src[n].clone();
-  }
-}
-
 export class Cascade {
   nsCount: number = 0;
   nsPrefix: { [key: string]: string } = {};
@@ -3744,25 +3723,6 @@ export class Cascade {
   pagetypes: ActionTable = {};
   order: number = 0;
   readonly layerTrees: { [flavor: string]: CascadeLayerTree } = {};
-
-  clone(): Cascade {
-    const r = new Cascade();
-    r.nsCount = this.nsCount;
-    for (const p in this.nsPrefix) {
-      r.nsPrefix[p] = this.nsPrefix[p];
-    }
-    copyTable(this.tags, r.tags);
-    copyTable(this.nstags, r.nstags);
-    copyTable(this.epubtypes, r.epubtypes);
-    copyTable(this.classes, r.classes);
-    copyTable(this.ids, r.ids);
-    copyTable(this.pagetypes, r.pagetypes);
-    r.order = this.order;
-    for (const f in this.layerTrees) {
-      r.layerTrees[f] = this.layerTrees[f];
-    }
-    return r;
-  }
 
   /**
    * Returns the cascade layer for a `@layer` rule of the given origin.
