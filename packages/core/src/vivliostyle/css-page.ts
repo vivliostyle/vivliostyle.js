@@ -1286,7 +1286,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
           container,
           boxInstance.style,
           isHorizontal,
-          scope,
           clientLayout,
         );
         containers[boxInfo.positionAlongVariableDimension] = container;
@@ -1326,7 +1325,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
             containers[name],
             boxInstances[name].style,
             isHorizontal,
-            scope,
             clientLayout,
             evaluatedMaxSize,
           ));
@@ -1365,7 +1363,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
             containers[name],
             boxInstances[name].style,
             isHorizontal,
-            scope,
             clientLayout,
             evaluatedMinSize,
           ));
@@ -1599,7 +1596,6 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
     protected readonly container: Vtree.Container,
     style: { [key: string]: Css.Val },
     protected readonly isHorizontal: boolean,
-    scope: Exprs.LexicalScope,
     private readonly clientLayout: Vtree.ClientLayout,
   ) {
     const val = style[isHorizontal ? "width" : "height"];
@@ -1771,11 +1767,10 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
     container: Vtree.Container,
     style: { [key: string]: Css.Val },
     isHorizontal: boolean,
-    scope: Exprs.LexicalScope,
     clientLayout: Vtree.ClientLayout,
     size: number,
   ) {
-    super(container, style, isHorizontal, scope, clientLayout);
+    super(container, style, isHorizontal, clientLayout);
     this.fixedSize = size;
   }
 
