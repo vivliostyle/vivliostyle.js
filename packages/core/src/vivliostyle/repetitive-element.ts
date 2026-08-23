@@ -801,15 +801,6 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 }
 
-export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
-  constructor(
-    public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
-    public readonly column: LayoutType.Column,
-  ) {
-    super();
-  }
-}
-
 export class RepetitiveElementsOwnerLayoutProcessor
   extends LayoutProcessor.BlockLayoutProcessor
   implements LayoutProcessor.LayoutProcessor
