@@ -158,7 +158,6 @@ class PageStyle {
   viewerFontSize: null | Observable<number | string>;
   viewerFontSizePercent: WritablePureComputed<number | string>;
 
-  static Mode = Mode;
   static Constants = CONSTANTS;
   static PresetSize = PRESET_SIZE;
   PresetSize = PageStyle.PresetSize;
