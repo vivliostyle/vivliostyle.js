@@ -5112,9 +5112,6 @@ export class PseudoColumn {
   ): Task.Result<boolean> {
     return this.column.finishBreak(nodeContext, forceRemoveSelf, endOfColumn);
   }
-  doFinishBreakOfFragmentLayoutConstraints(positionAfter: Vtree.NodeContext) {
-    this.column.doFinishBreakOfFragmentLayoutConstraints(positionAfter);
-  }
   isStartNodeContext(nodeContext: Vtree.NodeContext): boolean {
     const startNodeContext = this.startNodeContexts[0];
     return (
