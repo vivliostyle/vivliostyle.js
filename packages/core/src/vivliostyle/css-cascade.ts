@@ -1984,10 +1984,6 @@ export class MatchesAction extends ChainedAction {
   positive(): boolean {
     return true;
   }
-
-  relational(): boolean {
-    return false;
-  }
 }
 
 /**
@@ -2033,10 +2029,6 @@ export class MatchesRelationalAction extends MatchesAction {
     const applied = this.checkAppliedAction.applied;
     this.checkAppliedAction.applied = false;
     return applied;
-  }
-
-  override relational(): boolean {
-    return true;
   }
 }
 
