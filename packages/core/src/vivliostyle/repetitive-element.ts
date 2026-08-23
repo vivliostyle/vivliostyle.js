@@ -41,7 +41,6 @@ export class RepetitiveElementsOwnerFormattingContext
   implements RepetitiveElement.RepetitiveElementsOwnerFormattingContext
 {
   formattingContextType: FormattingContextType = "RepetitiveElementsOwner";
-  isRoot: boolean = false;
   repetitiveElements: RepetitiveElement.RepetitiveElements | null = null;
 
   constructor(
