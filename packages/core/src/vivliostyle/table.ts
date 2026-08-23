@@ -55,20 +55,11 @@ export class TableRow {
   addCell(cell: TableCell) {
     this.cells.push(cell);
   }
-
-  getMinimumHeight(): number {
-    return Math.min.apply(
-      null,
-      this.cells.map((c) => c.height),
-    );
-  }
 }
 
 export class TableCell {
-  viewElement: Element | null;
   colSpan: number;
   rowSpan: number;
-  height: number = 0;
 
   constructor(
     public readonly rowIndex: number,
@@ -78,13 +69,8 @@ export class TableCell {
     public readonly anchorColumnIndex: number,
     viewElement: Element,
   ) {
-    this.viewElement = viewElement;
     this.colSpan = (viewElement as HTMLTableCellElement).colSpan || 1;
     this.rowSpan = (viewElement as HTMLTableCellElement).rowSpan || 1;
-  }
-
-  setHeight(height: number) {
-    this.height = height;
   }
 }
 
@@ -557,20 +543,6 @@ export class TableFormattingContext
       );
     }
     return this.columnCount;
-  }
-
-  updateCellSizes(clientLayout: Vtree.ClientLayout) {
-    this.rows.forEach((row) => {
-      row.cells.forEach((cell) => {
-        const rect = LayoutHelper.getElementClientRectAdjusted(
-          clientLayout,
-          cell.viewElement as Element,
-          this.vertical,
-        );
-        cell.viewElement = null;
-        cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
-      });
-    });
   }
 
   /**
@@ -1838,7 +1810,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         return;
       }
       this.normalizeColGroups(formattingContext, tableElement, column);
-      formattingContext.updateCellSizes(column.clientLayout);
       frame.finish(null);
     });
     return frame.result();
