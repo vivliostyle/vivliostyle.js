@@ -37,7 +37,7 @@ describe("exprs", function () {
 
   function expectResult(actual, expected) {
     if (Number.isNaN(expected)) {
-      expect(Number.isNaN(actual)).toBeTrue();
+      expect(Number.isNaN(actual)).toBe(true);
     } else {
       expect(actual).toBe(expected);
     }
