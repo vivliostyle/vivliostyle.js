@@ -83,7 +83,6 @@ export class AdaptiveViewer {
   readyState: Constants.ReadyState = Constants.ReadyState.LOADING;
   packageURL: string[] = [];
   opf: Epub.OPFDoc | null = null;
-  touchActive: boolean = false;
   touchX: number = 0;
   touchY: number = 0;
   needResize: boolean = false;
