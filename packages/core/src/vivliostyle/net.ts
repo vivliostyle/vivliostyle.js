@@ -29,7 +29,6 @@ import { UserAgentXml } from "./assets";
  * @enum {string}
  */
 export enum FetchResponseType {
-  DEFAULT = "",
   ARRAYBUFFER = "arraybuffer",
   BLOB = "blob",
   DOCUMENT = "document",
