@@ -1353,7 +1353,7 @@ export class MediaBooleanTest extends Val {
 
   override appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("(");
-    buf.append(Base.escapeCSSStr(this.name.name));
+    buf.append(Base.escapeCSSIdent(this.name.name));
     buf.append(")");
   }
 
@@ -1373,7 +1373,7 @@ export class MediaTest extends Val {
 
   override appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("(");
-    buf.append(Base.escapeCSSStr(this.name.name));
+    buf.append(Base.escapeCSSIdent(this.name.name));
     buf.append(":");
     this.value.appendTo(buf, 0);
     buf.append(")");

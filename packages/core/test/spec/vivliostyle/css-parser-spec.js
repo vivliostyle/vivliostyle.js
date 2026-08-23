@@ -101,6 +101,14 @@ describe("css-parser", function () {
         expect(valueBearing).toEqual(jasmine.any(adapt_exprs.MediaTest));
       });
 
+      it("serializes escaped feature names as identifiers", function () {
+        const valueLess = parseMediaQuery("(foo\\20 bar)").expression;
+        const valueBearing = parseMediaQuery("(foo\\20 bar: 1)").expression;
+
+        expect(valueLess.toString()).toBe("(foo\\20 bar)");
+        expect(valueBearing.toString()).toBe("(foo\\20 bar:1)");
+      });
+
       it("evaluates both feature variants in one condition", function () {
         const { expression, mediaScope } = parseMediaQuery(
           "(width) and (min-width: 600px)",
