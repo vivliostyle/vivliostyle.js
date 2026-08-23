@@ -248,24 +248,6 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
   }
 
   /**
-   * @return Returns true if a forced break occurs.
-   */
-  processForcedBreak(
-    state: RenderedActiveLayoutIteratorState,
-    column: Layout.Column,
-  ): boolean {
-    const needForcedBreak =
-      !state.leadingEdge && Break.isForcedBreakValue(state.breakAtTheEdge);
-    if (needForcedBreak) {
-      const nodeContext = (state.nodeContext =
-        state.leadingEdgeContexts[0] || state.nodeContext);
-      nodeContext.viewNode.remove();
-      column.pageBreakType = state.breakAtTheEdge;
-    }
-    return needForcedBreak;
-  }
-
-  /**
    * @return Returns true if the node overflows the column.
    */
   saveEdgeAndProcessOverflow(
