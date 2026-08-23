@@ -881,9 +881,6 @@ export const footnoteAreaKey: string = "_footnoteArea";
  * @param style Cascaded style for `@page` rules
  */
 export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance> {
-  private pageMarginBoxes = {} as {
-    [key: string]: PageMarginBoxPartition;
-  };
   readonly pageRulePartition: PageRulePartition;
 
   constructor(
@@ -911,13 +908,9 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
     if (marginBoxesMap) {
       pageMarginBoxNames.forEach((name) => {
         if (marginBoxesMap[name]) {
-          this.pageMarginBoxes[name] = new PageMarginBoxPartition(
-            this.scope,
-            this,
-            name,
-            style,
-          );
+          return new PageMarginBoxPartition(this.scope, this, name, style);
         }
+        return undefined;
       });
     }
   }
