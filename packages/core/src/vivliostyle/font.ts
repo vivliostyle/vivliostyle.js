@@ -27,8 +27,6 @@ import * as Net from "./net";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 
-export let bogusFontCounter: number = 1;
-
 function getFontTraitNames(properties: { [key: string]: Css.Val }): string[] {
   return Object.keys(properties)
     .filter((prop) => !["src", "font-family", "font-display"].includes(prop))
