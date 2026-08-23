@@ -17,7 +17,7 @@
  *
  * @fileoverview Sizing - CSS Intrinsic & Extrinsic Sizing
  */
-import * as Base from "./base";
+import "./base";
 import * as Vtree from "./vtree";
 
 /**
