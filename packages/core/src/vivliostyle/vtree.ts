@@ -375,22 +375,6 @@ export type LayoutContext = Vtree.LayoutContext;
  */
 export type FormattingContext = Vtree.FormattingContext;
 
-export function eachAncestorFormattingContext(
-  nodeContext: NodeContext,
-  callback: (p1: FormattingContext) => any,
-): void {
-  if (!nodeContext) {
-    return;
-  }
-  for (
-    let fc: FormattingContext | null = nodeContext.formattingContext;
-    fc;
-    fc = fc.getParent()
-  ) {
-    callback(fc);
-  }
-}
-
 export type NodePositionStep = Vtree.NodePositionStep;
 export type RootNodePositionStep = Vtree.RootNodePositionStep;
 

@@ -156,10 +156,6 @@ export function readBlob(blob: Blob): Task.Result<ArrayBuffer> {
   return frame.result();
 }
 
-export function revokeObjectURL(url: string): void {
-  URL.revokeObjectURL(url);
-}
-
 /**
  * @return url
  */

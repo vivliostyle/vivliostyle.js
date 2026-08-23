@@ -113,8 +113,6 @@ export class RepetitiveElementsOwnerFormattingContext
   restoreState(state: any) {}
 }
 
-export type ElementsOffset = RepetitiveElement.ElementsOffset;
-
 export class RepetitiveElements
   implements RepetitiveElement.RepetitiveElements
 {

@@ -3718,37 +3718,6 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
 Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
 
-export function roman(num: number): string {
-  if (num <= 0 || num != Math.round(num) || num > 3999) {
-    return "";
-  }
-  const digits = ["I", "V", "X", "L", "C", "D", "M"];
-  let offset = 0;
-  let acc = "";
-  while (num > 0) {
-    let digit = num % 10;
-    num = (num - digit) / 10;
-    let result = "";
-    if (digit == 9) {
-      result += digits[offset] + digits[offset + 2];
-    } else if (digit == 4) {
-      result += digits[offset] + digits[offset + 1];
-    } else {
-      if (digit >= 5) {
-        result += digits[offset + 1];
-        digit -= 5;
-      }
-      while (digit > 0) {
-        result += digits[offset];
-        digit--;
-      }
-    }
-    acc = result + acc;
-    offset += 2;
-  }
-  return acc;
-}
-
 /**
  * Fitting order and specificity in the same number. Order is recorded in the
  * fractional part. Select value so that
