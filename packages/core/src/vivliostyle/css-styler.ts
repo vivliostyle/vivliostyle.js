@@ -52,14 +52,6 @@ export class SlipRange {
 export class SlipMap {
   map = [] as SlipRange[];
 
-  getMaxFixed(): number {
-    if (this.map.length == 0) {
-      return 0;
-    }
-    const range = this.map[this.map.length - 1];
-    return range.endFixed;
-  }
-
   getMaxSlipped(): number {
     if (this.map.length == 0) {
       return 0;
