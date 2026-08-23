@@ -138,7 +138,6 @@ export class RepetitiveElements
     nodeContext: Vtree.NodeContext;
     result: boolean;
   }[] = [];
-  allowInsert: boolean = false;
   allowInsertRepeatitiveElements: boolean = false;
 
   constructor(

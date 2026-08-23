@@ -938,7 +938,6 @@ export namespace RepetitiveElement {
     doneInitialLayout: boolean;
     firstContentSourceNode: Element | null;
     lastContentSourceNode: Element | null;
-    allowInsert: boolean;
     allowInsertRepeatitiveElements: boolean;
     ownerSourceNode: Element;
 
