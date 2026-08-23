@@ -4197,10 +4197,6 @@ export class ViewFactory
       })
     );
   }
-
-  isPseudoelement(elem) {
-    return !!PseudoElement.getPseudoName(elem);
-  }
 }
 
 export const propertiesNotPassedToDOM = {
