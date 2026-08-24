@@ -43,6 +43,63 @@ describe("exprs", function () {
     }
   }
 
+  function mediaName(name) {
+    return new Exprs.MediaName(scope, false, name);
+  }
+
+  describe("media feature tests", function () {
+    it("evaluates value-less features in a boolean context", function () {
+      expect(
+        new Exprs.MediaBooleanTest(scope, mediaName("width")).evaluate(context),
+      ).toBe(true);
+      expect(
+        new Exprs.MediaBooleanTest(scope, mediaName("unknown")).evaluate(
+          context,
+        ),
+      ).toBe(false);
+      expect(
+        new Exprs.MediaBooleanTest(scope, mediaName("min-width")).evaluate(
+          context,
+        ),
+      ).toBe(true);
+
+      const zeroWidthContext = new Exprs.Context(scope, 0, 600, 16, 20);
+      expect(
+        new Exprs.MediaBooleanTest(scope, mediaName("width")).evaluate(
+          zeroWidthContext,
+        ),
+      ).toBe(false);
+    });
+
+    it("evaluates value-bearing features against their requested values", function () {
+      [
+        ["width", 800, true],
+        ["width", 799, false],
+        ["min-width", 799, true],
+        ["min-width", 801, false],
+        ["max-width", 801, true],
+        ["max-width", 799, false],
+      ].forEach(([name, value, expected]) => {
+        expect(
+          new Exprs.MediaTest(
+            scope,
+            mediaName(name),
+            new Exprs.Const(scope, value),
+          ).evaluate(context),
+        ).toBe(expected);
+      });
+    });
+
+    it("does not evaluate the requested value of an unknown feature", function () {
+      const evaluateValue = jasmine.createSpy("evaluateValue");
+      const value = new Exprs.Native(scope, evaluateValue, "value");
+      const test = new Exprs.MediaTest(scope, mediaName("unknown"), value);
+
+      expect(test.evaluate(context)).toBe(false);
+      expect(evaluateValue).not.toHaveBeenCalled();
+    });
+  });
+
   describe("Negate", function () {
     it("coerces expression result types to numbers", function () {
       [

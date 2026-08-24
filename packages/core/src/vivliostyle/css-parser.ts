@@ -1029,10 +1029,9 @@ export class Parser {
         }
         if (tok == TokenType.O_PAR) {
           if (val.isMediaName()) {
-            val = new Exprs.MediaTest(
+            val = new Exprs.MediaBooleanTest(
               handler.getScope(),
               val as Exprs.MediaName,
-              null,
             );
           }
           op = TokenType.EOF;

@@ -494,56 +494,61 @@ export class Context {
     return not ? !enabled : enabled;
   }
 
-  evalMediaTest(feature: string, value: Val | null): boolean {
+  private parseMediaFeature(feature: string): {
+    feature: string;
+    prefix: string;
+  } {
     let prefix = "";
     const r = feature.match(/^(min|max)-(.*)$/);
     if (r) {
       prefix = r[1];
       feature = r[2];
     }
-    let req: Result | null = null;
-    let actual: number | null = null;
+
+    return { feature, prefix };
+  }
+
+  private actualMediaFeatureValue(feature: string): number | null {
     switch (feature) {
       case "width":
+        return this.pageWidth();
       case "height":
+        return this.pageHeight();
       case "device-width":
+        return window.screen.availWidth;
       case "device-height":
+        return window.screen.availHeight;
       case "color":
-        if (value) {
-          req = value.evaluate(this);
-        }
-        break;
+        return window.screen.pixelDepth;
+      default:
+        return null;
     }
-    switch (feature) {
-      case "width":
-        actual = this.pageWidth();
-        break;
-      case "height":
-        actual = this.pageHeight();
-        break;
-      case "device-width":
-        actual = window.screen.availWidth;
-        break;
-      case "device-height":
-        actual = window.screen.availHeight;
-        break;
-      case "color":
-        actual = window.screen.pixelDepth;
-        break;
+  }
+
+  evalMediaBooleanTest(feature: string): boolean {
+    const parsedFeature = this.parseMediaFeature(feature);
+    const actual = this.actualMediaFeatureValue(parsedFeature.feature);
+    return actual != null && actual !== 0;
+  }
+
+  evalMediaTest(feature: string, value: Val): boolean {
+    const parsedFeature = this.parseMediaFeature(feature);
+    const actual = this.actualMediaFeatureValue(parsedFeature.feature);
+    if (actual == null) {
+      return false;
     }
-    if (actual != null && req != null) {
-      switch (prefix) {
-        case "min":
-          return actual >= Number(req);
-        case "max":
-          return actual <= Number(req);
-        default:
-          return actual == req;
-      }
-    } else if (actual != null && value == null) {
-      return actual !== 0;
+    const req = value.evaluate(this);
+    if (req == null) {
+      return false;
     }
-    return false;
+    switch (parsedFeature.prefix) {
+      case "min":
+        return actual >= Number(req);
+      case "max":
+        return actual <= Number(req);
+      default:
+        return actual == req;
+    }
   }
 
   evalSupportsTest(name: string, value: string, isFunc: boolean): boolean {
@@ -1338,18 +1343,37 @@ export class Const extends Val {
   }
 }
 
-export class MediaTest extends Val {
+export class MediaBooleanTest extends Val {
   constructor(
     scope: LexicalScope,
     public name: MediaName,
-    public value: Val | null,
   ) {
     super(scope);
   }
 
   override appendTo(buf: Base.StringBuffer, priority: number): void {
     buf.append("(");
-    buf.append(Base.escapeCSSStr(this.name.name));
+    buf.append(Base.escapeCSSIdent(this.name.name));
+    buf.append(")");
+  }
+
+  override evaluateCore(context: Context): Result {
+    return context.evalMediaBooleanTest(this.name.name);
+  }
+}
+
+export class MediaTest extends Val {
+  constructor(
+    scope: LexicalScope,
+    public name: MediaName,
+    public value: Val,
+  ) {
+    super(scope);
+  }
+
+  override appendTo(buf: Base.StringBuffer, priority: number): void {
+    buf.append("(");
+    buf.append(Base.escapeCSSIdent(this.name.name));
     buf.append(":");
     this.value.appendTo(buf, 0);
     buf.append(")");

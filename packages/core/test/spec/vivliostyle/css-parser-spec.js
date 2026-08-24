@@ -81,6 +81,44 @@ describe("css-parser", function () {
       }
     }
 
+    function parseMediaQuery(text) {
+      const mediaScope = new adapt_exprs.LexicalScope(null);
+      const mediaHandler = new adapt_cssparse.ParserHandler(mediaScope);
+      const tokenizer = new adapt_csstok.Tokenizer(text, mediaHandler);
+      const expression = adapt_cssparse
+        .parseMediaQuery(tokenizer, mediaHandler, "")
+        .toExpr();
+      return { expression, mediaScope };
+    }
+
+    describe("media queries", function () {
+      it("represents value-less and value-bearing features separately", function () {
+        const valueLess = parseMediaQuery("(color)").expression;
+        const valueBearing = parseMediaQuery("(min-width: 600px)").expression;
+
+        expect(valueLess).toEqual(jasmine.any(adapt_exprs.MediaBooleanTest));
+        expect(valueLess.toString()).toBe("(color)");
+        expect(valueBearing).toEqual(jasmine.any(adapt_exprs.MediaTest));
+      });
+
+      it("serializes escaped feature names as identifiers", function () {
+        const valueLess = parseMediaQuery("(foo\\20 bar)").expression;
+        const valueBearing = parseMediaQuery("(foo\\20 bar: 1)").expression;
+
+        expect(valueLess.toString()).toBe("(foo\\20 bar)");
+        expect(valueBearing.toString()).toBe("(foo\\20 bar:1)");
+      });
+
+      it("evaluates both feature variants in one condition", function () {
+        const { expression, mediaScope } = parseMediaQuery(
+          "(width) and (min-width: 600px)",
+        );
+        const context = new adapt_exprs.Context(mediaScope, 800, 600, 16, 20);
+
+        expect(expression.evaluate(context)).toBe(true);
+      });
+    });
+
     describe("css nesting", function () {
       it("expands nested selectors using :is() semantics", function () {
         expect(
