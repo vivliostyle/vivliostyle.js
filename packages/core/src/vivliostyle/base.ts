@@ -48,10 +48,6 @@ export let emptyObj = {};
 
 export type JSON = any;
 
-export function jsonToString(json: JSON): string {
-  return JSON.stringify(json);
-}
-
 export function stringToJSON(str: string): JSON {
   return JSON.parse(str);
 }
@@ -315,41 +311,6 @@ export enum NS {
   DC = "http://purl.org/dc/elements/1.1/",
 }
 
-/**
- * @param name parameter name
- * @param opt_url URL; window.location.href is used if not provided
- * @return parameter value
- */
-export function getURLParam(name: string, opt_url?: string): string | null {
-  const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
-  const url = opt_url || window.location.href;
-  const r = url.match(rg);
-  if (r) {
-    return r[2];
-  }
-  return null;
-}
-
-/**
- * @param name parameter name
- * @param value parameter value
- * @return new url
- */
-export function setURLParam(url: string, name: string, value: string): string {
-  const rg = new RegExp(`#(.*&)?${escapeRegExp(name)}=([^#&]*)`);
-  const r = url.match(rg);
-  if (r) {
-    const length = r[2].length;
-    const index = r.index + r[0].length - length;
-    return url.substr(0, index) + value + url.substr(index + length);
-  }
-  if (!url.match(/#/)) {
-    return `${url}#${name}=${value}`;
-  } else {
-    return `${url}&${name}=${value}`;
-  }
-}
-
 export function asString(v: any): string | null {
   if (v == null) {
     return v;
@@ -535,7 +496,7 @@ export function getCSSProperty(
     return (elem as HTMLElement).style.getPropertyValue(
       propertyNames ? propertyNames[0] : prop,
     );
-  } catch (err) {}
+  } catch {}
   return opt_value || "";
 }
 
@@ -801,14 +762,6 @@ export function mapObj<P, R>(
   return res;
 }
 
-export function mapSize(obj: object): number {
-  let n = 0;
-  for (const key in obj) {
-    n++;
-  }
-  return n;
-}
-
 export type Event = {
   type: string;
   target?;
@@ -875,7 +828,6 @@ export class SimpleEventTarget {
     }
   }
 }
-export type EventTarget = SimpleEventTarget;
 
 export const mediaTags = {
   audio: true,

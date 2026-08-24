@@ -1229,11 +1229,6 @@ export class CascadeAction {
   mergeWith(other: CascadeAction): CascadeAction {
     return new CompoundAction([this, other]);
   }
-
-  clone(): CascadeAction {
-    // Mutable actions will override
-    return this;
-  }
 }
 
 export class ConditionItemAction extends CascadeAction {
@@ -1262,10 +1257,6 @@ export class CompoundAction extends CascadeAction {
   override mergeWith(other: CascadeAction): CascadeAction {
     this.list.push(other);
     return this;
-  }
-
-  override clone(): CascadeAction {
-    return new CompoundAction(([] as CascadeAction[]).concat(this.list));
   }
 }
 
@@ -1949,12 +1940,6 @@ export class CheckAppliedAction extends CascadeAction {
   override apply(cascadeInstance: StyledCascadeInstance): void {
     this.applied = true;
   }
-
-  override clone(): CascadeAction {
-    const cloned = new CheckAppliedAction();
-    cloned.applied = this.applied;
-    return cloned;
-  }
 }
 
 /**
@@ -1999,10 +1984,6 @@ export class MatchesAction extends ChainedAction {
   positive(): boolean {
     return true;
   }
-
-  relational(): boolean {
-    return false;
-  }
 }
 
 /**
@@ -2043,15 +2024,11 @@ export class MatchesRelationalAction extends MatchesAction {
           this.checkAppliedAction.apply(cascadeInstance);
           break;
         }
-      } catch (e) {}
+      } catch {}
     }
     const applied = this.checkAppliedAction.applied;
     this.checkAppliedAction.applied = false;
     return applied;
-  }
-
-  override relational(): boolean {
-    return true;
   }
 }
 
@@ -3718,37 +3695,6 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
 Plugin.registerHook(Plugin.HOOKS.POST_LAYOUT_BLOCK, postLayoutBlockLeader);
 
-export function roman(num: number): string {
-  if (num <= 0 || num != Math.round(num) || num > 3999) {
-    return "";
-  }
-  const digits = ["I", "V", "X", "L", "C", "D", "M"];
-  let offset = 0;
-  let acc = "";
-  while (num > 0) {
-    let digit = num % 10;
-    num = (num - digit) / 10;
-    let result = "";
-    if (digit == 9) {
-      result += digits[offset] + digits[offset + 2];
-    } else if (digit == 4) {
-      result += digits[offset] + digits[offset + 1];
-    } else {
-      if (digit >= 5) {
-        result += digits[offset + 1];
-        digit -= 5;
-      }
-      while (digit > 0) {
-        result += digits[offset];
-        digit--;
-      }
-    }
-    acc = result + acc;
-    offset += 2;
-  }
-  return acc;
-}
-
 /**
  * Fitting order and specificity in the same number. Order is recorded in the
  * fractional part. Select value so that
@@ -3757,12 +3703,6 @@ export function roman(num: number): string {
  *
  */
 export const ORDER_INCREMENT = 1 / 0x100000;
-
-export function copyTable(src: ActionTable, dst: ActionTable): void {
-  for (const n in src) {
-    dst[n] = src[n].clone();
-  }
-}
 
 export class Cascade {
   nsCount: number = 0;
@@ -3775,25 +3715,6 @@ export class Cascade {
   pagetypes: ActionTable = {};
   order: number = 0;
   readonly layerTrees: { [flavor: string]: CascadeLayerTree } = {};
-
-  clone(): Cascade {
-    const r = new Cascade();
-    r.nsCount = this.nsCount;
-    for (const p in this.nsPrefix) {
-      r.nsPrefix[p] = this.nsPrefix[p];
-    }
-    copyTable(this.tags, r.tags);
-    copyTable(this.nstags, r.nstags);
-    copyTable(this.epubtypes, r.epubtypes);
-    copyTable(this.classes, r.classes);
-    copyTable(this.ids, r.ids);
-    copyTable(this.pagetypes, r.pagetypes);
-    r.order = this.order;
-    for (const f in this.layerTrees) {
-      r.layerTrees[f] = this.layerTrees[f];
-    }
-    return r;
-  }
 
   /**
    * Returns the cascade layer for a `@layer` rule of the given origin.
@@ -3820,7 +3741,6 @@ export class Cascade {
     context: Exprs.Context,
     counterListener: CounterListener,
     counterResolver: CounterResolver,
-    lang,
     counterStyleStore: CounterStyle.CounterStyleStore,
     cmykStore: CmykStore.CmykStore,
     root: Element,
@@ -3834,7 +3754,6 @@ export class Cascade {
       context,
       counterListener,
       counterResolver,
-      lang,
       counterStyleStore,
       cmykStore,
       root,
@@ -3899,7 +3818,6 @@ export class CascadeInstance {
     public readonly context: Exprs.Context,
     public readonly counterListener: CounterListener,
     public readonly counterResolver: CounterResolver,
-    lang: string,
     public readonly counterStyleStore: CounterStyle.CounterStyleStore,
     public readonly cmykStore: CmykStore.CmykStore,
     public readonly root: Element,

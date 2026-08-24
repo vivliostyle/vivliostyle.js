@@ -711,8 +711,6 @@ export const fullHeight: Numeric = new Numeric(100, "pvh");
 
 export const numericZero: Numeric = new Numeric(0, "px");
 
-export const fullURange: URange = new URange("U+0-10FFFF");
-
 export const processingOrder = {
   "font-size": 1,
   "line-height": 2,

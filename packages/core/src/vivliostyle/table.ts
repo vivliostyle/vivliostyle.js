@@ -55,20 +55,11 @@ export class TableRow {
   addCell(cell: TableCell) {
     this.cells.push(cell);
   }
-
-  getMinimumHeight(): number {
-    return Math.min.apply(
-      null,
-      this.cells.map((c) => c.height),
-    );
-  }
 }
 
 export class TableCell {
-  viewElement: Element | null;
   colSpan: number;
   rowSpan: number;
-  height: number = 0;
 
   constructor(
     public readonly rowIndex: number,
@@ -78,13 +69,8 @@ export class TableCell {
     public readonly anchorColumnIndex: number,
     viewElement: Element,
   ) {
-    this.viewElement = viewElement;
     this.colSpan = (viewElement as HTMLTableCellElement).colSpan || 1;
     this.rowSpan = (viewElement as HTMLTableCellElement).rowSpan || 1;
-  }
-
-  setHeight(height: number) {
-    this.height = height;
   }
 }
 
@@ -291,7 +277,7 @@ export class InsideTableRowBreakPosition
 
   override getMinBreakPenalty(): number {
     const formattingContext = this.formattingContext;
-    const row = formattingContext.getRowByIndex(this.rowIndex);
+    formattingContext.getRowByIndex(this.rowIndex);
     let penalty = this.beforeNodeContext.breakPenalty;
 
     const breakPositions = this.getAcceptableCellBreakPositions();
@@ -557,20 +543,6 @@ export class TableFormattingContext
       );
     }
     return this.columnCount;
-  }
-
-  updateCellSizes(clientLayout: Vtree.ClientLayout) {
-    this.rows.forEach((row) => {
-      row.cells.forEach((cell) => {
-        const rect = LayoutHelper.getElementClientRectAdjusted(
-          clientLayout,
-          cell.viewElement as Element,
-          this.vertical,
-        );
-        cell.viewElement = null;
-        cell.setHeight(this.vertical ? rect["width"] : rect["height"]);
-      });
-    });
   }
 
   /**
@@ -1838,7 +1810,6 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         return;
       }
       this.normalizeColGroups(formattingContext, tableElement, column);
-      formattingContext.updateCellSizes(column.clientLayout);
       frame.finish(null);
     });
     return frame.result();
@@ -2270,7 +2241,7 @@ function adjustRowHeight(nodeContext: Vtree.NodeContext): void {
     spanStartRows = tbodyElement.querySelectorAll(
       ":scope>tr:has(>:empty):not(:has(>:not([rowspan]:not([rowspan='1']),:empty)))",
     );
-  } catch (e) {
+  } catch {
     // Do nothing if the browser does not support `:has()` to avoid error.
     // (Workaround for issue #1509)
     return;
@@ -2609,9 +2580,7 @@ export class TableRowLayoutConstraint
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
   ): Task.Result<boolean> {
-    const formattingContext = getTableFormattingContext(
-      this.nodeContext.formattingContext,
-    );
+    getTableFormattingContext(this.nodeContext.formattingContext);
     const frame: Task.Frame<boolean> = Task.newFrame("finishBreak");
     const constraints = this.cellFragmentLayoutConstraints.reduce(
       (array, entry) =>

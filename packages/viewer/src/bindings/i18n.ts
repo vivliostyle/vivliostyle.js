@@ -597,7 +597,7 @@ function detectLanguage(): string {
         return lng;
       }
     }
-  } catch (_e) {
+  } catch {
     // ignore
   }
   // fallback

@@ -52,14 +52,6 @@ export class SlipRange {
 export class SlipMap {
   map = [] as SlipRange[];
 
-  getMaxFixed(): number {
-    if (this.map.length == 0) {
-      return 0;
-    }
-    const range = this.map[this.map.length - 1];
-    return range.endFixed;
-  }
-
   getMaxSlipped(): number {
     if (this.map.length == 0) {
       return 0;
@@ -481,7 +473,6 @@ export class StyleStore implements CssCascade.StyleReader {
 
 export class Styler implements AbstractStyler {
   root: Base.ChildElement;
-  cascadeHolder: CssCascade.Cascade;
   last: Base.RootBoundCursor | null;
   rootStyle = {} as CssCascade.ElementStyle;
   /**
@@ -526,14 +517,12 @@ export class Styler implements AbstractStyler {
     mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.root = xmldoc.root;
-    this.cascadeHolder = cascade;
     this.styles = new StyleStore(xmldoc);
     this.last = Base.RootBoundCursor.atRoot(this.root);
     this.cascade = cascade.createInstance(
       context,
       counterListener,
       counterResolver,
-      xmldoc.lang,
       counterStyleStore,
       cmykStore,
       this.root,

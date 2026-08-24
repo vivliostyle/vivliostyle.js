@@ -116,10 +116,6 @@ export function newFrame<T>(name: string): Frame<T> {
   return frame;
 }
 
-export function newEventSource(): EventSource {
-  return new EventSource();
-}
-
 export function newScheduler(opt_timer?: Timer): Scheduler {
   return new Scheduler(opt_timer || new TimerImpl());
 }
@@ -834,106 +830,5 @@ export class LoopBodyFrame extends Frame<boolean> {
 
   breakLoop(): void {
     this.finish(false);
-  }
-}
-
-export class EventItem {
-  next: EventItem | null = null;
-
-  constructor(public event: Base.Event | null) {}
-}
-
-/**
- * An class to listen to evens and present them as a readable asynchronous
- * stream to tasks.
- */
-export class EventSource {
-  continuation: Continuation<boolean> | null = null;
-  listeners: {
-    target: Base.EventTarget;
-    type: string;
-    listener: Base.EventListener;
-  }[] = [];
-  head: EventItem;
-  tail: EventItem;
-
-  constructor() {
-    this.head = new EventItem(null);
-    this.tail = this.head;
-  }
-
-  /**
-   * Attaches as an event listener to an EventTarget.
-   */
-  attach(
-    target: Base.EventTarget,
-    type: string,
-    opt_preventDefault?: boolean,
-  ): void {
-    const listener = (event) => {
-      if (opt_preventDefault) {
-        event.preventDefault();
-      }
-      if (this.tail.event) {
-        this.tail.next = new EventItem(event);
-        this.tail = this.tail.next;
-      } else {
-        this.tail.event = event;
-        const continuation = this.continuation;
-        if (continuation) {
-          this.continuation = null;
-          continuation.schedule(true);
-        }
-      }
-    };
-    target.addEventListener(type, listener, false);
-    this.listeners.push({ target, type, listener });
-  }
-
-  detach(target: Base.EventTarget, type: string): void {
-    let i = 0;
-    let item: {
-      target: Base.SimpleEventTarget;
-      type: string;
-      listener: Base.EventListener;
-    } | null = null;
-    while (i < this.listeners.length) {
-      item = this.listeners[i];
-      if (item.type == type && item.target === target) {
-        this.listeners.splice(i, 1);
-        item.target.removeEventListener(item.type, item.listener, false);
-        return;
-      }
-      i++;
-    }
-    throw new Error("E_TASK_EVENT_SOURCE_NOT_ATTACHED");
-  }
-
-  /**
-   * Read next dispatched event, blocking the current task if needed.
-   */
-  nextEvent(): Result<Base.Event> {
-    const frame: Frame<Base.Event> = newFrame("EventSource.nextEvent");
-    const readEvent = () => {
-      if (this.head.event) {
-        const event = this.head.event;
-        if (this.head.next) {
-          this.head = this.head.next;
-        } else {
-          this.head.event = null;
-        }
-        frame.finish(event);
-      } else if (this.continuation) {
-        throw new Error("E_TASK_EVENT_SOURCE_OTHER_TASK_WAITING");
-      } else {
-        const frameInternal: Frame<boolean> = newFrame(
-          "EventSource.nextEventInternal",
-        );
-        this.continuation = frameInternal.suspend(this);
-        frameInternal.result().then(readEvent);
-      }
-    };
-    readEvent();
-    return frame.result();
   }
 }

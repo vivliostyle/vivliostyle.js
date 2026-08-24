@@ -41,7 +41,6 @@ export class RepetitiveElementsOwnerFormattingContext
   implements RepetitiveElement.RepetitiveElementsOwnerFormattingContext
 {
   formattingContextType: FormattingContextType = "RepetitiveElementsOwner";
-  isRoot: boolean = false;
   repetitiveElements: RepetitiveElement.RepetitiveElements | null = null;
 
   constructor(
@@ -113,8 +112,6 @@ export class RepetitiveElementsOwnerFormattingContext
   restoreState(state: any) {}
 }
 
-export type ElementsOffset = RepetitiveElement.ElementsOffset;
-
 export class RepetitiveElements
   implements RepetitiveElement.RepetitiveElements
 {
@@ -141,7 +138,6 @@ export class RepetitiveElements
     nodeContext: Vtree.NodeContext;
     result: boolean;
   }[] = [];
-  allowInsert: boolean = false;
   allowInsertRepeatitiveElements: boolean = false;
 
   constructor(
@@ -805,15 +801,6 @@ export class EntireBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
   }
 }
 
-export class FragmentedBlockLayoutStrategy extends LayoutUtil.EdgeSkipper {
-  constructor(
-    public readonly formattingContext: RepetitiveElementsOwnerFormattingContext,
-    public readonly column: LayoutType.Column,
-  ) {
-    super();
-  }
-}
-
 export class RepetitiveElementsOwnerLayoutProcessor
   extends LayoutProcessor.BlockLayoutProcessor
   implements LayoutProcessor.LayoutProcessor
@@ -877,9 +864,7 @@ export class RepetitiveElementsOwnerLayoutProcessor
     nodeContext: Vtree.NodeContext,
     column: LayoutType.Column,
   ): Task.Result<Vtree.NodeContext | null> {
-    const formattingContext = getRepetitiveElementsOwnerFormattingContext(
-      nodeContext.formattingContext,
-    );
+    getRepetitiveElementsOwnerFormattingContext(nodeContext.formattingContext);
     const frame = Task.newFrame<Vtree.NodeContext | null>(
       "BlockLayoutProcessor.doInitialLayout",
     );

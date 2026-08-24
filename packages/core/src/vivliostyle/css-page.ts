@@ -881,9 +881,6 @@ export const footnoteAreaKey: string = "_footnoteArea";
  * @param style Cascaded style for `@page` rules
  */
 export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance> {
-  private pageMarginBoxes = {} as {
-    [key: string]: PageMarginBoxPartition;
-  };
   readonly pageRulePartition: PageRulePartition;
 
   constructor(
@@ -911,13 +908,9 @@ export class PageRuleMaster extends PageMaster.PageMaster<PageRuleMasterInstance
     if (marginBoxesMap) {
       pageMarginBoxNames.forEach((name) => {
         if (marginBoxesMap[name]) {
-          this.pageMarginBoxes[name] = new PageMarginBoxPartition(
-            this.scope,
-            this,
-            name,
-            style,
-          );
+          return new PageMarginBoxPartition(this.scope, this, name, style);
         }
+        return undefined;
       });
     }
   }
@@ -1293,7 +1286,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
           container,
           boxInstance.style,
           isHorizontal,
-          scope,
           clientLayout,
         );
         containers[boxInfo.positionAlongVariableDimension] = container;
@@ -1333,7 +1325,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
             containers[name],
             boxInstances[name].style,
             isHorizontal,
-            scope,
             clientLayout,
             evaluatedMaxSize,
           ));
@@ -1372,7 +1363,6 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
             containers[name],
             boxInstances[name].style,
             isHorizontal,
-            scope,
             clientLayout,
             evaluatedMinSize,
           ));
@@ -1606,7 +1596,6 @@ class SingleBoxMarginBoxSizingParam implements MarginBoxSizingParam {
     protected readonly container: Vtree.Container,
     style: { [key: string]: Css.Val },
     protected readonly isHorizontal: boolean,
-    scope: Exprs.LexicalScope,
     private readonly clientLayout: Vtree.ClientLayout,
   ) {
     const val = style[isHorizontal ? "width" : "height"];
@@ -1778,11 +1767,10 @@ class FixedSizeMarginBoxSizingParam extends SingleBoxMarginBoxSizingParam {
     container: Vtree.Container,
     style: { [key: string]: Css.Val },
     isHorizontal: boolean,
-    scope: Exprs.LexicalScope,
     clientLayout: Vtree.ClientLayout,
     size: number,
   ) {
-    super(container, style, isHorizontal, scope, clientLayout);
+    super(container, style, isHorizontal, clientLayout);
     this.fixedSize = size;
   }
 

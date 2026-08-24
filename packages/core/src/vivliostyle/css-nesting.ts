@@ -409,7 +409,6 @@ function isDeclarationStart(
   if (terminator?.char === "{") {
     return !isLikelyNestedTypeOrUniversalSelector(
       input,
-      start,
       identEnd,
       colonIndex,
       terminator.index,
@@ -420,7 +419,6 @@ function isDeclarationStart(
 
 function isLikelyNestedTypeOrUniversalSelector(
   input: string,
-  start: number,
   identEnd: number,
   colonIndex: number,
   blockIndex: number,

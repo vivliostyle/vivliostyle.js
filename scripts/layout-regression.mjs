@@ -1780,10 +1780,10 @@ async function captureOneSide({
       await page.addInitScript(() => {
         try {
           localStorage.clear();
-        } catch (_) {}
+        } catch {}
         try {
           sessionStorage.clear();
-        } catch (_) {}
+        } catch {}
       });
       const captured = await capturePages({
         page,

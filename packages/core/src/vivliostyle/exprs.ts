@@ -84,8 +84,6 @@ export const Special = {
 
 export type Result = string | number | boolean | undefined;
 
-export type PendingResult = Special | Result;
-
 export function letterbox(
   viewW: number,
   viewH: number,
@@ -1186,14 +1184,6 @@ export function expandValArray(
     }
   }
   return expanded;
-}
-
-export function evalValArray(context: Context, arr: Val[]): Result[] {
-  const result: Result[] = Array(arr.length);
-  for (let i = 0; i < arr.length; i++) {
-    result[i] = arr[i].evaluate(context);
-  }
-  return result;
 }
 
 export class Call extends Val {

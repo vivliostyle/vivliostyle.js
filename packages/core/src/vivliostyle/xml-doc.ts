@@ -299,7 +299,7 @@ export function parseAndReturnNullIfError(
   let doc: Document | undefined;
   try {
     doc = parser.parseFromString(str, type as DOMParserSupportedType);
-  } catch (e) {}
+  } catch {}
   if (!doc) {
     return null;
   }

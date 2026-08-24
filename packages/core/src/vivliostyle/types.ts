@@ -904,7 +904,6 @@ export namespace PseudoElement {
 export namespace RepetitiveElement {
   export interface RepetitiveElementsOwnerFormattingContext
     extends Vtree.FormattingContext {
-    isRoot: boolean;
     repetitiveElements: RepetitiveElements | null;
     readonly parent: Vtree.FormattingContext | null;
     readonly rootSourceNode: Element;
@@ -939,7 +938,6 @@ export namespace RepetitiveElement {
     doneInitialLayout: boolean;
     firstContentSourceNode: Element | null;
     lastContentSourceNode: Element | null;
-    allowInsert: boolean;
     allowInsertRepeatitiveElements: boolean;
     ownerSourceNode: Element;
 

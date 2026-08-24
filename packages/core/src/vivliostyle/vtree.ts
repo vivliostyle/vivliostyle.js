@@ -107,7 +107,7 @@ export function makeListener(
       for (let k = 0; k < refs.length; k++) {
         try {
           actionFn(refs[k]);
-        } catch (err) {}
+        } catch {}
       }
     };
   }
@@ -374,22 +374,6 @@ export type LayoutContext = Vtree.LayoutContext;
  * Formatting context.
  */
 export type FormattingContext = Vtree.FormattingContext;
-
-export function eachAncestorFormattingContext(
-  nodeContext: NodeContext,
-  callback: (p1: FormattingContext) => any,
-): void {
-  if (!nodeContext) {
-    return;
-  }
-  for (
-    let fc: FormattingContext | null = nodeContext.formattingContext;
-    fc;
-    fc = fc.getParent()
-  ) {
-    callback(fc);
-  }
-}
 
 export type NodePositionStep = Vtree.NodePositionStep;
 export type RootNodePositionStep = Vtree.RootNodePositionStep;

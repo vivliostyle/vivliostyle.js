@@ -141,15 +141,6 @@ export function shapeForRect(
   ]);
 }
 
-export function shapeForRectObj(r: Rect): Shape {
-  return new Shape([
-    new Point(r.x1, r.y1),
-    new Point(r.x2, r.y1),
-    new Point(r.x2, r.y2),
-    new Point(r.x1, r.y2),
-  ]);
-}
-
 export class BandIntersection {
   constructor(
     public x: number,

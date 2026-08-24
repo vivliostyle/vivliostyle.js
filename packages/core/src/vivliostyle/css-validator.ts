@@ -68,10 +68,6 @@ export class Node {
     this.code = 2 * index + 1;
   }
 
-  isStartAlternate(): boolean {
-    return this.code > 0 && this.code % 2 != 0;
-  }
-
   markAsEndAlternate(index: number): void {
     this.code = 2 * index + 2;
   }

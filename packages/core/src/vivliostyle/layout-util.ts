@@ -20,7 +20,7 @@
 import * as Break from "./break";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
-import { Layout, Vtree } from "./types";
+import { Vtree } from "./types";
 
 export type LayoutIteratorState = {
   nodeContext: Vtree.NodeContext | null;
@@ -245,69 +245,6 @@ export class EdgeSkipper extends LayoutIteratorStrategy {
       leadingEdgeContexts: [],
       lastAfterNodeContext: null,
     };
-  }
-
-  /**
-   * @return Returns true if a forced break occurs.
-   */
-  processForcedBreak(
-    state: RenderedActiveLayoutIteratorState,
-    column: Layout.Column,
-  ): boolean {
-    const needForcedBreak =
-      !state.leadingEdge && Break.isForcedBreakValue(state.breakAtTheEdge);
-    if (needForcedBreak) {
-      const nodeContext = (state.nodeContext =
-        state.leadingEdgeContexts[0] || state.nodeContext);
-      nodeContext.viewNode.remove();
-      column.pageBreakType = state.breakAtTheEdge;
-    }
-    return needForcedBreak;
-  }
-
-  /**
-   * @return Returns true if the node overflows the column.
-   */
-  saveEdgeAndProcessOverflow(
-    state: RenderedActiveLayoutIteratorState,
-    column: Layout.Column,
-  ): boolean {
-    const overflow = column.checkOverflowAndSaveEdgeAndBreakPosition(
-      state.lastAfterNodeContext,
-      null,
-      true,
-      state.breakAtTheEdge,
-    );
-    if (overflow) {
-      state.nodeContext = (
-        state.lastAfterNodeContext || state.nodeContext
-      ).modify();
-      state.nodeContext.overflow = true;
-    }
-    return overflow;
-  }
-
-  /**
-   * @returns Returns true if the layout constraint is violated.
-   */
-  processLayoutConstraint(
-    state: RenderedActiveLayoutIteratorState,
-    layoutConstraint: Layout.LayoutConstraint,
-    column: Layout.Column,
-  ): boolean {
-    let nodeContext = state.nodeContext;
-    const violateConstraint = !layoutConstraint.allowLayout(nodeContext);
-    if (violateConstraint) {
-      column.checkOverflowAndSaveEdgeAndBreakPosition(
-        state.lastAfterNodeContext,
-        null,
-        false,
-        state.breakAtTheEdge,
-      );
-      nodeContext = state.nodeContext = nodeContext.modify();
-      nodeContext.overflow = true;
-    }
-    return violateConstraint;
   }
 
   override startNonElementNode(

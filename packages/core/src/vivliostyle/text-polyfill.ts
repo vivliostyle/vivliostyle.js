@@ -1100,8 +1100,6 @@ class TextSpacingPolyfill {
       }
     }
 
-    let spaceIdeoAlnumProcessing = false;
-
     function checkUpright(elem: Element): boolean {
       const style = elem?.ownerDocument.defaultView?.getComputedStyle(elem);
       return (
@@ -1165,7 +1163,6 @@ class TextSpacingPolyfill {
         !checkNonZeroMarginBorderPadding(prevNode, textNode)
       ) {
         textNode.before(document.createElement("viv-ts-thin-sp"));
-        spaceIdeoAlnumProcessing = true;
       }
       if (
         nextNode &&
@@ -1184,7 +1181,6 @@ class TextSpacingPolyfill {
         !checkNonZeroMarginBorderPadding(textNode, nextNode)
       ) {
         textNode.after(document.createElement("viv-ts-thin-sp"));
-        spaceIdeoAlnumProcessing = true;
       }
     }
     return columnOver;

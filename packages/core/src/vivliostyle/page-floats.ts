@@ -254,11 +254,6 @@ export class PageFloatStore {
     }
     return null;
   }
-
-  findPageFloatById(id: PageFloatID) {
-    const index = this.floats.findIndex((f) => f.id === id);
-    return index >= 0 ? this.floats[index] : null;
-  }
 }
 
 /**

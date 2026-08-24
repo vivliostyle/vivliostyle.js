@@ -29,7 +29,6 @@ import { UserAgentXml } from "./assets";
  * @enum {string}
  */
 export enum FetchResponseType {
-  DEFAULT = "",
   ARRAYBUFFER = "arraybuffer",
   BLOB = "blob",
   DOCUMENT = "document",
@@ -154,10 +153,6 @@ export function readBlob(blob: Blob): Task.Result<ArrayBuffer> {
   );
   fileReader.readAsArrayBuffer(blob);
   return frame.result();
-}
-
-export function revokeObjectURL(url: string): void {
-  URL.revokeObjectURL(url);
 }
 
 /**

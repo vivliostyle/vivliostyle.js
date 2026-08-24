@@ -83,9 +83,6 @@ export class AdaptiveViewer {
   readyState: Constants.ReadyState = Constants.ReadyState.LOADING;
   packageURL: string[] = [];
   opf: Epub.OPFDoc | null = null;
-  touchActive: boolean = false;
-  touchX: number = 0;
-  touchY: number = 0;
   needResize: boolean = false;
   resized: boolean = false;
   needRefresh: boolean = false;
@@ -762,7 +759,7 @@ export class AdaptiveViewer {
     pageIndex: number,
   ) {
     this.pageSizes[pageIndex] = pageSize;
-    this.setPageSizePageRules(pageSheetSize, spineIndex, pageIndex);
+    this.setPageSizePageRules(pageIndex);
     if (
       pageIndex === 0 &&
       this.pageViewMode === PageViewMode.AUTO_SPREAD &&
@@ -772,11 +769,7 @@ export class AdaptiveViewer {
     }
   }
 
-  private setPageSizePageRules(
-    pageSheetSize: { [key: string]: { width: number; height: number } },
-    spineIndex: number,
-    pageIndex: number,
-  ) {
+  private setPageSizePageRules(pageIndex: number) {
     // In this implementation, it generates one page rule with the largest
     // page size both in width and height in the multiple page sizes.
     // (Resolve issue #751)
