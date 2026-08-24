@@ -3224,7 +3224,7 @@ export class PageParserHandler
 
   override tagSelector(ns: string | null, name: string | null): void {
     Asserts.assert(name);
-    this.currentNamedPageSelector = name;
+    this.currentNamedPageSelector = name ?? "";
     if (name) {
       this.chain.push(new CheckPageTypeAction(name));
       this.specificity += 65536;
