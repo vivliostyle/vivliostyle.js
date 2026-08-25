@@ -467,6 +467,202 @@ describe("epub", function () {
         return testFrame.result();
       });
     });
+
+    it("reuses the requested slot when a final-page rerender shrinks the spine", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = { spineIndex: 0, offset: 0, fetchers: [] };
+        var viewItem = {
+          layoutPositions: new Array(17).fill(null),
+          pages: Array.from({ length: 17 }, function () {
+            return { container: { remove: function () {} } };
+          }),
+          pageCounterStarts: new Array(17).fill(null),
+          instance: {
+            getPageNumberContextDepth: function () {
+              return 0;
+            },
+            pushPageNumberContext: function () {},
+            restorePageNumberContextDepth: function () {},
+            layoutNextPage: function () {
+              return adapt_task.newResult(null);
+            },
+          },
+        };
+        view.counterStore = { finishPage: function () {} };
+        view.isInCounterResolveScope = function () {
+          return false;
+        };
+        view.preparePageCountersForRender = function () {
+          return null;
+        };
+        view.makePage = function () {
+          return page;
+        };
+        view.resolvePageTypeForRenderSlot = function () {};
+        spyOn(view, "finishPageContainer");
+        view.reportPaginationProgress = function () {};
+        view.maybeRelayoutFollowingPage = function () {
+          return adapt_task.newResult(true);
+        };
+        view.resolveUnresolvedReferencesForPage = function () {
+          return adapt_task.newResult(page);
+        };
+
+        view.renderSinglePage(viewItem, { page: 15 }).then(function () {
+          expect(view.finishPageContainer).toHaveBeenCalledWith(
+            viewItem,
+            page,
+            15,
+          );
+          expect(viewItem.pages.length).toBe(16);
+          expect(viewItem.layoutPositions.length).toBe(16);
+          expect(viewItem.pageCounterStarts.length).toBe(16);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("resolves references deferred by a nested counter scope", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = {};
+        var viewItem = {};
+        var nextLayoutPosition = { page: 16 };
+        var ref = {
+          isResolved: function () {
+            return false;
+          },
+        };
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [{ refs: [ref] }];
+          },
+        };
+        view.isInCounterResolveScope = function () {
+          return false;
+        };
+        spyOn(view, "resolveUnresolvedReferencesForPage").and.returnValue(
+          adapt_task.newResult(page),
+        );
+
+        view
+          .resolveDeferredReferencesAfterCounterScope(
+            viewItem,
+            page,
+            15,
+            nextLayoutPosition,
+          )
+          .then(function (result) {
+            expect(
+              view.resolveUnresolvedReferencesForPage,
+            ).toHaveBeenCalledWith(viewItem, page, 15, nextLayoutPosition);
+            expect(result).toBe(page);
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("remembers the cascaded page where a counter scope defers references", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = {
+          container: {
+            parentElement: {},
+            setAttribute: function () {},
+          },
+          spineIndex: 0,
+        };
+        var viewItem = { pages: [page], item: { spineIndex: 0 } };
+        var nextLayoutPosition = { page: 1 };
+        var ref = {
+          isResolved: function () {
+            return false;
+          },
+        };
+        view.opf = { spine: [{}, {}] };
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [{ refs: [ref] }];
+          },
+        };
+        view.isInCounterResolveScope = function () {
+          return true;
+        };
+        spyOn(view, "deferReferencesForPage").and.callThrough();
+
+        view
+          .resolveUnresolvedReferencesForPage(
+            viewItem,
+            page,
+            0,
+            nextLayoutPosition,
+          )
+          .then(function () {
+            expect(view.deferReferencesForPage).toHaveBeenCalledWith(
+              viewItem,
+              page,
+              0,
+              nextLayoutPosition,
+            );
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("queues deferred references until the outermost counter scope is restored", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = {};
+        var viewItem = { pages: [page] };
+        var inCounterScope = true;
+        var ref = {
+          isResolved: function () {
+            return false;
+          },
+        };
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [{ refs: [ref] }];
+          },
+        };
+        view.isInCounterResolveScope = function () {
+          return inCounterScope;
+        };
+        spyOn(view, "resolveUnresolvedReferencesForPage").and.returnValue(
+          adapt_task.newResult(page),
+        );
+
+        view
+          .resolveDeferredReferencesAfterCounterScope(viewItem, page, 0, null)
+          .then(function () {
+            expect(
+              view.resolveUnresolvedReferencesForPage,
+            ).not.toHaveBeenCalled();
+            inCounterScope = false;
+            view
+              .resolveDeferredReferencesAfterCounterScope(
+                viewItem,
+                page,
+                0,
+                null,
+              )
+              .then(function () {
+                expect(
+                  view.resolveUnresolvedReferencesForPage,
+                ).toHaveBeenCalledWith(viewItem, page, 0, null);
+                expect(
+                  view.resolveUnresolvedReferencesForPage.calls.count(),
+                ).toBe(1);
+                done();
+              });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
   });
   describe("OPFView pagination progress", function () {
     function createFakeView(totalOffsets) {

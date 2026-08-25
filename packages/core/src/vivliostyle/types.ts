@@ -70,6 +70,11 @@ export namespace Layout {
      * current position.
      */
     allowLayout(nodeContext: Vtree.NodeContext): boolean;
+    /**
+     * Returns if this constraint allows the node context immediately after a
+     * page-level break has already been satisfied.
+     */
+    allowLayoutAfterPageBreak?(nodeContext: Vtree.NodeContext): boolean;
   }
   /**
    * Represents constraints on laying out fragments

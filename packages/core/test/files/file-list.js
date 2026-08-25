@@ -768,6 +768,10 @@ module.exports = [
         title: "Combine break value regressions (Issue #1842)",
       },
       {
+        file: "page_breaks/break-before-flex-at-page-start.html",
+        title: "Consumed break-before on a flex box at page start",
+      },
+      {
         file: "page_breaks/break_left_right.html",
         title: "break-before/after: left/right",
       },
