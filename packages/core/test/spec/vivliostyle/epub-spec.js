@@ -1308,10 +1308,10 @@ describe("epub", function () {
           expect(result).toBe(rerenderedResult);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(
             view.counterStore.updateTargetTextNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(view.renderingAllPages).toBe(false);
           expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
@@ -1375,10 +1375,10 @@ describe("epub", function () {
           expect(result).toBe(requestedResult);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(
             view.counterStore.updateTargetTextNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
           expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
@@ -1442,10 +1442,10 @@ describe("epub", function () {
           expect(result).toBe(requestedResult);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(
             view.counterStore.updateTargetTextNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
           expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
