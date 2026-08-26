@@ -2589,6 +2589,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
           );
   }
 
+  private removeDeferredReferencePages(
+    shouldRemove: (entry: DeferredReferencePage) => boolean,
+  ): void {
+    // Keep the queue object stable because an active drain holds this array.
+    for (
+      let deferredIndex = this.deferredReferencePages.length - 1;
+      deferredIndex >= 0;
+      deferredIndex--
+    ) {
+      if (shouldRemove(this.deferredReferencePages[deferredIndex])) {
+        this.deferredReferencePages.splice(deferredIndex, 1);
+      }
+    }
+  }
+
   private rememberDeferredPageReplacement(
     spineIndex: number,
     page: Vtree.Page,
@@ -2687,8 +2702,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
       return null;
     }
     this.deferredFollowingSpineRelayoutStart = null;
-    this.deferredReferencePages = this.deferredReferencePages.filter(
-      (entry) => entry.viewItem.item.spineIndex < firstSpine,
+    this.removeDeferredReferencePages(
+      (entry) => entry.viewItem.item.spineIndex >= firstSpine,
     );
     this.counterStore.discardReferencesFromSpine(firstSpine);
     let lastInvalidatedSpine: number | null = null;
@@ -2765,16 +2780,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // final page in the requested slot.
         const finalLength = pageIndexToRender + 1;
         const pageCountChanged = viewItem.pages.length > finalLength;
-        for (
-          let deferredIndex = this.deferredReferencePages.length - 1;
-          deferredIndex >= 0;
-          deferredIndex--
-        ) {
-          const entry = this.deferredReferencePages[deferredIndex];
-          if (entry.viewItem === viewItem && entry.pageIndex >= finalLength) {
-            this.deferredReferencePages.splice(deferredIndex, 1);
-          }
-        }
+        this.removeDeferredReferencePages(
+          (entry) =>
+            entry.viewItem === viewItem && entry.pageIndex >= finalLength,
+        );
         for (
           let stalePageIndex = finalLength;
           stalePageIndex < viewItem.pages.length;

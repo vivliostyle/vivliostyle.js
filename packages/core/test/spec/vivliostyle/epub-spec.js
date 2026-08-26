@@ -594,10 +594,11 @@ describe("epub", function () {
       view.spineItems = [sourceItem, followingItem1, followingItem2];
       view.spineItemLoadingContinuations = [[], [], []];
       view.deferredPageReplacements = new Map();
-      view.deferredReferencePages = [
+      var deferredReferencePages = [
         { viewItem: sourceItem },
         { viewItem: followingItem1 },
       ];
+      view.deferredReferencePages = deferredReferencePages;
       view.counterStore = {
         discardReferencesFromSpine: jasmine.createSpy(),
       };
@@ -613,6 +614,7 @@ describe("epub", function () {
       expect(followingPage2.container.remove).toHaveBeenCalled();
       expect(view.spineItemLoadingContinuations[1]).toBeNull();
       expect(view.spineItemLoadingContinuations[2]).toBeNull();
+      expect(view.deferredReferencePages).toBe(deferredReferencePages);
       expect(view.deferredReferencePages).toEqual([{ viewItem: sourceItem }]);
       expect(view.counterStore.discardReferencesFromSpine).toHaveBeenCalledWith(
         1,
