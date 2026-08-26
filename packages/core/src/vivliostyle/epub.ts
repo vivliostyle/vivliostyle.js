@@ -1620,6 +1620,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   private deferredReferencePages: DeferredReferencePage[] = [];
   private resolvingDeferredReferences: boolean = false;
   private deferredFollowingSpineRelayoutStart: number | null = null;
+  private deferredPageReplacements = new Map<number, Map<number, Vtree.Page>>();
   private relayoutingFollowingSpines: boolean = false;
   private renderingAllPages: boolean = false;
   private paginationProgress = {
@@ -1727,6 +1728,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
       page.side as string,
     );
     const oldPage = viewItem.pages[pageIndex];
+    const deferredOldPage = this.takeDeferredPageReplacement(
+      viewItem.item.spineIndex,
+      pageIndex,
+    );
+    const replacedPage = oldPage || deferredOldPage;
     page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
     viewItem.pages[pageIndex] = page;
 
@@ -1751,13 +1757,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
         page.container,
         oldPage.container,
       );
-      oldPage.dispatchEvent({
-        type: "replaced",
-        target: null,
-        currentTarget: null,
-        preventDefault: null,
-        newPage: page,
-      });
     } else {
       // Find insert position in contentContainer.
       let insertPos: Element | null = null;
@@ -1780,6 +1779,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
         page.container,
         insertPos,
       );
+    }
+    if (replacedPage) {
+      replacedPage.dispatchEvent({
+        type: "replaced",
+        target: null,
+        currentTarget: null,
+        preventDefault: null,
+        newPage: page,
+      });
     }
     this.pageSheetSizeReporter(
       {
@@ -2568,6 +2576,47 @@ export class OPFView implements Vgen.CustomRendererFactory {
           );
   }
 
+  private rememberDeferredPageReplacement(
+    spineIndex: number,
+    pageIndex: number,
+    page: Vtree.Page,
+  ): void {
+    const replacements = (this.deferredPageReplacements ??= new Map());
+    let replacementsByPage = replacements.get(spineIndex);
+    if (!replacementsByPage) {
+      replacementsByPage = new Map();
+      replacements.set(spineIndex, replacementsByPage);
+    }
+    replacementsByPage.set(pageIndex, page);
+  }
+
+  private takeDeferredPageReplacement(
+    spineIndex: number,
+    pageIndex: number,
+  ): Vtree.Page | null {
+    const replacementsByPage = this.deferredPageReplacements?.get(spineIndex);
+    const page = replacementsByPage?.get(pageIndex) || null;
+    if (!page) {
+      return null;
+    }
+    replacementsByPage.delete(pageIndex);
+    if (replacementsByPage.size === 0) {
+      this.deferredPageReplacements.delete(spineIndex);
+    }
+    return page;
+  }
+
+  private updateRetainedTargetCounters(firstSpineIndex: number): void {
+    const pages: Vtree.Page[] = [];
+    for (let spineIndex = 0; spineIndex < firstSpineIndex; spineIndex++) {
+      const viewItem = this.spineItems[spineIndex];
+      if (viewItem) {
+        pages.push(...viewItem.pages);
+      }
+    }
+    this.counterStore.updateTargetCounterNodesInPages(pages);
+  }
+
   private relayoutDeferredFollowingSpines(): void {
     const firstSpine = this.deferredFollowingSpineRelayoutStart;
     if (firstSpine == null) {
@@ -2587,7 +2636,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
       if (!viewItem) {
         continue;
       }
-      viewItem.pages.forEach((renderedPage) => {
+      viewItem.pages.forEach((renderedPage, pageIndex) => {
+        this.rememberDeferredPageReplacement(
+          spineIndex,
+          pageIndex,
+          renderedPage,
+        );
         renderedPage.container.remove();
       });
       this.spineItems[spineIndex] = null;
@@ -2866,6 +2920,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             this.relayoutDeferredFollowingSpines();
             this.relayoutingFollowingSpines = true;
             this.renderPagesUpto(position, false).then((rerenderedResult) => {
+              this.updateRetainedTargetCounters(firstSpine);
               this.relayoutingFollowingSpines = false;
               endRendering();
               frame.finish(rerenderedResult);
@@ -3028,13 +3083,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
             frame.finish(result);
           });
       };
-      if (this.deferredFollowingSpineRelayoutStart == null) {
+      const firstSpine = this.deferredFollowingSpineRelayoutStart;
+      if (firstSpine == null) {
         finishAfterImages();
         return;
       }
       this.relayoutDeferredFollowingSpines();
       this.relayoutingFollowingSpines = true;
       this.renderPagesUpto(finalPosition, false).then((rerenderedResult) => {
+        this.updateRetainedTargetCounters(firstSpine);
         this.relayoutingFollowingSpines = false;
         result = rerenderedResult;
         finishAfterImages();

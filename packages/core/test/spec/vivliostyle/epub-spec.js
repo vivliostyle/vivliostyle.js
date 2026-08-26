@@ -589,6 +589,7 @@ describe("epub", function () {
       var sourceItem = { item: { spineIndex: 0 }, pages: [] };
       var oldViewItem = { item: { spineIndex: 1 }, pages: [oldPage] };
       view.opf = { epageIsRenderedPage: false };
+      view.pageSheetSizeReporter = function () {};
       view.spineItems = [sourceItem, oldViewItem];
       view.spineItemLoadingContinuations = [[], []];
       view.counterStore = {
@@ -606,7 +607,13 @@ describe("epub", function () {
       var newViewItem = {
         item: { spineIndex: 1 },
         pages: [],
-        instance: { viewport: { contentContainer: contentContainer } },
+        instance: {
+          viewport: { contentContainer: contentContainer },
+          pageSheetWidth: 0,
+          pageSheetHeight: 0,
+          pageSheetSize: {},
+          pageNumberOffset: 0,
+        },
       };
       view.spineItems[1] = newViewItem;
       view.finishPageContainer(newViewItem, newPage, 0);
@@ -682,9 +689,14 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
+        var sourcePage = { id: "source" };
         view.renderingPageTasks = new Map();
         view.renderingAllPages = false;
         view.relayoutingFollowingSpines = false;
+        view.spineItems = [{ pages: [sourcePage] }];
+        view.counterStore = {
+          updateTargetCounterNodesInPages: jasmine.createSpy(),
+        };
         view.deferredFollowingSpineRelayoutStart = 1;
         spyOn(view, "renderPageTracked").and.returnValue(
           adapt_task.newResult(initialResult),
@@ -702,6 +714,9 @@ describe("epub", function () {
           expect(view.relayoutDeferredFollowingSpines).toHaveBeenCalled();
           expect(view.renderPagesUpto).toHaveBeenCalledWith(position, false);
           expect(result).toBe(rerenderedResult);
+          expect(
+            view.counterStore.updateTargetCounterNodesInPages,
+          ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
           done();
