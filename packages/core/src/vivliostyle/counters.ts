@@ -1349,27 +1349,8 @@ export class CounterStore {
         }
 
         const oldPageIndex = this.pageIndicesById[id];
-        const movedLater = oldPageIndex && oldPageIndex.pageIndex < pageIndex;
-        const movedEarlierAfterPageBreak =
-          oldPageIndex &&
-          oldPageIndex.pageIndex > pageIndex &&
-          !this.targetsMovedEarlierAfterPageBreak.has(id);
-        if (movedEarlierAfterPageBreak) {
-          this.targetsMovedEarlierAfterPageBreak.add(id);
-        }
-        if (movedLater || movedEarlierAfterPageBreak) {
-          const resolvedRefs = this.resolvedReferences[id];
-          if (resolvedRefs) {
-            let unresolvedRefs = this.unresolvedReferences[id];
-            if (!unresolvedRefs) {
-              unresolvedRefs = this.unresolvedReferences[id] = [];
-            }
-            let ref: TargetCounterReference | undefined;
-            while ((ref = resolvedRefs.shift())) {
-              ref.unresolve();
-              unresolvedRefs.push(ref);
-            }
-          }
+        if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
+          this.unresolveReferences(id);
         }
         this.pageIndicesById[id] = { spineIndex, pageIndex };
       });
@@ -1959,14 +1940,39 @@ export class CounterStore {
     return new LayoutConstraint(this, pageIndex);
   }
 
-  canTargetMoveEarlierAfterPageBreak(id: string): boolean {
+  moveTargetEarlierAfterPageBreak(id: string, pageIndex: number): boolean {
+    const oldPageIndex = this.pageIndicesById[id];
+    if (!oldPageIndex || pageIndex >= oldPageIndex.pageIndex) {
+      return true;
+    }
     // Keep the anti-oscillation guarantee introduced by b0288a35: a target
-    // gets one exception for a page break that has already been satisfied,
-    // but cannot repeatedly alternate between earlier and later pages.
+    // gets one earlier-page correction for a break that has already been
+    // satisfied, but cannot repeatedly alternate between earlier and later
+    // pages. Commit the correction at the point it is accepted so subsequent
+    // constraint checks use the new position instead of retrying indefinitely.
     if (this.targetsMovedEarlierAfterPageBreak.has(id)) {
       return false;
     }
+    this.targetsMovedEarlierAfterPageBreak.add(id);
+    this.pageIndicesById[id] = { ...oldPageIndex, pageIndex };
+    this.unresolveReferences(id);
     return true;
+  }
+
+  private unresolveReferences(id: string): void {
+    const resolvedRefs = this.resolvedReferences[id];
+    if (!resolvedRefs) {
+      return;
+    }
+    let unresolvedRefs = this.unresolvedReferences[id];
+    if (!unresolvedRefs) {
+      unresolvedRefs = this.unresolvedReferences[id] = [];
+    }
+    let ref: TargetCounterReference | undefined;
+    while ((ref = resolvedRefs.shift())) {
+      ref.unresolve();
+      unresolvedRefs.push(ref);
+    }
   }
 }
 
@@ -1997,7 +2003,10 @@ class LayoutConstraint implements Layout.LayoutConstraint {
       return true;
     }
     const id = this.getReferencedTargetId(nodeContext);
-    return !!id && this.counterStore.canTargetMoveEarlierAfterPageBreak(id);
+    return (
+      !!id &&
+      this.counterStore.moveTargetEarlierAfterPageBreak(id, this.pageIndex)
+    );
   }
 
   allowLayout(nodeContext: Vtree.NodeContext): boolean {

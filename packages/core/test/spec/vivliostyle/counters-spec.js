@@ -49,8 +49,10 @@ describe("cross-reference layout constraint", function () {
 
     expect(constraint.allowLayout(nodeContext)).toBe(false);
     expect(constraint.allowLayoutAfterPageBreak(nodeContext)).toBe(true);
-
-    expect(constraint.allowLayoutAfterPageBreak(nodeContext)).toBe(true);
+    expect(store.pageIndicesById.target.pageIndex).toBe(1);
+    expect(reference.isResolved()).toBe(false);
+    expect(store.unresolvedReferences.target).toEqual([reference]);
+    expect(constraint.allowLayout(nodeContext)).toBe(true);
   });
 
   it("keeps non-counter constraints after a satisfied page break", function () {
@@ -92,14 +94,16 @@ describe("cross-reference layout constraint", function () {
     const constraint = store.createLayoutConstraint(1);
     const nodeContext = createNodeContext("target");
     expect(constraint.allowLayoutAfterPageBreak(nodeContext)).toBe(true);
-
-    store.finishPage(0, 1);
-
     expect(reference.isResolved()).toBe(false);
     expect(store.resolvedReferences.target).toEqual([]);
     expect(store.unresolvedReferences.target).toEqual([reference]);
+    expect(store.pageIndicesById.target).toEqual({
+      spineIndex: 0,
+      pageIndex: 1,
+    });
 
-    store.pageIndicesById.target = { spineIndex: 0, pageIndex: 1 };
+    store.finishPage(0, 1);
+
     const earlierConstraint = store.createLayoutConstraint(0);
     expect(earlierConstraint.allowLayoutAfterPageBreak(nodeContext)).toBe(
       false,
