@@ -1619,6 +1619,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
   tocView?: Toc.TOCView;
   private deferredReferencePages: DeferredReferencePage[] = [];
   private resolvingDeferredReferences: boolean = false;
+  private drainingDeferredReferencePage: {
+    viewItem: OPFViewItem;
+    pageIndex: number;
+  } | null = null;
   private deferredFollowingSpineRelayoutStart: number | null = null;
   private deferredPageReplacements = new Map<number, Vtree.Page[]>();
   private relayoutingFollowingSpines: boolean = false;
@@ -2494,6 +2498,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.resolvingDeferredReferences = true;
     frame.handler = (handlerFrame, err) => {
       this.resolvingDeferredReferences = false;
+      this.drainingDeferredReferencePage = null;
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
     frame
@@ -2509,15 +2514,23 @@ export class OPFView implements Vgen.CustomRendererFactory {
           loopFrame.continueLoop();
           return;
         }
+        this.drainingDeferredReferencePage = {
+          viewItem: entry.viewItem,
+          pageIndex: entry.pageIndex,
+        };
         this.resolveUnresolvedReferencesForPage(
           entry.viewItem,
           currentPage,
           entry.pageIndex,
           entry.nextLayoutPosition,
-        ).then(() => loopFrame.continueLoop());
+        ).then(() => {
+          this.drainingDeferredReferencePage = null;
+          loopFrame.continueLoop();
+        });
       })
       .then(() => {
         this.resolvingDeferredReferences = false;
+        this.drainingDeferredReferencePage = null;
         frame.finish(page);
       });
     return frame.result();
@@ -2536,9 +2549,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
     nextLayoutPosition: Vtree.LayoutPosition | null,
   ): void {
     // The deferred drain is the single retry allowed after the outermost
-    // counter scope. Do not let that retry enqueue itself again; doing so
-    // bypasses the #1686 recursion guard and creates an infinite loop.
-    if (this.resolvingDeferredReferences) {
+    // counter scope. Do not let the entry currently being retried enqueue
+    // itself again; cascaded pages must still join the active queue.
+    if (
+      this.drainingDeferredReferencePage?.viewItem === viewItem &&
+      this.drainingDeferredReferencePage.pageIndex === pageIndex
+    ) {
       return;
     }
     const latestPage = viewItem.pages?.[pageIndex] || page;
@@ -2630,19 +2646,20 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
     const newPages = viewItem.pages;
     for (const oldPage of oldPages) {
-      const sameKindPages = newPages.filter(
-        (page) => !!page.isBlankPage === !!oldPage.isBlankPage,
-      );
-      const candidates = sameKindPages.length ? sameKindPages : newPages;
-      const replacement = candidates.reduce<Vtree.Page | null>(
+      const replacement = newPages.reduce<Vtree.Page | null>(
         (closest, page) => {
           if (!closest) {
             return page;
           }
-          return Math.abs(page.offset - oldPage.offset) <
-            Math.abs(closest.offset - oldPage.offset)
-            ? page
-            : closest;
+          const distance = Math.abs(page.offset - oldPage.offset);
+          const closestDistance = Math.abs(closest.offset - oldPage.offset);
+          if (distance !== closestDistance) {
+            return distance < closestDistance ? page : closest;
+          }
+          const sameKind = !!page.isBlankPage === !!oldPage.isBlankPage;
+          const closestSameKind =
+            !!closest.isBlankPage === !!oldPage.isBlankPage;
+          return sameKind && !closestSameKind ? page : closest;
         },
         null,
       );
@@ -2748,6 +2765,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // final page in the requested slot.
         const finalLength = pageIndexToRender + 1;
         const pageCountChanged = viewItem.pages.length > finalLength;
+        for (
+          let deferredIndex = this.deferredReferencePages.length - 1;
+          deferredIndex >= 0;
+          deferredIndex--
+        ) {
+          const entry = this.deferredReferencePages[deferredIndex];
+          if (entry.viewItem === viewItem && entry.pageIndex >= finalLength) {
+            this.deferredReferencePages.splice(deferredIndex, 1);
+          }
+        }
         for (
           let stalePageIndex = finalLength;
           stalePageIndex < viewItem.pages.length;

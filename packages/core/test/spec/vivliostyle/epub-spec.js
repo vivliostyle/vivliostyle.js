@@ -526,6 +526,10 @@ describe("epub", function () {
         view.spineItems = [viewItem];
         view.spineItemLoadingContinuations = [null];
         view.deferredPageReplacements = new Map();
+        view.deferredReferencePages = [
+          { viewItem: viewItem, pageIndex: 15 },
+          { viewItem: viewItem, pageIndex: 16 },
+        ];
         view.counterStore = {
           finishPage: function () {},
           discardReferencesFromPage: jasmine.createSpy(),
@@ -563,6 +567,9 @@ describe("epub", function () {
           expect(
             view.counterStore.discardReferencesFromPage,
           ).toHaveBeenCalledOnceWith(0, 16);
+          expect(view.deferredReferencePages).toEqual([
+            { viewItem: viewItem, pageIndex: 15 },
+          ]);
           expect(viewItem.complete).toBe(true);
           done();
         });
@@ -679,6 +686,15 @@ describe("epub", function () {
       expect(replacedListener).toHaveBeenCalled();
       expect(replacedListener.calls.mostRecent().args[0].newPage).toBe(newPage);
       expect(newContainer.parentElement).toBe(contentContainer);
+      var laterBlankContainer = document.createElement("div");
+      var laterBlankPage = new adapt_vtree.Page(
+        laterBlankContainer,
+        laterBlankContainer,
+      );
+      laterBlankPage.offset = 100;
+      laterBlankPage.isBlankPage = true;
+      newViewItem.pages.push(laterBlankPage);
+      newViewItem.layoutPositions.push(null);
       view.markSpineItemCompleteIfReady(newViewItem);
       expect(blankReplacedListener).toHaveBeenCalled();
       expect(blankReplacedListener.calls.mostRecent().args[0].newPage).toBe(
@@ -1086,6 +1102,11 @@ describe("epub", function () {
           },
         };
         view.resolvingDeferredReferences = true;
+        view.deferredReferencePages = [];
+        view.drainingDeferredReferencePage = {
+          viewItem: viewItem,
+          pageIndex: 0,
+        };
         view.counterStore = {
           getUnresolvedRefsToPage: function () {
             return [{ spineIndex: 0, refs: [ref] }];
@@ -1093,8 +1114,66 @@ describe("epub", function () {
         };
 
         view.deferReferencesForPage(viewItem, page, 0, null);
-        expect(view.deferredReferencePages || []).toEqual([]);
+        expect(view.deferredReferencePages).toEqual([]);
         done();
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("drains references cascaded from another deferred page", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var pages = [{ id: "a" }, { id: "b" }, { id: "c" }];
+        var viewItem = { pages: pages };
+        var ref = {
+          isResolved: function () {
+            return false;
+          },
+        };
+        view.deferredReferencePages = [];
+        view.resolvingDeferredReferences = false;
+        view.drainingDeferredReferencePage = null;
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [{ refs: [ref] }];
+          },
+        };
+        view.isInCounterResolveScope = function () {
+          return false;
+        };
+        spyOn(view, "resolveUnresolvedReferencesForPage").and.callFake(
+          function (item, page, pageIndex) {
+            if (pageIndex < pages.length - 1) {
+              return view.resolveDeferredReferencesAfterCounterScope(
+                item,
+                pages[pageIndex + 1],
+                pageIndex + 1,
+                null,
+              );
+            }
+            return adapt_task.newResult(page);
+          },
+        );
+
+        view
+          .resolveDeferredReferencesAfterCounterScope(
+            viewItem,
+            pages[0],
+            0,
+            null,
+          )
+          .then(function () {
+            expect(
+              view.resolveUnresolvedReferencesForPage.calls
+                .allArgs()
+                .map(function (args) {
+                  return args[2];
+                }),
+            ).toEqual([0, 1, 2]);
+            expect(view.deferredReferencePages).toEqual([]);
+            expect(view.drainingDeferredReferencePage).toBeNull();
+            done();
+          });
         return adapt_task.newResult(true);
       });
     });
