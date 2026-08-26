@@ -513,9 +513,11 @@ describe("epub", function () {
         spyOn(view, "finishPageContainer");
         view.reportPaginationProgress = function () {};
         view.maybeRelayoutFollowingPage = function () {
+          expect(viewItem.complete).not.toBe(true);
           return adapt_task.newResult(true);
         };
         view.resolveUnresolvedReferencesForPage = function () {
+          expect(viewItem.complete).not.toBe(true);
           return adapt_task.newResult(page);
         };
 
