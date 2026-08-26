@@ -770,10 +770,9 @@ export class AdaptiveViewer {
   }
 
   private truncatePageSizes(pageCount: number) {
-    if (this.pageSizes.length <= pageCount) {
-      return;
+    if (this.pageSizes.length > pageCount) {
+      this.pageSizes.splice(pageCount);
     }
-    this.pageSizes.splice(pageCount);
     this.removePageSizePageRules();
     let lastPageSizeIndex = this.pageSizes.length - 1;
     while (

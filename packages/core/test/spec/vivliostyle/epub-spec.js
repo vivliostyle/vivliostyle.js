@@ -68,6 +68,27 @@ describe("epub", function () {
       );
       expect(viewer.pageRuleStyleElement.textContent).not.toContain("750pt");
     });
+
+    it("refreshes page rules after a same-length page-size rebuild", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [
+        { width: 100, height: 100 },
+        { width: 100, height: 100 },
+      ];
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageRuleStyleElement.textContent =
+        "@page {size: 750pt 750pt; margin: 0;}";
+      viewer.pageSheetSizeAlreadySet = true;
+      viewer.pixelRatio = 1;
+
+      viewer.truncatePageSizes(2);
+
+      expect(viewer.pageSizes.length).toBe(2);
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "size: 75pt 75pt",
+      );
+      expect(viewer.pageRuleStyleElement.textContent).not.toContain("750pt");
+    });
   });
 
   describe("EPUBDocStore", function () {
