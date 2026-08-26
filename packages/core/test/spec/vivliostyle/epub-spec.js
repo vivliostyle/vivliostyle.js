@@ -769,6 +769,9 @@ describe("epub", function () {
         view.finishPageContainer = function (item, renderedPage, pageIndex) {
           item.pages[pageIndex] = renderedPage;
         };
+        view.collectTotalOffsets = function () {
+          return adapt_task.newResult(true);
+        };
         view.reportPaginationProgress = function () {};
         view.maybeRelayoutFollowingPage = function () {
           return adapt_task.newResult(true);
