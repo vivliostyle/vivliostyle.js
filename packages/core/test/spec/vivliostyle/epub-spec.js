@@ -1282,6 +1282,7 @@ describe("epub", function () {
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
+          unresolveReferencesForTargets: function () {},
         };
         view.pageSheetSizeTruncator = jasmine.createSpy(
           "pageSheetSizeTruncator",
@@ -1340,6 +1341,7 @@ describe("epub", function () {
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
+          unresolveReferencesForTargets: function () {},
         };
         view.pageSheetSizeTruncator = jasmine.createSpy(
           "pageSheetSizeTruncator",
@@ -1407,6 +1409,7 @@ describe("epub", function () {
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
+          unresolveReferencesForTargets: function () {},
         };
         view.pageSheetSizeTruncator = jasmine.createSpy(
           "pageSheetSizeTruncator",
