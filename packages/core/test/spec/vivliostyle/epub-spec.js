@@ -611,7 +611,11 @@ describe("epub", function () {
           return page;
         };
         view.resolvePageTypeForRenderSlot = function () {};
-        spyOn(view, "finishPageContainer");
+        spyOn(view, "finishPageContainer").and.callFake(
+          function (item, renderedPage, pageIndex) {
+            item.pages[pageIndex] = renderedPage;
+          },
+        );
         view.reportPaginationProgress = function () {};
         view.maybeRelayoutFollowingPage = function () {
           expect(viewItem.complete).not.toBe(true);
