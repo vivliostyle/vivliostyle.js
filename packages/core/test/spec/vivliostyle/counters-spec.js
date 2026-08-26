@@ -285,8 +285,12 @@ describe("cross-reference layout constraint", function () {
 
     store.discardReferencesFromSpine(2);
 
-    expect(store.resolvedReferences.target).toEqual([earlierResolved]);
-    expect(store.unresolvedReferences.target).toEqual([earlierUnresolved]);
+    expect(store.resolvedReferences.target).toBeUndefined();
+    expect(store.unresolvedReferences.target).toEqual([
+      earlierUnresolved,
+      earlierResolved,
+    ]);
+    expect(earlierResolved.isResolved()).toBe(false);
     expect(store.pageIndicesById.target).toEqual({
       spineIndex: 2,
       pageIndex: 0,

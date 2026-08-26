@@ -919,7 +919,7 @@ describe("epub", function () {
       ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
     });
 
-    it("rerenders a deferred suffix once after full pagination", function (done) {
+    it("rerenders a deferred suffix until page counts stabilize", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
         var finalPosition = {
@@ -929,6 +929,8 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
+        var stabilizedResult = { id: "stabilized" };
+        var renderCount = 0;
         var sourcePage = { id: "source", fetchers: [] };
         view.opf = { spine: [{}, {}, {}] };
         view.spineItems = [{ pages: [sourcePage] }];
@@ -942,25 +944,33 @@ describe("epub", function () {
             view.deferredFollowingSpineRelayoutStart = null;
           },
         );
-        spyOn(view, "renderPagesUpto").and.returnValues(
-          adapt_task.newResult(initialResult),
-          adapt_task.newResult(rerenderedResult),
-        );
+        spyOn(view, "renderPagesUpto").and.callFake(function () {
+          renderCount++;
+          if (renderCount === 2) {
+            view.deferredFollowingSpineRelayoutStart = 1;
+            return adapt_task.newResult(rerenderedResult);
+          }
+          return adapt_task.newResult(
+            renderCount === 1 ? initialResult : stabilizedResult,
+          );
+        });
 
         view.renderAllPages().then(function (result) {
           expect(view.relayoutDeferredFollowingSpines).toHaveBeenCalled();
-          expect(view.renderPagesUpto.calls.count()).toBe(2);
+          expect(view.relayoutDeferredFollowingSpines.calls.count()).toBe(2);
+          expect(view.renderPagesUpto.calls.count()).toBe(3);
           expect(view.renderPagesUpto.calls.allArgs()).toEqual([
             [finalPosition, false],
             [finalPosition, false],
+            [finalPosition, false],
           ]);
-          expect(result).toBe(rerenderedResult);
+          expect(result).toBe(stabilizedResult);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledTimes(2);
           expect(
             view.counterStore.updateTargetTextNodesInPages,
-          ).toHaveBeenCalledOnceWith([sourcePage]);
+          ).toHaveBeenCalledTimes(2);
           expect(view.renderingAllPages).toBe(false);
           done();
         });
@@ -978,6 +988,7 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
+        var requestedResult = { id: "requested" };
         var sourcePage = { id: "source", fetchers: [] };
         view.renderingPageTasks = new Map();
         view.renderingAllPages = false;
@@ -988,8 +999,9 @@ describe("epub", function () {
           updateTargetTextNodesInPages: jasmine.createSpy(),
         };
         view.deferredFollowingSpineRelayoutStart = 1;
-        spyOn(view, "renderPageTracked").and.returnValue(
+        spyOn(view, "renderPageTracked").and.returnValues(
           adapt_task.newResult(initialResult),
+          adapt_task.newResult(requestedResult),
         );
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
           function () {
@@ -1003,7 +1015,8 @@ describe("epub", function () {
         view.renderPage(position).then(function (result) {
           expect(view.relayoutDeferredFollowingSpines).toHaveBeenCalled();
           expect(view.renderPagesUpto).toHaveBeenCalledWith(position, false);
-          expect(result).toBe(rerenderedResult);
+          expect(result).toBe(requestedResult);
+          expect(view.renderPageTracked.calls.count()).toBe(2);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
           ).toHaveBeenCalledOnceWith([sourcePage]);

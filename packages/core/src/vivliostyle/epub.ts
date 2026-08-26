@@ -1624,6 +1624,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     Set<number>
   > | null = null;
   private deferredFollowingSpineRelayoutStart: number | null = null;
+  private activeFollowingSpineRelayoutStart: number | null = null;
   private deferredPageReplacements = new Map<number, Vtree.Page[]>();
   private relayoutingFollowingSpines: boolean = false;
   private renderingAllPages: boolean = false;
@@ -2734,6 +2735,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       return null;
     }
     this.deferredFollowingSpineRelayoutStart = null;
+    this.activeFollowingSpineRelayoutStart = firstSpine;
     this.removeDeferredReferencePages(
       (entry) => entry.viewItem.item.spineIndex >= firstSpine,
     );
@@ -2757,6 +2759,64 @@ export class OPFView implements Vgen.CustomRendererFactory {
       this.spineItemLoadingContinuations[spineIndex] = null;
     }
     return lastInvalidatedSpine;
+  }
+
+  private rerenderDeferredFollowingSpines(
+    position: Position,
+  ): Task.Result<PageAndPosition | null> {
+    const frame: Task.Frame<PageAndPosition | null> = Task.newFrame(
+      "rerenderDeferredFollowingSpines",
+    );
+    const maxPasses = Math.max(2, this.opf.spine.length * 2 + 2);
+    let passCount = 0;
+    let result: PageAndPosition | null = null;
+
+    frame.handler = (handlerFrame, err) => {
+      this.relayoutingFollowingSpines = false;
+      this.activeFollowingSpineRelayoutStart = null;
+      handlerFrame.task.raise(err, handlerFrame.parent);
+    };
+
+    const runNextPass = (): void => {
+      if (this.deferredFollowingSpineRelayoutStart == null) {
+        this.relayoutingFollowingSpines = false;
+        this.activeFollowingSpineRelayoutStart = null;
+        frame.finish(result);
+        return;
+      }
+      passCount++;
+      if (passCount > maxPasses) {
+        this.relayoutingFollowingSpines = false;
+        this.activeFollowingSpineRelayoutStart = null;
+        frame.task.raise(
+          new Error("Cross-reference pagination did not stabilize"),
+          frame.parent,
+        );
+        return;
+      }
+
+      const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
+      const rerenderPosition =
+        lastInvalidatedSpine != null &&
+        lastInvalidatedSpine > position.spineIndex
+          ? {
+              spineIndex: lastInvalidatedSpine,
+              pageIndex: Number.POSITIVE_INFINITY,
+              offsetInItem: -1,
+            }
+          : position;
+      this.relayoutingFollowingSpines = true;
+      this.renderPagesUpto(rerenderPosition, false).then((rerenderedResult) => {
+        this.updateRetainedTargetCounters();
+        this.relayoutingFollowingSpines = false;
+        this.activeFollowingSpineRelayoutStart = null;
+        result = rerenderedResult;
+        runNextPass();
+      });
+    };
+
+    runNextPass();
+    return frame.result();
   }
   /**
    * Render a single page. If the new page contains elements with ids that are
@@ -2842,7 +2902,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
         viewItem.pages.splice(finalLength);
         viewItem.layoutPositions.splice(finalLength);
         viewItem.pageCounterStarts.splice(finalLength);
-        if (pageCountChanged && !this.relayoutingFollowingSpines) {
+        if (
+          pageCountChanged &&
+          (!this.relayoutingFollowingSpines ||
+            (this.activeFollowingSpineRelayoutStart != null &&
+              viewItem.item.spineIndex <
+                this.activeFollowingSpineRelayoutStart))
+        ) {
           this.deferFollowingSpinesForRelayout(viewItem.item.spineIndex);
         }
       }
@@ -3077,38 +3143,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
             firstSpine <= position.spineIndex
           ) {
             // In on-demand pagination there is no final renderAllPages pass.
-            // Rebuild the invalid suffix only after the current page render
-            // has unwound, and suppress nested requests while doing so.
-            const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
-            const rerenderPosition =
-              lastInvalidatedSpine != null &&
-              lastInvalidatedSpine > position.spineIndex
-                ? {
-                    spineIndex: lastInvalidatedSpine,
-                    pageIndex: Number.POSITIVE_INFINITY,
-                    offsetInItem: -1,
-                  }
-                : position;
-            this.relayoutingFollowingSpines = true;
-            this.renderPagesUpto(rerenderPosition, false).then(
-              (rerenderedResult) => {
-                this.updateRetainedTargetCounters();
-                const finishRerender = (
-                  requestedResult: PageAndPosition | null,
-                ): void => {
-                  this.relayoutingFollowingSpines = false;
-                  endRendering();
-                  frame.finish(requestedResult);
-                };
-                if (rerenderPosition === position) {
-                  finishRerender(rerenderedResult);
-                } else {
-                  // Return the originally requested page after rebuilding the
-                  // farthest invalidated spine and refreshing retained refs.
-                  this.renderPageTracked(position).then(finishRerender);
-                }
-              },
-            );
+            // Stabilize the invalid suffix only after the current page render
+            // has unwound. Retained reference-source pages can themselves
+            // change an earlier page count, which schedules another pass.
+            this.rerenderDeferredFollowingSpines(position).then(() => {
+              this.renderPageTracked(position).then((requestedResult) => {
+                endRendering();
+                frame.finish(requestedResult);
+              });
+            });
             return;
           }
           endRendering();
@@ -3117,6 +3160,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       },
       (frame, err) => {
         this.relayoutingFollowingSpines = false;
+        this.activeFollowingSpineRelayoutStart = null;
         endRendering();
         frame.task.raise(err, frame.parent);
       },
@@ -3239,6 +3283,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.renderingAllPages = true;
     frame.handler = (handlerFrame, err) => {
       this.relayoutingFollowingSpines = false;
+      this.activeFollowingSpineRelayoutStart = null;
       this.renderingAllPages = false;
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
@@ -3272,14 +3317,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
         finishAfterImages();
         return;
       }
-      this.relayoutDeferredFollowingSpines();
-      this.relayoutingFollowingSpines = true;
-      this.renderPagesUpto(finalPosition, false).then((rerenderedResult) => {
-        this.updateRetainedTargetCounters();
-        this.relayoutingFollowingSpines = false;
-        result = rerenderedResult;
-        finishAfterImages();
-      });
+      this.rerenderDeferredFollowingSpines(finalPosition).then(
+        (rerenderedResult) => {
+          result = rerenderedResult;
+          finishAfterImages();
+        },
+      );
     });
     return frame.result();
   }
