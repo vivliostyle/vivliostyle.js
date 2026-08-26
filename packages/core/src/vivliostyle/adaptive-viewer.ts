@@ -775,8 +775,15 @@ export class AdaptiveViewer {
     }
     this.pageSizes.splice(pageCount);
     this.removePageSizePageRules();
-    if (this.pageSizes.length > 0) {
-      this.setPageSizePageRules(this.pageSizes.length - 1);
+    let lastPageSizeIndex = this.pageSizes.length - 1;
+    while (
+      lastPageSizeIndex >= 0 &&
+      this.pageSizes[lastPageSizeIndex] == null
+    ) {
+      lastPageSizeIndex--;
+    }
+    if (lastPageSizeIndex >= 0) {
+      this.setPageSizePageRules(lastPageSizeIndex);
     }
   }
 
@@ -784,16 +791,19 @@ export class AdaptiveViewer {
     // In this implementation, it generates one page rule with the largest
     // page size both in width and height in the multiple page sizes.
     // (Resolve issue #751)
+    const currentPageSize = this.pageSizes[pageIndex];
     if (
       this.pageRuleStyleElement &&
+      currentPageSize &&
       (!this.pageSheetSizeAlreadySet ||
-        this.pageSizes[pageIndex].width !==
-          this.pageSizes[pageIndex - 1]?.width ||
-        this.pageSizes[pageIndex].height !==
-          this.pageSizes[pageIndex - 1]?.height)
+        currentPageSize.width !== this.pageSizes[pageIndex - 1]?.width ||
+        currentPageSize.height !== this.pageSizes[pageIndex - 1]?.height)
     ) {
-      const widthMax = Math.max(...this.pageSizes.map((p) => p.width));
-      const heightMax = Math.max(...this.pageSizes.map((p) => p.height));
+      const definedPageSizes = this.pageSizes.filter(
+        (pageSize) => pageSize != null,
+      );
+      const widthMax = Math.max(...definedPageSizes.map((p) => p.width));
+      const heightMax = Math.max(...definedPageSizes.map((p) => p.height));
 
       function convertSize(px: number): number {
         const pt = px * 0.75;

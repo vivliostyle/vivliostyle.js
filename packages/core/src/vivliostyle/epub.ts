@@ -2814,9 +2814,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
         const pageCountChanged = viewItem.pages.length > finalLength;
         if (pageCountChanged) {
           this.updateEPageRangesAfterShrink(viewItem, finalLength);
-          this.pageSheetSizeTruncator(
-            viewItem.instance.pageNumberOffset + finalLength,
-          );
         }
         this.removeDeferredReferencePages(
           (entry) =>
@@ -3101,16 +3098,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
                   frame.finish(requestedResult);
                 };
                 if (rerenderPosition === position) {
+                  this.pageSheetSizeTruncator(this.getRenderedPageCount());
                   finishRerender(rerenderedResult);
                 } else {
                   // Return the originally requested page after rebuilding the
                   // farthest invalidated spine and refreshing retained refs.
-                  this.renderPageTracked(position).then(finishRerender);
+                  this.renderPageTracked(position).then((requestedResult) => {
+                    this.pageSheetSizeTruncator(this.getRenderedPageCount());
+                    finishRerender(requestedResult);
+                  });
                 }
               },
             );
             return;
           }
+          this.pageSheetSizeTruncator(this.getRenderedPageCount());
           endRendering();
           frame.finish(result);
         });
@@ -3263,6 +3265,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             }
           })
           .then(() => {
+            this.pageSheetSizeTruncator(this.getRenderedPageCount());
             this.renderingAllPages = false;
             frame.finish(result);
           });

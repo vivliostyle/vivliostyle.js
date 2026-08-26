@@ -693,7 +693,7 @@ describe("epub", function () {
           expect(followingItem.epage).toBe(16);
           expect(view.opf.epageCount).toBe(19);
           expect(epageCountCallback).toHaveBeenCalledOnceWith(19);
-          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(16);
+          expect(view.pageSheetSizeTruncator).not.toHaveBeenCalled();
           expect(stalePageReplaced).toHaveBeenCalled();
           expect(stalePageReplaced.calls.mostRecent().args[0].newPage).toBe(
             page,
@@ -936,6 +936,9 @@ describe("epub", function () {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
         };
+        view.pageSheetSizeTruncator = jasmine.createSpy(
+          "pageSheetSizeTruncator",
+        );
         view.deferredFollowingSpineRelayoutStart = 1;
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
           function () {
@@ -962,6 +965,7 @@ describe("epub", function () {
             view.counterStore.updateTargetTextNodesInPages,
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.renderingAllPages).toBe(false);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
           done();
         });
         return adapt_task.newResult(true);
@@ -987,6 +991,9 @@ describe("epub", function () {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
         };
+        view.pageSheetSizeTruncator = jasmine.createSpy(
+          "pageSheetSizeTruncator",
+        );
         view.deferredFollowingSpineRelayoutStart = 1;
         spyOn(view, "renderPageTracked").and.returnValue(
           adapt_task.newResult(initialResult),
@@ -1012,6 +1019,7 @@ describe("epub", function () {
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
           done();
         });
         return adapt_task.newResult(true);
@@ -1038,6 +1046,9 @@ describe("epub", function () {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
         };
+        view.pageSheetSizeTruncator = jasmine.createSpy(
+          "pageSheetSizeTruncator",
+        );
         view.deferredFollowingSpineRelayoutStart = 1;
         spyOn(view, "renderPageTracked").and.returnValues(
           adapt_task.newResult(initialResult),
@@ -1072,6 +1083,7 @@ describe("epub", function () {
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
           done();
         });
         return adapt_task.newResult(true);
