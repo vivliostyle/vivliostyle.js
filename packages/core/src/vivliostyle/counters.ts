@@ -1552,15 +1552,11 @@ export class CounterStore {
 
   /**
    * Drop references whose source page belongs to spine items that are about to
-   * be rebuilt. Target snapshots owned by that suffix are normally invalidated,
-   * but a fixed-point pagination pass can retain them as the starting estimate
-   * for the next pass. Retain pageIndicesById so unresolved forward references
-   * can still locate and render their targets while the suffix is reconstructed.
+   * be rebuilt, and invalidate target snapshots owned by that suffix. Retain
+   * pageIndicesById so unresolved forward references can still locate and
+   * render their targets while the suffix is reconstructed.
    */
-  discardReferencesFromSpine(
-    firstSpineIndex: number,
-    preserveTargetSnapshots: boolean = false,
-  ): void {
+  discardReferencesFromSpine(firstSpineIndex: number): void {
     const targetIds = new Set([
       ...Object.keys(this.resolvedReferences),
       ...Object.keys(this.unresolvedReferences),
@@ -1586,13 +1582,11 @@ export class CounterStore {
       }
     }
 
-    if (!preserveTargetSnapshots) {
-      for (const id of Object.keys(this.pageIndicesById)) {
-        if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
-          delete this.pageCountersById[id];
-          delete this.pageDocCountersById[id];
-          delete this.pageTextById[id];
-        }
+    for (const id of Object.keys(this.pageIndicesById)) {
+      if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
+        delete this.pageCountersById[id];
+        delete this.pageDocCountersById[id];
+        delete this.pageTextById[id];
       }
     }
 
@@ -1623,7 +1617,10 @@ export class CounterStore {
    * Walk through target-counter DOM nodes in the given page containers and
    * update their text content from the current pageCountersById snapshots.
    */
-  updateTargetCounterNodesInPages(pages: Vtree.Page[]): Set<Vtree.Page> {
+  updateTargetCounterNodesInPages(
+    pages: Vtree.Page[],
+    changedTargetIds?: Set<string>,
+  ): Set<Vtree.Page> {
     const changedPages = new Set<Vtree.Page>();
     for (const page of pages) {
       if (!page || !page.container) continue;
@@ -1640,6 +1637,7 @@ export class CounterStore {
               if (node.textContent !== value) {
                 node.textContent = value;
                 changedPages.add(page);
+                changedTargetIds?.add(expr.transformedId);
               }
             }
           }
@@ -1652,7 +1650,10 @@ export class CounterStore {
   /**
    * Update target-text() nodes retained outside a rebuilt spine suffix.
    */
-  updateTargetTextNodesInPages(pages: Vtree.Page[]): Set<Vtree.Page> {
+  updateTargetTextNodesInPages(
+    pages: Vtree.Page[],
+    changedTargetIds?: Set<string>,
+  ): Set<Vtree.Page> {
     const changedPages = new Set<Vtree.Page>();
     for (const page of pages) {
       if (!page || !page.container) continue;
@@ -1674,6 +1675,7 @@ export class CounterStore {
             if (node.textContent !== value) {
               node.textContent = value;
               changedPages.add(page);
+              changedTargetIds?.add(expr.transformedId);
             }
           }
         }
@@ -2076,6 +2078,12 @@ export class CounterStore {
     this.pageIndicesById[id] = { ...oldPageIndex, pageIndex };
     this.unresolveReferences(id);
     return true;
+  }
+
+  unresolveReferencesForTargets(targetIds: Iterable<string>): void {
+    for (const id of targetIds) {
+      this.unresolveReferences(id);
+    }
   }
 
   private unresolveReferences(id: string): void {

@@ -2731,33 +2731,68 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.deferredPageReplacements.delete(spineIndex);
   }
 
-  private updateRetainedTargetCounters(): number | null {
+  private updateRetainedTargetCounters(): Set<string> {
     const pages: Vtree.Page[] = [];
     for (const viewItem of this.spineItems) {
       if (viewItem) {
         pages.push(...viewItem.pages);
       }
     }
-    const changedPages = new Set<Vtree.Page>([
-      ...(this.counterStore.updateTargetCounterNodesInPages(pages) || []),
-      ...(this.counterStore.updateTargetTextNodesInPages(pages) || []),
-    ]);
-    let firstChangedSpine: number | null = null;
-    for (const viewItem of this.spineItems) {
-      if (
-        viewItem?.pages.some((page) => changedPages.has(page)) &&
-        (firstChangedSpine == null ||
-          viewItem.item.spineIndex < firstChangedSpine)
-      ) {
-        firstChangedSpine = viewItem.item.spineIndex;
-      }
-    }
-    return firstChangedSpine;
+    const changedTargetIds = new Set<string>();
+    this.counterStore.updateTargetCounterNodesInPages(pages, changedTargetIds);
+    this.counterStore.updateTargetTextNodesInPages(pages, changedTargetIds);
+    this.counterStore.unresolveReferencesForTargets(changedTargetIds);
+    return changedTargetIds;
   }
 
-  private relayoutDeferredFollowingSpines(
-    preserveTargetSnapshots: boolean = false,
-  ): number | null {
+  private resolveChangedRetainedTargetReferences(
+    targetIds: Set<string>,
+  ): Task.Result<any> {
+    const targetPages = new Map<
+      string,
+      {
+        viewItem: OPFViewItem;
+        page: Vtree.Page;
+        pageIndex: number;
+        nextLayoutPosition: Vtree.LayoutPosition | null;
+      }
+    >();
+    for (const id of targetIds) {
+      const position = this.counterStore.pageIndicesById[id];
+      if (!position) continue;
+      const viewItem = this.spineItems[position.spineIndex];
+      const page = viewItem?.pages[position.pageIndex];
+      if (!viewItem || !page) continue;
+      const key = `${position.spineIndex}:${position.pageIndex}`;
+      targetPages.set(key, {
+        viewItem,
+        page,
+        pageIndex: position.pageIndex,
+        nextLayoutPosition:
+          viewItem.layoutPositions[position.pageIndex + 1] || null,
+      });
+    }
+    const pages = Array.from(targetPages.values());
+    for (const target of pages) {
+      this.deferReferencesForPage(
+        target.viewItem,
+        target.page,
+        target.pageIndex,
+        target.nextLayoutPosition,
+      );
+    }
+    const first = pages[0];
+    return first
+      ? this.resolveDeferredReferencesAfterCounterScope(
+          first.viewItem,
+          first.page,
+          first.pageIndex,
+          first.nextLayoutPosition,
+        )
+      : Task.newResult(true);
+  }
+
+  private relayoutDeferredFollowingSpines(): number | null {
     const firstSpine = this.deferredFollowingSpineRelayoutStart;
     if (firstSpine == null) {
       return null;
@@ -2766,10 +2801,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.removeDeferredReferencePages(
       (entry) => entry.viewItem.item.spineIndex >= firstSpine,
     );
-    this.counterStore.discardReferencesFromSpine(
-      firstSpine,
-      preserveTargetSnapshots,
-    );
+    this.counterStore.discardReferencesFromSpine(firstSpine);
     let lastInvalidatedSpine: number | null = null;
     for (
       let spineIndex = firstSpine;
@@ -2801,7 +2833,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const maxPasses = Math.max(3, spineCount * 2 + 2);
     let passCount = 0;
     let result: PageAndPosition | null = null;
-    let preserveTargetSnapshots = false;
 
     const clearRelayoutState = (): void => {
       this.relayoutingFollowingSpines = false;
@@ -2831,10 +2862,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
       this.relayoutingFollowingSpines = true;
       this.relayoutingFollowingSpineStart = firstSpine;
-      const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines(
-        preserveTargetSnapshots,
-      );
-      preserveTargetSnapshots = false;
+      const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
       const rerenderPosition =
         lastInvalidatedSpine != null
           ? {
@@ -2845,20 +2873,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
           : position;
       this.renderPagesUpto(rerenderPosition, false).then((rerenderedResult) => {
         result = rerenderedResult;
-        const firstChangedSourceSpine = this.updateRetainedTargetCounters();
-        if (firstChangedSourceSpine != null) {
-          // Updating generated reference text after layout is insufficient:
-          // a width change (for example page 10 to 9) can alter line and page
-          // breaks. Rebuild from the earliest page whose value actually
-          // changed, and repeat until no rendered reference changes.
-          this.deferSpinesForRelayoutFrom(firstChangedSourceSpine);
-          // Seed the next fixed-point pass with the target values produced by
-          // this pass. Clearing them would lay out the source with the
-          // unresolved fallback again, causing an oscillation such as
-          // "??" -> "9" -> "??" instead of converging to "8".
-          preserveTargetSnapshots = true;
-        }
-        runNextPass();
+        const changedTargetIds = this.updateRetainedTargetCounters();
+        // Patching generated reference text is insufficient when its width
+        // changes. Feed the changed targets back through the existing
+        // page-level reference resolver so only retained source pages are
+        // re-laid out. If one of those pages shrinks, it queues the following
+        // spine suffix for the next pass without discarding the target that
+        // supplied the resolved value.
+        this.resolveChangedRetainedTargetReferences(changedTargetIds).then(() =>
+          runNextPass(),
+        );
       });
     };
 

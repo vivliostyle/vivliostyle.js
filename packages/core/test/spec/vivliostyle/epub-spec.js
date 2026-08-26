@@ -965,7 +965,6 @@ describe("epub", function () {
       expect(view.deferredReferencePages).toEqual([{ viewItem: sourceItem }]);
       expect(view.counterStore.discardReferencesFromSpine).toHaveBeenCalledWith(
         1,
-        false,
       );
     });
 
@@ -1130,24 +1129,84 @@ describe("epub", function () {
       view.counterStore = {
         updateTargetCounterNodesInPages: jasmine
           .createSpy()
-          .and.returnValue(new Set([prefixPage])),
+          .and.callFake(function (pages, changedTargetIds) {
+            changedTargetIds.add("counter-target");
+            return new Set([prefixPage]);
+          }),
         updateTargetTextNodesInPages: jasmine
           .createSpy()
-          .and.returnValue(new Set([rebuiltPage])),
+          .and.callFake(function (pages, changedTargetIds) {
+            changedTargetIds.add("text-target");
+            return new Set([rebuiltPage]);
+          }),
+        unresolveReferencesForTargets: jasmine.createSpy(),
       };
 
-      var firstChangedSpine = view.updateRetainedTargetCounters();
+      var changedTargetIds = view.updateRetainedTargetCounters();
 
       expect(
         view.counterStore.updateTargetCounterNodesInPages,
-      ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
+      ).toHaveBeenCalledWith([prefixPage, rebuiltPage], jasmine.any(Set));
       expect(
         view.counterStore.updateTargetTextNodesInPages,
-      ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
-      expect(firstChangedSpine).toBe(0);
+      ).toHaveBeenCalledWith([prefixPage, rebuiltPage], jasmine.any(Set));
+      expect(changedTargetIds).toEqual(
+        new Set(["counter-target", "text-target"]),
+      );
+      expect(
+        view.counterStore.unresolveReferencesForTargets,
+      ).toHaveBeenCalledOnceWith(changedTargetIds);
     });
 
-    it("rebuilds from a changed retained reference until stable", function (done) {
+    it("routes changed retained references through the target page resolver", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var targetPage = { id: "target-page" };
+        var nextPosition = { page: 1 };
+        var targetViewItem = {
+          item: { spineIndex: 1 },
+          pages: [targetPage],
+          layoutPositions: [{ page: 0 }, nextPosition],
+        };
+        view.spineItems = [null, targetViewItem];
+        view.counterStore = {
+          pageIndicesById: {
+            target1: { spineIndex: 1, pageIndex: 0 },
+            target2: { spineIndex: 1, pageIndex: 0 },
+          },
+        };
+        spyOn(view, "deferReferencesForPage");
+        spyOn(
+          view,
+          "resolveDeferredReferencesAfterCounterScope",
+        ).and.returnValue(adapt_task.newResult(targetPage));
+
+        view
+          .resolveChangedRetainedTargetReferences(
+            new Set(["target1", "target2"]),
+          )
+          .then(function () {
+            expect(view.deferReferencesForPage).toHaveBeenCalledOnceWith(
+              targetViewItem,
+              targetPage,
+              0,
+              nextPosition,
+            );
+            expect(
+              view.resolveDeferredReferencesAfterCounterScope,
+            ).toHaveBeenCalledOnceWith(
+              targetViewItem,
+              targetPage,
+              0,
+              nextPosition,
+            );
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("rerenders changed retained references before rebuilding the suffix", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
         var position = {
@@ -1162,9 +1221,8 @@ describe("epub", function () {
         view.relayoutingFollowingSpines = false;
         view.relayoutingFollowingSpineStart = null;
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
-          function (preserveTargetSnapshots) {
+          function () {
             passStarts.push(view.deferredFollowingSpineRelayoutStart);
-            expect(preserveTargetSnapshots).toBe(passStarts.length > 1);
             view.deferredFollowingSpineRelayoutStart = null;
             return 2;
           },
@@ -1173,16 +1231,31 @@ describe("epub", function () {
           adapt_task.newResult({ id: "first" }),
           adapt_task.newResult({ id: "stable" }),
         );
-        spyOn(view, "updateRetainedTargetCounters").and.returnValues(0, null);
+        var changedTargetIds = new Set(["target"]);
+        spyOn(view, "updateRetainedTargetCounters").and.returnValues(
+          changedTargetIds,
+          new Set(),
+        );
+        spyOn(view, "resolveChangedRetainedTargetReferences").and.callFake(
+          function (targetIds) {
+            if (targetIds.size) {
+              view.deferredFollowingSpineRelayoutStart = 1;
+            }
+            return adapt_task.newResult(true);
+          },
+        );
 
         view.rerenderDeferredFollowingSpines(position).then(function (result) {
-          expect(passStarts).toEqual([1, 0]);
+          expect(passStarts).toEqual([1, 1]);
           expect(view.renderPagesUpto.calls.count()).toBe(2);
           expect(view.renderPagesUpto.calls.allArgs()).toEqual([
             [position, false],
             [position, false],
           ]);
           expect(result).toEqual({ id: "stable" });
+          expect(
+            view.resolveChangedRetainedTargetReferences.calls.allArgs(),
+          ).toEqual([[changedTargetIds], [new Set()]]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.relayoutingFollowingSpineStart).toBeNull();
           done();

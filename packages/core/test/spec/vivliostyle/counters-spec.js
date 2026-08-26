@@ -59,10 +59,15 @@ describe("cross-reference layout constraint", function () {
       marker: "",
     };
 
-    const changedPages = store.updateTargetTextNodesInPages([page]);
+    const changedTargetIds = new Set();
+    const changedPages = store.updateTargetTextNodesInPages(
+      [page],
+      changedTargetIds,
+    );
 
     expect(node.textContent).toBe("A");
     expect(changedPages).toEqual(new Set([page]));
+    expect(changedTargetIds).toEqual(new Set(["target"]));
     expect(store.updateTargetTextNodesInPages([page])).toEqual(new Set());
   });
 
@@ -300,30 +305,5 @@ describe("cross-reference layout constraint", function () {
     expect(store.pageTextById.retained).toBe(retainedText);
     expect(store.namedStringPageSnapshots[10]).toBeDefined();
     expect(store.namedStringPageSnapshots[20]).toBeUndefined();
-  });
-
-  it("can retain target snapshots as the seed for a pagination fixed-point pass", function () {
-    const store = new Counters.CounterStore(documentURLTransformer);
-    const discardedReference = new Counters.TargetCounterReference(
-      "target",
-      true,
-    );
-    discardedReference.spineIndex = 0;
-    const targetCounters = { page: [9] };
-    const targetDocCounters = { chapter: [2] };
-    const targetText = { content: "target" };
-
-    store.resolvedReferences.target = [discardedReference];
-    store.pageIndicesById.target = { spineIndex: 2, pageIndex: 0 };
-    store.pageCountersById.target = targetCounters;
-    store.pageDocCountersById.target = targetDocCounters;
-    store.pageTextById.target = targetText;
-
-    store.discardReferencesFromSpine(0, true);
-
-    expect(store.resolvedReferences.target).toBeUndefined();
-    expect(store.pageCountersById.target).toBe(targetCounters);
-    expect(store.pageDocCountersById.target).toBe(targetDocCounters);
-    expect(store.pageTextById.target).toBe(targetText);
   });
 });
