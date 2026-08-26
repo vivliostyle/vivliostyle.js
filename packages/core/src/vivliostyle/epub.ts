@@ -2729,18 +2729,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
   }
 
   private relayoutDeferredFollowingSpines(): number | null {
-    const firstDeferredSpine = this.deferredFollowingSpineRelayoutStart;
-    if (firstDeferredSpine == null) {
+    const firstSpine = this.deferredFollowingSpineRelayoutStart;
+    if (firstSpine == null) {
       return null;
     }
     this.deferredFollowingSpineRelayoutStart = null;
-    // If retained pages reference targets in the invalid suffix, merely
-    // patching their text after reconstruction cannot update line or page
-    // breaks. Expand the rebuild backwards to every such source page. The
-    // lookup is a transitive closure because expanding the suffix can expose
-    // an earlier source that references a newly included target spine.
-    const firstSpine =
-      this.counterStore.getRebuildStartForReferences(firstDeferredSpine);
     this.removeDeferredReferencePages(
       (entry) => entry.viewItem.item.spineIndex >= firstSpine,
     );

@@ -299,18 +299,4 @@ describe("cross-reference layout constraint", function () {
     expect(store.namedStringPageSnapshots[10]).toBeDefined();
     expect(store.namedStringPageSnapshots[20]).toBeUndefined();
   });
-
-  it("expands a suffix rebuild transitively to retained reference sources", function () {
-    const store = new Counters.CounterStore(documentURLTransformer);
-    const source0 = new Counters.TargetCounterReference("target-1", true);
-    source0.spineIndex = 0;
-    const source1 = new Counters.TargetCounterReference("target-2", true);
-    source1.spineIndex = 1;
-    store.pageIndicesById["target-1"] = { spineIndex: 1, pageIndex: 0 };
-    store.pageIndicesById["target-2"] = { spineIndex: 2, pageIndex: 0 };
-    store.resolvedReferences["target-1"] = [source0];
-    store.resolvedReferences["target-2"] = [source1];
-
-    expect(store.getRebuildStartForReferences(2)).toBe(0);
-  });
 });

@@ -615,6 +615,7 @@ describe("epub", function () {
           }),
           pageCounterStarts: new Array(17).fill(null),
           instance: {
+            pageNumberOffset: 0,
             viewport: {
               layoutBox: { removeAttribute: function () {} },
             },
@@ -727,9 +728,6 @@ describe("epub", function () {
       ];
       view.deferredReferencePages = deferredReferencePages;
       view.counterStore = {
-        getRebuildStartForReferences: function (firstSpine) {
-          return firstSpine;
-        },
         discardReferencesFromSpine: jasmine.createSpy(),
       };
 
@@ -749,41 +747,6 @@ describe("epub", function () {
       expect(view.counterStore.discardReferencesFromSpine).toHaveBeenCalledWith(
         1,
       );
-    });
-
-    it("rebuilds retained source pages whose target is in the invalid suffix", function () {
-      var view = Object.create(adapt_epub.OPFView.prototype);
-      var sourcePage = { container: { remove: jasmine.createSpy() } };
-      var targetPage = { container: { remove: jasmine.createSpy() } };
-      var sourceItem = {
-        item: { spineIndex: 0 },
-        pages: [sourcePage],
-      };
-      var targetItem = {
-        item: { spineIndex: 1 },
-        pages: [targetPage],
-      };
-      view.spineItems = [sourceItem, targetItem];
-      view.spineItemLoadingContinuations = [[], []];
-      view.deferredPageReplacements = new Map();
-      view.deferredReferencePages = [];
-      view.counterStore = {
-        getRebuildStartForReferences: jasmine.createSpy().and.returnValue(0),
-        discardReferencesFromSpine: jasmine.createSpy(),
-      };
-
-      view.deferFollowingSpinesForRelayout(0);
-      view.relayoutDeferredFollowingSpines();
-
-      expect(
-        view.counterStore.getRebuildStartForReferences,
-      ).toHaveBeenCalledOnceWith(1);
-      expect(view.counterStore.discardReferencesFromSpine).toHaveBeenCalledWith(
-        0,
-      );
-      expect(sourcePage.container.remove).toHaveBeenCalled();
-      expect(targetPage.container.remove).toHaveBeenCalled();
-      expect(view.spineItems).toEqual([null, null]);
     });
 
     it("notifies a displayed page when its rebuilt replacement is ready", function () {
@@ -818,9 +781,6 @@ describe("epub", function () {
       view.deferredPageReplacements = new Map();
       view.deferredReferencePages = [];
       view.counterStore = {
-        getRebuildStartForReferences: function (firstSpine) {
-          return firstSpine;
-        },
         discardReferencesFromSpine: function () {},
       };
       var replacedListener = jasmine.createSpy("replacedListener");
