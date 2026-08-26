@@ -2989,6 +2989,20 @@ export class OPFView implements Vgen.CustomRendererFactory {
             });
           return;
         }
+        if (this.isRenderingPageInAnotherTask()) {
+          if (sync) {
+            frame.finish(null);
+            return;
+          }
+          // Another navigation task is already rebuilding the invalid suffix.
+          // Retry after it has released the shared layout and counter state.
+          frame.sleep(100).then(() => {
+            this.findPage(position, sync).then((result) =>
+              frame.finish(result),
+            );
+          });
+          return;
+        }
         // A cached page in the invalid suffix must not bypass the deferred
         // rebuild. renderPage() consumes the marker before returning it.
         this.renderPage(position).then((result) => frame.finish(result));

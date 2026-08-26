@@ -627,6 +627,65 @@ describe("epub", function () {
       });
     });
 
+    it("waits for another navigation task to rebuild an invalid suffix", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = { spineIndex: 1, pageIndex: 0, offsetInItem: -1 };
+        var rebuiltPage = {};
+        var viewItem = { pages: [rebuiltPage], complete: true };
+        view.deferredFollowingSpineRelayoutStart = 1;
+        view.renderingAllPages = false;
+        view.renderingPageTasks = new Map([[{}, 1]]);
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "getPageViewItem").and.returnValue(
+          adapt_task.newResult(viewItem),
+        );
+        spyOn(view, "renderPage");
+        var scheduler = adapt_task.currentTask().getScheduler();
+        var rebuildTask = scheduler.run(function () {
+          var rebuildFrame = adapt_task.newFrame("finishNavigationRebuild");
+          rebuildFrame.sleep(50).then(function () {
+            view.renderingPageTasks.clear();
+            view.deferredFollowingSpineRelayoutStart = null;
+            rebuildFrame.finish(true);
+          });
+          return rebuildFrame.result();
+        });
+
+        view.findPage(position, false).then(function (result) {
+          expect(result.page).toBe(rebuiltPage);
+          expect(view.renderPage).not.toHaveBeenCalled();
+          rebuildTask.join().then(function () {
+            done();
+          });
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("does not start a synchronous invalid-suffix rebuild in parallel", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = { spineIndex: 1, pageIndex: 0, offsetInItem: -1 };
+        view.deferredFollowingSpineRelayoutStart = 1;
+        view.renderingAllPages = false;
+        view.renderingPageTasks = new Map([[{}, 1]]);
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "renderPage");
+
+        view.findPage(position, true).then(function (result) {
+          expect(result).toBeNull();
+          expect(view.renderPage).not.toHaveBeenCalled();
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("reuses the requested slot when a final-page rerender shrinks the spine", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
