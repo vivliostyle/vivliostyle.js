@@ -18,6 +18,7 @@
 
 import * as adapt_epub from "../../../src/vivliostyle/epub";
 import * as adapt_task from "../../../src/vivliostyle/task";
+import * as adapt_vtree from "../../../src/vivliostyle/vtree";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 
@@ -578,6 +579,43 @@ describe("epub", function () {
       );
     });
 
+    it("notifies a displayed page when its rebuilt replacement is ready", function () {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      var contentContainer = document.createElement("div");
+      var oldContainer = document.createElement("div");
+      contentContainer.appendChild(oldContainer);
+      var oldPage = new adapt_vtree.Page(oldContainer, oldContainer);
+      oldPage.spineIndex = 1;
+      var sourceItem = { item: { spineIndex: 0 }, pages: [] };
+      var oldViewItem = { item: { spineIndex: 1 }, pages: [oldPage] };
+      view.opf = { epageIsRenderedPage: false };
+      view.spineItems = [sourceItem, oldViewItem];
+      view.spineItemLoadingContinuations = [[], []];
+      view.counterStore = {
+        discardReferencesFromSpine: function () {},
+      };
+      var replacedListener = jasmine.createSpy("replacedListener");
+      oldPage.addEventListener("replaced", replacedListener, false);
+
+      view.deferFollowingSpinesForRelayout(0);
+      view.relayoutDeferredFollowingSpines();
+
+      var newContainer = document.createElement("div");
+      var newPage = new adapt_vtree.Page(newContainer, newContainer);
+      newPage.side = "right";
+      var newViewItem = {
+        item: { spineIndex: 1 },
+        pages: [],
+        instance: { viewport: { contentContainer: contentContainer } },
+      };
+      view.spineItems[1] = newViewItem;
+      view.finishPageContainer(newViewItem, newPage, 0);
+
+      expect(replacedListener).toHaveBeenCalled();
+      expect(replacedListener.calls.mostRecent().args[0].newPage).toBe(newPage);
+      expect(newContainer.parentElement).toBe(contentContainer);
+    });
+
     it("keeps the earliest following spine queued for relayout", function () {
       var view = Object.create(adapt_epub.OPFView.prototype);
       view.spineItems = [];
@@ -599,8 +637,12 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
+        var sourcePage = { id: "source" };
         view.opf = { spine: [{}, {}, {}] };
-        view.spineItems = [];
+        view.spineItems = [{ pages: [sourcePage] }];
+        view.counterStore = {
+          updateTargetCounterNodesInPages: jasmine.createSpy(),
+        };
         view.deferredFollowingSpineRelayoutStart = 1;
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
           function () {
@@ -620,6 +662,9 @@ describe("epub", function () {
             [finalPosition, false],
           ]);
           expect(result).toBe(rerenderedResult);
+          expect(
+            view.counterStore.updateTargetCounterNodesInPages,
+          ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.renderingAllPages).toBe(false);
           done();
         });
