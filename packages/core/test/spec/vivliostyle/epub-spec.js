@@ -644,7 +644,7 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
-        var sourcePage = { id: "source" };
+        var sourcePage = { id: "source", fetchers: [] };
         view.opf = { spine: [{}, {}, {}] };
         view.spineItems = [{ pages: [sourcePage] }];
         view.counterStore = {
@@ -689,7 +689,7 @@ describe("epub", function () {
         };
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
-        var sourcePage = { id: "source" };
+        var sourcePage = { id: "source", fetchers: [] };
         view.renderingPageTasks = new Map();
         view.renderingAllPages = false;
         view.relayoutingFollowingSpines = false;
