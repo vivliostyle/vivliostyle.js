@@ -107,6 +107,30 @@ describe("cross-reference layout constraint", function () {
     expect(store.resolvedReferences.target[0].pageIndex).toBe(0);
   });
 
+  it("drops references owned by a truncated source page", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const retained = new Counters.TargetCounterReference("target", false);
+    const discarded = new Counters.TargetCounterReference("target", false);
+
+    const page0Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page0Container, page0Container));
+    store.newReferencesOfCurrentPage = [retained];
+    store.finishPage(0, 0);
+
+    const page1Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page1Container, page1Container));
+    store.newReferencesOfCurrentPage = [discarded];
+    store.finishPage(0, 1);
+    store.referencesToSolve = [retained, discarded];
+    store.referencesToSolveStack = [[retained, discarded]];
+
+    store.discardReferencesFromPage(0, 1);
+
+    expect(store.unresolvedReferences.target).toEqual([retained]);
+    expect(store.referencesToSolve).toEqual([retained]);
+    expect(store.referencesToSolveStack).toEqual([[retained]]);
+  });
+
   it("re-resolves references when a target moves to an earlier page", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const reference = new Counters.TargetCounterReference("target", true);
@@ -150,7 +174,19 @@ describe("cross-reference layout constraint", function () {
     );
     staleFollowingPageRef.spineIndex = 0;
     staleFollowingPageRef.pageIndex = 1;
-    store.unresolvedReferences.target = [earlierPageRef, staleFollowingPageRef];
+    const initialPage0Container = document.createElement("div");
+    store.setCurrentPage(
+      new Vtree.Page(initialPage0Container, initialPage0Container),
+    );
+    store.newReferencesOfCurrentPage = [earlierPageRef];
+    store.finishPage(0, 0);
+
+    const initialPage1Container = document.createElement("div");
+    store.setCurrentPage(
+      new Vtree.Page(initialPage1Container, initialPage1Container),
+    );
+    store.newReferencesOfCurrentPage = [staleFollowingPageRef];
+    store.finishPage(0, 1);
     store.referencesToSolve = [earlierPageRef];
 
     const page0Container = document.createElement("div");

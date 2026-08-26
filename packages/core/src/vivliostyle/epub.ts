@@ -2648,6 +2648,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // final page in the requested slot.
         const finalLength = pageIndexToRender + 1;
         const pageCountChanged = viewItem.pages.length > finalLength;
+        for (
+          let stalePageIndex = finalLength;
+          stalePageIndex < viewItem.pages.length;
+          stalePageIndex++
+        ) {
+          this.counterStore.discardReferencesFromPage(
+            viewItem.item.spineIndex,
+            stalePageIndex,
+          );
+        }
         viewItem.pages
           .slice(finalLength)
           .forEach((stalePage) => stalePage.container.remove());

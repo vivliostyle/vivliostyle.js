@@ -338,11 +338,26 @@ export class AllLayoutConstraint implements LayoutConstraint {
   }
 
   allowLayoutAfterPageBreak(nodeContext: Vtree.NodeContext): boolean {
-    return this.constraints.every(
-      (c) =>
-        c.allowLayoutAfterPageBreak?.(nodeContext) ??
-        c.allowLayout(nodeContext),
-    );
+    // Hooks may update retained layout state (the counter constraint does).
+    // Reject on ordinary constraints first so a later failure cannot leave a
+    // one-shot page-break allowance consumed by an otherwise rejected node.
+    for (const constraint of this.constraints) {
+      if (
+        !constraint.allowLayoutAfterPageBreak &&
+        !constraint.allowLayout(nodeContext)
+      ) {
+        return false;
+      }
+    }
+    for (const constraint of this.constraints) {
+      if (
+        constraint.allowLayoutAfterPageBreak &&
+        !constraint.allowLayoutAfterPageBreak(nodeContext)
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

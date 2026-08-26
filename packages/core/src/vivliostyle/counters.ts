@@ -944,6 +944,10 @@ export class CounterStore {
     Object.create(null);
   resolvedReferences: { [key: string]: TargetCounterReference[] } =
     Object.create(null);
+  private referenceTargetIdsBySourcePage = new Map<
+    number,
+    Map<number, Set<string>>
+  >();
   private targetsMovedEarlierAfterPageBreak = new Set<string>();
   pageControlledCounterNames: { [key: string]: boolean } = Object.assign(
     Object.create(null),
@@ -1377,6 +1381,17 @@ export class CounterStore {
       if (arr.every((r) => !ref.equals(r))) {
         arr.push(ref);
       }
+      let targetIdsByPage = this.referenceTargetIdsBySourcePage.get(spineIndex);
+      if (!targetIdsByPage) {
+        targetIdsByPage = new Map();
+        this.referenceTargetIdsBySourcePage.set(spineIndex, targetIdsByPage);
+      }
+      let targetIds = targetIdsByPage.get(pageIndex);
+      if (!targetIds) {
+        targetIds = new Set();
+        targetIdsByPage.set(pageIndex, targetIds);
+      }
+      targetIds.add(ref.targetId);
     }
     if (this.hasDeferredNamedStrings && this.currentPage) {
       this.recordNamedStringPageSnapshot(spineIndex);
@@ -1384,14 +1399,12 @@ export class CounterStore {
     this.currentPage = null;
   }
 
-  private discardReferencesFromPage(
-    spineIndex: number,
-    pageIndex: number,
-  ): void {
-    const targetIds = new Set([
-      ...Object.keys(this.resolvedReferences),
-      ...Object.keys(this.unresolvedReferences),
-    ]);
+  discardReferencesFromPage(spineIndex: number, pageIndex: number): void {
+    const targetIdsByPage = this.referenceTargetIdsBySourcePage.get(spineIndex);
+    const targetIds = targetIdsByPage?.get(pageIndex);
+    if (!targetIds) {
+      return;
+    }
     for (const id of targetIds) {
       const keepOtherPage = (ref: TargetCounterReference) =>
         ref.spineIndex !== spineIndex || ref.pageIndex !== pageIndex;
@@ -1411,6 +1424,16 @@ export class CounterStore {
       } else {
         delete this.unresolvedReferences[id];
       }
+    }
+    const keepOtherPage = (ref: TargetCounterReference) =>
+      ref.spineIndex !== spineIndex || ref.pageIndex !== pageIndex;
+    this.referencesToSolve = this.referencesToSolve.filter(keepOtherPage);
+    this.referencesToSolveStack = this.referencesToSolveStack.map((refs) =>
+      refs.filter(keepOtherPage),
+    );
+    targetIdsByPage.delete(pageIndex);
+    if (targetIdsByPage.size === 0) {
+      this.referenceTargetIdsBySourcePage.delete(spineIndex);
     }
   }
 
@@ -1557,6 +1580,12 @@ export class CounterStore {
       const snapshot = this.namedStringPageSnapshots[parseInt(key, 10)];
       if (snapshot.spineIndex >= firstSpineIndex) {
         delete this.namedStringPageSnapshots[parseInt(key, 10)];
+      }
+    }
+
+    for (const spineIndex of this.referenceTargetIdsBySourcePage.keys()) {
+      if (spineIndex >= firstSpineIndex) {
+        this.referenceTargetIdsBySourcePage.delete(spineIndex);
       }
     }
 
