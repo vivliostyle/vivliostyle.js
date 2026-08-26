@@ -525,6 +525,7 @@ describe("epub", function () {
         };
         view.spineItems = [viewItem];
         view.spineItemLoadingContinuations = [null];
+        view.deferredPageReplacements = new Map();
         view.counterStore = {
           finishPage: function () {},
           discardReferencesFromPage: jasmine.createSpy(),
@@ -641,6 +642,7 @@ describe("epub", function () {
       view.spineItems = [sourceItem, oldViewItem];
       view.spineItemLoadingContinuations = [[], []];
       view.deferredPageReplacements = new Map();
+      view.deferredReferencePages = [];
       view.counterStore = {
         discardReferencesFromSpine: function () {},
       };
