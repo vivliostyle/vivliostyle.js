@@ -2478,7 +2478,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     // Keep the page until the outermost scope is restored, then drain all
     // deferred pages in order.
     this.deferReferencesForPage(viewItem, page, pageIndex, nextLayoutPosition);
-    const deferredReferencePages = (this.deferredReferencePages ??= []);
+    const deferredReferencePages = this.deferredReferencePages;
 
     if (
       this.isInCounterResolveScope() ||
@@ -2545,7 +2545,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     if (!this.hasUnresolvedReferencesToPage(latestPage)) {
       return;
     }
-    const deferredReferencePages = (this.deferredReferencePages ??= []);
+    const deferredReferencePages = this.deferredReferencePages;
     const queued = deferredReferencePages.find(
       (entry) => entry.viewItem === viewItem && entry.pageIndex === pageIndex,
     );
@@ -2577,7 +2577,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     spineIndex: number,
     page: Vtree.Page,
   ): void {
-    const replacements = (this.deferredPageReplacements ??= new Map());
+    const replacements = this.deferredPageReplacements;
     let pages = replacements.get(spineIndex);
     if (!pages) {
       pages = [];
@@ -2590,7 +2590,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     spineIndex: number,
     newPage: Vtree.Page,
   ): Vtree.Page | null {
-    const pages = this.deferredPageReplacements?.get(spineIndex);
+    const pages = this.deferredPageReplacements.get(spineIndex);
     if (!pages) {
       return null;
     }
@@ -2624,7 +2624,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
   private flushDeferredPageReplacements(viewItem: OPFViewItem): void {
     const spineIndex = viewItem.item.spineIndex;
-    const oldPages = this.deferredPageReplacements?.get(spineIndex);
+    const oldPages = this.deferredPageReplacements.get(spineIndex);
     if (!oldPages) {
       return;
     }
@@ -2670,7 +2670,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       return null;
     }
     this.deferredFollowingSpineRelayoutStart = null;
-    this.deferredReferencePages = (this.deferredReferencePages || []).filter(
+    this.deferredReferencePages = this.deferredReferencePages.filter(
       (entry) => entry.viewItem.item.spineIndex < firstSpine,
     );
     this.counterStore.discardReferencesFromSpine(firstSpine);
