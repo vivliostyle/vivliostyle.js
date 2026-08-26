@@ -1732,7 +1732,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
       viewItem.item.spineIndex,
       page,
     );
-    const replacedPage = oldPage || deferredOldPage;
     page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
     viewItem.pages[pageIndex] = page;
 
@@ -1780,8 +1779,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
         insertPos,
       );
     }
-    if (replacedPage) {
-      this.dispatchPageReplacement(replacedPage, page);
+    if (oldPage) {
+      this.dispatchPageReplacement(oldPage, page);
+    }
+    if (deferredOldPage && deferredOldPage !== oldPage) {
+      this.dispatchPageReplacement(deferredOldPage, page);
     }
     this.pageSheetSizeReporter(
       {
@@ -2651,10 +2653,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.deferredPageReplacements.delete(spineIndex);
   }
 
-  private updateRetainedTargetCounters(firstSpineIndex: number): void {
+  private updateRetainedTargetCounters(): void {
     const pages: Vtree.Page[] = [];
-    for (let spineIndex = 0; spineIndex < firstSpineIndex; spineIndex++) {
-      const viewItem = this.spineItems[spineIndex];
+    for (const viewItem of this.spineItems) {
       if (viewItem) {
         pages.push(...viewItem.pages);
       }
@@ -2867,6 +2868,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const frame: Task.Frame<PageAndPosition | null> = Task.newFrame("findPage");
 
     this.waitForPreviousSpines(position.spineIndex, sync).then(() => {
+      const firstInvalidSpine = this.deferredFollowingSpineRelayoutStart;
+      if (
+        firstInvalidSpine != null &&
+        firstInvalidSpine <= position.spineIndex
+      ) {
+        // A cached page in the invalid suffix must not bypass the deferred
+        // rebuild. renderPage() consumes the marker before returning it.
+        this.renderPage(position).then((result) => frame.finish(result));
+        return;
+      }
       this.getPageViewItem(position.spineIndex).then((viewItem) => {
         if (!viewItem) {
           frame.finish(null);
@@ -2975,7 +2986,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             this.relayoutingFollowingSpines = true;
             this.renderPagesUpto(rerenderPosition, false).then(
               (rerenderedResult) => {
-                this.updateRetainedTargetCounters(firstSpine);
+                this.updateRetainedTargetCounters();
                 const finishRerender = (
                   requestedResult: PageAndPosition | null,
                 ): void => {
@@ -3158,7 +3169,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       this.relayoutDeferredFollowingSpines();
       this.relayoutingFollowingSpines = true;
       this.renderPagesUpto(finalPosition, false).then((rerenderedResult) => {
-        this.updateRetainedTargetCounters(firstSpine);
+        this.updateRetainedTargetCounters();
         this.relayoutingFollowingSpines = false;
         result = rerenderedResult;
         finishAfterImages();
