@@ -544,6 +544,7 @@ describe("epub", function () {
         var cachedPage = {};
         var rebuiltPage = {};
         view.deferredFollowingSpineRelayoutStart = 1;
+        view.renderingPageTasks = new Map();
         spyOn(view, "waitForPreviousSpines").and.returnValue(
           adapt_task.newResult(true),
         );
