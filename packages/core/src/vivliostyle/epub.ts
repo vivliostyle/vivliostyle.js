@@ -1620,7 +1620,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   private deferredReferencePages: DeferredReferencePage[] = [];
   private resolvingDeferredReferences: boolean = false;
   private deferredFollowingSpineRelayoutStart: number | null = null;
-  private deferredPageReplacements = new Map<number, Map<number, Vtree.Page>>();
+  private deferredPageReplacements = new Map<number, Vtree.Page[]>();
   private relayoutingFollowingSpines: boolean = false;
   private renderingAllPages: boolean = false;
   private paginationProgress = {
@@ -1730,7 +1730,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const oldPage = viewItem.pages[pageIndex];
     const deferredOldPage = this.takeDeferredPageReplacement(
       viewItem.item.spineIndex,
-      pageIndex,
+      page,
     );
     const replacedPage = oldPage || deferredOldPage;
     page.isFirstPage = viewItem.item.spineIndex == 0 && pageIndex == 0;
@@ -1781,13 +1781,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       );
     }
     if (replacedPage) {
-      replacedPage.dispatchEvent({
-        type: "replaced",
-        target: null,
-        currentTarget: null,
-        preventDefault: null,
-        newPage: page,
-      });
+      this.dispatchPageReplacement(replacedPage, page);
     }
     this.pageSheetSizeReporter(
       {
@@ -1822,6 +1816,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       viewItem.layoutPositions.length === viewItem.pages.length;
     if (viewItem.complete) {
       viewItem.instance.viewport.layoutBox.removeAttribute("style");
+      this.flushDeferredPageReplacements(viewItem);
     }
   }
 
@@ -2578,32 +2573,82 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
   private rememberDeferredPageReplacement(
     spineIndex: number,
-    pageIndex: number,
     page: Vtree.Page,
   ): void {
     const replacements = (this.deferredPageReplacements ??= new Map());
-    let replacementsByPage = replacements.get(spineIndex);
-    if (!replacementsByPage) {
-      replacementsByPage = new Map();
-      replacements.set(spineIndex, replacementsByPage);
+    let pages = replacements.get(spineIndex);
+    if (!pages) {
+      pages = [];
+      replacements.set(spineIndex, pages);
     }
-    replacementsByPage.set(pageIndex, page);
+    pages.push(page);
   }
 
   private takeDeferredPageReplacement(
     spineIndex: number,
-    pageIndex: number,
+    newPage: Vtree.Page,
   ): Vtree.Page | null {
-    const replacementsByPage = this.deferredPageReplacements?.get(spineIndex);
-    const page = replacementsByPage?.get(pageIndex) || null;
-    if (!page) {
+    const pages = this.deferredPageReplacements?.get(spineIndex);
+    if (!pages) {
       return null;
     }
-    replacementsByPage.delete(pageIndex);
-    if (replacementsByPage.size === 0) {
+    const pageIndex = pages.findIndex(
+      (page) =>
+        page.offset === newPage.offset &&
+        !!page.isBlankPage === !!newPage.isBlankPage,
+    );
+    if (pageIndex < 0) {
+      return null;
+    }
+    const [page] = pages.splice(pageIndex, 1);
+    if (pages.length === 0) {
       this.deferredPageReplacements.delete(spineIndex);
     }
     return page;
+  }
+
+  private dispatchPageReplacement(
+    oldPage: Vtree.Page,
+    newPage: Vtree.Page,
+  ): void {
+    oldPage.dispatchEvent({
+      type: "replaced",
+      target: null,
+      currentTarget: null,
+      preventDefault: null,
+      newPage,
+    });
+  }
+
+  private flushDeferredPageReplacements(viewItem: OPFViewItem): void {
+    const spineIndex = viewItem.item.spineIndex;
+    const oldPages = this.deferredPageReplacements?.get(spineIndex);
+    if (!oldPages) {
+      return;
+    }
+    const newPages = viewItem.pages;
+    for (const oldPage of oldPages) {
+      const sameKindPages = newPages.filter(
+        (page) => !!page.isBlankPage === !!oldPage.isBlankPage,
+      );
+      const candidates = sameKindPages.length ? sameKindPages : newPages;
+      const replacement = candidates.reduce<Vtree.Page | null>(
+        (closest, page) => {
+          if (!closest) {
+            return page;
+          }
+          return Math.abs(page.offset - oldPage.offset) <
+            Math.abs(closest.offset - oldPage.offset)
+            ? page
+            : closest;
+        },
+        null,
+      );
+      if (replacement) {
+        this.dispatchPageReplacement(oldPage, replacement);
+      }
+    }
+    this.deferredPageReplacements.delete(spineIndex);
   }
 
   private updateRetainedTargetCounters(firstSpineIndex: number): void {
@@ -2615,6 +2660,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       }
     }
     this.counterStore.updateTargetCounterNodesInPages(pages);
+    this.counterStore.updateTargetTextNodesInPages(pages);
   }
 
   private relayoutDeferredFollowingSpines(): void {
@@ -2636,12 +2682,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
       if (!viewItem) {
         continue;
       }
-      viewItem.pages.forEach((renderedPage, pageIndex) => {
-        this.rememberDeferredPageReplacement(
-          spineIndex,
-          pageIndex,
-          renderedPage,
-        );
+      viewItem.pages.forEach((renderedPage) => {
+        this.rememberDeferredPageReplacement(spineIndex, renderedPage);
         renderedPage.container.remove();
       });
       this.spineItems[spineIndex] = null;

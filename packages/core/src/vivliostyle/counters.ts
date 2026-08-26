@@ -1624,6 +1624,26 @@ export class CounterStore {
   }
 
   /**
+   * Update target-text() nodes retained outside a rebuilt spine suffix.
+   */
+  updateTargetTextNodesInPages(pages: Vtree.Page[]): void {
+    for (const page of pages) {
+      if (!page || !page.container) continue;
+      const nodes = page.container.querySelectorAll(`[${TARGET_TEXT_ATTR}]`);
+      for (const node of nodes) {
+        const key = node.getAttribute(TARGET_TEXT_ATTR);
+        const expr = this.targetTextExprs.find((o) => o.expr.key === key);
+        if (expr && expr.transformedId) {
+          const text = this.pageTextById[expr.transformedId];
+          if (text) {
+            node.textContent = text[expr.pseudoElement] ?? "";
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Resolve page-level counter values for a page.
    *
    * Prefer an explicit per-page snapshot when one is supplied. Otherwise fall
