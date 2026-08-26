@@ -207,7 +207,7 @@ describe("cross-reference layout constraint", function () {
     expect(store.resolvedReferences.target[0].pageIndex).toBe(0);
   });
 
-  it("drops only references whose source spine will be rebuilt", function () {
+  it("invalidates references and target snapshots in a rebuilt suffix", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const earlierResolved = new Counters.TargetCounterReference("target", true);
     earlierResolved.spineIndex = 0;
@@ -227,7 +227,10 @@ describe("cross-reference layout constraint", function () {
     );
     discardedUnresolved.spineIndex = 3;
     const targetCounters = { page: [9] };
+    const targetDocCounters = { chapter: [2] };
     const targetText = { content: "target" };
+    const retainedCounters = { page: [4] };
+    const retainedText = { content: "retained" };
 
     store.resolvedReferences.target = [earlierResolved, discardedResolved];
     store.unresolvedReferences.target = [
@@ -236,7 +239,11 @@ describe("cross-reference layout constraint", function () {
     ];
     store.pageIndicesById.target = { spineIndex: 2, pageIndex: 0 };
     store.pageCountersById.target = targetCounters;
+    store.pageDocCountersById.target = targetDocCounters;
     store.pageTextById.target = targetText;
+    store.pageIndicesById.retained = { spineIndex: 1, pageIndex: 0 };
+    store.pageCountersById.retained = retainedCounters;
+    store.pageTextById.retained = retainedText;
     store.namedStringPageSnapshots[10] = {
       lastOffset: 19,
       spineIndex: 1,
@@ -256,8 +263,11 @@ describe("cross-reference layout constraint", function () {
       spineIndex: 2,
       pageIndex: 0,
     });
-    expect(store.pageCountersById.target).toBe(targetCounters);
-    expect(store.pageTextById.target).toBe(targetText);
+    expect(store.pageCountersById.target).toBeUndefined();
+    expect(store.pageDocCountersById.target).toBeUndefined();
+    expect(store.pageTextById.target).toBeUndefined();
+    expect(store.pageCountersById.retained).toBe(retainedCounters);
+    expect(store.pageTextById.retained).toBe(retainedText);
     expect(store.namedStringPageSnapshots[10]).toBeDefined();
     expect(store.namedStringPageSnapshots[20]).toBeUndefined();
   });

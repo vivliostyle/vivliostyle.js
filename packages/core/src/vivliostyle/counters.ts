@@ -1545,10 +1545,9 @@ export class CounterStore {
 
   /**
    * Drop references whose source page belongs to spine items that are about to
-   * be rebuilt. Target snapshots are deliberately retained until the rebuilt
-   * pages overwrite them: invalidating a still-resolved target here would
-   * unnecessarily rerender earlier source pages and can restart the
-   * page-break oscillation that triggered the suffix rebuild.
+   * be rebuilt, and invalidate target snapshots owned by that suffix. Retain
+   * pageIndicesById so unresolved forward references can still locate and
+   * render their targets while the suffix is reconstructed.
    */
   discardReferencesFromSpine(firstSpineIndex: number): void {
     const targetIds = new Set([
@@ -1573,6 +1572,14 @@ export class CounterStore {
         this.unresolvedReferences[id] = unresolved;
       } else {
         delete this.unresolvedReferences[id];
+      }
+    }
+
+    for (const id of Object.keys(this.pageIndicesById)) {
+      if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
+        delete this.pageCountersById[id];
+        delete this.pageDocCountersById[id];
+        delete this.pageTextById[id];
       }
     }
 

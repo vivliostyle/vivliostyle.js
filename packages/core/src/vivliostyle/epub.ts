@@ -2614,7 +2614,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
       pages = [];
       replacements.set(spineIndex, pages);
     }
-    pages.push(page);
+    if (!pages.includes(page)) {
+      pages.push(page);
+    }
   }
 
   private takeDeferredPageReplacement(
@@ -2794,9 +2796,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
             stalePageIndex,
           );
         }
-        viewItem.pages
-          .slice(finalLength)
-          .forEach((stalePage) => stalePage.container.remove());
+        viewItem.pages.slice(finalLength).forEach((stalePage) => {
+          this.rememberDeferredPageReplacement(
+            viewItem.item.spineIndex,
+            stalePage,
+          );
+          stalePage.container.remove();
+        });
         viewItem.pages.splice(finalLength);
         viewItem.layoutPositions.splice(finalLength);
         viewItem.pageCounterStarts.splice(finalLength);

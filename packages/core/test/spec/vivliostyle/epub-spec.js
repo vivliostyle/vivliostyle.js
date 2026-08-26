@@ -501,12 +501,18 @@ describe("epub", function () {
     it("reuses the requested slot when a final-page rerender shrinks the spine", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
-        var page = { spineIndex: 0, offset: 0, fetchers: [] };
+        var page = { spineIndex: 0, offset: 15, fetchers: [] };
+        var stalePageReplaced = jasmine.createSpy("stalePageReplaced");
         var viewItem = {
           item: { spineIndex: 0 },
           layoutPositions: new Array(17).fill(null),
-          pages: Array.from({ length: 17 }, function () {
-            return { container: { remove: function () {} } };
+          pages: Array.from({ length: 17 }, function (_, pageIndex) {
+            return {
+              offset: pageIndex,
+              container: { remove: function () {} },
+              dispatchEvent:
+                pageIndex === 16 ? stalePageReplaced : function () {},
+            };
           }),
           pageCounterStarts: new Array(17).fill(null),
           instance: {
@@ -570,6 +576,10 @@ describe("epub", function () {
           expect(view.deferredReferencePages).toEqual([
             { viewItem: viewItem, pageIndex: 15 },
           ]);
+          expect(stalePageReplaced).toHaveBeenCalled();
+          expect(stalePageReplaced.calls.mostRecent().args[0].newPage).toBe(
+            page,
+          );
           expect(viewItem.complete).toBe(true);
           done();
         });
