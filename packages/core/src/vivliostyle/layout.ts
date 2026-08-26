@@ -3784,7 +3784,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let leadingEdgeContexts: Vtree.RenderedNodeContext[] = [];
     let trailingEdgeContexts: Vtree.NodeContext[] = [];
     let onStartEdges = false;
-    let hasSatisfiedLeadingPageBreak = false;
 
     // Issue #1842: if a stronger page/spread break wins at the page's first
     // column, drop weaker ancestor column breaks so they do not fire again
@@ -3848,23 +3847,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       breakAtTheEdge = null;
     }
 
-    // A page-level break at the start of the page's first column has already
-    // been satisfied by entering this page. Consume the accumulated edge
-    // value, but keep the break on the node context so continuation positions
-    // still point at the forced-break target.
-    function consumeSatisfiedLeadingPageBreak(): void {
-      if (
-        !leadingEdge ||
-        column.isNonFirstColumn ||
-        forcedBreakValue ||
-        !Break.isPageLevelForcedBreak(breakAtTheEdge)
-      ) {
-        return;
-      }
-      hasSatisfiedLeadingPageBreak = true;
-      breakAtTheEdge = null;
-    }
-
     function suppressWeakerTrailingColumnBreaks(
       currentNodeContext: Vtree.NodeContext,
     ): void {
@@ -3896,13 +3878,28 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
 
     function allowLayout(nodeContext: Vtree.NodeContext): boolean {
-      if (!hasSatisfiedLeadingPageBreak) {
-        return column.layoutConstraint.allowLayout(nodeContext);
+      if (column.layoutConstraint.allowLayout(nodeContext)) {
+        return true;
       }
-      return (
+      if (
+        !leadingEdge ||
+        column.isNonFirstColumn ||
+        forcedBreakValue ||
+        !Break.isPageLevelForcedBreak(breakAtTheEdge)
+      ) {
+        return false;
+      }
+      const allowedAfterPageBreak =
         column.layoutConstraint.allowLayoutAfterPageBreak?.(nodeContext) ??
-        column.layoutConstraint.allowLayout(nodeContext)
-      );
+        false;
+      if (allowedAfterPageBreak) {
+        // The page-level break has already been satisfied by entering this
+        // page. Consume it only when it is what allows this exact node to move
+        // earlier; keeping a broader flag here changes later, unrelated break
+        // combinations on the same leading edge.
+        breakAtTheEdge = null;
+      }
+      return allowedAfterPageBreak;
     }
 
     function needForcedBreak(): boolean {
@@ -4049,7 +4046,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 setBreakAtTheEdge(nodeContext.breakBefore);
                 suppressWeakerLeadingColumnBreaks(nodeContext);
                 consumeSatisfiedLeadingColumnBreak(nodeContext);
-                consumeSatisfiedLeadingPageBreak();
                 // Leading edge of non-empty block -> finished going through
                 // all starting edges of the box
                 if (needForcedBreak()) {
@@ -4175,7 +4171,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 setBreakAtTheEdge(nodeContext.breakBefore);
                 suppressWeakerLeadingColumnBreaks(nodeContext);
                 consumeSatisfiedLeadingColumnBreak(nodeContext);
-                consumeSatisfiedLeadingPageBreak();
 
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
@@ -4318,7 +4313,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               setBreakAtTheEdge(nodeContext.breakBefore);
               suppressWeakerLeadingColumnBreaks(nodeContext);
               consumeSatisfiedLeadingColumnBreak(nodeContext);
-              consumeSatisfiedLeadingPageBreak();
 
               // Prevent unnecessary blank pages by removing unnecessary forced column breaks
               if (

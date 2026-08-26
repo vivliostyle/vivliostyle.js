@@ -16,7 +16,8 @@
       }
       .trigger {
         font: 10px/20px monospace;
-        inline-size: 10ch;
+        /* Leave room for subpixel rounding at the generated-text boundary. */
+        inline-size: 10.1ch;
         margin: 0;
         word-break: break-all;
       }
@@ -40,7 +41,7 @@
       on page 1. The forced break must then put the target on page 2 without
       retaining the now-stale page 3 position.
     -->
-    <p class="trigger">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<a href="#target"></a></p>
+    <p class="trigger">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<a href="#target"></a></p>
     <section>
       <h2 id="target">This heading should be on page 2.</h2>
       <p>There must not be a blank page before this heading.</p>
