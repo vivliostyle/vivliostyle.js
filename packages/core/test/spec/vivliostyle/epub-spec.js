@@ -469,6 +469,35 @@ describe("epub", function () {
       });
     });
 
+    it("processes a pending suffix rebuild before returning a cached page", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = { spineIndex: 1, pageIndex: 0, offsetInItem: -1 };
+        var cachedPage = {};
+        var rebuiltPage = {};
+        view.deferredFollowingSpineRelayoutStart = 1;
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "getPageViewItem").and.returnValue(
+          adapt_task.newResult({ pages: [cachedPage], complete: true }),
+        );
+        spyOn(view, "renderPage").and.returnValue(
+          adapt_task.newResult({
+            page: rebuiltPage,
+            position: position,
+          }),
+        );
+
+        view.findPage(position, false).then(function (result) {
+          expect(view.renderPage).toHaveBeenCalledOnceWith(position);
+          expect(result.page).toBe(rebuiltPage);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("reuses the requested slot when a final-page rerender shrinks the spine", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
@@ -654,6 +683,61 @@ describe("epub", function () {
       expect(view.deferredPageReplacements.size).toBe(0);
     });
 
+    it("notifies both intermediate and original pages after recursive replacement", function () {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      var contentContainer = document.createElement("div");
+      var originalContainer = document.createElement("div");
+      var intermediateContainer = document.createElement("div");
+      contentContainer.appendChild(intermediateContainer);
+      var originalPage = new adapt_vtree.Page(
+        originalContainer,
+        originalContainer,
+      );
+      originalPage.offset = 10;
+      var intermediatePage = new adapt_vtree.Page(
+        intermediateContainer,
+        intermediateContainer,
+      );
+      intermediatePage.offset = 20;
+      var newContainer = document.createElement("div");
+      var newPage = new adapt_vtree.Page(newContainer, newContainer);
+      newPage.offset = 10;
+      newPage.side = "right";
+      var viewItem = {
+        item: { spineIndex: 1 },
+        pages: [intermediatePage],
+        instance: {
+          viewport: { contentContainer: contentContainer },
+          pageSheetWidth: 0,
+          pageSheetHeight: 0,
+          pageSheetSize: {},
+          pageNumberOffset: 0,
+        },
+      };
+      view.opf = { epageIsRenderedPage: false };
+      view.spineItems = [null, viewItem];
+      view.pageSheetSizeReporter = function () {};
+      view.deferredPageReplacements = new Map([[1, [originalPage]]]);
+      var originalListener = jasmine.createSpy("originalListener");
+      var intermediateListener = jasmine.createSpy("intermediateListener");
+      originalPage.addEventListener("replaced", originalListener, false);
+      intermediatePage.addEventListener(
+        "replaced",
+        intermediateListener,
+        false,
+      );
+
+      view.finishPageContainer(viewItem, newPage, 0);
+
+      expect(originalListener).toHaveBeenCalled();
+      expect(intermediateListener).toHaveBeenCalled();
+      expect(originalListener.calls.mostRecent().args[0].newPage).toBe(newPage);
+      expect(intermediateListener.calls.mostRecent().args[0].newPage).toBe(
+        newPage,
+      );
+      expect(view.deferredPageReplacements.size).toBe(0);
+    });
+
     it("keeps the earliest following spine queued for relayout", function () {
       var view = Object.create(adapt_epub.OPFView.prototype);
       view.spineItems = [];
@@ -663,6 +747,29 @@ describe("epub", function () {
       view.deferFollowingSpinesForRelayout(1);
 
       expect(view.deferredFollowingSpineRelayoutStart).toBe(2);
+    });
+
+    it("refreshes target references in rebuilt suffix pages", function () {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      var prefixPage = { id: "prefix" };
+      var rebuiltPage = { id: "rebuilt" };
+      view.spineItems = [
+        { pages: [prefixPage] },
+        { pages: [rebuiltPage] },
+      ];
+      view.counterStore = {
+        updateTargetCounterNodesInPages: jasmine.createSpy(),
+        updateTargetTextNodesInPages: jasmine.createSpy(),
+      };
+
+      view.updateRetainedTargetCounters(1);
+
+      expect(
+        view.counterStore.updateTargetCounterNodesInPages,
+      ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
+      expect(
+        view.counterStore.updateTargetTextNodesInPages,
+      ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
     });
 
     it("rerenders a deferred suffix once after full pagination", function (done) {
