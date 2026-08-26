@@ -480,6 +480,9 @@ describe("epub", function () {
           }),
           pageCounterStarts: new Array(17).fill(null),
           instance: {
+            viewport: {
+              layoutBox: { removeAttribute: function () {} },
+            },
             getPageNumberContextDepth: function () {
               return 0;
             },
@@ -521,6 +524,7 @@ describe("epub", function () {
           expect(viewItem.pages.length).toBe(16);
           expect(viewItem.layoutPositions.length).toBe(16);
           expect(viewItem.pageCounterStarts.length).toBe(16);
+          expect(viewItem.complete).toBe(true);
           done();
         });
         return adapt_task.newResult(true);
