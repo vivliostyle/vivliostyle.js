@@ -2767,13 +2767,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
       const pageIndex = pos ? pos.page - 1 : pageIndexToRender;
       this.finishPageContainer(viewItem, page, pageIndex);
       this.counterStore.finishPage(page.spineIndex, pageIndex);
-      if (!pos) {
-        // A final page can be produced by a nested relayout while resolving a
-        // target reference. Mark the spine complete here as well as in the
-        // outer render loop, otherwise that loop requests the final page again.
-        this.markSpineItemCompleteIfReady(viewItem);
-      }
-
       const collectResult = Plugin.getHooksForName(
         Plugin.HOOKS.PAGINATION_PROGRESS,
       ).length
@@ -2794,6 +2787,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
             ),
           )
           .then((resolvedPage) => {
+            if (!pos) {
+              // A final page can be produced by a nested relayout while
+              // resolving a target reference. Mark the spine complete only
+              // after that asynchronous work settles, otherwise navigation
+              // can start the next spine against counter state still in use.
+              this.markSpineItemCompleteIfReady(viewItem);
+            }
             restorePageNumberContext();
             frame.finish({
               pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
