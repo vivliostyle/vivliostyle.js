@@ -38,6 +38,32 @@ function createNodeContext(id) {
 }
 
 describe("cross-reference layout constraint", function () {
+  it("refreshes retained target-text first-letter nodes", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const container = document.createElement("div");
+    const node = document.createElement("span");
+    node.setAttribute(Counters.TARGET_TEXT_ATTR, "first-letter-key");
+    container.appendChild(node);
+    const page = new Vtree.Page(container, container);
+    store.targetTextExprs = [
+      {
+        expr: { key: "first-letter-key" },
+        transformedId: "target",
+        pseudoElement: "first-letter",
+      },
+    ];
+    store.pageTextById.target = {
+      before: "",
+      content: "Alpha",
+      after: "",
+      marker: "",
+    };
+
+    store.updateTargetTextNodesInPages([page]);
+
+    expect(node.textContent).toBe("A");
+  });
+
   it("allows a target to move earlier after a satisfied page break", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const reference = new Counters.TargetCounterReference("target", true);

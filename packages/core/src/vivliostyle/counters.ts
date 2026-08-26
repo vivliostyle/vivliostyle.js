@@ -1650,7 +1650,14 @@ export class CounterStore {
         if (expr && expr.transformedId) {
           const text = this.pageTextById[expr.transformedId];
           if (text) {
-            node.textContent = text[expr.pseudoElement] ?? "";
+            if (expr.pseudoElement === "first-letter") {
+              const fullText =
+                (text.before ?? "") + (text.content ?? "") + (text.after ?? "");
+              node.textContent =
+                fullText.match(Base.firstLetterPattern)?.[0] ?? "";
+            } else {
+              node.textContent = text[expr.pseudoElement] ?? "";
+            }
           }
         }
       }
