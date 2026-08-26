@@ -495,7 +495,10 @@ describe("epub", function () {
         };
         view.spineItems = [viewItem];
         view.spineItemLoadingContinuations = [null];
-        view.counterStore = { finishPage: function () {} };
+        view.counterStore = {
+          finishPage: function () {},
+          discardReferencesFromPage: jasmine.createSpy(),
+        };
         view.isInCounterResolveScope = function () {
           return false;
         };
@@ -524,6 +527,9 @@ describe("epub", function () {
           expect(viewItem.pages.length).toBe(16);
           expect(viewItem.layoutPositions.length).toBe(16);
           expect(viewItem.pageCounterStarts.length).toBe(16);
+          expect(
+            view.counterStore.discardReferencesFromPage,
+          ).toHaveBeenCalledOnceWith(0, 16);
           expect(viewItem.complete).toBe(true);
           done();
         });

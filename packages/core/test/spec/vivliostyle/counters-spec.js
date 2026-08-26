@@ -56,15 +56,12 @@ describe("cross-reference layout constraint", function () {
   });
 
   it("keeps non-counter constraints after a satisfied page break", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const reference = new Counters.TargetCounterReference("target", true);
+    store.pageIndicesById.target = { spineIndex: 0, pageIndex: 2 };
+    store.resolvedReferences.target = [reference];
     const nodeContext = createNodeContext("target");
-    const counterConstraint = {
-      allowLayout() {
-        return false;
-      },
-      allowLayoutAfterPageBreak() {
-        return true;
-      },
-    };
+    const counterConstraint = store.createLayoutConstraint(1);
     const rejectingConstraint = {
       allowLayout() {
         return false;
@@ -76,6 +73,38 @@ describe("cross-reference layout constraint", function () {
     ]);
 
     expect(constraint.allowLayoutAfterPageBreak(nodeContext)).toBe(false);
+    expect(store.pageIndicesById.target).toEqual({
+      spineIndex: 0,
+      pageIndex: 2,
+    });
+    expect(reference.isResolved()).toBe(true);
+    expect(store.unresolvedReferences.target).toBeUndefined();
+  });
+
+  it("does not scan unrelated reference buckets when finishing a page", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const page0Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page0Container, page0Container));
+    store.saveReferenceOfCurrentPage("target", true);
+    store.finishPage(0, 0);
+
+    const ownKeys = jasmine
+      .createSpy("ownKeys")
+      .and.callFake((target) => Reflect.ownKeys(target));
+    store.resolvedReferences = new Proxy(store.resolvedReferences, {
+      ownKeys,
+    });
+    store.unresolvedReferences = new Proxy(store.unresolvedReferences, {
+      ownKeys,
+    });
+
+    const page1Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page1Container, page1Container));
+    store.finishPage(0, 1);
+
+    expect(ownKeys).not.toHaveBeenCalled();
+    expect(store.resolvedReferences.target.length).toBe(1);
+    expect(store.resolvedReferences.target[0].pageIndex).toBe(0);
   });
 
   it("re-resolves references when a target moves to an earlier page", function () {
