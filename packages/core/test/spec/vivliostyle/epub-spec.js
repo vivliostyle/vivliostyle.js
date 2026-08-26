@@ -48,6 +48,26 @@ describe("epub", function () {
       );
       expect(viewer.pageRuleStyleElement.textContent).not.toContain("750pt");
     });
+
+    it("keeps a live sparse page-size slot created by startPage", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.pageSizes[4] = { width: 120, height: 110 };
+      viewer.pageSizes[5] = { width: 1000, height: 1000 };
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageRuleStyleElement.textContent = "stale";
+      viewer.pageSheetSizeAlreadySet = true;
+      viewer.pixelRatio = 1;
+
+      viewer.truncatePageSizes(5);
+
+      expect(viewer.pageSizes.length).toBe(5);
+      expect(viewer.pageSizes[4]).toEqual({ width: 120, height: 110 });
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "size: 90pt 83pt",
+      );
+      expect(viewer.pageRuleStyleElement.textContent).not.toContain("750pt");
+    });
   });
 
   describe("EPUBDocStore", function () {
@@ -705,6 +725,69 @@ describe("epub", function () {
       });
     });
 
+    it("defers final-page completion while a counter scope is still pushed", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = { spineIndex: 0, offset: 0, fetchers: [] };
+        var removeLayoutStyle = jasmine.createSpy("removeLayoutStyle");
+        var restorePageNumberContext = jasmine.createSpy(
+          "restorePageNumberContext",
+        );
+        var viewItem = {
+          item: { spineIndex: 0 },
+          layoutPositions: [null],
+          pages: [],
+          pageCounterStarts: [null],
+          instance: {
+            pageNumberOffset: 0,
+            viewport: {
+              layoutBox: { removeAttribute: removeLayoutStyle },
+            },
+            getPageNumberContextDepth: function () {
+              return 0;
+            },
+            pushPageNumberContext: function () {},
+            restorePageNumberContextDepth: restorePageNumberContext,
+            layoutNextPage: function () {
+              return adapt_task.newResult(null);
+            },
+          },
+        };
+        view.counterStore = {
+          finishPage: function () {},
+        };
+        view.isInCounterResolveScope = function () {
+          return true;
+        };
+        view.preparePageCountersForRender = function () {
+          return null;
+        };
+        view.makePage = function () {
+          return page;
+        };
+        view.resolvePageTypeForRenderSlot = function () {};
+        view.finishPageContainer = function (item, renderedPage, pageIndex) {
+          item.pages[pageIndex] = renderedPage;
+        };
+        view.reportPaginationProgress = function () {};
+        view.maybeRelayoutFollowingPage = function () {
+          return adapt_task.newResult(true);
+        };
+        view.resolveUnresolvedReferencesForPage = function () {
+          return adapt_task.newResult(page);
+        };
+
+        view.renderSinglePage(viewItem, { page: 0 }).then(function () {
+          expect(viewItem.pages).toEqual([page]);
+          expect(viewItem.complete).not.toBe(true);
+          expect(removeLayoutStyle).not.toHaveBeenCalled();
+          expect(restorePageNumberContext).toHaveBeenCalledOnceWith(0);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("discards following spines after an earlier spine shrinks", function () {
       var view = Object.create(adapt_epub.OPFView.prototype);
       var sourcePage = { container: { remove: jasmine.createSpy() } };
@@ -931,7 +1014,9 @@ describe("epub", function () {
         var rerenderedResult = { id: "rerendered" };
         var sourcePage = { id: "source", fetchers: [] };
         view.opf = { spine: [{}, {}, {}] };
-        view.spineItems = [{ pages: [sourcePage] }];
+        view.spineItems = [
+          { pages: [sourcePage], instance: { pageNumberOffset: 4 } },
+        ];
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
@@ -965,7 +1050,7 @@ describe("epub", function () {
             view.counterStore.updateTargetTextNodesInPages,
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.renderingAllPages).toBe(false);
-          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
         });
         return adapt_task.newResult(true);
@@ -986,7 +1071,9 @@ describe("epub", function () {
         view.renderingPageTasks = new Map();
         view.renderingAllPages = false;
         view.relayoutingFollowingSpines = false;
-        view.spineItems = [{ pages: [sourcePage] }];
+        view.spineItems = [
+          { pages: [sourcePage], instance: { pageNumberOffset: 4 } },
+        ];
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
@@ -1019,7 +1106,7 @@ describe("epub", function () {
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
-          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
         });
         return adapt_task.newResult(true);
@@ -1041,7 +1128,9 @@ describe("epub", function () {
         view.renderingPageTasks = new Map();
         view.renderingAllPages = false;
         view.relayoutingFollowingSpines = false;
-        view.spineItems = [{ pages: [sourcePage] }];
+        view.spineItems = [
+          { pages: [sourcePage], instance: { pageNumberOffset: 4 } },
+        ];
         view.counterStore = {
           updateTargetCounterNodesInPages: jasmine.createSpy(),
           updateTargetTextNodesInPages: jasmine.createSpy(),
@@ -1083,7 +1172,7 @@ describe("epub", function () {
           ).toHaveBeenCalledOnceWith([sourcePage]);
           expect(view.relayoutingFollowingSpines).toBe(false);
           expect(view.renderingPageTasks.size).toBe(0);
-          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
         });
         return adapt_task.newResult(true);

@@ -1813,6 +1813,19 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return count;
   }
 
+  private getRenderedPageSizeCount(): number {
+    let count = 0;
+    for (const item of this.spineItems) {
+      if (item) {
+        count = Math.max(
+          count,
+          item.instance.pageNumberOffset + item.pages.length,
+        );
+      }
+    }
+    return count;
+  }
+
   /**
    * Mark a spine item as complete if all layout positions have corresponding
    * rendered pages (Issue #1498).  When the item becomes complete, clean up
@@ -2866,7 +2879,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             ),
           )
           .then((resolvedPage) => {
-            if (!pos) {
+            if (!pos && !inCounterResolveScopeAtStart) {
               // A final page can be produced by a nested relayout while
               // resolving a target reference. Mark the spine complete only
               // after that asynchronous work settles, otherwise navigation
@@ -3098,13 +3111,15 @@ export class OPFView implements Vgen.CustomRendererFactory {
                   frame.finish(requestedResult);
                 };
                 if (rerenderPosition === position) {
-                  this.pageSheetSizeTruncator(this.getRenderedPageCount());
+                  this.pageSheetSizeTruncator(this.getRenderedPageSizeCount());
                   finishRerender(rerenderedResult);
                 } else {
                   // Return the originally requested page after rebuilding the
                   // farthest invalidated spine and refreshing retained refs.
                   this.renderPageTracked(position).then((requestedResult) => {
-                    this.pageSheetSizeTruncator(this.getRenderedPageCount());
+                    this.pageSheetSizeTruncator(
+                      this.getRenderedPageSizeCount(),
+                    );
                     finishRerender(requestedResult);
                   });
                 }
@@ -3112,7 +3127,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             );
             return;
           }
-          this.pageSheetSizeTruncator(this.getRenderedPageCount());
+          this.pageSheetSizeTruncator(this.getRenderedPageSizeCount());
           endRendering();
           frame.finish(result);
         });
@@ -3265,7 +3280,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             }
           })
           .then(() => {
-            this.pageSheetSizeTruncator(this.getRenderedPageCount());
+            this.pageSheetSizeTruncator(this.getRenderedPageSizeCount());
             this.renderingAllPages = false;
             frame.finish(result);
           });
