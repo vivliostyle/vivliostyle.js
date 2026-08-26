@@ -2915,6 +2915,34 @@ export class OPFView implements Vgen.CustomRendererFactory {
         firstInvalidSpine != null &&
         firstInvalidSpine <= position.spineIndex
       ) {
+        if (this.renderingAllPages) {
+          if (sync) {
+            frame.finish(null);
+            return;
+          }
+          // Full pagination owns the shared StyleInstance and will consume
+          // the suffix marker. Do not let navigation return a cached page
+          // from that invalid suffix while the rebuild is still pending.
+          frame
+            .loopWithFrame((loopFrame) => {
+              const pendingSpine = this.deferredFollowingSpineRelayoutStart;
+              if (
+                this.renderingAllPages &&
+                pendingSpine != null &&
+                pendingSpine <= position.spineIndex
+              ) {
+                frame.sleep(100).then(() => loopFrame.continueLoop());
+              } else {
+                loopFrame.breakLoop();
+              }
+            })
+            .then(() => {
+              this.findPage(position, sync).then((result) =>
+                frame.finish(result),
+              );
+            });
+          return;
+        }
         // A cached page in the invalid suffix must not bypass the deferred
         // rebuild. renderPage() consumes the marker before returning it.
         this.renderPage(position).then((result) => frame.finish(result));
