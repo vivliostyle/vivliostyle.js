@@ -763,6 +763,67 @@ describe("epub", function () {
         return adapt_task.newResult(true);
       });
     });
+
+    it("rerenders every previously rendered spine after on-demand invalidation", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = {
+          spineIndex: 2,
+          pageIndex: Number.POSITIVE_INFINITY,
+          offsetInItem: -1,
+        };
+        var initialResult = { id: "initial" };
+        var requestedResult = { id: "requested" };
+        var farthestResult = { id: "farthest" };
+        var sourcePage = { id: "source", fetchers: [] };
+        view.renderingPageTasks = new Map();
+        view.renderingAllPages = false;
+        view.relayoutingFollowingSpines = false;
+        view.spineItems = [{ pages: [sourcePage] }];
+        view.counterStore = {
+          updateTargetCounterNodesInPages: jasmine.createSpy(),
+          updateTargetTextNodesInPages: jasmine.createSpy(),
+        };
+        view.deferredFollowingSpineRelayoutStart = 1;
+        spyOn(view, "renderPageTracked").and.returnValues(
+          adapt_task.newResult(initialResult),
+          adapt_task.newResult(requestedResult),
+        );
+        spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
+          function () {
+            view.deferredFollowingSpineRelayoutStart = null;
+            return 4;
+          },
+        );
+        spyOn(view, "renderPagesUpto").and.returnValue(
+          adapt_task.newResult(farthestResult),
+        );
+
+        view.renderPage(position).then(function (result) {
+          expect(view.renderPagesUpto).toHaveBeenCalledOnceWith(
+            {
+              spineIndex: 4,
+              pageIndex: Number.POSITIVE_INFINITY,
+              offsetInItem: -1,
+            },
+            false,
+          );
+          expect(view.renderPageTracked.calls.count()).toBe(2);
+          expect(result).toBe(requestedResult);
+          expect(
+            view.counterStore.updateTargetCounterNodesInPages,
+          ).toHaveBeenCalledOnceWith([sourcePage]);
+          expect(
+            view.counterStore.updateTargetTextNodesInPages,
+          ).toHaveBeenCalledOnceWith([sourcePage]);
+          expect(view.relayoutingFollowingSpines).toBe(false);
+          expect(view.renderingPageTasks.size).toBe(0);
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("resolves references deferred by a nested counter scope", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
