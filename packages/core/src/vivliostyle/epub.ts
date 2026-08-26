@@ -2663,16 +2663,17 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.counterStore.updateTargetTextNodesInPages(pages);
   }
 
-  private relayoutDeferredFollowingSpines(): void {
+  private relayoutDeferredFollowingSpines(): number | null {
     const firstSpine = this.deferredFollowingSpineRelayoutStart;
     if (firstSpine == null) {
-      return;
+      return null;
     }
     this.deferredFollowingSpineRelayoutStart = null;
     this.deferredReferencePages = (this.deferredReferencePages || []).filter(
       (entry) => entry.viewItem.item.spineIndex < firstSpine,
     );
     this.counterStore.discardReferencesFromSpine(firstSpine);
+    let lastInvalidatedSpine: number | null = null;
     for (
       let spineIndex = firstSpine;
       spineIndex < this.spineItems.length;
@@ -2682,6 +2683,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       if (!viewItem) {
         continue;
       }
+      lastInvalidatedSpine = spineIndex;
       viewItem.pages.forEach((renderedPage) => {
         this.rememberDeferredPageReplacement(spineIndex, renderedPage);
         renderedPage.container.remove();
@@ -2689,6 +2691,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       this.spineItems[spineIndex] = null;
       this.spineItemLoadingContinuations[spineIndex] = null;
     }
+    return lastInvalidatedSpine;
   }
   /**
    * Render a single page. If the new page contains elements with ids that are
@@ -2959,14 +2962,36 @@ export class OPFView implements Vgen.CustomRendererFactory {
             // In on-demand pagination there is no final renderAllPages pass.
             // Rebuild the invalid suffix only after the current page render
             // has unwound, and suppress nested requests while doing so.
-            this.relayoutDeferredFollowingSpines();
+            const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
+            const rerenderPosition =
+              lastInvalidatedSpine != null &&
+              lastInvalidatedSpine > position.spineIndex
+                ? {
+                    spineIndex: lastInvalidatedSpine,
+                    pageIndex: Number.POSITIVE_INFINITY,
+                    offsetInItem: -1,
+                  }
+                : position;
             this.relayoutingFollowingSpines = true;
-            this.renderPagesUpto(position, false).then((rerenderedResult) => {
-              this.updateRetainedTargetCounters(firstSpine);
-              this.relayoutingFollowingSpines = false;
-              endRendering();
-              frame.finish(rerenderedResult);
-            });
+            this.renderPagesUpto(rerenderPosition, false).then(
+              (rerenderedResult) => {
+                this.updateRetainedTargetCounters(firstSpine);
+                const finishRerender = (
+                  requestedResult: PageAndPosition | null,
+                ): void => {
+                  this.relayoutingFollowingSpines = false;
+                  endRendering();
+                  frame.finish(requestedResult);
+                };
+                if (rerenderPosition === position) {
+                  finishRerender(rerenderedResult);
+                } else {
+                  // Return the originally requested page after rebuilding the
+                  // farthest invalidated spine and refreshing retained refs.
+                  this.renderPageTracked(position).then(finishRerender);
+                }
+              },
+            );
             return;
           }
           endRendering();
