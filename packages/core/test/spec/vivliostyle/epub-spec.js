@@ -1193,15 +1193,16 @@ describe("epub", function () {
       });
     });
 
-    it("rerenders a deferred suffix after on-demand pagination", function (done) {
+    it("rerenders an invalidated spine through its end after on-demand pagination", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
         var position = {
           spineIndex: 2,
-          pageIndex: Number.POSITIVE_INFINITY,
+          pageIndex: 1,
           offsetInItem: -1,
         };
         var initialResult = { id: "initial" };
+        var requestedResult = { id: "requested" };
         var rerenderedResult = { id: "rerendered" };
         var sourcePage = { id: "source", fetchers: [] };
         view.renderingPageTasks = new Map();
@@ -1218,12 +1219,14 @@ describe("epub", function () {
           "pageSheetSizeTruncator",
         );
         view.deferredFollowingSpineRelayoutStart = 1;
-        spyOn(view, "renderPageTracked").and.returnValue(
+        spyOn(view, "renderPageTracked").and.returnValues(
           adapt_task.newResult(initialResult),
+          adapt_task.newResult(requestedResult),
         );
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
           function () {
             view.deferredFollowingSpineRelayoutStart = null;
+            return 2;
           },
         );
         spyOn(view, "renderPagesUpto").and.returnValue(
@@ -1232,8 +1235,16 @@ describe("epub", function () {
 
         view.renderPage(position).then(function (result) {
           expect(view.relayoutDeferredFollowingSpines).toHaveBeenCalled();
-          expect(view.renderPagesUpto).toHaveBeenCalledWith(position, false);
-          expect(result).toBe(rerenderedResult);
+          expect(view.renderPagesUpto).toHaveBeenCalledWith(
+            {
+              spineIndex: 2,
+              pageIndex: Number.POSITIVE_INFINITY,
+              offsetInItem: -1,
+            },
+            false,
+          );
+          expect(view.renderPageTracked.calls.count()).toBe(2);
+          expect(result).toBe(requestedResult);
           expect(
             view.counterStore.updateTargetCounterNodesInPages,
           ).toHaveBeenCalledOnceWith([sourcePage]);

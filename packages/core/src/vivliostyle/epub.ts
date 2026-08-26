@@ -3096,8 +3096,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             this.relayoutingFollowingSpineStart = firstSpine;
             const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
             const rerenderPosition =
-              lastInvalidatedSpine != null &&
-              lastInvalidatedSpine > position.spineIndex
+              lastInvalidatedSpine != null
                 ? {
                     spineIndex: lastInvalidatedSpine,
                     pageIndex: Number.POSITIVE_INFINITY,
