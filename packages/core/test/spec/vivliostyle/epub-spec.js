@@ -1122,13 +1122,20 @@ describe("epub", function () {
       var view = Object.create(adapt_epub.OPFView.prototype);
       var prefixPage = { id: "prefix" };
       var rebuiltPage = { id: "rebuilt" };
-      view.spineItems = [{ pages: [prefixPage] }, { pages: [rebuiltPage] }];
+      view.spineItems = [
+        { item: { spineIndex: 0 }, pages: [prefixPage] },
+        { item: { spineIndex: 1 }, pages: [rebuiltPage] },
+      ];
       view.counterStore = {
-        updateTargetCounterNodesInPages: jasmine.createSpy(),
-        updateTargetTextNodesInPages: jasmine.createSpy(),
+        updateTargetCounterNodesInPages: jasmine
+          .createSpy()
+          .and.returnValue(new Set([prefixPage])),
+        updateTargetTextNodesInPages: jasmine
+          .createSpy()
+          .and.returnValue(new Set([rebuiltPage])),
       };
 
-      view.updateRetainedTargetCounters();
+      var firstChangedSpine = view.updateRetainedTargetCounters();
 
       expect(
         view.counterStore.updateTargetCounterNodesInPages,
@@ -1136,6 +1143,50 @@ describe("epub", function () {
       expect(
         view.counterStore.updateTargetTextNodesInPages,
       ).toHaveBeenCalledOnceWith([prefixPage, rebuiltPage]);
+      expect(firstChangedSpine).toBe(0);
+    });
+
+    it("rebuilds from a changed retained reference until stable", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = {
+          spineIndex: 2,
+          pageIndex: Number.POSITIVE_INFINITY,
+          offsetInItem: -1,
+        };
+        var passStarts = [];
+        view.opf = { spine: [{}, {}, {}] };
+        view.spineItems = [];
+        view.deferredFollowingSpineRelayoutStart = 1;
+        view.relayoutingFollowingSpines = false;
+        view.relayoutingFollowingSpineStart = null;
+        spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
+          function () {
+            passStarts.push(view.deferredFollowingSpineRelayoutStart);
+            view.deferredFollowingSpineRelayoutStart = null;
+            return 2;
+          },
+        );
+        spyOn(view, "renderPagesUpto").and.returnValues(
+          adapt_task.newResult({ id: "first" }),
+          adapt_task.newResult({ id: "stable" }),
+        );
+        spyOn(view, "updateRetainedTargetCounters").and.returnValues(0, null);
+
+        view.rerenderDeferredFollowingSpines(position).then(function (result) {
+          expect(passStarts).toEqual([1, 0]);
+          expect(view.renderPagesUpto.calls.count()).toBe(2);
+          expect(view.renderPagesUpto.calls.allArgs()).toEqual([
+            [position, false],
+            [position, false],
+          ]);
+          expect(result).toEqual({ id: "stable" });
+          expect(view.relayoutingFollowingSpines).toBe(false);
+          expect(view.relayoutingFollowingSpineStart).toBeNull();
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
     });
 
     it("rerenders a deferred suffix once after full pagination", function (done) {

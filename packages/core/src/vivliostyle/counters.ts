@@ -1617,7 +1617,8 @@ export class CounterStore {
    * Walk through target-counter DOM nodes in the given page containers and
    * update their text content from the current pageCountersById snapshots.
    */
-  updateTargetCounterNodesInPages(pages: Vtree.Page[]): void {
+  updateTargetCounterNodesInPages(pages: Vtree.Page[]): Set<Vtree.Page> {
+    const changedPages = new Set<Vtree.Page>();
     for (const page of pages) {
       if (!page || !page.container) continue;
       const nodes = page.container.querySelectorAll(`[${TARGET_COUNTER_ATTR}]`);
@@ -1629,18 +1630,24 @@ export class CounterStore {
           if (counterValue) {
             const arr: number[] = counterValue[expr.name];
             if (arr) {
-              node.textContent = expr.format(arr[arr.length - 1]);
+              const value = expr.format(arr[arr.length - 1]);
+              if (node.textContent !== value) {
+                node.textContent = value;
+                changedPages.add(page);
+              }
             }
           }
         }
       }
     }
+    return changedPages;
   }
 
   /**
    * Update target-text() nodes retained outside a rebuilt spine suffix.
    */
-  updateTargetTextNodesInPages(pages: Vtree.Page[]): void {
+  updateTargetTextNodesInPages(pages: Vtree.Page[]): Set<Vtree.Page> {
+    const changedPages = new Set<Vtree.Page>();
     for (const page of pages) {
       if (!page || !page.container) continue;
       const nodes = page.container.querySelectorAll(`[${TARGET_TEXT_ATTR}]`);
@@ -1650,18 +1657,23 @@ export class CounterStore {
         if (expr && expr.transformedId) {
           const text = this.pageTextById[expr.transformedId];
           if (text) {
+            let value: string;
             if (expr.pseudoElement === "first-letter") {
               const fullText =
                 (text.before ?? "") + (text.content ?? "") + (text.after ?? "");
-              node.textContent =
-                fullText.match(Base.firstLetterPattern)?.[0] ?? "";
+              value = fullText.match(Base.firstLetterPattern)?.[0] ?? "";
             } else {
-              node.textContent = text[expr.pseudoElement] ?? "";
+              value = text[expr.pseudoElement] ?? "";
+            }
+            if (node.textContent !== value) {
+              node.textContent = value;
+              changedPages.add(page);
             }
           }
         }
       }
     }
+    return changedPages;
   }
 
   /**

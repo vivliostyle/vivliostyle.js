@@ -454,6 +454,10 @@ module.exports = [
         title: "target-text() reflow that shrinks an earlier WebPub spine",
       },
       {
+        file: "target-counter-retained-source/publication.json",
+        title: "target-counter() reflow after a retained source value changes",
+      },
+      {
         file: "target-text-vs-named-strings.html",
         title: "target-text() vs Named Strings",
       },

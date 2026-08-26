@@ -59,9 +59,11 @@ describe("cross-reference layout constraint", function () {
       marker: "",
     };
 
-    store.updateTargetTextNodesInPages([page]);
+    const changedPages = store.updateTargetTextNodesInPages([page]);
 
     expect(node.textContent).toBe("A");
+    expect(changedPages).toEqual(new Set([page]));
+    expect(store.updateTargetTextNodesInPages([page])).toEqual(new Set());
   });
 
   it("allows a target to move earlier after a satisfied page break", function () {
