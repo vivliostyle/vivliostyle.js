@@ -769,6 +769,17 @@ export class AdaptiveViewer {
     }
   }
 
+  private truncatePageSizes(pageCount: number) {
+    if (this.pageSizes.length <= pageCount) {
+      return;
+    }
+    this.pageSizes.splice(pageCount);
+    this.removePageSizePageRules();
+    if (this.pageSizes.length > 0) {
+      this.setPageSizePageRules(this.pageSizes.length - 1);
+    }
+  }
+
   private setPageSizePageRules(pageIndex: number) {
     // In this implementation, it generates one page rule with the largest
     // page size both in width and height in the multiple page sizes.
@@ -853,6 +864,7 @@ export class AdaptiveViewer {
       this.pref,
       this.setPageSize.bind(this),
       this.cmykReserveMap,
+      this.truncatePageSizes.bind(this),
     );
     if (tocVisible) {
       this.sendCommand({ a: "toc", v: "show", autohide: tocAutohide });

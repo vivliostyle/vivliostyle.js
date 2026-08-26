@@ -1619,10 +1619,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
   tocView?: Toc.TOCView;
   private deferredReferencePages: DeferredReferencePage[] = [];
   private resolvingDeferredReferences: boolean = false;
-  private drainingDeferredReferencePage: {
-    viewItem: OPFViewItem;
-    pageIndex: number;
-  } | null = null;
+  private processedDeferredReferencePages: Map<
+    OPFViewItem,
+    Set<number>
+  > | null = null;
   private deferredFollowingSpineRelayoutStart: number | null = null;
   private deferredPageReplacements = new Map<number, Vtree.Page[]>();
   private relayoutingFollowingSpines: boolean = false;
@@ -1649,6 +1649,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
       p4: number,
     ) => any,
     cmykReserveMap?: CmykStore.CmykReserveMapEntry[],
+    public readonly pageSheetSizeTruncator: (
+      pageCount: number,
+    ) => void = () => {},
   ) {
     this.pref = Exprs.clonePreferences(pref);
     this.clientLayout = new Vgen.DefaultClientLayout(viewport);
@@ -2209,7 +2212,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
           return;
         }
         const refs = unresolvedRefs[unresolvedRefIndex - 1];
-        refs.refs = refs.refs.filter((ref) => !ref.isResolved());
+        refs.refs = refs.refs.filter(
+          (ref) =>
+            !ref.isResolved() && this.counterStore.isReferenceTracked(ref),
+        );
         if (refs.refs.length === 0) {
           loopFrame.continueLoop();
           return;
@@ -2496,9 +2502,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
       "resolveDeferredReferencesAfterCounterScope",
     );
     this.resolvingDeferredReferences = true;
+    this.processedDeferredReferencePages = new Map();
     frame.handler = (handlerFrame, err) => {
       this.resolvingDeferredReferences = false;
-      this.drainingDeferredReferencePage = null;
+      this.processedDeferredReferencePages = null;
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
     frame
@@ -2514,23 +2521,27 @@ export class OPFView implements Vgen.CustomRendererFactory {
           loopFrame.continueLoop();
           return;
         }
-        this.drainingDeferredReferencePage = {
-          viewItem: entry.viewItem,
-          pageIndex: entry.pageIndex,
-        };
+        let processedPageIndices = this.processedDeferredReferencePages!.get(
+          entry.viewItem,
+        );
+        if (!processedPageIndices) {
+          processedPageIndices = new Set();
+          this.processedDeferredReferencePages!.set(
+            entry.viewItem,
+            processedPageIndices,
+          );
+        }
+        processedPageIndices.add(entry.pageIndex);
         this.resolveUnresolvedReferencesForPage(
           entry.viewItem,
           currentPage,
           entry.pageIndex,
           entry.nextLayoutPosition,
-        ).then(() => {
-          this.drainingDeferredReferencePage = null;
-          loopFrame.continueLoop();
-        });
+        ).then(() => loopFrame.continueLoop());
       })
       .then(() => {
         this.resolvingDeferredReferences = false;
-        this.drainingDeferredReferencePage = null;
+        this.processedDeferredReferencePages = null;
         frame.finish(page);
       });
     return frame.result();
@@ -2551,10 +2562,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     // The deferred drain is the single retry allowed after the outermost
     // counter scope. Do not let the entry currently being retried enqueue
     // itself again; cascaded pages must still join the active queue.
-    if (
-      this.drainingDeferredReferencePage?.viewItem === viewItem &&
-      this.drainingDeferredReferencePage.pageIndex === pageIndex
-    ) {
+    if (this.processedDeferredReferencePages?.get(viewItem)?.has(pageIndex)) {
       return;
     }
     const latestPage = viewItem.pages?.[pageIndex] || page;
@@ -2602,6 +2610,28 @@ export class OPFView implements Vgen.CustomRendererFactory {
         this.deferredReferencePages.splice(deferredIndex, 1);
       }
     }
+  }
+
+  private updateEPageRangesAfterShrink(
+    viewItem: OPFViewItem,
+    finalLength: number,
+  ): void {
+    if (!this.opf.epageIsRenderedPage) {
+      return;
+    }
+    const spineIndex = viewItem.item.spineIndex;
+    viewItem.item.epageCount = finalLength;
+    let nextEPage = viewItem.item.epage + finalLength;
+    for (let index = spineIndex + 1; index < this.opf.spine.length; index++) {
+      const item = this.opf.spine[index];
+      item.epage = nextEPage;
+      nextEPage += item.epageCount;
+    }
+    this.opf.epageCount = this.opf.spine.reduce(
+      (count, item) => count + item.epageCount,
+      0,
+    );
+    this.opf.epageCountCallback?.(this.opf.epageCount);
   }
 
   private rememberDeferredPageReplacement(
@@ -2782,6 +2812,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // final page in the requested slot.
         const finalLength = pageIndexToRender + 1;
         const pageCountChanged = viewItem.pages.length > finalLength;
+        if (pageCountChanged) {
+          this.updateEPageRangesAfterShrink(viewItem, finalLength);
+          this.pageSheetSizeTruncator(
+            viewItem.instance.pageNumberOffset + finalLength,
+          );
+        }
         this.removeDeferredReferencePages(
           (entry) =>
             entry.viewItem === viewItem && entry.pageIndex >= finalLength,

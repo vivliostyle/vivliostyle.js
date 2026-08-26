@@ -129,6 +129,8 @@ describe("cross-reference layout constraint", function () {
     expect(store.unresolvedReferences.target).toEqual([retained]);
     expect(store.referencesToSolve).toEqual([retained]);
     expect(store.referencesToSolveStack).toEqual([[retained]]);
+    expect(store.isReferenceTracked(retained)).toBe(true);
+    expect(store.isReferenceTracked(discarded)).toBe(false);
   });
 
   it("re-resolves references when a target moves to an earlier page", function () {

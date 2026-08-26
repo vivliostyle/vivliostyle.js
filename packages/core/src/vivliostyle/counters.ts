@@ -1437,6 +1437,13 @@ export class CounterStore {
     }
   }
 
+  isReferenceTracked(ref: TargetCounterReference): boolean {
+    return (
+      (this.resolvedReferences[ref.targetId] || []).includes(ref) ||
+      (this.unresolvedReferences[ref.targetId] || []).includes(ref)
+    );
+  }
+
   /**
    * Record a snapshot of the current page counters keyed by the page's element
    * offset range, so page-based counters in named strings (string-set) can be
