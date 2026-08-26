@@ -687,6 +687,57 @@ describe("epub", function () {
       });
     });
 
+    it("waits until an in-progress suffix rebuild has completed", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = { spineIndex: 1, pageIndex: 0, offsetInItem: -1 };
+        var rebuiltPage = {};
+        view.relayoutingFollowingSpineStart = 1;
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "getPageViewItem").and.returnValue(
+          adapt_task.newResult({ pages: [rebuiltPage], complete: true }),
+        );
+        var scheduler = adapt_task.currentTask().getScheduler();
+        var rebuildTask = scheduler.run(function () {
+          var rebuildFrame = adapt_task.newFrame("finishSuffixRelayout");
+          rebuildFrame.sleep(50).then(function () {
+            view.relayoutingFollowingSpineStart = null;
+            rebuildFrame.finish(true);
+          });
+          return rebuildFrame.result();
+        });
+
+        view.findPage(position, false).then(function (result) {
+          expect(result.page).toBe(rebuiltPage);
+          rebuildTask.join().then(function () {
+            done();
+          });
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("does not expose an in-progress suffix rebuild synchronously", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var position = { spineIndex: 1, pageIndex: 0, offsetInItem: -1 };
+        view.relayoutingFollowingSpineStart = 1;
+        spyOn(view, "waitForPreviousSpines").and.returnValue(
+          adapt_task.newResult(true),
+        );
+        spyOn(view, "getPageViewItem");
+
+        view.findPage(position, true).then(function (result) {
+          expect(result).toBeNull();
+          expect(view.getPageViewItem).not.toHaveBeenCalled();
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("reuses the requested slot when a final-page rerender shrinks the spine", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);

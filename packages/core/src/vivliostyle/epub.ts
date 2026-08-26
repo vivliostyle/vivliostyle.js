@@ -1626,6 +1626,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   private deferredFollowingSpineRelayoutStart: number | null = null;
   private deferredPageReplacements = new Map<number, Vtree.Page[]>();
   private relayoutingFollowingSpines: boolean = false;
+  private relayoutingFollowingSpineStart: number | null = null;
   private renderingAllPages: boolean = false;
   private paginationProgress = {
     totalOffsetsBySpine: [] as number[],
@@ -2954,53 +2955,41 @@ export class OPFView implements Vgen.CustomRendererFactory {
     sync: boolean,
   ): Task.Result<PageAndPosition | null> {
     const frame: Task.Frame<PageAndPosition | null> = Task.newFrame("findPage");
+    const waitForSuffixRelayout = (): void => {
+      if (sync) {
+        frame.finish(null);
+        return;
+      }
+      frame.sleep(100).then(() => {
+        this.findPage(position, sync).then((result) => frame.finish(result));
+      });
+    };
 
     this.waitForPreviousSpines(position.spineIndex, sync).then(() => {
+      const relayoutingSpine = this.relayoutingFollowingSpineStart;
+      if (relayoutingSpine != null && relayoutingSpine <= position.spineIndex) {
+        // relayoutDeferredFollowingSpines clears the pending marker before it
+        // rebuilds the suffix. Keep navigation behind the in-progress boundary
+        // so it cannot observe or concurrently lay out the partial suffix.
+        waitForSuffixRelayout();
+        return;
+      }
       const firstInvalidSpine = this.deferredFollowingSpineRelayoutStart;
       if (
         firstInvalidSpine != null &&
         firstInvalidSpine <= position.spineIndex
       ) {
         if (this.renderingAllPages) {
-          if (sync) {
-            frame.finish(null);
-            return;
-          }
           // Full pagination owns the shared StyleInstance and will consume
           // the suffix marker. Do not let navigation return a cached page
           // from that invalid suffix while the rebuild is still pending.
-          frame
-            .loopWithFrame((loopFrame) => {
-              const pendingSpine = this.deferredFollowingSpineRelayoutStart;
-              if (
-                this.renderingAllPages &&
-                pendingSpine != null &&
-                pendingSpine <= position.spineIndex
-              ) {
-                frame.sleep(100).then(() => loopFrame.continueLoop());
-              } else {
-                loopFrame.breakLoop();
-              }
-            })
-            .then(() => {
-              this.findPage(position, sync).then((result) =>
-                frame.finish(result),
-              );
-            });
+          waitForSuffixRelayout();
           return;
         }
         if (this.isRenderingPageInAnotherTask()) {
-          if (sync) {
-            frame.finish(null);
-            return;
-          }
           // Another navigation task is already rebuilding the invalid suffix.
           // Retry after it has released the shared layout and counter state.
-          frame.sleep(100).then(() => {
-            this.findPage(position, sync).then((result) =>
-              frame.finish(result),
-            );
-          });
+          waitForSuffixRelayout();
           return;
         }
         // A cached page in the invalid suffix must not bypass the deferred
@@ -3103,6 +3092,8 @@ export class OPFView implements Vgen.CustomRendererFactory {
             // In on-demand pagination there is no final renderAllPages pass.
             // Rebuild the invalid suffix only after the current page render
             // has unwound, and suppress nested requests while doing so.
+            this.relayoutingFollowingSpines = true;
+            this.relayoutingFollowingSpineStart = firstSpine;
             const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
             const rerenderPosition =
               lastInvalidatedSpine != null &&
@@ -3113,7 +3104,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
                     offsetInItem: -1,
                   }
                 : position;
-            this.relayoutingFollowingSpines = true;
             this.renderPagesUpto(rerenderPosition, false).then(
               (rerenderedResult) => {
                 this.updateRetainedTargetCounters();
@@ -3121,6 +3111,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
                   requestedResult: PageAndPosition | null,
                 ): void => {
                   this.relayoutingFollowingSpines = false;
+                  this.relayoutingFollowingSpineStart = null;
                   endRendering();
                   frame.finish(requestedResult);
                 };
@@ -3148,6 +3139,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       },
       (frame, err) => {
         this.relayoutingFollowingSpines = false;
+        this.relayoutingFollowingSpineStart = null;
         endRendering();
         frame.task.raise(err, frame.parent);
       },
@@ -3270,6 +3262,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.renderingAllPages = true;
     frame.handler = (handlerFrame, err) => {
       this.relayoutingFollowingSpines = false;
+      this.relayoutingFollowingSpineStart = null;
       this.renderingAllPages = false;
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
@@ -3304,11 +3297,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
         finishAfterImages();
         return;
       }
-      this.relayoutDeferredFollowingSpines();
       this.relayoutingFollowingSpines = true;
+      this.relayoutingFollowingSpineStart = firstSpine;
+      this.relayoutDeferredFollowingSpines();
       this.renderPagesUpto(finalPosition, false).then((rerenderedResult) => {
         this.updateRetainedTargetCounters();
         this.relayoutingFollowingSpines = false;
+        this.relayoutingFollowingSpineStart = null;
         result = rerenderedResult;
         finishAfterImages();
       });
