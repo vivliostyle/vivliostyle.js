@@ -1444,6 +1444,30 @@ export class CounterStore {
     );
   }
 
+  getRebuildStartForReferences(firstSpineIndex: number): number {
+    let rebuildStart = firstSpineIndex;
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const id of Object.keys(this.pageIndicesById)) {
+        if (this.pageIndicesById[id].spineIndex < rebuildStart) {
+          continue;
+        }
+        const refs = [
+          ...(this.resolvedReferences[id] || []),
+          ...(this.unresolvedReferences[id] || []),
+        ];
+        for (const ref of refs) {
+          if (ref.spineIndex >= 0 && ref.spineIndex < rebuildStart) {
+            rebuildStart = ref.spineIndex;
+            changed = true;
+          }
+        }
+      }
+    }
+    return rebuildStart;
+  }
+
   /**
    * Record a snapshot of the current page counters keyed by the page's element
    * offset range, so page-based counters in named strings (string-set) can be
