@@ -1283,7 +1283,6 @@ export class CounterStore {
     if (!resolvedRefs) {
       resolvedRefs = this.resolvedReferences[id] = [];
     }
-    let pushed = false;
     for (let i = 0; i < this.referencesToSolve.length;) {
       const ref = this.referencesToSolve[i];
       if (ref.targetId === id) {
@@ -1296,14 +1295,15 @@ export class CounterStore {
           }
         }
         resolvedRefs.push(ref);
-        pushed = true;
       } else {
         i++;
       }
     }
-    if (!pushed) {
-      this.saveReferenceOfCurrentPage(id, true);
-    }
+    // Record the reference at its current source page as well as resolving
+    // the old record. A rerender can move generated target-counter()/
+    // target-text() content to another page; finishPage replaces the old
+    // page's records with these newly observed references.
+    this.saveReferenceOfCurrentPage(id, true);
   }
 
   /**
@@ -1355,6 +1355,7 @@ export class CounterStore {
         this.pageIndicesById[id] = { spineIndex, pageIndex };
       });
     }
+    this.discardReferencesFromPage(spineIndex, pageIndex);
     const prevPageCounters = this.previousPageCounters;
     let ref: TargetCounterReference | undefined;
     while ((ref = this.newReferencesOfCurrentPage.shift())) {
@@ -1381,6 +1382,36 @@ export class CounterStore {
       this.recordNamedStringPageSnapshot(spineIndex);
     }
     this.currentPage = null;
+  }
+
+  private discardReferencesFromPage(
+    spineIndex: number,
+    pageIndex: number,
+  ): void {
+    const targetIds = new Set([
+      ...Object.keys(this.resolvedReferences),
+      ...Object.keys(this.unresolvedReferences),
+    ]);
+    for (const id of targetIds) {
+      const keepOtherPage = (ref: TargetCounterReference) =>
+        ref.spineIndex !== spineIndex || ref.pageIndex !== pageIndex;
+      const resolved = (this.resolvedReferences[id] || []).filter(
+        keepOtherPage,
+      );
+      const unresolved = (this.unresolvedReferences[id] || []).filter(
+        keepOtherPage,
+      );
+      if (resolved.length) {
+        this.resolvedReferences[id] = resolved;
+      } else {
+        delete this.resolvedReferences[id];
+      }
+      if (unresolved.length) {
+        this.unresolvedReferences[id] = unresolved;
+      } else {
+        delete this.unresolvedReferences[id];
+      }
+    }
   }
 
   /**

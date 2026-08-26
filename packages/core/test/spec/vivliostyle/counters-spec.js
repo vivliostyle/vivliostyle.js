@@ -110,6 +110,38 @@ describe("cross-reference layout constraint", function () {
     );
   });
 
+  it("replaces stale source-page references after content moves earlier", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const earlierPageRef = new Counters.TargetCounterReference("target", false);
+    earlierPageRef.spineIndex = 0;
+    earlierPageRef.pageIndex = 0;
+    const staleFollowingPageRef = new Counters.TargetCounterReference(
+      "target",
+      false,
+    );
+    staleFollowingPageRef.spineIndex = 0;
+    staleFollowingPageRef.pageIndex = 1;
+    store.unresolvedReferences.target = [earlierPageRef, staleFollowingPageRef];
+    store.referencesToSolve = [earlierPageRef];
+
+    const page0Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page0Container, page0Container));
+    store.resolveReference("target");
+    store.finishPage(0, 0);
+
+    expect(store.resolvedReferences.target.length).toBe(1);
+    expect(store.resolvedReferences.target[0].pageIndex).toBe(0);
+    expect(store.unresolvedReferences.target).toEqual([staleFollowingPageRef]);
+
+    const page1Container = document.createElement("div");
+    store.setCurrentPage(new Vtree.Page(page1Container, page1Container));
+    store.finishPage(0, 1);
+
+    expect(store.unresolvedReferences.target).toBeUndefined();
+    expect(store.resolvedReferences.target.length).toBe(1);
+    expect(store.resolvedReferences.target[0].pageIndex).toBe(0);
+  });
+
   it("drops only references whose source spine will be rebuilt", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const earlierResolved = new Counters.TargetCounterReference("target", true);

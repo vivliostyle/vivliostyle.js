@@ -2530,6 +2530,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
     pageIndex: number,
     nextLayoutPosition: Vtree.LayoutPosition | null,
   ): void {
+    // The deferred drain is the single retry allowed after the outermost
+    // counter scope. Do not let that retry enqueue itself again; doing so
+    // bypasses the #1686 recursion guard and creates an infinite loop.
+    if (this.resolvingDeferredReferences) {
+      return;
+    }
     const latestPage = viewItem.pages?.[pageIndex] || page;
     if (!this.hasUnresolvedReferencesToPage(latestPage)) {
       return;
@@ -2655,6 +2661,12 @@ export class OPFView implements Vgen.CustomRendererFactory {
       const pageIndex = pos ? pos.page - 1 : pageIndexToRender;
       this.finishPageContainer(viewItem, page, pageIndex);
       this.counterStore.finishPage(page.spineIndex, pageIndex);
+      if (!pos) {
+        // A final page can be produced by a nested relayout while resolving a
+        // target reference. Mark the spine complete here as well as in the
+        // outer render loop, otherwise that loop requests the final page again.
+        this.markSpineItemCompleteIfReady(viewItem);
+      }
 
       const collectResult = Plugin.getHooksForName(
         Plugin.HOOKS.PAGINATION_PROGRESS,

@@ -793,6 +793,30 @@ describe("epub", function () {
         return adapt_task.newResult(true);
       });
     });
+
+    it("does not requeue a deferred page while draining it", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var page = {};
+        var viewItem = { pages: [page] };
+        var ref = {
+          isResolved: function () {
+            return false;
+          },
+        };
+        view.resolvingDeferredReferences = true;
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [{ spineIndex: 0, refs: [ref] }];
+          },
+        };
+
+        view.deferReferencesForPage(viewItem, page, 0, null);
+        expect(view.deferredReferencePages || []).toEqual([]);
+        done();
+        return adapt_task.newResult(true);
+      });
+    });
   });
   describe("OPFView pagination progress", function () {
     function createFakeView(totalOffsets) {
