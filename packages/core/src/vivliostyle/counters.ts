@@ -1584,11 +1584,6 @@ export class CounterStore {
 
     for (const id of Object.keys(this.pageIndicesById)) {
       if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
-        // Targets in the rebuilt suffix can keep the same spine-local page
-        // index while their absolute page counter changes. Mark retained
-        // source references unresolved so the normal target-resolution path
-        // re-lays out those source pages instead of only patching their DOM.
-        this.unresolveReferences(id);
         delete this.pageCountersById[id];
         delete this.pageDocCountersById[id];
         delete this.pageTextById[id];
