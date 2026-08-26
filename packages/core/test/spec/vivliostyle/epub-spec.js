@@ -965,6 +965,7 @@ describe("epub", function () {
       expect(view.deferredReferencePages).toEqual([{ viewItem: sourceItem }]);
       expect(view.counterStore.discardReferencesFromSpine).toHaveBeenCalledWith(
         1,
+        false,
       );
     });
 
@@ -1161,8 +1162,9 @@ describe("epub", function () {
         view.relayoutingFollowingSpines = false;
         view.relayoutingFollowingSpineStart = null;
         spyOn(view, "relayoutDeferredFollowingSpines").and.callFake(
-          function () {
+          function (preserveTargetSnapshots) {
             passStarts.push(view.deferredFollowingSpineRelayoutStart);
+            expect(preserveTargetSnapshots).toBe(passStarts.length > 1);
             view.deferredFollowingSpineRelayoutStart = null;
             return 2;
           },

@@ -1552,11 +1552,15 @@ export class CounterStore {
 
   /**
    * Drop references whose source page belongs to spine items that are about to
-   * be rebuilt, and invalidate target snapshots owned by that suffix. Retain
-   * pageIndicesById so unresolved forward references can still locate and
-   * render their targets while the suffix is reconstructed.
+   * be rebuilt. Target snapshots owned by that suffix are normally invalidated,
+   * but a fixed-point pagination pass can retain them as the starting estimate
+   * for the next pass. Retain pageIndicesById so unresolved forward references
+   * can still locate and render their targets while the suffix is reconstructed.
    */
-  discardReferencesFromSpine(firstSpineIndex: number): void {
+  discardReferencesFromSpine(
+    firstSpineIndex: number,
+    preserveTargetSnapshots: boolean = false,
+  ): void {
     const targetIds = new Set([
       ...Object.keys(this.resolvedReferences),
       ...Object.keys(this.unresolvedReferences),
@@ -1582,11 +1586,13 @@ export class CounterStore {
       }
     }
 
-    for (const id of Object.keys(this.pageIndicesById)) {
-      if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
-        delete this.pageCountersById[id];
-        delete this.pageDocCountersById[id];
-        delete this.pageTextById[id];
+    if (!preserveTargetSnapshots) {
+      for (const id of Object.keys(this.pageIndicesById)) {
+        if (this.pageIndicesById[id].spineIndex >= firstSpineIndex) {
+          delete this.pageCountersById[id];
+          delete this.pageDocCountersById[id];
+          delete this.pageTextById[id];
+        }
       }
     }
 

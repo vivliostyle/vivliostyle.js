@@ -2755,7 +2755,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return firstChangedSpine;
   }
 
-  private relayoutDeferredFollowingSpines(): number | null {
+  private relayoutDeferredFollowingSpines(
+    preserveTargetSnapshots: boolean = false,
+  ): number | null {
     const firstSpine = this.deferredFollowingSpineRelayoutStart;
     if (firstSpine == null) {
       return null;
@@ -2764,7 +2766,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.removeDeferredReferencePages(
       (entry) => entry.viewItem.item.spineIndex >= firstSpine,
     );
-    this.counterStore.discardReferencesFromSpine(firstSpine);
+    this.counterStore.discardReferencesFromSpine(
+      firstSpine,
+      preserveTargetSnapshots,
+    );
     let lastInvalidatedSpine: number | null = null;
     for (
       let spineIndex = firstSpine;
@@ -2796,6 +2801,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     const maxPasses = Math.max(3, spineCount * 2 + 2);
     let passCount = 0;
     let result: PageAndPosition | null = null;
+    let preserveTargetSnapshots = false;
 
     const clearRelayoutState = (): void => {
       this.relayoutingFollowingSpines = false;
@@ -2825,7 +2831,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
 
       this.relayoutingFollowingSpines = true;
       this.relayoutingFollowingSpineStart = firstSpine;
-      const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines();
+      const lastInvalidatedSpine = this.relayoutDeferredFollowingSpines(
+        preserveTargetSnapshots,
+      );
+      preserveTargetSnapshots = false;
       const rerenderPosition =
         lastInvalidatedSpine != null
           ? {
@@ -2843,6 +2852,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
           // breaks. Rebuild from the earliest page whose value actually
           // changed, and repeat until no rendered reference changes.
           this.deferSpinesForRelayoutFrom(firstChangedSourceSpine);
+          // Seed the next fixed-point pass with the target values produced by
+          // this pass. Clearing them would lay out the source with the
+          // unresolved fallback again, causing an oscillation such as
+          // "??" -> "9" -> "??" instead of converging to "8".
+          preserveTargetSnapshots = true;
         }
         runNextPass();
       });
