@@ -585,6 +585,7 @@ describe("epub", function () {
       };
       view.spineItems = [sourceItem, followingItem1, followingItem2];
       view.spineItemLoadingContinuations = [[], [], []];
+      view.deferredPageReplacements = new Map();
       view.deferredReferencePages = [
         { viewItem: sourceItem },
         { viewItem: followingItem1 },
@@ -639,6 +640,7 @@ describe("epub", function () {
       view.pageSheetSizeReporter = function () {};
       view.spineItems = [sourceItem, oldViewItem];
       view.spineItemLoadingContinuations = [[], []];
+      view.deferredPageReplacements = new Map();
       view.counterStore = {
         discardReferencesFromSpine: function () {},
       };
@@ -753,16 +755,13 @@ describe("epub", function () {
       var view = Object.create(adapt_epub.OPFView.prototype);
       var prefixPage = { id: "prefix" };
       var rebuiltPage = { id: "rebuilt" };
-      view.spineItems = [
-        { pages: [prefixPage] },
-        { pages: [rebuiltPage] },
-      ];
+      view.spineItems = [{ pages: [prefixPage] }, { pages: [rebuiltPage] }];
       view.counterStore = {
         updateTargetCounterNodesInPages: jasmine.createSpy(),
         updateTargetTextNodesInPages: jasmine.createSpy(),
       };
 
-      view.updateRetainedTargetCounters(1);
+      view.updateRetainedTargetCounters();
 
       expect(
         view.counterStore.updateTargetCounterNodesInPages,
@@ -936,6 +935,7 @@ describe("epub", function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
         var page = {};
         var viewItem = {};
+        view.deferredReferencePages = [];
         var nextLayoutPosition = { page: 16 };
         var ref = {
           isResolved: function () {
@@ -983,6 +983,7 @@ describe("epub", function () {
           spineIndex: 0,
         };
         var viewItem = { pages: [page], item: { spineIndex: 0 } };
+        view.deferredReferencePages = [];
         var nextLayoutPosition = { page: 1 };
         var ref = {
           isResolved: function () {
@@ -1025,6 +1026,7 @@ describe("epub", function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
         var page = {};
         var viewItem = { pages: [page] };
+        view.deferredReferencePages = [];
         var inCounterScope = true;
         var ref = {
           isResolved: function () {
