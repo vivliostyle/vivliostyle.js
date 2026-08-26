@@ -1,0 +1,19 @@
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "type": "Book",
+  "name": "target-text reflow that shrinks an earlier spine",
+  "readingOrder": [
+    {
+      "url": "chapter-one.html",
+      "name": "Chapter one"
+    },
+    {
+      "url": "chapter-two.html",
+      "name": "Chapter two"
+    },
+    {
+      "url": "targets.html",
+      "name": "Referenced chapters"
+    }
+  ]
+}

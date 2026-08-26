@@ -1,0 +1,58 @@
+@page {
+  size: 80mm 100mm;
+  margin: 8mm;
+
+  @bottom-center {
+    content: counter(page);
+    font: 8px sans-serif;
+  }
+}
+
+html {
+  font: 12px/1.3 sans-serif;
+  widows: 1;
+  orphans: 1;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+p,
+table {
+  margin: 0 0 6px;
+}
+
+h1 {
+  break-before: right;
+}
+
+.summary {
+  break-before: page;
+}
+
+.xref::before {
+  content: "Chapter " target-text(attr(href url), before);
+}
+
+.chapter-number::before {
+  content: attr(data-number);
+}
+
+table {
+  border-collapse: collapse;
+  font: 10px/1.2 monospace;
+  table-layout: fixed;
+  width: 126px;
+}
+
+.filler {
+  height: 110px;
+}
+
+td {
+  border: 1px solid;
+  padding: 2px;
+}

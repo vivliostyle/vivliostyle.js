@@ -944,6 +944,7 @@ export class CounterStore {
     Object.create(null);
   resolvedReferences: { [key: string]: TargetCounterReference[] } =
     Object.create(null);
+  private targetsMovedEarlierAfterPageBreak = new Set<string>();
   pageControlledCounterNames: { [key: string]: boolean } = Object.assign(
     Object.create(null),
     { page: true },
@@ -1348,7 +1349,15 @@ export class CounterStore {
         }
 
         const oldPageIndex = this.pageIndicesById[id];
-        if (oldPageIndex && oldPageIndex.pageIndex < pageIndex) {
+        const movedLater = oldPageIndex && oldPageIndex.pageIndex < pageIndex;
+        const movedEarlierAfterPageBreak =
+          oldPageIndex &&
+          oldPageIndex.pageIndex > pageIndex &&
+          !this.targetsMovedEarlierAfterPageBreak.has(id);
+        if (movedEarlierAfterPageBreak) {
+          this.targetsMovedEarlierAfterPageBreak.add(id);
+        }
+        if (movedLater || movedEarlierAfterPageBreak) {
           const resolvedRefs = this.resolvedReferences[id];
           if (resolvedRefs) {
             let unresolvedRefs = this.unresolvedReferences[id];
@@ -1497,6 +1506,56 @@ export class CounterStore {
         snap.counters["page"] = snap.counters["page"].map((v) => v + pageDelta);
       }
     }
+  }
+
+  /**
+   * Drop references whose source page belongs to spine items that are about to
+   * be rebuilt. Target snapshots are deliberately retained until the rebuilt
+   * pages overwrite them: invalidating a still-resolved target here would
+   * unnecessarily rerender earlier source pages and can restart the
+   * page-break oscillation that triggered the suffix rebuild.
+   */
+  discardReferencesFromSpine(firstSpineIndex: number): void {
+    const targetIds = new Set([
+      ...Object.keys(this.resolvedReferences),
+      ...Object.keys(this.unresolvedReferences),
+    ]);
+
+    for (const id of targetIds) {
+      const resolved = (this.resolvedReferences[id] || []).filter(
+        (ref) => ref.spineIndex < firstSpineIndex,
+      );
+      const unresolved = (this.unresolvedReferences[id] || []).filter(
+        (ref) => ref.spineIndex < firstSpineIndex,
+      );
+
+      if (resolved.length) {
+        this.resolvedReferences[id] = resolved;
+      } else {
+        delete this.resolvedReferences[id];
+      }
+      if (unresolved.length) {
+        this.unresolvedReferences[id] = unresolved;
+      } else {
+        delete this.unresolvedReferences[id];
+      }
+    }
+
+    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+      const snapshot = this.namedStringPageSnapshots[parseInt(key, 10)];
+      if (snapshot.spineIndex >= firstSpineIndex) {
+        delete this.namedStringPageSnapshots[parseInt(key, 10)];
+      }
+    }
+
+    const keepEarlierSource = (ref: TargetCounterReference) =>
+      ref.spineIndex < firstSpineIndex;
+    this.newReferencesOfCurrentPage =
+      this.newReferencesOfCurrentPage.filter(keepEarlierSource);
+    this.referencesToSolve = this.referencesToSolve.filter(keepEarlierSource);
+    this.referencesToSolveStack = this.referencesToSolveStack.map((refs) =>
+      refs.filter(keepEarlierSource),
+    );
   }
 
   /**
@@ -1899,6 +1958,16 @@ export class CounterStore {
   createLayoutConstraint(pageIndex: number): Layout.LayoutConstraint {
     return new LayoutConstraint(this, pageIndex);
   }
+
+  canTargetMoveEarlierAfterPageBreak(id: string): boolean {
+    // Keep the anti-oscillation guarantee introduced by b0288a35: a target
+    // gets one exception for a page break that has already been satisfied,
+    // but cannot repeatedly alternate between earlier and later pages.
+    if (this.targetsMovedEarlierAfterPageBreak.has(id)) {
+      return false;
+    }
+    return true;
+  }
 }
 
 export const PAGES_COUNTER_ATTR = "data-vivliostyle-pages-counter";
@@ -1923,25 +1992,17 @@ class LayoutConstraint implements Layout.LayoutConstraint {
   ) {}
 
   /** @override */
+  allowLayoutAfterPageBreak(nodeContext: Vtree.NodeContext): boolean {
+    if (this.allowLayout(nodeContext)) {
+      return true;
+    }
+    const id = this.getReferencedTargetId(nodeContext);
+    return !!id && this.counterStore.canTargetMoveEarlierAfterPageBreak(id);
+  }
+
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
-    if (!nodeContext || nodeContext.after) {
-      return true;
-    }
-    const viewNode = nodeContext.viewNode;
-    if (!viewNode || viewNode.nodeType !== 1) {
-      return true;
-    }
-    const id =
-      (viewNode as Element).getAttribute("data-vivliostyle-id") ||
-      (viewNode as Element).getAttribute("id") ||
-      (viewNode as Element).getAttribute("name");
+    const id = this.getReferencedTargetId(nodeContext);
     if (!id) {
-      return true;
-    }
-    if (
-      !this.counterStore.resolvedReferences[id] &&
-      !this.counterStore.unresolvedReferences[id]
-    ) {
       return true;
     }
     const pageIndex = this.counterStore.pageIndicesById[id];
@@ -1949,5 +2010,29 @@ class LayoutConstraint implements Layout.LayoutConstraint {
       return true;
     }
     return this.pageIndex >= pageIndex.pageIndex;
+  }
+
+  private getReferencedTargetId(nodeContext: Vtree.NodeContext): string | null {
+    if (!nodeContext || nodeContext.after) {
+      return null;
+    }
+    const viewNode = nodeContext.viewNode;
+    if (!viewNode || viewNode.nodeType !== 1) {
+      return null;
+    }
+    const id =
+      (viewNode as Element).getAttribute("data-vivliostyle-id") ||
+      (viewNode as Element).getAttribute("id") ||
+      (viewNode as Element).getAttribute("name");
+    if (!id) {
+      return null;
+    }
+    if (
+      !this.counterStore.resolvedReferences[id] &&
+      !this.counterStore.unresolvedReferences[id]
+    ) {
+      return null;
+    }
+    return id;
   }
 }
