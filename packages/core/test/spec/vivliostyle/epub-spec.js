@@ -756,6 +756,7 @@ describe("epub", function () {
         view.counterStore = {
           finishPage: function () {},
         };
+        view.deferredReferencePages = [];
         view.isInCounterResolveScope = function () {
           return true;
         };
