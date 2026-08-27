@@ -857,6 +857,62 @@ describe("epub", function () {
       });
     });
 
+    it("recomputes following epage ranges when a spine grows", function () {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      var precedingItem = { spineIndex: 0, epage: 0, epageCount: 10 };
+      var grownItem = { spineIndex: 1, epage: 10, epageCount: 5 };
+      var loadedFollowingItem = { spineIndex: 2, epage: 15, epageCount: 3 };
+      var unloadedFollowingItem = { spineIndex: 3, epage: 18, epageCount: 4 };
+      var epageCountCallback = jasmine.createSpy("epageCountCallback");
+      view.opf = {
+        epageIsRenderedPage: true,
+        spine: [
+          precedingItem,
+          grownItem,
+          loadedFollowingItem,
+          unloadedFollowingItem,
+        ],
+        epageCount: 22,
+        epageCountCallback: epageCountCallback,
+      };
+      // Only the loaded following spine has a view item; the last one is
+      // not yet rendered and must still get its epage start recomputed.
+      view.spineItems = [
+        null,
+        { item: grownItem },
+        { item: loadedFollowingItem },
+        null,
+      ];
+
+      view.updateEPageRangesAfterPageCountChange({ item: grownItem }, 7);
+
+      expect(grownItem.epageCount).toBe(7);
+      expect(loadedFollowingItem.epage).toBe(17);
+      expect(unloadedFollowingItem.epage).toBe(20);
+      expect(view.opf.epageCount).toBe(24);
+      expect(epageCountCallback).toHaveBeenCalledOnceWith(24);
+    });
+
+    it("keeps epage ranges when epage is not the rendered page", function () {
+      var view = Object.create(adapt_epub.OPFView.prototype);
+      var changedItem = { spineIndex: 0, epage: 0, epageCount: 10 };
+      var followingItem = { spineIndex: 1, epage: 10, epageCount: 3 };
+      var epageCountCallback = jasmine.createSpy("epageCountCallback");
+      view.opf = {
+        epageIsRenderedPage: false,
+        spine: [changedItem, followingItem],
+        epageCount: 13,
+        epageCountCallback: epageCountCallback,
+      };
+
+      view.updateEPageRangesAfterPageCountChange({ item: changedItem }, 12);
+
+      expect(changedItem.epageCount).toBe(10);
+      expect(followingItem.epage).toBe(10);
+      expect(view.opf.epageCount).toBe(13);
+      expect(epageCountCallback).not.toHaveBeenCalled();
+    });
+
     it("defers final-page completion while a counter scope is still pushed", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
