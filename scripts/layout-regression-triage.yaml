@@ -1,1 +1,36 @@
-[]
+- category: Cross-references
+  title: target-text() reflow that shrinks an earlier WebPub spine
+  file: target-text-shrinking-spine/publication.json
+  decision: expected  # regression / expected / skip
+  notes: "New test case for PR #2132"
+  approvedViewer: git-fork-minorun365-fix-referenc-2ffc35  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-shrinking-spine/publication.json&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-shrinking-spine/publication.json&zoom=1&spread=false
+- category: Cross-references
+  title: target-counter() reflow after a retained source value changes
+  file: target-counter-retained-source/publication.json
+  decision: expected  # regression / expected / skip
+  notes: "New test case for PR #2132"
+  approvedViewer: git-fork-minorun365-fix-referenc-2ffc35  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-retained-source/publication.json&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-retained-source/publication.json&zoom=1&spread=false
+- category: Page breaks
+  title: Consumed break-before on a flex box at page start
+  file: page_breaks/break-before-flex-at-page-start.html
+  decision: expected  # regression / expected / skip
+  notes: "New test case for PR #2132"
+  approvedViewer: git-fork-minorun365-fix-referenc-2ffc35  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/break-before-flex-at-page-start.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/break-before-flex-at-page-start.html&zoom=1&spread=false
