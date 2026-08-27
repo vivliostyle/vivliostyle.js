@@ -1,0 +1,11 @@
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "type": "Book",
+  "name": "target-counter reflow in a retained source spine",
+  "readingOrder": [
+    { "url": "source.html", "name": "Retained reference source" },
+    { "url": "shrinker.html", "name": "Shrinking spine" },
+    { "url": "filler.html", "name": "Fixed filler pages" },
+    { "url": "target.html", "name": "Referenced target" }
+  ]
+}

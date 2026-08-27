@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Retained reference source</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!--
+      The unresolved value and page 10 both occupy two characters, so this
+      source initially takes two pages. After the next spine shrinks, the
+      target moves to a single-digit page and this source must be repaginated
+      to one page rather than having only its generated text patched.
+    -->
+    <p class="line-box">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<a class="page-number" href="target.html#target"></a></p>
+  </body>
+</html>

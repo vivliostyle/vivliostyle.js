@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Consumed break-before on a flex box at page start</title>
+    <style>
+      @page {
+        size: 200px 200px;
+        margin: 20px;
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      body {
+        margin: 0;
+      }
+      .trigger {
+        font: 10px/20px monospace;
+        /* Leave room for subpixel rounding at the generated-text boundary. */
+        inline-size: 10.1ch;
+        margin: 0;
+        word-break: break-all;
+      }
+      h2 {
+        display: flex;
+        margin: 0;
+      }
+      section {
+        break-before: page;
+        break-inside: avoid;
+      }
+      a::after {
+        content: " (page " target-counter(attr(href url), page) ")";
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      The unresolved "??" target counter makes this paragraph 9 lines high.
+      Once it resolves to "2", the paragraph becomes exactly 8 lines and fits
+      on page 1. The forced break must then put the target on page 2 without
+      retaining the now-stale page 3 position.
+    -->
+    <p class="trigger">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<a href="#target"></a></p>
+    <section>
+      <h2 id="target">This heading should be on page 2.</h2>
+      <p>There must not be a blank page before this heading.</p>
+    </section>
+  </body>
+</html>

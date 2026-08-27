@@ -450,6 +450,14 @@ module.exports = [
           "target-text() reflow across WebPub spine navigation (Issue #1856)",
       },
       {
+        file: "target-text-shrinking-spine/publication.json",
+        title: "target-text() reflow that shrinks an earlier WebPub spine",
+      },
+      {
+        file: "target-counter-retained-source/publication.json",
+        title: "target-counter() reflow after a retained source value changes",
+      },
+      {
         file: "target-text-vs-named-strings.html",
         title: "target-text() vs Named Strings",
       },
@@ -766,6 +774,10 @@ module.exports = [
       {
         file: "page_breaks/combine_breaks_2.html",
         title: "Combine break value regressions (Issue #1842)",
+      },
+      {
+        file: "page_breaks/break-before-flex-at-page-start.html",
+        title: "Consumed break-before on a flex box at page start",
       },
       {
         file: "page_breaks/break_left_right.html",

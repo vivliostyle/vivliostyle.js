@@ -336,6 +336,29 @@ export class AllLayoutConstraint implements LayoutConstraint {
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
     return this.constraints.every((c) => c.allowLayout(nodeContext));
   }
+
+  allowLayoutAfterPageBreak(nodeContext: Vtree.NodeContext): boolean {
+    // Hooks may update retained layout state (the counter constraint does).
+    // Reject on ordinary constraints first so a later failure cannot leave a
+    // one-shot page-break allowance consumed by an otherwise rejected node.
+    for (const constraint of this.constraints) {
+      if (
+        !constraint.allowLayoutAfterPageBreak &&
+        !constraint.allowLayout(nodeContext)
+      ) {
+        return false;
+      }
+    }
+    for (const constraint of this.constraints) {
+      if (
+        constraint.allowLayoutAfterPageBreak &&
+        !constraint.allowLayoutAfterPageBreak(nodeContext)
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 /**
@@ -3869,6 +3892,31 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       );
     }
 
+    function allowLayout(nodeContext: Vtree.NodeContext): boolean {
+      if (column.layoutConstraint.allowLayout(nodeContext)) {
+        return true;
+      }
+      if (
+        !leadingEdge ||
+        column.isNonFirstColumn ||
+        forcedBreakValue ||
+        !Break.isPageLevelForcedBreak(breakAtTheEdge)
+      ) {
+        return false;
+      }
+      const allowedAfterPageBreak =
+        column.layoutConstraint.allowLayoutAfterPageBreak?.(nodeContext) ??
+        false;
+      if (allowedAfterPageBreak) {
+        // The page-level break has already been satisfied by entering this
+        // page. Consume it only when it is what allows this exact node to move
+        // earlier; keeping a broader flag here changes later, unrelated break
+        // combinations on the same leading edge.
+        breakAtTheEdge = null;
+      }
+      return allowedAfterPageBreak;
+    }
+
     function needForcedBreak(): boolean {
       if (forcedBreakValue) {
         return true;
@@ -4149,7 +4197,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     true,
                     breakAtTheEdge,
                   ) ||
-                  !this.layoutConstraint.allowLayout(nodeContext)
+                  !allowLayout(nodeContext)
                 ) {
                   // overflow
                   nodeContext = (
@@ -4295,7 +4343,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (
                 (nodeContext.pageType != nodeContext.parent?.pageType || // Fix for issue #771
                   !Break.isForcedBreakValue(breakAtTheEdge)) && // Fix for issue #722
-                !this.layoutConstraint.allowLayout(nodeContext)
+                !allowLayout(nodeContext)
               ) {
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
