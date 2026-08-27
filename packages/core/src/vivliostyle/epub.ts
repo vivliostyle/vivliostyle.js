@@ -2411,6 +2411,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
                     this.counterStore.updateTargetCounterNodesInPages(
                       targetViewItem.pages,
                     );
+                    this.updateEPageRangesAfterPageCountChange(
+                      targetViewItem,
+                      targetViewItem.pages.length,
+                    );
                     // Adjust pageCounterStarts and page-counter DOM nodes
                     // for all already-rendered later-spine viewItems so
                     // their counter(page) margins show the corrected value
@@ -2423,7 +2427,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
                     ) {
                       const laterItem = this.spineItems[si];
                       if (!laterItem) continue;
-                      laterItem.item.epage += pageDelta;
                       for (const pcs of laterItem.pageCounterStarts) {
                         if (pcs?.["page"]) {
                           pcs["page"] = pcs["page"].map((v) => v + pageDelta);
@@ -2626,16 +2629,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
     }
   }
 
-  private updateEPageRangesAfterShrink(
+  private updateEPageRangesAfterPageCountChange(
     viewItem: OPFViewItem,
-    finalLength: number,
+    pageCount: number,
   ): void {
     if (!this.opf.epageIsRenderedPage) {
       return;
     }
     const spineIndex = viewItem.item.spineIndex;
-    viewItem.item.epageCount = finalLength;
-    let nextEPage = viewItem.item.epage + finalLength;
+    viewItem.item.epageCount = pageCount;
+    let nextEPage = viewItem.item.epage + pageCount;
     for (let index = spineIndex + 1; index < this.opf.spine.length; index++) {
       const item = this.opf.spine[index];
       item.epage = nextEPage;
@@ -2697,6 +2700,22 @@ export class OPFView implements Vgen.CustomRendererFactory {
       preventDefault: null,
       newPage,
     });
+  }
+
+  /**
+   * Detach stale rendered pages, remembering them so a later rebuilt page can
+   * dispatch the `replaced` event to any viewer still displaying them.
+   */
+  private retireStalePages(spineIndex: number, pages: Vtree.Page[]): void {
+    for (const stalePage of pages) {
+      this.rememberDeferredPageReplacement(spineIndex, stalePage);
+      stalePage.container.remove();
+    }
+  }
+
+  private clearFollowingSpineRelayoutState(): void {
+    this.relayoutingFollowingSpines = false;
+    this.relayoutingFollowingSpineStart = null;
   }
 
   private flushDeferredPageReplacements(viewItem: OPFViewItem): void {
@@ -2813,10 +2832,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         continue;
       }
       lastInvalidatedSpine = spineIndex;
-      viewItem.pages.forEach((renderedPage) => {
-        this.rememberDeferredPageReplacement(spineIndex, renderedPage);
-        renderedPage.container.remove();
-      });
+      this.retireStalePages(spineIndex, viewItem.pages);
       this.spineItems[spineIndex] = null;
       this.spineItemLoadingContinuations[spineIndex] = null;
     }
@@ -2834,25 +2850,21 @@ export class OPFView implements Vgen.CustomRendererFactory {
     let passCount = 0;
     let result: PageAndPosition | null = null;
 
-    const clearRelayoutState = (): void => {
-      this.relayoutingFollowingSpines = false;
-      this.relayoutingFollowingSpineStart = null;
-    };
     frame.handler = (handlerFrame, err) => {
-      clearRelayoutState();
+      this.clearFollowingSpineRelayoutState();
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
 
     const runNextPass = (): void => {
       const firstSpine = this.deferredFollowingSpineRelayoutStart;
       if (firstSpine == null) {
-        clearRelayoutState();
+        this.clearFollowingSpineRelayoutState();
         frame.finish(result);
         return;
       }
       passCount++;
       if (passCount > maxPasses) {
-        clearRelayoutState();
+        this.clearFollowingSpineRelayoutState();
         frame.task.raise(
           new Error("Cross-reference pagination did not stabilize"),
           frame.parent,
@@ -2944,7 +2956,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         const finalLength = pageIndexToRender + 1;
         const pageCountChanged = viewItem.pages.length > finalLength;
         if (pageCountChanged) {
-          this.updateEPageRangesAfterShrink(viewItem, finalLength);
+          this.updateEPageRangesAfterPageCountChange(viewItem, finalLength);
         }
         this.removeDeferredReferencePages(
           (entry) =>
@@ -2960,13 +2972,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
             stalePageIndex,
           );
         }
-        viewItem.pages.slice(finalLength).forEach((stalePage) => {
-          this.rememberDeferredPageReplacement(
-            viewItem.item.spineIndex,
-            stalePage,
-          );
-          stalePage.container.remove();
-        });
+        this.retireStalePages(
+          viewItem.item.spineIndex,
+          viewItem.pages.slice(finalLength),
+        );
         viewItem.pages.splice(finalLength);
         viewItem.layoutPositions.splice(finalLength);
         viewItem.pageCounterStarts.splice(finalLength);
@@ -3229,8 +3238,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         });
       },
       (frame, err) => {
-        this.relayoutingFollowingSpines = false;
-        this.relayoutingFollowingSpineStart = null;
+        this.clearFollowingSpineRelayoutState();
         endRendering();
         frame.task.raise(err, frame.parent);
       },
@@ -3352,8 +3360,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     let result: PageAndPosition | null = null;
     this.renderingAllPages = true;
     frame.handler = (handlerFrame, err) => {
-      this.relayoutingFollowingSpines = false;
-      this.relayoutingFollowingSpineStart = null;
+      this.clearFollowingSpineRelayoutState();
       this.renderingAllPages = false;
       handlerFrame.task.raise(err, handlerFrame.parent);
     };

@@ -1405,28 +1405,11 @@ export class CounterStore {
     if (!targetIds) {
       return;
     }
-    for (const id of targetIds) {
-      const keepOtherPage = (ref: TargetCounterReference) =>
-        ref.spineIndex !== spineIndex || ref.pageIndex !== pageIndex;
-      const resolved = (this.resolvedReferences[id] || []).filter(
-        keepOtherPage,
-      );
-      const unresolved = (this.unresolvedReferences[id] || []).filter(
-        keepOtherPage,
-      );
-      if (resolved.length) {
-        this.resolvedReferences[id] = resolved;
-      } else {
-        delete this.resolvedReferences[id];
-      }
-      if (unresolved.length) {
-        this.unresolvedReferences[id] = unresolved;
-      } else {
-        delete this.unresolvedReferences[id];
-      }
-    }
     const keepOtherPage = (ref: TargetCounterReference) =>
       ref.spineIndex !== spineIndex || ref.pageIndex !== pageIndex;
+    for (const id of targetIds) {
+      this.retainReferences(id, keepOtherPage);
+    }
     this.referencesToSolve = this.referencesToSolve.filter(keepOtherPage);
     this.referencesToSolveStack = this.referencesToSolveStack.map((refs) =>
       refs.filter(keepOtherPage),
@@ -1434,6 +1417,28 @@ export class CounterStore {
     targetIdsByPage.delete(pageIndex);
     if (targetIdsByPage.size === 0) {
       this.referenceTargetIdsBySourcePage.delete(spineIndex);
+    }
+  }
+
+  /**
+   * Keep only the resolved/unresolved references of the target that satisfy
+   * the given predicate, removing the arrays entirely when they become empty.
+   */
+  private retainReferences(
+    id: string,
+    keep: (ref: TargetCounterReference) => boolean,
+  ): void {
+    const resolved = (this.resolvedReferences[id] || []).filter(keep);
+    const unresolved = (this.unresolvedReferences[id] || []).filter(keep);
+    if (resolved.length) {
+      this.resolvedReferences[id] = resolved;
+    } else {
+      delete this.resolvedReferences[id];
+    }
+    if (unresolved.length) {
+      this.unresolvedReferences[id] = unresolved;
+    } else {
+      delete this.unresolvedReferences[id];
     }
   }
 
@@ -1562,24 +1567,10 @@ export class CounterStore {
       ...Object.keys(this.unresolvedReferences),
     ]);
 
+    const keepEarlierSource = (ref: TargetCounterReference) =>
+      ref.spineIndex < firstSpineIndex;
     for (const id of targetIds) {
-      const resolved = (this.resolvedReferences[id] || []).filter(
-        (ref) => ref.spineIndex < firstSpineIndex,
-      );
-      const unresolved = (this.unresolvedReferences[id] || []).filter(
-        (ref) => ref.spineIndex < firstSpineIndex,
-      );
-
-      if (resolved.length) {
-        this.resolvedReferences[id] = resolved;
-      } else {
-        delete this.resolvedReferences[id];
-      }
-      if (unresolved.length) {
-        this.unresolvedReferences[id] = unresolved;
-      } else {
-        delete this.unresolvedReferences[id];
-      }
+      this.retainReferences(id, keepEarlierSource);
     }
 
     for (const id of Object.keys(this.pageIndicesById)) {
@@ -1603,8 +1594,6 @@ export class CounterStore {
       }
     }
 
-    const keepEarlierSource = (ref: TargetCounterReference) =>
-      ref.spineIndex < firstSpineIndex;
     this.newReferencesOfCurrentPage =
       this.newReferencesOfCurrentPage.filter(keepEarlierSource);
     this.referencesToSolve = this.referencesToSolve.filter(keepEarlierSource);
@@ -1621,30 +1610,26 @@ export class CounterStore {
     pages: Vtree.Page[],
     changedTargetIds?: Set<string>,
   ): Set<Vtree.Page> {
-    const changedPages = new Set<Vtree.Page>();
-    for (const page of pages) {
-      if (!page || !page.container) continue;
-      const nodes = page.container.querySelectorAll(`[${TARGET_COUNTER_ATTR}]`);
-      for (const node of nodes) {
-        const key = node.getAttribute(TARGET_COUNTER_ATTR);
+    return this.updateGeneratedContentNodesInPages(
+      pages,
+      TARGET_COUNTER_ATTR,
+      (key) => {
         const expr = this.targetCounterExprs.find((o) => o.expr.key === key);
-        if (expr && expr.transformedId) {
-          const counterValue = this.pageCountersById[expr.transformedId];
-          if (counterValue) {
-            const arr: number[] = counterValue[expr.name];
-            if (arr) {
-              const value = expr.format(arr[arr.length - 1]);
-              if (node.textContent !== value) {
-                node.textContent = value;
-                changedPages.add(page);
-                changedTargetIds?.add(expr.transformedId);
-              }
-            }
-          }
+        if (!expr || !expr.transformedId) {
+          return null;
         }
-      }
-    }
-    return changedPages;
+        const arr: number[] | undefined =
+          this.pageCountersById[expr.transformedId]?.[expr.name];
+        if (!arr) {
+          return null;
+        }
+        return {
+          id: expr.transformedId,
+          value: expr.format(arr[arr.length - 1]),
+        };
+      },
+      changedTargetIds,
+    );
   }
 
   /**
@@ -1654,30 +1639,52 @@ export class CounterStore {
     pages: Vtree.Page[],
     changedTargetIds?: Set<string>,
   ): Set<Vtree.Page> {
+    return this.updateGeneratedContentNodesInPages(
+      pages,
+      TARGET_TEXT_ATTR,
+      (key) => {
+        const expr = this.targetTextExprs.find((o) => o.expr.key === key);
+        if (!expr || !expr.transformedId) {
+          return null;
+        }
+        const text = this.pageTextById[expr.transformedId];
+        if (!text) {
+          return null;
+        }
+        let value: string;
+        if (expr.pseudoElement === "first-letter") {
+          const fullText =
+            (text.before ?? "") + (text.content ?? "") + (text.after ?? "");
+          value = fullText.match(Base.firstLetterPattern)?.[0] ?? "";
+        } else {
+          value = text[expr.pseudoElement] ?? "";
+        }
+        return { id: expr.transformedId, value };
+      },
+      changedTargetIds,
+    );
+  }
+
+  /**
+   * Shared walker for patching generated-content nodes (target-counter/
+   * target-text) in retained pages from the current target snapshots.
+   */
+  private updateGeneratedContentNodesInPages(
+    pages: Vtree.Page[],
+    attrName: string,
+    resolveValue: (key: string | null) => { id: string; value: string } | null,
+    changedTargetIds?: Set<string>,
+  ): Set<Vtree.Page> {
     const changedPages = new Set<Vtree.Page>();
     for (const page of pages) {
       if (!page || !page.container) continue;
-      const nodes = page.container.querySelectorAll(`[${TARGET_TEXT_ATTR}]`);
+      const nodes = page.container.querySelectorAll(`[${attrName}]`);
       for (const node of nodes) {
-        const key = node.getAttribute(TARGET_TEXT_ATTR);
-        const expr = this.targetTextExprs.find((o) => o.expr.key === key);
-        if (expr && expr.transformedId) {
-          const text = this.pageTextById[expr.transformedId];
-          if (text) {
-            let value: string;
-            if (expr.pseudoElement === "first-letter") {
-              const fullText =
-                (text.before ?? "") + (text.content ?? "") + (text.after ?? "");
-              value = fullText.match(Base.firstLetterPattern)?.[0] ?? "";
-            } else {
-              value = text[expr.pseudoElement] ?? "";
-            }
-            if (node.textContent !== value) {
-              node.textContent = value;
-              changedPages.add(page);
-              changedTargetIds?.add(expr.transformedId);
-            }
-          }
+        const resolved = resolveValue(node.getAttribute(attrName));
+        if (resolved && node.textContent !== resolved.value) {
+          node.textContent = resolved.value;
+          changedPages.add(page);
+          changedTargetIds?.add(resolved.id);
         }
       }
     }
