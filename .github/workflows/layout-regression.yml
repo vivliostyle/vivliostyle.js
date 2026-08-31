@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # needed to post/update PR comments
+      pull-requests: write # needed to post/update PR comments, and to read the Vercel bot's preview-URL comment
     # For pull_request events, only run on internal PRs (same repo).
     # Fork PRs don't have a Vercel preview until a maintainer authorizes it.
     # In that case, a maintainer can manually trigger via workflow_dispatch
@@ -70,22 +70,65 @@ jobs:
             fi
           fi
 
-      # ── For PR runs: derive the Vercel preview URL from the branch name ───
-      - name: Derive PR Vercel preview spec
+      # ── For PR runs: derive (or resolve) the Vercel preview URL ────────────
+      # Deriving the URL from the sanitized branch name works as long as the
+      # resulting host is at most 63 characters. Beyond that, Vercel truncates
+      # the host and appends a short content hash to keep it unique, and that
+      # hash can't be predicted here — so for long branch names, look up the
+      # real URL from the Vercel bot's PR comment (which always has the exact
+      # branch-alias URL) instead of guessing.
+      - name: Resolve PR Vercel preview URL
         if: github.event_name == 'pull_request'
         id: pr_viewer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BRANCH: ${{ github.head_ref }}
         run: |
-          BRANCH="${{ github.head_ref }}"
-          # Replicate Vercel's branch name sanitization
           SANITIZED=$(echo "$BRANCH" \
             | tr '[:upper:]' '[:lower:]' \
-            | sed 's/[^a-z0-9]\+/-/g' \
-            | sed 's/^-\|-$//g')
-          echo "spec=git-${SANITIZED}" >> "$GITHUB_OUTPUT"
-          echo "label=git-${SANITIZED}" >> "$GITHUB_OUTPUT"
-          echo "url=https://vivliostyle-git-${SANITIZED}-vivliostyle.vercel.app/" >> "$GITHUB_OUTPUT"
+            | sed -E 's/[^a-z0-9]+/-/g' \
+            | sed -E 's/^-|-$//g')
+          HOST="vivliostyle-git-${SANITIZED}-vivliostyle"
 
-      # ── Wait for Vercel preview to become ready (PR runs only) ────────────
+          if [ "${#HOST}" -le 63 ]; then
+            URL="https://${HOST}.vercel.app/"
+            echo "Branch-derived URL: $URL"
+          else
+            echo "Branch-derived host is ${#HOST} chars (over the 63-char Vercel limit)."
+            echo "Looking up the real preview URL from the Vercel bot's PR comment..."
+            URL=""
+            for i in $(seq 1 20); do
+              BODY=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
+                --jq '[.[] | select(.user.login == "vercel[bot]")] | last | .body // empty')
+              if echo "$BODY" | grep -q 'ready\.svg'; then
+                CANDIDATE_URL=$(echo "$BODY" | grep -oE '\[Preview\]\(https://[^)]+\)' | grep -oE 'https://[^)]+' | head -1)
+                if [ -n "$CANDIDATE_URL" ]; then
+                  URL="$CANDIDATE_URL"
+                  echo "Preview is ready (attempt $i): $URL"
+                  break
+                fi
+              fi
+              echo "  attempt $i: not ready yet — waiting 15s..."
+              sleep 15
+            done
+            if [ -z "$URL" ]; then
+              # Best-effort fallback: likely wrong for this branch name, since
+              # Vercel's truncation hash can't be predicted here.
+              echo "Warning: could not resolve the real Vercel preview URL in time; falling back to a branch-derived guess."
+              URL="https://${HOST}.vercel.app/"
+            fi
+          fi
+
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "label=git-${SANITIZED}" >> "$GITHUB_OUTPUT"
+
+      # ── Wait for the Vercel preview to become ready (PR runs only) ────────
+      # Needed for the fast (short branch name) path above, which derives the
+      # URL without confirming the deployment has finished. The bot-comment
+      # lookup path already confirms readiness itself, so this is a quick
+      # no-op there.
       - name: Wait for Vercel preview
         if: github.event_name == 'pull_request'
         run: |
@@ -106,7 +149,8 @@ jobs:
       - name: Run regression compare
         id: compare
         env:
-          ACTUAL_VIEWER: ${{ github.event_name == 'pull_request' && steps.pr_viewer.outputs.spec || inputs.actual_viewer }}
+          ACTUAL_VIEWER: ${{ github.event_name == 'pull_request' && steps.pr_viewer.outputs.url || inputs.actual_viewer }}
+          ACTUAL_LABEL: ${{ steps.pr_viewer.outputs.label }}
           BASELINE_VIEWER: ${{ inputs.baseline_viewer }}
           INPUT_CATEGORY: ${{ inputs.category }}
           INPUT_LIMIT: ${{ inputs.limit }}
@@ -128,6 +172,7 @@ jobs:
           else
             # PR run: actual = PR preview, baseline = stable (default)
             args+=(--actual-viewer "$ACTUAL_VIEWER")
+            args+=(--actual-label "$ACTUAL_LABEL")
           fi
           yarn test:layout-regression "${args[@]}"
         continue-on-error: true

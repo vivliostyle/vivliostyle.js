@@ -220,6 +220,16 @@ yarn test:reftest-diff \
 | legacy version | `2019.11.100` | https://vivliostyle.github.io/viewer/2019.11.100/vivliostyle-viewer.html |
 | URL | `https://...` | Any viewer URL (legacy `vivliostyle-viewer.html` URLs are auto-detected) |
 
+`git-<branch>`/`git:<branch>` derives the preview URL from the sanitized branch
+name, which only works reliably up to 63 characters. Beyond that, Vercel
+truncates the hostname and appends a short content hash to keep it unique — a
+hash this script cannot predict — so the derived URL is likely wrong for long
+branch names. The script prints a warning in that case; pass the real preview
+URL directly with `--actual-viewer <url>` instead (e.g. from the PR's Vercel
+comment). The CI workflow uses the same short-name derivation, but for long
+branch names it looks up the real URL from the Vercel bot's PR comment instead
+of guessing.
+
 Examples:
 
 ```bash

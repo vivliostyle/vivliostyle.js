@@ -218,6 +218,16 @@ yarn test:reftest-diff \
 | レガシーバージョン | `2019.11.100` | https://vivliostyle.github.io/viewer/2019.11.100/vivliostyle-viewer.html |
 | URL | `https://...` | 任意のビューワー URL（レガシーの `vivliostyle-viewer.html` URL も自動判別） |
 
+`git-<branch>` / `git:<branch>` はサニタイズしたブランチ名から URL を組み立てる
+ため、ホスト名が63文字以内であれば確実に動作する。それを超える場合、Vercel は
+ホスト名を切り詰めた上で一意性のためのハッシュを付加するが、このハッシュは
+本スクリプトからは予測できないため、長いブランチ名では生成した URL が誤った
+ものになる可能性が高い。この場合スクリプトは警告を表示するので、代わりに
+実際のプレビュー URL（PR の Vercel コメントなどから取得）を
+`--actual-viewer <url>` で直接指定すること。CI ワークフローも同じ63文字以内の
+判定を使うが、それを超えるブランチ名の場合は推測する代わりに Vercel bot の
+PR コメントから実際の URL を取得する。
+
 使用例:
 
 ```bash
