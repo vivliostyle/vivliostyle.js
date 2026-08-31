@@ -5336,7 +5336,7 @@ export class CascadeParserHandler
         ? !functionalPseudoClasses.has(name.toLowerCase())
         : functionalPseudoClasses.has(name.toLowerCase())
     ) {
-      this.invalidSelector(`Unsupported pseudo-class :${name}`);
+      this.unsupportedPseudoclassSelector(name, !!params);
       return;
     }
     switch (name.toLowerCase()) {
@@ -5458,10 +5458,26 @@ export class CascadeParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default:
-        this.invalidSelector(`Unknown pseudo-class :${name}`);
+        this.unsupportedPseudoclassSelector(name, !!params);
         return;
     }
     this.specificity += 256;
+  }
+
+  private unsupportedPseudoclassSelector(
+    name: string,
+    functional: boolean,
+  ): void {
+    if (
+      functional
+        ? unsupportedFunctionalPseudoClasses.has(name.toLowerCase())
+        : CSS.supports(`selector(:${name})`)
+    ) {
+      this.chain.push(new CheckConditionAction("")); // always fails
+      this.specificity += 256;
+    } else {
+      this.invalidSelector(`Unsupported pseudo-class :${name}`);
+    }
   }
 
   override pseudoelementSelector(
@@ -5515,11 +5531,27 @@ export class CascadeParserHandler
           this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
-      default: // always fails
-        this.invalidSelector(`Unknown pseudo-element ::${name}`);
+      default:
+        this.unsupportedPseudoelementSelector(name, !!params);
         return;
     }
     this.specificity += 1;
+  }
+
+  private unsupportedPseudoelementSelector(
+    name: string,
+    functional: boolean,
+  ): void {
+    if (
+      functional
+        ? unsupportedFunctionalPseudoElements.has(name.toLowerCase())
+        : CSS.supports(`selector(::${name})`)
+    ) {
+      this.chain.push(new CheckConditionAction("")); // always fails
+      this.specificity += 1;
+    } else {
+      this.invalidSelector(`Unknown pseudo-element ::${name}`);
+    }
   }
 
   override idSelector(id: string): void {
@@ -5944,6 +5976,29 @@ const functionalPseudoClasses: ReadonlySet<string> = new Set([
   "nth-last-child",
   "nth-last-of-type",
   "nth-of-type",
+]);
+
+// Functional selectors that browsers parse but that never match anything this
+// engine lays out, such as the shadow-DOM ones. Their arguments are not
+// validated; a browser would reject e.g. `:host(a b)`, this engine keeps it as
+// never matching.
+const unsupportedFunctionalPseudoClasses: ReadonlySet<string> = new Set([
+  "active-view-transition-type",
+  "host",
+  "host-context",
+  "state",
+]);
+
+const unsupportedFunctionalPseudoElements: ReadonlySet<string> = new Set([
+  "cue",
+  "highlight",
+  "part",
+  "picker",
+  "slotted",
+  "view-transition-group",
+  "view-transition-image-pair",
+  "view-transition-new",
+  "view-transition-old",
 ]);
 
 export let conditionCount: number = 0;

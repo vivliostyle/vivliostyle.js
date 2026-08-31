@@ -1943,8 +1943,15 @@ export class Parser {
                 if (params === null) {
                   break;
                 }
-              } else {
+              } else if (text == "first-n-lines") {
                 params = this.readPseudoParams();
+              } else {
+                // A pseudo-element this engine does not implement; its
+                // argument can hold tokens `readPseudoParams` rejects.
+                params = [];
+                if (!this.skipPseudoFunctionContents()) {
+                  break;
+                }
               }
               token = tokenizer.token();
               if (token.type == TokenType.C_PAR) {
