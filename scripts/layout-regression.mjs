@@ -637,8 +637,22 @@ function resolveViewerSpec(spec) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
     const label = `git-${sanitized}`;
+    const host = `vivliostyle-git-${sanitized}-vivliostyle`;
+    // Vercel truncates a subdomain longer than 63 characters (before
+    // `.vercel.app`) and appends a short content hash to keep it unique.
+    // That hash can't be predicted here, so the derived URL below is only
+    // reliable for short branch names; long ones need the real preview URL
+    // (e.g. from the PR's Vercel comment) passed via --actual-viewer <url>.
+    if (host.length > 63) {
+      console.warn(
+        `Warning: branch name "${branch}" produces a Vercel preview host longer than 63 characters.\n` +
+          `Vercel truncates and hashes such hosts unpredictably, so the derived URL below is likely wrong:\n` +
+          `  https://${host}.vercel.app/\n` +
+          `Pass the actual preview URL directly instead, e.g. --actual-viewer <url>.`,
+      );
+    }
     return {
-      url: `https://vivliostyle-git-${sanitized}-vivliostyle.vercel.app/`,
+      url: `https://${host}.vercel.app/`,
       label,
     };
   }
