@@ -2328,10 +2328,17 @@ describe("css-cascade", function () {
         expectNeverMatching();
       });
 
-      it("keeps :host-context(.foo) as a never-matching selector", function () {
+      it("follows the host browser on :host-context(.foo)", function () {
+        // `:host-context()` is supported by Chrome only; a browser that does
+        // not recognize it treats the selector as invalid, and so does this
+        // handler.
         handler.pseudoclassSelector("host-context", [".foo"]);
 
-        expectNeverMatching();
+        if (CSS.supports("selector(:host-context(.foo))")) {
+          expectNeverMatching();
+        } else {
+          expect(handler.selectorListVoided).toBe(true);
+        }
       });
 
       it("voids the selector list when a functional pseudo-class argument is invalid", function () {
