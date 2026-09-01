@@ -114,7 +114,11 @@ jobs:
                 # the first one.
                 BODY=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" \
                   | jq -s -r 'add | [.[] | select(.user.login == "vercel[bot]")] | last | .body // empty')
-                CANDIDATE_URL=$(echo "$BODY" | grep -oE '\[Preview\]\(https://[^)]+\)' | grep -oE 'https://[^)]+' | head -1)
+                # `|| true`: GitHub Actions runs this with `bash -e -o pipefail`,
+                # so a non-matching grep (expected while the comment hasn't
+                # picked up the new commit's Preview link yet) would otherwise
+                # abort this step outright instead of letting the loop retry.
+                CANDIDATE_URL=$(echo "$BODY" | grep -oE '\[Preview\]\(https://[^)]+\)' | grep -oE 'https://[^)]+' | head -1 || true)
                 if [ -n "$CANDIDATE_URL" ]; then
                   URL="$CANDIDATE_URL"
                   echo "Preview is ready (attempt $i): $URL"
