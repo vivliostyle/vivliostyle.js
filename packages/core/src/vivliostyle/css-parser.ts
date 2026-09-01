@@ -1288,6 +1288,21 @@ export class Parser {
     }
   }
 
+  /**
+   * Raw source text of the argument of a functional pseudo-class or
+   * pseudo-element, from `funcPosition` (the position of its name) to the
+   * closing parenthesis the tokenizer is left on by
+   * `skipPseudoFunctionContents`.
+   */
+  rawPseudoFunctionArg(funcPosition: number): string {
+    const tokenizer = this.tokenizer;
+    const text = tokenizer.input.substring(
+      funcPosition,
+      tokenizer.token().position,
+    );
+    return text.substring(text.indexOf("(") + 1);
+  }
+
   skipPseudoFunctionContents(): boolean {
     let depth = 0;
     while (true) {
@@ -1525,6 +1540,7 @@ export class Parser {
     let num: number;
     let val: Css.Val | null = null;
     let params: (number | string)[] | null;
+    let funcPosition = 0;
     let selectorStartPosition: number | null = null;
 
     if (parsingStyleAttr) {
@@ -1772,6 +1788,7 @@ export class Parser {
               continue;
             case TokenType.FUNC:
               text = token.text.toLowerCase();
+              funcPosition = token.position;
               tokenizer.consume();
               switch (text) {
                 case "is":
@@ -1893,12 +1910,21 @@ export class Parser {
                     tokenizer.consume();
                     break;
                   }
-                // fall through
-                default:
+                  // An argument that is not a single identifier is invalid;
+                  // the empty params array tells the handler to void it.
                   params = [];
                   if (!this.skipPseudoFunctionContents()) {
                     break pseudoclassType;
                   }
+                  break;
+                default:
+                  // A pseudo-class this engine does not implement. Its raw
+                  // argument text goes to the handler, which validates the
+                  // whole functional selector with `CSS.supports`.
+                  if (!this.skipPseudoFunctionContents()) {
+                    break pseudoclassType;
+                  }
+                  params = [this.rawPseudoFunctionArg(funcPosition)];
               }
               token = tokenizer.token();
               if (token.type == TokenType.C_PAR) {
@@ -1937,6 +1963,7 @@ export class Parser {
               continue;
             case TokenType.FUNC:
               text = token.text.toLowerCase();
+              funcPosition = token.position;
               tokenizer.consume();
               if (text == "nth-fragment") {
                 params = this.readNthPseudoParams();
@@ -1946,12 +1973,14 @@ export class Parser {
               } else if (text == "first-n-lines") {
                 params = this.readPseudoParams();
               } else {
-                // A pseudo-element this engine does not implement; its
-                // argument can hold tokens `readPseudoParams` rejects.
-                params = [];
+                // A pseudo-element this engine does not implement. Its raw
+                // argument text goes to the handler, which validates the whole
+                // functional selector with `CSS.supports`; `readPseudoParams`
+                // would reject tokens the argument may legitimately contain.
                 if (!this.skipPseudoFunctionContents()) {
                   break;
                 }
+                params = [this.rawPseudoFunctionArg(funcPosition)];
               }
               token = tokenizer.token();
               if (token.type == TokenType.C_PAR) {

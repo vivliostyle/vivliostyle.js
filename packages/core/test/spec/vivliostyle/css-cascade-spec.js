@@ -2322,16 +2322,29 @@ describe("css-cascade", function () {
         expectNeverMatching();
       });
 
-      it("keeps the functional form :host() as a never-matching selector", function () {
-        handler.pseudoclassSelector("host", []);
+      it("keeps the functional form :host(.foo) as a never-matching selector", function () {
+        handler.pseudoclassSelector("host", [".foo"]);
 
         expectNeverMatching();
       });
 
-      it("keeps :host-context() as a never-matching selector", function () {
-        handler.pseudoclassSelector("host-context", []);
+      it("keeps :host-context(.foo) as a never-matching selector", function () {
+        handler.pseudoclassSelector("host-context", [".foo"]);
 
         expectNeverMatching();
+      });
+
+      it("voids the selector list when a functional pseudo-class argument is invalid", function () {
+        handler.pseudoclassSelector("host", ["a b"]);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+
+      it("voids the selector list for an escaped name that is not valid CSS", function () {
+        // `:\69s\28 \.foo` is one pseudo-class name, not `:is(.foo)`.
+        handler.pseudoclassSelector("is(.foo", null);
+
+        expect(handler.selectorListVoided).toBe(true);
       });
 
       it("voids the selector list for a pseudo-class that is not valid CSS", function () {
@@ -2346,10 +2359,16 @@ describe("css-cascade", function () {
         expectNeverMatching();
       });
 
-      it("keeps ::slotted() as a never-matching selector", function () {
-        handler.pseudoelementSelector("slotted", []);
+      it("keeps ::slotted(.foo) as a never-matching selector", function () {
+        handler.pseudoelementSelector("slotted", [".foo"]);
 
         expectNeverMatching();
+      });
+
+      it("voids the selector list when a functional pseudo-element argument is invalid", function () {
+        handler.pseudoelementSelector("slotted", ["a b"]);
+
+        expect(handler.selectorListVoided).toBe(true);
       });
 
       it("voids the selector list for a pseudo-element that is not valid CSS", function () {
@@ -2389,6 +2408,36 @@ describe("css-cascade", function () {
         parseAndCheck(
           done,
           "x::slotted(.foo), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).toContain("p");
+          },
+        );
+      });
+
+      it("voids the whole selector list when ::slotted() has an invalid argument", function (done) {
+        parseAndCheck(
+          done,
+          "::slotted(a b), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+          },
+        );
+      });
+
+      it("voids the whole selector list when ::part() has an invalid argument", function (done) {
+        parseAndCheck(
+          done,
+          "::part(#x), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+          },
+        );
+      });
+
+      it("keeps a pseudo-class that follows an unsupported pseudo-element", function (done) {
+        parseAndCheck(
+          done,
+          "::part(button):hover, p { color: red; }",
           function (handler) {
             expect(Object.keys(handler.cascade.tags)).toContain("p");
           },
