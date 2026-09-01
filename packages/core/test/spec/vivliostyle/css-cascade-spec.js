@@ -1484,7 +1484,14 @@ describe("css-cascade", function () {
           "p:focus-visible { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            // The rule survives as valid CSS, but its selector matches
+            // nothing instead of being handed to the native matcher.
+            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
+            var action = cascade.tags["p"];
+            expect(action).toEqual(
+              jasmine.any(adapt_csscasc.WiredConditionScope),
+            );
+            expect(action.condition.condition).toBe("");
           },
         );
       });
@@ -2287,6 +2294,171 @@ describe("css-cascade", function () {
 
         expect(handler.chain.actions).toBeUndefined();
         expect(handler.selectorListVoided).toBe(true);
+      });
+    });
+
+    describe("valid but unsupported selectors", function () {
+      var handler;
+
+      beforeEach(function () {
+        handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
+        handler.startSelectorRule();
+      });
+
+      function expectNeverMatching() {
+        expect(handler.selectorListVoided).toBe(false);
+        expect(handler.chain.actions.length).toBe(1);
+        var action = handler.chain.actions[0];
+        expect(action).toEqual(jasmine.any(adapt_csscasc.CheckConditionAction));
+        expect(action.condition).toBe("");
+      }
+
+      it("keeps :host as a never-matching selector", function () {
+        handler.pseudoclassSelector("host", null);
+
+        expectNeverMatching();
+      });
+
+      it("keeps the functional form :host(.foo) as a never-matching selector", function () {
+        handler.pseudoclassSelector("host", [".foo"]);
+
+        expectNeverMatching();
+      });
+
+      it("follows the host browser on :host-context(.foo)", function () {
+        // `:host-context()` is supported by Chrome only; a browser that does
+        // not recognize it treats the selector as invalid, and so does this
+        // handler.
+        handler.pseudoclassSelector("host-context", [".foo"]);
+
+        if (CSS.supports("selector(:host-context(.foo))")) {
+          expectNeverMatching();
+        } else {
+          expect(handler.selectorListVoided).toBe(true);
+        }
+      });
+
+      it("voids the selector list when a functional pseudo-class argument is invalid", function () {
+        handler.pseudoclassSelector("host", ["a b"]);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+
+      it("voids the selector list for an escaped name that is not valid CSS", function () {
+        // `:\69s\28 \.foo` is one pseudo-class name, not `:is(.foo)`.
+        handler.pseudoclassSelector("is(.foo", null);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+
+      it("voids the selector list for a pseudo-class that is not valid CSS", function () {
+        handler.pseudoclassSelector("this-is-not-css", null);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+
+      it("keeps ::selection as a never-matching selector", function () {
+        handler.pseudoelementSelector("selection", null);
+
+        expectNeverMatching();
+      });
+
+      it("keeps ::slotted(.foo) as a never-matching selector", function () {
+        handler.pseudoelementSelector("slotted", [".foo"]);
+
+        expectNeverMatching();
+      });
+
+      it("voids the selector list when a functional pseudo-element argument is invalid", function () {
+        handler.pseudoelementSelector("slotted", ["a b"]);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+
+      it("voids the selector list for a pseudo-element that is not valid CSS", function () {
+        handler.pseudoelementSelector("this-is-not-css", null);
+
+        expect(handler.selectorListVoided).toBe(true);
+      });
+    });
+
+    describe("valid but unsupported selectors in a selector list", function () {
+      function parseAndCheck(done, text, fn) {
+        var handler = cascadeParserHandler(
+          new adapt_exprs.LexicalScope(null),
+          adapt_cssvalid.baseValidatorSet(),
+        );
+        var tokenizer = new adapt_csstok.Tokenizer(text, handler.owner);
+
+        adapt_task.start(function () {
+          adapt_cssparse
+            .parseStylesheet(tokenizer, handler.owner, null, null, null)
+            .then(function (result) {
+              expect(result).toBe(true);
+              fn(handler);
+              done();
+            });
+          return adapt_task.newResult(true);
+        });
+      }
+
+      it("keeps the rest of the selector list when it contains :host", function (done) {
+        parseAndCheck(done, ":host, p { color: red; }", function (handler) {
+          expect(Object.keys(handler.cascade.tags)).toContain("p");
+        });
+      });
+
+      it("parses a compound selector argument of ::slotted()", function (done) {
+        parseAndCheck(
+          done,
+          "x::slotted(.foo), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).toContain("p");
+          },
+        );
+      });
+
+      it("voids the whole selector list when ::slotted() has an invalid argument", function (done) {
+        parseAndCheck(
+          done,
+          "::slotted(a b), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+          },
+        );
+      });
+
+      it("voids the whole selector list when ::part() has an invalid argument", function (done) {
+        parseAndCheck(
+          done,
+          "::part(#x), p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+          },
+        );
+      });
+
+      it("keeps a pseudo-class that follows an unsupported pseudo-element", function (done) {
+        parseAndCheck(
+          done,
+          "::part(button):hover, p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).toContain("p");
+          },
+        );
+      });
+
+      it("voids the whole selector list when it contains an invalid selector", function (done) {
+        parseAndCheck(
+          done,
+          ":this-is-not-css, p { color: red; }",
+          function (handler) {
+            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+          },
+        );
       });
     });
   });

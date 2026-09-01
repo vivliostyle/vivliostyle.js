@@ -5336,7 +5336,7 @@ export class CascadeParserHandler
         ? !functionalPseudoClasses.has(name.toLowerCase())
         : functionalPseudoClasses.has(name.toLowerCase())
     ) {
-      this.invalidSelector(`Unsupported pseudo-class :${name}`);
+      this.unsupportedPseudoclassSelector(name, params);
       return;
     }
     switch (name.toLowerCase()) {
@@ -5458,10 +5458,24 @@ export class CascadeParserHandler
         this.pseudoelementSelector(name, params);
         return;
       default:
-        this.invalidSelector(`Unknown pseudo-class :${name}`);
+        this.unsupportedPseudoclassSelector(name, params);
         return;
     }
     this.specificity += 256;
+  }
+
+  private unsupportedPseudoclassSelector(
+    name: string,
+    params: (number | string)[] | null,
+  ): void {
+    if (
+      CSS.supports(`selector(${unsupportedSelectorText(":", name, params)})`)
+    ) {
+      this.chain.push(new CheckConditionAction("")); // always fails
+      this.specificity += 256;
+    } else {
+      this.invalidSelector(`Unsupported pseudo-class :${name}`);
+    }
   }
 
   override pseudoelementSelector(
@@ -5515,11 +5529,25 @@ export class CascadeParserHandler
           this.chain.push(new CheckConditionAction("")); // always fails
         }
         break;
-      default: // always fails
-        this.invalidSelector(`Unknown pseudo-element ::${name}`);
+      default:
+        this.unsupportedPseudoelementSelector(name, params);
         return;
     }
     this.specificity += 1;
+  }
+
+  private unsupportedPseudoelementSelector(
+    name: string,
+    params: (number | string)[] | null,
+  ): void {
+    if (
+      CSS.supports(`selector(${unsupportedSelectorText("::", name, params)})`)
+    ) {
+      this.chain.push(new CheckConditionAction("")); // always fails
+      this.specificity += 1;
+    } else {
+      this.invalidSelector(`Unknown pseudo-element ::${name}`);
+    }
   }
 
   override idSelector(id: string): void {
@@ -5945,6 +5973,22 @@ const functionalPseudoClasses: ReadonlySet<string> = new Set([
   "nth-last-of-type",
   "nth-of-type",
 ]);
+
+/**
+ * Source text of a pseudo-class or pseudo-element this engine does not
+ * implement, for probing with `CSS.supports`. `params` holds the raw argument
+ * text of a functional form, as the parser hands it over, and is null for the
+ * plain form. The name is escaped again because the tokenizer has decoded the
+ * escapes it was written with.
+ */
+function unsupportedSelectorText(
+  colons: string,
+  name: string,
+  params: (number | string)[] | null,
+): string {
+  const ident = Base.escapeCSSIdent(name);
+  return params ? `${colons}${ident}(${params[0]})` : `${colons}${ident}`;
+}
 
 export let conditionCount: number = 0;
 
