@@ -114,10 +114,12 @@ jobs:
               sleep 15
             done
             if [ -z "$URL" ]; then
-              # Best-effort fallback: likely wrong for this branch name, since
-              # Vercel's truncation hash can't be predicted here.
-              echo "Warning: could not resolve the real Vercel preview URL in time; falling back to a branch-derived guess."
-              URL="https://${HOST}.vercel.app/"
+              # No safe fallback here: HOST is already known to exceed 63
+              # characters, so guessing it as the URL would be a guaranteed
+              # DNS failure, not a best effort. Fail explicitly instead of
+              # feeding a known-bad URL into the comparison step.
+              echo "::error::Could not resolve the real Vercel preview URL for branch '$BRANCH' from the Vercel bot's PR comment in time."
+              exit 1
             fi
           fi
 
