@@ -34,6 +34,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write # needed to post/update PR comments, and to read the Vercel bot's preview-URL comment
+      statuses: read # needed to confirm the Vercel deployment for the exact head commit is ready
     # For pull_request events, only run on internal PRs (same repo).
     # Fork PRs don't have a Vercel preview until a maintainer authorizes it.
     # In that case, a maintainer can manually trigger via workflow_dispatch
@@ -84,6 +85,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
           BRANCH: ${{ github.head_ref }}
         run: |
           SANITIZED=$(echo "$BRANCH" \
@@ -97,18 +99,30 @@ jobs:
             echo "Branch-derived URL: $URL"
           else
             echo "Branch-derived host is ${#HOST} chars (over the 63-char Vercel limit)."
-            echo "Looking up the real preview URL from the Vercel bot's PR comment..."
+            echo "Waiting for the Vercel deployment of commit $SHA, then looking up the real preview URL..."
             URL=""
             for i in $(seq 1 20); do
-              BODY=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
-                --jq '[.[] | select(.user.login == "vercel[bot]")] | last | .body // empty')
-              if echo "$BODY" | grep -q 'ready\.svg'; then
+              # Gate on a Vercel status tied to the exact head commit before
+              # trusting the PR comment: Vercel edits a single comment in
+              # place on every push, so right after a new push it can still
+              # show the previous commit's "Ready" state and alias link.
+              COMMIT_STATE=$(gh api "repos/$REPO/commits/$SHA/statuses?per_page=100" \
+                --jq '[.[] | select(.context == "Vercel")] | sort_by(.created_at) | last | .state // empty')
+              if [ "$COMMIT_STATE" = "success" ]; then
+                # Paginate: the bot comment is normally the first comment on
+                # the PR, but fetch every page rather than assume it fits in
+                # the first one.
+                BODY=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" \
+                  | jq -s -r 'add | [.[] | select(.user.login == "vercel[bot]")] | last | .body // empty')
                 CANDIDATE_URL=$(echo "$BODY" | grep -oE '\[Preview\]\(https://[^)]+\)' | grep -oE 'https://[^)]+' | head -1)
                 if [ -n "$CANDIDATE_URL" ]; then
                   URL="$CANDIDATE_URL"
                   echo "Preview is ready (attempt $i): $URL"
                   break
                 fi
+              elif [ "$COMMIT_STATE" = "failure" ] || [ "$COMMIT_STATE" = "error" ]; then
+                echo "Vercel deployment for commit $SHA reported state=$COMMIT_STATE — giving up."
+                break
               fi
               echo "  attempt $i: not ready yet — waiting 15s..."
               sleep 15
