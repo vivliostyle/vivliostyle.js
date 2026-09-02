@@ -252,6 +252,13 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/240962040?v=4",
       "profile": "https://sayportfolio.vercel.app/",
       "contributions": ["code"]
+    },
+    {
+      "login": "minorun365",
+      "name": "Minoru Onda（みのるん）",
+      "avatar_url": "https://avatars.githubusercontent.com/u/74597894?v=4",
+      "profile": "https://github.com/minorun365",
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7

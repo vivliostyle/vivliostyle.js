@@ -160,6 +160,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="http://wanderer.tw/"><img src="https://avatars.githubusercontent.com/u/1863378?v=4?s=80" width="80px;" alt="Bobby Tung"/><br /><sub><b>Bobby Tung</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=bobbytung" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://sayportfolio.vercel.app/"><img src="https://avatars.githubusercontent.com/u/240962040?v=4?s=80" width="80px;" alt="Sai Asish Y"/><br /><sub><b>Sai Asish Y</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=SAY-5" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/minorun365"><img src="https://avatars.githubusercontent.com/u/74597894?v=4?s=80" width="80px;" alt="Minoru Onda（みのるん）"/><br /><sub><b>Minoru Onda（みのるん）</b></sub></a><br /><a href="https://github.com/vivliostyle/vivliostyle.js/commits?author=minorun365" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
