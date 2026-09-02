@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2137: table <caption> must stay before <thead> in the
+     view tree (output DOM order) even when the table fragments across pages. -->
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Test: Table caption order when table breaks across pages</title>
+<style>
+@page {
+  size: 150mm 100mm;
+  margin: 10mm;
+}
+body {
+  font: 10pt/1.4 sans-serif;
+  margin: 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #888;
+  padding: 2px 4px;
+}
+thead th {
+  background: #ccc;
+}
+caption {
+  font-weight: bold;
+  padding: 2px;
+}
+table.bottom-caption > caption {
+  caption-side: bottom;
+}
+</style>
+</head>
+<body>
+<h1>Table caption order (Issue #2137)</h1>
+
+<table id="tab-1">
+  <caption>Caption 1 (caption-side: top)</caption>
+  <colgroup>
+    <col style="width: 20%"/>
+    <col/>
+  </colgroup>
+  <thead>
+    <tr><th>No.</th><th>Header cell</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>Row 1</td></tr>
+    <tr><td>2</td><td>Row 2</td></tr>
+    <tr><td>3</td><td>Row 3</td></tr>
+    <tr><td>4</td><td>Row 4</td></tr>
+    <tr><td>5</td><td>Row 5</td></tr>
+    <tr><td>6</td><td>Row 6</td></tr>
+    <tr><td>7</td><td>Row 7</td></tr>
+    <tr><td>8</td><td>Row 8</td></tr>
+    <tr><td>9</td><td>Row 9</td></tr>
+    <tr><td>10</td><td>Row 10</td></tr>
+    <tr><td>11</td><td>Row 11</td></tr>
+    <tr><td>12</td><td>Row 12</td></tr>
+  </tbody>
+  <tfoot>
+    <tr><th>No.</th><th>Footer cell</th></tr>
+  </tfoot>
+</table>
+
+<table id="tab-2" class="bottom-caption">
+  <caption>Caption 2 (caption-side: bottom)</caption>
+  <thead>
+    <tr><th>No.</th><th>Header cell</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>Row 1</td></tr>
+    <tr><td>2</td><td>Row 2</td></tr>
+    <tr><td>3</td><td>Row 3</td></tr>
+    <tr><td>4</td><td>Row 4</td></tr>
+    <tr><td>5</td><td>Row 5</td></tr>
+    <tr><td>6</td><td>Row 6</td></tr>
+    <tr><td>7</td><td>Row 7</td></tr>
+    <tr><td>8</td><td>Row 8</td></tr>
+    <tr><td>9</td><td>Row 9</td></tr>
+    <tr><td>10</td><td>Row 10</td></tr>
+    <tr><td>11</td><td>Row 11</td></tr>
+    <tr><td>12</td><td>Row 12</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

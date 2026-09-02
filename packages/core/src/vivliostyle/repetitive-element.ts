@@ -1017,6 +1017,61 @@ export function appendHeaderToAncestors(
   );
 }
 
+/**
+ * Check whether the view node is a table caption or a table column group
+ * (or column), which must precede the table header in the view tree.
+ */
+function isTableCaptionOrColumnGroup(node: Node): boolean {
+  if (node.nodeType !== 1) {
+    return false;
+  }
+  const element = node as Element;
+  switch (element.localName) {
+    case "caption":
+    case "colgroup":
+    case "col":
+      return true;
+    case "thead":
+    case "tbody":
+    case "tfoot":
+    case "tr":
+      return false;
+  }
+  const display =
+    element.ownerDocument.defaultView?.getComputedStyle(element).display;
+  return (
+    display === "table-caption" ||
+    display === "table-column-group" ||
+    display === "table-column"
+  );
+}
+
+/**
+ * Find the node before which the repeated header is to be inserted into the
+ * fragment root view node. The header is normally inserted at the beginning,
+ * but in a table it must come after the caption and the column groups, which
+ * are inserted into each fragment before the header. (Issue #2137)
+ */
+function findHeaderInsertionPoint(
+  formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
+  rootViewNode: Element,
+): Node | null {
+  let insertionPoint = rootViewNode.firstChild;
+  if (!Table.isInstanceOfTableFormattingContext(formattingContext)) {
+    return insertionPoint;
+  }
+  let child = insertionPoint;
+  while (child) {
+    if (isTableCaptionOrColumnGroup(child)) {
+      insertionPoint = child.nextSibling;
+    } else if (!VtreeImpl.canIgnore(child)) {
+      break;
+    }
+    child = child.nextSibling;
+  }
+  return insertionPoint;
+}
+
 export function appendHeader(
   formattingContext: RepetitiveElement.RepetitiveElementsOwnerFormattingContext,
   nodeContext: Vtree.NodeContext,
@@ -1028,7 +1083,10 @@ export function appendHeader(
     const rootElementContext =
       rootNodeContext && VtreeImpl.asElementNodeContext(rootNodeContext);
     if (rootElementContext) {
-      const firstChild = rootElementContext.viewNode.firstChild;
+      const firstChild = findHeaderInsertionPoint(
+        formattingContext,
+        rootElementContext.viewNode,
+      );
       return repetitiveElements.appendHeaderToFragment(
         rootElementContext,
         firstChild,

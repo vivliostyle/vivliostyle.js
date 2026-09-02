@@ -940,6 +940,11 @@ module.exports = [
         file: "table/table-header-repeat-nested-rowspan.html",
         title: "Table header repeat with nested rowspans (Issue #1980)",
       },
+      {
+        file: "table/table-caption-order.html",
+        title:
+          "Table caption order when table breaks across pages (Issue #2137)",
+      },
     ],
   },
   {
