@@ -1,3 +1,23 @@
+- id: "0001"
+  category: Text Spacing
+  title: "Line breaking stability with text-spacing (Issue #2142)"
+  file: text-spacing/line-break-stability.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Fix for Issue #2142: the paragraph no longer gains a line after pagination, so the overflowing line is now broken to
+    the next page.
+  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
 - category: Cross-references
   title: target-text() reflow that shrinks an earlier WebPub spine
   file: target-text-shrinking-spine/publication.json
