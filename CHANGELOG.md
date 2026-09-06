@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.45.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.45.0...v2.45.1) (2026-09-06)
+
+### Bug Fixes
+
+- Fix text overflowing outside the page area after text-spacing ([#2143](https://github.com/vivliostyle/vivliostyle.js/issues/2143)) ([6882d49](https://github.com/vivliostyle/vivliostyle.js/commit/6882d49736daff1e3415cdc30ae1bac415431198)), closes [#2142](https://github.com/vivliostyle/vivliostyle.js/issues/2142)
+- Keep table caption before repeated header in the view tree ([#2138](https://github.com/vivliostyle/vivliostyle.js/issues/2138)) ([98732f8](https://github.com/vivliostyle/vivliostyle.js/commit/98732f8d3e19ef250abb488730be964c275e218b)), closes [#2137](https://github.com/vivliostyle/vivliostyle.js/issues/2137)
+- Keep rules with valid but unsupported selectors like `:host` ([#2135](https://github.com/vivliostyle/vivliostyle.js/issues/2135)) ([fee26d8](https://github.com/vivliostyle/vivliostyle.js/commit/fee26d803f88aeb680bf5561cb352859ba82881f))
+- stabilize cross-reference relayout after spine shrinkage ([#2132](https://github.com/vivliostyle/vivliostyle.js/issues/2132)) ([23c8db7](https://github.com/vivliostyle/vivliostyle.js/commit/23c8db7a5eae03e6480a1d4dcb203add7d2b2426))
+- Avoid invoking a cleared print error callback ([#2126](https://github.com/vivliostyle/vivliostyle.js/issues/2126)) ([cff472e](https://github.com/vivliostyle/vivliostyle.js/commit/cff472eab1cc2c1a763a9f070c25555886a9f54a))
+
 # [2.45.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.44.1...v2.45.0) (2026-08-22)
 
 ### Features
