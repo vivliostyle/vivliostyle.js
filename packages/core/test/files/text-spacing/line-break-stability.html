@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2142: line breaking must not change after the
+     text-spacing polyfill has wrapped the punctuation in its own elements.
+
+     The paragraph ends with a 。 that text-spacing trims to half width, and
+     the width is chosen so that the trimmed 。 lands exactly on the line end.
+     The page area is 3 lines tall, so the expected result is 2 pages, with
+     the last line on page 2.
+
+     When the block is measured before Chromium has re-shaped it, the
+     paragraph is taken to be 3 lines and kept on a single page, then gains a
+     4th line that overflows the page area (in the reported case, into an
+     extra column outside the page). -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Line breaking stability with text-spacing (Issue #2142)</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Serif+JP");
+      @page {
+        size: 210mm 41mm;
+        margin: 14mm 15mm 15mm;
+        outline: 1pt solid red;
+      }
+      html {
+        font-family: "Noto Serif JP", serif;
+        font-size: 8pt;
+        line-height: 1.3;
+        text-align: justify;
+        text-spacing: auto;
+        orphans: 1;
+        widows: 1;
+      }
+      body {
+        margin: 0;
+      }
+      p {
+        margin: 0;
+        width: 324.5px;
+        text-indent: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <p>同委員会は、原則として四半期に一度開催し、気候変動、人的資本、人権の尊重、サプライチェーン管理並びに製品の品質及び安全に関する方針の策定、目標の設定及び進捗の管理を行っております。</p>
+  </body>
+</html>

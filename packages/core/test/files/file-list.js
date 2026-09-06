@@ -614,6 +614,10 @@ module.exports = [
         file: "text-spacing/text-decoration.html",
         title: "Continuous text decorations across text-autospace",
       },
+      {
+        file: "text-spacing/line-break-stability.html",
+        title: "Line breaking stability with text-spacing (Issue #2142)",
+      },
     ],
   },
   {

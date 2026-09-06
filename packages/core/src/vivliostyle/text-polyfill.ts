@@ -298,6 +298,48 @@ function normalizeLang(lang: string | null | undefined): string | null {
   return null;
 }
 
+/**
+ * Find the block container establishing the inline formatting context that
+ * the node participates in.
+ */
+function findBlockContainer(node: Node): HTMLElement | null {
+  const window = node.ownerDocument?.defaultView;
+  if (!window) {
+    return null;
+  }
+  for (let elem = node.parentElement; elem; elem = elem.parentElement) {
+    if (elem.hasAttribute("data-vivliostyle-column")) {
+      return elem;
+    }
+    const { display } = window.getComputedStyle(elem);
+    if (
+      display !== "inline" &&
+      display !== "contents" &&
+      !/^ruby/.test(display)
+    ) {
+      return elem;
+    }
+  }
+  return null;
+}
+
+/**
+ * Force the block to be laid out from scratch.
+ *
+ * After the `viv-ts-*` elements are inserted, the browser may reuse cached
+ * shaping results and break lines differently than it does on a fresh layout,
+ * so measuring the block as-is would paginate against a layout that changes
+ * later. (Issue #2142)
+ */
+function reshapeBlockContainer(element: HTMLElement): void {
+  const savedFontKerning = element.style.fontKerning;
+  const { fontKerning } =
+    element.ownerDocument.defaultView.getComputedStyle(element);
+  element.style.fontKerning = fontKerning === "none" ? "normal" : "none";
+  element.offsetHeight; // force layout so that restoring the value re-shapes
+  element.style.fontKerning = savedFontKerning;
+}
+
 const CHROMIUM_VO_TR_FALLBACK_PATTERN = /^[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛]\p{M}*$/u;
 const CHROMIUM_VO_TR_FALLBACK_OPEN_PATTERN = /^[‘“﹙﹛﹝〚]\p{M}*$/u;
 
@@ -548,6 +590,7 @@ class TextSpacingPolyfill {
     }
 
     let iFirst = -1;
+    const reshapeTargets = new Set<HTMLElement>();
     for (let i = 0; i < checkPoints.length; i++) {
       const p = checkPoints[i];
       const textP =
@@ -774,12 +817,21 @@ class TextSpacingPolyfill {
           lang,
           textP.vertical,
         );
+        const blockContainer = findBlockContainer(textP.viewNode);
+        if (blockContainer) {
+          reshapeTargets.add(blockContainer);
+        }
         if (columnOver > 0) {
           // Stop processing if the node is moved to next column
           // because it will be processed again in the next column.
           // (Issue #1256)
           break;
         }
+      }
+    }
+    for (const target of reshapeTargets) {
+      if (target.querySelector("viv-ts-open, viv-ts-close, viv-ts-thin-sp")) {
+        reshapeBlockContainer(target);
       }
     }
   }
