@@ -7,7 +7,7 @@
   notes: >-
     Fix for Issue #2142: the paragraph no longer gains a line after pagination, so the overflowing line is now broken to
     the next page.
-  approvedViewer: ""  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-issue2142  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false

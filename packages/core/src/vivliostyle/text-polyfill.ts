@@ -326,8 +326,8 @@ function findBlockContainer(node: Node): HTMLElement | null {
 /**
  * Force the block to be laid out from scratch.
  *
- * After the `viv-ts-*` elements are inserted, Chromium reuses cached shaping
- * results and can break lines differently than it does on a fresh layout,
+ * After the `viv-ts-*` elements are inserted, the browser may reuse cached
+ * shaping results and break lines differently than it does on a fresh layout,
  * so measuring the block as-is would paginate against a layout that changes
  * later. (Issue #2142)
  */
@@ -336,9 +336,8 @@ function reshapeBlockContainer(element: HTMLElement): void {
   const { fontKerning } =
     element.ownerDocument.defaultView.getComputedStyle(element);
   element.style.fontKerning = fontKerning === "none" ? "normal" : "none";
-  element.offsetHeight; // force layout
+  element.offsetHeight; // force layout so that restoring the value re-shapes
   element.style.fontKerning = savedFontKerning;
-  element.offsetHeight; // force layout
 }
 
 const CHROMIUM_VO_TR_FALLBACK_PATTERN = /^[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛]\p{M}*$/u;
