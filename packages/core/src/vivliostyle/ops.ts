@@ -288,6 +288,22 @@ function restoreFormattingContextStates(
   }
 }
 
+function releaseBreakPositions(
+  context: PageFloats.AttachedPageFloatLayoutContext,
+): void {
+  if ("breakPositions" in context.container) {
+    (context.container as LayoutType.Column).breakPositions = [];
+  }
+  for (const child of context.children) {
+    releaseBreakPositions(child);
+  }
+  for (const fragment of context.floatFragments) {
+    releaseBreakPositions(
+      (fragment.area as Layout.PageFloatArea).pageFloatLayoutContext,
+    );
+  }
+}
+
 type OpenedPageBox = {
   readonly boxContainer: HTMLElement;
   /** Replaced by the column when this box holds the flow itself. */
@@ -3334,6 +3350,9 @@ export class StyleInstance
         cp.highestSeenOffset = this.styler.getReachedOffset();
         const triggers = this.style.store.getTriggersForDoc(this.xmldoc);
         page.finish(triggers, this.clientLayout);
+        if (attachedPageFloatLayoutContext) {
+          releaseBreakPositions(attachedPageFloatLayoutContext);
+        }
         if (
           this.noMorePrimaryFlows(cp) &&
           !this.hasActiveRootPageFloatLayoutContext()
