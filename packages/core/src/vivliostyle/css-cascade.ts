@@ -1198,9 +1198,7 @@ export function convertFontSizeToPx(
   }
 }
 
-export type ActionTable = {
-  [key: string]: CascadeAction;
-};
+export type ActionTable = Map<string, CascadeAction>;
 
 export class StyledCascadeInstance {
   constructor(
@@ -1433,10 +1431,10 @@ export class CheckNSTagAction extends ChainedAction {
   // tag is a pretty good thing to check, after epub:type
 
   override primarySlot(cascade: Cascade): PrimarySlot | null {
-    let prefix = cascade.nsPrefix[this.ns];
+    let prefix = cascade.nsPrefix.get(this.ns);
     if (!prefix) {
       prefix = `ns${cascade.nsCount++}:`;
-      cascade.nsPrefix[this.ns] = prefix;
+      cascade.nsPrefix.set(this.ns, prefix);
     }
     return { table: cascade.nstags, key: prefix + this.localName };
   }
@@ -3706,15 +3704,15 @@ export const ORDER_INCREMENT = 1 / 0x100000;
 
 export class Cascade {
   nsCount: number = 0;
-  nsPrefix: { [key: string]: string } = {};
-  tags: ActionTable = {};
-  nstags: ActionTable = {};
-  epubtypes: ActionTable = {};
-  classes: ActionTable = {};
-  ids: ActionTable = {};
-  pagetypes: ActionTable = {};
+  nsPrefix = new Map<string, string>();
+  tags: ActionTable = new Map();
+  nstags: ActionTable = new Map();
+  epubtypes: ActionTable = new Map();
+  classes: ActionTable = new Map();
+  ids: ActionTable = new Map();
+  pagetypes: ActionTable = new Map();
   order: number = 0;
-  readonly layerTrees: { [flavor: string]: CascadeLayerTree } = {};
+  readonly layerTrees = new Map<string, CascadeLayerTree>();
 
   /**
    * Returns the cascade layer for a `@layer` rule of the given origin.
@@ -3725,16 +3723,20 @@ export class Cascade {
     parent: CascadeLayer | null,
     nameList: string[] | null,
   ): CascadeLayer {
-    const tree = (this.layerTrees[flavor] ??= new CascadeLayerTree());
+    let tree = this.layerTrees.get(flavor);
+    if (!tree) {
+      tree = new CascadeLayerTree();
+      this.layerTrees.set(flavor, tree);
+    }
     return tree.register(parent, nameList);
   }
 
   insertInTable(table: ActionTable, key: string, action: CascadeAction): void {
-    const a = table[key];
+    const a = table.get(key);
     if (a) {
       action = a.mergeWith(action);
     }
-    table[key] = action;
+    table.set(key, action);
   }
 
   createInstance(
@@ -3912,7 +3914,7 @@ export class CascadeInstance {
     table: ActionTable,
     key: string,
   ): void {
-    const action = table[key];
+    const action = table.get(key);
     if (action) {
       action.apply(cascadeInstance);
     }
@@ -4250,7 +4252,7 @@ export class CascadeInstance {
     this.currentLocalName = element.localName;
     const prefix =
       this.currentNamespace !== null
-        ? this.code.nsPrefix[this.currentNamespace]
+        ? this.code.nsPrefix.get(this.currentNamespace)
         : undefined;
     if (prefix) {
       this.currentNSTag = prefix + this.currentLocalName;

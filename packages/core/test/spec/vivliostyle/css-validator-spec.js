@@ -61,15 +61,15 @@ describe("css-validator", function () {
   describe("background shorthand regression", function () {
     it("keeps color in cascade for a semicolonless declaration", function (done) {
       parseCascade("h1 { color: blue }", done, function (cascade) {
-        expect(cascade.tags.h1).toBeDefined();
-        expect(cascade.tags.h1.style.color).toBeDefined();
+        expect(cascade.tags.get("h1")).toBeDefined();
+        expect(cascade.tags.get("h1").style.color).toBeDefined();
       });
     });
 
     it("keeps background-color in cascade for a semicolonless declaration", function (done) {
       parseCascade("ul { background: green }", done, function (cascade) {
-        expect(cascade.tags.ul).toBeDefined();
-        expect(cascade.tags.ul.style["background-color"]).toBeDefined();
+        expect(cascade.tags.get("ul")).toBeDefined();
+        expect(cascade.tags.get("ul").style["background-color"]).toBeDefined();
       });
     });
 
@@ -78,8 +78,10 @@ describe("css-validator", function () {
         "ul { background: green } li:has(strong) { display: none; :has(> &) { background: red; } }",
         done,
         function (cascade) {
-          expect(cascade.tags.ul).toBeDefined();
-          expect(cascade.tags.ul.style["background-color"]).toBeDefined();
+          expect(cascade.tags.get("ul")).toBeDefined();
+          expect(
+            cascade.tags.get("ul").style["background-color"],
+          ).toBeDefined();
         },
       );
     });
@@ -91,15 +93,15 @@ describe("css-validator", function () {
         "div { place-items: center start; }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["align-items"]).toBeDefined();
-          expect(cascade.tags.div.style["justify-items"]).toBeDefined();
-          expect(cascade.tags.div.style["align-items"].value.toString()).toBe(
-            "center",
-          );
-          expect(cascade.tags.div.style["justify-items"].value.toString()).toBe(
-            "start",
-          );
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["align-items"]).toBeDefined();
+          expect(cascade.tags.get("div").style["justify-items"]).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["align-items"].value.toString(),
+          ).toBe("center");
+          expect(
+            cascade.tags.get("div").style["justify-items"].value.toString(),
+          ).toBe("start");
         },
       );
     });
@@ -109,28 +111,28 @@ describe("css-validator", function () {
         "div { place-items: center start; justify-items: stretch; }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["align-items"]).toBeDefined();
-          expect(cascade.tags.div.style["justify-items"]).toBeDefined();
-          expect(cascade.tags.div.style["align-items"].value.toString()).toBe(
-            "center",
-          );
-          expect(cascade.tags.div.style["justify-items"].value.toString()).toBe(
-            "stretch",
-          );
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["align-items"]).toBeDefined();
+          expect(cascade.tags.get("div").style["justify-items"]).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["align-items"].value.toString(),
+          ).toBe("center");
+          expect(
+            cascade.tags.get("div").style["justify-items"].value.toString(),
+          ).toBe("stretch");
         },
       );
     });
 
     it("propagates CSS-wide values from browser shorthands to their longhands", function (done) {
       parseCascade("div { place-items: initial; }", done, function (cascade) {
-        expect(cascade.tags.div).toBeDefined();
-        expect(cascade.tags.div.style["align-items"]).toBeDefined();
-        expect(cascade.tags.div.style["justify-items"]).toBeDefined();
-        expect(cascade.tags.div.style["align-items"].value).toBe(
+        expect(cascade.tags.get("div")).toBeDefined();
+        expect(cascade.tags.get("div").style["align-items"]).toBeDefined();
+        expect(cascade.tags.get("div").style["justify-items"]).toBeDefined();
+        expect(cascade.tags.get("div").style["align-items"].value).toBe(
           adapt_css.ident.initial,
         );
-        expect(cascade.tags.div.style["justify-items"].value).toBe(
+        expect(cascade.tags.get("div").style["justify-items"].value).toBe(
           adapt_css.ident.initial,
         );
       });
@@ -184,9 +186,11 @@ describe("css-validator", function () {
         "div { BORDER-SPACING: var(--bs); }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["border-spacing"]).toBeDefined();
-          expect(cascade.tags.div.style["BORDER-SPACING"]).toBeUndefined();
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["border-spacing"]).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["BORDER-SPACING"],
+          ).toBeUndefined();
         },
       );
     });
@@ -228,14 +232,22 @@ describe("css-validator", function () {
         "div { transition: opacity 1s ease, transform 2s linear; }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["transition-property"]).toBeDefined();
-          expect(cascade.tags.div.style["transition-duration"]).toBeDefined();
+          expect(cascade.tags.get("div")).toBeDefined();
           expect(
-            cascade.tags.div.style["transition-property"].value.toString(),
+            cascade.tags.get("div").style["transition-property"],
+          ).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["transition-duration"],
+          ).toBeDefined();
+          expect(
+            cascade.tags
+              .get("div")
+              .style["transition-property"].value.toString(),
           ).toBe("opacity,transform");
           expect(
-            cascade.tags.div.style["transition-duration"].value.toString(),
+            cascade.tags
+              .get("div")
+              .style["transition-duration"].value.toString(),
           ).toBe("1s,2s");
         },
       );
@@ -246,15 +258,19 @@ describe("css-validator", function () {
         "div { transition: opacity 1s ease; all: initial; }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["transition-property"]).toBeDefined();
-          expect(cascade.tags.div.style["transition-duration"]).toBeDefined();
-          expect(cascade.tags.div.style["transition-property"].value).toBe(
-            adapt_css.ident.initial,
-          );
-          expect(cascade.tags.div.style["transition-duration"].value).toBe(
-            adapt_css.ident.initial,
-          );
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["transition-property"],
+          ).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["transition-duration"],
+          ).toBeDefined();
+          expect(
+            cascade.tags.get("div").style["transition-property"].value,
+          ).toBe(adapt_css.ident.initial);
+          expect(
+            cascade.tags.get("div").style["transition-duration"].value,
+          ).toBe(adapt_css.ident.initial);
         },
       );
     });
@@ -298,26 +314,38 @@ describe("css-validator", function () {
         "div { all: initial; position: absolute; top: 0; right: 0; }",
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["inset"]).toBeUndefined();
-          expect(cascade.tags.div.style["inset-block-start"]).toBeUndefined();
-          expect(cascade.tags.div.style["inset-block-end"]).toBeUndefined();
-          expect(cascade.tags.div.style["inset-inline-start"]).toBeUndefined();
-          expect(cascade.tags.div.style["inset-inline-end"]).toBeUndefined();
-          expect(cascade.tags.div.style["position"].value.toString()).toBe(
-            "absolute",
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["inset"]).toBeUndefined();
+          expect(
+            cascade.tags.get("div").style["inset-block-start"],
+          ).toBeUndefined();
+          expect(
+            cascade.tags.get("div").style["inset-block-end"],
+          ).toBeUndefined();
+          expect(
+            cascade.tags.get("div").style["inset-inline-start"],
+          ).toBeUndefined();
+          expect(
+            cascade.tags.get("div").style["inset-inline-end"],
+          ).toBeUndefined();
+          expect(
+            cascade.tags.get("div").style["position"].value.toString(),
+          ).toBe("absolute");
+          expect(cascade.tags.get("div").style["top"].value.toString()).toBe(
+            "0",
           );
-          expect(cascade.tags.div.style["top"].value.toString()).toBe("0");
-          expect(cascade.tags.div.style["right"].value.toString()).toBe("0");
+          expect(cascade.tags.get("div").style["right"].value.toString()).toBe(
+            "0",
+          );
         },
       );
     });
 
     it("keeps self-referential custom property declarations through the parser path", function (done) {
       parseCascade("div { --a: var(--a, red); }", done, function (cascade) {
-        expect(cascade.tags.div).toBeDefined();
-        expect(cascade.tags.div.style["--a"]).toBeDefined();
-        expect(cascade.tags.div.style["--a"].value.toString()).toBe(
+        expect(cascade.tags.get("div")).toBeDefined();
+        expect(cascade.tags.get("div").style["--a"]).toBeDefined();
+        expect(cascade.tags.get("div").style["--a"].value.toString()).toBe(
           "var(--a,red)",
         );
       });
@@ -330,10 +358,10 @@ describe("css-validator", function () {
         "p { background: lime; } foo % address, p { background: red; }",
         done,
         function (cascade) {
-          expect(cascade.tags.p).toBeDefined();
-          expect(cascade.tags.p.style["background-color"]).toBeDefined();
+          expect(cascade.tags.get("p")).toBeDefined();
+          expect(cascade.tags.get("p").style["background-color"]).toBeDefined();
           expect(
-            cascade.tags.p.style["background-color"].value.toString(),
+            cascade.tags.get("p").style["background-color"].value.toString(),
           ).toBe("lime");
         },
       );
@@ -344,10 +372,10 @@ describe("css-validator", function () {
         "foo % address, p { background: red ! important; } p { background: lime; }",
         done,
         function (cascade) {
-          expect(cascade.tags.p).toBeDefined();
-          expect(cascade.tags.p.style["background-color"]).toBeDefined();
+          expect(cascade.tags.get("p")).toBeDefined();
+          expect(cascade.tags.get("p").style["background-color"]).toBeDefined();
           expect(
-            cascade.tags.p.style["background-color"].value.toString(),
+            cascade.tags.get("p").style["background-color"].value.toString(),
           ).toBe("lime");
         },
       );
@@ -382,8 +410,8 @@ describe("css-validator", function () {
         'div { string-set: chapter attr(data-title type(<string>), "fallback"); }',
         done,
         function (cascade) {
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["string-set"]).toBeDefined();
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["string-set"]).toBeDefined();
         },
       );
     });
@@ -394,8 +422,8 @@ describe("css-validator", function () {
         done,
         function (cascade, handler) {
           expect(handler.invalid).toBe(true);
-          expect(cascade.tags.div).toBeDefined();
-          expect(cascade.tags.div.style["string-set"]).toBeUndefined();
+          expect(cascade.tags.get("div")).toBeDefined();
+          expect(cascade.tags.get("div").style["string-set"]).toBeUndefined();
         },
       );
     });

@@ -1167,7 +1167,7 @@ describe("css-cascade", function () {
     describe("a syntax error inside the argument", function () {
       it("fails a list whose only alternative was voided", function (done) {
         parseCascade("div:is(!!!) { color: red }", done, function (cascade) {
-          var action = cascade.tags["div"];
+          var action = cascade.tags.get("div");
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.WiredConditionScope),
           );
@@ -1180,8 +1180,8 @@ describe("css-cascade", function () {
           "div:is(!!!, .x) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["div"]).toBeUndefined();
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("div")).toBeUndefined();
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
           },
         );
       });
@@ -1192,7 +1192,7 @@ describe("css-cascade", function () {
           "div:nth-child(2n of !!!, .x) { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
           },
         );
       });
@@ -1203,7 +1203,7 @@ describe("css-cascade", function () {
           "div:has(# p, q) { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
           },
         );
       });
@@ -1213,7 +1213,7 @@ describe("css-cascade", function () {
           "div:is(:has(.x, # p), .z) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
           },
         );
       });
@@ -1223,7 +1223,7 @@ describe("css-cascade", function () {
           "div:is(!!!}p, .x) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(2);
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(2);
           },
         );
       });
@@ -1235,8 +1235,8 @@ describe("css-cascade", function () {
           "x:not(u|y, .c d, z) { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
-            expect(Object.keys(cascade.classes)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
+            expect(Array.from(cascade.classes.keys())).toEqual([]);
           },
         );
       });
@@ -1246,7 +1246,7 @@ describe("css-cascade", function () {
           "a, b:has(# p), c { color: red } e { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["e"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["e"]);
           },
         );
       });
@@ -1258,7 +1258,7 @@ describe("css-cascade", function () {
           "div:is(# p q, .x) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
           },
         );
       });
@@ -1270,7 +1270,7 @@ describe("css-cascade", function () {
           "div:is(# #i, .x) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].chained.chained.specificity).toBe(257);
+            expect(cascade.tags.get("*").chained.chained.specificity).toBe(257);
           },
         );
       });
@@ -1282,10 +1282,10 @@ describe("css-cascade", function () {
           "div:is(.x, # ::before) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["span"]).toEqual(
+            expect(cascade.tags.get("span")).toEqual(
               jasmine.any(adapt_csscasc.WiredConditionScope),
             );
-            expect(cascade.tags["span"].chained).toEqual(
+            expect(cascade.tags.get("span").chained).toEqual(
               jasmine.any(adapt_csscasc.ApplyRuleAction),
             );
           },
@@ -1297,7 +1297,7 @@ describe("css-cascade", function () {
           "div:is(*, # ::before) { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["div"].chained.specificity).toBe(1);
+            expect(cascade.tags.get("div").chained.specificity).toBe(1);
           },
         );
       });
@@ -1307,7 +1307,7 @@ describe("css-cascade", function () {
           "p::nth-fragment(2n+1):not(# a) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(cascade.tags["q"].viewConditionId).toBeNull();
+            expect(cascade.tags.get("q").viewConditionId).toBeNull();
           },
         );
       });
@@ -1318,7 +1318,7 @@ describe("css-cascade", function () {
           "div:is(!!!}p>{}) span { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
           },
         );
       });
@@ -1330,8 +1330,8 @@ describe("css-cascade", function () {
           "div:is(.x, ::before) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
-            expect(cascade.tags["span"]).toEqual(
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("span")).toEqual(
               jasmine.any(adapt_csscasc.WiredConditionScope),
             );
           },
@@ -1343,7 +1343,7 @@ describe("css-cascade", function () {
           "div:not(.x, ::before) span { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
           },
         );
       });
@@ -1353,7 +1353,7 @@ describe("css-cascade", function () {
           "div:is(::before) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["div"].condition.condition).toBe("");
+            expect(cascade.tags.get("div").condition.condition).toBe("");
           },
         );
       });
@@ -1363,7 +1363,7 @@ describe("css-cascade", function () {
           "div:is(.x) ::before { color: red }",
           done,
           function (cascade) {
-            var applied = cascade.tags["*"].list[1].chained;
+            var applied = cascade.tags.get("*").list[1].chained;
             expect(applied.pseudoelement).toBe("before");
           },
         );
@@ -1376,7 +1376,7 @@ describe("css-cascade", function () {
           "p:unknown-pseudo, div { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual([]);
+            expect(Array.from(cascade.tags.keys())).toEqual([]);
           },
         );
       });
@@ -1386,7 +1386,7 @@ describe("css-cascade", function () {
           "p:unknown-pseudo { color: red } div { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["div"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["div"]);
           },
         );
       });
@@ -1396,7 +1396,7 @@ describe("css-cascade", function () {
           "p::nth-fragment(2n+1):unknown-pseudo { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(cascade.tags["q"].viewConditionId).toBeNull();
+            expect(cascade.tags.get("q").viewConditionId).toBeNull();
           },
         );
       });
@@ -1406,8 +1406,8 @@ describe("css-cascade", function () {
           "div:is(.x, :unknown-pseudo) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
-            expect(cascade.tags["span"]).toEqual(
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("span")).toEqual(
               jasmine.any(adapt_csscasc.WiredConditionScope),
             );
           },
@@ -1421,7 +1421,7 @@ describe("css-cascade", function () {
           "p:empty(x) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1431,7 +1431,7 @@ describe("css-cascade", function () {
           "a:link(x) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1451,7 +1451,7 @@ describe("css-cascade", function () {
             "p:" + name + " { color: red } q { color: blue }",
             done,
             function (cascade) {
-              expect(Object.keys(cascade.tags)).toEqual(["q"]);
+              expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
             },
           );
         });
@@ -1462,7 +1462,7 @@ describe("css-cascade", function () {
           "a:href-epub-type, q { color: red } r { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["r"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["r"]);
           },
         );
       });
@@ -1472,8 +1472,8 @@ describe("css-cascade", function () {
           "p:lang::nth-fragment(2n+1) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
-            expect(cascade.tags["q"].viewConditionId).toBeNull();
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
+            expect(cascade.tags.get("q").viewConditionId).toBeNull();
           },
         );
       });
@@ -1486,8 +1486,8 @@ describe("css-cascade", function () {
           function (cascade) {
             // The rule survives as valid CSS, but its selector matches
             // nothing instead of being handed to the native matcher.
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            var action = cascade.tags["p"];
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            var action = cascade.tags.get("p");
             expect(action).toEqual(
               jasmine.any(adapt_csscasc.WiredConditionScope),
             );
@@ -1500,8 +1500,8 @@ describe("css-cascade", function () {
     describe("a pseudo-element name case", function () {
       it("takes a pseudo-element name case-insensitively", function (done) {
         parseCascade("p:BEFORE, h1 { color: red }", done, function (cascade) {
-          expect(Object.keys(cascade.tags)).toEqual(["p", "h1"]);
-          expect(cascade.tags["p"].pseudoelement).toBe("before");
+          expect(Array.from(cascade.tags.keys())).toEqual(["p", "h1"]);
+          expect(cascade.tags.get("p").pseudoelement).toBe("before");
         });
       });
 
@@ -1510,8 +1510,8 @@ describe("css-cascade", function () {
           "p::NTH-FRAGMENT(2n+1) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            expect(cascade.tags["p"].viewConditionId).toBe("NFS_2_1");
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            expect(cascade.tags.get("p").viewConditionId).toBe("NFS_2_1");
           },
         );
       });
@@ -1521,7 +1521,7 @@ describe("css-cascade", function () {
           "p:before(x) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1530,13 +1530,13 @@ describe("css-cascade", function () {
     describe(":any-link", function () {
       it("matches as :link does", function (done) {
         parseCascade(":any-link { color: red }", done, function (cascade) {
-          expect(Object.keys(cascade.tags)).toEqual(["a"]);
-          expect(cascade.tags["a"].condition).toEqual(
+          expect(Array.from(cascade.tags.keys())).toEqual(["a"]);
+          expect(cascade.tags.get("a").condition).toEqual(
             jasmine.any(adapt_csscasc.CheckAttributePresentAction),
           );
-          expect(cascade.tags["a"].condition.ns).toBe("");
-          expect(cascade.tags["a"].condition.name).toBe("href");
-          expect(cascade.tags["a"].chained.specificity).toBe(256);
+          expect(cascade.tags.get("a").condition.ns).toBe("");
+          expect(cascade.tags.get("a").condition.name).toBe("href");
+          expect(cascade.tags.get("a").chained.specificity).toBe(256);
         });
       });
 
@@ -1545,7 +1545,7 @@ describe("css-cascade", function () {
           "div:has(:any-link) { color: red }",
           done,
           function (cascade) {
-            var action = cascade.tags["div"].condition;
+            var action = cascade.tags.get("div").condition;
             expect(action).toEqual(
               jasmine.any(adapt_csscasc.MatchesRelationalAction),
             );
@@ -1559,7 +1559,7 @@ describe("css-cascade", function () {
           ":any-link(x) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1568,14 +1568,14 @@ describe("css-cascade", function () {
     describe(":dir()", function () {
       it("compiles to a directionality check", function (done) {
         parseCascade("p:dir(rtl) { color: red }", done, function (cascade) {
-          expect(cascade.tags["p"]).toEqual(
+          expect(cascade.tags.get("p")).toEqual(
             jasmine.any(adapt_csscasc.WiredGuard),
           );
-          expect(cascade.tags["p"].condition).toEqual(
+          expect(cascade.tags.get("p").condition).toEqual(
             jasmine.any(adapt_csscasc.MatchesNativeSelectorAction),
           );
-          expect(cascade.tags["p"].condition.selector).toBe(":dir(rtl)");
-          expect(cascade.tags["p"].chained.specificity).toBe(257);
+          expect(cascade.tags.get("p").condition.selector).toBe(":dir(rtl)");
+          expect(cascade.tags.get("p").chained.specificity).toBe(257);
         });
       });
 
@@ -1584,8 +1584,8 @@ describe("css-cascade", function () {
           "p:DIR(RTL) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            expect(cascade.tags["p"].condition.selector).toBe(":dir(rtl)");
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            expect(cascade.tags.get("p").condition.selector).toBe(":dir(rtl)");
           },
         );
       });
@@ -1595,12 +1595,12 @@ describe("css-cascade", function () {
           "p:dir(foo) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            expect(cascade.tags["p"]).toEqual(
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            expect(cascade.tags.get("p")).toEqual(
               jasmine.any(adapt_csscasc.WiredConditionScope),
             );
-            expect(cascade.tags["p"].condition.condition).toBe("");
-            expect(cascade.tags["p"].chained.specificity).toBe(257);
+            expect(cascade.tags.get("p").condition.condition).toBe("");
+            expect(cascade.tags.get("p").chained.specificity).toBe(257);
           },
         );
       });
@@ -1610,7 +1610,7 @@ describe("css-cascade", function () {
           "p:dir() { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1620,7 +1620,7 @@ describe("css-cascade", function () {
           "p:dir(ltr rtl) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1630,7 +1630,7 @@ describe("css-cascade", function () {
           'p:dir("ltr") { color: red } q { color: blue }',
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1640,7 +1640,7 @@ describe("css-cascade", function () {
           "p:dir { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1650,7 +1650,7 @@ describe("css-cascade", function () {
           "p:not(:dir()) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1660,8 +1660,8 @@ describe("css-cascade", function () {
           "div:is(:dir(), .x) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
-            expect(cascade.tags["span"]).toBeDefined();
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("span")).toBeDefined();
           },
         );
       });
@@ -1671,8 +1671,8 @@ describe("css-cascade", function () {
           "p:is(:dir()), q { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            expect(cascade.tags["p"].condition.condition).toBe("");
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            expect(cascade.tags.get("p").condition.condition).toBe("");
           },
         );
       });
@@ -1682,8 +1682,8 @@ describe("css-cascade", function () {
           "div:is(:not(:dir()), .x) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
-            expect(cascade.tags["span"]).toBeDefined();
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("span")).toBeDefined();
           },
         );
       });
@@ -1693,7 +1693,7 @@ describe("css-cascade", function () {
           "a, b:has(:dir()), c { color: red } e { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["e"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["e"]);
           },
         );
       });
@@ -1703,8 +1703,8 @@ describe("css-cascade", function () {
           "div:is(:dir(a(b)), .x) span { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition.firstActions.length).toBe(1);
-            expect(cascade.tags["span"]).toBeDefined();
+            expect(cascade.tags.get("*").condition.firstActions.length).toBe(1);
+            expect(cascade.tags.get("span")).toBeDefined();
           },
         );
       });
@@ -1714,7 +1714,7 @@ describe("css-cascade", function () {
           "div:has(:is(:dir())) { color: red }",
           done,
           function (cascade) {
-            var action = cascade.tags["div"].condition;
+            var action = cascade.tags.get("div").condition;
             expect(action).toEqual(
               jasmine.any(adapt_csscasc.MatchesRelationalAction),
             );
@@ -1728,7 +1728,7 @@ describe("css-cascade", function () {
           "li:nth-child(2n of :dir()) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["q"]);
+            expect(Array.from(cascade.tags.keys())).toEqual(["q"]);
           },
         );
       });
@@ -1738,8 +1738,8 @@ describe("css-cascade", function () {
           "p:where(:dir()), q { color: red }",
           done,
           function (cascade) {
-            expect(Object.keys(cascade.tags)).toEqual(["p", "q"]);
-            expect(cascade.tags["p"].condition.condition).toBe("");
+            expect(Array.from(cascade.tags.keys())).toEqual(["p", "q"]);
+            expect(cascade.tags.get("p").condition.condition).toBe("");
           },
         );
       });
@@ -1749,16 +1749,16 @@ describe("css-cascade", function () {
           ":not(:dir(ltr)) + div { color: red }",
           done,
           function (cascade) {
-            expect(cascade.tags["*"].condition).toEqual(
+            expect(cascade.tags.get("*").condition).toEqual(
               jasmine.any(adapt_csscasc.MatchesNoneAction),
             );
             expect(
-              cascade.tags["*"].condition.firstActions[0].condition,
+              cascade.tags.get("*").condition.firstActions[0].condition,
             ).toEqual(jasmine.any(adapt_csscasc.MatchesNativeSelectorAction));
-            expect(cascade.tags["*"].chained).toEqual(
+            expect(cascade.tags.get("*").chained).toEqual(
               jasmine.any(adapt_csscasc.ConditionItemAction),
             );
-            expect(cascade.tags["div"]).toBeDefined();
+            expect(cascade.tags.get("div")).toBeDefined();
           },
         );
       });
@@ -1768,7 +1768,7 @@ describe("css-cascade", function () {
           "div:has(*:dir(ltr)) { color: red }",
           done,
           function (cascade) {
-            var action = cascade.tags["div"].condition;
+            var action = cascade.tags.get("div").condition;
             expect(action).toEqual(
               jasmine.any(adapt_csscasc.MatchesRelationalAction),
             );
@@ -1783,7 +1783,7 @@ describe("css-cascade", function () {
         // The condition item is read by the rest of the selector, so it must
         // not be guarded by the condition it sets.
         parseCascade("div + p { color: red }", done, function (cascade) {
-          expect(cascade.tags["div"]).toEqual(
+          expect(cascade.tags.get("div")).toEqual(
             jasmine.any(adapt_csscasc.ConditionItemAction),
           );
         });
@@ -1791,7 +1791,7 @@ describe("css-cascade", function () {
 
       it("registers a following sibling condition before the chain restarts", function (done) {
         parseCascade("div ~ p { color: red }", done, function (cascade) {
-          expect(cascade.tags["div"]).toEqual(
+          expect(cascade.tags.get("div")).toEqual(
             jasmine.any(adapt_csscasc.ConditionItemAction),
           );
         });
@@ -1799,7 +1799,7 @@ describe("css-cascade", function () {
 
       it("keeps the source text of the alternatives :has() takes", function (done) {
         parseCascade("div:has(p, q) { color: red }", done, function (cascade) {
-          var action = cascade.tags["div"].condition;
+          var action = cascade.tags.get("div").condition;
           expect(action).toEqual(
             jasmine.any(adapt_csscasc.MatchesRelationalAction),
           );
@@ -1812,7 +1812,7 @@ describe("css-cascade", function () {
           "div:nth-last-child(2n of .x) { color: red }",
           done,
           function (cascade) {
-            var action = cascade.tags["div"].condition;
+            var action = cascade.tags.get("div").condition;
             expect(action).toEqual(
               jasmine.any(adapt_csscasc.IsNthLastSiblingOfSelectorAction),
             );
@@ -1826,7 +1826,7 @@ describe("css-cascade", function () {
         // the id table is looked up by `currentId` while CheckIdAction also
         // accepts `currentXmlId`.
         parseCascade("#a#b { color: red }", done, function (cascade) {
-          expect(Object.keys(cascade.ids)).toEqual(["a"]);
+          expect(Array.from(cascade.ids.keys())).toEqual(["a"]);
         });
       });
 
@@ -1844,8 +1844,8 @@ describe("css-cascade", function () {
         handler.startRuleBody();
 
         var cascade = handler.finish();
-        expect(Object.keys(cascade.tags)).toEqual(["div"]);
-        expect(cascade.tags["div"]).toEqual(
+        expect(Array.from(cascade.tags.keys())).toEqual(["div"]);
+        expect(cascade.tags.get("div")).toEqual(
           jasmine.any(adapt_csscasc.ApplyRuleAction),
         );
       });
@@ -1855,7 +1855,7 @@ describe("css-cascade", function () {
           "p::nth-fragment(2n+1) { color: red } q { color: blue }",
           done,
           function (cascade) {
-            expect(cascade.tags["q"].viewConditionId).toBeNull();
+            expect(cascade.tags.get("q").viewConditionId).toBeNull();
           },
         );
       });
@@ -2407,7 +2407,7 @@ describe("css-cascade", function () {
 
       it("keeps the rest of the selector list when it contains :host", function (done) {
         parseAndCheck(done, ":host, p { color: red; }", function (handler) {
-          expect(Object.keys(handler.cascade.tags)).toContain("p");
+          expect(Array.from(handler.cascade.tags.keys())).toContain("p");
         });
       });
 
@@ -2416,7 +2416,7 @@ describe("css-cascade", function () {
           done,
           "x::slotted(.foo), p { color: red; }",
           function (handler) {
-            expect(Object.keys(handler.cascade.tags)).toContain("p");
+            expect(Array.from(handler.cascade.tags.keys())).toContain("p");
           },
         );
       });
@@ -2426,7 +2426,7 @@ describe("css-cascade", function () {
           done,
           "::slotted(a b), p { color: red; }",
           function (handler) {
-            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+            expect(Array.from(handler.cascade.tags.keys())).not.toContain("p");
           },
         );
       });
@@ -2436,7 +2436,7 @@ describe("css-cascade", function () {
           done,
           "::part(#x), p { color: red; }",
           function (handler) {
-            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+            expect(Array.from(handler.cascade.tags.keys())).not.toContain("p");
           },
         );
       });
@@ -2446,7 +2446,7 @@ describe("css-cascade", function () {
           done,
           "::part(button):hover, p { color: red; }",
           function (handler) {
-            expect(Object.keys(handler.cascade.tags)).toContain("p");
+            expect(Array.from(handler.cascade.tags.keys())).toContain("p");
           },
         );
       });
@@ -2456,7 +2456,7 @@ describe("css-cascade", function () {
           done,
           ":this-is-not-css, p { color: red; }",
           function (handler) {
-            expect(Object.keys(handler.cascade.tags)).not.toContain("p");
+            expect(Array.from(handler.cascade.tags.keys())).not.toContain("p");
           },
         );
       });
