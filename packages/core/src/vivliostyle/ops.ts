@@ -439,7 +439,7 @@ export class StyleInstance
 
     // Check the spread break at beginning of a document that may cause
     // the first page verso side or cause a blank page (issue #666)
-    if (!this.matchStartPageSide(this.styler.breakBeforeValues[0])) {
+    if (!this.matchStartPageSide(this.styler.breakBeforeValues.get(0))) {
       if (this.pageNumberOffset === 0) {
         this.isVersoFirstPage = true;
       } else {

@@ -499,7 +499,7 @@ export class Styler implements AbstractStyler {
   rootBackgroundAssigned: boolean = false;
   rootLayoutAssigned: boolean = false;
   lastOffset: number;
-  breakBeforeValues = {} as { [key: number]: string | null };
+  breakBeforeValues = new Map<number, string | null>();
   boxStack: BoxStack;
   bodyReached: boolean = true;
 
@@ -985,7 +985,7 @@ export class Styler implements AbstractStyler {
         0,
       );
     }
-    const breakBefore = this.breakBeforeValues[startOffset] || null;
+    const breakBefore = this.breakBeforeValues.get(startOffset) || null;
     let flow = this.flows[flowName];
     if (!flow) {
       const parentFlowName = this.boxStack.lastFlowName();
@@ -1030,10 +1030,10 @@ export class Styler implements AbstractStyler {
         forcedBreakOffsets.push(offset);
       }
     }
-    const previousValue = this.breakBeforeValues[offset];
-    this.breakBeforeValues[offset] = Break.resolveEffectiveBreakValue(
-      previousValue,
-      breakValue,
+    const previousValue = this.breakBeforeValues.get(offset);
+    this.breakBeforeValues.set(
+      offset,
+      Break.resolveEffectiveBreakValue(previousValue, breakValue),
     );
   }
 
