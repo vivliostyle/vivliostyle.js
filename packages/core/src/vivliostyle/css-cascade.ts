@@ -4376,6 +4376,7 @@ export class CascadeInstance {
     }
     const pseudos = getStyleMap(baseStyle, "_pseudos");
     if (pseudos) {
+      const droppedPseudos: string[] = [];
       let before = true;
       for (const pseudoName of pseudoNames) {
         if (!pseudoName) {
@@ -4435,7 +4436,7 @@ export class CascadeInstance {
               isSemanticFootnoteContent &&
               !hasSemanticFootnotePseudoContent)
           ) {
-            delete pseudos[pseudoName];
+            droppedPseudos.push(pseudoName);
           } else if (before) {
             this.processPseudoelementProps(
               pseudoProps,
@@ -4454,7 +4455,7 @@ export class CascadeInstance {
                 baseStyle,
               );
               // Delete the pseudo to prevent fake element generation
-              delete pseudos[pseudoName];
+              droppedPseudos.push(pseudoName);
             } else if (pseudoName === "footnote-marker") {
               // For ::footnote-marker, use native ::marker only when
               // list-style-position: outside. When inside (default), use
@@ -4500,7 +4501,7 @@ export class CascadeInstance {
                   0,
                 );
                 // Delete the pseudo to prevent fake element generation
-                delete pseudos[pseudoName];
+                droppedPseudos.push(pseudoName);
               }
               // else: keep the pseudo for traditional span-based rendering
             } else if (
@@ -4529,6 +4530,15 @@ export class CascadeInstance {
             );
           }
         }
+      }
+      if (droppedPseudos.length > 0) {
+        const keptPseudos = {} as ElementStyleMap;
+        for (const name in pseudos) {
+          if (!droppedPseudos.includes(name)) {
+            keptPseudos[name] = pseudos[name];
+          }
+        }
+        baseStyle["_pseudos"] = keptPseudos;
       }
     }
 
