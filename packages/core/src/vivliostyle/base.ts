@@ -400,7 +400,7 @@ export class PriorityQueue {
 
 export const knownPrefixes = ["", "-webkit-", "-moz-"];
 
-export const propNameMap: { [key: string]: string[] | null } = {};
+export const propNameMap = new Map<string, string[] | null>();
 
 export function checkIfPropertySupported(
   prefix: string,
@@ -410,7 +410,7 @@ export function checkIfPropertySupported(
 }
 
 export function getPrefixedPropertyNames(prop: string): string[] | null {
-  let prefixed = propNameMap[prop];
+  let prefixed = propNameMap.get(prop);
   if (prefixed || prefixed === null) {
     // null means the browser does not support the property
     return prefixed;
@@ -420,7 +420,7 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
     case "template":
     case "ua-list-item-count":
     case "x-first-pseudo":
-      propNameMap[prop] = null;
+      propNameMap.set(prop, null);
       return null;
     case "text-combine-upright":
       // Special case for Safari
@@ -428,7 +428,7 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
         checkIfPropertySupported("-webkit-", "text-combine") &&
         !checkIfPropertySupported("", "text-combine-upright")
       ) {
-        propNameMap[prop] = ["-webkit-text-combine"];
+        propNameMap.set(prop, ["-webkit-text-combine"]);
         return ["-webkit-text-combine"];
       }
       break;
@@ -436,14 +436,14 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   for (const prefix of knownPrefixes) {
     if (checkIfPropertySupported(prefix, prop)) {
       prefixed = [prefix + prop];
-      propNameMap[prop] = prefixed;
+      propNameMap.set(prop, prefixed);
       return prefixed;
     }
   }
 
   // Not supported by the browser
   Logging.logger.warn("Property not supported by the browser: ", prop);
-  propNameMap[prop] = null;
+  propNameMap.set(prop, null);
   return null;
 }
 
@@ -492,7 +492,7 @@ export function getCSSProperty(
   opt_value?: string,
 ): string {
   try {
-    const propertyNames = propNameMap[prop];
+    const propertyNames = propNameMap.get(prop);
     return (elem as HTMLElement).style.getPropertyValue(
       propertyNames ? propertyNames[0] : prop,
     );

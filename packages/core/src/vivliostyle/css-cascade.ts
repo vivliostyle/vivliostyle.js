@@ -1918,7 +1918,7 @@ export class CheckConditionAction extends ChainedAction {
   }
 
   override matches(cascadeInstance: StyledCascadeInstance): boolean {
-    return !!cascadeInstance.instance.conditions[this.condition];
+    return !!cascadeInstance.instance.conditions.get(this.condition);
   }
 
   override wire(chained: CascadeAction): WiredAction {
@@ -3776,7 +3776,7 @@ export interface StyleReader {
 export class CascadeInstance {
   code: Cascade;
   stack = [[], []] as ConditionItem[][];
-  conditions = Object.create(null) as { [key: string]: number };
+  conditions = new Map<string, number>();
   currentElement: Element | null = null;
   currentElementOffset: number | null = null;
   currentLocalName: string = "";
@@ -3809,7 +3809,7 @@ export class CascadeInstance {
     emptySiblingTypeCounts(),
   ];
   currentFollowingSiblingTypeCounts: SiblingTypeCounts;
-  viewConditions: { [key: string]: Matchers.Matcher[] } = Object.create(null);
+  viewConditions = new Map<string, Matchers.Matcher[]>();
   dependentConditions: string[] = [];
   elementStack: Element[] = [];
 
@@ -3843,27 +3843,29 @@ export class CascadeInstance {
   }
 
   increment(condition: string, viewCondition: Matchers.Matcher | null): void {
-    this.conditions[condition] = (this.conditions[condition] || 0) + 1;
+    this.conditions.set(condition, (this.conditions.get(condition) || 0) + 1);
     if (!viewCondition) {
       return;
     }
-    if (this.viewConditions[condition]) {
-      this.viewConditions[condition].push(viewCondition);
+    const matchers = this.viewConditions.get(condition);
+    if (matchers) {
+      matchers.push(viewCondition);
     } else {
-      this.viewConditions[condition] = [viewCondition];
+      this.viewConditions.set(condition, [viewCondition]);
     }
   }
 
   decrement(condition: string, viewCondition: Matchers.Matcher | null): void {
-    this.conditions[condition]--;
-    if (!this.viewConditions[condition]) {
+    this.conditions.set(condition, this.conditions.get(condition) - 1);
+    const matchers = this.viewConditions.get(condition);
+    if (!matchers) {
       return;
     }
-    this.viewConditions[condition] = this.viewConditions[condition].filter(
-      (item) => item !== viewCondition,
-    );
-    if (this.viewConditions[condition].length === 0) {
-      delete this.viewConditions[condition];
+    const remaining = matchers.filter((item) => item !== viewCondition);
+    if (remaining.length === 0) {
+      this.viewConditions.delete(condition);
+    } else {
+      this.viewConditions.set(condition, remaining);
     }
   }
 
@@ -3880,7 +3882,7 @@ export class CascadeInstance {
     }
     const dependentConditionMatchers = this.dependentConditions
       .map((conditionId) => {
-        const conditions = this.viewConditions[conditionId];
+        const conditions = this.viewConditions.get(conditionId);
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
             ? conditions[0]

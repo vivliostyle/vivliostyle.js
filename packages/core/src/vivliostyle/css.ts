@@ -322,15 +322,15 @@ export class Str extends Val {
   }
 }
 
-const nameTable: { [key: string]: Ident } = Object.create(null);
+const nameTable = new Map<string, Ident>();
 
 export class Ident extends Val {
   constructor(public name: string) {
     super();
-    if (nameTable[name]) {
+    if (nameTable.has(name)) {
       throw new Error("E_INVALID_CALL");
     }
-    nameTable[name] = this;
+    nameTable.set(name, this);
   }
 
   override toExpr(scope: Exprs.LexicalScope, ref: Exprs.Val | null): Exprs.Val {
@@ -355,7 +355,7 @@ export class Ident extends Val {
 }
 
 export function getName(name: string): Ident {
-  let r = nameTable[name];
+  let r = nameTable.get(name);
   if (!r) {
     r = new Ident(name);
   }
