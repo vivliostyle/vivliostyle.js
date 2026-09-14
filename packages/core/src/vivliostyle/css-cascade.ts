@@ -2584,7 +2584,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     if (Css.isDefaultingValue(value)) {
       return value;
     }
-    const validator = this.validatorSet.validators[this.propName];
+    const validator = this.validatorSet.validators.get(this.propName);
     if (validator) {
       return value.visit(validator) ?? Css.ident.unset;
     }
@@ -4758,7 +4758,7 @@ export class CascadeInstance {
         return val;
       }
     }
-    return this.validatorSet.defaultValues[propName] ?? null;
+    return this.validatorSet.defaultValues.get(propName) ?? null;
   }
 
   resolvePseudoelementInheritedPropertyValue(
@@ -4776,7 +4776,7 @@ export class CascadeInstance {
         !Css.isRollbackValue(val)
       ) {
         if (val === Css.ident.initial) {
-          return this.validatorSet.defaultValues[propName] ?? null;
+          return this.validatorSet.defaultValues.get(propName) ?? null;
         }
         return val;
       }
@@ -4900,7 +4900,7 @@ export class CascadeInstance {
                 for (const nameLH of shorthand.propList) {
                   const avLH = cascVal.withValue(
                     shorthand.values[nameLH] ??
-                      this.validatorSet.defaultValues[nameLH] ??
+                      this.validatorSet.defaultValues.get(nameLH) ??
                       Css.ident.initial,
                   );
                   const tvLH = getProp(elementStyle, nameLH);

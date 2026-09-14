@@ -1247,7 +1247,7 @@ export class ShorthandSyntaxProperty extends ShorthandSyntaxNode {
     public readonly name: string,
   ) {
     super();
-    this.validator = validatorSet.validators[this.name];
+    this.validator = validatorSet.validators.get(this.name);
   }
 
   override tryParse(
@@ -1367,7 +1367,7 @@ export class ShorthandValidator extends Css.Visitor {
         receiver.simpleProperty(
           name,
           this.values[name] ??
-            this.validatorSet.defaultValues[name] ??
+            this.validatorSet.defaultValues.get(name) ??
             Css.ident.initial,
           important,
         );
@@ -1534,7 +1534,7 @@ export class CommaShorthandValidator extends SimpleShorthandValidator {
     for (const name of this.propList) {
       const val =
         values[name] ??
-        this.validatorSet.defaultValues[name] ??
+        this.validatorSet.defaultValues.get(name) ??
         Css.ident.initial;
       let arr = acc[name];
       if (!arr) {
@@ -1614,7 +1614,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
     }
     this.error = false;
     const validators = this.validatorSet.validators;
-    if (!list[index].visit(validators["font-size"])) {
+    if (!list[index].visit(validators.get("font-size"))) {
       // If font-size validation fails and a calc() was incorrectly consumed
       // as font-weight by super.validateList (calc() is ambiguous between
       // font-weight <number> and font-size <length>), backtrack to the
@@ -1624,7 +1624,10 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
         fontWeight instanceof Css.Func && fontWeight.name === "calc"
           ? list.indexOf(fontWeight)
           : -1;
-      if (calcIndex >= 0 && list[calcIndex].visit(validators["font-size"])) {
+      if (
+        calcIndex >= 0 &&
+        list[calcIndex].visit(validators.get("font-size"))
+      ) {
         delete this.values["font-weight"];
         index = calcIndex;
       } else {
@@ -1641,7 +1644,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
         this.error = true;
         return index;
       }
-      if (!list[index].visit(validators["line-height"])) {
+      if (!list[index].visit(validators.get("line-height"))) {
         this.error = true;
         return index;
       }
@@ -1651,7 +1654,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
       index == list.length - 1
         ? list[index]
         : new Css.SpaceList(list.slice(index, list.length));
-    if (!fontFamily.visit(validators["font-family"])) {
+    if (!fontFamily.visit(validators.get("font-family"))) {
       this.error = true;
       return index;
     }
@@ -1669,7 +1672,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
       familyList.push(list.values[i]);
     }
     const family = new Css.CommaList(familyList);
-    if (!family.visit(this.validatorSet.validators["font-family"])) {
+    if (!family.visit(this.validatorSet.validators.get("font-family"))) {
       this.error = true;
     } else {
       this.values["font-family"] = family;
@@ -1678,7 +1681,7 @@ export class FontShorthandValidator extends SimpleShorthandValidator {
   }
 
   override visitIdent(ident: Css.Ident): Css.Val | null {
-    const props = this.validatorSet.systemFonts[ident.name];
+    const props = this.validatorSet.systemFonts.get(ident.name);
     if (props) {
       for (const name in props) {
         this.values[name] = props[name];
@@ -1696,8 +1699,8 @@ export class TextSpacingShorthandValidator extends SimpleShorthandValidator {
       switch (list[0].name.toLowerCase()) {
         case "normal":
           list = [
-            this.validatorSet.defaultValues["text-autospace"],
-            this.validatorSet.defaultValues["text-spacing-trim"],
+            this.validatorSet.defaultValues.get("text-autospace"),
+            this.validatorSet.defaultValues.get("text-spacing-trim"),
           ];
           break;
         case "auto":
@@ -1905,16 +1908,16 @@ const propsBrowserDependent = ["initial-letter"];
  * properties into corresponding simple ones, also stripping property prefixes.
  */
 export class ValidatorSet {
-  validators: { [key: string]: PropertyValidator } = {};
-  prefixes: { [key: string]: { [key: string]: boolean } } = {};
-  defaultValues: ValueMap = {};
-  namedValidators: { [key: string]: ValidatingGroup } = {};
-  systemFonts: { [key: string]: ValueMap } = {};
-  shorthands: { [key: string]: ShorthandValidator } = {};
-  layoutProps: ValueMap = {};
-  backgroundProps: ValueMap = {};
+  validators = new Map<string, PropertyValidator>();
+  prefixes = new Map<string, Set<string>>();
+  defaultValues = new Map<string, Css.Val>();
+  namedValidators = new Map<string, ValidatingGroup>();
+  systemFonts = new Map<string, ValueMap>();
+  shorthands = new Map<string, ShorthandValidator>();
+  layoutProps = new Map<string, Css.Val>();
+  backgroundProps = new Map<string, Css.Val>();
   private browserShorthandStyle: CSSStyleDeclaration | null = null;
-  private browserShorthandMisses: { [key: string]: true } = {};
+  private browserShorthandMisses = new Set<string>();
   private browserPropertyNamesForAll: string[] | null = null;
   private allPropertyNames: string[] | null = null;
 
@@ -1958,7 +1961,7 @@ export class ValidatorSet {
       return this.allPropertyNames;
     }
     const names = new Set<string>();
-    for (const name in this.validators) {
+    for (const name of this.validators.keys()) {
       if (!propsExcludedFromAll.includes(name)) {
         names.add(name);
       }
@@ -1966,7 +1969,7 @@ export class ValidatorSet {
     const browserPropertyNames = this.getBrowserPropertyNamesForAll();
     if (browserPropertyNames) {
       for (const name of browserPropertyNames) {
-        if (this.shorthands[name]) {
+        if (this.shorthands.has(name)) {
           continue;
         }
         names.add(name);
@@ -2028,7 +2031,7 @@ export class ValidatorSet {
     // CSS property names are ASCII case-insensitive, and callers may pass a
     // name that kept the author's casing, so normalize before every lookup.
     name = name.toLowerCase();
-    const shorthand = this.shorthands[name];
+    const shorthand = this.shorthands.get(name);
     if (shorthand) {
       if (
         shorthand instanceof AllShorthandValidator &&
@@ -2038,14 +2041,14 @@ export class ValidatorSet {
       }
       return shorthand;
     }
-    if (this.validators[name]) {
+    if (this.validators.has(name)) {
       // Vivliostyle has its own validator for this property and looks it up by
       // this name after the cascade, so it must not be split into the browser's
       // longhands even when the browser treats it as a shorthand
       // (e.g. `background-position` → `background-position-x`/`-y`).
       return null;
     }
-    if (this.browserShorthandMisses[name]) {
+    if (this.browserShorthandMisses.has(name)) {
       return null;
     }
     if (value == null) {
@@ -2061,7 +2064,7 @@ export class ValidatorSet {
           ? !/\bvar\(/i.test(value)
           : !containsVar(value)
       ) {
-        this.browserShorthandMisses[name] = true;
+        this.browserShorthandMisses.add(name);
       }
       return null;
     }
@@ -2070,7 +2073,7 @@ export class ValidatorSet {
       name,
       expanded.propList,
     );
-    this.shorthands[name] = browserShorthand;
+    this.shorthands.set(name, browserShorthand);
     this.invalidateAllPropertyNames();
     return browserShorthand;
   }
@@ -2183,72 +2186,112 @@ export class ValidatorSet {
   }
 
   initBuiltInValidators(): void {
-    this.namedValidators["COLOR"] = this.primitive(
-      new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "COLOR",
+      this.primitive(new PrimitiveValidator(ALLOW_COLOR, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["ATTR"] = this.primitive(new AttrFuncValidator());
-    this.namedValidators["IMAGE_FUNCTION"] = this.primitive(
-      new PrimitiveValidator(ALLOW_IMAGE, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set("ATTR", this.primitive(new AttrFuncValidator()));
+    this.namedValidators.set(
+      "IMAGE_FUNCTION",
+      this.primitive(new PrimitiveValidator(ALLOW_IMAGE, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["POS_INT"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "POS_INT",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_INT, NO_IDENTS, NO_IDENTS),
+      ),
     );
-    this.namedValidators["POS_NUM"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "POS_NUM",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUM, NO_IDENTS, NO_IDENTS),
+      ),
     );
-    this.namedValidators["POS_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, PERCENTAGE_UNITS),
+    this.namedValidators.set(
+      "POS_PERCENTAGE",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, PERCENTAGE_UNITS),
+      ),
     );
-    this.namedValidators["NEGATIVE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "NEGATIVE",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_NEGATIVE, NO_IDENTS, NO_IDENTS),
+      ),
     );
-    this.namedValidators["ZERO"] = this.primitive(
-      new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "ZERO",
+      this.primitive(new PrimitiveValidator(ALLOW_ZERO, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["ZERO_PERCENTAGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "ZERO_PERCENTAGE",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_ZERO_PERCENT, NO_IDENTS, NO_IDENTS),
+      ),
     );
-    this.namedValidators["POS_LENGTH"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, LENGTH_UNITS),
+    this.namedValidators.set(
+      "POS_LENGTH",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, LENGTH_UNITS),
+      ),
     );
-    this.namedValidators["POS_ANGLE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, ANGLE_UNITS),
+    this.namedValidators.set(
+      "POS_ANGLE",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, ANGLE_UNITS),
+      ),
     );
-    this.namedValidators["POS_TIME"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, TIME_UNITS),
+    this.namedValidators.set(
+      "POS_TIME",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, TIME_UNITS),
+      ),
     );
-    this.namedValidators["FREQUENCY"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, FREQUENCY_UNITS),
+    this.namedValidators.set(
+      "FREQUENCY",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, FREQUENCY_UNITS),
+      ),
     );
-    this.namedValidators["RESOLUTION"] = this.primitive(
-      new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
-        dpi: Css.empty,
-        dpcm: Css.empty,
-        dppx: Css.empty,
-      }),
+    this.namedValidators.set(
+      "RESOLUTION",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_POS_NUMERIC, NO_IDENTS, {
+          dpi: Css.empty,
+          dpcm: Css.empty,
+          dppx: Css.empty,
+        }),
+      ),
     );
-    this.namedValidators["URI"] = this.primitive(
-      new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "URI",
+      this.primitive(new PrimitiveValidator(ALLOW_URL, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["URANGE"] = this.primitive(
-      new PrimitiveValidator(ALLOW_URANGE, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "URANGE",
+      this.primitive(
+        new PrimitiveValidator(ALLOW_URANGE, NO_IDENTS, NO_IDENTS),
+      ),
     );
-    this.namedValidators["IDENT"] = this.primitive(
-      new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "IDENT",
+      this.primitive(new PrimitiveValidator(ALLOW_IDENT, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["STRING"] = this.primitive(
-      new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "STRING",
+      this.primitive(new PrimitiveValidator(ALLOW_STR, NO_IDENTS, NO_IDENTS)),
     );
-    this.namedValidators["SLASH"] = this.primitive(
-      new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS),
+    this.namedValidators.set(
+      "SLASH",
+      this.primitive(new PrimitiveValidator(ALLOW_SLASH, NO_IDENTS, NO_IDENTS)),
     );
     const stdfont = { "font-family": Css.getName("sans-serif") };
-    this.systemFonts["caption"] = stdfont;
-    this.systemFonts["icon"] = stdfont;
-    this.systemFonts["menu"] = stdfont;
-    this.systemFonts["message-box"] = stdfont;
-    this.systemFonts["small-caption"] = stdfont;
-    this.systemFonts["status-bar"] = stdfont;
+    this.systemFonts.set("caption", stdfont);
+    this.systemFonts.set("icon", stdfont);
+    this.systemFonts.set("menu", stdfont);
+    this.systemFonts.set("message-box", stdfont);
+    this.systemFonts.set("small-caption", stdfont);
+    this.systemFonts.set("status-bar", stdfont);
   }
 
   private isBuiltIn(name: string): boolean {
@@ -2264,7 +2307,7 @@ export class ValidatorSet {
       // Finished normally
       return null;
     }
-    const rulePrefixes: { [key: string]: boolean } = { "": true };
+    const rulePrefixes = new Set([""]);
     if (token.type == TokenType.O_BRK) {
       do {
         tok.consume();
@@ -2272,7 +2315,7 @@ export class ValidatorSet {
         if (token.type != TokenType.IDENT) {
           throw new Error("Prefix name expected");
         }
-        rulePrefixes[token.text] = true;
+        rulePrefixes.add(token.text);
         tok.consume();
         token = tok.token();
       } while (token.type == TokenType.COMMA);
@@ -2296,7 +2339,7 @@ export class ValidatorSet {
         throw new Error("'=' expected");
       }
       if (!this.isBuiltIn(name)) {
-        this.prefixes[name] = rulePrefixes;
+        this.prefixes.set(name, rulePrefixes);
       }
     } else {
       if (tok.token().type != TokenType.COLON) {
@@ -2351,7 +2394,7 @@ export class ValidatorSet {
               setop(" ");
             }
             if (this.isBuiltIn(token.text)) {
-              const builtIn = this.namedValidators[token.text];
+              const builtIn = this.namedValidators.get(token.text);
               if (!builtIn) {
                 throw new Error(`'${token.text}' unexpected`);
               }
@@ -2485,12 +2528,12 @@ export class ValidatorSet {
       }
       tok.consume();
       if (this.isBuiltIn(ruleName)) {
-        this.namedValidators[ruleName] = result;
+        this.namedValidators.set(ruleName, result);
       } else {
         if (result.isSimple()) {
-          this.validators[ruleName] = result.nodes[0].validator;
+          this.validators.set(ruleName, result.nodes[0].validator);
         } else {
-          this.validators[ruleName] = new SpaceListValidator(result);
+          this.validators.set(ruleName, new SpaceListValidator(result));
         }
       }
     }
@@ -2527,8 +2570,10 @@ export class ValidatorSet {
             throw new Error("unexpected token");
         }
       }
-      this.defaultValues[propName] =
-        vals.length > 1 ? new Css.SpaceList(vals) : vals[0];
+      this.defaultValues.set(
+        propName,
+        vals.length > 1 ? new Css.SpaceList(vals) : vals[0],
+      );
     }
   }
 
@@ -2556,18 +2601,19 @@ export class ValidatorSet {
         token = tok.token();
         switch (token.type) {
           case TokenType.IDENT:
-            if (this.validators[token.text]) {
+            if (this.validators.has(token.text)) {
               syntax.push(new ShorthandSyntaxProperty(this, token.text));
               // `font-variant_css2` and `font-stretch_css3` are not real properties
               if (!token.text.includes("_")) {
                 propList.push(token.text);
               }
             } else if (
-              this.shorthands[token.text] instanceof InsetsShorthandValidator
+              this.shorthands.get(token.text) instanceof
+              InsetsShorthandValidator
             ) {
-              const insetShorthand = this.shorthands[
-                token.text
-              ] as InsetsShorthandValidator;
+              const insetShorthand = this.shorthands.get(
+                token.text,
+              ) as InsetsShorthandValidator;
               syntax.push(insetShorthand.createSyntaxNode());
               propList.push(...insetShorthand.propList);
             } else {
@@ -2604,7 +2650,7 @@ export class ValidatorSet {
         }
       }
       const shorthandValidator = validatorClass.create(this, syntax, propList);
-      this.shorthands[ruleName] = shorthandValidator;
+      this.shorthands.set(ruleName, shorthandValidator);
       this.invalidateAllPropertyNames();
     }
   }
@@ -2627,13 +2673,13 @@ export class ValidatorSet {
     ]);
   }
 
-  makePropSet(propList: string[]): ValueMap {
-    const map: ValueMap = {};
+  makePropSet(propList: string[]): Map<string, Css.Val> {
+    const map = new Map<string, Css.Val>();
     for (const prop of propList) {
-      const shorthand = this.shorthands[prop];
+      const shorthand = this.shorthands.get(prop);
       const list = shorthand ? shorthand.propList : [prop];
       for (const pname of list) {
-        map[pname] = this.defaultValues[pname] ?? Css.ident.initial;
+        map.set(pname, this.defaultValues.get(pname) ?? Css.ident.initial);
       }
     }
     return map;
@@ -2684,7 +2730,7 @@ export class ValidatorSet {
       receiver.simpleProperty(shorthandName, value, important);
       return;
     }
-    const px = this.prefixes[name];
+    const px = this.prefixes.get(name);
     // The rollback keywords (`revert`, `revert-layer` and `revert-rule`) are
     // resolved by Vivliostyle's own cascade rather than handed to the browser,
     // so whether this browser build happens to support the keyword must not
@@ -2692,7 +2738,7 @@ export class ValidatorSet {
     // Probe the property with `unset` instead, which every browser accepts
     // wherever a CSS-wide keyword is allowed.
     const probeText = Css.isRollbackValue(value) ? "unset" : value.toString();
-    if (!px || !px[prefix]) {
+    if (!px || !px.has(prefix)) {
       if (CSS.supports(origName, probeText)) {
         const shorthand = this.getShorthand(shorthandName, probeText)?.clone(
           scope,
@@ -2719,7 +2765,7 @@ export class ValidatorSet {
     } else if (propsBrowserDependent.includes(name)) {
       // For properties whose support depends on browser, check via CSS.supports
       if (
-        !Object.keys(px).some((p) =>
+        !Array.from(px).some((p) =>
           Base.checkIfPropertySupported(p ? `-${p}-` : "", name),
         )
       ) {
@@ -2727,7 +2773,7 @@ export class ValidatorSet {
         return;
       }
     }
-    const validator = this.validators[name];
+    const validator = this.validators.get(name);
     if (validator) {
       const rvalue =
         Css.isDefaultingValue(value) || value.isExpr()

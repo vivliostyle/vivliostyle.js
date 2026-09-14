@@ -559,30 +559,27 @@ export class Styler implements AbstractStyler {
 
   hasProp(
     style: CssCascade.ElementStyle,
-    map: CssValidator.ValueMap,
+    map: ReadonlyMap<string, Css.Val>,
     name: string,
   ): boolean {
     const cascVal = style[name] as CssCascade.CascadeValue;
-    return cascVal && cascVal.evaluate(this.context) !== map[name];
+    return cascVal && cascVal.evaluate(this.context) !== map.get(name);
   }
 
   transferPropsToRoot(
     srcStyle: CssCascade.ElementStyle,
-    map: CssValidator.ValueMap,
+    map: ReadonlyMap<string, Css.Val>,
   ): void {
-    for (const pname in map) {
+    for (const [pname, val] of map) {
       const cascval = srcStyle[pname];
       if (cascval) {
         this.rootStyle[pname] = cascval;
         delete srcStyle[pname];
-      } else {
-        const val = map[pname];
-        if (val) {
-          this.rootStyle[pname] = new CssCascade.CascadeValue(
-            val,
-            CssParser.SPECIFICITY_AUTHOR,
-          );
-        }
+      } else if (val) {
+        this.rootStyle[pname] = new CssCascade.CascadeValue(
+          val,
+          CssParser.SPECIFICITY_AUTHOR,
+        );
       }
     }
   }
@@ -636,6 +633,7 @@ export class Styler implements AbstractStyler {
         (backgroundColor && !Css.isDefaultingValue(backgroundColor)) ||
         (backgroundImage && !Css.isDefaultingValue(backgroundImage))
       ) {
+        // css-backgrounds-3 §2.11: the element does not paint this background.
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         // background-position-x/-y are not part of the `background` shorthand
         // grammar, so they are absent from backgroundProps. Move them only when

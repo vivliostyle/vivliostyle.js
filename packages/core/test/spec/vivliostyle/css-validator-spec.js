@@ -489,9 +489,9 @@ describe("css-validator", function () {
         "foo = normal | auto | no-autospace | [[ ideograph-alpha || ideograph-numeric || punctuation ] || [ insert | replace ]];",
       );
 
-      expect(adapt_css.getName("x").visit(validatorSet.validators.foo)).toBe(
-        null,
-      );
+      expect(
+        adapt_css.getName("x").visit(validatorSet.validators.get("foo")),
+      ).toBe(null);
     });
 
     it("accepts valid single values for text-autospace-like nested alternates", function () {
@@ -502,7 +502,9 @@ describe("css-validator", function () {
       );
 
       expect(
-        adapt_css.getName("punctuation").visit(validatorSet.validators.foo),
+        adapt_css
+          .getName("punctuation")
+          .visit(validatorSet.validators.get("foo")),
       ).not.toBe(null);
     });
 
