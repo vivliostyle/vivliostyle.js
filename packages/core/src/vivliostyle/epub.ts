@@ -2263,7 +2263,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
           // This is necessary for :blank page selector to work.
           // (fix for issues #1131 and #1513)
           const scopes = targetViewItem.instance.scopes;
-          targetViewItem.instance.scopes = {};
+          targetViewItem.instance.scopes = new Map();
 
           // Isolate root page-float layout context only when re-rendering an
           // already rendered target page. For first-time rendering of the
