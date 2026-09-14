@@ -458,16 +458,16 @@ export class BoxStack {
 }
 
 export class StyleStore implements CssCascade.StyleReader {
-  private readonly map: { [key: string]: CssCascade.ElementStyle } = {};
+  private readonly map = new Map<number, CssCascade.ElementStyle>();
 
   constructor(private readonly xmldoc: XmlDoc.XMLDocHolder) {}
 
   setAt(offset: number, style: CssCascade.ElementStyle): void {
-    this.map[`e${offset}`] = style;
+    this.map.set(offset, style);
   }
 
   styleOf(element: Element): CssCascade.ElementStyle {
-    return this.map[`e${this.xmldoc.getElementOffset(element)}`];
+    return this.map.get(this.xmldoc.getElementOffset(element));
   }
 }
 
