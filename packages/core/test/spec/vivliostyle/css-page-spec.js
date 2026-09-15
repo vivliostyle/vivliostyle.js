@@ -20,11 +20,148 @@ import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
+import * as adapt_ops from "../../../src/vivliostyle/ops";
+import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_css_page from "../../../src/vivliostyle/css-page";
 
 describe("css-page", function () {
   var module = vivliostyle_css_page;
   var expected;
+
+  describe("StyleInstance#layoutContainer", function () {
+    var instance;
+    var parent;
+    var observer;
+    var page;
+    var floatContext;
+
+    beforeEach(function () {
+      instance = Object.create(adapt_ops.StyleInstance.prototype);
+      instance.viewport = { document };
+      instance.counterStore = { getExprContentListener: () => () => null };
+      instance.pageBreaks = {};
+      instance.currentLayoutPosition = { flowPositions: {} };
+      parent = document.createElement("div");
+      document.body.appendChild(parent);
+      observer = new MutationObserver(() => {});
+      observer.observe(parent, { childList: true, subtree: true });
+      page = { fetchers: [] };
+      floatContext = { isInvalidated: () => false };
+      spyOn(document, "createElement").and.callThrough();
+    });
+
+    afterEach(function () {
+      observer.disconnect();
+      parent.remove();
+    });
+
+    function makeBox(properties, children = [], suppress = true) {
+      return {
+        suppressEmptyBoxGeneration: suppress,
+        children,
+        reset: jasmine.createSpy("reset"),
+        prepareContainer: jasmine
+          .createSpy("prepareContainer")
+          .and.callFake((_context, container) => {
+            container.width = 100;
+            container.height = 100;
+          }),
+        finishContainer: jasmine.createSpy("finishContainer"),
+        transferContentProps: () => {},
+        getProp: function (_context, name) {
+          if (name === "wrap-flow") {
+            return adapt_css.ident.auto;
+          }
+          return properties[name];
+        },
+        getPropAsNumber: () => 1,
+      };
+    }
+
+    function layout(box, check, done) {
+      adapt_task.start(function () {
+        return instance
+          .layoutContainer(page, box, parent, 0, 0, [], floatContext)
+          .thenAsync(function () {
+            check();
+            done();
+            return adapt_task.newResult(true);
+          });
+      });
+    }
+
+    [undefined, adapt_css.ident.normal, adapt_css.ident.none].forEach(
+      (content) => {
+        it(`does not create or attach a margin box for ${content}`, function (done) {
+          var box = makeBox({ content });
+          layout(
+            box,
+            function () {
+              expect(document.createElement).not.toHaveBeenCalled();
+              expect(observer.takeRecords()).toEqual([]);
+              expect(box.reset).toHaveBeenCalledTimes(1);
+              expect(box.prepareContainer).not.toHaveBeenCalled();
+              expect(box.finishContainer).not.toHaveBeenCalled();
+            },
+            done,
+          );
+        });
+      },
+    );
+
+    ["", "Header"].forEach((text) => {
+      it(`generates a margin box for content: ${JSON.stringify(text)}`, function (done) {
+        var box = makeBox({ content: new adapt_css.Str(text) });
+        layout(
+          box,
+          function () {
+            expect(parent.children.length).toBe(1);
+            expect(parent.firstElementChild.textContent).toBe(text);
+            expect(box.prepareContainer).toHaveBeenCalledTimes(1);
+            expect(box.finishContainer).toHaveBeenCalledTimes(1);
+          },
+          done,
+        );
+      });
+    });
+
+    it("lays out a named flow even without generated content", function (done) {
+      var box = makeBox({ "flow-from": adapt_css.getName("body") });
+      spyOn(instance, "layoutFlowColumnsWithBalancing").and.callFake(
+        (_page, _box, _x, _y, _exclusions, _floats, container) => {
+          container.element.textContent = "Body";
+          container.computedBlockSize = 10;
+          return adapt_task.newResult([container]);
+        },
+      );
+      layout(
+        box,
+        function () {
+          expect(parent.textContent).toBe("Body");
+          expect(instance.layoutFlowColumnsWithBalancing).toHaveBeenCalledTimes(
+            1,
+          );
+          expect(box.finishContainer).toHaveBeenCalledTimes(1);
+        },
+        done,
+      );
+    });
+
+    it("creates empty ordinary partitions and lays out their children", function (done) {
+      var child = makeBox({}, [], false);
+      var box = makeBox({}, [child], false);
+      layout(
+        box,
+        function () {
+          expect(parent.children.length).toBe(1);
+          expect(parent.firstElementChild.children.length).toBe(1);
+          expect(box.finishContainer).toHaveBeenCalledTimes(1);
+          expect(child.finishContainer).toHaveBeenCalledTimes(1);
+        },
+        done,
+      );
+    });
+  });
 
   describe("resolvePageSizeAndBleed", function () {
     beforeEach(function () {

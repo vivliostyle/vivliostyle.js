@@ -312,10 +312,8 @@ type OpenedPageBox = {
   container: Vtree.Container;
   readonly offsetX: number;
   readonly offsetY: number;
-  readonly flowName: Css.Val;
   readonly dontExclude: boolean;
   readonly forwardOrderInLayout: boolean;
-  removed: boolean;
 };
 
 //-------------------------------------------------------------------------------
@@ -2566,10 +2564,8 @@ export class StyleInstance
         offsetX + container.left + container.marginLeft + container.borderLeft,
       offsetY:
         offsetY + container.top + container.marginTop + container.borderTop,
-      flowName,
       dontExclude,
       forwardOrderInLayout,
-      removed: false,
     };
   }
 
@@ -2577,12 +2573,16 @@ export class StyleInstance
   private layoutGeneratedContent(
     page: Vtree.Page,
     boxInstance: PageMaster.PageBoxInstance,
-    opened: OpenedPageBox,
-    parentContainer: HTMLElement,
-  ): Task.Result<boolean> {
+    open: () => OpenedPageBox,
+  ): Task.Result<OpenedPageBox | null> {
+    const contentVal = boxInstance.getProp(this, "content");
+    const hasContent = Vtree.nonTrivialContent(contentVal);
+    if (!hasContent && boxInstance.suppressEmptyBoxGeneration) {
+      return Task.newResult(null);
+    }
+    const opened = open();
     const boxContainer = opened.boxContainer;
     const fetchers: TaskUtil.Fetcher<string>[] = [];
-    const contentVal = boxInstance.getProp(this, "content");
     if (
       contentVal instanceof Css.Expr &&
       contentVal.expr instanceof Exprs.Native &&
@@ -2597,7 +2597,7 @@ export class StyleInstance
           this.counterStore.getExprContentListener(),
         ),
       );
-    } else if (Vtree.nonTrivialContent(contentVal)) {
+    } else if (hasContent) {
       let innerContainerTag = "span";
       if (contentVal instanceof Css.URL) {
         innerContainerTag = "img";
@@ -2661,46 +2661,36 @@ export class StyleInstance
           boxInstance.vertical,
         );
       }
-    } else if (boxInstance.suppressEmptyBoxGeneration) {
-      parentContainer.removeChild(boxContainer);
-      opened.removed = true;
     }
-    if (!opened.removed) {
-      boxInstance.finishContainer(
-        this,
-        opened.container,
-        page,
-        null,
-        1,
-        this.clientLayout,
-        this.faces,
-      );
-    }
+    boxInstance.finishContainer(
+      this,
+      opened.container,
+      page,
+      null,
+      1,
+      this.clientLayout,
+      this.faces,
+    );
     return fetchers.length
-      ? TaskUtil.waitForFetchers(fetchers).thenReturn(true)
-      : Task.newResult(true);
+      ? TaskUtil.waitForFetchers(fetchers).thenReturn(opened)
+      : Task.newResult(opened);
   }
 
   private layoutPageBoxContent(
     page: Vtree.Page,
     boxInstance: PageMaster.PageBoxInstance,
-    opened: OpenedPageBox,
-    parentContainer: HTMLElement,
+    open: () => OpenedPageBox,
     exclusions: GeometryUtil.Shape[],
     pagePageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
-  ): Task.Result<boolean> {
-    const boxContainer = opened.boxContainer;
-    const flowName = opened.flowName;
+  ): Task.Result<OpenedPageBox | null> {
+    const flowName = boxInstance.getProp(this, "flow-from");
     if (!flowName || !flowName.isIdent()) {
-      return this.layoutGeneratedContent(
-        page,
-        boxInstance,
-        opened,
-        parentContainer,
-      );
+      return this.layoutGeneratedContent(page, boxInstance, open);
     }
+    const opened = open();
+    const boxContainer = opened.boxContainer;
     if (!this.pageBreaks[flowName.toString()]) {
-      const innerFrame: Task.Frame<boolean> = Task.newFrame(
+      const innerFrame: Task.Frame<OpenedPageBox> = Task.newFrame(
         "layoutPageBoxContent.inner",
       );
       const flowNameStr = flowName.toString();
@@ -2743,7 +2733,7 @@ export class StyleInstance
             flowPosition.breakAfter = null;
           }
         }
-        innerFrame.finish(true);
+        innerFrame.finish(opened);
       });
       return innerFrame.result();
     }
@@ -2758,7 +2748,7 @@ export class StyleInstance
         this.faces,
       );
     }
-    return Task.newResult(true);
+    return Task.newResult(opened);
   }
 
   /**
@@ -2775,7 +2765,7 @@ export class StyleInstance
       !boxInstance.isAutoHeight ||
       Math.floor(opened.container.computedBlockSize) > 0
     ) {
-      if (!opened.removed && !opened.dontExclude) {
+      if (!opened.dontExclude) {
         const outerShapeProp = boxInstance.getProp(this, "shape-outside");
         const outerShape = opened.container.getOuterShape(outerShapeProp, this);
         exclusions.push(outerShape);
@@ -2868,8 +2858,7 @@ export class StyleInstance
       this.layoutPageBoxContent(
         page,
         boxInstance,
-        opened,
-        parentContainer,
+        () => opened,
         exclusions,
         attached,
       ).then(() => {
@@ -2897,15 +2886,8 @@ export class StyleInstance
       });
       return frame.result();
     }
-    this.layoutGeneratedContent(
-      page,
-      boxInstance,
-      opened,
-      parentContainer,
-    ).then(() => {
+    this.layoutGeneratedContent(page, boxInstance, () => opened).then(() => {
       // No invalidation test: generated content cannot invalidate a context.
-      // The result is unused. A box on the way down holds the establishing
-      // child, and is never the empty box this removes.
       this.excludeOrRemovePageBox(
         boxInstance,
         opened,
@@ -2960,23 +2942,22 @@ export class StyleInstance
       return Task.newResult(true);
     }
     const frame: Task.Frame<boolean> = Task.newFrame("layoutContainer");
-    const opened = this.openPageBox(
-      page,
-      boxInstance,
-      parentContainer,
-      offsetX,
-      offsetY,
-      exclusions,
-    );
     this.layoutPageBoxContent(
       page,
       boxInstance,
-      opened,
-      parentContainer,
+      () =>
+        this.openPageBox(
+          page,
+          boxInstance,
+          parentContainer,
+          offsetX,
+          offsetY,
+          exclusions,
+        ),
       exclusions,
       pagePageFloatLayoutContext,
-    ).then(() => {
-      if (pagePageFloatLayoutContext.isInvalidated()) {
+    ).then((opened) => {
+      if (!opened || pagePageFloatLayoutContext.isInvalidated()) {
         frame.finish(true);
         return;
       }
