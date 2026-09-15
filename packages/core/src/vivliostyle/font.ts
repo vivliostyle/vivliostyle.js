@@ -290,6 +290,26 @@ export class Mapper {
   private reorderFontFaceRules(
     fetchers: TaskUtil.Fetcher<Face | null>[],
   ): void {
+    const styleElements = fetchers
+      .map((fetcher) => fetcher.resource?.styleElement)
+      .filter(
+        (styleElement): styleElement is HTMLStyleElement =>
+          styleElement?.parentNode === this.head,
+      );
+    if (new Set(styleElements).size === styleElements.length) {
+      let sibling = this.head.lastElementChild;
+      let ordered = true;
+      for (let i = styleElements.length - 1; i >= 0; i--) {
+        if (styleElements[i] !== sibling) {
+          ordered = false;
+          break;
+        }
+        sibling = sibling.previousElementSibling;
+      }
+      if (ordered) {
+        return;
+      }
+    }
     for (const fetcher of fetchers) {
       const styleElement = fetcher.resource?.styleElement;
       if (styleElement?.parentNode === this.head) {
