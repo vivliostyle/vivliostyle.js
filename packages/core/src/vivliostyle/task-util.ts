@@ -36,11 +36,10 @@ export class Fetcher<T> {
   resource: T | null = null;
   task: Task.Task | null = null;
   piggybacks: ((p1: any) => void)[] | null = [];
+  private fetch: (() => Task.Result<T>) | null;
 
-  constructor(
-    public readonly fetch: () => Task.Result<T>,
-    opt_name?: string,
-  ) {
+  constructor(fetch: () => Task.Result<T>, opt_name?: string) {
+    this.fetch = fetch;
     this.name = opt_name;
   }
 
@@ -48,12 +47,14 @@ export class Fetcher<T> {
    * Start fetching/computing a resource, don't block current task.
    */
   start(): void {
-    if (!this.task) {
+    if (!this.task && this.fetch) {
+      const fetch = this.fetch;
+      this.fetch = null;
       this.task = Task.currentTask()
         .getScheduler()
         .run(() => {
           const frame = Task.newFrame("Fetcher.run");
-          this.fetch().then((resource) => {
+          fetch().then((resource) => {
             const piggibacks = this.piggybacks;
             this.arrived = true;
             this.resource = resource;
