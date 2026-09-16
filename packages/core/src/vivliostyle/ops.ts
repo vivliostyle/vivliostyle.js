@@ -292,7 +292,9 @@ function releaseBreakPositions(
   context: PageFloats.AttachedPageFloatLayoutContext,
 ): void {
   if ("breakPositions" in context.container) {
-    (context.container as LayoutType.Column).breakPositions = [];
+    const column = context.container as LayoutType.Column;
+    column.breakPositions = [];
+    column.nodeContextOverflowingDueToRepetitiveElements = null;
   }
   for (const child of context.children) {
     releaseBreakPositions(child);
