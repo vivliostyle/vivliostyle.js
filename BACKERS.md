@@ -39,6 +39,8 @@ USAMI Kenta⭐️
 monami-ya⭐️
 <p><a href="https://github.com/Motoki-N"><img src="https://github.com/Motoki-N.png" title="Motoki-N" width="60" height="60" style="max-width:100%;"></a>
 Motoki-N⭐️
+<p><a href="https://github.com/sakaeura"><img src="https://github.com/sakaeura.png" title="Sakae Ura" width="60" height="60" style="max-width:100%;"></a>
+Sakae Ura⭐️
 
 ### Past Sponsors
 
