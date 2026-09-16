@@ -458,16 +458,16 @@ export class BoxStack {
 }
 
 export class StyleStore implements CssCascade.StyleReader {
-  private readonly map: { [key: string]: CssCascade.ElementStyle } = {};
+  private readonly map = new Map<number, CssCascade.ElementStyle>();
 
   constructor(private readonly xmldoc: XmlDoc.XMLDocHolder) {}
 
   setAt(offset: number, style: CssCascade.ElementStyle): void {
-    this.map[`e${offset}`] = style;
+    this.map.set(offset, style);
   }
 
   styleOf(element: Element): CssCascade.ElementStyle {
-    return this.map[`e${this.xmldoc.getElementOffset(element)}`];
+    return this.map.get(this.xmldoc.getElementOffset(element));
   }
 }
 
@@ -499,7 +499,7 @@ export class Styler implements AbstractStyler {
   rootBackgroundAssigned: boolean = false;
   rootLayoutAssigned: boolean = false;
   lastOffset: number;
-  breakBeforeValues = {} as { [key: number]: string | null };
+  breakBeforeValues = new Map<number, string | null>();
   boxStack: BoxStack;
   bodyReached: boolean = true;
 
@@ -559,30 +559,27 @@ export class Styler implements AbstractStyler {
 
   hasProp(
     style: CssCascade.ElementStyle,
-    map: CssValidator.ValueMap,
+    map: ReadonlyMap<string, Css.Val>,
     name: string,
   ): boolean {
     const cascVal = style[name] as CssCascade.CascadeValue;
-    return cascVal && cascVal.evaluate(this.context) !== map[name];
+    return cascVal && cascVal.evaluate(this.context) !== map.get(name);
   }
 
   transferPropsToRoot(
     srcStyle: CssCascade.ElementStyle,
-    map: CssValidator.ValueMap,
+    map: ReadonlyMap<string, Css.Val>,
   ): void {
-    for (const pname in map) {
+    for (const [pname, val] of map) {
       const cascval = srcStyle[pname];
       if (cascval) {
         this.rootStyle[pname] = cascval;
         delete srcStyle[pname];
-      } else {
-        const val = map[pname];
-        if (val) {
-          this.rootStyle[pname] = new CssCascade.CascadeValue(
-            val,
-            CssParser.SPECIFICITY_AUTHOR,
-          );
-        }
+      } else if (val) {
+        this.rootStyle[pname] = new CssCascade.CascadeValue(
+          val,
+          CssParser.SPECIFICITY_AUTHOR,
+        );
       }
     }
   }
@@ -636,6 +633,7 @@ export class Styler implements AbstractStyler {
         (backgroundColor && !Css.isDefaultingValue(backgroundColor)) ||
         (backgroundImage && !Css.isDefaultingValue(backgroundImage))
       ) {
+        // css-backgrounds-3 §2.11: the element does not paint this background.
         this.transferPropsToRoot(elemStyle, this.validatorSet.backgroundProps);
         // background-position-x/-y are not part of the `background` shorthand
         // grammar, so they are absent from backgroundProps. Move them only when
@@ -985,7 +983,7 @@ export class Styler implements AbstractStyler {
         0,
       );
     }
-    const breakBefore = this.breakBeforeValues[startOffset] || null;
+    const breakBefore = this.breakBeforeValues.get(startOffset) || null;
     let flow = this.flows[flowName];
     if (!flow) {
       const parentFlowName = this.boxStack.lastFlowName();
@@ -1030,10 +1028,10 @@ export class Styler implements AbstractStyler {
         forcedBreakOffsets.push(offset);
       }
     }
-    const previousValue = this.breakBeforeValues[offset];
-    this.breakBeforeValues[offset] = Break.resolveEffectiveBreakValue(
-      previousValue,
-      breakValue,
+    const previousValue = this.breakBeforeValues.get(offset);
+    this.breakBeforeValues.set(
+      offset,
+      Break.resolveEffectiveBreakValue(previousValue, breakValue),
     );
   }
 

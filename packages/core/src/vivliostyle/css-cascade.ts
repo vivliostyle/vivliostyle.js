@@ -1198,9 +1198,7 @@ export function convertFontSizeToPx(
   }
 }
 
-export type ActionTable = {
-  [key: string]: CascadeAction;
-};
+export type ActionTable = Map<string, CascadeAction>;
 
 export class StyledCascadeInstance {
   constructor(
@@ -1433,10 +1431,10 @@ export class CheckNSTagAction extends ChainedAction {
   // tag is a pretty good thing to check, after epub:type
 
   override primarySlot(cascade: Cascade): PrimarySlot | null {
-    let prefix = cascade.nsPrefix[this.ns];
+    let prefix = cascade.nsPrefix.get(this.ns);
     if (!prefix) {
       prefix = `ns${cascade.nsCount++}:`;
-      cascade.nsPrefix[this.ns] = prefix;
+      cascade.nsPrefix.set(this.ns, prefix);
     }
     return { table: cascade.nstags, key: prefix + this.localName };
   }
@@ -1918,7 +1916,7 @@ export class CheckConditionAction extends ChainedAction {
   }
 
   override matches(cascadeInstance: StyledCascadeInstance): boolean {
-    return !!cascadeInstance.instance.conditions[this.condition];
+    return !!cascadeInstance.instance.conditions.get(this.condition);
   }
 
   override wire(chained: CascadeAction): WiredAction {
@@ -2586,7 +2584,7 @@ export class AttrValueFilterVisitor extends Css.FilterVisitor {
     if (Css.isDefaultingValue(value)) {
       return value;
     }
-    const validator = this.validatorSet.validators[this.propName];
+    const validator = this.validatorSet.validators.get(this.propName);
     if (validator) {
       return value.visit(validator) ?? Css.ident.unset;
     }
@@ -3706,15 +3704,15 @@ export const ORDER_INCREMENT = 1 / 0x100000;
 
 export class Cascade {
   nsCount: number = 0;
-  nsPrefix: { [key: string]: string } = {};
-  tags: ActionTable = {};
-  nstags: ActionTable = {};
-  epubtypes: ActionTable = {};
-  classes: ActionTable = {};
-  ids: ActionTable = {};
-  pagetypes: ActionTable = {};
+  nsPrefix = new Map<string, string>();
+  tags: ActionTable = new Map();
+  nstags: ActionTable = new Map();
+  epubtypes: ActionTable = new Map();
+  classes: ActionTable = new Map();
+  ids: ActionTable = new Map();
+  pagetypes: ActionTable = new Map();
   order: number = 0;
-  readonly layerTrees: { [flavor: string]: CascadeLayerTree } = {};
+  readonly layerTrees = new Map<string, CascadeLayerTree>();
 
   /**
    * Returns the cascade layer for a `@layer` rule of the given origin.
@@ -3725,16 +3723,20 @@ export class Cascade {
     parent: CascadeLayer | null,
     nameList: string[] | null,
   ): CascadeLayer {
-    const tree = (this.layerTrees[flavor] ??= new CascadeLayerTree());
+    let tree = this.layerTrees.get(flavor);
+    if (!tree) {
+      tree = new CascadeLayerTree();
+      this.layerTrees.set(flavor, tree);
+    }
     return tree.register(parent, nameList);
   }
 
   insertInTable(table: ActionTable, key: string, action: CascadeAction): void {
-    const a = table[key];
+    const a = table.get(key);
     if (a) {
       action = a.mergeWith(action);
     }
-    table[key] = action;
+    table.set(key, action);
   }
 
   createInstance(
@@ -3776,7 +3778,7 @@ export interface StyleReader {
 export class CascadeInstance {
   code: Cascade;
   stack = [[], []] as ConditionItem[][];
-  conditions = Object.create(null) as { [key: string]: number };
+  conditions = new Map<string, number>();
   currentElement: Element | null = null;
   currentElementOffset: number | null = null;
   currentLocalName: string = "";
@@ -3809,7 +3811,7 @@ export class CascadeInstance {
     emptySiblingTypeCounts(),
   ];
   currentFollowingSiblingTypeCounts: SiblingTypeCounts;
-  viewConditions: { [key: string]: Matchers.Matcher[] } = Object.create(null);
+  viewConditions = new Map<string, Matchers.Matcher[]>();
   dependentConditions: string[] = [];
   elementStack: Element[] = [];
 
@@ -3843,27 +3845,29 @@ export class CascadeInstance {
   }
 
   increment(condition: string, viewCondition: Matchers.Matcher | null): void {
-    this.conditions[condition] = (this.conditions[condition] || 0) + 1;
+    this.conditions.set(condition, (this.conditions.get(condition) || 0) + 1);
     if (!viewCondition) {
       return;
     }
-    if (this.viewConditions[condition]) {
-      this.viewConditions[condition].push(viewCondition);
+    const matchers = this.viewConditions.get(condition);
+    if (matchers) {
+      matchers.push(viewCondition);
     } else {
-      this.viewConditions[condition] = [viewCondition];
+      this.viewConditions.set(condition, [viewCondition]);
     }
   }
 
   decrement(condition: string, viewCondition: Matchers.Matcher | null): void {
-    this.conditions[condition]--;
-    if (!this.viewConditions[condition]) {
+    this.conditions.set(condition, this.conditions.get(condition) - 1);
+    const matchers = this.viewConditions.get(condition);
+    if (!matchers) {
       return;
     }
-    this.viewConditions[condition] = this.viewConditions[condition].filter(
-      (item) => item !== viewCondition,
-    );
-    if (this.viewConditions[condition].length === 0) {
-      delete this.viewConditions[condition];
+    const remaining = matchers.filter((item) => item !== viewCondition);
+    if (remaining.length === 0) {
+      this.viewConditions.delete(condition);
+    } else {
+      this.viewConditions.set(condition, remaining);
     }
   }
 
@@ -3880,7 +3884,7 @@ export class CascadeInstance {
     }
     const dependentConditionMatchers = this.dependentConditions
       .map((conditionId) => {
-        const conditions = this.viewConditions[conditionId];
+        const conditions = this.viewConditions.get(conditionId);
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
             ? conditions[0]
@@ -3910,7 +3914,7 @@ export class CascadeInstance {
     table: ActionTable,
     key: string,
   ): void {
-    const action = table[key];
+    const action = table.get(key);
     if (action) {
       action.apply(cascadeInstance);
     }
@@ -4229,6 +4233,22 @@ export class CascadeInstance {
     this.popCounters();
   }
 
+  private dropPseudoelement(
+    baseStyle: ElementStyle,
+    pseudos: ElementStyleMap,
+    pseudoName: string,
+  ): ElementStyleMap {
+    // Rebuilding keeps _pseudos out of V8 dictionary mode.
+    const keptPseudos = {} as ElementStyleMap;
+    for (const name in pseudos) {
+      if (name !== pseudoName) {
+        keptPseudos[name] = pseudos[name];
+      }
+    }
+    baseStyle["_pseudos"] = keptPseudos;
+    return keptPseudos;
+  }
+
   pushElement(
     element: Base.ChildElement,
     baseStyle: ElementStyle,
@@ -4248,7 +4268,7 @@ export class CascadeInstance {
     this.currentLocalName = element.localName;
     const prefix =
       this.currentNamespace !== null
-        ? this.code.nsPrefix[this.currentNamespace]
+        ? this.code.nsPrefix.get(this.currentNamespace)
         : undefined;
     if (prefix) {
       this.currentNSTag = prefix + this.currentLocalName;
@@ -4370,7 +4390,7 @@ export class CascadeInstance {
       });
       this.counterListener.countersOfId(id, counters);
     }
-    const pseudos = getStyleMap(baseStyle, "_pseudos");
+    let pseudos = getStyleMap(baseStyle, "_pseudos");
     if (pseudos) {
       let before = true;
       for (const pseudoName of pseudoNames) {
@@ -4431,7 +4451,7 @@ export class CascadeInstance {
               isSemanticFootnoteContent &&
               !hasSemanticFootnotePseudoContent)
           ) {
-            delete pseudos[pseudoName];
+            pseudos = this.dropPseudoelement(baseStyle, pseudos, pseudoName);
           } else if (before) {
             this.processPseudoelementProps(
               pseudoProps,
@@ -4450,7 +4470,7 @@ export class CascadeInstance {
                 baseStyle,
               );
               // Delete the pseudo to prevent fake element generation
-              delete pseudos[pseudoName];
+              pseudos = this.dropPseudoelement(baseStyle, pseudos, pseudoName);
             } else if (pseudoName === "footnote-marker") {
               // For ::footnote-marker, use native ::marker only when
               // list-style-position: outside. When inside (default), use
@@ -4496,7 +4516,11 @@ export class CascadeInstance {
                   0,
                 );
                 // Delete the pseudo to prevent fake element generation
-                delete pseudos[pseudoName];
+                pseudos = this.dropPseudoelement(
+                  baseStyle,
+                  pseudos,
+                  pseudoName,
+                );
               }
               // else: keep the pseudo for traditional span-based rendering
             } else if (
@@ -4754,7 +4778,7 @@ export class CascadeInstance {
         return val;
       }
     }
-    return this.validatorSet.defaultValues[propName] ?? null;
+    return this.validatorSet.defaultValues.get(propName) ?? null;
   }
 
   resolvePseudoelementInheritedPropertyValue(
@@ -4772,7 +4796,7 @@ export class CascadeInstance {
         !Css.isRollbackValue(val)
       ) {
         if (val === Css.ident.initial) {
-          return this.validatorSet.defaultValues[propName] ?? null;
+          return this.validatorSet.defaultValues.get(propName) ?? null;
         }
         return val;
       }
@@ -4896,7 +4920,7 @@ export class CascadeInstance {
                 for (const nameLH of shorthand.propList) {
                   const avLH = cascVal.withValue(
                     shorthand.values[nameLH] ??
-                      this.validatorSet.defaultValues[nameLH] ??
+                      this.validatorSet.defaultValues.get(nameLH) ??
                       Css.ident.initial,
                   );
                   const tvLH = getProp(elementStyle, nameLH);

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>content(marker) in the ::first-letter of a non-list-item element</title>
+    <style>
+      p::marker {
+        content: "MARKER";
+      }
+      p::first-letter {
+        content: content(marker);
+      }
+      li::marker {
+        content: "LIMARKER";
+      }
+      li::first-letter {
+        content: content(marker);
+      }
+    </style>
+  </head>
+  <body>
+    <p>This paragraph is not a list item.</p>
+    <ul>
+      <li>This list item is one.</li>
+    </ul>
+  </body>
+</html>

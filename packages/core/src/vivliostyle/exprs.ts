@@ -309,9 +309,7 @@ export function needUnitConversion(unit: string): boolean {
   }
 }
 
-export type ScopeContext = {
-  [key: string]: Result;
-};
+export type ScopeContext = Map<string, Result>;
 
 /**
  * Run-time instance of a scope and its children.
@@ -328,7 +326,7 @@ export class Context {
   rootLineHeight: number;
   isRootLineHeightFromRelativeCalc: boolean = false;
   pref: Preferences;
-  scopes: { [key: string]: ScopeContext } = {};
+  scopes = new Map<string, ScopeContext>();
   pageAreaWidth: number | null = null;
   pageAreaHeight: number | null = null;
   pageVertical: boolean | null = null;
@@ -371,16 +369,16 @@ export class Context {
   }
 
   private getScopeContext(scope: LexicalScope): ScopeContext {
-    let s = this.scopes[scope.scopeKey];
+    let s = this.scopes.get(scope.scopeKey);
     if (!s) {
-      s = {};
-      this.scopes[scope.scopeKey] = s;
+      s = new Map();
+      this.scopes.set(scope.scopeKey, s);
     }
     return s;
   }
 
   clearScope(scope: LexicalScope): void {
-    this.scopes[scope.scopeKey] = {};
+    this.scopes.set(scope.scopeKey, new Map());
     for (let k = 0; k < scope.children.length; k++) {
       this.clearScope(scope.children[k]);
     }
@@ -554,12 +552,11 @@ export class Context {
   }
 
   queryVal(scope: LexicalScope, key: string): Result | undefined {
-    const s = this.scopes[scope.scopeKey];
-    return s ? s[key] : undefined;
+    return this.scopes.get(scope.scopeKey)?.get(key);
   }
 
   storeVal(scope: LexicalScope, key: string, val: Result): void {
-    this.getScopeContext(scope)[key] = val;
+    this.getScopeContext(scope).set(key, val);
   }
 }
 

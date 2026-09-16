@@ -288,6 +288,24 @@ function restoreFormattingContextStates(
   }
 }
 
+function releaseBreakPositions(
+  context: PageFloats.AttachedPageFloatLayoutContext,
+): void {
+  if ("breakPositions" in context.container) {
+    const column = context.container as LayoutType.Column;
+    column.breakPositions = [];
+    column.nodeContextOverflowingDueToRepetitiveElements = null;
+  }
+  for (const child of context.children) {
+    releaseBreakPositions(child);
+  }
+  for (const fragment of context.floatFragments) {
+    releaseBreakPositions(
+      (fragment.area as Layout.PageFloatArea).pageFloatLayoutContext,
+    );
+  }
+}
+
 type OpenedPageBox = {
   readonly boxContainer: HTMLElement;
   /** Replaced by the column when this box holds the flow itself. */
@@ -423,7 +441,7 @@ export class StyleInstance
 
     // Check the spread break at beginning of a document that may cause
     // the first page verso side or cause a blank page (issue #666)
-    if (!this.matchStartPageSide(this.styler.breakBeforeValues[0])) {
+    if (!this.matchStartPageSide(this.styler.breakBeforeValues.get(0))) {
       if (this.pageNumberOffset === 0) {
         this.isVersoFirstPage = true;
       } else {
@@ -3334,6 +3352,9 @@ export class StyleInstance
         cp.highestSeenOffset = this.styler.getReachedOffset();
         const triggers = this.style.store.getTriggersForDoc(this.xmldoc);
         page.finish(triggers, this.clientLayout);
+        if (attachedPageFloatLayoutContext) {
+          releaseBreakPositions(attachedPageFloatLayoutContext);
+        }
         if (
           this.noMorePrimaryFlows(cp) &&
           !this.hasActiveRootPageFloatLayoutContext()
