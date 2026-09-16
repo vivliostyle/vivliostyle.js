@@ -90,6 +90,11 @@ module.exports = [
         file: "pseudo-element-context/after-list-item-counter.html",
         title: "list-item counter in the pseudo-elements of an ordered list",
       },
+      {
+        file: "pseudo-element-context/first-letter-content-marker.html",
+        title:
+          "content(marker) in the ::first-letter of a non-list-item element",
+      },
       { file: "rem_in_page_margin.html", title: "rem in page margin" },
       {
         file: "rlh_unit/root-line-height-normal.html",
