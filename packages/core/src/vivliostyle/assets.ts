@@ -210,6 +210,11 @@ export const VivliostyleViewportCss = `
     max-height: 100vh;
   }
 
+  [data-vivliostyle-spread-container][data-vivliostyle-rendering-all-pages]
+    > [data-vivliostyle-page-container] {
+    contain: strict;
+  }
+
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
     break-after: page;
   }

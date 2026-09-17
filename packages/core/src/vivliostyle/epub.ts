@@ -3359,9 +3359,16 @@ export class OPFView implements Vgen.CustomRendererFactory {
     };
     let result: PageAndPosition | null = null;
     this.renderingAllPages = true;
+    this.viewport.contentContainer.setAttribute(
+      "data-vivliostyle-rendering-all-pages",
+      "true",
+    );
     frame.handler = (handlerFrame, err) => {
       this.clearFollowingSpineRelayoutState();
       this.renderingAllPages = false;
+      this.viewport.contentContainer.removeAttribute(
+        "data-vivliostyle-rendering-all-pages",
+      );
       handlerFrame.task.raise(err, handlerFrame.parent);
     };
     this.renderPagesUpto(finalPosition, false).then((initialResult) => {
@@ -3387,6 +3394,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
           .then(() => {
             this.pageSheetSizeTruncator(this.getRenderedPageSizeCount());
             this.renderingAllPages = false;
+            this.viewport.contentContainer.removeAttribute(
+              "data-vivliostyle-rendering-all-pages",
+            );
             frame.finish(result);
           });
       };

@@ -18,12 +18,56 @@
 
 import * as adapt_epub from "../../../src/vivliostyle/epub";
 import * as adapt_viewer from "../../../src/vivliostyle/adaptive-viewer";
+import { VivliostyleViewportCss } from "../../../src/vivliostyle/assets";
 import * as adapt_task from "../../../src/vivliostyle/task";
 import * as adapt_vtree from "../../../src/vivliostyle/vtree";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 
 describe("epub", function () {
+  describe("full pagination containment", function () {
+    it("contains direct page children only during print pagination", function () {
+      var style = document.createElement("style");
+      style.textContent = VivliostyleViewportCss;
+      document.head.appendChild(style);
+      var spread = document.createElement("div");
+      spread.setAttribute("data-vivliostyle-spread-container", "true");
+      spread.setAttribute("data-vivliostyle-rendering-all-pages", "true");
+      var page = document.createElement("div");
+      page.setAttribute("data-vivliostyle-page-container", "true");
+      var wrapper = document.createElement("div");
+      var nestedPage = document.createElement("div");
+      nestedPage.setAttribute("data-vivliostyle-page-container", "true");
+      wrapper.appendChild(nestedPage);
+      spread.append(page, wrapper);
+      document.body.appendChild(spread);
+
+      expect(getComputedStyle(page).contain).toBe("none");
+      var printRule = Array.from(style.sheet.cssRules).find(
+        (rule) =>
+          rule instanceof CSSMediaRule && rule.conditionText === "print",
+      );
+      var containmentRule = Array.from(printRule.cssRules).find(
+        (rule) =>
+          rule instanceof CSSStyleRule &&
+          rule.selectorText ===
+            "[data-vivliostyle-spread-container][data-vivliostyle-rendering-all-pages] > [data-vivliostyle-page-container]",
+      );
+      expect(containmentRule.style.contain).toBe("strict");
+
+      printRule.media.mediaText = "all";
+
+      expect(getComputedStyle(page).contain).toBe("strict");
+      expect(getComputedStyle(nestedPage).contain).toBe("none");
+
+      spread.removeAttribute("data-vivliostyle-rendering-all-pages");
+
+      expect(getComputedStyle(page).contain).toBe("none");
+      spread.remove();
+      style.remove();
+    });
+  });
+
   describe("AdaptiveViewer page sizes", function () {
     it("removes stale page sizes after pagination shrinks", function () {
       var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
@@ -1331,7 +1375,9 @@ describe("epub", function () {
         var initialResult = { id: "initial" };
         var rerenderedResult = { id: "rerendered" };
         var sourcePage = { id: "source", fetchers: [] };
+        var contentContainer = document.createElement("div");
         view.opf = { spine: [{}, {}, {}] };
+        view.viewport = { contentContainer: contentContainer };
         view.spineItems = [
           { pages: [sourcePage], instance: { pageNumberOffset: 4 } },
         ];
@@ -1349,10 +1395,15 @@ describe("epub", function () {
             view.deferredFollowingSpineRelayoutStart = null;
           },
         );
-        spyOn(view, "renderPagesUpto").and.returnValues(
-          adapt_task.newResult(initialResult),
-          adapt_task.newResult(rerenderedResult),
-        );
+        var renderResults = [initialResult, rerenderedResult];
+        spyOn(view, "renderPagesUpto").and.callFake(function () {
+          expect(
+            contentContainer.hasAttribute(
+              "data-vivliostyle-rendering-all-pages",
+            ),
+          ).toBeTrue();
+          return adapt_task.newResult(renderResults.shift());
+        });
 
         view.renderAllPages().then(function (result) {
           expect(view.relayoutDeferredFollowingSpines).toHaveBeenCalled();
@@ -1369,10 +1420,52 @@ describe("epub", function () {
             view.counterStore.updateTargetTextNodesInPages,
           ).toHaveBeenCalledOnceWith([sourcePage], jasmine.any(Set));
           expect(view.renderingAllPages).toBe(false);
+          expect(
+            contentContainer.hasAttribute(
+              "data-vivliostyle-rendering-all-pages",
+            ),
+          ).toBeFalse();
           expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
         });
         return adapt_task.newResult(true);
+      });
+    });
+
+    it("removes full pagination containment after an error", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var contentContainer = document.createElement("div");
+        var error = new Error("pagination failed");
+        view.opf = { spine: [{}] };
+        view.viewport = { contentContainer: contentContainer };
+        view.spineItems = [];
+        view.deferredFollowingSpineRelayoutStart = null;
+        view.pageSheetSizeTruncator = function () {
+          throw error;
+        };
+        spyOn(view, "renderPagesUpto").and.returnValue(
+          adapt_task.newResult(null),
+        );
+        spyOn(view, "clearFollowingSpineRelayoutState");
+
+        return adapt_task.handle(
+          "testFullPaginationContainmentErrorCleanup",
+          function () {
+            view.renderAllPages();
+          },
+          function (frame, caughtError) {
+            expect(caughtError).toBe(error);
+            expect(view.renderingAllPages).toBeFalse();
+            expect(
+              contentContainer.hasAttribute(
+                "data-vivliostyle-rendering-all-pages",
+              ),
+            ).toBeFalse();
+            frame.finish(true);
+            done();
+          },
+        );
       });
     });
 
