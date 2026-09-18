@@ -377,14 +377,14 @@ class TextSpacingPolyfill {
 
   preprocessForTextSpacing(element: Element): void {
     // Split text nodes by punctuations and ideograph/non-ideograph boundary
-    const nodeIter = element.ownerDocument.createNodeIterator(
+    const walker = element.ownerDocument.createTreeWalker(
       element,
       NodeFilter.SHOW_TEXT,
     );
     for (
-      let node = nodeIter.nextNode() as Text | null;
+      let node = walker.nextNode() as Text | null;
       node;
-      node = nodeIter.nextNode() as Text | null
+      node = walker.nextNode() as Text | null
     ) {
       const parentElem = node.parentElement;
       if (
@@ -441,14 +441,14 @@ class TextSpacingPolyfill {
       element.style.whiteSpace = "pre";
     }
 
-    const nodeIter = element.ownerDocument.createNodeIterator(
+    const walker = element.ownerDocument.createTreeWalker(
       element,
       NodeFilter.SHOW_TEXT,
     );
     let prevNode: Text | null = null;
     let nextNode: Text | null = null;
-    for (let node = nodeIter.nextNode() as Text | null; node; node = nextNode) {
-      nextNode = nodeIter.nextNode() as Text | null;
+    for (let node = walker.nextNode() as Text | null; node; node = nextNode) {
+      nextNode = walker.nextNode() as Text | null;
       const isFirstInBlock = !prevNode;
       const isFirstAfterForcedLineBreak =
         !prevNode || /\n$/.test(prevNode.textContent);
