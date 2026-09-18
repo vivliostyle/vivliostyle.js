@@ -39,6 +39,7 @@ import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
 import * as Matchers from "./matchers";
 import * as PseudoElement from "./pseudo-element";
+import * as RangeClientRects from "./range-client-rects";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
 import * as Vgen from "./vgen";
@@ -2918,11 +2919,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     end: Element | Text,
   ): Vtree.ClientRect[] {
     const arr: Vtree.ClientRect[] = [];
-    const range = start.ownerDocument.createRange();
     let wentUp = false;
     let node: Node = start;
     let lastGood: Node | null = null;
-    let haveStart = false;
+    let rangeStart: RangeClientRects.RangeBoundary | null = null;
     let endNotReached = true;
     while (endNotReached) {
       let seekRange = true;
@@ -2940,12 +2940,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         const element = node.nodeType === 1 ? (node as Element) : null;
         if (!element) {
-          if (!haveStart) {
+          if (!rangeStart) {
             if (node.parentNode == null) {
               endNotReached = false;
             } else {
-              range.setStartBefore(node);
-              haveStart = true;
+              rangeStart = RangeClientRects.before(node);
             }
           }
           lastGood = node;
@@ -2953,7 +2952,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           wentUp = false;
         } else if (LayoutHelper.isSpecial(element)) {
           // Skip special
-          seekRange = !haveStart;
+          seekRange = !rangeStart;
         } else if (
           !element.firstChild ||
           Base.mediaTags[element.localName] ||
@@ -2963,14 +2962,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           )
         ) {
           // img, ruby, inline-block, etc.
-          seekRange = !haveStart;
+          seekRange = !rangeStart;
           if (seekRange) {
             if (element.localName === "ruby" && node.firstChild) {
               // Fix for issue #985
               node = node.firstChild;
             }
-            range.setStartBefore(node);
-            haveStart = true;
+            rangeStart = RangeClientRects.before(node);
             lastGood = node;
           } else if (!/^r(uby|tc?)$/.test(element.localName)) {
             // Fix for issue #1319 and #1401
@@ -2991,9 +2989,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
         node = next;
       } while (seekRange && endNotReached);
-      if (haveStart) {
-        range.setEndAfter(lastGood);
-        const boxList = this.clientLayout.getRangeClientRects(range);
+      if (rangeStart) {
+        const boxList = RangeClientRects.getLayoutClientRectsBetween(
+          this.clientLayout,
+          rangeStart,
+          RangeClientRects.after(lastGood),
+        );
 
         // Adjust boxes' positions for column breaking
         LayoutHelper.adjustRectsForColumnBreaking(boxList, this.vertical);
@@ -3001,7 +3002,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         for (let i = 0; i < boxList.length; i++) {
           arr.push(boxList[i]);
         }
-        haveStart = false;
+        rangeStart = null;
       }
     }
     return arr;

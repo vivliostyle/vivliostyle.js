@@ -33,6 +33,7 @@ import * as LayoutHelper from "./layout-helper";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Plugin from "./plugin";
+import * as RangeClientRects from "./range-client-rects";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Vtree from "./vtree";
 import { CssCascade, CssStyler, Layout } from "./types";
@@ -3383,9 +3384,10 @@ function getContentWidth(
   if (node.nodeType === 1) {
     rects = Array.from((node as Element).getClientRects());
   } else {
-    const range = node.ownerDocument.createRange();
-    range.selectNodeContents(node);
-    rects = clientLayout.getRangeClientRects(range);
+    rects = RangeClientRects.getLayoutClientRectsOfNodeContents(
+      clientLayout,
+      node,
+    );
   }
 
   const totalWidth = rects.reduce(
