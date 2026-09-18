@@ -18,6 +18,7 @@
  */
 import * as Base from "./base";
 import * as Display from "./display";
+import * as RangeClientRects from "./range-client-rects";
 import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
@@ -552,7 +553,6 @@ export function calculateEdge(
     return NaN;
   } else {
     let edge = NaN;
-    const range = node.ownerDocument.createRange();
     const length = node.textContent.length;
     if (!length) {
       return NaN;
@@ -563,9 +563,11 @@ export function calculateEdge(
     if (extraOffset >= length) {
       extraOffset = length - 1;
     }
-    range.setStart(node, extraOffset);
-    range.setEnd(node, extraOffset + 1);
-    let boxes = clientLayout.getRangeClientRects(range);
+    let boxes = RangeClientRects.getLayoutClientRectsBetween(
+      clientLayout,
+      RangeClientRects.at(node, extraOffset),
+      RangeClientRects.at(node, extraOffset + 1),
+    );
 
     // Adjust boxes' positions for column breaking
     adjustRectsForColumnBreaking(boxes, vertical);

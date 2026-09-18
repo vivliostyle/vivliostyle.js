@@ -22,6 +22,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
 import * as PageFloats from "./page-floats";
+import * as RangeClientRects from "./range-client-rects";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
 import * as Vtree from "./vtree";
@@ -180,10 +181,13 @@ function getBlockEndEdgeFromViewNode(
   if (!text.length) {
     return NaN;
   }
-  const range = viewNode.ownerDocument.createRange();
-  range.setStart(viewNode, 0);
-  range.setEnd(viewNode, text.length);
-  const rects = getAdjustedNonEmptyRects(range.getClientRects(), vertical);
+  const rects = getAdjustedNonEmptyRects(
+    RangeClientRects.getClientRectsBetween(
+      RangeClientRects.at(viewNode, 0),
+      RangeClientRects.at(viewNode, text.length),
+    ),
+    vertical,
+  );
   return getBlockEndEdgeFromRects(rects, vertical);
 }
 
@@ -221,10 +225,13 @@ function getNodeContextEdge(
     offset += text.length;
   }
   offset = Math.max(0, Math.min(offset, text.length - 1));
-  const range = node.ownerDocument.createRange();
-  range.setStart(node, offset);
-  range.setEnd(node, offset + 1);
-  const rects = getAdjustedNonEmptyRects(range.getClientRects(), vertical);
+  const rects = getAdjustedNonEmptyRects(
+    RangeClientRects.getClientRectsBetween(
+      RangeClientRects.at(node, offset),
+      RangeClientRects.at(node, offset + 1),
+    ),
+    vertical,
+  );
   return getBlockEndEdgeFromRects(rects, vertical);
 }
 

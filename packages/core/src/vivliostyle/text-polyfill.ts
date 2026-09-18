@@ -22,6 +22,7 @@ import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
 import * as PseudoElement from "./pseudo-element";
+import * as RangeClientRects from "./range-client-rects";
 import * as Vtree from "./vtree";
 
 type PropertyValue = string | number | Css.Val | undefined;
@@ -854,9 +855,6 @@ class TextSpacingPolyfill {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
     let columnOver = 0;
-    let currRange: Range;
-    let prevRange: Range;
-    let nextRange: Range;
 
     function isAtStartOfLine(): boolean {
       if (isFirstAfterBreak) {
@@ -865,19 +863,11 @@ class TextSpacingPolyfill {
       if (!prevNode) {
         return false;
       }
-      if (!currRange) {
-        currRange = document.createRange();
-        currRange.selectNode(textNode);
-      }
-      const rect = currRange.getClientRects()[0];
+      const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
       if (!rect) {
         return false;
       }
-      if (!prevRange) {
-        prevRange = document.createRange();
-        prevRange.selectNode(prevNode);
-      }
-      const prevRects = prevRange.getClientRects();
+      const prevRects = RangeClientRects.getClientRectsOfNode(prevNode);
       const prevRect = prevRects[prevRects.length - 1];
       if (!prevRect) {
         return false;
@@ -896,20 +886,12 @@ class TextSpacingPolyfill {
       if (!nextNode) {
         return false;
       }
-      if (!currRange) {
-        currRange = document.createRange();
-        currRange.selectNode(textNode);
-      }
-      const rect = currRange.getClientRects()[0];
+      const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
       if (!rect) {
         return false;
       }
       columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(rect, vertical);
-      if (!nextRange) {
-        nextRange = document.createRange();
-        nextRange.selectNode(nextNode);
-      }
-      const nextRect = nextRange.getClientRects()[0];
+      const nextRect = RangeClientRects.getClientRectsOfNode(nextNode)[0];
       if (!nextRect) {
         return false;
       }

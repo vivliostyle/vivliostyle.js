@@ -1050,6 +1050,12 @@ export namespace Vtree {
     pixelRatio: number;
     scaleRatio: number;
     layoutUnitPerPixel: number;
+    /**
+     * @param range range to measure. The caller may share it with later
+     *     measurements and reset it to a collapsed range at the start of its
+     *     document once this call returns.
+     * @return client rects of the range relative to the layout box.
+     */
     getRangeClientRects(range: Range): ClientRect[];
     getElementClientRect(element: Element): ClientRect;
     /**
