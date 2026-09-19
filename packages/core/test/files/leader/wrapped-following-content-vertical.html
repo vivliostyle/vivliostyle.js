@@ -104,6 +104,18 @@
     </section>
 
     <section>
+      <h3>Following element with <code>white-space: normal</code></h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span style="white-space: normal">one two three</span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span style="white-space: normal">one two three</span></div>
+    </section>
+
+    <section>
+      <h3>Descendant of the following element with <code>white-space: normal</code></h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span><span style="white-space: normal">one two three</span></span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span><span style="white-space: normal">one two three</span></span></div>
+    </section>
+
+    <section>
       <h3>Justified block</h3>
       <div class="entry justify"><span class="has-leader-after">text before a leader</span>one two three</div>
       <div class="entry reference justify-last">text before a leader</div>
