@@ -528,6 +528,16 @@ module.exports = [
         file: "leader/multi-column-balance-on-body.html",
         title: "leader() in multi-column on body with column-fill: balance",
       },
+      {
+        file: "leader/wrapped-following-content.html",
+        title:
+          "leader() followed by content that wraps before the leader expands",
+      },
+      {
+        file: "leader/wrapped-following-content-vertical.html",
+        title:
+          "leader() followed by content that wraps before the leader expands (Vertical)",
+      },
     ],
   },
   {
