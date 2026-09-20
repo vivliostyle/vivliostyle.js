@@ -39,37 +39,19 @@ type SetElement<T> = T extends ReadonlySet<infer U> ? U : never;
 /**
  * Count the grapheme clusters in a string. Per CSS Counter Styles Level 3,
  * character counting for descriptors like `pad` is defined in terms of
- * grapheme clusters, not Unicode code points. Falls back to code-point
- * counting (`[...s].length`) on engines without `Intl.Segmenter`.
+ * grapheme clusters, not Unicode code points.
  *
  * @see https://drafts.csswg.org/css-counter-styles/#counter-style-pad
  */
-interface GraphemeSegmenter {
-  segment(input: string): Iterable<unknown>;
-}
-let cachedGraphemeSegmenter: GraphemeSegmenter | null | undefined;
+const graphemeSegmenter = new Intl.Segmenter(undefined, {
+  granularity: "grapheme",
+});
+
 function graphemeClusterCount(s: string): number {
   if (s === "") return 0;
-  if (cachedGraphemeSegmenter === undefined) {
-    const SegmenterCtor = (
-      Intl as unknown as {
-        Segmenter?: new (
-          locale?: string | string[] | undefined,
-          options?: { granularity?: "grapheme" | "word" | "sentence" },
-        ) => GraphemeSegmenter;
-      }
-    ).Segmenter;
-    cachedGraphemeSegmenter =
-      typeof SegmenterCtor === "function"
-        ? new SegmenterCtor(undefined, { granularity: "grapheme" })
-        : null;
-  }
-  if (cachedGraphemeSegmenter === null) {
-    return [...s].length;
-  }
   let count = 0;
 
-  for (const _ of cachedGraphemeSegmenter.segment(s)) count++;
+  for (const _ of graphemeSegmenter.segment(s)) count++;
   return count;
 }
 
