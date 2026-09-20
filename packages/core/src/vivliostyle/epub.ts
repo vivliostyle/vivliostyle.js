@@ -1344,7 +1344,7 @@ export class OPFDoc {
         );
         const path = getPathFromURL(hrefNoFragment, pubURL);
         const url = path !== null ? encodeURLPath(path) : hrefNoFragment;
-        if (manifestObj["readingOrder"].indexOf(url) == -1) {
+        if (!manifestObj["readingOrder"].includes(url)) {
           manifestObj["readingOrder"].push(url);
         }
       }
