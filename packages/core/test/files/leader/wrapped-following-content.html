@@ -100,6 +100,12 @@
     </section>
 
     <section>
+      <h3>The line of the last word has room for most of the leader's patterns, but not for the following content</h3>
+      <div class="entry"><span class="has-leader-after">text before leader</span>one two three</div>
+      <div class="entry reference">text before leader<br /><span class="has-leader-after"></span>one two three</div>
+    </section>
+
+    <section>
       <h3>Following element with <code>white-space: normal</code></h3>
       <div class="entry"><span class="has-leader-after">text before a leader</span><span style="white-space: normal">one two three</span></div>
       <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span style="white-space: normal">one two three</span></div>

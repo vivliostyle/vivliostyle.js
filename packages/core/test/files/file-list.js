@@ -547,6 +547,14 @@ module.exports = [
         title:
           "leader() in a block container with padding beside its lines (Vertical)",
       },
+      {
+        file: "leader/block-size.html",
+        title: "leader() in a block container taller than its lines",
+      },
+      {
+        file: "leader/block-size-vertical.html",
+        title: "leader() in a block container taller than its lines (Vertical)",
+      },
     ],
   },
   {

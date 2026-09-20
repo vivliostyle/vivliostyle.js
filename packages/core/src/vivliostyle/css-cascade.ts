@@ -3477,15 +3477,44 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       columnContainer.style.columnFill = "auto";
     }
 
-    const box = column.clientLayout.getElementClientRect(container.viewNode);
-    const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
-    const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
+    const vertical =
+      writingMode === "vertical-rl" || writingMode === "vertical-lr";
+    const [inlineLowSide, inlineHighSide] = vertical
+      ? (["top", "bottom"] as const)
+      : (["left", "right"] as const);
+    const [blockLowSide, blockHighSide] = vertical
+      ? (["left", "right"] as const)
+      : (["top", "bottom"] as const);
+    const [blockStartSide, blockEndSide] =
+      writingMode === "vertical-rl"
+        ? ([blockHighSide, blockLowSide] as const)
+        : ([blockLowSide, blockHighSide] as const);
+    const blockSign = writingMode === "vertical-rl" ? -1 : 1;
+    const [inlineStartSide, inlineEndSide] =
+      direction === "rtl"
+        ? ([inlineHighSide, inlineLowSide] as const)
+        : ([inlineLowSide, inlineHighSide] as const);
+    const inlineSign = direction === "rtl" ? -1 : 1;
+    const inlineSizeOf = (rect: Vtree.ClientRect) =>
+      rect[inlineHighSide] - rect[inlineLowSide];
+    // The comparisons below run between client rects that separate layout
+    // passes produced, where a box that has not moved can still come back with
+    // a coordinate differing in its low bits, so they need a dead zone. Its
+    // width follows the tolerance `Column.almostEquals` compares client rect
+    // coordinates with.
+    const subPixel = 0.5;
 
-    // The client rect of the block container is its border box, while its
-    // lines end at its content box.
+    // The lines run in the direction of the block container, which an author
+    // can set against the direction of the leader itself.
     const containerStyle = column.clientLayout.getElementComputedStyle(
       container.viewNode,
     );
+    const lineIsRtl = containerStyle.direction === "rtl";
+    const lineStartSide = lineIsRtl ? inlineHighSide : inlineLowSide;
+    const leaderRunsWithTheLine = lineIsRtl === (direction === "rtl");
+
+    // The client rect of the block container is its border box, while its
+    // lines end at its content box.
     const containerInset = (side: string) =>
       column.parseComputedLength(
         containerStyle.getPropertyValue(`padding-${side}`),
@@ -3493,12 +3522,40 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       column.parseComputedLength(
         containerStyle.getPropertyValue(`border-${side}-width`),
       );
-    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-      box.top += containerInset("top");
-      box.bottom -= containerInset("bottom");
-    } else {
-      box.left += containerInset("left");
-      box.right -= containerInset("right");
+
+    // Alignment distributes the free space of a line between its two edges,
+    // and every pattern the leader gains takes from that space, so the browser
+    // moves the pseudo element along the line unless the free space all sits
+    // at the end of the line. The number of patterns that fit does not depend
+    // on where that space sits. The declarations go on the element itself
+    // because a rule of the polyfill style sheet aligns the last line of a
+    // split block to both edges.
+    const physicalLineStart = lineIsRtl ? "right" : "left";
+    const alignsToLineStart =
+      ["start", physicalLineStart].includes(containerStyle.textAlign) &&
+      ["auto", "start", physicalLineStart].includes(
+        containerStyle.textAlignLast,
+      );
+    const containerInlineStyle = (container.viewNode as HTMLElement).style;
+    const alignmentToRestore: {
+      property: string;
+      value: string;
+      priority: string;
+    }[] = [];
+    if (leaderRunsWithTheLine && !alignsToLineStart) {
+      for (const property of ["text-align", "text-align-last"] as const) {
+        alignmentToRestore.push({
+          property,
+          value: containerInlineStyle.getPropertyValue(property),
+          priority: containerInlineStyle.getPropertyPriority(property),
+        });
+        containerInlineStyle.setProperty(
+          property,
+          property === "text-align" ? "start" : "auto",
+          "important",
+        );
+      }
+      container.viewNode.setAttribute("data-viv-text-align-start", "");
     }
 
     // Calculate width of following inline siblings (Issue #1563)
@@ -3548,6 +3605,24 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         }
       }
       sibling = sibling.nextSibling;
+    }
+
+    const box = column.clientLayout.getElementClientRect(container.viewNode);
+    const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
+    const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
+
+    box[inlineLowSide] += containerInset(inlineLowSide);
+    box[inlineHighSide] -= containerInset(inlineHighSide);
+
+    let followingInit: Vtree.ClientRect | undefined;
+    for (const node of inlineNodes) {
+      followingInit = RangeClientRects.getLayoutClientRectsOfNodeContents(
+        column.clientLayout,
+        node,
+      ).find((rect) => inlineSizeOf(rect) > 0);
+      if (followingInit) {
+        break;
+      }
     }
 
     // The following content is measured on a single line: where it wraps, the
@@ -3601,66 +3676,90 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       box.right = Math.max(innerInit.right, box.right);
     }
 
-    function overrun() {
-      const inner = column.clientLayout.getElementClientRect(pseudoElem);
-      if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-        if (direction === "rtl") {
-          inner.top -= followingInlineSiblingsWidth;
-        } else {
-          inner.bottom += followingInlineSiblingsWidth;
-        }
-      } else {
-        if (direction === "rtl") {
-          inner.left -= followingInlineSiblingsWidth;
-        } else {
-          inner.right += followingInlineSiblingsWidth;
-        }
-      }
-      if (
-        box.left > inner.left ||
-        box.right < inner.right ||
-        box.top > inner.top ||
-        box.bottom < inner.bottom
-      ) {
-        return true;
-      }
-      return false;
+    function overrun(inner: Vtree.ClientRect): boolean {
+      const end =
+        inner[inlineEndSide] + inlineSign * followingInlineSiblingsWidth;
+      return (
+        box[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
+        box[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
+        box[blockLowSide] > inner[blockLowSide] ||
+        box[blockHighSide] < inner[blockHighSide]
+      );
     }
 
+    // The browser moves the pseudo element along its line where it balances
+    // the lines or redistributes the free space of its container again, and it
+    // moves the lines in the block direction where the container aligns them
+    // to its center or end.
+    const hasMovedAlongLine = (inner: Vtree.ClientRect) =>
+      Math.abs(inner[lineStartSide] - innerInit[lineStartSide]) >= subPixel;
+    const hasMovedAcrossLines = (inner: Vtree.ClientRect) =>
+      Math.abs(inner[blockLowSide] - innerInit[blockLowSide]) >= subPixel;
+
+    // A leader belongs on the line where the content before it ends, and grows
+    // while the content following it still fits on that line. Only where a
+    // single pattern and that content do not fit there does the leader move to
+    // the next line, and it then grows while it fits on that line.
+    // TODO: CSS Generated Content 3 puts a leader and the content around it on
+    // one line, so it leaves the length undefined where the content following
+    // the leader carries a forced break or is longer than a line. That content
+    // is measured here as a width on one line: the part after a break counts
+    // as though it shared the line, which shortens the leader by that width,
+    // and content longer than a line leaves no room, which keeps the leader at
+    // a single pattern.
+    const startsOnALaterLine = (rect: Vtree.ClientRect) =>
+      (rect[blockStartSide] - innerInit[blockEndSide]) * blockSign >= -subPixel;
+    const fitsWithOnePattern =
+      !overrun(innerInit) &&
+      (followingInit === undefined || !startsOnALaterLine(followingInit));
+    // The room runs in the direction of the leader, which is the direction of
+    // the line unless an author sets them against each other. On such a line
+    // it measures the other way, and the search below pays for that in probes
+    // rather than in the count it settles on.
+    const lineRoom =
+      (box[inlineEndSide] - box[inlineStartSide]) * inlineSign -
+      followingInlineSiblingsWidth;
+    const isTooLong = (inner: Vtree.ClientRect) =>
+      fitsWithOnePattern
+        ? overrun(inner) ||
+          (hasMovedAlongLine(inner) && hasMovedAcrossLines(inner))
+        : overrun(inner) &&
+          (hasMovedAlongLine(inner) || inlineSizeOf(inner) > lineRoom);
+
     function setLeader() {
-      // min-max search
-      let lower: number;
-      let upper: number;
-      let templeader = leader.repeat(10000);
-      setLeaderTextContent(templeader);
-      if (overrun()) {
-        lower = 1;
-        upper = 10000;
-      } else {
+      const maxCount = 10000;
+      let notTooLong = { count: 1, fits: fitsWithOnePattern };
+      let measuredCount = maxCount;
+      setLeaderTextContent(leader.repeat(maxCount));
+      if (!isTooLong(column.clientLayout.getElementClientRect(pseudoElem))) {
         return;
       }
-      // leader is set to overrun state here
-      for (let i = 0; i < 16; i++) {
-        let templeader = "";
-        const mid = Math.floor((lower + upper) / 2);
-        for (let j = 0; j < mid; j++) {
-          templeader += leader;
-        }
-        setLeaderTextContent(templeader);
-        if (overrun()) {
-          upper = mid;
+      let tooLongCount = maxCount;
+      while (tooLongCount - notTooLong.count > 1) {
+        const mid = Math.floor((notTooLong.count + tooLongCount) / 2);
+        setLeaderTextContent(leader.repeat(mid));
+        measuredCount = mid;
+        const inner = column.clientLayout.getElementClientRect(pseudoElem);
+        if (isTooLong(inner)) {
+          tooLongCount = mid;
         } else {
-          if (lower == mid) {
-            return;
-          }
-          lower = mid;
+          notTooLong = { count: mid, fits: !overrun(inner) };
         }
       }
-      setLeaderTextContent(leader);
+      const count = notTooLong.fits ? notTooLong.count : 1;
+      if (measuredCount !== count) {
+        setLeaderTextContent(leader.repeat(count));
+      }
     }
 
     // set the expanded leader
     setLeader();
+    if (alignmentToRestore.length > 0) {
+      container.viewNode.removeAttribute("data-viv-text-align-start");
+      for (const { property, value, priority } of alignmentToRestore) {
+        containerInlineStyle.setProperty(property, value, priority);
+      }
+    }
 
     // Without inline-end, we use margin-inline-start to adjust the position.
     // To get the margin size, set float, calculate then cancel float.
@@ -3683,21 +3782,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       }
       return inset;
     }
-    let padding = 0;
-    if (direction == "rtl") {
-      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-        padding = innerInline.top - innerAligned.top - getInset("top");
-      } else {
-        padding = innerInline.left - innerAligned.left - getInset("left");
-      }
-    } else {
-      if (writingMode == "vertical-rl" || writingMode == "vertical-lr") {
-        padding = innerAligned.bottom - innerInline.bottom - getInset("bottom");
-      } else {
-        padding = innerAligned.right - innerInline.right - getInset("right");
-      }
-    }
-    padding -= followingInlineSiblingsWidth;
+    let padding =
+      (innerAligned[inlineEndSide] - innerInline[inlineEndSide]) * inlineSign -
+      getInset(inlineEndSide) -
+      followingInlineSiblingsWidth;
     padding = Math.max(0, padding - 0.1); // prevent line wrapping (Issue #1112)
     pseudoElem.style.float = "";
     leaderElem.style.marginInlineStart = `${padding}px`;

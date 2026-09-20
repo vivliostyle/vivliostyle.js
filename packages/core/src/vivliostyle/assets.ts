@@ -1605,6 +1605,10 @@ span[data-viv-leader] {
 [data-viv-nowrap] * {
   text-wrap-mode: nowrap !important;
 }
+[data-viv-text-align-start] * {
+  text-align: start !important;
+  text-align-last: auto !important;
+}
 
 /* ::marker */
 [style*="--viv-marker-content"]::marker {
