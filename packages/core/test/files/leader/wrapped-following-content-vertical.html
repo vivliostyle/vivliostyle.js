@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() followed by content that wraps before the leader expands
+      (Vertical Writing Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block-start: 6px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        margin-block-start: 4px;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .entry.continued {
+        margin-block-start: 0;
+      }
+
+      .justify {
+        text-align: justify;
+      }
+
+      .justify-last {
+        text-align-last: justify;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+
+      .has-leader-before::before {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      Each gray block must render identically to the blue block below it, which
+      has an explicit line break. The content after the leader must end at the
+      inline-end edge of the block.
+    </p>
+
+    <section>
+      <h3><code>::after</code>, followed by a text node</h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span>one two three</div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span>one two three</div>
+    </section>
+
+    <section>
+      <h3><code>::after</code>, followed by an element</h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span>one two three</span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span>one two three</span></div>
+    </section>
+
+    <section>
+      <h3><code>::after</code>, followed by elements separated by white space</h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span>one</span> <span>two</span> <span>three</span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span>one</span> <span>two</span> <span>three</span></div>
+    </section>
+
+    <section>
+      <h3><code>::before</code></h3>
+      <div class="entry">text before a leader<span class="has-leader-before">one two three</span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-before">one two three</span></div>
+    </section>
+
+    <section>
+      <h3>Following element with <code>white-space: normal</code></h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span style="white-space: normal">one two three</span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span style="white-space: normal">one two three</span></div>
+    </section>
+
+    <section>
+      <h3>Descendant of the following element with <code>white-space: normal</code></h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span><span><span style="white-space: normal">one two three</span></span></div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span><span><span style="white-space: normal">one two three</span></span></div>
+    </section>
+
+    <section>
+      <h3>Justified block</h3>
+      <div class="entry justify"><span class="has-leader-after">text before a leader</span>one two three</div>
+      <div class="entry reference justify-last">text before a leader</div>
+      <div class="entry reference continued"><span class="has-leader-after"></span>one two three</div>
+    </section>
+
+    <section>
+      <h3>Following content fits beside the last word before the leader expands</h3>
+      <div class="entry"><span class="has-leader-after">text before a leader that wraps</span>one two three</div>
+      <div class="entry reference">text before a leader that<br /><span class="has-leader-after">wraps</span>one two three</div>
+    </section>
+
+    <section>
+      <h3>Following content wraps after a hyphen before the leader expands</h3>
+      <div class="entry"><span class="has-leader-after">text before a leader</span>one-two-three</div>
+      <div class="entry reference">text before a leader<br /><span class="has-leader-after"></span>one-two-three</div>
+    </section>
+  </body>
+</html>

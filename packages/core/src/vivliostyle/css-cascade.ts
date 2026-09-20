@@ -3537,6 +3537,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       sibling = sibling.nextSibling;
     }
 
+    // The following content is measured on a single line: where it wraps, the
+    // browser gives the collapsible space at the wrap point no client rect
+    // width, and justification stretches the spaces of the wrapped line.
+    container.viewNode.setAttribute("data-viv-nowrap", "");
+
     // Measure the width of following siblings by reducing each node's actual width
     let followingInlineSiblingsWidth = inlineNodes.reduce(
       (acc, node) =>
@@ -3560,6 +3565,8 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
       followingInlineSiblingsWidth += parentWidth - pseudoWidth;
     }
+
+    container.viewNode.removeAttribute("data-viv-nowrap");
 
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.

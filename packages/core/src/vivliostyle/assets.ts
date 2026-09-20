@@ -1601,6 +1601,10 @@ span[data-viv-leader] {
   text-orientation: mixed;
   white-space: pre;
 }
+[data-viv-nowrap],
+[data-viv-nowrap] * {
+  text-wrap-mode: nowrap !important;
+}
 
 /* ::marker */
 [style*="--viv-marker-content"]::marker {
