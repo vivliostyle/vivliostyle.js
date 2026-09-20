@@ -625,7 +625,7 @@ export function isLetter(ch: string): boolean {
 
 export function escapeCharToHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
-  return prefix + (65536 | str.charCodeAt(0)).toString(16).slice(1);
+  return prefix + (str.charCodeAt(0) || 0).toString(16).padStart(4, "0");
 }
 
 export function escapeNameStrToHex(str: string, prefix?: string): string {
