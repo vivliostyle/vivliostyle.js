@@ -599,15 +599,9 @@ export function calculateEdge(
       return NaN;
     }
     if (vertical) {
-      edge = Math.min.apply(
-        null,
-        boxes.map((box) => box.left),
-      );
+      edge = Math.min(...boxes.map((box) => box.left));
     } else {
-      edge = Math.max.apply(
-        null,
-        boxes.map((box) => box.bottom),
-      );
+      edge = Math.max(...boxes.map((box) => box.bottom));
     }
     return edge;
   }

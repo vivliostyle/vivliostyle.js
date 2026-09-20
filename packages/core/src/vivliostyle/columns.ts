@@ -152,9 +152,8 @@ export abstract class ColumnBalancer {
     if (columns.length <= 1) {
       return;
     }
-    const maxComputedBlockSize = Math.max.apply(
-      null,
-      columns.map((c) => c.computedBlockSize),
+    const maxComputedBlockSize = Math.max(
+      ...columns.map((c) => c.computedBlockSize),
     );
     if (maxComputedBlockSize <= 0) {
       return;
@@ -234,13 +233,11 @@ export function canReduceContainerSize(
     return false;
   }
   const columns = lastCandidate.layoutResult.columns;
-  const maxColumnBlockSize = Math.max.apply(
-    null,
-    columns.map((c) => c.computedBlockSize),
+  const maxColumnBlockSize = Math.max(
+    ...columns.map((c) => c.computedBlockSize),
   );
-  const maxPageFloatBlockSize = Math.max.apply(
-    null,
-    columns.map((c) => c.getMaxBlockSizeOfPageFloats()),
+  const maxPageFloatBlockSize = Math.max(
+    ...columns.map((c) => c.getMaxBlockSizeOfPageFloats()),
   );
   return maxColumnBlockSize > maxPageFloatBlockSize + COLUMN_LENGTH_STEP;
 }
@@ -250,9 +247,8 @@ export function reduceContainerSize(
   container: Vtree.Container,
 ): void {
   const columns = candidates.at(-1).layoutResult.columns;
-  const maxColumnBlockSize = Math.max.apply(
-    null,
-    columns.map((c) => {
+  const maxColumnBlockSize = Math.max(
+    ...columns.map((c) => {
       if (!isNaN(c.blockDistanceToBlockEndFloats)) {
         return (
           c.computedBlockSize -
@@ -311,10 +307,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     if (isLastColumnLongerThanAnyOtherColumn(columns)) {
       return Infinity;
     }
-    return Math.max.apply(
-      null,
-      columns.map((c) => c.computedBlockSize),
-    );
+    return Math.max(...columns.map((c) => c.computedBlockSize));
   }
 
   override hasNextCandidate(candidates: ColumnBalancingTrialResult[]): boolean {

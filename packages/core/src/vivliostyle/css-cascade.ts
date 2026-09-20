@@ -1045,7 +1045,7 @@ export function mergeIn(
       // special properties: list of all assigned values
       const as = getSpecial(style, prop);
       const ts = getMutableSpecial(target, prop);
-      Array.prototype.push.apply(ts, as);
+      ts.push(...as);
     } else {
       // regular properties: higher priority wins
       const cascval = getProp(style, prop);

@@ -2560,7 +2560,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         });
       })
       .then(() => {
-        Array.prototype.push.apply(checkPoints, lastCheckPoints);
+        checkPoints.push(...lastCheckPoints);
         if (VIVLIOSTYLE_DEBUG) {
           validateCheckPoints(checkPoints);
         }
@@ -5643,9 +5643,8 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
   }
 
   getContentInlineSize(): number {
-    return Math.max.apply(
-      null,
-      this.rootViewNodes.map((r, i) => {
+    return Math.max(
+      ...this.rootViewNodes.map((r, i) => {
         const box = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           r,
@@ -5663,9 +5662,8 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     if (this.rootViewNodes.length === 0) {
       return 0;
     }
-    return Math.max.apply(
-      null,
-      this.rootViewNodes.map((r, i) => {
+    return Math.max(
+      ...this.rootViewNodes.map((r, i) => {
         const margin = this.floatMargins[i];
         return this.vertical ? margin.left : margin.bottom;
       }),

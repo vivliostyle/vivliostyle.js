@@ -535,9 +535,8 @@ export class TableFormattingContext
 
   getColumnCount(): number {
     if (this.columnCount < 0) {
-      this.columnCount = Math.max.apply(
-        null,
-        this.rows.map((row) =>
+      this.columnCount = Math.max(
+        ...this.rows.map((row) =>
           row.cells.reduce((sum, c) => sum + c.colSpan, 0),
         ),
       );

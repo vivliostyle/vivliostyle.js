@@ -296,10 +296,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
 
   getOrder(): number {
     const floats = this.continuations.map((c) => c.float);
-    return Math.min.apply(
-      null,
-      floats.map((f) => f.getOrder()),
-    );
+    return Math.min(...floats.map((f) => f.getOrder()));
   }
 
   shouldBeStashedBefore(float: PageFloat): boolean {
@@ -2689,9 +2686,8 @@ export class AttachedPageFloatLayoutContext
     if (!this.floatFragments.length) {
       return 0;
     }
-    return Math.max.apply(
-      null,
-      this.floatFragments.map((fragment) => {
+    return Math.max(
+      ...this.floatFragments.map((fragment) => {
         const area = fragment.area;
         if (isVertical) {
           return area.width;

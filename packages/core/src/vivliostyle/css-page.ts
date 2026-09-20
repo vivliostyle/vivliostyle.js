@@ -1737,19 +1737,19 @@ class MultipleBoxesMarginBoxSizingParam implements MarginBoxSizingParam {
   /** @override */
   getOuterMaxContentSize(): number {
     const sizes = this.params.map((p) => p?.getOuterMaxContentSize() ?? 0);
-    return Math.max.apply(null, sizes) * sizes.length;
+    return Math.max(...sizes) * sizes.length;
   }
 
   /** @override */
   getOuterMinContentSize(): number {
     const sizes = this.params.map((p) => p?.getOuterMinContentSize() ?? 0);
-    return Math.max.apply(null, sizes) * sizes.length;
+    return Math.max(...sizes) * sizes.length;
   }
 
   /** @override */
   getOuterSize(): number {
     const sizes = this.params.map((p) => p?.getOuterSize() ?? 0);
-    return Math.max.apply(null, sizes) * sizes.length;
+    return Math.max(...sizes) * sizes.length;
   }
 }
 

@@ -2722,9 +2722,8 @@ export class StyleInstance
           if (column.element === boxContainer) {
             opened.container = column;
           }
-          opened.container.computedBlockSize = Math.max.apply(
-            null,
-            columns.map((c) => c.computedBlockSize),
+          opened.container.computedBlockSize = Math.max(
+            ...columns.map((c) => c.computedBlockSize),
           );
           boxInstance.finishContainer(
             this,
