@@ -1155,9 +1155,7 @@ export class OPFDoc {
     }
     this.epageCount = epage;
 
-    if (this.epageCountCallback) {
-      this.epageCountCallback(this.epageCount);
-    }
+    this.epageCountCallback?.(this.epageCount);
   }
 
   setEPageCountMode(epageIsRenderedPage: boolean) {
@@ -1206,9 +1204,7 @@ export class OPFDoc {
           item.epageCount = Math.ceil(xmldoc.getTotalOffset() / offsetPerEPage);
           epage += item.epageCount;
           this.epageCount = epage;
-          if (this.epageCountCallback) {
-            this.epageCountCallback(this.epageCount);
-          }
+          this.epageCountCallback?.(this.epageCount);
           loopFrame.continueLoop();
         });
       })
@@ -1754,9 +1750,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         0,
       );
 
-      if (this.opf.epageCountCallback) {
-        this.opf.epageCountCallback(this.opf.epageCount);
-      }
+      this.opf.epageCountCallback?.(this.opf.epageCount);
     }
 
     if (oldPage) {

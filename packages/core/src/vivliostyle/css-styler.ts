@@ -1005,9 +1005,7 @@ export class Styler implements AbstractStyler {
     if (this.flowToReach == flowName) {
       this.flowToReach = null;
     }
-    if (this.flowListener) {
-      this.flowListener.encounteredFlowChunk(flowChunk, flow);
-    }
+    this.flowListener?.encounteredFlowChunk(flowChunk, flow);
     return flowChunk;
   }
 

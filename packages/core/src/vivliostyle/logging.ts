@@ -92,9 +92,7 @@ export class Logger {
 
   private triggerListeners(level: LogLevel, args: ErrorInfo) {
     const listener = this.listeners[level];
-    if (listener) {
-      listener(args);
-    }
+    listener?.(args);
   }
 
   /**

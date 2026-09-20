@@ -144,7 +144,7 @@ export const Renderer = ({
       payload.content.error?.toString() ?? payload.content.messages.join("\n");
 
     function handleMessage(payload: Payload, type: MessageType) {
-      onMessage && onMessage(getMessage(payload), type);
+      onMessage?.(getMessage(payload), type);
     }
 
     const handleDebug = (payload: Payload) => handleMessage(payload, "debug");
@@ -152,16 +152,16 @@ export const Renderer = ({
     const handleWarn = (payload: Payload) => handleMessage(payload, "warn");
 
     function handleError(payload: Payload) {
-      onError && onError(getMessage(payload));
+      onError?.(getMessage(payload));
     }
 
     function handleReadyStateChange() {
       const { readyState } = instanceRef.current!;
-      onReadyStateChange && onReadyStateChange(readyState);
+      onReadyStateChange?.(readyState);
     }
 
     function handleLoaded() {
-      onLoad && onLoad(stateRef.current!);
+      onLoad?.(stateRef.current!);
     }
 
     function handleNavigation(payload: NavigationPayload) {
@@ -173,11 +173,11 @@ export const Renderer = ({
         metadata,
       };
       stateRef.current = currentState;
-      onNavigation && onNavigation(currentState);
+      onNavigation?.(currentState);
     }
 
     function handleHyperlink(payload: HyperlinkPayload) {
-      onHyperlink && onHyperlink(payload);
+      onHyperlink?.(payload);
     }
 
     const instance = instanceRef.current!;
@@ -191,7 +191,7 @@ export const Renderer = ({
     instance.addListener("hyperlink", handleHyperlink);
 
     return () => {
-      onReadyStateChange && onReadyStateChange(ReadyState.LOADING);
+      onReadyStateChange?.(ReadyState.LOADING);
       instance.removeListener("debug", handleDebug);
       instance.removeListener("info", handleInfo);
       instance.removeListener("warn", handleWarn);
