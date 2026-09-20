@@ -51,12 +51,7 @@ class URLParameterStore {
   getParameter(name: string): Array<string> {
     const url = this.location.href;
     const regexp = getRegExpForParameter(name);
-    const results = [];
-    let r;
-    while ((r = regexp.exec(url))) {
-      results.push(r[1]);
-    }
-    return results;
+    return [...url.matchAll(regexp)].map((match) => match[1]);
   }
 
   /**
