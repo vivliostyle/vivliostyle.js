@@ -2141,12 +2141,6 @@ export class ViewFactory
               );
             }
           }
-          if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
-            // Workaround for Edge bug
-            // See
-            // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
-            attributeName = attributeName.toLowerCase();
-          }
           if (this.isSVGUrlAttribute(attributeName)) {
             attributeValue = Urls.transformURIs(
               attributeValue,

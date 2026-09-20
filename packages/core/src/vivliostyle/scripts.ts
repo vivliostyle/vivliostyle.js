@@ -41,19 +41,11 @@ function sameScripts(s1: HTMLScriptElement, s2: HTMLScriptElement): boolean {
 }
 
 function getScriptsInOrNearHead(document: Document): HTMLScriptElement[] {
-  // To support Chrome < 88 and Firefox < 84, we cannot use
-  // the selector "body > script:not(:not(script, link, style) ~ *)".
-  // (Issue #919)
-  const scriptsInBodyNotNearHead = Array.from(
-    document.querySelectorAll(
-      "body > :not(script):not(link):not(style) ~ script",
+  return Array.from(
+    document.querySelectorAll<HTMLScriptElement>(
+      "head > script, body > script:not(:not(script, link, style) ~ *)",
     ),
-  ) as HTMLScriptElement[];
-  return (
-    Array.from(
-      document.querySelectorAll("head > script, body > script"),
-    ) as HTMLScriptElement[]
-  ).filter((script) => !scriptsInBodyNotNearHead.includes(script));
+  );
 }
 
 export function loadScript(

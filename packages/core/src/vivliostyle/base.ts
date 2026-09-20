@@ -473,14 +473,6 @@ export function setCSSProperty(
             break;
         }
         break;
-      case "text-combine-upright":
-        switch (value) {
-          case "all":
-            // workaround for Chrome 93 bug https://crbug.com/1242755
-            elemStyle.setProperty("text-indent", "0");
-            break;
-        }
-        break;
     }
     elemStyle.setProperty(prefixed, value);
   }
