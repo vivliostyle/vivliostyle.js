@@ -3634,6 +3634,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const box = column.clientLayout.getElementClientRect(container.viewNode);
     let innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
+    const patternSize = inlineSizeOf(
+      column.clientLayout.getElementClientRect(leaderElem),
+    );
 
     // A block container that continues in another column has a client rect for
     // each fragment, side by side in the inline direction, while its bounding
@@ -3801,7 +3804,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // it measures the other way, and the search below pays for that in probes
     // rather than in the count it settles on.
     const roomOnTheLine = () =>
-      (initialLineBox[inlineEndSide] - initialLineBox[inlineStartSide]) *
+      (initialLineBox[inlineEndSide] -
+        (fitsWithOnePattern
+          ? innerInit[inlineStartSide]
+          : initialLineBox[inlineStartSide])) *
         inlineSign -
       followingInlineSiblingsWidth;
     let lineRoom = roomOnTheLine();
@@ -3836,34 +3842,64 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
         ? overrun(inner) ||
           (hasMovedAlongLine(inner) && hasMovedAcrossLines(inner))
         : overrun(inner) &&
-          (hasMovedAlongLine(inner) || inlineSizeOf(inner) > lineRoom);
+          (hasMovedAlongLine(inner) ||
+            inlineSizeOf(inner) > lineRoom + followingInlineSiblingsWidth);
 
     function setLeader() {
+      if (!(patternSize > 0)) {
+        return;
+      }
       const maxCount = 10000;
+      const sizeWithoutPatterns = inlineSizeOf(innerInit) - patternSize;
+      const patternRoom = lineRoom - sizeWithoutPatterns;
       let notTooLong = {
         count: 1,
         fits: leaderIsOnItsLine && !overrun(innerInit),
       };
-      let measuredCount = maxCount;
-      setLeaderTextContent(leader.repeat(maxCount));
-      if (!isTooLong(column.clientLayout.getElementClientRect(pseudoElem))) {
-        return;
-      }
-      let tooLongCount = maxCount;
+      let tooLongCount = maxCount + 1;
+      let measuredCount = 1;
+      let patternAdvance = patternSize;
+      let step = 1;
       while (tooLongCount - notTooLong.count > 1) {
-        const mid = Math.floor((notTooLong.count + tooLongCount) / 2);
-        setLeaderTextContent(leader.repeat(mid));
-        measuredCount = mid;
+        // The browser decides whether a leader is too long on more than its
+        // inline size, as it does where it reorders a bidirectional line or
+        // gives the following content a line of its own, so the room can keep
+        // proposing a count the search has already measured.
+        const estimate = Math.min(
+          Math.floor(patternRoom / patternAdvance),
+          maxCount,
+        );
+        const half = Math.max(
+          1,
+          Math.floor((tooLongCount - notTooLong.count) / 2),
+        );
+        let count: number;
+        if (estimate > notTooLong.count && estimate < tooLongCount) {
+          count = estimate;
+          step = 1;
+        } else if (estimate >= tooLongCount) {
+          count = notTooLong.count + half;
+        } else {
+          count = notTooLong.count + Math.min(step, half);
+          step *= 2;
+        }
+        setLeaderTextContent(leader.repeat(count));
+        measuredCount = count;
         const inner = column.clientLayout.getElementClientRect(pseudoElem);
         if (isTooLong(inner)) {
-          tooLongCount = mid;
+          tooLongCount = count;
         } else {
-          notTooLong = { count: mid, fits: !overrun(inner) };
+          notTooLong = { count, fits: leaderIsOnItsLine || !overrun(inner) };
+        }
+        const measuredAdvance =
+          (inlineSizeOf(inner) - sizeWithoutPatterns) / count;
+        if (measuredAdvance > 0) {
+          patternAdvance = measuredAdvance;
         }
       }
-      const count = notTooLong.fits ? notTooLong.count : 1;
-      if (measuredCount !== count) {
-        setLeaderTextContent(leader.repeat(count));
+      const expandedCount = notTooLong.fits ? notTooLong.count : 1;
+      if (measuredCount !== expandedCount) {
+        setLeaderTextContent(leader.repeat(expandedCount));
       }
     }
 
