@@ -2843,7 +2843,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
   }
 
   private formatLastValue(values: number[], type: string): string {
-    const last = values.length ? values[values.length - 1] : 0;
+    const last = values.length ? values.at(-1) : 0;
     return this.format(last, type);
   }
 
@@ -2911,12 +2911,8 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         // Issue #1999: increment-only inside page/margin-box content is a
         // delta from the page-start counter value, not a fresh local counter.
         const pageCounters = store.currentPageCounters?.[counterName] || [];
-        const pageStartVal = pageCounters.length
-          ? pageCounters[pageCounters.length - 1]
-          : 0;
-        counterValues = [
-          pageStartVal + cascadeDocCounters[cascadeDocCounters.length - 1],
-        ];
+        const pageStartVal = pageCounters.length ? pageCounters.at(-1) : 0;
+        counterValues = [pageStartVal + cascadeDocCounters.at(-1)];
         storeFootnoteCounterValuesIfNeeded(counterValues);
         return formatCounterValues(counterValues);
       }
@@ -2948,7 +2944,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
         store.currentPageDocCounters?.[counterName] || [];
       const pageStartCounters = store.currentPageCounters?.[counterName] || [];
       const pageStartVal = pageStartCounters.length
-        ? pageStartCounters[pageStartCounters.length - 1]
+        ? pageStartCounters.at(-1)
         : 0;
       // Adjust the outermost (first) counter value with the page contribution.
       // The page counter operates at the outermost scope, so only the first
@@ -3024,7 +3020,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
     }
     const arr = this.cascade.counters[counterName];
     if (arr && arr.length) {
-      const numval = (arr && arr.length && arr[arr.length - 1]) || 0;
+      const numval = (arr && arr.length && arr.at(-1)) || 0;
       return new Css.Str(this.format(numval, type));
     } else {
       const c = new Css.Expr(
@@ -3850,7 +3846,7 @@ export class CascadeInstance {
   }
 
   pushConditionItem(item: ConditionItem): void {
-    this.stack[this.stack.length - 1].push(item);
+    this.stack.at(-1).push(item);
   }
 
   increment(condition: string, viewCondition: Matchers.Matcher | null): void {
@@ -3948,7 +3944,7 @@ export class CascadeInstance {
   }
 
   defineCounter(counterName: string, value: number) {
-    let scoping = this.counterScoping[this.counterScoping.length - 1];
+    let scoping = this.counterScoping.at(-1);
     if (!scoping) {
       scoping = Object.create(null) as { [key: string]: boolean };
       this.counterScoping[this.counterScoping.length - 1] = scoping;
@@ -4124,7 +4120,7 @@ export class CascadeInstance {
     }
     if (Display.isListItem(displayVal)) {
       const listItemCounts = this.counters["list-item"];
-      const listItemCount = listItemCounts[listItemCounts.length - 1];
+      const listItemCount = listItemCounts.at(-1);
       props["ua-list-item-count"] = new CascadeValue(
         new Css.Num(listItemCount),
         0,
@@ -4292,7 +4288,7 @@ export class CascadeInstance {
     const epubTypes = types ? types.split(/\s+/) : EMPTY;
     const lang = Base.getLangAttribute(element);
     if (lang) {
-      this.stack[this.stack.length - 1].push(new RestoreLangItem(this.lang));
+      this.stack.at(-1).push(new RestoreLangItem(this.lang));
       this.lang = lang.toLowerCase();
     }
     const isRoot = this.isRoot;
@@ -4303,7 +4299,7 @@ export class CascadeInstance {
     siblingOrderStack.push(0);
     const siblingTypeCountsStack = this.siblingTypeCountsStack;
     const currentSiblingTypeCounts = (this.currentSiblingTypeCounts =
-      siblingTypeCountsStack[siblingTypeCountsStack.length - 1]);
+      siblingTypeCountsStack.at(-1));
     const currentNamespaceTypeCounts = typeCountsForNamespace(
       currentSiblingTypeCounts,
       this.currentNamespace,
@@ -4312,8 +4308,7 @@ export class CascadeInstance {
       (currentNamespaceTypeCounts[this.currentLocalName] || 0) + 1;
     siblingTypeCountsStack.push(emptySiblingTypeCounts());
     const followingSiblingOrderStack = this.followingSiblingOrderStack;
-    const lastOrder =
-      followingSiblingOrderStack[followingSiblingOrderStack.length - 1];
+    const lastOrder = followingSiblingOrderStack.at(-1);
     if (lastOrder !== null) {
       this.currentFollowingSiblingOrder = followingSiblingOrderStack[
         followingSiblingOrderStack.length - 1
@@ -4326,9 +4321,7 @@ export class CascadeInstance {
       this.followingSiblingTypeCountsStack;
     const currentFollowingSiblingTypeCounts =
       (this.currentFollowingSiblingTypeCounts =
-        followingSiblingTypeCountsStack[
-          followingSiblingTypeCountsStack.length - 1
-        ]);
+        followingSiblingTypeCountsStack.at(-1));
     const followingNamespaceTypeCounts =
       currentFollowingSiblingTypeCounts &&
       (this.currentNamespace !== null

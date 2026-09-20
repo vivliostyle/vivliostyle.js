@@ -409,7 +409,7 @@ export class BoxBreakPosition
   override getNodeContext(): Vtree.NodeContext | null {
     return this.alreadyEvaluated
       ? this.breakNodeContext
-      : this.checkPoints[this.checkPoints.length - 1];
+      : this.checkPoints.at(-1);
   }
 }
 
@@ -1156,7 +1156,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     if (foundNonZeroWidthBand) {
       // Update footnoteEdge (Fix for issue #1298)
-      const lastBand = bands[bands.length - 1];
+      const lastBand = bands.at(-1);
       // Use wider tolerance for the y2 comparison: in multi-column layout,
       // getBoundingClientRect() can report band edges ~1.2px off from the
       // actual column edge. The default 0.5px precision (pixelRatio=0) is
@@ -3019,7 +3019,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const positions: number[] = [];
     const boxes = this.getRangeBoxes(
       checkPoints[0].viewNode,
-      checkPoints[checkPoints.length - 1].viewNode,
+      checkPoints.at(-1).viewNode,
     );
     boxes.sort(
       this.vertical
@@ -3195,7 +3195,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // Workaround for the case of block child after text in parent block
     // (Issue #1036)
-    let lastNode = checkPoints[checkPoints.length - 1].viewNode;
+    let lastNode = checkPoints.at(-1).viewNode;
     lastNode = LayoutHelper.textSpacingWrapperOf(lastNode) ?? lastNode;
     if (
       (lineIndex === linePositions.length && lastNode.nextSibling) ||
@@ -4149,9 +4149,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
                     )
-                  : this.breakPositions[
-                      this.breakPositions.length - 1
-                    ] instanceof BoxBreakPosition ||
+                  : this.breakPositions.at(-1) instanceof BoxBreakPosition ||
                     // When lastAfterNodeContext is null (no in-flow
                     // trailing edge, e.g. after CSS floats converted to
                     // position:absolute) and no block-level leading edges

@@ -736,9 +736,7 @@ export class StyleInstance
     // Issue #2013: target-counter() rerender can evaluate page-number after
     // currentLayoutPosition has been cleared, so fall back to the active
     // render-slot page number captured by OPFView.renderSinglePage().
-    return (
-      this.pageNumberContextStack[this.pageNumberContextStack.length - 1] ?? 0
-    );
+    return this.pageNumberContextStack.at(-1) ?? 0;
   }
 
   getPageNumberContextDepth(): number {

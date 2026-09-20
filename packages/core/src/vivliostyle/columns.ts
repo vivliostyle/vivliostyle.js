@@ -222,7 +222,7 @@ const COLUMN_LENGTH_STEP = 1;
 export function canReduceContainerSize(
   candidates: ColumnBalancingTrialResult[],
 ): boolean {
-  const lastCandidate = candidates[candidates.length - 1];
+  const lastCandidate = candidates.at(-1);
   if (lastCandidate.penalty === 0) {
     return false;
   }
@@ -249,7 +249,7 @@ export function reduceContainerSize(
   candidates: ColumnBalancingTrialResult[],
   container: Vtree.Container,
 ): void {
-  const columns = candidates[candidates.length - 1].layoutResult.columns;
+  const columns = candidates.at(-1).layoutResult.columns;
   const maxColumnBlockSize = Math.max.apply(
     null,
     columns.map((c) => {
@@ -323,7 +323,7 @@ export class BalanceLastColumnBalancer extends ColumnBalancer {
     } else if (this.foundUpperBound) {
       return canReduceContainerSize(candidates);
     } else {
-      const lastCandidate = candidates[candidates.length - 1];
+      const lastCandidate = candidates.at(-1);
       if (this.checkPosition(lastCandidate.layoutResult.position)) {
         if (
           !isLastColumnLongerThanAnyOtherColumn(
@@ -360,7 +360,7 @@ function isLastColumnLongerThanAnyOtherColumn(
   if (columns.length <= 1) {
     return false;
   }
-  const lastColumnBlockSize = columns[columns.length - 1].computedBlockSize;
+  const lastColumnBlockSize = columns.at(-1).computedBlockSize;
   const otherColumns = columns.slice(0, columns.length - 1);
 
   // When a column is broken mid-paragraph, its computedBlockSize is measured
@@ -420,7 +420,7 @@ export function createColumnBalancer(
     // TODO: how to handle a case where no more in-flow contents but some
     // page floats
     const noMoreContent = flowPosition.positions.length === 0;
-    const lastColumn = columns[columns.length - 1];
+    const lastColumn = columns.at(-1);
     const isLastColumnForceBroken = !!(lastColumn && lastColumn.pageBreakType);
     if (noMoreContent || isLastColumnForceBroken) {
       return new BalanceLastColumnBalancer(

@@ -520,7 +520,7 @@ function applyNodePositionStep(
 export function rootStepOfNodePosition(
   position: Vtree.NodePosition,
 ): RootNodePositionStep {
-  return position.steps[position.steps.length - 1] as RootNodePositionStep;
+  return position.steps.at(-1) as RootNodePositionStep;
 }
 
 export const ShadowType = Vtree.ShadowType;

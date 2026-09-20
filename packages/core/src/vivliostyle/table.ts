@@ -512,7 +512,7 @@ export class TableFormattingContext
   getCellsFallingOnRow(rowIndex: number): TableCell[] {
     const rowSlots = this.getRowSlots(rowIndex);
     return rowSlots.reduce((uniqueCells, slot) => {
-      if (slot.cell !== uniqueCells[uniqueCells.length - 1]) {
+      if (slot.cell !== uniqueCells.at(-1)) {
         return uniqueCells.concat(slot.cell);
       } else {
         return uniqueCells;

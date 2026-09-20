@@ -3301,8 +3301,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             loopFrame.breakLoop();
             return;
           }
-          let pos =
-            viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
+          let pos = viewItem.layoutPositions.at(-1);
           this.renderSinglePage(viewItem, pos).then((result) => {
             const page = result.pageAndPosition.page;
             pos = result.nextLayoutPosition;
@@ -3510,7 +3509,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // to avoid unpaired page.
         const nextViewItem = this.spineItems[spineIndex];
         const nextPage = nextViewItem && nextViewItem.pages[0];
-        const currentPage = viewItem.pages[viewItem.pages.length - 1];
+        const currentPage = viewItem.pages.at(-1);
         if (nextPage && currentPage && nextPage.side == currentPage.side) {
           nextViewItem.pages.forEach((page) => {
             if (page.container) page.container.remove();
@@ -4138,14 +4137,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
           if (prevLastPageCounters && prevLastPageCounters.length) {
             // pageCounterStarts stores the counter BEFORE auto-increment,
             // so add 1 for the page's own increment.
-            pageCounterOffset =
-              prevLastPageCounters[prevLastPageCounters.length - 1] + 1;
+            pageCounterOffset = prevLastPageCounters.at(-1) + 1;
           } else {
             const counters = this.counterStore.currentPageCounters["page"];
             pageCounterOffset =
               !counters || !counters.length
                 ? pageNumberOffset
-                : counters[counters.length - 1];
+                : counters.at(-1);
           }
 
           // Note: The "page" counter value differs to the "page-number" value
