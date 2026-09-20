@@ -1,1 +1,24 @@
-[]
+- category: Leader
+  title: leader() followed by content that wraps before the leader expands
+  file: leader/wrapped-following-content.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-leader-wrapped-following-width  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/wrapped-following-content.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/wrapped-following-content.html&zoom=1&spread=false
+- category: Leader
+  title: leader() followed by content that wraps before the leader expands (Vertical)
+  file: leader/wrapped-following-content-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-leader-wrapped-following-width  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/wrapped-following-content-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/wrapped-following-content-vertical.html&zoom=1&spread=false
