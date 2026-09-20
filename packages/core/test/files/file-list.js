@@ -538,6 +538,15 @@ module.exports = [
         title:
           "leader() followed by content that wraps before the leader expands (Vertical)",
       },
+      {
+        file: "leader/container-padding.html",
+        title: "leader() in a block container with padding beside its lines",
+      },
+      {
+        file: "leader/container-padding-vertical.html",
+        title:
+          "leader() in a block container with padding beside its lines (Vertical)",
+      },
     ],
   },
   {

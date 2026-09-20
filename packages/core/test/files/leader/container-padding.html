@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() in a block container with padding beside its lines</title>
+    <style>
+      @page {
+        size: 640px 960px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .padded {
+        padding-inline-end: 4ch;
+      }
+
+      .bordered {
+        border-inline-end: 4ch solid #ddd;
+      }
+
+      .indented {
+        padding-inline-start: 2ch;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      The lines of each gray block must render identically to the lines of the
+      blue block below it, which has no padding beside them.
+    </p>
+
+    <section>
+      <h3>Padding beside the lines</h3>
+      <div class="entry padded"><span class="has-leader-after">text before a leader</span>12</div>
+      <div class="entry reference"><span class="has-leader-after">text before a leader</span>12</div>
+    </section>
+
+    <section>
+      <h3>A border beside the lines</h3>
+      <div class="entry bordered"><span class="has-leader-after">text before a leader</span>12</div>
+      <div class="entry reference"><span class="has-leader-after">text before a leader</span>12</div>
+    </section>
+
+    <section>
+      <h3>Padding on both sides of the lines</h3>
+      <div class="entry padded indented"><span class="has-leader-after">text before a leader</span>12</div>
+      <div class="entry reference indented"><span class="has-leader-after">text before a leader</span>12</div>
+    </section>
+  </body>
+</html>
