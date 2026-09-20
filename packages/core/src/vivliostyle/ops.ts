@@ -2197,7 +2197,7 @@ export class StyleInstance
               borderBoxSizing: false,
             },
             innerShape,
-            dontApplyExclusions ? [] : exclusions.concat(),
+            dontApplyExclusions ? [] : [...exclusions],
             this.flowRootFormattingContextFor(flowNameStr),
           );
           // Issue #1842: columns after the first treat already-satisfied leading
@@ -2213,7 +2213,7 @@ export class StyleInstance
             columnPageFloatLayoutContext,
             layoutContainer,
             innerShape,
-            dontApplyExclusions ? [] : exclusions.concat(),
+            dontApplyExclusions ? [] : [...exclusions],
             this.flowRootFormattingContextFor(flowNameStr),
           );
           // Single-column layout always behaves like the first column on a page.

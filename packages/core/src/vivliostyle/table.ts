@@ -661,15 +661,13 @@ export class TableFormattingContext
   }
 
   override saveState(): any {
-    return ([] as BrokenTableCellPosition[]).concat(this.cellBreakPositions);
+    return [...this.cellBreakPositions];
   }
 
   override restoreState(state: any) {
     // Create a fresh copy to prevent the saved state from being mutated
     // during subsequent layout attempts (issue #1667).
-    this.cellBreakPositions = ([] as BrokenTableCellPosition[]).concat(
-      state as BrokenTableCellPosition[],
-    );
+    this.cellBreakPositions = [...(state as BrokenTableCellPosition[])];
   }
 }
 

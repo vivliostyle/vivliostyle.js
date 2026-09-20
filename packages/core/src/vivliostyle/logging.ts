@@ -143,7 +143,7 @@ function argumentsToErrorInfo(args: IArguments): ErrorInfo {
 function buildMessageAndStackTrace(args: ErrorInfo): string[] {
   const e = args.error;
   const stack = e && (e["frameTrace"] || e["stack"]);
-  let messages = ([] as any[]).concat(args["messages"]);
+  let messages = [...args["messages"]];
   if (e) {
     if (messages.length > 0) {
       messages = messages.concat(["\n"]);

@@ -3890,9 +3890,7 @@ export class CascadeInstance {
         if (conditions && conditions.length > 0) {
           return conditions.length === 1
             ? conditions[0]
-            : Matchers.MatcherBuilder.buildAnyMatcher(
-                ([] as Matchers.Matcher[]).concat(conditions),
-              );
+            : Matchers.MatcherBuilder.buildAnyMatcher([...conditions]);
         } else {
           return null;
         }

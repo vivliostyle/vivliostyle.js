@@ -1809,7 +1809,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         borderBoxSizing: false,
       },
       null,
-      (floatContainer.exclusions || []).concat(),
+      [...(floatContainer.exclusions || [])],
       this.flowRootFormattingContext,
     );
     floatArea.isFloat = true;
@@ -2512,7 +2512,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (VIVLIOSTYLE_DEBUG) {
       validateCheckPoints(checkPoints);
     }
-    let lastCheckPoints = checkPoints.concat([]); // make a copy
+    let lastCheckPoints = [...checkPoints]; // make a copy
     checkPoints.splice(0, checkPoints.length); // make empty
     let totalLineCount = 0;
     let firstPseudo = nodeContext.firstPseudo; // :first-letter is not processed here
