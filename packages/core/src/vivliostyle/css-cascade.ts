@@ -2767,7 +2767,7 @@ export class ContentPropVisitor extends Css.FilterVisitor {
       return false;
     }
     const counters = CssProp.toCounters(value, options);
-    return Object.prototype.hasOwnProperty.call(counters, counterName);
+    return Object.hasOwn(counters, counterName);
   }
 
   /**

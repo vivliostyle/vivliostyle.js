@@ -984,7 +984,7 @@ export class PageRulePartition extends PageMaster.Partition<PageRulePartitionIns
       0,
     );
     for (const prop in propertiesAppliedToPartition) {
-      if (propertiesAppliedToPartition.hasOwnProperty(prop)) {
+      if (Object.hasOwn(propertiesAppliedToPartition, prop)) {
         this.specified[prop] = style[prop];
       }
     }
@@ -1049,7 +1049,7 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
       }
     }
     for (const prop in ownStyle) {
-      if (Object.prototype.hasOwnProperty.call(ownStyle, prop)) {
+      if (Object.hasOwn(ownStyle, prop)) {
         const val = ownStyle[prop] as CssCascade.CascadeValue;
         if (
           val &&
@@ -1103,7 +1103,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
       }
     ).styler?.bodyPropagatedStyle;
     for (const name in docElementStyle) {
-      if (Object.prototype.hasOwnProperty.call(docElementStyle, name)) {
+      if (Object.hasOwn(docElementStyle, name)) {
         switch (name) {
           case "writing-mode":
           case "direction":
@@ -2790,7 +2790,7 @@ export class PageManager {
   private makeCascadeValueObjectKey(object: CssCascade.ElementStyle): string {
     const props = [] as string[];
     for (const prop in object) {
-      if (Object.prototype.hasOwnProperty.call(object, prop)) {
+      if (Object.hasOwn(object, prop)) {
         const val = object[prop] as CssCascade.CascadeValue;
         let str: string;
         if (val instanceof CssCascade.CascadeValue) {
@@ -3093,7 +3093,7 @@ export function mergeInPageRule(
   if (marginBoxes) {
     const targetMap = CssCascade.getMutableStyleMap(target, marginBoxesKey);
     for (const boxName in marginBoxes) {
-      if (marginBoxes.hasOwnProperty(boxName)) {
+      if (Object.hasOwn(marginBoxes, boxName)) {
         let targetBox = targetMap[boxName];
         if (!targetBox) {
           targetBox = {} as CssCascade.ElementStyle;
@@ -3119,7 +3119,7 @@ export function mergeInPageRule(
       footnoteAreaKey,
     );
     for (const key in footnoteArea) {
-      if (footnoteArea.hasOwnProperty(key)) {
+      if (Object.hasOwn(footnoteArea, key)) {
         let targetArea = targetFootnoteArea[key];
         if (!targetArea) {
           targetArea = {} as CssCascade.ElementStyle;
@@ -3129,7 +3129,7 @@ export function mergeInPageRule(
 
         // Merge regular properties (excluding _pseudos)
         for (const prop in sourceArea) {
-          if (sourceArea.hasOwnProperty(prop) && prop !== "_pseudos") {
+          if (Object.hasOwn(sourceArea, prop) && prop !== "_pseudos") {
             const val = sourceArea[prop];
             if (val instanceof CssCascade.CascadeValue) {
               CssCascade.setPropCascadeValue(targetArea, prop, val);
@@ -3145,7 +3145,7 @@ export function mergeInPageRule(
             "_pseudos",
           );
           for (const pseudoName in sourcePseudos) {
-            if (sourcePseudos.hasOwnProperty(pseudoName)) {
+            if (Object.hasOwn(sourcePseudos, pseudoName)) {
               let targetPseudo = targetPseudos[pseudoName];
               if (!targetPseudo) {
                 targetPseudo = {} as CssCascade.ElementStyle;
@@ -3153,7 +3153,7 @@ export function mergeInPageRule(
               }
               const sourcePseudo = sourcePseudos[pseudoName];
               for (const prop in sourcePseudo) {
-                if (sourcePseudo.hasOwnProperty(prop)) {
+                if (Object.hasOwn(sourcePseudo, prop)) {
                   const val = sourcePseudo[prop];
                   if (val instanceof CssCascade.CascadeValue) {
                     CssCascade.setPropCascadeValue(targetPseudo, prop, val);

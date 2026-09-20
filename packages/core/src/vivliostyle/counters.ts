@@ -1213,12 +1213,7 @@ export class CounterStore {
     const countersBeforeOverride: CssCascade.CounterValues =
       Object.create(null);
     const rememberCounterBase = (counterName: string): void => {
-      if (
-        !Object.prototype.hasOwnProperty.call(
-          countersBeforeOverride,
-          counterName,
-        )
-      ) {
+      if (!Object.hasOwn(countersBeforeOverride, counterName)) {
         const counterValues = baseCounters[counterName];
         if (counterValues) {
           countersBeforeOverride[counterName] = Array.from(counterValues);

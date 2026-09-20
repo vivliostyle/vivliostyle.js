@@ -93,7 +93,7 @@ export abstract class PageBox<
     const specified = this.specified;
     const destSpecified = dest.specified;
     for (const prop in specified) {
-      if (Object.prototype.hasOwnProperty.call(specified, prop)) {
+      if (Object.hasOwn(specified, prop)) {
         destSpecified[prop] = specified[prop];
       }
     }

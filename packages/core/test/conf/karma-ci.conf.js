@@ -65,7 +65,7 @@ module.exports = function (config) {
   };
 
   for (var key in commonConfig) {
-    if (commonConfig.hasOwnProperty(key)) {
+    if (Object.hasOwn(commonConfig, key)) {
       options[key] = commonConfig[key];
     }
   }
