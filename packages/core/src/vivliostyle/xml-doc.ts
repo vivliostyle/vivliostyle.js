@@ -332,7 +332,7 @@ export function resolveContentType(response: Net.FetchResponse): string | null {
         return contentType;
       }
     }
-    if (contentType.match(/\+xml$/)) {
+    if (contentType.endsWith("+xml")) {
       return DOMParserSupportedType.APPLICATION_XML;
     }
   }

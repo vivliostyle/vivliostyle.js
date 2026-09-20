@@ -140,14 +140,14 @@ export function resolveURL(relURL: string, baseURL: string): string {
     baseURL = `${baseURL}/`;
   }
   let r: string[] | null;
-  if (relURL.match(/^\/\//)) {
+  if (relURL.startsWith("//")) {
     r = baseURL.match(/^(\w{2,}:)\/\//);
     if (r) {
       return r[1] + relURL;
     }
     return relURL;
   }
-  if (relURL.match(/^\//)) {
+  if (relURL.startsWith("/")) {
     const wptRawRepoRootURL = getWptRawRepoRootURL(baseURL);
     if (wptRawRepoRootURL) {
       return wptRawRepoRootURL + relURL;
@@ -158,11 +158,11 @@ export function resolveURL(relURL: string, baseURL: string): string {
     }
     return relURL;
   }
-  if (relURL.match(/^\.(\/|$)/)) {
+  if (relURL === "." || relURL.startsWith("./")) {
     relURL = relURL.slice(2); // './foo' => 'foo'
   }
   baseURL = stripFragmentAndQuery(baseURL);
-  if (relURL.match(/^#/)) {
+  if (relURL.startsWith("#")) {
     return baseURL + relURL;
   }
   let i = baseURL.lastIndexOf("/");
@@ -197,7 +197,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
  * resolveURL("#id", data:...) intentionally returns just "#id".
  */
 export function resolveReferenceURL(relURL: string, baseURL: string): string {
-  if (relURL.match(/^#/) && baseURL) {
+  if (relURL.startsWith("#") && baseURL) {
     return stripFragment(baseURL) + relURL;
   }
   return resolveURL(relURL, baseURL);
@@ -641,7 +641,7 @@ export function escapeRegExp(str: string): string {
 
 export function unescapeCharFromHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
-  if (str.indexOf(prefix) === 0) {
+  if (str.startsWith(prefix)) {
     return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
   } else {
     return str;

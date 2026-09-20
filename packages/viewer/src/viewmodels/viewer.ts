@@ -180,7 +180,7 @@ class Viewer {
           !docTitle ||
           docTitle === pubTitle ||
           this.firstPage() ||
-          /\.xhtml$/.test(docTitle)
+          docTitle.endsWith(".xhtml")
         ) {
           // ignore ugly titles copied from *.xhtml file name
           title = pubTitle;

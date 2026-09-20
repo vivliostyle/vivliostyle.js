@@ -1698,14 +1698,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
     if (this.pageBox.pseudoName == userAgentPageMasterPseudo) {
       for (const name in docElementStyle) {
-        if (name.match(/^background-/) || name == "writing-mode") {
+        if (name.startsWith("background-") || name == "writing-mode") {
           style[name] = docElementStyle[name];
         }
       }
     }
     if (this.pageBox.pseudoName == "layout-host") {
       for (const name in docElementStyle) {
-        if (!name.match(/^background-/) && name != "writing-mode") {
+        if (!name.startsWith("background-") && name != "writing-mode") {
           style[name] = docElementStyle[name];
         }
       }

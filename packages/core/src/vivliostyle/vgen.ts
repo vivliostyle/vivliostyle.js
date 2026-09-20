@@ -472,7 +472,7 @@ export class ViewFactory
         ) {
           continue;
         }
-        if (name.match(/^first-/)) {
+        if (name.startsWith("first-")) {
           const display = computedStyle["display"];
           if (!display || display === Css.ident.inline) {
             continue;
@@ -525,7 +525,7 @@ export class ViewFactory
         );
       }
       att.appendChild(elem);
-      if (name.match(/^first-/)) {
+      if (name.startsWith("first-")) {
         att = elem;
       }
     }
@@ -1997,7 +1997,7 @@ export class ViewFactory
           let attributeName = attribute.localName;
           let attributeValue = attribute.value;
           if (!attributeNS) {
-            if (!Scripts.allowScripts && attributeName.match(/^on/)) {
+            if (!Scripts.allowScripts && attributeName.startsWith("on")) {
               continue; // don't propagate JavaScript code
             }
             if (attributeName == "style") {

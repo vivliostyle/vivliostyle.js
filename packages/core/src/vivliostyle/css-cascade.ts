@@ -929,11 +929,11 @@ export function isSpecialName(name: string): boolean {
 }
 
 export function isMapName(name: string): boolean {
-  return name.charAt(0) === "_" && name !== "_viewConditionalStyles";
+  return name.startsWith("_") && name !== "_viewConditionalStyles";
 }
 
 export function isPropName(name: string): boolean {
-  return name.charAt(0) !== "_" && !SPECIALS[name];
+  return !name.startsWith("_") && !SPECIALS[name];
 }
 
 export function isInherited(name: string): boolean {

@@ -226,7 +226,7 @@ class CounterResolver implements CssCascade.CounterResolver {
       Base.resolveURL(url, this.baseURL),
       this.baseURL,
     );
-    if (transformedId.charAt(0) === "#") {
+    if (transformedId.startsWith("#")) {
       transformedId = transformedId.substring(1);
     }
     return transformedId;

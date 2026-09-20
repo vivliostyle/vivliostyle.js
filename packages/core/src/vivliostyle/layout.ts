@@ -5531,7 +5531,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     function convertPercentageToPx(props: string[], refValue: number) {
       props.forEach((propName) => {
         const valueString = Base.getCSSProperty(target, propName);
-        if (valueString && valueString.charAt(valueString.length - 1) === "%") {
+        if (valueString?.endsWith("%")) {
           const percentageValue = parseFloat(valueString);
           const value = (refValue * percentageValue) / 100;
           Base.setCSSProperty(target, propName, `${value}px`);

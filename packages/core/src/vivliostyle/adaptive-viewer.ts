@@ -1345,10 +1345,8 @@ export class AdaptiveViewer {
       viewer.hyperlinkListener = (evt) => {
         const hrefEvent = evt as Vtree.PageHyperlinkEvent;
         const internal =
-          hrefEvent.href.charAt(0) === "#" ||
-          viewer.packageURL.some(
-            (url) => hrefEvent.href.slice(0, url.length) == url,
-          );
+          hrefEvent.href.startsWith("#") ||
+          viewer.packageURL.some((url) => hrefEvent.href.startsWith(url));
         if (internal) {
           evt.preventDefault();
           const msg = {

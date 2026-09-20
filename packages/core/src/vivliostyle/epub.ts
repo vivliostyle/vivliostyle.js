@@ -333,7 +333,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         );
         if (manifestLink) {
           const href = manifestLink.getAttribute("href");
-          if (/^#/.test(href)) {
+          if (href?.startsWith("#")) {
             const manifestObj = Base.stringToJSON(
               doc.getElementById(href.slice(1)).textContent,
             );
@@ -851,10 +851,10 @@ function getPathFromURL(url: string, pubURL: string): string | null {
     if (url === epubBaseURL || url + "/" === epubBaseURL) {
       return "";
     }
-    if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
+    if (!epubBaseURL.endsWith("/")) {
       epubBaseURL += "/";
     }
-    return url.slice(0, epubBaseURL.length) == epubBaseURL
+    return url.startsWith(epubBaseURL)
       ? decodeURIComponent(url.slice(epubBaseURL.length))
       : null;
   } else {
@@ -966,10 +966,10 @@ export class OPFDoc {
 
       /** @override */
       restoreURL(encoded: string): string[] {
-        if (encoded.charAt(0) === "#") {
+        if (encoded.startsWith("#")) {
           encoded = encoded.substring(1);
         }
-        if (encoded.indexOf(transformedIdPrefix) === 0) {
+        if (encoded.startsWith(transformedIdPrefix)) {
           encoded = encoded.substring(transformedIdPrefix.length);
         }
         const decoded = Base.unescapeStrFromHex(encoded, ":");
@@ -3757,10 +3757,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     Logging.logger.debug("Navigate to", href);
     let path = this.opf.getPathFromURL(Base.stripFragment(href));
     if (!path) {
-      if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
+      if (this.opf.opfXML && href.startsWith("#epubcfi(")) {
         // CFI fragment is "relative" to OPF.
         path = this.opf.getPathFromURL(this.opf.opfXML.url);
-      } else if (href.charAt(0) === "#") {
+      } else if (href.startsWith("#")) {
         const restored = this.opf.documentURLTransformer.restoreURL(href);
         if (this.opf.opfXML) {
           path = this.opf.getPathFromURL(restored[0]);

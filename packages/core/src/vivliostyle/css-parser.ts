@@ -1354,7 +1354,7 @@ export class Parser {
 
       // FALLTHROUGH
       case TokenType.IDENT:
-        if (hasLeadingPlus && token.text.charAt(0) === "-") {
+        if (hasLeadingPlus && token.text.startsWith("-")) {
           // reject '+-n'
           return null;
         }

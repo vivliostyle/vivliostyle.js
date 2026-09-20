@@ -1820,7 +1820,7 @@ export class PageRulePartitionInstance
   ) {
     super(parentInstance, pageRulePartition);
     for (const name in docElementStyle) {
-      if (name.match(/^background-/)) {
+      if (name.startsWith("background-")) {
         this.cascaded[name] = docElementStyle[name];
       }
     }
@@ -2030,7 +2030,7 @@ export class PageAreaPartitionInstance
     docElementStyle: CssCascade.ElementStyle,
   ): void {
     for (const name in docElementStyle) {
-      if (name.match(/^column.*$/)) {
+      if (name.startsWith("column")) {
         this.cascaded[name] = docElementStyle[name];
       }
     }
