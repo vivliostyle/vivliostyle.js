@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() in a block container that continues in another column (Vertical
+      Writing Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .columns {
+        column-count: 2;
+        column-gap: 4ch;
+        column-fill: auto;
+        inline-size: 64ch;
+        block-size: 24px;
+      }
+
+      .entry {
+        block-size: 24px;
+        background: #ddd;
+      }
+
+      .entry.two-columns {
+        block-size: 48px;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      Each gray block must render identically to the blue blocks below it,
+      which are not split.
+    </p>
+
+    <section>
+      <h3>The leader is on a line of the first column</h3>
+      <div class="columns"><div class="entry two-columns"><span class="has-leader-after">text</span>one two</div></div>
+      <div class="columns"><div class="entry reference"><span class="has-leader-after">text</span>one two</div><div class="entry reference"></div></div>
+    </section>
+  </body>
+</html>

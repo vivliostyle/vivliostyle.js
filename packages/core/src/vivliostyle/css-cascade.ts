@@ -3620,8 +3620,52 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     let innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
-    box[inlineLowSide] += containerInset(inlineLowSide);
-    box[inlineHighSide] -= containerInset(inlineHighSide);
+    // A block container that continues in another column has a client rect for
+    // each fragment, side by side in the inline direction, while its bounding
+    // client rect spans all of them.
+    const viewportBox = container.viewNode.getBoundingClientRect();
+    const fragments = Array.from(container.viewNode.getClientRects());
+    const boxOffset = box[inlineStartSide] - viewportBox[inlineStartSide];
+    const boxWith = (sides: Partial<Vtree.ClientRect>): Vtree.ClientRect => {
+      const { left, top, right, bottom } = { ...box, ...sides };
+      return {
+        left,
+        top,
+        right,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+      };
+    };
+    const fragmentBoxes = (
+      fragments.length > 0 ? fragments : [viewportBox]
+    ).map((fragment) =>
+      boxWith({
+        [inlineStartSide]:
+          fragment[inlineStartSide] +
+          boxOffset +
+          inlineSign * containerInset(inlineStartSide),
+        [inlineEndSide]:
+          fragment[inlineEndSide] +
+          boxOffset -
+          inlineSign * (containerInset(inlineEndSide) + innerMarginInlineEnd),
+      }),
+    );
+    const inlineDistance = (fragmentBox: Vtree.ClientRect, center: number) =>
+      Math.max(
+        fragmentBox[inlineLowSide] - center,
+        center - fragmentBox[inlineHighSide],
+        0,
+      );
+    const fragmentBoxOf = (rect: Vtree.ClientRect) => {
+      const center = (rect[inlineLowSide] + rect[inlineHighSide]) / 2;
+      return fragmentBoxes.reduce((nearest, fragmentBox) =>
+        inlineDistance(fragmentBox, center) < inlineDistance(nearest, center)
+          ? fragmentBox
+          : nearest,
+      );
+    };
+    const initialFragmentBox = fragmentBoxOf(innerInit);
 
     // A range around a node yields a rect for each line it occupies, where the
     // contents of a replaced element or of an empty inline box yield none and
@@ -3674,32 +3718,31 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.
-    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-      if (direction === "rtl") {
-        box.top += innerMarginInlineEnd;
-      } else {
-        box.bottom -= innerMarginInlineEnd;
-      }
-      box.top = Math.min(innerInit.top, box.top);
-      box.bottom = Math.max(innerInit.bottom, box.bottom);
-    } else {
-      if (direction === "rtl") {
-        box.left += innerMarginInlineEnd;
-      } else {
-        box.right -= innerMarginInlineEnd;
-      }
-      box.left = Math.min(innerInit.left, box.left);
-      box.right = Math.max(innerInit.right, box.right);
-    }
+    const initialLineBox = boxWith({
+      ...initialFragmentBox,
+      [inlineLowSide]: Math.min(
+        innerInit[inlineLowSide],
+        initialFragmentBox[inlineLowSide],
+      ),
+      [inlineHighSide]: Math.max(
+        innerInit[inlineHighSide],
+        initialFragmentBox[inlineHighSide],
+      ),
+    });
+    const lineBoxOf = (inner: Vtree.ClientRect) => {
+      const fragmentBox = fragmentBoxOf(inner);
+      return fragmentBox === initialFragmentBox ? initialLineBox : fragmentBox;
+    };
 
     function overrun(inner: Vtree.ClientRect): boolean {
+      const lineBox = lineBoxOf(inner);
       const end =
         inner[inlineEndSide] + inlineSign * followingInlineSiblingsWidth;
       return (
-        box[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
-        box[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
-        box[blockLowSide] - inner[blockLowSide] > subPixel ||
-        inner[blockHighSide] - box[blockHighSide] > subPixel
+        lineBox[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
+        lineBox[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
+        lineBox[blockLowSide] - inner[blockLowSide] > subPixel ||
+        inner[blockHighSide] - lineBox[blockHighSide] > subPixel
       );
     }
 
@@ -3708,8 +3751,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // moves the lines in the block direction where the container aligns them
     // to its center or end.
     const hasMovedAlongLine = (inner: Vtree.ClientRect) =>
+      fragmentBoxOf(inner) !== initialFragmentBox ||
       Math.abs(inner[lineStartSide] - innerInit[lineStartSide]) >= subPixel;
     const hasMovedAcrossLines = (inner: Vtree.ClientRect) =>
+      fragmentBoxOf(inner) !== initialFragmentBox ||
       Math.abs(inner[blockLowSide] - innerInit[blockLowSide]) >= subPixel;
 
     // A leader belongs on the line where the content before it ends, and grows
@@ -3739,7 +3784,8 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // it measures the other way, and the search below pays for that in probes
     // rather than in the count it settles on.
     const lineRoom =
-      (box[inlineEndSide] - box[inlineStartSide]) * inlineSign -
+      (initialLineBox[inlineEndSide] - initialLineBox[inlineStartSide]) *
+        inlineSign -
       followingInlineSiblingsWidth;
     // CSS Generated Content 3 breaks the line after the content preceding a
     // leader where not one full copy of the leader is visible beside it, and
