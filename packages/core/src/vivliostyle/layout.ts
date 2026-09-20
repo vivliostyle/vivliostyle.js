@@ -704,12 +704,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             position.sourceNode.textContent = firstLetterText;
             viewNode.textContent = firstLetterText;
             position.sourceNode.nextSibling.textContent =
-              text2.substr(firstLetterLength);
+              text2.slice(firstLetterLength);
           }
         }
         if (firstLetterLength > 0) {
           const viewText = viewNode.textContent ?? "";
-          viewNode.textContent = viewText.substr(0, firstLetterLength);
+          viewNode.textContent = viewText.slice(0, firstLetterLength);
         }
         return this.layoutContext.peelOff(textPosition, firstLetterLength);
       }

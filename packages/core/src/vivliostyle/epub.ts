@@ -335,7 +335,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
           const href = manifestLink.getAttribute("href");
           if (/^#/.test(href)) {
             const manifestObj = Base.stringToJSON(
-              doc.getElementById(href.substr(1)).textContent,
+              doc.getElementById(href.slice(1)).textContent,
             );
             OPFDoc.fromWebPubManifest(this, url, manifestObj, doc).then(
               (opf) => {
@@ -486,7 +486,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
       )) != null
     ) {
-      content = content.substr(r[0].length);
+      content = content.slice(r[0].length);
       vals[r[1]] = r[2];
     }
     const width = vals["width"] - 0;
@@ -700,7 +700,7 @@ export function readMetadata(
         /^\s*([A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/,
       )) != null
     ) {
-      prefixes = prefixes.substr(r[0].length);
+      prefixes = prefixes.slice(r[0].length);
       prefixMap[r[1]] = r[2];
     }
   }
@@ -854,8 +854,8 @@ function getPathFromURL(url: string, pubURL: string): string | null {
     if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
       epubBaseURL += "/";
     }
-    return url.substr(0, epubBaseURL.length) == epubBaseURL
-      ? decodeURIComponent(url.substr(epubBaseURL.length))
+    return url.slice(0, epubBaseURL.length) == epubBaseURL
+      ? decodeURIComponent(url.slice(epubBaseURL.length))
       : null;
   } else {
     return url;
@@ -3786,7 +3786,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         const fragmentIndex = href.indexOf("#");
         if (fragmentIndex >= 0) {
           return this.navigateToFragment(
-            href.substr(fragmentIndex + 1),
+            href.slice(fragmentIndex + 1),
             position,
             sync,
           );

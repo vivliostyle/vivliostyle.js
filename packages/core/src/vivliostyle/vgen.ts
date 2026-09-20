@@ -2802,7 +2802,7 @@ export class ViewFactory
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
     this.preprocessTextContent(nodeContext).then((preprocessedTextContent) => {
       const offsetInNode = this.offsetInNode || 0;
-      const textContent = Diff.restoreNewText(preprocessedTextContent).substr(
+      const textContent = Diff.restoreNewText(preprocessedTextContent).slice(
         offsetInNode,
       );
       this.viewNode = document.createTextNode(textContent);

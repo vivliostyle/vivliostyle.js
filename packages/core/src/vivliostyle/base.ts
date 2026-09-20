@@ -159,7 +159,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
     return relURL;
   }
   if (relURL.match(/^\.(\/|$)/)) {
-    relURL = relURL.substr(2); // './foo' => 'foo'
+    relURL = relURL.slice(2); // './foo' => 'foo'
   }
   baseURL = stripFragmentAndQuery(baseURL);
   if (relURL.match(/^#/)) {
@@ -169,7 +169,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
   if (i < 0) {
     return relURL;
   }
-  let url = baseURL.substr(0, i + 1) + relURL;
+  let url = baseURL.slice(0, i + 1) + relURL;
   let urlOption = "";
   r = url.match(/^([^?#]*)([?#].*)$/);
   if (r) {
@@ -186,7 +186,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
     if (j <= 0) {
       break;
     }
-    url = url.substr(0, j) + url.substr(i + 3);
+    url = url.slice(0, j) + url.slice(i + 3);
   }
   return url.replace(/\/(\.\/)+/g, "/") + urlOption;
 }
@@ -625,7 +625,7 @@ export function isLetter(ch: string): boolean {
 
 export function escapeCharToHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
-  return prefix + (65536 | str.charCodeAt(0)).toString(16).substr(1);
+  return prefix + (65536 | str.charCodeAt(0)).toString(16).slice(1);
 }
 
 export function escapeNameStrToHex(str: string, prefix?: string): string {

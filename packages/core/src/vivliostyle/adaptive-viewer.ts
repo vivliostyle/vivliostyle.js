@@ -1347,7 +1347,7 @@ export class AdaptiveViewer {
         const internal =
           hrefEvent.href.charAt(0) === "#" ||
           viewer.packageURL.some(
-            (url) => hrefEvent.href.substr(0, url.length) == url,
+            (url) => hrefEvent.href.slice(0, url.length) == url,
           );
         if (internal) {
           evt.preventDefault();
