@@ -45,7 +45,7 @@
   "source": "src/index.tsx",
   "types": "dist/index.d.ts",
   "main": "dist/react-vivliostyle.js",
-  "module": "dist/react-vivliostyle.modern.js",
+  "module": "dist/react-vivliostyle.modern.mjs",
   "files": [
     "dist"
   ],
