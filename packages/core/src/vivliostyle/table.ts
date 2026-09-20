@@ -2582,18 +2582,11 @@ export class TableRowLayoutConstraint
   ): Task.Result<boolean> {
     getTableFormattingContext(this.nodeContext.formattingContext);
     const frame: Task.Frame<boolean> = Task.newFrame("finishBreak");
-    const constraints = this.cellFragmentLayoutConstraints.reduce(
-      (array, entry) =>
-        array.concat(
-          entry.constraints.map((constraint) => ({
-            constraint,
-            breakPosition: entry.breakPosition,
-          })),
-        ),
-      [] as {
-        constraint: Layout.FragmentLayoutConstraint;
-        breakPosition: Vtree.NodeContext | null;
-      }[],
+    const constraints = this.cellFragmentLayoutConstraints.flatMap((entry) =>
+      entry.constraints.map((constraint) => ({
+        constraint,
+        breakPosition: entry.breakPosition,
+      })),
     );
     let i = 0;
     frame

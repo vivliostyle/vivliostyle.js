@@ -152,10 +152,7 @@ export function getPolyfilledInheritedProps(): string[] {
   const hooks: Plugin.PolyfilledInheritedPropsHook[] = Plugin.getHooksForName(
     Plugin.HOOKS.POLYFILLED_INHERITED_PROPS,
   );
-  return hooks.reduce(
-    (props, f) => props.concat(f()),
-    ([] as string[]).concat(polyfilledInheritedProps),
-  );
+  return [...polyfilledInheritedProps, ...hooks.flatMap((f) => f())];
 }
 
 export const supportedNamespaces = {

@@ -808,10 +808,7 @@ export class MarksMenuStatus {
       if (text.length == 0) {
         return;
       }
-      // want to use map and flat, but the compiler option allows only es2018
-      const rects = text.reduce((acc, t) => {
-        return acc.concat(textNodeRects(t));
-      }, []);
+      const rects = text.flatMap(textNodeRects);
       if (rects.length == 0) {
         return;
       }

@@ -1497,9 +1497,8 @@ export class AttachedPageFloatLayoutContext
 
   checkAndForbidFloatFollowingDeferredFloat(): boolean {
     const deferredFloats = this.getFloatsDeferredToNextInChildContexts();
-    const floatsInFragments = this.floatFragments.reduce(
-      (r, fr) => r.concat(fr.continuations.map((c) => c.float)),
-      [] as PageFloat[],
+    const floatsInFragments = this.floatFragments.flatMap((fr) =>
+      fr.continuations.map((c) => c.float),
     );
     floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
     for (const float of floatsInFragments) {
