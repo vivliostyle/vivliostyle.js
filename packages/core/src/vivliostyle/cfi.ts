@@ -48,7 +48,7 @@ export function escape(str: string): string {
 }
 
 export function unescapeChar(str: string): string {
-  return str.substr(1);
+  return str.slice(1);
 }
 
 export function unescape(str: string): string {
@@ -63,7 +63,7 @@ export function parseExtVal(extstr: string): string | string[] {
   do {
     const r = extstr.match(/^(\^,|[^,])*/);
     const p = unescape(r[0]);
-    extstr = extstr.substr(r[0].length + 1);
+    extstr = extstr.slice(r[0].length + 1);
     if (!extstr && !result.length) {
       return p;
     }
@@ -80,7 +80,7 @@ export function parseExt(extstr: string): { [key: string]: string | string[] } {
       return ext;
     }
     ext[r[1]] = parseExtVal(r[2]);
-    extstr = extstr.substr(r[0].length);
+    extstr = extstr.slice(r[0].length);
   }
   return ext;
 }
@@ -249,7 +249,7 @@ export class Fragment {
         case "/": {
           i++;
           r = str
-            .substr(i)
+            .slice(i)
             .match(/^(0|[1-9][0-9]*)(\[(.*?)(;([^\]]|\^\])*)?\])?/);
           if (!r) {
             throw new Error("E_CFI_NUMBER_EXPECTED");
@@ -264,7 +264,7 @@ export class Fragment {
         case ":": {
           i++;
           r = str
-            .substr(i)
+            .slice(i)
             .match(
               /^(0|[1-9][0-9]*)(\[((([^\];,]|\^[\];,])*)(,(([^\];,]|\^[\];,])*))?)(;([^]]|\^\])*)?\])?/,
             );
@@ -370,8 +370,8 @@ export class Fragment {
               offset = textLength;
             }
             after = true;
-            textBefore = text.substr(0, offset);
-            textAfter = text.substr(offset);
+            textBefore = text.slice(0, offset);
+            textAfter = text.slice(offset);
           }
           node = node.previousSibling;
           continue;

@@ -333,9 +333,9 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         );
         if (manifestLink) {
           const href = manifestLink.getAttribute("href");
-          if (/^#/.test(href)) {
+          if (href?.startsWith("#")) {
             const manifestObj = Base.stringToJSON(
-              doc.getElementById(href.substr(1)).textContent,
+              doc.getElementById(href.slice(1)).textContent,
             );
             OPFDoc.fromWebPubManifest(this, url, manifestObj, doc).then(
               (opf) => {
@@ -486,7 +486,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         /^,?\s*([-A-Za-z_.][-A-Za-z_0-9.]*)\s*=\s*([-+A-Za-z_0-9.]*)\s*/,
       )) != null
     ) {
-      content = content.substr(r[0].length);
+      content = content.slice(r[0].length);
       vals[r[1]] = r[2];
     }
     const width = vals["width"] - 0;
@@ -700,7 +700,7 @@ export function readMetadata(
         /^\s*([A-Z_a-z\u007F-\uFFFF][-.A-Z_a-z0-9\u007F-\uFFFF]*):\s*(\S+)/,
       )) != null
     ) {
-      prefixes = prefixes.substr(r[0].length);
+      prefixes = prefixes.slice(r[0].length);
       prefixMap[r[1]] = r[2];
     }
   }
@@ -851,11 +851,11 @@ function getPathFromURL(url: string, pubURL: string): string | null {
     if (url === epubBaseURL || url + "/" === epubBaseURL) {
       return "";
     }
-    if (epubBaseURL.charAt(epubBaseURL.length - 1) != "/") {
+    if (!epubBaseURL.endsWith("/")) {
       epubBaseURL += "/";
     }
-    return url.substr(0, epubBaseURL.length) == epubBaseURL
-      ? decodeURIComponent(url.substr(epubBaseURL.length))
+    return url.startsWith(epubBaseURL)
+      ? decodeURIComponent(url.slice(epubBaseURL.length))
       : null;
   } else {
     return url;
@@ -966,10 +966,10 @@ export class OPFDoc {
 
       /** @override */
       restoreURL(encoded: string): string[] {
-        if (encoded.charAt(0) === "#") {
+        if (encoded.startsWith("#")) {
           encoded = encoded.substring(1);
         }
-        if (encoded.indexOf(transformedIdPrefix) === 0) {
+        if (encoded.startsWith(transformedIdPrefix)) {
           encoded = encoded.substring(transformedIdPrefix.length);
         }
         const decoded = Base.unescapeStrFromHex(encoded, ":");
@@ -1155,9 +1155,7 @@ export class OPFDoc {
     }
     this.epageCount = epage;
 
-    if (this.epageCountCallback) {
-      this.epageCountCallback(this.epageCount);
-    }
+    this.epageCountCallback?.(this.epageCount);
   }
 
   setEPageCountMode(epageIsRenderedPage: boolean) {
@@ -1206,9 +1204,7 @@ export class OPFDoc {
           item.epageCount = Math.ceil(xmldoc.getTotalOffset() / offsetPerEPage);
           epage += item.epageCount;
           this.epageCount = epage;
-          if (this.epageCountCallback) {
-            this.epageCountCallback(this.epageCount);
-          }
+          this.epageCountCallback?.(this.epageCount);
           loopFrame.continueLoop();
         });
       })
@@ -1348,7 +1344,7 @@ export class OPFDoc {
         );
         const path = getPathFromURL(hrefNoFragment, pubURL);
         const url = path !== null ? encodeURLPath(path) : hrefNoFragment;
-        if (manifestObj["readingOrder"].indexOf(url) == -1) {
+        if (!manifestObj["readingOrder"].includes(url)) {
           manifestObj["readingOrder"].push(url);
         }
       }
@@ -1754,9 +1750,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         0,
       );
 
-      if (this.opf.epageCountCallback) {
-        this.opf.epageCountCallback(this.opf.epageCount);
-      }
+      this.opf.epageCountCallback?.(this.opf.epageCount);
     }
 
     if (oldPage) {
@@ -3301,8 +3295,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
             loopFrame.breakLoop();
             return;
           }
-          let pos =
-            viewItem.layoutPositions[viewItem.layoutPositions.length - 1];
+          let pos = viewItem.layoutPositions.at(-1);
           this.renderSinglePage(viewItem, pos).then((result) => {
             const page = result.pageAndPosition.page;
             pos = result.nextLayoutPosition;
@@ -3510,7 +3503,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         // to avoid unpaired page.
         const nextViewItem = this.spineItems[spineIndex];
         const nextPage = nextViewItem && nextViewItem.pages[0];
-        const currentPage = viewItem.pages[viewItem.pages.length - 1];
+        const currentPage = viewItem.pages.at(-1);
         if (nextPage && currentPage && nextPage.side == currentPage.side) {
           nextViewItem.pages.forEach((page) => {
             if (page.container) page.container.remove();
@@ -3758,10 +3751,10 @@ export class OPFView implements Vgen.CustomRendererFactory {
     Logging.logger.debug("Navigate to", href);
     let path = this.opf.getPathFromURL(Base.stripFragment(href));
     if (!path) {
-      if (this.opf.opfXML && href.match(/^#epubcfi\(/)) {
+      if (this.opf.opfXML && href.startsWith("#epubcfi(")) {
         // CFI fragment is "relative" to OPF.
         path = this.opf.getPathFromURL(this.opf.opfXML.url);
-      } else if (href.charAt(0) === "#") {
+      } else if (href.startsWith("#")) {
         const restored = this.opf.documentURLTransformer.restoreURL(href);
         if (this.opf.opfXML) {
           path = this.opf.getPathFromURL(restored[0]);
@@ -3787,7 +3780,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         const fragmentIndex = href.indexOf("#");
         if (fragmentIndex >= 0) {
           return this.navigateToFragment(
-            href.substr(fragmentIndex + 1),
+            href.slice(fragmentIndex + 1),
             position,
             sync,
           );
@@ -4138,14 +4131,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
           if (prevLastPageCounters && prevLastPageCounters.length) {
             // pageCounterStarts stores the counter BEFORE auto-increment,
             // so add 1 for the page's own increment.
-            pageCounterOffset =
-              prevLastPageCounters[prevLastPageCounters.length - 1] + 1;
+            pageCounterOffset = prevLastPageCounters.at(-1) + 1;
           } else {
             const counters = this.counterStore.currentPageCounters["page"];
             pageCounterOffset =
               !counters || !counters.length
                 ? pageNumberOffset
-                : counters[counters.length - 1];
+                : counters.at(-1);
           }
 
           // Note: The "page" counter value differs to the "page-number" value

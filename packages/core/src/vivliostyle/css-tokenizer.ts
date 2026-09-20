@@ -25,7 +25,7 @@ export interface TokenizerHandler {
 }
 
 export function escapeParseSingle(str: string): string {
-  str = str.substr(1);
+  str = str.slice(1);
   if (str.match(/^[^0-9a-fA-F\n\r]$/)) {
     return str;
   }

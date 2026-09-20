@@ -140,14 +140,14 @@ export function resolveURL(relURL: string, baseURL: string): string {
     baseURL = `${baseURL}/`;
   }
   let r: string[] | null;
-  if (relURL.match(/^\/\//)) {
+  if (relURL.startsWith("//")) {
     r = baseURL.match(/^(\w{2,}:)\/\//);
     if (r) {
       return r[1] + relURL;
     }
     return relURL;
   }
-  if (relURL.match(/^\//)) {
+  if (relURL.startsWith("/")) {
     const wptRawRepoRootURL = getWptRawRepoRootURL(baseURL);
     if (wptRawRepoRootURL) {
       return wptRawRepoRootURL + relURL;
@@ -158,18 +158,18 @@ export function resolveURL(relURL: string, baseURL: string): string {
     }
     return relURL;
   }
-  if (relURL.match(/^\.(\/|$)/)) {
-    relURL = relURL.substr(2); // './foo' => 'foo'
+  if (relURL === "." || relURL.startsWith("./")) {
+    relURL = relURL.slice(2); // './foo' => 'foo'
   }
   baseURL = stripFragmentAndQuery(baseURL);
-  if (relURL.match(/^#/)) {
+  if (relURL.startsWith("#")) {
     return baseURL + relURL;
   }
   let i = baseURL.lastIndexOf("/");
   if (i < 0) {
     return relURL;
   }
-  let url = baseURL.substr(0, i + 1) + relURL;
+  let url = baseURL.slice(0, i + 1) + relURL;
   let urlOption = "";
   r = url.match(/^([^?#]*)([?#].*)$/);
   if (r) {
@@ -186,7 +186,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
     if (j <= 0) {
       break;
     }
-    url = url.substr(0, j) + url.substr(i + 3);
+    url = url.slice(0, j) + url.slice(i + 3);
   }
   return url.replace(/\/(\.\/)+/g, "/") + urlOption;
 }
@@ -197,7 +197,7 @@ export function resolveURL(relURL: string, baseURL: string): string {
  * resolveURL("#id", data:...) intentionally returns just "#id".
  */
 export function resolveReferenceURL(relURL: string, baseURL: string): string {
-  if (relURL.match(/^#/) && baseURL) {
+  if (relURL.startsWith("#") && baseURL) {
     return stripFragment(baseURL) + relURL;
   }
   return resolveURL(relURL, baseURL);
@@ -473,14 +473,6 @@ export function setCSSProperty(
             break;
         }
         break;
-      case "text-combine-upright":
-        switch (value) {
-          case "all":
-            // workaround for Chrome 93 bug https://crbug.com/1242755
-            elemStyle.setProperty("text-indent", "0");
-            break;
-        }
-        break;
     }
     elemStyle.setProperty(prefixed, value);
   }
@@ -625,7 +617,7 @@ export function isLetter(ch: string): boolean {
 
 export function escapeCharToHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
-  return prefix + (65536 | str.charCodeAt(0)).toString(16).substr(1);
+  return prefix + (str.charCodeAt(0) || 0).toString(16).padStart(4, "0");
 }
 
 export function escapeNameStrToHex(str: string, prefix?: string): string {
@@ -641,7 +633,7 @@ export function escapeRegExp(str: string): string {
 
 export function unescapeCharFromHex(str: string, prefix?: string): string {
   prefix = typeof prefix === "string" ? prefix : "\\u";
-  if (str.indexOf(prefix) === 0) {
+  if (str.startsWith(prefix)) {
     return String.fromCharCode(parseInt(str.substring(prefix.length), 16));
   } else {
     return str;

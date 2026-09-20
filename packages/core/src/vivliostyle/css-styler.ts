@@ -56,7 +56,7 @@ export class SlipMap {
     if (this.map.length == 0) {
       return 0;
     }
-    const range = this.map[this.map.length - 1];
+    const range = this.map.at(-1);
     return range.endSlipped;
   }
 
@@ -64,7 +64,7 @@ export class SlipMap {
     if (this.map.length == 0) {
       this.map.push(new SlipRange(endFixed, endFixed, endFixed));
     } else {
-      const range = this.map[this.map.length - 1];
+      const range = this.map.at(-1);
       const endSlipped = range.endSlipped + endFixed - range.endFixed;
       if (range.endFixed == range.endStuckFixed) {
         range.endFixed = endFixed;
@@ -80,7 +80,7 @@ export class SlipMap {
     if (this.map.length == 0) {
       this.map.push(new SlipRange(endFixed, 0, 0));
     } else {
-      this.map[this.map.length - 1].endFixed = endFixed;
+      this.map.at(-1).endFixed = endFixed;
     }
   }
 
@@ -310,7 +310,7 @@ export class BoxStack {
    * Returns the last box in the stack.
    */
   lastBox(): Box | undefined {
-    return this.stack[this.stack.length - 1];
+    return this.stack.at(-1);
   }
 
   /**
@@ -791,8 +791,7 @@ export class Styler implements AbstractStyler {
       changes: Array.from(changes || []),
       changeTypes: changeTypes ? { ...changeTypes } : undefined,
     } as CounterSnapshot;
-    const lastSnapshot =
-      this.counterSnapshots[this.counterSnapshots.length - 1];
+    const lastSnapshot = this.counterSnapshots.at(-1);
     // If multiple updates occur at the same offset (e.g., relayout),
     // keep the latest snapshot so counters reflect the most recent state.
     if (lastSnapshot && lastSnapshot.offset === offset) {
@@ -815,9 +814,7 @@ export class Styler implements AbstractStyler {
   }
 
   getLastCounterSnapshot(): CounterSnapshot | null {
-    return this.counterSnapshots.length
-      ? this.counterSnapshots[this.counterSnapshots.length - 1]
-      : null;
+    return this.counterSnapshots.length ? this.counterSnapshots.at(-1) : null;
   }
 
   /**
@@ -1008,9 +1005,7 @@ export class Styler implements AbstractStyler {
     if (this.flowToReach == flowName) {
       this.flowToReach = null;
     }
-    if (this.flowListener) {
-      this.flowListener.encounteredFlowChunk(flowChunk, flow);
-    }
+    this.flowListener?.encounteredFlowChunk(flowChunk, flow);
     return flowChunk;
   }
 
@@ -1023,7 +1018,7 @@ export class Styler implements AbstractStyler {
       const forcedBreakOffsets = this.flows[flowName].forcedBreakOffsets;
       if (
         forcedBreakOffsets.length === 0 ||
-        forcedBreakOffsets[forcedBreakOffsets.length - 1] < offset
+        forcedBreakOffsets.at(-1) < offset
       ) {
         forcedBreakOffsets.push(offset);
       }

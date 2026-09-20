@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "module": "esnext",
-    "lib": ["dom", "esnext"],
+    "lib": ["dom", "es2022"],
     "moduleResolution": "bundler",
     "jsx": "react",
     "jsxFactory": "React.createElement",
@@ -16,7 +16,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2015",
+    "target": "es2022",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

@@ -93,7 +93,7 @@ export abstract class PageBox<
     const specified = this.specified;
     const destSpecified = dest.specified;
     for (const prop in specified) {
-      if (Object.prototype.hasOwnProperty.call(specified, prop)) {
+      if (Object.hasOwn(specified, prop)) {
         destSpecified[prop] = specified[prop];
       }
     }
@@ -1698,14 +1698,14 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
     if (this.pageBox.pseudoName == userAgentPageMasterPseudo) {
       for (const name in docElementStyle) {
-        if (name.match(/^background-/) || name == "writing-mode") {
+        if (name.startsWith("background-") || name == "writing-mode") {
           style[name] = docElementStyle[name];
         }
       }
     }
     if (this.pageBox.pseudoName == "layout-host") {
       for (const name in docElementStyle) {
-        if (!name.match(/^background-/) && name != "writing-mode") {
+        if (!name.startsWith("background-") && name != "writing-mode") {
           style[name] = docElementStyle[name];
         }
       }

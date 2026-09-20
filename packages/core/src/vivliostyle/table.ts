@@ -512,7 +512,7 @@ export class TableFormattingContext
   getCellsFallingOnRow(rowIndex: number): TableCell[] {
     const rowSlots = this.getRowSlots(rowIndex);
     return rowSlots.reduce((uniqueCells, slot) => {
-      if (slot.cell !== uniqueCells[uniqueCells.length - 1]) {
+      if (slot.cell !== uniqueCells.at(-1)) {
         return uniqueCells.concat(slot.cell);
       } else {
         return uniqueCells;
@@ -535,9 +535,8 @@ export class TableFormattingContext
 
   getColumnCount(): number {
     if (this.columnCount < 0) {
-      this.columnCount = Math.max.apply(
-        null,
-        this.rows.map((row) =>
+      this.columnCount = Math.max(
+        ...this.rows.map((row) =>
           row.cells.reduce((sum, c) => sum + c.colSpan, 0),
         ),
       );
@@ -662,15 +661,13 @@ export class TableFormattingContext
   }
 
   override saveState(): any {
-    return ([] as BrokenTableCellPosition[]).concat(this.cellBreakPositions);
+    return [...this.cellBreakPositions];
   }
 
   override restoreState(state: any) {
     // Create a fresh copy to prevent the saved state from being mutated
     // during subsequent layout attempts (issue #1667).
-    this.cellBreakPositions = ([] as BrokenTableCellPosition[]).concat(
-      state as BrokenTableCellPosition[],
-    );
+    this.cellBreakPositions = [...(state as BrokenTableCellPosition[])];
   }
 }
 
@@ -2582,18 +2579,11 @@ export class TableRowLayoutConstraint
   ): Task.Result<boolean> {
     getTableFormattingContext(this.nodeContext.formattingContext);
     const frame: Task.Frame<boolean> = Task.newFrame("finishBreak");
-    const constraints = this.cellFragmentLayoutConstraints.reduce(
-      (array, entry) =>
-        array.concat(
-          entry.constraints.map((constraint) => ({
-            constraint,
-            breakPosition: entry.breakPosition,
-          })),
-        ),
-      [] as {
-        constraint: Layout.FragmentLayoutConstraint;
-        breakPosition: Vtree.NodeContext | null;
-      }[],
+    const constraints = this.cellFragmentLayoutConstraints.flatMap((entry) =>
+      entry.constraints.map((constraint) => ({
+        constraint,
+        breakPosition: entry.breakPosition,
+      })),
     );
     let i = 0;
     frame

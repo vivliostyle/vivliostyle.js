@@ -18,8 +18,15 @@
 /*eslint-env node */
 
 const webpack = require("webpack");
-const karmaWebpack = require("karma-webpack");
 
+// Preserve karma-webpack 4's per-entry module isolation for a simpler migration to Webpack 5.
+class IsolateTestEntriesPlugin {
+  apply(compiler) {
+    compiler.options.optimization.runtimeChunk = false;
+    compiler.options.optimization.splitChunks = false;
+    compiler.options.optimization.usedExports = false;
+  }
+}
 var testFiles = [
   "test/util/dom.js",
   "test/util/matchers.js",
@@ -32,7 +39,7 @@ var testFiles = [
 module.exports = function (config) {
   return {
     basePath: "../..",
-    frameworks: ["jasmine"],
+    frameworks: ["jasmine", "webpack"],
     files: testFiles,
     preprocessors: {
       "test/{util,spec}/**/*.js": ["webpack", "sourcemap"],
@@ -40,7 +47,6 @@ module.exports = function (config) {
     webpack: {
       mode:
         process.env.NODE_ENV === "production" ? "production" : "development",
-      entry: "../src/vivliostyle.ts",
       devtool: "inline-source-map",
       stats: "errors-warnings",
       resolve: {
@@ -54,11 +60,12 @@ module.exports = function (config) {
           },
           {
             test: /\.(css|txt|xml)$/,
-            use: "raw-loader",
+            type: "asset/source",
           },
         ],
       },
       plugins: [
+        new IsolateTestEntriesPlugin(),
         new webpack.DefinePlugin({
           VIVLIOSTYLE_DEBUG: JSON.stringify(
             process.env.NODE_ENV !== "production",

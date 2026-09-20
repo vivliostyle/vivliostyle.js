@@ -296,10 +296,7 @@ export class PageFloatFragment implements PageFloats.PageFloatFragment {
 
   getOrder(): number {
     const floats = this.continuations.map((c) => c.float);
-    return Math.min.apply(
-      null,
-      floats.map((f) => f.getOrder()),
-    );
+    return Math.min(...floats.map((f) => f.getOrder()));
   }
 
   shouldBeStashedBefore(float: PageFloat): boolean {
@@ -1042,9 +1039,9 @@ export abstract class PageFloatLayoutContext
     floatReference: FloatReference,
   ): PageFloatFragment[] {
     if (floatReference === this.floatReference) {
-      return this.state.stashedFloatFragments
-        .concat()
-        .sort((fr1, fr2) => fr2.getOrder() - fr1.getOrder()); // return in reverse order
+      return [...this.state.stashedFloatFragments].sort(
+        (fr1, fr2) => fr2.getOrder() - fr1.getOrder(),
+      ); // return in reverse order
     } else {
       return this.getParent(floatReference).getStashedFloatFragments(
         floatReference,
@@ -1497,9 +1494,8 @@ export class AttachedPageFloatLayoutContext
 
   checkAndForbidFloatFollowingDeferredFloat(): boolean {
     const deferredFloats = this.getFloatsDeferredToNextInChildContexts();
-    const floatsInFragments = this.floatFragments.reduce(
-      (r, fr) => r.concat(fr.continuations.map((c) => c.float)),
-      [] as PageFloat[],
+    const floatsInFragments = this.floatFragments.flatMap((fr) =>
+      fr.continuations.map((c) => c.float),
     );
     floatsInFragments.sort((f1, f2) => f2.getOrder() - f1.getOrder());
     for (const float of floatsInFragments) {
@@ -2690,9 +2686,8 @@ export class AttachedPageFloatLayoutContext
     if (!this.floatFragments.length) {
       return 0;
     }
-    return Math.max.apply(
-      null,
-      this.floatFragments.map((fragment) => {
+    return Math.max(
+      ...this.floatFragments.map((fragment) => {
         const area = fragment.area;
         if (isVertical) {
           return area.width;

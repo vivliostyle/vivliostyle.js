@@ -192,6 +192,7 @@ describe("base", function () {
     it("escape the first character to a 4-digit hex code and add '\\u' prefix when prefix is not specified", function () {
       expect(module.escapeCharToHex("a")).toBe("\\u0061");
       expect(module.escapeCharToHex("\\")).toBe("\\u005c");
+      expect(module.escapeCharToHex("")).toBe("\\u0000");
     });
   });
 

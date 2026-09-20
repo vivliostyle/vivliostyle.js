@@ -736,9 +736,7 @@ export class StyleInstance
     // Issue #2013: target-counter() rerender can evaluate page-number after
     // currentLayoutPosition has been cleared, so fall back to the active
     // render-slot page number captured by OPFView.renderSinglePage().
-    return (
-      this.pageNumberContextStack[this.pageNumberContextStack.length - 1] ?? 0
-    );
+    return this.pageNumberContextStack.at(-1) ?? 0;
   }
 
   getPageNumberContextDepth(): number {
@@ -2199,7 +2197,7 @@ export class StyleInstance
               borderBoxSizing: false,
             },
             innerShape,
-            dontApplyExclusions ? [] : exclusions.concat(),
+            dontApplyExclusions ? [] : [...exclusions],
             this.flowRootFormattingContextFor(flowNameStr),
           );
           // Issue #1842: columns after the first treat already-satisfied leading
@@ -2215,7 +2213,7 @@ export class StyleInstance
             columnPageFloatLayoutContext,
             layoutContainer,
             innerShape,
-            dontApplyExclusions ? [] : exclusions.concat(),
+            dontApplyExclusions ? [] : [...exclusions],
             this.flowRootFormattingContextFor(flowNameStr),
           );
           // Single-column layout always behaves like the first column on a page.
@@ -2724,9 +2722,8 @@ export class StyleInstance
           if (column.element === boxContainer) {
             opened.container = column;
           }
-          opened.container.computedBlockSize = Math.max.apply(
-            null,
-            columns.map((c) => c.computedBlockSize),
+          opened.container.computedBlockSize = Math.max(
+            ...columns.map((c) => c.computedBlockSize),
           );
           boxInstance.finishContainer(
             this,

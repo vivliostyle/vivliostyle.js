@@ -260,7 +260,7 @@ const selectedNodeToPosition = (node: Node, offset: number): SelectPosition => {
       if (children[0].nodeType == 3 && lastNodeType == 3) {
         childrenCount -= 1;
       }
-      const lastNode = children[children.length - 1];
+      const lastNode = children.at(-1);
       lastNodeType = lastNode.nodeType;
       if (lastNodeType == 3) {
         lastNodeTextLength += (lastNode as Text).data.length;
@@ -333,6 +333,7 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
     );
     const childrenCount = children.length;
     if (childrenCount > 0) {
+      const lastNode = children.at(-1);
       if (children[0].nodeType == 3 && lastNodeType == 3) {
         count--;
       }
@@ -348,12 +349,9 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
             targetNode = targetCandidate;
             break;
           }
-        } else if (
-          nextCount == pos.nodePath[0] + 1 &&
-          children[children.length - 1].nodeType == 3
-        ) {
+        } else if (nextCount == pos.nodePath[0] + 1 && lastNode.nodeType == 3) {
           // maybe the result is the last node
-          const targetCandidate = children[children.length - 1] as Text;
+          const targetCandidate = lastNode as Text;
           if (pos.offset <= targetCandidate.data.length) {
             targetNode = targetCandidate;
             lastNodeTextLength = 0;
@@ -377,7 +375,6 @@ const selectedPositionToNode = (pos: SelectPosition): NodePosition | null => {
           break;
         }
       }
-      const lastNode = children[children.length - 1];
       lastNodeType = lastNode.nodeType;
       if (lastNodeType == 3) {
         lastNodeTextLength += (lastNode as Text).data.length;
@@ -811,20 +808,16 @@ export class MarksMenuStatus {
       if (text.length == 0) {
         return;
       }
-      // want to use map and flat, but the compiler option allows only es2018
-      const rects = text.reduce((acc, t) => {
-        return acc.concat(textNodeRects(t));
-      }, []);
+      const rects = text.flatMap(textNodeRects);
       if (rects.length == 0) {
         return;
       }
       const start = selectedNodeToPosition(text[0].t, text[0].startOffset);
-      const end = selectedNodeToPosition(
-        text[text.length - 1].t,
-        text[text.length - 1].endOffset,
-      );
-      const x = rects[rects.length - 1].left;
-      const y = rects[rects.length - 1].bottom;
+      const lastText = text.at(-1);
+      const end = selectedNodeToPosition(lastText.t, lastText.endOffset);
+      const lastRect = rects.at(-1);
+      const x = lastRect.left;
+      const y = lastRect.bottom;
       const clickListner = (e: MouseEvent): void => {
         e.stopPropagation();
         if (button) {

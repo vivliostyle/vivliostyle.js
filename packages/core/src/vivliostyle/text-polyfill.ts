@@ -316,7 +316,7 @@ function findBlockContainer(node: Node): HTMLElement | null {
     if (
       display !== "inline" &&
       display !== "contents" &&
-      !/^ruby/.test(display)
+      !display.startsWith("ruby")
     ) {
       return elem;
     }
@@ -451,9 +451,9 @@ class TextSpacingPolyfill {
       nextNode = walker.nextNode() as Text | null;
       const isFirstInBlock = !prevNode;
       const isFirstAfterForcedLineBreak =
-        !prevNode || /\n$/.test(prevNode.textContent);
+        !prevNode || prevNode.textContent.endsWith("\n");
       const isLastBeforeForcedLineBreak =
-        !nextNode || /^\n/.test(nextNode.textContent);
+        !nextNode || nextNode.textContent.startsWith("\n");
       const isLastInBlock = !nextNode;
       this.processTextSpacing(
         node,
@@ -577,7 +577,7 @@ class TextSpacingPolyfill {
           }
         } else if (prevNode.nodeType === Node.TEXT_NODE) {
           if (p.whitespace === Vtree.Whitespace.PRESERVE) {
-            if (/\n$/.test(prevNode.textContent)) {
+            if (prevNode.textContent?.endsWith("\n")) {
               return true;
             }
           } else if (p.whitespace === Vtree.Whitespace.NEWLINE) {
@@ -648,7 +648,7 @@ class TextSpacingPolyfill {
           if (prevP.viewNode?.nodeType === Node.TEXT_NODE) {
             const prevTextNode = prevP.viewNode as Text;
             if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (/\n$/.test(prevTextNode.textContent)) {
+              if (prevTextNode.textContent?.endsWith("\n")) {
                 return true;
               }
             } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
@@ -672,7 +672,7 @@ class TextSpacingPolyfill {
           if (nextP.viewNode?.nodeType === Node.TEXT_NODE) {
             const nextTextNode = nextP.viewNode as Text;
             if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (/^\n/.test(nextTextNode.textContent)) {
+              if (nextTextNode.textContent?.startsWith("\n")) {
                 return true;
               }
             } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {

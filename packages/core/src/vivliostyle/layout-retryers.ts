@@ -92,12 +92,10 @@ export abstract class AbstractLayoutRetryer {
 
   saveState(nodeContext: Vtree.NodeContext, column: Layout.Column) {
     this.initialPosition = nodeContext.copy();
-    this.initialBreakPositions = ([] as Layout.BreakPosition[]).concat(
-      column.breakPositions,
-    );
-    this.initialFragmentLayoutConstraints = (
-      [] as Layout.FragmentLayoutConstraint[]
-    ).concat(column.fragmentLayoutConstraints);
+    this.initialBreakPositions = [...column.breakPositions];
+    this.initialFragmentLayoutConstraints = [
+      ...column.fragmentLayoutConstraints,
+    ];
     this.initialStateOfFormattingContext =
       nodeContext.formattingContext.saveState();
   }

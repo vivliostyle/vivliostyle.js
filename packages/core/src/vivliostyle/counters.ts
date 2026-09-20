@@ -226,7 +226,7 @@ class CounterResolver implements CssCascade.CounterResolver {
       Base.resolveURL(url, this.baseURL),
       this.baseURL,
     );
-    if (transformedId.charAt(0) === "#") {
+    if (transformedId.startsWith("#")) {
       transformedId = transformedId.substring(1);
     }
     return transformedId;
@@ -239,7 +239,7 @@ class CounterResolver implements CssCascade.CounterResolver {
   ): Exprs.Val {
     const getCounterNumber = () => {
       const values = this.counterStore.currentPageCounters[name];
-      return values && values.length ? values[values.length - 1] : null;
+      return values && values.length ? values.at(-1) : null;
     };
 
     const expr = new Exprs.Native(
@@ -249,7 +249,7 @@ class CounterResolver implements CssCascade.CounterResolver {
     );
 
     const arrayFormat = (arr: number[]) => {
-      return format(arr[arr.length - 1]);
+      return format(arr.at(-1));
     };
 
     this.counterStore.registerPageCounterExpr(name, arrayFormat, expr);
@@ -347,7 +347,7 @@ class CounterResolver implements CssCascade.CounterResolver {
       return elementCounters;
     }
     const pageVals = pageCounters[name] || [];
-    const pageVal = pageVals.length ? pageVals[pageVals.length - 1] : 0;
+    const pageVal = pageVals.length ? pageVals.at(-1) : 0;
     const docStartVals = docStartCounters?.[name] || [];
     const docStartVal = docStartVals.length ? docStartVals[0] : 0;
     if (!elementCounters.length) {
@@ -434,7 +434,7 @@ class CounterResolver implements CssCascade.CounterResolver {
             if (pageCounters) {
               this.counterStore.resolveReference(transformedId);
             }
-            return format(adjusted[adjusted.length - 1] || null);
+            return format(adjusted.at(-1) || null);
           } else {
             const pageCounters = this.getTargetPageCounters(transformedId);
             if (pageCounters) {
@@ -443,9 +443,7 @@ class CounterResolver implements CssCascade.CounterResolver {
 
               if (pageCounters[name]) {
                 const pageCountersOfName = pageCounters[name];
-                return format(
-                  pageCountersOfName[pageCountersOfName.length - 1] || null,
-                );
+                return format(pageCountersOfName.at(-1) || null);
               } else {
                 // No corresponding counter with the name.
                 return format(0);
@@ -680,8 +678,7 @@ class CounterResolver implements CssCascade.CounterResolver {
           const counterName = m[1];
           const format =
             store.getPageCounterFormat(ex) ||
-            ((arr: number[]) =>
-              arr.length ? String(arr[arr.length - 1]) : "");
+            ((arr: number[]) => (arr.length ? String(arr.at(-1)) : ""));
           const patchExpr = store.getOrCreateNamedStringPageCounterExpr(
             this.pageScope,
             offset,
@@ -1078,12 +1075,10 @@ export class CounterStore {
           continue;
         }
         const docCounters = this.currentPageDocCounters[counterName];
-        const docVal = docCounters.length
-          ? docCounters[docCounters.length - 1]
-          : 0;
+        const docVal = docCounters.length ? docCounters.at(-1) : 0;
         const prevDocCountersOfName = prevDocCounters[counterName] || [];
         const prevDocVal = prevDocCountersOfName.length
-          ? prevDocCountersOfName[prevDocCountersOfName.length - 1]
+          ? prevDocCountersOfName.at(-1)
           : 0;
         const delta = docVal - prevDocVal;
         const changeType = docChangeTypes[counterName];
@@ -1213,12 +1208,7 @@ export class CounterStore {
     const countersBeforeOverride: CssCascade.CounterValues =
       Object.create(null);
     const rememberCounterBase = (counterName: string): void => {
-      if (
-        !Object.prototype.hasOwnProperty.call(
-          countersBeforeOverride,
-          counterName,
-        )
-      ) {
+      if (!Object.hasOwn(countersBeforeOverride, counterName)) {
         const counterValues = baseCounters[counterName];
         if (counterValues) {
           countersBeforeOverride[counterName] = Array.from(counterValues);
@@ -1625,7 +1615,7 @@ export class CounterStore {
         }
         return {
           id: expr.transformedId,
-          value: expr.format(arr[arr.length - 1]),
+          value: expr.format(arr.at(-1)),
         };
       },
       changedTargetIds,
@@ -2042,7 +2032,7 @@ export class CounterStore {
         if (counterValue) {
           const arr: number[] = counterValue[expr.name];
           if (arr) {
-            node.textContent = expr.format(arr[arr.length - 1]);
+            node.textContent = expr.format(arr.at(-1));
           }
         }
       }

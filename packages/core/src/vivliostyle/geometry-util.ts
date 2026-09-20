@@ -89,7 +89,7 @@ export class Shape {
   addSegments(arr: Segment[], id: number): void {
     const points = this.points;
     const length = points.length;
-    let prev = points[length - 1];
+    let prev = points.at(-1);
     for (let i = 0; i < length; i++) {
       const curr = points[i];
       let s: Segment;
@@ -643,7 +643,7 @@ export function addFloatToBands(
     floatBands[0].y1 = box.y1;
   }
   let band: Band;
-  const lastY = bands.length == 0 ? box.y1 : bands[bands.length - 1].y2;
+  const lastY = bands.length == 0 ? box.y1 : bands.at(-1).y2;
   if (lastY < box.y2) {
     // add the tail band that we typically don't keep, it will be cleared by
     // normalize()

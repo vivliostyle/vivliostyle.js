@@ -472,7 +472,7 @@ export class ViewFactory
         ) {
           continue;
         }
-        if (name.match(/^first-/)) {
+        if (name.startsWith("first-")) {
           const display = computedStyle["display"];
           if (!display || display === Css.ident.inline) {
             continue;
@@ -525,7 +525,7 @@ export class ViewFactory
         );
       }
       att.appendChild(elem);
-      if (name.match(/^first-/)) {
+      if (name.startsWith("first-")) {
         att = elem;
       }
     }
@@ -1997,7 +1997,7 @@ export class ViewFactory
           let attributeName = attribute.localName;
           let attributeValue = attribute.value;
           if (!attributeNS) {
-            if (!Scripts.allowScripts && attributeName.match(/^on/)) {
+            if (!Scripts.allowScripts && attributeName.startsWith("on")) {
               continue; // don't propagate JavaScript code
             }
             if (attributeName == "style") {
@@ -2140,12 +2140,6 @@ export class ViewFactory
                 this.xmldoc.url,
               );
             }
-          }
-          if (ns == Base.NS.SVG && /^[A-Z\-]+$/.test(attributeName)) {
-            // Workaround for Edge bug
-            // See
-            // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5579311/
-            attributeName = attributeName.toLowerCase();
           }
           if (this.isSVGUrlAttribute(attributeName)) {
             attributeValue = Urls.transformURIs(
@@ -2802,7 +2796,7 @@ export class ViewFactory
     const frame: Task.Frame<boolean> = Task.newFrame("createTextNodeView");
     this.preprocessTextContent(nodeContext).then((preprocessedTextContent) => {
       const offsetInNode = this.offsetInNode || 0;
-      const textContent = Diff.restoreNewText(preprocessedTextContent).substr(
+      const textContent = Diff.restoreNewText(preprocessedTextContent).slice(
         offsetInNode,
       );
       this.viewNode = document.createTextNode(textContent);

@@ -1115,7 +1115,7 @@ export class Parser {
             break;
           case TokenType.COLON:
             if (valStack.length > 1) {
-              switch (valStack[valStack.length - 1]) {
+              switch (valStack.at(-1)) {
                 case TokenType.QMARK:
                   valStack.pop();
                   val = new Exprs.Cond(
@@ -1354,7 +1354,7 @@ export class Parser {
 
       // FALLTHROUGH
       case TokenType.IDENT:
-        if (hasLeadingPlus && token.text.charAt(0) === "-") {
+        if (hasLeadingPlus && token.text.startsWith("-")) {
           // reject '+-n'
           return null;
         }
@@ -1508,7 +1508,7 @@ export class Parser {
   }
 
   isInsidePropertyOnlyRule(): boolean {
-    switch (this.ruleStack[this.ruleStack.length - 1]) {
+    switch (this.ruleStack.at(-1)) {
       case "[selector]":
       case "font-face":
       case "counter-style":
@@ -1568,11 +1568,11 @@ export class Parser {
       if (
         this.actions === actionsPropVal &&
         this.errorBrackets.length > 0 &&
-        (token.type === this.errorBrackets[this.errorBrackets.length - 1] ||
+        (token.type === this.errorBrackets.at(-1) ||
           token.type === TokenType.SEMICOL ||
           token.type === TokenType.BANG)
       ) {
-        if (token.type === this.errorBrackets[this.errorBrackets.length - 1]) {
+        if (token.type === this.errorBrackets.at(-1)) {
           this.errorBrackets.pop();
           if (token.type === TokenType.C_PAR) {
             // For nested func in parens (Issue #1014)
@@ -2322,8 +2322,8 @@ export class Parser {
             } else if (
               this.exprContext === ExprContext.SUPPORTS &&
               token.text.toLowerCase() === "not" &&
-              valStack[valStack.length - 1] !== OP_MEDIA_AND &&
-              valStack[valStack.length - 1] !== OP_MEDIA_OR &&
+              valStack.at(-1) !== OP_MEDIA_AND &&
+              valStack.at(-1) !== OP_MEDIA_OR &&
               (token1.type === TokenType.O_PAR ||
                 token1.type === TokenType.FUNC)
             ) {
@@ -2477,7 +2477,7 @@ export class Parser {
           this.inStyleDeclaration = false;
           if (this.ruleStack.length) {
             this.ruleStack.pop();
-            switch (this.ruleStack[this.ruleStack.length - 1]) {
+            switch (this.ruleStack.at(-1)) {
               case "page":
               case "-epubx-page-master":
               case "-epubx-partition-group":
@@ -2895,7 +2895,7 @@ export class Parser {
           // Close bracket while skipping error syntax
           if (
             this.errorBrackets.length > 0 &&
-            this.errorBrackets[this.errorBrackets.length - 1] == token.type
+            this.errorBrackets.at(-1) == token.type
           ) {
             this.errorBrackets.pop();
           }
@@ -2950,8 +2950,7 @@ export class Parser {
                   }
                   if (
                     this.errorBrackets.length > 0 &&
-                    this.errorBrackets[this.errorBrackets.length - 1] ==
-                      token.type
+                    this.errorBrackets.at(-1) == token.type
                   ) {
                     this.errorBrackets.pop();
                   }
@@ -2971,8 +2970,7 @@ export class Parser {
                 case TokenType.C_BRK:
                   if (
                     this.errorBrackets.length > 0 &&
-                    this.errorBrackets[this.errorBrackets.length - 1] ==
-                      token.type
+                    this.errorBrackets.at(-1) == token.type
                   ) {
                     this.errorBrackets.pop();
                   }

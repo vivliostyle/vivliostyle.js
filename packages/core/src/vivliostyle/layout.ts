@@ -409,7 +409,7 @@ export class BoxBreakPosition
   override getNodeContext(): Vtree.NodeContext | null {
     return this.alreadyEvaluated
       ? this.breakNodeContext
-      : this.checkPoints[this.checkPoints.length - 1];
+      : this.checkPoints.at(-1);
   }
 }
 
@@ -704,12 +704,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             position.sourceNode.textContent = firstLetterText;
             viewNode.textContent = firstLetterText;
             position.sourceNode.nextSibling.textContent =
-              text2.substr(firstLetterLength);
+              text2.slice(firstLetterLength);
           }
         }
         if (firstLetterLength > 0) {
           const viewText = viewNode.textContent ?? "";
-          viewNode.textContent = viewText.substr(0, firstLetterLength);
+          viewNode.textContent = viewText.slice(0, firstLetterLength);
         }
         return this.layoutContext.peelOff(textPosition, firstLetterLength);
       }
@@ -1156,7 +1156,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     if (foundNonZeroWidthBand) {
       // Update footnoteEdge (Fix for issue #1298)
-      const lastBand = bands[bands.length - 1];
+      const lastBand = bands.at(-1);
       // Use wider tolerance for the y2 comparison: in multi-column layout,
       // getBoundingClientRect() can report band edges ~1.2px off from the
       // actual column edge. The default 0.5px precision (pixelRatio=0) is
@@ -1809,7 +1809,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         borderBoxSizing: false,
       },
       null,
-      (floatContainer.exclusions || []).concat(),
+      [...(floatContainer.exclusions || [])],
       this.flowRootFormattingContext,
     );
     floatArea.isFloat = true;
@@ -2512,7 +2512,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (VIVLIOSTYLE_DEBUG) {
       validateCheckPoints(checkPoints);
     }
-    let lastCheckPoints = checkPoints.concat([]); // make a copy
+    let lastCheckPoints = [...checkPoints]; // make a copy
     checkPoints.splice(0, checkPoints.length); // make empty
     let totalLineCount = 0;
     let firstPseudo = nodeContext.firstPseudo; // :first-letter is not processed here
@@ -2560,7 +2560,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         });
       })
       .then(() => {
-        Array.prototype.push.apply(checkPoints, lastCheckPoints);
+        checkPoints.push(...lastCheckPoints);
         if (VIVLIOSTYLE_DEBUG) {
           validateCheckPoints(checkPoints);
         }
@@ -3019,7 +3019,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const positions: number[] = [];
     const boxes = this.getRangeBoxes(
       checkPoints[0].viewNode,
-      checkPoints[checkPoints.length - 1].viewNode,
+      checkPoints.at(-1).viewNode,
     );
     boxes.sort(
       this.vertical
@@ -3195,7 +3195,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // Workaround for the case of block child after text in parent block
     // (Issue #1036)
-    let lastNode = checkPoints[checkPoints.length - 1].viewNode;
+    let lastNode = checkPoints.at(-1).viewNode;
     lastNode = LayoutHelper.textSpacingWrapperOf(lastNode) ?? lastNode;
     if (
       (lineIndex === linePositions.length && lastNode.nextSibling) ||
@@ -4149,9 +4149,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
                     )
-                  : this.breakPositions[
-                      this.breakPositions.length - 1
-                    ] instanceof BoxBreakPosition ||
+                  : this.breakPositions.at(-1) instanceof BoxBreakPosition ||
                     // When lastAfterNodeContext is null (no in-flow
                     // trailing edge, e.g. after CSS floats converted to
                     // position:absolute) and no block-level leading edges
@@ -5533,7 +5531,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     function convertPercentageToPx(props: string[], refValue: number) {
       props.forEach((propName) => {
         const valueString = Base.getCSSProperty(target, propName);
-        if (valueString && valueString.charAt(valueString.length - 1) === "%") {
+        if (valueString?.endsWith("%")) {
           const percentageValue = parseFloat(valueString);
           const value = (refValue * percentageValue) / 100;
           Base.setCSSProperty(target, propName, `${value}px`);
@@ -5645,9 +5643,8 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
   }
 
   getContentInlineSize(): number {
-    return Math.max.apply(
-      null,
-      this.rootViewNodes.map((r, i) => {
+    return Math.max(
+      ...this.rootViewNodes.map((r, i) => {
         const box = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           r,
@@ -5665,9 +5662,8 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     if (this.rootViewNodes.length === 0) {
       return 0;
     }
-    return Math.max.apply(
-      null,
-      this.rootViewNodes.map((r, i) => {
+    return Math.max(
+      ...this.rootViewNodes.map((r, i) => {
         const margin = this.floatMargins[i];
         return this.vertical ? margin.left : margin.bottom;
       }),
