@@ -3481,6 +3481,26 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
+    // The client rect of the block container is its border box, while its
+    // lines end at its content box.
+    const containerStyle = column.clientLayout.getElementComputedStyle(
+      container.viewNode,
+    );
+    const containerInset = (side: string) =>
+      column.parseComputedLength(
+        containerStyle.getPropertyValue(`padding-${side}`),
+      ) +
+      column.parseComputedLength(
+        containerStyle.getPropertyValue(`border-${side}-width`),
+      );
+    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
+      box.top += containerInset("top");
+      box.bottom -= containerInset("bottom");
+    } else {
+      box.left += containerInset("left");
+      box.right -= containerInset("right");
+    }
+
     // Calculate width of following inline siblings (Issue #1563)
     const inlineNodes: (Element | Text)[] = [];
 
