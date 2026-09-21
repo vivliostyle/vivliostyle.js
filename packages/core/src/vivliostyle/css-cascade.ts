@@ -3438,34 +3438,6 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const { writingMode, direction, marginInlineEnd } =
       column.clientLayout.getElementComputedStyle(pseudoElem);
 
-    function setLeaderTextContent(leaderStr: string): void {
-      if (direction === "rtl") {
-        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
-        // to ensure RTL order around the leader.
-        const RLM = "\u200f";
-        leaderElem.textContent =
-          (leaderStr.startsWith(RLM) ? "" : RLM) +
-          leaderStr +
-          (leaderStr.endsWith(RLM) ? "" : RLM);
-      } else {
-        leaderElem.textContent = leaderStr;
-      }
-    }
-
-    // prevent leader layout problem (Issue #1117)
-    leaderElem.style.marginInlineStart = "1px";
-
-    // reset the expanded leader
-    setLeaderTextContent(leader);
-    // setting inline-block removes the pseudo CONTENT from normal text flow
-    pseudoElem.style.display = "inline-block";
-    pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
-
-    const previousLineBreak = pseudoElem.previousElementSibling;
-    if (previousLineBreak?.hasAttribute("data-viv-leader-break")) {
-      previousLineBreak.remove();
-    }
-
     // Workaround for Issue #1598:
     // In multi-column layout with column-fill: balance, changing leader length
     // triggers column rebalancing, making the initially measured `box` unreliable.
@@ -3480,6 +3452,49 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const originalColumnFill = columnContainer?.style.columnFill || null;
     if (columnContainer) {
       columnContainer.style.columnFill = "auto";
+    }
+
+    // Firefox sends the line of a leader that overflows a column to the next
+    // column and, until the event loop updates the rendering, keeps it there
+    // through the layout that reading a client rect forces, however far the
+    // leader shrinks again. Switching column-fill makes the container fragment
+    // its contents again.
+    const refragmentColumns =
+      columnContainer && Base.browserType === "firefox"
+        ? () => {
+            columnContainer.style.columnFill = "balance";
+            column.clientLayout.getElementClientRect(columnContainer);
+            columnContainer.style.columnFill = "auto";
+          }
+        : () => {};
+
+    function setLeaderTextContent(leaderStr: string): void {
+      if (direction === "rtl") {
+        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+        // to ensure RTL order around the leader.
+        const RLM = "\u200f";
+        leaderElem.textContent =
+          (leaderStr.startsWith(RLM) ? "" : RLM) +
+          leaderStr +
+          (leaderStr.endsWith(RLM) ? "" : RLM);
+      } else {
+        leaderElem.textContent = leaderStr;
+      }
+      refragmentColumns();
+    }
+
+    // prevent leader layout problem (Issue #1117)
+    leaderElem.style.marginInlineStart = "1px";
+
+    // reset the expanded leader
+    setLeaderTextContent(leader);
+    // setting inline-block removes the pseudo CONTENT from normal text flow
+    pseudoElem.style.display = "inline-block";
+    pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
+
+    const previousLineBreak = pseudoElem.previousElementSibling;
+    if (previousLineBreak?.hasAttribute("data-viv-leader-break")) {
+      previousLineBreak.remove();
     }
 
     const vertical =
