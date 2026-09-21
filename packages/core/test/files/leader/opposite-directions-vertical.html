@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() running against the direction of its line (Vertical Writing
+      Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        margin-block-start: 4px;
+        background: #ddd;
+      }
+
+      .ltr {
+        direction: ltr;
+      }
+
+      .rtl {
+        direction: rtl;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <section>
+      <h3>A left to right line, a right to left leader</h3>
+      <div class="entry ltr"><span class="has-leader-after rtl">text before a leader</span>12</div>
+      <div class="entry ltr"><span class="has-leader-after rtl">text</span>one two three</div>
+      <div class="entry ltr"><span class="has-leader-after rtl">text before a leader</span><span class="rtl">one two</span></div>
+    </section>
+
+    <section>
+      <h3>A right to left line, a left to right leader</h3>
+      <div class="entry rtl"><span class="has-leader-after ltr">text before a leader</span>12</div>
+      <div class="entry rtl"><span class="has-leader-after ltr">text</span>one two three</div>
+      <div class="entry rtl"><span class="has-leader-after ltr">text before a leader</span><span class="ltr">one two</span></div>
+    </section>
+  </body>
+</html>
