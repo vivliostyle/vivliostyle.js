@@ -3748,10 +3748,16 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // CSS Generated Content 3 breaks the line after the content preceding a
     // leader where not one full copy of the leader is visible beside it, and
     // draws the leader and the content following it on the next line. A leader
-    // that ends within the line it belongs to does not move there on its own,
-    // so the break goes into the tree.
+    // long enough to fill that line reaches it on its own wherever it is also
+    // too long for the room beside the content before it. The break goes into
+    // the tree only where it does not, because a break of its own aligns the
+    // line before it as the last line of a block.
+    const roomBesideTheContentBefore =
+      (box[inlineEndSide] - innerInit[inlineStartSide]) * inlineSign;
     const startsTheNextLine =
-      !fitsWithOnePattern && lineRoom >= inlineSizeOf(innerInit);
+      !fitsWithOnePattern &&
+      lineRoom >= inlineSizeOf(innerInit) &&
+      lineRoom <= roomBesideTheContentBefore;
     if (startsTheNextLine) {
       const lineBreak = pseudoElem.ownerDocument.createElementNS(
         Base.NS.XHTML,
