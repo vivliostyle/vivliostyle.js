@@ -3519,6 +3519,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     );
     const lineIsRtl = containerStyle.direction === "rtl";
     const lineStartSide = lineIsRtl ? inlineHighSide : inlineLowSide;
+    const lineSign = lineIsRtl ? -1 : 1;
     const leaderRunsWithTheLine = lineIsRtl === (direction === "rtl");
 
     // The client rect of the block container is its border box, while its
@@ -3724,13 +3725,12 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // a single pattern.
     // An inline box that `vertical-align` displaces can clear the leader in the
     // block direction while it stays on the line, so content that has left the
-    // line is recognized by the inline direction as well: it resumes at the
-    // start of its line, no further along than the leader.
+    // line is recognized by the direction of the line as well: it resumes at
+    // the start of its line, no further along than the leader.
     const startsOnALaterLine = (rect: Vtree.ClientRect) =>
       (rect[blockStartSide] - innerInit[blockEndSide]) * blockSign >=
         -subPixel &&
-      (rect[inlineStartSide] - innerInit[inlineStartSide]) * inlineSign <=
-        subPixel;
+      (rect[lineStartSide] - innerInit[lineStartSide]) * lineSign <= subPixel;
     const fitsWithOnePattern =
       !overrun(innerInit) &&
       (followingInit === undefined || !startsOnALaterLine(followingInit));
