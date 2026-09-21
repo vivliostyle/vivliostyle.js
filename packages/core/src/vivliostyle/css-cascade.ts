@@ -3808,13 +3808,14 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       lineBreak.setAttribute("data-viv-leader-break", "");
       pseudoParent.insertBefore(lineBreak, pseudoElem);
       innerInit = column.clientLayout.getElementClientRect(pseudoElem);
-      box[inlineLowSide] = Math.min(
+      const lineBox = lineBoxOf(innerInit);
+      lineBox[inlineLowSide] = Math.min(
         innerInit[inlineLowSide],
-        box[inlineLowSide],
+        lineBox[inlineLowSide],
       );
-      box[inlineHighSide] = Math.max(
+      lineBox[inlineHighSide] = Math.max(
         innerInit[inlineHighSide],
-        box[inlineHighSide],
+        lineBox[inlineHighSide],
       );
     }
     const leaderIsOnItsLine = fitsWithOnePattern || startsTheNextLine;
