@@ -3528,11 +3528,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const subPixel = 0.5;
     // Where a leader is measured against the edge it grows toward, that width
     // would let it past the edge by half a pixel, so the comparison of the two
-    // takes the width of the arithmetic alone. Summing client rect
-    // coordinates leaves a fraction of a low bit behind, while a layout engine
-    // expresses a position in a unit of its own, a sixtieth of a pixel in
-    // Gecko and a sixty-fourth in Blink.
-    const coordinateNoise = 1 / 64;
+    // takes the width of the arithmetic alone. Client rect coordinates sit on
+    // the layout unit of the viewport, so a sum of them can stand a unit away
+    // from a coordinate it should equal.
+    const coordinateNoise = 1 / column.clientLayout.layoutUnitPerPixel;
 
     // The lines run in the direction of the block container, which an author
     // can set against the direction of the leader itself.
