@@ -3857,9 +3857,14 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     function setLeader() {
       const maxCount = 10000;
       // A pattern that advances the line by nothing, as a zero width space or
-      // a combining mark does, reaches no edge however often it repeats.
+      // a combining mark does, reaches no edge however often it repeats. What
+      // stands beside it in the pseudo element can still be too long for the
+      // line, and repeating the pattern leaves that as it is.
       if (!(patternSize > 0)) {
         setLeaderTextContent(leader.repeat(maxCount));
+        if (isTooLong(column.clientLayout.getElementClientRect(pseudoElem))) {
+          setLeaderTextContent(leader);
+        }
         return;
       }
       const sizeWithoutPatterns = inlineSizeOf(innerInit) - patternSize;
