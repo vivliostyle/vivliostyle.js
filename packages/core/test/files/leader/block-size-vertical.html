@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() in a block container taller than its lines (Vertical Writing
+      Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .three-lines {
+        block-size: 72px;
+      }
+
+      .two-lines {
+        block-size: 48px;
+      }
+
+      .cell {
+        display: table-cell;
+      }
+
+      .middle {
+        vertical-align: middle;
+      }
+
+      .bottom {
+        vertical-align: bottom;
+      }
+
+      .end {
+        text-align: end;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      Each gray block must render identically to the blue blocks below it, which
+      are as tall as their lines or have an explicit line break.
+    </p>
+
+    <section>
+      <h3>Following content fits beside the leader, and a longer leader would fit on the next line</h3>
+      <div class="entry three-lines"><span class="has-leader-after">text before a leader</span>12</div>
+      <div class="entry reference"><span class="has-leader-after">text before a leader</span>12</div>
+      <div class="entry reference two-lines"></div>
+    </section>
+
+    <section>
+      <h3>Following content wraps before the leader expands, in a table cell that centers its lines</h3>
+      <div><div class="entry cell three-lines middle"><span class="has-leader-after">text before a leader</span>one two three</div></div>
+      <div><div class="entry cell three-lines middle reference">text before a leader<br /><span class="has-leader-after"></span>one two three</div></div>
+    </section>
+
+    <section>
+      <h3>Lines aligned to the inline end, in a table cell that aligns them to the block end</h3>
+      <div><div class="entry cell three-lines bottom end"><span class="has-leader-after">text one</span>12</div></div>
+      <div class="entry reference two-lines"></div>
+      <div><div class="entry cell end reference"><span class="has-leader-after">text one</span>12</div></div>
+    </section>
+  </body>
+</html>

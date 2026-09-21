@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() that does not fit beside the content before it (Vertical Writing
+      Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        margin-block-start: 4px;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      Each gray block must render identically to the blue block below it, which
+      has an explicit line break. The content after the leader must end at the
+      inline-end edge of the block.
+    </p>
+
+    <section>
+      <h3>The content following the leader is longer than the content before it</h3>
+      <div class="entry"><span class="has-leader-after">12345</span>abcdefghijklmnopqrstuvwxyz1</div>
+      <div class="entry reference">12345<br /><span class="has-leader-after"></span>abcdefghijklmnopqrstuvwxyz1</div>
+    </section>
+
+    <section>
+      <h3>The next line has room for several patterns</h3>
+      <div class="entry"><span class="has-leader-after">1234567890</span>abcdefghijklmnopqrst</div>
+      <div class="entry reference">1234567890<br /><span class="has-leader-after"></span>abcdefghijklmnopqrst</div>
+    </section>
+  </body>
+</html>
