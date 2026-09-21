@@ -3701,8 +3701,8 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       return (
         box[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
         box[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
-        box[blockLowSide] > inner[blockLowSide] ||
-        box[blockHighSide] < inner[blockHighSide]
+        box[blockLowSide] - inner[blockLowSide] > subPixel ||
+        inner[blockHighSide] - box[blockHighSide] > subPixel
       );
     }
 
