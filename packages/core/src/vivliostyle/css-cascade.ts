@@ -3846,10 +3846,13 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
             inlineSizeOf(inner) > lineRoom + followingInlineSiblingsWidth);
 
     function setLeader() {
+      const maxCount = 10000;
+      // A pattern that advances the line by nothing, as a zero width space or
+      // a combining mark does, reaches no edge however often it repeats.
       if (!(patternSize > 0)) {
+        setLeaderTextContent(leader.repeat(maxCount));
         return;
       }
-      const maxCount = 10000;
       const sizeWithoutPatterns = inlineSizeOf(innerInit) - patternSize;
       const patternRoom = lineRoom - sizeWithoutPatterns;
       let notTooLong = {
