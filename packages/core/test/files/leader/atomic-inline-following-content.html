@@ -59,6 +59,12 @@
         background: #99f;
       }
 
+      .padded {
+        display: inline-block;
+        padding-inline-start: 14ch;
+        background: #99f;
+      }
+
       .has-leader-after::after {
         content: leader(dotted);
       }
@@ -83,6 +89,12 @@
       <h3>An image on a line a float has narrowed</h3>
       <div class="entry"><span class="floater"></span><span class="has-leader-after">abcdefghijkl</span><img class="box" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2216%22%3E%3Crect%20width%3D%2264%22%20height%3D%2216%22%20fill%3D%22%2399f%22%2F%3E%3C%2Fsvg%3E" width="64" height="16" alt="" /></div>
       <div class="entry reference"><span class="floater"></span>abcdefghijkl<br /><span class="has-leader-after"></span><img class="box" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2216%22%3E%3Crect%20width%3D%2264%22%20height%3D%2216%22%20fill%3D%22%2399f%22%2F%3E%3C%2Fsvg%3E" width="64" height="16" alt="" /></div>
+    </section>
+
+    <section>
+      <h3>An inline block whose contents start inside it, on a line a float has narrowed</h3>
+      <div class="entry"><span class="floater"></span><span class="has-leader-after">abcdefghijkl</span><span class="padded">x</span></div>
+      <div class="entry reference"><span class="floater"></span>abcdefghijkl<br /><span class="has-leader-after"></span><span class="padded">x</span></div>
     </section>
   </body>
 </html>

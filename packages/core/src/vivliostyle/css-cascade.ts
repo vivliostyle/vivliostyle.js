@@ -3622,19 +3622,15 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     box[inlineLowSide] += containerInset(inlineLowSide);
     box[inlineHighSide] -= containerInset(inlineHighSide);
 
-    const firstInlineRectOf = (node: Element | Text) => {
-      const contents = RangeClientRects.getLayoutClientRectsOfNodeContents(
+    // A range around a node yields a rect for each line it occupies, where the
+    // contents of a replaced element or of an empty inline box yield none and
+    // the bounding rect of an element spans every line it occupies at once.
+    const firstInlineRectOf = (node: Element | Text) =>
+      RangeClientRects.getLayoutClientRectsBetween(
         column.clientLayout,
-        node,
-      );
-      // A range around the contents of a replaced element or of an empty
-      // inline box selects nothing and yields no rect.
-      const rects =
-        contents.length === 0 && node.nodeType === 1
-          ? [column.clientLayout.getElementClientRect(node as Element)]
-          : contents;
-      return rects.find((rect) => inlineSizeOf(rect) > 0);
-    };
+        RangeClientRects.before(node),
+        RangeClientRects.after(node),
+      ).find((rect) => inlineSizeOf(rect) > 0);
 
     let followingInit: Vtree.ClientRect | undefined;
     for (const node of inlineNodes) {
