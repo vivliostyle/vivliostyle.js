@@ -3500,8 +3500,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // The comparisons below run between client rects that separate layout
     // passes produced, where a box that has not moved can still come back with
     // a coordinate differing in its low bits, so they need a dead zone. Its
-    // width follows the tolerance `Column.almostEquals` compares client rect
-    // coordinates with.
+    // width is the tolerance `Column.almostEquals` compares client rect
+    // coordinates with where the viewport emulates no pixel ratio. It stays
+    // fixed because the displacements these comparisons separate are line and
+    // content sizes in CSS pixels, while emulating a pixel ratio leaves those
+    // sizes alone and only makes the rects finer.
     const subPixel = 0.5;
 
     // The lines run in the direction of the block container, which an author
