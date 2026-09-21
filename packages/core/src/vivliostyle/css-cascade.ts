@@ -3461,6 +3461,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     pseudoElem.style.display = "inline-block";
     pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
 
+    const previousLineBreak = pseudoElem.previousElementSibling;
+    if (previousLineBreak?.hasAttribute("data-viv-leader-break")) {
+      previousLineBreak.remove();
+    }
+
     // Workaround for Issue #1598:
     // In multi-column layout with column-fill: balance, changing leader length
     // triggers column rebalancing, making the initially measured `box` unreliable.
@@ -3611,7 +3616,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     }
 
     const box = column.clientLayout.getElementClientRect(container.viewNode);
-    const innerInit = column.clientLayout.getElementClientRect(pseudoElem);
+    let innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
     box[inlineLowSide] += containerInset(inlineLowSide);
@@ -3733,8 +3738,33 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const lineRoom =
       (box[inlineEndSide] - box[inlineStartSide]) * inlineSign -
       followingInlineSiblingsWidth;
+    // CSS Generated Content 3 breaks the line after the content preceding a
+    // leader where not one full copy of the leader is visible beside it, and
+    // draws the leader and the content following it on the next line. A leader
+    // that ends within the line it belongs to does not move there on its own,
+    // so the break goes into the tree.
+    const startsTheNextLine =
+      !fitsWithOnePattern && lineRoom >= inlineSizeOf(innerInit);
+    if (startsTheNextLine) {
+      const lineBreak = pseudoElem.ownerDocument.createElementNS(
+        Base.NS.XHTML,
+        "br",
+      );
+      lineBreak.setAttribute("data-viv-leader-break", "");
+      pseudoParent.insertBefore(lineBreak, pseudoElem);
+      innerInit = column.clientLayout.getElementClientRect(pseudoElem);
+      box[inlineLowSide] = Math.min(
+        innerInit[inlineLowSide],
+        box[inlineLowSide],
+      );
+      box[inlineHighSide] = Math.max(
+        innerInit[inlineHighSide],
+        box[inlineHighSide],
+      );
+    }
+    const leaderIsOnItsLine = fitsWithOnePattern || startsTheNextLine;
     const isTooLong = (inner: Vtree.ClientRect) =>
-      fitsWithOnePattern
+      leaderIsOnItsLine
         ? overrun(inner) ||
           (hasMovedAlongLine(inner) && hasMovedAcrossLines(inner))
         : overrun(inner) &&
@@ -3742,7 +3772,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     function setLeader() {
       const maxCount = 10000;
-      let notTooLong = { count: 1, fits: fitsWithOnePattern };
+      let notTooLong = {
+        count: 1,
+        fits: leaderIsOnItsLine && !overrun(innerInit),
+      };
       let measuredCount = maxCount;
       setLeaderTextContent(leader.repeat(maxCount));
       if (!isTooLong(column.clientLayout.getElementClientRect(pseudoElem))) {

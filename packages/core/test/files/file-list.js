@@ -563,6 +563,15 @@ module.exports = [
         file: "leader/atomic-inline-following-content-vertical.html",
         title: "leader() followed by an atomic inline box (Vertical)",
       },
+      {
+        file: "leader/line-break-before-leader.html",
+        title: "leader() that does not fit beside the content before it",
+      },
+      {
+        file: "leader/line-break-before-leader-vertical.html",
+        title:
+          "leader() that does not fit beside the content before it (Vertical)",
+      },
     ],
   },
   {
