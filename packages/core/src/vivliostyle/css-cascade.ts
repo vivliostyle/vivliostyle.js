@@ -3665,7 +3665,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
           : nearest,
       );
     };
-    const initialFragmentBox = fragmentBoxOf(innerInit);
+    let initialFragmentBox = fragmentBoxOf(innerInit);
 
     // A range around a node yields a rect for each line it occupies, where the
     // contents of a replaced element or of an empty inline box yield none and
@@ -3718,17 +3718,19 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.
-    const initialLineBox = boxWith({
-      ...initialFragmentBox,
-      [inlineLowSide]: Math.min(
-        innerInit[inlineLowSide],
-        initialFragmentBox[inlineLowSide],
-      ),
-      [inlineHighSide]: Math.max(
-        innerInit[inlineHighSide],
-        initialFragmentBox[inlineHighSide],
-      ),
-    });
+    const lineBoxAround = (inner: Vtree.ClientRect) =>
+      boxWith({
+        ...initialFragmentBox,
+        [inlineLowSide]: Math.min(
+          inner[inlineLowSide],
+          initialFragmentBox[inlineLowSide],
+        ),
+        [inlineHighSide]: Math.max(
+          inner[inlineHighSide],
+          initialFragmentBox[inlineHighSide],
+        ),
+      });
+    let initialLineBox = lineBoxAround(innerInit);
     const lineBoxOf = (inner: Vtree.ClientRect) => {
       const fragmentBox = fragmentBoxOf(inner);
       return fragmentBox === initialFragmentBox ? initialLineBox : fragmentBox;
@@ -3783,10 +3785,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // the line unless an author sets them against each other. On such a line
     // it measures the other way, and the search below pays for that in probes
     // rather than in the count it settles on.
-    const lineRoom =
+    const roomOnTheLine = () =>
       (initialLineBox[inlineEndSide] - initialLineBox[inlineStartSide]) *
         inlineSign -
       followingInlineSiblingsWidth;
+    let lineRoom = roomOnTheLine();
     // CSS Generated Content 3 breaks the line after the content preceding a
     // leader where not one full copy of the leader is visible beside it, and
     // draws the leader and the content following it on the next line. A leader
@@ -3808,15 +3811,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       lineBreak.setAttribute("data-viv-leader-break", "");
       pseudoParent.insertBefore(lineBreak, pseudoElem);
       innerInit = column.clientLayout.getElementClientRect(pseudoElem);
-      const lineBox = lineBoxOf(innerInit);
-      lineBox[inlineLowSide] = Math.min(
-        innerInit[inlineLowSide],
-        lineBox[inlineLowSide],
-      );
-      lineBox[inlineHighSide] = Math.max(
-        innerInit[inlineHighSide],
-        lineBox[inlineHighSide],
-      );
+      initialFragmentBox = fragmentBoxOf(innerInit);
+      initialLineBox = lineBoxAround(innerInit);
+      lineRoom = roomOnTheLine();
     }
     const leaderIsOnItsLine = fitsWithOnePattern || startsTheNextLine;
     const isTooLong = (inner: Vtree.ClientRect) =>
