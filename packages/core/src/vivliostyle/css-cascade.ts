@@ -3795,7 +3795,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // the tree only where it does not, because a break of its own aligns the
     // line before it as the last line of a block.
     const roomBesideTheContentBefore =
-      (box[inlineEndSide] - innerInit[inlineStartSide]) * inlineSign;
+      (initialLineBox[inlineEndSide] - innerInit[inlineStartSide]) * inlineSign;
     const startsTheNextLine =
       !fitsWithOnePattern &&
       lineRoom >= inlineSizeOf(innerInit) &&
