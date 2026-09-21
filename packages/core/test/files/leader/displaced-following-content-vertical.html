@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      leader() followed by content displaced along the block axis (Vertical
+      Writing Mode)
+    </title>
+    <style>
+      @page {
+        size: 960px 640px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+        writing-mode: vertical-rl;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        margin-block-start: 4px;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .displaced {
+        vertical-align: -48px;
+      }
+
+      .box {
+        display: inline-block;
+        inline-size: 3ch;
+        block-size: 16px;
+        background: #99f;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      In each gray block the content after the leader is displaced along the
+      block axis. It stays on the line the leader is on, so the leader must
+      have the length it has in the blue block below, where the same content
+      sits on that line.
+    </p>
+
+    <section>
+      <h3>A word displaced by <code>vertical-align</code></h3>
+      <div class="entry"><span class="has-leader-after">text</span><span class="displaced">one</span></div>
+      <div class="entry reference"><span class="has-leader-after">text</span><span>one</span></div>
+    </section>
+
+    <section>
+      <h3>An inline block displaced by <code>vertical-align</code></h3>
+      <div class="entry"><span class="has-leader-after">text</span><span class="box displaced"></span></div>
+      <div class="entry reference"><span class="has-leader-after">text</span><span class="box"></span></div>
+    </section>
+  </body>
+</html>

@@ -564,6 +564,15 @@ module.exports = [
         title: "leader() followed by an atomic inline box (Vertical)",
       },
       {
+        file: "leader/displaced-following-content.html",
+        title: "leader() followed by content displaced along the block axis",
+      },
+      {
+        file: "leader/displaced-following-content-vertical.html",
+        title:
+          "leader() followed by content displaced along the block axis (Vertical)",
+      },
+      {
         file: "leader/line-break-before-leader.html",
         title: "leader() that does not fit beside the content before it",
       },

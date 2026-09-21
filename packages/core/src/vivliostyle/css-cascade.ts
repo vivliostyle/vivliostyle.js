@@ -3726,8 +3726,15 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // as though it shared the line, which shortens the leader by that width,
     // and content longer than a line leaves no room, which keeps the leader at
     // a single pattern.
+    // An inline box that `vertical-align` displaces can clear the leader in the
+    // block direction while it stays on the line, so content that has left the
+    // line is recognized by the inline direction as well: it resumes at the
+    // start of its line, no further along than the leader.
     const startsOnALaterLine = (rect: Vtree.ClientRect) =>
-      (rect[blockStartSide] - innerInit[blockEndSide]) * blockSign >= -subPixel;
+      (rect[blockStartSide] - innerInit[blockEndSide]) * blockSign >=
+        -subPixel &&
+      (rect[inlineStartSide] - innerInit[inlineStartSide]) * inlineSign <=
+        subPixel;
     const fitsWithOnePattern =
       !overrun(innerInit) &&
       (followingInit === undefined || !startsOnALaterLine(followingInit));
