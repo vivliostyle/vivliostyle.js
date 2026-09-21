@@ -59,6 +59,10 @@
       .has-leader-after::after {
         content: leader(dotted);
       }
+
+      .has-leader-x-after::after {
+        content: leader("x");
+      }
     </style>
   </head>
 
@@ -83,8 +87,8 @@
 
     <section>
       <h3>The break before the leader moves it into the second column</h3>
-      <div class="columns"><div class="entry two-columns"><span class="has-leader-after">12345</span>abcdefghijklmnopqrstuvwxyz1</div></div>
-      <div class="columns"><div class="entry reference">12345</div><div class="entry reference"><span class="has-leader-after"></span>abcdefghijklmnopqrstuvwxyz1</div></div>
+      <div class="columns"><div class="entry two-columns"><span class="has-leader-x-after">text before her</span>abcdefghijklmnopqrst</div></div>
+      <div class="columns"><div class="entry reference">text before her</div><div class="entry reference"><span class="has-leader-x-after"></span>abcdefghijklmnopqrst</div></div>
     </section>
   </body>
 </html>
