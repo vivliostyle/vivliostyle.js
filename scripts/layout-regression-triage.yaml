@@ -1,4 +1,28 @@
 - category: Leader
+  title: leader() in a block container with padding beside its lines
+  file: leader/container-padding.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-leader-content-edge  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/container-padding.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/container-padding.html&zoom=1&spread=false
+- category: Leader
+  title: leader() in a block container with padding beside its lines (Vertical)
+  file: leader/container-padding-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-leader-content-edge  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/container-padding-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/leader/container-padding-vertical.html&zoom=1&spread=false
+- category: Leader
   title: leader() followed by content that wraps before the leader expands
   file: leader/wrapped-following-content.html
   decision: expected  # regression / expected / skip
