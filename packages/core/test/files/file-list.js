@@ -555,6 +555,14 @@ module.exports = [
         file: "leader/block-size-vertical.html",
         title: "leader() in a block container taller than its lines (Vertical)",
       },
+      {
+        file: "leader/atomic-inline-following-content.html",
+        title: "leader() followed by an atomic inline box",
+      },
+      {
+        file: "leader/atomic-inline-following-content-vertical.html",
+        title: "leader() followed by an atomic inline box (Vertical)",
+      },
     ],
   },
   {

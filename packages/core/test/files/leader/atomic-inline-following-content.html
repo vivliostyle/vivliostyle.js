@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>leader() followed by an atomic inline box</title>
+    <style>
+      @page {
+        size: 640px 960px;
+        margin: 20px 30px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        line-height: 24px;
+        font-family: monospace;
+      }
+
+      section {
+        margin-block-end: 16px;
+        break-inside: avoid;
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-block: 6px 4px;
+      }
+
+      .note {
+        margin-block-end: 10px;
+      }
+
+      .entry {
+        inline-size: 30ch;
+        margin-block-start: 4px;
+        background: #ddd;
+      }
+
+      .entry.reference {
+        background: #cde;
+      }
+
+      .floater {
+        float: inline-end;
+        inline-size: 10ch;
+        block-size: 24px;
+        background: #fbb;
+      }
+
+      .box {
+        display: inline-block;
+        inline-size: 8ch;
+        block-size: 16px;
+        background: #99f;
+      }
+
+      .has-leader-after::after {
+        content: leader(dotted);
+      }
+    </style>
+  </head>
+
+  <!-- prettier-ignore -->
+  <body>
+    <p class="note">
+      Each gray block must render identically to the blue block below it, which
+      has an explicit line break. The box after the leader must end at the
+      inline-end edge of the block.
+    </p>
+
+    <section>
+      <h3>An empty inline block on a line a float has narrowed</h3>
+      <div class="entry"><span class="floater"></span><span class="has-leader-after">abcdefghijkl</span><span class="box"></span></div>
+      <div class="entry reference"><span class="floater"></span>abcdefghijkl<br /><span class="has-leader-after"></span><span class="box"></span></div>
+    </section>
+
+    <section>
+      <h3>An image on a line a float has narrowed</h3>
+      <div class="entry"><span class="floater"></span><span class="has-leader-after">abcdefghijkl</span><img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2216%22%3E%3Crect%20width%3D%2264%22%20height%3D%2216%22%20fill%3D%22%2399f%22%2F%3E%3C%2Fsvg%3E" width="64" height="16" alt="" /></div>
+      <div class="entry reference"><span class="floater"></span>abcdefghijkl<br /><span class="has-leader-after"></span><img src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2216%22%3E%3Crect%20width%3D%2264%22%20height%3D%2216%22%20fill%3D%22%2399f%22%2F%3E%3C%2Fsvg%3E" width="64" height="16" alt="" /></div>
+    </section>
+  </body>
+</html>

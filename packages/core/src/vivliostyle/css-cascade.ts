@@ -3617,12 +3617,23 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     box[inlineLowSide] += containerInset(inlineLowSide);
     box[inlineHighSide] -= containerInset(inlineHighSide);
 
-    let followingInit: Vtree.ClientRect | undefined;
-    for (const node of inlineNodes) {
-      followingInit = RangeClientRects.getLayoutClientRectsOfNodeContents(
+    const firstInlineRectOf = (node: Element | Text) => {
+      const contents = RangeClientRects.getLayoutClientRectsOfNodeContents(
         column.clientLayout,
         node,
-      ).find((rect) => inlineSizeOf(rect) > 0);
+      );
+      // A range around the contents of a replaced element or of an empty
+      // inline box selects nothing and yields no rect.
+      const rects =
+        contents.length === 0 && node.nodeType === 1
+          ? [column.clientLayout.getElementClientRect(node as Element)]
+          : contents;
+      return rects.find((rect) => inlineSizeOf(rect) > 0);
+    };
+
+    let followingInit: Vtree.ClientRect | undefined;
+    for (const node of inlineNodes) {
+      followingInit = firstInlineRectOf(node);
       if (followingInit) {
         break;
       }
