@@ -3438,34 +3438,6 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const { writingMode, direction, marginInlineEnd } =
       column.clientLayout.getElementComputedStyle(pseudoElem);
 
-    function setLeaderTextContent(leaderStr: string): void {
-      if (direction === "rtl") {
-        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
-        // to ensure RTL order around the leader.
-        const RLM = "\u200f";
-        leaderElem.textContent =
-          (leaderStr.startsWith(RLM) ? "" : RLM) +
-          leaderStr +
-          (leaderStr.endsWith(RLM) ? "" : RLM);
-      } else {
-        leaderElem.textContent = leaderStr;
-      }
-    }
-
-    // prevent leader layout problem (Issue #1117)
-    leaderElem.style.marginInlineStart = "1px";
-
-    // reset the expanded leader
-    setLeaderTextContent(leader);
-    // setting inline-block removes the pseudo CONTENT from normal text flow
-    pseudoElem.style.display = "inline-block";
-    pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
-
-    const previousLineBreak = pseudoElem.previousElementSibling;
-    if (previousLineBreak?.hasAttribute("data-viv-leader-break")) {
-      previousLineBreak.remove();
-    }
-
     // Workaround for Issue #1598:
     // In multi-column layout with column-fill: balance, changing leader length
     // triggers column rebalancing, making the initially measured `box` unreliable.
@@ -3480,6 +3452,49 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     const originalColumnFill = columnContainer?.style.columnFill || null;
     if (columnContainer) {
       columnContainer.style.columnFill = "auto";
+    }
+
+    // Firefox sends the line of a leader that overflows a column to the next
+    // column and, until the event loop updates the rendering, keeps it there
+    // through the layout that reading a client rect forces, however far the
+    // leader shrinks again. Switching column-fill makes the container fragment
+    // its contents again.
+    const refragmentColumns =
+      columnContainer && Base.browserType === "firefox"
+        ? () => {
+            columnContainer.style.columnFill = "balance";
+            column.clientLayout.getElementClientRect(columnContainer);
+            columnContainer.style.columnFill = "auto";
+          }
+        : () => {};
+
+    function setLeaderTextContent(leaderStr: string): void {
+      if (direction === "rtl") {
+        // in RTL direction, enclose the leader with U+200F (RIGHT-TO-LEFT MARK)
+        // to ensure RTL order around the leader.
+        const RLM = "\u200f";
+        leaderElem.textContent =
+          (leaderStr.startsWith(RLM) ? "" : RLM) +
+          leaderStr +
+          (leaderStr.endsWith(RLM) ? "" : RLM);
+      } else {
+        leaderElem.textContent = leaderStr;
+      }
+      refragmentColumns();
+    }
+
+    // prevent leader layout problem (Issue #1117)
+    leaderElem.style.marginInlineStart = "1px";
+
+    // reset the expanded leader
+    setLeaderTextContent(leader);
+    // setting inline-block removes the pseudo CONTENT from normal text flow
+    pseudoElem.style.display = "inline-block";
+    pseudoElem.style.textIndent = "0"; // cancel inherited text-indent
+
+    const previousLineBreak = pseudoElem.previousElementSibling;
+    if (previousLineBreak?.hasAttribute("data-viv-leader-break")) {
+      previousLineBreak.remove();
     }
 
     const vertical =
@@ -3620,8 +3635,52 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     let innerInit = column.clientLayout.getElementClientRect(pseudoElem);
     const innerMarginInlineEnd = column.parseComputedLength(marginInlineEnd);
 
-    box[inlineLowSide] += containerInset(inlineLowSide);
-    box[inlineHighSide] -= containerInset(inlineHighSide);
+    // A block container that continues in another column has a client rect for
+    // each fragment, side by side in the inline direction, while its bounding
+    // client rect spans all of them.
+    const viewportBox = container.viewNode.getBoundingClientRect();
+    const fragments = Array.from(container.viewNode.getClientRects());
+    const boxOffset = box[inlineStartSide] - viewportBox[inlineStartSide];
+    const boxWith = (sides: Partial<Vtree.ClientRect>): Vtree.ClientRect => {
+      const { left, top, right, bottom } = { ...box, ...sides };
+      return {
+        left,
+        top,
+        right,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+      };
+    };
+    const fragmentBoxes = (
+      fragments.length > 0 ? fragments : [viewportBox]
+    ).map((fragment) =>
+      boxWith({
+        [inlineStartSide]:
+          fragment[inlineStartSide] +
+          boxOffset +
+          inlineSign * containerInset(inlineStartSide),
+        [inlineEndSide]:
+          fragment[inlineEndSide] +
+          boxOffset -
+          inlineSign * (containerInset(inlineEndSide) + innerMarginInlineEnd),
+      }),
+    );
+    const inlineDistance = (fragmentBox: Vtree.ClientRect, center: number) =>
+      Math.max(
+        fragmentBox[inlineLowSide] - center,
+        center - fragmentBox[inlineHighSide],
+        0,
+      );
+    const fragmentBoxOf = (rect: Vtree.ClientRect) => {
+      const center = (rect[inlineLowSide] + rect[inlineHighSide]) / 2;
+      return fragmentBoxes.reduce((nearest, fragmentBox) =>
+        inlineDistance(fragmentBox, center) < inlineDistance(nearest, center)
+          ? fragmentBox
+          : nearest,
+      );
+    };
+    let initialFragmentBox = fragmentBoxOf(innerInit);
 
     // A range around a node yields a rect for each line it occupies, where the
     // contents of a replaced element or of an empty inline box yield none and
@@ -3674,32 +3733,33 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
 
     // capture the line boundary
     // Some leader text ("_" e.g.) creates higher top than container.
-    if (writingMode === "vertical-rl" || writingMode === "vertical-lr") {
-      if (direction === "rtl") {
-        box.top += innerMarginInlineEnd;
-      } else {
-        box.bottom -= innerMarginInlineEnd;
-      }
-      box.top = Math.min(innerInit.top, box.top);
-      box.bottom = Math.max(innerInit.bottom, box.bottom);
-    } else {
-      if (direction === "rtl") {
-        box.left += innerMarginInlineEnd;
-      } else {
-        box.right -= innerMarginInlineEnd;
-      }
-      box.left = Math.min(innerInit.left, box.left);
-      box.right = Math.max(innerInit.right, box.right);
-    }
+    const lineBoxAround = (inner: Vtree.ClientRect) =>
+      boxWith({
+        ...initialFragmentBox,
+        [inlineLowSide]: Math.min(
+          inner[inlineLowSide],
+          initialFragmentBox[inlineLowSide],
+        ),
+        [inlineHighSide]: Math.max(
+          inner[inlineHighSide],
+          initialFragmentBox[inlineHighSide],
+        ),
+      });
+    let initialLineBox = lineBoxAround(innerInit);
+    const lineBoxOf = (inner: Vtree.ClientRect) => {
+      const fragmentBox = fragmentBoxOf(inner);
+      return fragmentBox === initialFragmentBox ? initialLineBox : fragmentBox;
+    };
 
     function overrun(inner: Vtree.ClientRect): boolean {
+      const lineBox = lineBoxOf(inner);
       const end =
         inner[inlineEndSide] + inlineSign * followingInlineSiblingsWidth;
       return (
-        box[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
-        box[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
-        box[blockLowSide] - inner[blockLowSide] > subPixel ||
-        inner[blockHighSide] - box[blockHighSide] > subPixel
+        lineBox[inlineLowSide] > Math.min(inner[inlineLowSide], end) ||
+        lineBox[inlineHighSide] < Math.max(inner[inlineHighSide], end) ||
+        lineBox[blockLowSide] - inner[blockLowSide] > subPixel ||
+        inner[blockHighSide] - lineBox[blockHighSide] > subPixel
       );
     }
 
@@ -3708,8 +3768,10 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // moves the lines in the block direction where the container aligns them
     // to its center or end.
     const hasMovedAlongLine = (inner: Vtree.ClientRect) =>
+      fragmentBoxOf(inner) !== initialFragmentBox ||
       Math.abs(inner[lineStartSide] - innerInit[lineStartSide]) >= subPixel;
     const hasMovedAcrossLines = (inner: Vtree.ClientRect) =>
+      fragmentBoxOf(inner) !== initialFragmentBox ||
       Math.abs(inner[blockLowSide] - innerInit[blockLowSide]) >= subPixel;
 
     // A leader belongs on the line where the content before it ends, and grows
@@ -3738,9 +3800,11 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // the line unless an author sets them against each other. On such a line
     // it measures the other way, and the search below pays for that in probes
     // rather than in the count it settles on.
-    const lineRoom =
-      (box[inlineEndSide] - box[inlineStartSide]) * inlineSign -
+    const roomOnTheLine = () =>
+      (initialLineBox[inlineEndSide] - initialLineBox[inlineStartSide]) *
+        inlineSign -
       followingInlineSiblingsWidth;
+    let lineRoom = roomOnTheLine();
     // CSS Generated Content 3 breaks the line after the content preceding a
     // leader where not one full copy of the leader is visible beside it, and
     // draws the leader and the content following it on the next line. A leader
@@ -3749,7 +3813,7 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
     // the tree only where it does not, because a break of its own aligns the
     // line before it as the last line of a block.
     const roomBesideTheContentBefore =
-      (box[inlineEndSide] - innerInit[inlineStartSide]) * inlineSign;
+      (initialLineBox[inlineEndSide] - innerInit[inlineStartSide]) * inlineSign;
     const startsTheNextLine =
       !fitsWithOnePattern &&
       lineRoom >= inlineSizeOf(innerInit) &&
@@ -3762,14 +3826,9 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       lineBreak.setAttribute("data-viv-leader-break", "");
       pseudoParent.insertBefore(lineBreak, pseudoElem);
       innerInit = column.clientLayout.getElementClientRect(pseudoElem);
-      box[inlineLowSide] = Math.min(
-        innerInit[inlineLowSide],
-        box[inlineLowSide],
-      );
-      box[inlineHighSide] = Math.max(
-        innerInit[inlineHighSide],
-        box[inlineHighSide],
-      );
+      initialFragmentBox = fragmentBoxOf(innerInit);
+      initialLineBox = lineBoxAround(innerInit);
+      lineRoom = roomOnTheLine();
     }
     const leaderIsOnItsLine = fitsWithOnePattern || startsTheNextLine;
     const isTooLong = (inner: Vtree.ClientRect) =>

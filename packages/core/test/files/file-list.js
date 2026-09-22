@@ -581,6 +581,15 @@ module.exports = [
         title:
           "leader() that does not fit beside the content before it (Vertical)",
       },
+      {
+        file: "leader/column-fragment.html",
+        title: "leader() in a block container that continues in another column",
+      },
+      {
+        file: "leader/column-fragment-vertical.html",
+        title:
+          "leader() in a block container that continues in another column (Vertical)",
+      },
     ],
   },
   {
