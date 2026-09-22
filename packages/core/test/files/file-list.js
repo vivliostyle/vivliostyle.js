@@ -582,6 +582,14 @@ module.exports = [
           "leader() that does not fit beside the content before it (Vertical)",
       },
       {
+        file: "leader/opposite-directions.html",
+        title: "leader() running against the direction of its line",
+      },
+      {
+        file: "leader/opposite-directions-vertical.html",
+        title: "leader() running against the direction of its line (Vertical)",
+      },
+      {
         file: "leader/column-fragment.html",
         title: "leader() in a block container that continues in another column",
       },
