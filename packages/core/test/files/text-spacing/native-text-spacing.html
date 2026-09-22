@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- Test case for Issues #2151 and #1562: native spacing and unsplit text. -->
+<html lang="ja">
+<meta charset="utf-8">
+<title>Native text spacing and fallback</title>
+<style>
+  @page { size: 160mm 180mm; margin: 12mm; }
+  body { font-family: "Hiragino Mincho ProN", serif; font-size: 16px; }
+  p { width: 22em; margin: 1em 0; }
+  .none { text-spacing: none; }
+  .native { text-spacing-trim: trim-start; }
+  .fallback { text-spacing-trim: trim-both; }
+  .font-fallback { font-family: "BIZ UDGothic", "UD Digi Kyokasho N-R", "Meiryo", sans-serif; }
+  .alpha { text-autospace: ideograph-alpha; }
+  .hanging { hanging-punctuation: first allow-end last; }
+  .vertical { writing-mode: vertical-rl; height: 12em; width: auto; }
+</style>
+<h1>Native text spacing</h1>
+<p class="none">「分割不要」日本語ABCと123の混植。“Latin punctuation”もそのまま。</p>
+<p class="native">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
+<p class="fallback">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
+<p class="native font-fallback">「非対応フォント」「括弧」、句読点。日本語ABCと123の混植。</p>
+<p class="alpha">日本語ABC日本語123日本語<span>DEF</span>日本語。</p>
+<p class="hanging">「ぶら下げ処理と詰め処理を組み合わせる。括弧と句読点の配置を確認する。」</p>
+<p class="native vertical">「縦書き」「括弧」、句読点。日本語ABCと123の混植。“引用符”も確認。</p>
+</html>
