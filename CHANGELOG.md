@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.45.2](https://github.com/vivliostyle/vivliostyle.js/compare/v2.45.1...v2.45.2) (2026-09-23)
+
+### Bug Fixes
+
+- Compare a leader against the fragment of its block container ([#2159](https://github.com/vivliostyle/vivliostyle.js/issues/2159)) ([5456d7d](https://github.com/vivliostyle/vivliostyle.js/commit/5456d7d1b14fddc9bd53498b8f8a68b3af6561fc))
+- Search for the length a leader can have on the line it belongs to ([#2157](https://github.com/vivliostyle/vivliostyle.js/issues/2157)) ([88fdb68](https://github.com/vivliostyle/vivliostyle.js/commit/88fdb683f0a47d3db88ef1373bd1d0c11ea0a1e3))
+- Measure a leader against the content edge of its block container ([#2156](https://github.com/vivliostyle/vivliostyle.js/issues/2156)) ([36017ba](https://github.com/vivliostyle/vivliostyle.js/commit/36017bad1e927eb5fd67f130c41ce705163d4bd5))
+- Measure the content following a leader on a single line ([#2154](https://github.com/vivliostyle/vivliostyle.js/issues/2154)) ([89a40cf](https://github.com/vivliostyle/vivliostyle.js/commit/89a40cf89cd92b28e8e56943036fed1635b44e0e))
+- Measure client rects through one Range per document ([#2153](https://github.com/vivliostyle/vivliostyle.js/issues/2153)) ([0e9f1d3](https://github.com/vivliostyle/vivliostyle.js/commit/0e9f1d3d5d4a5bc8b4f39ec98d89885ddfb5e418))
+- Release completed fetch operations ([#2152](https://github.com/vivliostyle/vivliostyle.js/issues/2152)) ([0a854a6](https://github.com/vivliostyle/vivliostyle.js/commit/0a854a62b9ae3c73cb552f55a4cfe580ce0b070b))
+- Keep node contexts out of dictionary mode and release page layout state ([#2147](https://github.com/vivliostyle/vivliostyle.js/issues/2147)) ([f37de2a](https://github.com/vivliostyle/vivliostyle.js/commit/f37de2a591101c0a2c16bb91a9d6c2f4c7ac0dc0))
+
+### Performance Improvements
+
+- Compute the repeat count of a leader instead of searching for it ([#2160](https://github.com/vivliostyle/vivliostyle.js/issues/2160)) ([ee8d6df](https://github.com/vivliostyle/vivliostyle.js/commit/ee8d6df17ba13a7d8dc997e66a180b1ca348e55f))
+
 ## [2.45.1](https://github.com/vivliostyle/vivliostyle.js/compare/v2.45.0...v2.45.1) (2026-09-06)
 
 ### Bug Fixes
