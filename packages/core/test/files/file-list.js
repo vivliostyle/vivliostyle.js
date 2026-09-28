@@ -895,6 +895,16 @@ module.exports = [
         file: "page_breaks/page-breaking-with-container-padding-border.html",
         title: "Page breaking with container padding/border (Issue #1846)",
       },
+      {
+        file: "page_breaks/line-height-line-fitting.html",
+        title:
+          "Line fitting with line-height smaller than font ascent + descent (Issue #2163)",
+      },
+      {
+        file: "page_breaks/line-height-line-fitting-vertical.html",
+        title:
+          "Line fitting with line-height smaller than font ascent + descent, vertical writing-mode (Issue #2163)",
+      },
     ],
   },
   {

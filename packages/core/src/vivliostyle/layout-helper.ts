@@ -172,6 +172,73 @@ export function adjustRectsForColumnBreaking(
 }
 
 /**
+ * Adjust the block-direction size of the client rectangles of a text run to
+ * the inline box height, i.e. the line-height of the element containing the
+ * text.
+ *
+ * Browsers return the font's ascent + descent for the client rects of a text
+ * range, regardless of the line-height. When the line-height is smaller than
+ * that (e.g. `line-height: 1` with a font whose ascent + descent is 1.16em),
+ * the last line of a fragmentainer (page or column) sticks out of the page
+ * area even though its line box fits, and the line is pushed to the next
+ * page/column. Correct this by measuring line positions and character edges
+ * with the line box instead of the glyph box. (Issue #2163)
+ *
+ * A text run's glyph box and its inline box share the same block-direction
+ * center (the half-leading is distributed above and below the glyph box), so
+ * the inline box is obtained by resizing the glyph box symmetrically around
+ * its center to the line-height. Note that this must be applied only to the
+ * rects of a single text run: the rects of replaced elements and inline-level
+ * boxes (e.g. inline-block) are their own boxes and are not affected by
+ * line-height.
+ *
+ * The computed line-height and the client rects are in the same coordinate
+ * space, so no conversion of the line-height is needed: the layout box is
+ * laid out at scale 1 (the high pixel ratio emulation cancels the `zoom` of
+ * the layout box with an inverse `transform: scale()`, and the output scale
+ * of the viewer only affects the display after layout). Other layout code
+ * also compares computed lengths (e.g. margins) with measured rects directly.
+ */
+export function adjustTextRectsForLineHeight(
+  rects: Vtree.ClientRect[],
+  element: Element | null,
+  clientLayout: Vtree.ClientLayout,
+  vertical: boolean,
+): void {
+  if (!element || !rects.length) {
+    return;
+  }
+  const lineHeight = parseFloat(
+    clientLayout.getElementComputedStyle(element).lineHeight,
+  );
+  // `line-height: normal` (and other non-numeric values) cannot be compared
+  // with the rects here. With `normal` the used line-height is derived from
+  // the same font metrics as the rects, so no correction is needed.
+  if (!(lineHeight > 0)) {
+    return;
+  }
+  for (const rect of rects) {
+    if (vertical) {
+      if (!(rect.width > lineHeight)) {
+        continue;
+      }
+      const center = (rect.left + rect.right) / 2;
+      rect.left = center - lineHeight / 2;
+      rect.right = center + lineHeight / 2;
+      rect.width = lineHeight;
+    } else {
+      if (!(rect.height > lineHeight)) {
+        continue;
+      }
+      const center = (rect.top + rect.bottom) / 2;
+      rect.top = center - lineHeight / 2;
+      rect.bottom = center + lineHeight / 2;
+      rect.height = lineHeight;
+    }
+  }
+}
+
+/**
  * Get the client rectangle of an element, adjusted for column breaking.
  */
 export function getElementClientRectAdjusted(
@@ -571,6 +638,11 @@ export function calculateEdge(
 
     // Adjust boxes' positions for column breaking
     adjustRectsForColumnBreaking(boxes, vertical);
+
+    // Measure the character edge with the line box instead of the glyph box
+    // when the line-height is smaller than the font's ascent + descent.
+    // (Issue #2163)
+    adjustTextRectsForLineHeight(boxes, element, clientLayout, vertical);
 
     // Prefer non-zero-area rects for stable edge calculation.
     // Fallback to block-direction-only rects only in preformatted contexts
