@@ -31,6 +31,45 @@ function createElement() {
   return element;
 }
 
+/**
+ * Create `<div><span>...</span></div>` (with an extra `em` inside the span
+ * when `innerLineHeight` is given) and return the innermost element, i.e. the
+ * element containing the text.
+ */
+function createInlineChain({
+  blockLineHeight,
+  spanLineHeight,
+  innerLineHeight,
+}) {
+  const container = DomUtil.getDummyContainer();
+  const block = document.createElement("div");
+  block.style.display = "block";
+  block.style.lineHeight = blockLineHeight;
+  const span = document.createElement("span");
+  span.style.display = "inline";
+  span.style.lineHeight = spanLineHeight;
+  block.appendChild(span);
+  let target = span;
+  if (innerLineHeight !== undefined) {
+    const inner = document.createElement("em");
+    inner.style.display = "inline";
+    inner.style.lineHeight = innerLineHeight;
+    span.appendChild(inner);
+    target = inner;
+  }
+  container.appendChild(block);
+  return target;
+}
+
+function createClientLayoutFromStyles() {
+  return {
+    getElementComputedStyle: (element) => ({
+      lineHeight: element.style.lineHeight,
+      display: element.style.display,
+    }),
+  };
+}
+
 function createRect({ left, top, right, bottom }) {
   return {
     left,
@@ -99,6 +138,75 @@ describe("layout-helper", function () {
       // The inline-direction size and position are unchanged.
       expect(rect.top).toBe(0);
       expect(rect.bottom).toBe(100);
+    });
+
+    it("uses the line box height: the strut of the block container", function () {
+      // The block container's line-height (the strut) is larger than the
+      // line-height of the span containing the text, so the line box is as
+      // high as the strut.
+      const span = createInlineChain({
+        blockLineHeight: "30px",
+        spanLineHeight: "10px",
+      });
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 40 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        span,
+        clientLayout,
+        false,
+      );
+
+      expect(rect.top).toBe(5);
+      expect(rect.bottom).toBe(35);
+      expect(rect.height).toBe(30);
+    });
+
+    it("does not shrink a rect below the line box height", function () {
+      // A glyph box smaller than the line box must stay unchanged even when
+      // the line-height of the element containing the text is smaller.
+      const span = createInlineChain({
+        blockLineHeight: "30px",
+        spanLineHeight: "10px",
+      });
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 11 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        span,
+        clientLayout,
+        false,
+      );
+
+      expect(rect).toEqual(
+        createRect({ left: 0, top: 0, right: 100, bottom: 11 }),
+      );
+    });
+
+    it("uses the line box height: an ancestor inline box", function () {
+      // A larger line-height of an inline ancestor (here the span) raises the
+      // line box as well, even when the element containing the text (the em)
+      // has a smaller line-height.
+      const em = createInlineChain({
+        blockLineHeight: "10px",
+        spanLineHeight: "30px",
+        innerLineHeight: "10px",
+      });
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 40 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        em,
+        clientLayout,
+        false,
+      );
+
+      expect(rect.top).toBe(5);
+      expect(rect.bottom).toBe(35);
+      expect(rect.height).toBe(30);
     });
 
     it("ignores line-height: normal", function () {

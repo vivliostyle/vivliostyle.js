@@ -173,8 +173,7 @@ export function adjustRectsForColumnBreaking(
 
 /**
  * Adjust the block-direction size of the client rectangles of a text run to
- * the inline box height, i.e. the line-height of the element containing the
- * text.
+ * the height of the line box the text is on.
  *
  * Browsers return the font's ascent + descent for the client rects of a text
  * range, regardless of the line-height. When the line-height is smaller than
@@ -184,13 +183,19 @@ export function adjustRectsForColumnBreaking(
  * page/column. Correct this by measuring line positions and character edges
  * with the line box instead of the glyph box. (Issue #2163)
  *
- * A text run's glyph box and its inline box share the same block-direction
+ * A text run's glyph box and its line box share the same block-direction
  * center (the half-leading is distributed above and below the glyph box), so
- * the inline box is obtained by resizing the glyph box symmetrically around
- * its center to the line-height. Note that this must be applied only to the
- * rects of a single text run: the rects of replaced elements and inline-level
- * boxes (e.g. inline-block) are their own boxes and are not affected by
- * line-height.
+ * the line box is obtained by resizing the glyph box symmetrically around its
+ * center to the line box height, which is the largest line-height among the
+ * inline boxes containing the text and the strut of the block container (see
+ * `getLineBoxHeight()`). Using only the line-height of the element that
+ * contains the text would shrink the rects below the line box when an ancestor
+ * inline box or the block container has a larger line-height, which makes the
+ * line fit although its line box overflows the fragmentainer.
+ *
+ * Note that this must be applied only to the rects of a single text run: the
+ * rects of replaced elements and inline-level boxes (e.g. inline-block) are
+ * their own boxes and are not affected by line-height.
  *
  * The computed line-height and the client rects are in the same coordinate
  * space, so no conversion of the line-height is needed: the layout box is
@@ -208,9 +213,7 @@ export function adjustTextRectsForLineHeight(
   if (!element || !rects.length) {
     return;
   }
-  const lineHeight = parseFloat(
-    clientLayout.getElementComputedStyle(element).lineHeight,
-  );
+  const lineHeight = getLineBoxHeight(element, clientLayout);
   // `line-height: normal` (and other non-numeric values) cannot be compared
   // with the rects here. With `normal` the used line-height is derived from
   // the same font metrics as the rects, so no correction is needed.
@@ -236,6 +239,39 @@ export function adjustTextRectsForLineHeight(
       rect.height = lineHeight;
     }
   }
+}
+
+/**
+ * Get the height of the line box the text in the given element is on: the
+ * largest computed line-height among the inline boxes that contain the text
+ * and the strut of the block container, i.e. the line-height of the nearest
+ * ancestor that is not an inline box.
+ *
+ * Non-numeric line-heights (e.g. `normal`) are ignored: their used value is
+ * derived from the same font metrics as the rects, so those boxes do not need
+ * a correction.
+ */
+function getLineBoxHeight(
+  element: Element,
+  clientLayout: Vtree.ClientLayout,
+): number {
+  let lineHeight = 0;
+  for (let el: Element | null = element; el; el = el.parentElement) {
+    const style = clientLayout.getElementComputedStyle(el);
+    const value = parseFloat(style.lineHeight);
+    if (value > lineHeight) {
+      lineHeight = value;
+    }
+    // `display: contents` generates no box, so the walk continues to the
+    // ancestors whose boxes contain the text.
+    if (style.display !== "inline" && style.display !== "contents") {
+      // The block container (or the atomic inline-level box, e.g.
+      // inline-block or ruby text) provides the strut of the line box, and
+      // the boxes outside it are on other lines.
+      break;
+    }
+  }
+  return lineHeight;
 }
 
 /**
