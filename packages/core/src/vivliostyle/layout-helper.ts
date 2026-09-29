@@ -250,7 +250,9 @@ export function adjustTextRectsForLineHeight(
  * Get the height of the line box the text in the given element is on: the
  * largest computed line-height among the inline boxes that contain the text
  * and the strut of the block container, i.e. the line-height of the nearest
- * ancestor that is not an inline box.
+ * ancestor that is not an inline box. Elements with `display: contents`
+ * generate no box, so they do not contribute: the walk continues with their
+ * ancestors, whose boxes contain the text.
  *
  * Returns 0 if the height cannot be determined, i.e. when one of those boxes
  * has a non-numeric line-height (e.g. `normal`): the used value is derived
@@ -264,6 +266,11 @@ function getLineBoxHeight(
   let lineHeight = 0;
   for (let el: Element | null = element; el; el = el.parentElement) {
     const style = clientLayout.getElementComputedStyle(el);
+    if (style.display === "contents") {
+      // `display: contents` generates no box: its line-height does not
+      // contribute to the line box, so the walk continues with its ancestors.
+      continue;
+    }
     const value = parseFloat(style.lineHeight);
     if (!(value >= 0)) {
       // Non-numeric (e.g. `normal`): the line box height is unknown.
@@ -272,9 +279,7 @@ function getLineBoxHeight(
     if (value > lineHeight) {
       lineHeight = value;
     }
-    // `display: contents` generates no box, so the walk continues to the
-    // ancestors whose boxes contain the text.
-    if (style.display !== "inline" && style.display !== "contents") {
+    if (style.display !== "inline") {
       // The block container (or the atomic inline-level box, e.g.
       // inline-block or ruby text) provides the strut of the line box, and
       // the boxes outside it are on other lines.

@@ -4261,6 +4261,20 @@ export class DefaultClientLayout implements Vtree.ClientLayout {
     return this.subtractOffsets(rect, layoutBoxRect);
   }
 
+  /**
+   * @param element element to measure
+   * @return the client rects of the element's own boxes relative to the layout
+   *     box, i.e. its border box fragments, without the rects of its contents
+   * @override
+   */
+  getElementClientRects(element: Element): Vtree.ClientRect[] {
+    const rects = element.getClientRects();
+    const layoutBoxRect = this.layoutBox.getBoundingClientRect();
+    return Array.from(rects).map((rect) =>
+      this.subtractOffsets(rect, layoutBoxRect),
+    );
+  }
+
   /** @override */
   getElementComputedStyle(element: Element): CSSStyleDeclaration {
     return this.window.getComputedStyle(element, null);

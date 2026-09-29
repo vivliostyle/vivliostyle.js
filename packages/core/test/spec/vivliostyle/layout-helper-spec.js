@@ -255,6 +255,38 @@ describe("layout-helper", function () {
       );
     });
 
+    it("skips display: contents elements when measuring the line box", function () {
+      // A `display: contents` element generates no box, so its line-height does
+      // not contribute to the line box: only its child (the element containing
+      // the text) and the strut of the block container do.
+      const container = DomUtil.getDummyContainer();
+      const block = document.createElement("div");
+      block.style.display = "block";
+      block.style.lineHeight = "10px";
+      const contents = document.createElement("div");
+      contents.style.display = "contents";
+      contents.style.lineHeight = "100px";
+      const span = document.createElement("span");
+      span.style.display = "inline";
+      span.style.lineHeight = "10px";
+      contents.appendChild(span);
+      block.appendChild(contents);
+      container.appendChild(block);
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 40 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        span,
+        clientLayout,
+        false,
+      );
+
+      expect(rect.top).toBe(15);
+      expect(rect.bottom).toBe(25);
+      expect(rect.height).toBe(10);
+    });
+
     it("ignores line-height: normal", function () {
       const element = createElement();
       const clientLayout = createClientLayout({ lineHeight: "normal" });

@@ -2919,13 +2919,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     end: Element | Text,
   ): Vtree.ClientRect[] {
     const arr: Vtree.ClientRect[] = [];
-    // Boxes of the elements visited by the walk, collected separately: the
-    // merged range measurement this replaces included the border boxes
-    // (padding, border) of the elements fully contained in the measured range,
-    // because those boxes extend beyond the boxes of their text. They are
-    // added after the walk, except for the elements that contain the range
-    // boundaries (the first and last measured node): those were only partially
-    // contained in the merged range. (Issue #2163)
+    // The elements' own boxes, collected separately: the merged range
+    // measurement this replaces included the border boxes (padding, border) of
+    // the elements fully contained in the measured range, because those boxes
+    // extend beyond the boxes of their text. They are added after the walk,
+    // except for the elements that contain the range boundaries (the first and
+    // last measured node): those were only partially contained in the merged
+    // range. (Issue #2163)
     const elementBoxes: { element: Element; rects: Vtree.ClientRect[] }[] = [];
     let firstMeasuredNode: Node | null = null;
     let lastMeasuredNode: Node | null = null;
@@ -2985,9 +2985,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       } else {
         if (node !== start && node !== end) {
-          const rects: Vtree.ClientRect[] = [];
-          this.measureBoxesOfNode(node, rects);
-          elementBoxes.push({ element, rects });
+          // Measure only the element's own boxes: the rects of its contents
+          // are the boxes of the descendant text nodes, which are measured
+          // (and adjusted to the line box) above, and appending them here
+          // again would reintroduce the unadjusted glyph boxes. (Issue #2163)
+          elementBoxes.push({
+            element,
+            rects: this.clientLayout.getElementClientRects(element),
+          });
         }
         next = node.firstChild;
       }

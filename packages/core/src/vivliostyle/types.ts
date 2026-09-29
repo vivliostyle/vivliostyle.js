@@ -1059,6 +1059,13 @@ export namespace Vtree {
     getRangeClientRects(range: Range): ClientRect[];
     getElementClientRect(element: Element): ClientRect;
     /**
+     * @param element element to measure.
+     * @return client rects of the element's own boxes relative to the layout
+     *     box, i.e. its border box fragments (one per line for an inline
+     *     element), without the rects of its contents.
+     */
+    getElementClientRects(element: Element): ClientRect[];
+    /**
      * @return element's computed style
      */
     getElementComputedStyle(element: Element): CSSStyleDeclaration;
