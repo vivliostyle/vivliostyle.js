@@ -6,7 +6,7 @@
     <title>Absolutely positioned rt at a page break (vertical)</title>
     <style>
       @page {
-        size: 200px 140px;
+        size: 140px 140px;
         margin: 10px;
       }
       :root {
@@ -19,6 +19,13 @@
       body,
       p {
         margin: 0;
+      }
+      p {
+        inline-size: 100px;
+      }
+      .unit {
+        display: inline-block;
+        inline-size: 100px;
       }
       ruby {
         position: relative;
@@ -38,6 +45,6 @@
     </style>
   </head>
   <body>
-    <p>あああああああああああああああああああああああああああああああああああ<ruby>永<rt>﹅</rt></ruby>いいいいいいいいいいいいいいいいいいいい</p>
+    <p><span class="unit">あ</span><span class="unit">あ</span><span class="unit">あ</span><ruby>永<rt>﹅</rt></ruby><span class="unit">い</span><span class="unit">い</span><span class="unit">い</span><span class="unit">い</span></p>
   </body>
 </html>
