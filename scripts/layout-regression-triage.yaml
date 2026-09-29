@@ -1,4 +1,52 @@
 - category: General
+  title: "Absolutely positioned rt at a page break (horizontal, Issue #2162)"
+  file: absolute-rt-page-break-horizontal.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-rt-page-break-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-rt-page-break-horizontal.html&zoom=1&spread=false
+- category: General
+  title: "Absolutely positioned rt at a page break (vertical, Issue #2162)"
+  file: absolute-rt-page-break-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-rt-page-break-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-rt-page-break-vertical.html&zoom=1&spread=false
+- category: General
+  title: "Absolutely positioned span in an inline element at a page break (horizontal, Issue #2162)"
+  file: absolute-inline-child-page-break-horizontal.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
+- category: General
+  title: "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)"
+  file: absolute-inline-child-page-break-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: ""
+  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
+- category: General
   title: Justification
   file: justification.html
   decision: expected  # regression / expected / skip
