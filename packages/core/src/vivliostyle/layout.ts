@@ -2919,93 +2919,173 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     end: Element | Text,
   ): Vtree.ClientRect[] {
     const arr: Vtree.ClientRect[] = [];
+    // The elements' own boxes, collected separately: the merged range
+    // measurement this replaces included the border boxes (padding, border) of
+    // the elements fully contained in the measured range, because those boxes
+    // extend beyond the boxes of their text. They are added after the walk,
+    // except for the elements that contain the range boundaries (the first and
+    // last measured node): those were only partially contained in the merged
+    // range. (Issue #2163)
+    const elementBoxes: { element: Element; rects: Vtree.ClientRect[] }[] = [];
+    let firstMeasuredNode: Node | null = null;
+    let lastMeasuredNode: Node | null = null;
     let wentUp = false;
     let node: Node = start;
-    let lastGood: Node | null = null;
-    let rangeStart: RangeClientRects.RangeBoundary | null = null;
     let endNotReached = true;
     while (endNotReached) {
-      let seekRange = true;
-      do {
-        let next: Node | null = null;
-        if (node == end) {
-          if (end.nodeType === 1) {
-            // If end is an element, continue traversing its children to find
-            // the last text node inside it. Finish when end has no child or
-            // when came back from its children (wentUp==true).
-            endNotReached = !(!end.firstChild || wentUp);
-          } else {
-            endNotReached = false;
-          }
-        }
-        const element = node.nodeType === 1 ? (node as Element) : null;
-        if (!element) {
-          if (!rangeStart) {
-            if (node.parentNode == null) {
-              endNotReached = false;
-            } else {
-              rangeStart = RangeClientRects.before(node);
-            }
-          }
-          lastGood = node;
-        } else if (wentUp) {
-          wentUp = false;
-        } else if (LayoutHelper.isSpecial(element)) {
-          // Skip special
-          seekRange = !rangeStart;
-        } else if (
-          !element.firstChild ||
-          Base.mediaTags[element.localName] ||
-          /^r(uby|[bt]c?)$/.test(element.localName) ||
-          LayoutHelper.isSpecialInlineDisplay(
-            this.clientLayout.getElementComputedStyle(element).display,
-          )
-        ) {
-          // img, ruby, inline-block, etc.
-          seekRange = !rangeStart;
-          if (seekRange) {
-            if (element.localName === "ruby" && node.firstChild) {
-              // Fix for issue #985
-              node = node.firstChild;
-            }
-            rangeStart = RangeClientRects.before(node);
-            lastGood = node;
-          } else if (!/^r(uby|tc?)$/.test(element.localName)) {
-            // Fix for issue #1319 and #1401
-            lastGood = node;
-          }
-          if (node.contains(end)) {
-            endNotReached = false;
-          }
+      let next: Node | null = null;
+      if (node == end) {
+        if (end.nodeType === 1) {
+          // If end is an element, continue traversing its children to find
+          // the last text node inside it. Finish when end has no child or
+          // when came back from its children (wentUp==true).
+          endNotReached = !(!end.firstChild || wentUp);
         } else {
-          next = node.firstChild;
+          endNotReached = false;
         }
+      }
+      const element = node.nodeType === 1 ? (node as Element) : null;
+      if (!element) {
+        // Measure each text node individually so that its rects can be
+        // adjusted to the line box (line-height) of the element containing it.
+        // (Issue #2163)
+        if (node.nodeType === 3 && node.parentNode) {
+          this.measureTextNodeBoxes(node as Text, arr);
+          firstMeasuredNode ??= node;
+          lastMeasuredNode = node;
+        } else if (node.parentNode == null) {
+          endNotReached = false;
+        }
+      } else if (wentUp) {
+        wentUp = false;
+      } else if (LayoutHelper.isSpecial(element)) {
+        // Skip special
+      } else if (
+        !element.firstChild ||
+        Base.mediaTags[element.localName] ||
+        /^r(uby|[bt]c?)$/.test(element.localName) ||
+        LayoutHelper.isSpecialInlineDisplay(
+          this.clientLayout.getElementComputedStyle(element).display,
+        )
+      ) {
+        // img, ruby, inline-block, etc.
+        if (element.localName === "ruby" && element.firstChild) {
+          // Fix for issue #985
+          node = element.firstChild;
+        }
+        if (node.nodeType === 3) {
+          this.measureTextNodeBoxes(node as Text, arr);
+        } else {
+          this.measureBoxesOfNode(node, arr);
+        }
+        firstMeasuredNode ??= node;
+        lastMeasuredNode = node;
+        if (node.contains(end)) {
+          endNotReached = false;
+        }
+      } else {
+        if (node !== start && node !== end) {
+          // Measure only the element's own boxes: the rects of its contents
+          // are the boxes of the descendant text nodes, which are measured
+          // (and adjusted to the line box) above, and appending them here
+          // again would reintroduce the unadjusted glyph boxes. (Issue #2163)
+          const rects = this.clientLayout.getElementClientRects(element);
+          // Adjust the rects' positions for column breaking, like the other
+          // measured boxes, so that the synthetic column offsets of the
+          // browser's multi-column layout are normalized. (Issue #2163)
+          LayoutHelper.adjustRectsForColumnBreaking(rects, this.vertical);
+          LayoutHelper.adjustInlineRectsForLineHeight(
+            rects,
+            element,
+            this.clientLayout,
+            this.vertical,
+          );
+          elementBoxes.push({ element, rects });
+        }
+        next = node.firstChild;
+      }
+      if (!next) {
+        next = node.nextSibling;
         if (!next) {
-          next = node.nextSibling;
-          if (!next) {
-            wentUp = true;
-            next = node.parentNode;
-          }
+          wentUp = true;
+          next = node.parentNode;
         }
-        node = next;
-      } while (seekRange && endNotReached);
-      if (rangeStart) {
-        const boxList = RangeClientRects.getLayoutClientRectsBetween(
-          this.clientLayout,
-          rangeStart,
-          RangeClientRects.after(lastGood),
-        );
-
-        // Adjust boxes' positions for column breaking
-        LayoutHelper.adjustRectsForColumnBreaking(boxList, this.vertical);
-
-        for (let i = 0; i < boxList.length; i++) {
-          arr.push(boxList[i]);
-        }
-        rangeStart = null;
+      }
+      node = next;
+    }
+    for (const { element, rects } of elementBoxes) {
+      if (
+        (firstMeasuredNode && element.contains(firstMeasuredNode)) ||
+        (lastMeasuredNode && element.contains(lastMeasuredNode))
+      ) {
+        continue;
+      }
+      for (let i = 0; i < rects.length; i++) {
+        arr.push(rects[i]);
       }
     }
     return arr;
+  }
+
+  /**
+   * Measure the client rects of a text node, adjusting their block-direction
+   * size to the line box (line-height) of the element containing the text.
+   * (Issue #2163)
+   */
+  private measureTextNodeBoxes(text: Text, arr: Vtree.ClientRect[]): void {
+    if (!text.length) {
+      return;
+    }
+    const boxes = RangeClientRects.getLayoutClientRectsBetween(
+      this.clientLayout,
+      RangeClientRects.at(text, 0),
+      RangeClientRects.at(text, text.length),
+    );
+
+    // Adjust boxes' positions for column breaking
+    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.vertical);
+
+    // Measure the line box instead of the glyph box. (Issue #2163)
+    LayoutHelper.adjustTextRectsForLineHeight(
+      boxes,
+      text.parentElement,
+      this.clientLayout,
+      this.vertical,
+    );
+
+    for (let i = 0; i < boxes.length; i++) {
+      arr.push(boxes[i]);
+    }
+  }
+
+  /**
+   * Measure the client rects of an element box (a replaced element, an
+   * inline-block, `<br>`, an empty inline element, etc.). Keep BR range rects
+   * unchanged for line grouping in fragmented browser columns; calculateEdge
+   * measures their line-height-adjusted ends separately with a marker.
+   */
+  private measureBoxesOfNode(node: Node, arr: Vtree.ClientRect[]): void {
+    const boxes = RangeClientRects.getLayoutClientRectsBetween(
+      this.clientLayout,
+      RangeClientRects.before(node),
+      RangeClientRects.after(node),
+    );
+
+    // Adjust boxes' positions for column breaking
+    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.vertical);
+
+    if (node.nodeType === 1 && (node as Element).localName !== "br") {
+      LayoutHelper.adjustInlineRectsForLineHeight(
+        boxes,
+        node as Element,
+        this.clientLayout,
+        this.vertical,
+      );
+    }
+
+    for (let i = 0; i < boxes.length; i++) {
+      arr.push(boxes[i]);
+    }
   }
 
   /**
@@ -3030,6 +3110,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let lineAfter = 0;
     let lineEnd = 0;
     let lineLength = 0;
+    // Block extent of the line box, reported as the line's position. Unlike
+    // `lineBefore`/`lineAfter`, it includes the boxes of line break markers
+    // (e.g. `<br>`), whose block extent is the line box of the line it ends.
+    let lineBoxAfter = 0;
     let i = 0;
     const dir = this.getBoxDir();
     while (true) {
@@ -3052,16 +3136,37 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           (overlap >= LOW_OVERLAP && this.getStartEdge(box) >= lineEnd - 1)
         ) {
           lineEnd = this.getEndEdge(box);
+          // A box without inline extent (e.g. `<br>`) does not contain any
+          // content: its block extent is the line box of the line it ends, so
+          // it extends the reported line box, but it must not extend the line
+          // extent used above. Browsers can report such a box with a position
+          // that straddles the boundary between two lines (e.g. in content
+          // fragmented into columns); extending the line extent with it would
+          // make the following lines merge into this line, losing line
+          // positions and disturbing the page/column break decisions.
+          // (Issue #2163)
+          const isLineBreakMarker =
+            lineLength > 0 &&
+            this.getInlineSize(box) === 0 &&
+            this.getBoxSize(box) > 0;
           if (this.vertical) {
-            lineBefore =
-              lineLength == 0 ? box.right : Math.max(lineBefore, box.right);
-            lineAfter =
-              lineLength == 0 ? box.left : Math.min(lineAfter, box.left);
+            lineBoxAfter =
+              lineLength == 0 ? box.left : Math.min(lineBoxAfter, box.left);
+            if (!isLineBreakMarker) {
+              lineBefore =
+                lineLength == 0 ? box.right : Math.max(lineBefore, box.right);
+              lineAfter =
+                lineLength == 0 ? box.left : Math.min(lineAfter, box.left);
+            }
           } else {
-            lineBefore =
-              lineLength == 0 ? box.top : Math.min(lineBefore, box.top);
-            lineAfter =
-              lineLength == 0 ? box.bottom : Math.max(lineAfter, box.bottom);
+            lineBoxAfter =
+              lineLength == 0 ? box.bottom : Math.max(lineBoxAfter, box.bottom);
+            if (!isLineBreakMarker) {
+              lineBefore =
+                lineLength == 0 ? box.top : Math.min(lineBefore, box.top);
+              lineAfter =
+                lineLength == 0 ? box.bottom : Math.max(lineAfter, box.bottom);
+            }
           }
           lineLength++;
           i++;
@@ -3071,7 +3176,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
       // Add line
       if (lineLength > 0) {
-        positions.push(lineAfter);
+        positions.push(lineBoxAfter);
         lineLength = 0;
       }
       if (i >= boxes.length) {

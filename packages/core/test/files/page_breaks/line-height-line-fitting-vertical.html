@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Line fitting with line-height smaller than font ascent + descent, vertical writing-mode (Issue #2163)</title>
+<style>
+/*
+ * Test case for Issue #2163 (vertical writing-mode)
+ *
+ * With font-size 9mm and line-height 0.8, the line pitch is 7.2mm. The page
+ * area is 86.6mm x 94mm, so 12 lines of 10 characters fit, with only 0.2mm
+ * of slack: the line boxes of the 12 lines end at 86.4mm, while the glyph
+ * box of the 12th line ends at about 87.3mm and sticks out of the page area.
+ *
+ * The 160 characters below are 16 lines (16 lines of 10 characters), so the
+ * paragraph must be broken. After the fix, the first page has 12 lines
+ * (120 characters). Before the fix, only 11 lines (110 characters) fit on
+ * the first page, because the glyph box of the 12th line sticks out of the
+ * page area.
+ */
+@page {
+  size: 96.6mm 104mm;
+  margin: 5mm; /* page area: 86.6mm x 94mm */
+}
+:root {
+  writing-mode: vertical-rl;
+  font-family: serif;
+  font-size: 9mm;
+  line-height: 0.8;
+}
+body {
+  margin: 0;
+}
+p {
+  margin: 0;
+  orphans: 1;
+  widows: 1;
+}
+</style>
+</head>
+<body>
+<p>ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ</p>
+</body>
+</html>
