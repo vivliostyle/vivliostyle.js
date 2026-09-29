@@ -1600,10 +1600,16 @@ export class ViewFactory
         // Don't break inside ruby, inline-block, etc.
         nodeContext.breakPenalty++;
       }
+      // An absolutely positioned child is out of flow even when its display
+      // is block-level (for example, flex). Keep it in the inline parent's
+      // layout traversal so a page break cannot separate them. (#2162)
+      const isAbsolutelyPositionedInInline =
+        position === Css.ident.absolute && !!nodeContext.parent?.inline;
       nodeContext.inline =
         (!floating && !display) ||
         Display.isInlineLevel(display) ||
-        Display.isRubyInternalDisplay(display);
+        Display.isRubyInternalDisplay(display) ||
+        isAbsolutelyPositionedInInline;
       nodeContext.display = display ? display.toString() : "inline";
       nodeContext.floatSide = floating ? floatSideName : null;
       nodeContext.floatReference =
