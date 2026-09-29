@@ -191,7 +191,9 @@ export function adjustRectsForColumnBreaking(
  * `getLineBoxHeight()`). Using only the line-height of the element that
  * contains the text would shrink the rects below the line box when an ancestor
  * inline box or the block container has a larger line-height, which makes the
- * line fit although its line box overflows the fragmentainer.
+ * line fit although its line box overflows the fragmentainer. If the line box
+ * height cannot be determined, the rects are left unchanged (see
+ * `getLineBoxHeight()`).
  *
  * Note that this must be applied only to the rects of a single text run: the
  * rects of replaced elements and inline-level boxes (e.g. inline-block) are
@@ -214,9 +216,12 @@ export function adjustTextRectsForLineHeight(
     return;
   }
   const lineHeight = getLineBoxHeight(element, clientLayout);
-  // `line-height: normal` (and other non-numeric values) cannot be compared
-  // with the rects here. With `normal` the used line-height is derived from
-  // the same font metrics as the rects, so no correction is needed.
+  // `getLineBoxHeight()` returns 0 when the line box height cannot be
+  // determined (e.g. when a containing box has `line-height: normal`). The
+  // rects must then be left unchanged: the used value of `normal` is derived
+  // from the font metrics of the box and may be larger than the numeric
+  // line-heights of the other boxes, so resizing the rects would shrink them
+  // below the line box.
   if (!(lineHeight > 0)) {
     return;
   }
@@ -247,9 +252,10 @@ export function adjustTextRectsForLineHeight(
  * and the strut of the block container, i.e. the line-height of the nearest
  * ancestor that is not an inline box.
  *
- * Non-numeric line-heights (e.g. `normal`) are ignored: their used value is
- * derived from the same font metrics as the rects, so those boxes do not need
- * a correction.
+ * Returns 0 if the height cannot be determined, i.e. when one of those boxes
+ * has a non-numeric line-height (e.g. `normal`): the used value is derived
+ * from the font metrics of the box and may be larger than the numeric
+ * line-heights of the other boxes.
  */
 function getLineBoxHeight(
   element: Element,
@@ -259,6 +265,10 @@ function getLineBoxHeight(
   for (let el: Element | null = element; el; el = el.parentElement) {
     const style = clientLayout.getElementComputedStyle(el);
     const value = parseFloat(style.lineHeight);
+    if (!(value >= 0)) {
+      // Non-numeric (e.g. `normal`): the line box height is unknown.
+      return 0;
+    }
     if (value > lineHeight) {
       lineHeight = value;
     }

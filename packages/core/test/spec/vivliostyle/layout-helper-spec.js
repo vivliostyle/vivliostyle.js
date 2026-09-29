@@ -209,6 +209,52 @@ describe("layout-helper", function () {
       expect(rect.height).toBe(30);
     });
 
+    it("leaves rects unchanged when the strut has line-height: normal", function () {
+      // The used value of `normal` may be larger than the numeric
+      // line-heights of the other boxes (e.g. a 10px span inside a block whose
+      // strut is `normal`), so the line box height cannot be determined and
+      // the rects must be left unchanged instead of being shrunk below the
+      // line box.
+      const span = createInlineChain({
+        blockLineHeight: "normal",
+        spanLineHeight: "10px",
+      });
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 40 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        span,
+        clientLayout,
+        false,
+      );
+
+      expect(rect).toEqual(
+        createRect({ left: 0, top: 0, right: 100, bottom: 40 }),
+      );
+    });
+
+    it("leaves rects unchanged when an inline ancestor has line-height: normal", function () {
+      const em = createInlineChain({
+        blockLineHeight: "10px",
+        spanLineHeight: "normal",
+        innerLineHeight: "10px",
+      });
+      const clientLayout = createClientLayoutFromStyles();
+      const rect = createRect({ left: 0, top: 0, right: 100, bottom: 40 });
+
+      adapt_layouthelper.adjustTextRectsForLineHeight(
+        [rect],
+        em,
+        clientLayout,
+        false,
+      );
+
+      expect(rect).toEqual(
+        createRect({ left: 0, top: 0, right: 100, bottom: 40 }),
+      );
+    });
+
     it("ignores line-height: normal", function () {
       const element = createElement();
       const clientLayout = createClientLayout({ lineHeight: "normal" });
