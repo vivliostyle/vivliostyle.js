@@ -2919,6 +2919,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     end: Element | Text,
   ): Vtree.ClientRect[] {
     const arr: Vtree.ClientRect[] = [];
+    // Boxes of the elements visited by the walk, collected separately: the
+    // merged range measurement this replaces included the border boxes
+    // (padding, border) of the elements fully contained in the measured range,
+    // because those boxes extend beyond the boxes of their text. They are
+    // added after the walk, except for the elements that contain the range
+    // boundaries (the first and last measured node): those were only partially
+    // contained in the merged range. (Issue #2163)
+    const elementBoxes: { element: Element; rects: Vtree.ClientRect[] }[] = [];
+    let firstMeasuredNode: Node | null = null;
+    let lastMeasuredNode: Node | null = null;
     let wentUp = false;
     let node: Node = start;
     let endNotReached = true;
@@ -2941,6 +2951,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // (Issue #2163)
         if (node.nodeType === 3 && node.parentNode) {
           this.measureTextNodeBoxes(node as Text, arr);
+          firstMeasuredNode ??= node;
+          lastMeasuredNode = node;
         } else if (node.parentNode == null) {
           endNotReached = false;
         }
@@ -2966,10 +2978,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         } else {
           this.measureBoxesOfNode(node, arr);
         }
+        firstMeasuredNode ??= node;
+        lastMeasuredNode = node;
         if (node.contains(end)) {
           endNotReached = false;
         }
       } else {
+        if (node !== start && node !== end) {
+          const rects: Vtree.ClientRect[] = [];
+          this.measureBoxesOfNode(node, rects);
+          elementBoxes.push({ element, rects });
+        }
         next = node.firstChild;
       }
       if (!next) {
@@ -2980,6 +2999,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
       node = next;
+    }
+    for (const { element, rects } of elementBoxes) {
+      if (
+        (firstMeasuredNode && element.contains(firstMeasuredNode)) ||
+        (lastMeasuredNode && element.contains(lastMeasuredNode))
+      ) {
+        continue;
+      }
+      for (let i = 0; i < rects.length; i++) {
+        arr.push(rects[i]);
+      }
     }
     return arr;
   }
