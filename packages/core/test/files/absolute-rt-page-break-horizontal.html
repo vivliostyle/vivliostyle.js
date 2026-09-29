@@ -37,12 +37,15 @@
         inset-block-end: 100%;
         inset-inline-start: 50%;
         transform: translateX(-50%);
+        font-size: 0;
+        white-space: nowrap;
+      }
+      rt::before {
+        content: "";
         inline-size: 8px;
         block-size: 8px;
         border-radius: 50%;
         background: black;
-        font-size: 0;
-        white-space: nowrap;
       }
     </style>
   </head>
