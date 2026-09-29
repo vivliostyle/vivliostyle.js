@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2162: an absolutely positioned span must stay with its inline containing block on page 1. -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Absolutely positioned span in an inline element at a page break (vertical)</title>
+    <style>
+      @page {
+        size: 200px 140px;
+        margin: 10px;
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font-size: 20px;
+        line-height: 30px;
+        orphans: 1;
+        widows: 1;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      .anchor {
+        position: relative;
+        display: inline;
+        white-space: nowrap;
+      }
+      .annotation {
+        position: absolute;
+        display: flex;
+        inset-block-end: 100%;
+        inset-inline-start: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <p>あああああああああああああああああああああああああああああああああああ<span class="anchor">永<span class="annotation">﹅</span></span>いいいいいいいいいいいいいいいいいいいい</p>
+  </body>
+</html>

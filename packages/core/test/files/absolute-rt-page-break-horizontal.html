@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2162: the final ruby base and its absolutely positioned rt must stay on page 1. -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Absolutely positioned rt at a page break (horizontal)</title>
+    <style>
+      @page {
+        size: 200px 140px;
+        margin: 10px;
+      }
+      :root {
+        font-size: 20px;
+        line-height: 30px;
+        orphans: 1;
+        widows: 1;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      ruby {
+        position: relative;
+        display: inline;
+        white-space: nowrap;
+      }
+      rt {
+        position: absolute;
+        display: flex;
+        inset-block-end: 100%;
+        inset-inline-start: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <p>あああああああああああああああああああああああああああああああああああ<ruby>永<rt>﹅</rt></ruby>いいいいいいいいいいいいいいいいいいいい</p>
+  </body>
+</html>

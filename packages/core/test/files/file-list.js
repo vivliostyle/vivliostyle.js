@@ -42,6 +42,26 @@ module.exports = [
       },
       { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
       {
+        file: "absolute-rt-page-break-horizontal.html",
+        title:
+          "Absolutely positioned rt at a page break (horizontal, Issue #2162)",
+      },
+      {
+        file: "absolute-rt-page-break-vertical.html",
+        title:
+          "Absolutely positioned rt at a page break (vertical, Issue #2162)",
+      },
+      {
+        file: "absolute-inline-child-page-break-horizontal.html",
+        title:
+          "Absolutely positioned span in an inline element at a page break (horizontal, Issue #2162)",
+      },
+      {
+        file: "absolute-inline-child-page-break-vertical.html",
+        title:
+          "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)",
+      },
+      {
         file: "css-parse-error/gradient-background-image.html",
         title: "Gradient background-image",
       },
