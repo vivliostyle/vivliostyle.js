@@ -2989,10 +2989,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // are the boxes of the descendant text nodes, which are measured
           // (and adjusted to the line box) above, and appending them here
           // again would reintroduce the unadjusted glyph boxes. (Issue #2163)
-          elementBoxes.push({
-            element,
-            rects: this.clientLayout.getElementClientRects(element),
-          });
+          const rects = this.clientLayout.getElementClientRects(element);
+          // Adjust the rects' positions for column breaking, like the other
+          // measured boxes, so that the synthetic column offsets of the
+          // browser's multi-column layout are normalized. (Issue #2163)
+          LayoutHelper.adjustRectsForColumnBreaking(rects, this.vertical);
+          elementBoxes.push({ element, rects });
         }
         next = node.firstChild;
       }
