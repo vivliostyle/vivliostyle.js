@@ -2994,6 +2994,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // measured boxes, so that the synthetic column offsets of the
           // browser's multi-column layout are normalized. (Issue #2163)
           LayoutHelper.adjustRectsForColumnBreaking(rects, this.vertical);
+          LayoutHelper.adjustInlineRectsForLineHeight(
+            rects,
+            element,
+            this.clientLayout,
+            this.vertical,
+          );
           elementBoxes.push({ element, rects });
         }
         next = node.firstChild;
@@ -3054,8 +3060,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   /**
    * Measure the client rects of an element box (a replaced element, an
-   * inline-block, `<br>`, an empty inline element, etc.). These boxes are not
-   * affected by line-height, so they are measured as they are.
+   * inline-block, `<br>`, an empty inline element, etc.). Keep BR range rects
+   * unchanged for line grouping in fragmented browser columns; calculateEdge
+   * measures their line-height-adjusted ends separately with a marker.
    */
   private measureBoxesOfNode(node: Node, arr: Vtree.ClientRect[]): void {
     const boxes = RangeClientRects.getLayoutClientRectsBetween(
@@ -3066,6 +3073,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // Adjust boxes' positions for column breaking
     LayoutHelper.adjustRectsForColumnBreaking(boxes, this.vertical);
+
+    if (node.nodeType === 1 && (node as Element).localName !== "br") {
+      LayoutHelper.adjustInlineRectsForLineHeight(
+        boxes,
+        node as Element,
+        this.clientLayout,
+        this.vertical,
+      );
+    }
 
     for (let i = 0; i < boxes.length; i++) {
       arr.push(boxes[i]);

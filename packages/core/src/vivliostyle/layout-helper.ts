@@ -247,6 +247,46 @@ export function adjustTextRectsForLineHeight(
 }
 
 /**
+ * Ordinary inline elements also expose font-sized client rects, even without
+ * padding or borders. Normalize those just like text, but retain decorated
+ * border boxes and atomic/replaced elements, whose extents must still fit.
+ */
+export function adjustInlineRectsForLineHeight(
+  rects: Vtree.ClientRect[],
+  element: Element,
+  clientLayout: Vtree.ClientLayout,
+  vertical: boolean,
+): void {
+  if (
+    Base.mediaTags[element.localName] ||
+    /^r(uby|[bt]c?)$/.test(element.localName)
+  ) {
+    return;
+  }
+  const style = clientLayout.getElementComputedStyle(element);
+  if (style.display !== "inline") {
+    return;
+  }
+  const decorations = vertical
+    ? [
+        style.paddingLeft,
+        style.paddingRight,
+        style.borderLeftWidth,
+        style.borderRightWidth,
+      ]
+    : [
+        style.paddingTop,
+        style.paddingBottom,
+        style.borderTopWidth,
+        style.borderBottomWidth,
+      ];
+  if (decorations.some((value) => parseFloat(value) > 0)) {
+    return;
+  }
+  adjustTextRectsForLineHeight(rects, element, clientLayout, vertical);
+}
+
+/**
  * Get the height of the line box the text in the given element is on: the
  * largest computed line-height among the inline boxes that contain the text
  * and the strut of the block container, i.e. the line-height of the nearest
@@ -625,6 +665,15 @@ export function calculateEdge(
       if (markerRect) {
         const rects = [markerRect];
         adjustRectsForColumnBreaking(rects, vertical);
+        // The marker has the font's extent, just like a text range. Use the
+        // same line-height adjustment so a fitting line does not leave its
+        // BR on the next page as an extra blank line. (Issue #2163)
+        adjustTextRectsForLineHeight(
+          rects,
+          element.parentElement,
+          clientLayout,
+          vertical,
+        );
         const adjustedRect = rects[0];
         const edge = vertical ? adjustedRect.left : adjustedRect.bottom;
         if (!isNaN(edge) && edge !== 0) {
@@ -662,6 +711,24 @@ export function calculateEdge(
       }
       if (cbox.right >= cbox.left && cbox.bottom >= cbox.top) {
         if (nodeContext.after) {
+          if (nodeContext.inline) {
+            // An inline may span several lines. Adjust each fragment, not
+            // their bounding rectangle, which would collapse several lines
+            // to a single line-height.
+            const rects = clientLayout.getElementClientRects(element);
+            adjustRectsForColumnBreaking(rects, vertical);
+            adjustInlineRectsForLineHeight(
+              rects,
+              element,
+              clientLayout,
+              vertical,
+            );
+            if (rects.length) {
+              return vertical
+                ? Math.min(...rects.map((rect) => rect.left))
+                : Math.max(...rects.map((rect) => rect.bottom));
+            }
+          }
           return vertical ? cbox.left : cbox.bottom;
         } else {
           return vertical ? cbox.right : cbox.top;
