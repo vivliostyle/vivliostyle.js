@@ -21,6 +21,7 @@ import * as Base from "./base";
 import * as Css from "./css";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
+import * as NativeTextSpacing from "./native-text-spacing";
 import * as PseudoElement from "./pseudo-element";
 import * as RangeClientRects from "./range-client-rects";
 import * as Vtree from "./vtree";
@@ -363,52 +364,170 @@ function getChromiumVoTrFallbackTagName(
     : "viv-ts-close";
 }
 
-class TextSpacingPolyfill {
+type Spacing = {
+  chromiumVoTrFallback?: boolean;
+  autospace: Autospace;
+  spacingTrim: SpacingTrim;
+  hangingPunctuation: HangingPunctuation;
+};
+
+function resolveSpacing(
+  element: HTMLElement,
+  autospaceValue: PropertyValue,
+  trimValue: PropertyValue,
+  hangingValue: PropertyValue,
+  lang: string | null,
+  vertical: boolean,
+): Spacing {
+  let autospace = autospaceFromPropertyValue(autospaceValue);
+  let spacingTrim = spacingTrimFromPropertyValue(trimValue);
+  const hangingPunctuation = hangingPunctuationFromPropertyValue(hangingValue);
+  const chromiumVoTrFallback =
+    vertical &&
+    Base.browserType === "chromium" &&
+    /[‘’“”〰﹙﹚﹛﹜﹝﹞〚〛]/u.test(element.textContent) &&
+    !(
+      isTextSpacingNone(autospace, spacingTrim) &&
+      isHangingPunctuationNone(hangingPunctuation)
+    );
+  const autospaceCSS = autospace.ideographAlpha
+    ? autospace.ideographNumeric
+      ? "normal"
+      : "ideograph-alpha"
+    : autospace.ideographNumeric
+      ? "ideograph-numeric"
+      : "no-autospace";
+  const nativeAutospace = NativeTextSpacing.supports(
+    "text-autospace",
+    autospaceCSS,
+  );
+  element.style.setProperty(
+    "text-autospace",
+    nativeAutospace ? autospaceCSS : "no-autospace",
+  );
+  if (nativeAutospace) autospace = AUTOSPACE_NONE;
+
+  const trimCSS = trimValue?.toString() ?? "normal";
+  // The legacy combinations (including auto = trim-both) have different
+  // semantics. Keep them, and interactions with hanging punctuation, together
+  // in the polyfill so that native and synthetic trimming cannot add up.
+  const nativeTrim =
+    /^(normal|space-all|trim-start|space-first)$/.test(trimCSS) &&
+    isHangingPunctuationNone(hangingPunctuation) &&
+    !chromiumVoTrFallback &&
+    NativeTextSpacing.supportsTrim(element, trimCSS, lang, vertical);
+  element.style.setProperty(
+    "text-spacing-trim",
+    nativeTrim ? trimCSS : "space-all",
+  );
+  if (nativeTrim) spacingTrim = SPACING_TRIM_NONE;
+  return { autospace, spacingTrim, hangingPunctuation, chromiumVoTrFallback };
+}
+
+/** Split a view node only when a fallback needs character boundaries. */
+function splitTextNode(
+  node: Text,
+  spacing?: Spacing,
+  limit = Infinity,
+): Text[] {
+  let text = node.data;
+  if (
+    !spacing ||
+    spacing.chromiumVoTrFallback ||
+    !isTextSpacingNone(AUTOSPACE_NONE, spacing.spacingTrim) ||
+    !isHangingPunctuationNone(spacing.hangingPunctuation)
+  ) {
+    text = text.replace(
+      /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030])/gsu,
+      "$&\x00",
+    );
+  }
+  if (
+    !spacing ||
+    spacing.autospace.ideographAlpha ||
+    spacing.autospace.ideographNumeric
+  ) {
+    text = text.replace(
+      /(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
+      "$&\x00",
+    );
+  }
+  const parts = text.split("\x00");
+  const nodes = [node];
+  let count = 0;
+  let offset = 0;
+  while (count < parts.length - 1 && offset + parts[count].length <= limit) {
+    offset += parts[count++].length;
+  }
+  if (!count) return nodes;
+  // Build the remaining siblings off-tree instead of repeatedly splitting
+  // (and invalidating the shaping of) the long tail of the original node.
+  const fragment = node.ownerDocument.createDocumentFragment();
+  for (let i = 1; i <= count; i++) {
+    const sibling = node.ownerDocument.createTextNode(
+      i === count ? node.data.slice(offset) : parts[i],
+    );
+    fragment.appendChild(sibling);
+    nodes.push(sibling);
+  }
+  node.data = parts[0];
+  node.after(fragment);
+  return nodes;
+}
+
+/** Preserve source offsets and box offsets for pagination after view splitting. */
+export function splitCheckPoint(
+  point: Vtree.RenderedNodeContext,
+  spacing?: Spacing,
+  deferredViews?: Set<Text>,
+): Vtree.RenderedNodeContext[] {
+  const textPoint = Vtree.asTextNodeContext(point);
+  if (!textPoint || point.after) return [point];
+  const textNode = textPoint.viewNode;
+  let limit = textNode.length;
+  // Keep the unprocessed tail as one text node. Splitting an entire long
+  // paragraph again on every page would make the fallback quadratic. As in
+  // buildViewToNextBlockEdge, two columns of lookahead suffice (Issue #1256).
+  if (limit > 1024) {
+    const range = textNode.ownerDocument.createRange();
+    const beyondLookahead = (offset: number) => {
+      range.setStart(textNode, offset);
+      range.setEnd(textNode, offset + 1);
+      const rect = range.getClientRects()[0];
+      return (
+        rect &&
+        LayoutHelper.checkIfBeyondColumnBreaks(rect, point.vertical) >= 2
+      );
+    };
+    if (beyondLookahead(limit - 1)) {
+      let low = 0;
+      let high = limit - 1;
+      while (low < high) {
+        const mid = (low + high) >>> 1;
+        if (beyondLookahead(mid)) high = mid;
+        else low = mid + 1;
+      }
+      limit = low;
+    }
+  }
+  const nodes = splitTextNode(textNode, spacing, limit);
+  if (limit < nodes.reduce((length, node) => length + node.length, 0)) {
+    deferredViews?.add(nodes.at(-1));
+  }
+  let offset = 0;
+  return nodes.map((node) => {
+    const p = point.copy().modify();
+    p.viewNode = node;
+    p.offsetInNode += offset;
+    p.boxOffset += offset;
+    offset += node.length;
+    return p;
+  });
+}
+
+export class TextSpacingPolyfill {
   getPolyfilledInheritedProps() {
     return ["hanging-punctuation", "text-autospace", "text-spacing-trim"];
-  }
-
-  preprocessSingleDocument(document: Document): void {
-    if (!document.body) {
-      return;
-    }
-    this.preprocessForTextSpacing(document.body);
-  }
-
-  preprocessForTextSpacing(element: Element): void {
-    // Split text nodes by punctuations and ideograph/non-ideograph boundary
-    const walker = element.ownerDocument.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-    );
-    for (
-      let node = walker.nextNode() as Text | null;
-      node;
-      node = walker.nextNode() as Text | null
-    ) {
-      const parentElem = node.parentElement;
-      if (
-        !parentElem ||
-        parentElem.namespaceURI !== Base.NS.XHTML ||
-        parentElem.dataset?.["mathTypeset"] === "true"
-      ) {
-        continue;
-      }
-      const textArr = node.textContent
-        .replace(
-          /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030])|(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu,
-          "$&\x00",
-        )
-        .split("\x00");
-
-      if (textArr.length > 1) {
-        const lastIndex = textArr.length - 1;
-        for (let i = 0; i < lastIndex; i++) {
-          node.before(document.createTextNode(textArr[i]));
-        }
-        node.textContent = textArr[lastIndex];
-      }
-    }
   }
 
   processGeneratedContent(
@@ -420,20 +539,32 @@ class TextSpacingPolyfill {
     vertical: boolean,
   ): void {
     lang = normalizeLang(lang);
-    const autospace = autospaceFromPropertyValue(autospaceVal);
-    const spacingTrim = spacingTrimFromPropertyValue(spacingTrimVal);
-    const hangingPunctuation = hangingPunctuationFromPropertyValue(
+    const spacing = resolveSpacing(
+      element,
+      autospaceVal,
+      spacingTrimVal,
       hangingPunctuationVal,
+      lang,
+      vertical,
     );
+    const { autospace, spacingTrim, hangingPunctuation } = spacing;
 
     if (
+      !spacing.chromiumVoTrFallback &&
       isHangingPunctuationNone(hangingPunctuation) &&
       isTextSpacingNone(autospace, spacingTrim)
     ) {
       return;
     }
 
-    this.preprocessForTextSpacing(element);
+    const textWalker = element.ownerDocument.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+    );
+    const textNodes: Text[] = [];
+    while (textWalker.nextNode())
+      textNodes.push(textWalker.currentNode as Text);
+    textNodes.forEach((node) => splitTextNode(node, spacing));
 
     const whiteSpaceSave = element.style.whiteSpace;
     if ((vertical ? element.offsetHeight : element.offsetWidth) === 0) {
@@ -480,6 +611,80 @@ class TextSpacingPolyfill {
     nodeContext: Vtree.NodeContext,
     checkPoints: Vtree.RenderedNodeContext[],
   ): void {
+    const spacingByElement = new Map<HTMLElement, Spacing>();
+    const contextsByElement = new Map<HTMLElement, Vtree.NodeContext>();
+    const blocksByElement = new Map<HTMLElement, HTMLElement>();
+    const fallbackBlocks = new Set<HTMLElement>();
+    // Decide for the entire inline formatting context before inserting any
+    // wrappers. Native punctuation adjacent to a synthetic half-width glyph
+    // cannot reliably participate in the same trimming sequence.
+    for (const p of checkPoints) {
+      const textP =
+        !p.after && p.inline && !p.display ? Vtree.asTextNodeContext(p) : null;
+      const element = textP?.viewNode.parentElement;
+      if (
+        !element ||
+        element.localName === "viv-ts-inner" ||
+        element.dataset?.["mathTypeset"] === "true" ||
+        spacingByElement.has(element)
+      )
+        continue;
+      const spacing = resolveSpacing(
+        element,
+        p.inheritedProps["text-autospace"],
+        p.inheritedProps["text-spacing-trim"],
+        p.inheritedProps["hanging-punctuation"],
+        normalizeLang(p.lang ?? p.parent?.lang),
+        p.vertical,
+      );
+      spacingByElement.set(element, spacing);
+      contextsByElement.set(element, p);
+      const block = findBlockContainer(textP.viewNode) ?? element;
+      blocksByElement.set(element, block);
+      if (
+        !isTextSpacingNone(AUTOSPACE_NONE, spacing.spacingTrim) ||
+        !isHangingPunctuationNone(spacing.hangingPunctuation)
+      )
+        fallbackBlocks.add(block);
+    }
+    for (const [element, spacing] of spacingByElement) {
+      if (fallbackBlocks.has(blocksByElement.get(element))) {
+        element.style.setProperty("text-spacing-trim", "space-all");
+        spacing.spacingTrim = spacingTrimFromPropertyValue(
+          contextsByElement.get(element).inheritedProps["text-spacing-trim"],
+        );
+      }
+    }
+    const splitNodes = new Map<Node, Text>();
+    const deferredViews = new Set<Text>();
+    for (let i = 0; i < checkPoints.length; i++) {
+      const p = checkPoints[i];
+      const textP =
+        !p.after && p.inline && !p.display ? Vtree.asTextNodeContext(p) : null;
+      if (!textP) {
+        const last = splitNodes.get(p.viewNode);
+        if (last && p.after) {
+          const after = p.copy().modify();
+          after.viewNode = last;
+          checkPoints[i] = after;
+        }
+        continue;
+      }
+      const spacing = spacingByElement.get(textP.viewNode.parentElement);
+      if (
+        !spacing ||
+        (!spacing.chromiumVoTrFallback &&
+          isHangingPunctuationNone(spacing.hangingPunctuation) &&
+          isTextSpacingNone(spacing.autospace, spacing.spacingTrim))
+      )
+        continue;
+      const points = splitCheckPoint(p, spacing, deferredViews);
+      if (points.length > 1) {
+        splitNodes.set(p.viewNode, points.at(-1).viewNode as Text);
+        checkPoints.splice(i, 1, ...points);
+        i += points.length - 1;
+      }
+    }
     const isFirstFragment =
       !nodeContext ||
       (nodeContext.fragmentIndex === 1 && checkIfFirstInBlock());
@@ -592,242 +797,253 @@ class TextSpacingPolyfill {
 
     let iFirst = -1;
     const reshapeTargets = new Set<HTMLElement>();
-    for (let i = 0; i < checkPoints.length; i++) {
-      const p = checkPoints[i];
-      const textP =
-        !p.after && p.inline && !p.display ? Vtree.asTextNodeContext(p) : null;
-      if (
-        textP &&
-        textP.viewNode.parentNode &&
-        !Vtree.canIgnore(textP.viewNode, textP.whitespace)
-      ) {
-        if (iFirst < 0) {
-          iFirst = i;
-        }
-        const lang = normalizeLang(
-          textP.lang ??
-            textP.parent.lang ??
-            nodeContext?.lang ??
-            nodeContext?.parent?.lang,
-        );
-        const autospace = autospaceFromPropertyValue(
-          textP.inheritedProps["text-autospace"],
-        );
-        const spacingTrim = spacingTrimFromPropertyValue(
-          textP.inheritedProps["text-spacing-trim"],
-        );
-        const hangingPunctuation = hangingPunctuationFromPropertyValue(
-          textP.inheritedProps["hanging-punctuation"],
-        );
-
+    // The distant tail is not needed while measuring fallback punctuation.
+    // Keeping it in the DOM would reflow all later pages for every wrapper.
+    // Restore it before pagination consumes the checkpoints.
+    const deferred = Array.from(deferredViews, (node) => {
+      const placeholder = node.ownerDocument.createComment("text-spacing tail");
+      node.replaceWith(placeholder);
+      return { node, placeholder };
+    });
+    try {
+      for (let i = 0; i < checkPoints.length; i++) {
+        const p = checkPoints[i];
+        const textP =
+          !p.after && p.inline && !p.display
+            ? Vtree.asTextNodeContext(p)
+            : null;
         if (
-          isHangingPunctuationNone(hangingPunctuation) &&
-          isTextSpacingNone(autospace, spacingTrim)
+          textP &&
+          textP.viewNode.parentNode &&
+          !Vtree.canIgnore(textP.viewNode, textP.whitespace)
         ) {
-          continue;
-        }
-        if (/\b(flex|grid)\b/.test(textP.parent.display ?? "")) {
-          // Cannot process if parent is flex or grid. (Issue #926)
-          continue;
-        }
-        let prevNode: Node | null = null;
-        let nextNode: Node | null = null;
-        let isFirstAfterBreak = i === iFirst;
-        let isFirstInBlock = i === iFirst && isFirstFragment;
-        let isFirstAfterForcedLineBreak =
-          i === iFirst && isAfterForcedLineBreak;
-        let isLastBeforeForcedLineBreak = false;
-        let isLastInBlock = false;
+          if (iFirst < 0) {
+            iFirst = i;
+          }
+          const lang = normalizeLang(
+            textP.lang ??
+              textP.parent.lang ??
+              nodeContext?.lang ??
+              nodeContext?.parent?.lang,
+          );
+          const spacing = spacingByElement.get(textP.viewNode.parentElement);
+          if (!spacing) continue;
+          const { autospace, spacingTrim, hangingPunctuation } = spacing;
 
-        function checkIfFirstAfterForcedLineBreak(
-          prevP: Vtree.NodeContext,
-        ): boolean {
-          if (prevP.viewNode?.nodeType === Node.ELEMENT_NODE) {
-            return (prevP.viewNode as Element).localName === "br";
-          }
-          if (prevP.viewNode?.nodeType === Node.TEXT_NODE) {
-            const prevTextNode = prevP.viewNode as Text;
-            if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (prevTextNode.textContent?.endsWith("\n")) {
-                return true;
-              }
-            } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/\n[ \t\r\n\f]*$/.test(prevTextNode.textContent)) {
-                return true;
-              }
-            }
-            if (prevTextNode.previousElementSibling?.localName === "br") {
-              return Vtree.canIgnore(prevTextNode, prevP.whitespace);
-            }
-          }
-          return false;
-        }
-
-        function checkIfLastBeforeForcedLineBreak(
-          nextP: Vtree.NodeContext,
-        ): boolean {
-          if (nextP.viewNode?.nodeType === Node.ELEMENT_NODE) {
-            return (nextP.viewNode as Element).localName === "br";
-          }
-          if (nextP.viewNode?.nodeType === Node.TEXT_NODE) {
-            const nextTextNode = nextP.viewNode as Text;
-            if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
-              if (nextTextNode.textContent?.startsWith("\n")) {
-                return true;
-              }
-            } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {
-              if (/^[ \t\r\n\f]*\n/.test(nextTextNode.textContent)) {
-                return true;
-              }
-            }
-            if (nextTextNode.nextElementSibling?.localName === "br") {
-              return Vtree.canIgnore(nextTextNode, nextP.whitespace);
-            }
-          }
-          return false;
-        }
-
-        for (let prev = i - 1; prev >= 0; prev--) {
-          const prevP = checkPoints[prev];
-          if (checkIfFirstAfterForcedLineBreak(prevP)) {
-            isFirstAfterForcedLineBreak = true;
-            break;
-          }
           if (
-            !prevP.display &&
-            prevP.viewNode.nodeType === Node.TEXT_NODE &&
-            prevP.viewNode.textContent.length > 0
+            !spacing.chromiumVoTrFallback &&
+            isHangingPunctuationNone(hangingPunctuation) &&
+            isTextSpacingNone(autospace, spacingTrim)
           ) {
-            prevNode = prevP.viewNode;
-            break;
+            continue;
           }
-          // Issue #868: Look inside footnote-call for the last text node.
-          // BUT skip and look further back if we're inside that same footnote-call.
-          if (
-            prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
-            PseudoElement.getPseudoName(prevP.viewNode as Element) ===
-              "footnote-call"
-          ) {
-            if (prevP.viewNode.contains(textP.viewNode)) {
-              continue;
+          if (/\b(flex|grid)\b/.test(textP.parent.display ?? "")) {
+            // Cannot process if parent is flex or grid. (Issue #926)
+            continue;
+          }
+          let prevNode: Node | null = null;
+          let nextNode: Node | null = null;
+          let isFirstAfterBreak = i === iFirst;
+          let isFirstInBlock = i === iFirst && isFirstFragment;
+          let isFirstAfterForcedLineBreak =
+            i === iFirst && isAfterForcedLineBreak;
+          let isLastBeforeForcedLineBreak = false;
+          let isLastInBlock = false;
+
+          function checkIfFirstAfterForcedLineBreak(
+            prevP: Vtree.NodeContext,
+          ): boolean {
+            if (prevP.viewNode?.nodeType === Node.ELEMENT_NODE) {
+              return (prevP.viewNode as Element).localName === "br";
             }
-            const lastText = LayoutHelper.findLastTextNodeInElement(
-              prevP.viewNode,
-            );
-            if (lastText) {
-              prevNode = lastText;
+            if (prevP.viewNode?.nodeType === Node.TEXT_NODE) {
+              const prevTextNode = prevP.viewNode as Text;
+              if (prevP.whitespace === Vtree.Whitespace.PRESERVE) {
+                if (prevTextNode.textContent?.endsWith("\n")) {
+                  return true;
+                }
+              } else if (prevP.whitespace === Vtree.Whitespace.NEWLINE) {
+                if (/\n[ \t\r\n\f]*$/.test(prevTextNode.textContent)) {
+                  return true;
+                }
+              }
+              if (prevTextNode.previousElementSibling?.localName === "br") {
+                return Vtree.canIgnore(prevTextNode, prevP.whitespace);
+              }
+            }
+            return false;
+          }
+
+          function checkIfLastBeforeForcedLineBreak(
+            nextP: Vtree.NodeContext,
+          ): boolean {
+            if (nextP.viewNode?.nodeType === Node.ELEMENT_NODE) {
+              return (nextP.viewNode as Element).localName === "br";
+            }
+            if (nextP.viewNode?.nodeType === Node.TEXT_NODE) {
+              const nextTextNode = nextP.viewNode as Text;
+              if (nextP.whitespace === Vtree.Whitespace.PRESERVE) {
+                if (nextTextNode.textContent?.startsWith("\n")) {
+                  return true;
+                }
+              } else if (nextP.whitespace === Vtree.Whitespace.NEWLINE) {
+                if (/^[ \t\r\n\f]*\n/.test(nextTextNode.textContent)) {
+                  return true;
+                }
+              }
+              if (nextTextNode.nextElementSibling?.localName === "br") {
+                return Vtree.canIgnore(nextTextNode, nextP.whitespace);
+              }
+            }
+            return false;
+          }
+
+          for (let prev = i - 1; prev >= 0; prev--) {
+            const prevP = checkPoints[prev];
+            if (checkIfFirstAfterForcedLineBreak(prevP)) {
+              isFirstAfterForcedLineBreak = true;
               break;
             }
-          }
-          if (
-            (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
-            (prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
-              ((prevP.viewNode as Element).localName === "br" ||
-                Base.mediaTags[(prevP.viewNode as Element).localName]))
-          ) {
-            break;
-          }
-          if (prev === 0) {
-            isFirstAfterBreak = true;
-            if (isFirstFragment) {
-              isFirstInBlock = true;
-              isFirstAfterForcedLineBreak = true;
-            }
-          }
-        }
-        for (let next = i + 1; next < checkPoints.length; next++) {
-          const nextP = checkPoints[next];
-          if (checkIfLastBeforeForcedLineBreak(nextP)) {
-            isLastBeforeForcedLineBreak = true;
-            break;
-          }
-          if (
-            nextP.viewNode !== textP.viewNode &&
-            !nextP.display &&
-            nextP.viewNode.nodeType === Node.TEXT_NODE &&
-            nextP.viewNode.textContent.length > 0
-          ) {
-            nextNode = nextP.viewNode;
-            break;
-          }
-          if (
-            (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
-            (nextP.viewNode?.nodeType === Node.ELEMENT_NODE &&
-              ((nextP.viewNode as Element).localName === "br" ||
-                Base.mediaTags[(nextP.viewNode as Element).localName]))
-          ) {
             if (
-              next === checkPoints.length - 1 &&
-              isOutOfLine(nextP.viewNode)
+              !prevP.display &&
+              prevP.viewNode.nodeType === Node.TEXT_NODE &&
+              prevP.viewNode.textContent.length > 0
             ) {
-              isLastInBlock = true;
+              prevNode = prevP.viewNode;
+              break;
             }
-            break;
-          }
-          if (next === checkPoints.length - 1) {
-            isLastBeforeForcedLineBreak = true;
-            isLastInBlock = true;
-            for (
-              let nextNext = nextP.viewNode.nextSibling;
-              nextNext;
-              nextNext = nextNext.nextSibling
+            // Issue #868: Look inside footnote-call for the last text node.
+            // BUT skip and look further back if we're inside that same footnote-call.
+            if (
+              prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
+              PseudoElement.getPseudoName(prevP.viewNode as Element) ===
+                "footnote-call"
             ) {
-              if (!isOutOfLine(nextNext)) {
-                isLastInBlock = false;
+              if (prevP.viewNode.contains(textP.viewNode)) {
+                continue;
+              }
+              const lastText = LayoutHelper.findLastTextNodeInElement(
+                prevP.viewNode,
+              );
+              if (lastText) {
+                prevNode = lastText;
                 break;
               }
             }
+            if (
+              (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
+              (prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
+                ((prevP.viewNode as Element).localName === "br" ||
+                  Base.mediaTags[(prevP.viewNode as Element).localName]))
+            ) {
+              break;
+            }
+            if (prev === 0) {
+              isFirstAfterBreak = true;
+              if (isFirstFragment) {
+                isFirstInBlock = true;
+                isFirstAfterForcedLineBreak = true;
+              }
+            }
           }
-        }
-        if (textP.parent.display === "inline-block") {
-          // an inline-block box enclosing rendered checkpoints has its
-          // element view
-          const inlineBlock = Vtree.asElementNodeContext(textP.parent);
-          Asserts.assert(inlineBlock);
-          if (!isFirstInBlock) {
-            let firstInInlineBlock = inlineBlock.viewNode.firstChild;
-            while (Vtree.canIgnore(firstInInlineBlock, textP.whitespace)) {
-              firstInInlineBlock = firstInInlineBlock.nextSibling;
+          for (let next = i + 1; next < checkPoints.length; next++) {
+            const nextP = checkPoints[next];
+            if (checkIfLastBeforeForcedLineBreak(nextP)) {
+              isLastBeforeForcedLineBreak = true;
+              break;
             }
-            if (textP.viewNode === firstInInlineBlock) {
-              isFirstInBlock = true;
+            if (
+              nextP.viewNode !== textP.viewNode &&
+              !nextP.display &&
+              nextP.viewNode.nodeType === Node.TEXT_NODE &&
+              nextP.viewNode.textContent.length > 0
+            ) {
+              nextNode = nextP.viewNode;
+              break;
             }
-          }
-          if (!isLastInBlock) {
-            let lastInInlineBlock = inlineBlock.viewNode.lastChild;
-            while (Vtree.canIgnore(lastInInlineBlock, textP.whitespace)) {
-              lastInInlineBlock = lastInInlineBlock.previousSibling;
+            if (
+              (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
+              (nextP.viewNode?.nodeType === Node.ELEMENT_NODE &&
+                ((nextP.viewNode as Element).localName === "br" ||
+                  Base.mediaTags[(nextP.viewNode as Element).localName]))
+            ) {
+              if (
+                next === checkPoints.length - 1 &&
+                isOutOfLine(nextP.viewNode)
+              ) {
+                isLastInBlock = true;
+              }
+              break;
             }
-            if (textP.viewNode === lastInInlineBlock) {
+            if (next === checkPoints.length - 1) {
+              isLastBeforeForcedLineBreak = true;
               isLastInBlock = true;
+              for (
+                let nextNext = nextP.viewNode.nextSibling;
+                nextNext;
+                nextNext = nextNext.nextSibling
+              ) {
+                if (!isOutOfLine(nextNext)) {
+                  isLastInBlock = false;
+                  break;
+                }
+              }
             }
           }
+          if (textP.parent.display === "inline-block") {
+            // an inline-block box enclosing rendered checkpoints has its
+            // element view
+            const inlineBlock = Vtree.asElementNodeContext(textP.parent);
+            Asserts.assert(inlineBlock);
+            if (!isFirstInBlock) {
+              let firstInInlineBlock = inlineBlock.viewNode.firstChild;
+              while (Vtree.canIgnore(firstInInlineBlock, textP.whitespace)) {
+                firstInInlineBlock = firstInInlineBlock.nextSibling;
+              }
+              if (textP.viewNode === firstInInlineBlock) {
+                isFirstInBlock = true;
+              }
+            }
+            if (!isLastInBlock) {
+              let lastInInlineBlock = inlineBlock.viewNode.lastChild;
+              while (Vtree.canIgnore(lastInInlineBlock, textP.whitespace)) {
+                lastInInlineBlock = lastInInlineBlock.previousSibling;
+              }
+              if (textP.viewNode === lastInInlineBlock) {
+                isLastInBlock = true;
+              }
+            }
+          }
+          const columnOver = this.processTextSpacing(
+            textP.viewNode,
+            isFirstAfterBreak,
+            isFirstInBlock,
+            isFirstAfterForcedLineBreak,
+            isLastBeforeForcedLineBreak,
+            isLastInBlock,
+            prevNode,
+            nextNode,
+            autospace,
+            spacingTrim,
+            hangingPunctuation,
+            lang,
+            textP.vertical,
+          );
+          const blockContainer = findBlockContainer(textP.viewNode);
+          if (blockContainer) {
+            reshapeTargets.add(blockContainer);
+          }
+          if (columnOver > 0) {
+            // Stop processing if the node is moved to next column
+            // because it will be processed again in the next column.
+            // (Issue #1256)
+            break;
+          }
         }
-        const columnOver = this.processTextSpacing(
-          textP.viewNode,
-          isFirstAfterBreak,
-          isFirstInBlock,
-          isFirstAfterForcedLineBreak,
-          isLastBeforeForcedLineBreak,
-          isLastInBlock,
-          prevNode,
-          nextNode,
-          autospace,
-          spacingTrim,
-          hangingPunctuation,
-          lang,
-          textP.vertical,
-        );
-        const blockContainer = findBlockContainer(textP.viewNode);
-        if (blockContainer) {
-          reshapeTargets.add(blockContainer);
-        }
-        if (columnOver > 0) {
-          // Stop processing if the node is moved to next column
-          // because it will be processed again in the next column.
-          // (Issue #1256)
-          break;
-        }
+      }
+    } finally {
+      for (const { node, placeholder } of deferred) {
+        placeholder.replaceWith(node);
       }
     }
     for (const target of reshapeTargets) {
@@ -992,6 +1208,16 @@ class TextSpacingPolyfill {
         );
       }
       const isFullWidth = checkFullWidth(innerElem);
+      if (
+        !isFullWidth &&
+        !hangingFirst &&
+        !hangingLast &&
+        !hangingEnd &&
+        !needsChromiumVoTrFallback
+      ) {
+        outerElem.replaceWith(textNode);
+        return 0;
+      }
 
       function linePosition(): number {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
@@ -1226,10 +1452,6 @@ class TextSpacingPolyfill {
       this.getPolyfilledInheritedProps.bind(this),
     );
     Plugin.registerHook(
-      Plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
-      this.preprocessSingleDocument.bind(this),
-    );
-    Plugin.registerHook(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
       this.postLayoutBlock.bind(this),
       true, // text-spacing must be processed before others (Issue #1105)
@@ -1239,10 +1461,6 @@ class TextSpacingPolyfill {
 
 const textPolyfill = new TextSpacingPolyfill();
 textPolyfill.registerHooks();
-
-export function preprocessForTextSpacing(element: Element): void {
-  textPolyfill.preprocessForTextSpacing(element);
-}
 
 export function processGeneratedContent(
   element: HTMLElement,

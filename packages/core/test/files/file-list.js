@@ -654,6 +654,10 @@ module.exports = [
     category: "Text Spacing",
     files: [
       {
+        file: "text-spacing/native-text-spacing.html",
+        title: "Native text spacing and fallback (Issues #2151, #1562)",
+      },
+      {
         file: "text-spacing/text-spacing-ja.html",
         title: "Text Spacing (Japanese)",
       },
