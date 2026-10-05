@@ -30,6 +30,9 @@ npx playwright install chromium --with-deps
 npx playwright install firefox webkit --with-deps
 ```
 
+After updating Playwright, run the install command again to obtain its matching
+browser binaries.
+
 ## Basic run
 
 Run all entries (default: canary vs stable):

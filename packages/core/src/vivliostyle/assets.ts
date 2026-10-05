@@ -103,9 +103,10 @@ export const VivliostyleViewportCss = `
   transform-origin: left top;
 }
 
+/* Keep the normal height when measuring emphasis leading in debug mode.
+   right: auto keeps the empty box from covering text selection (PR #1740). */
 [data-vivliostyle-debug] [data-vivliostyle-layout-box] {
   right: auto;
-  bottom: auto;
   z-index: auto;
   overflow: visible;
 }
@@ -1516,6 +1517,11 @@ export const VivliostylePolyfillCss = `
   border-block-end-width: 0 !important;
   border-end-start-radius: 0 !important;
   border-end-end-radius: 0 !important;
+}
+/* Preserve internal leading compensation while discarding author margins. */
+[data-viv-margin-discard~="block-start"][data-viv-emphasis-adjust~="block-start"],
+[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>thead))[data-viv-emphasis-adjust~="block-start"] {
+  margin-block-start: var(--viv-emphasis-start) !important;
 }
 [data-viv-box-break~="block-start"][data-viv-box-break~="text-start"] {
   text-indent: 0 !important;

@@ -19,6 +19,7 @@
 import * as Base from "./base";
 import * as Display from "./display";
 import * as RangeClientRects from "./range-client-rects";
+import * as RubyEmphasis from "./ruby-emphasis";
 import * as VtreeImpl from "./vtree";
 import { Layout, Vtree } from "./types";
 
@@ -257,6 +258,7 @@ export function adjustInlineRectsForLineHeight(
   clientLayout: Vtree.ClientLayout,
   vertical: boolean,
 ): void {
+  RubyEmphasis.adjustRubyEndRects(rects, element, vertical);
   if (
     Base.mediaTags[element.localName] ||
     /^r(uby|[bt]c?)$/.test(element.localName)
@@ -729,7 +731,10 @@ export function calculateEdge(
                 : Math.max(...rects.map((rect) => rect.bottom));
             }
           }
-          return vertical ? cbox.left : cbox.bottom;
+          const allowance = nodeContext.inline
+            ? 0
+            : RubyEmphasis.blockEndAllowance(element, clientLayout, vertical);
+          return vertical ? cbox.left + allowance : cbox.bottom - allowance;
         } else {
           return vertical ? cbox.right : cbox.top;
         }
@@ -761,6 +766,7 @@ export function calculateEdge(
     // when the line-height is smaller than the font's ascent + descent.
     // (Issue #2163)
     adjustTextRectsForLineHeight(boxes, element, clientLayout, vertical);
+    RubyEmphasis.adjustRubyEndRects(boxes, element, vertical);
 
     // Prefer non-zero-area rects for stable edge calculation.
     // Fallback to block-direction-only rects only in preformatted contexts

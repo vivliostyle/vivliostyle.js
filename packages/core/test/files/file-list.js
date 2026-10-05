@@ -40,17 +40,6 @@ module.exports = [
         file: "lowercase-doctype",
         title: "Lowercase doctype must not cause parser error (Issue #2101)",
       },
-      { file: "ruby-broken-pagination.html", title: "Ruby broken pagination" },
-      {
-        file: "absolute-rt-page-break-horizontal.html",
-        title:
-          "Absolutely positioned rt at a page break (horizontal, Issue #2162)",
-      },
-      {
-        file: "absolute-rt-page-break-vertical.html",
-        title:
-          "Absolutely positioned rt at a page break (vertical, Issue #2162)",
-      },
       {
         file: "absolute-inline-child-page-break-horizontal.html",
         title:
@@ -318,6 +307,51 @@ module.exports = [
       },
       { file: "all-shorthand.html", title: "all shorthand property" },
       { file: "env-doc-title.html", title: "env(doc-title) function" },
+    ],
+  },
+  {
+    category: "Ruby and text emphasis",
+    files: [
+      {
+        file: "ruby-text-emphasis/ruby-broken-pagination.html",
+        title: "Ruby broken pagination",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html",
+        title: "Ruby and emphasis line spacing (horizontal, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html",
+        title: "Ruby and emphasis line spacing (vertical, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html",
+        title: "Ruby and emphasis start borders (horizontal, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-emphasis-start-border-vertical.html",
+        title: "Ruby and emphasis start borders (vertical, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-margin-reset-horizontal.html",
+        title:
+          "Ruby margin reset and important opt-out (horizontal, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/ruby-margin-reset-vertical.html",
+        title:
+          "Ruby margin reset and important opt-out (vertical, Issue #1604)",
+      },
+      {
+        file: "ruby-text-emphasis/absolute-rt-page-break-horizontal.html",
+        title:
+          "Absolutely positioned rt at a page break (horizontal, Issue #2162)",
+      },
+      {
+        file: "ruby-text-emphasis/absolute-rt-page-break-vertical.html",
+        title:
+          "Absolutely positioned rt at a page break (vertical, Issue #2162)",
+      },
     ],
   },
   {

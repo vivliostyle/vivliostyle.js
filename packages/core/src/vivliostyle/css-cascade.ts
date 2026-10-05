@@ -344,6 +344,11 @@ const ORIGIN_UNIT = 0x1000000;
  */
 const FIRST_IMPORTANT_ORIGIN = 4;
 
+/** Whether a winning declaration belongs to an important cascade origin. */
+export function isImportant(cascVal: CascadePriority): boolean {
+  return Math.floor(cascVal.priority / ORIGIN_UNIT) >= FIRST_IMPORTANT_ORIGIN;
+}
+
 let lastRuleId = 0;
 
 /**

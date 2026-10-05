@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- Test case for Issue #1604: start borders keep ruby/emphasis inside their boxes. -->
+<html lang="ja"><meta charset="UTF-8"><title>Ruby and emphasis start borders (horizontal)</title>
+<style>
+* { margin: 0; padding: 0; }
+:root { writing-mode: horizontal-tb; font-size: 20px; line-height: 34px; }
+@page { size: 640px 260px; margin: 20px; outline: 1px dashed #b8b8b8; }
+/* Keep the gray page-area guide separate from actual blue borders. */
+@page bordered { border-top: 1px solid #287da8; outline: none; }
+@page content-bordered { outline: none; }
+.paragraph-border, .ancestor-border { page: content-bordered; }
+section + section { break-before: page; }
+h2 { position: absolute; inset-block-end: 0; inset-inline-start: 0; font-size: 14px; line-height: 22px; }
+p { widows: 1; orphans: 1; }
+rt { font-size: 50%; line-height: 1; background: #bcecff; }
+.css-ruby { display: ruby; }
+.css-ruby-base { display: ruby-base; white-space: nowrap; }
+.css-ruby-text { display: ruby-text; font-size: 50%; line-height: 1; white-space: nowrap; background: #bcecff; }
+.emphasis { text-emphasis: sesame; }
+.paragraph-border p, .ancestor-border { border: 1px solid #287da8; }
+.page-bordered { page: bordered; }
+/* Only boxes in the document root formatting context may be corrected. */
+.flow-root { display: flow-root; }
+.leading-float { float: left; inline-size: 80px; block-size: 34px; background: #ffe5af; }
+.leading-float.full { inline-size: 100%; }
+.leading-absolute { position: absolute; inset-inline-end: 0; inline-size: 80px; block-size: 34px; background: #ffe5af; }
+.leading-float, .leading-absolute { font-size: 14px; line-height: 17px; }
+
+.columns { column-count: 2; column-gap: 40px; column-fill: auto; block-size: 120px; }
+</style><body>
+<section data-case="ruby-page-border" data-start-border="false" class="page-bordered"><h2>ruby-page-border</h2>
+<p data-line="1">01 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="2">02 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="3">03 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+</section>
+<section data-case="ruby-paragraph-border" data-start-border="true" class="paragraph-border"><h2>ruby-paragraph-border</h2>
+<p data-line="1">01 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="2">02 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="3">03 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+</section>
+<section data-case="ruby-ancestor-border" data-start-border="true" class="ancestor-border"><h2>ruby-ancestor-border</h2>
+<p data-line="1">01 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="2">02 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="3">03 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+</section>
+<section data-case="ruby-flow-root-continuation" data-start-border="false" data-start-context="false"><h2>ruby-flow-root-continuation</h2><div class="flow-root">
+<p data-line="1">01 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="2">02 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="3">03 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="4">04 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="5">05 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="6">06 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="7">07 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+</div></section>
+<section data-case="ruby-nested-columns" data-start-border="false" data-start-context="false"><h2>ruby-nested-columns</h2><div class="columns">
+<p data-line="1">01 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+<p data-line="2">02 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+<p data-line="3">03 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+<p data-line="4">04 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+<p data-line="5">05 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+<p data-line="6">06 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></p>
+</div></section>
+<section data-case="ruby-leading-full-float" data-start-border="false" data-start-context="true"><h2>ruby-leading-full-float</h2><div class="leading-absolute"><br>absolute</div><div class="leading-float full"><br>float 100%</div><div class="none">
+<p data-line="1">01 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="2">02 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+<p data-line="3">03 HTML<ruby>ルビ<rt>るび</rt></ruby>の行を確認 CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</p>
+</div></section>
+<section data-case="emphasis-paragraph-border" data-start-border="true" class="paragraph-border"><h2>emphasis-paragraph-border</h2>
+<p data-line="1">01 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="2">02 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="3">03 <span class="emphasis">圏点の行を確認</span></p>
+</section>
+<section data-case="emphasis-flow-root" data-start-border="false" data-start-context="false"><h2>emphasis-flow-root</h2><div class="flow-root">
+<p data-line="1">01 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="2">02 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="3">03 <span class="emphasis">圏点の行を確認</span></p>
+</div></section>
+<section data-case="emphasis-nested-columns" data-start-border="false" data-start-context="false"><h2>emphasis-nested-columns</h2><div class="columns">
+<p data-line="1">01 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="2">02 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="3">03 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="4">04 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="5">05 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="6">06 <span class="emphasis">圏点の行を確認</span></p>
+</div></section>
+<section data-case="emphasis-leading-full-float" data-start-border="false" data-start-context="true" class="page-bordered"><h2>emphasis-leading-full-float</h2><div class="leading-absolute"><br>absolute</div><div class="leading-float full"><br>float 100%</div><div class="none">
+<p data-line="1">01 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="2">02 <span class="emphasis">圏点の行を確認</span></p>
+<p data-line="3">03 <span class="emphasis">圏点の行を確認</span></p>
+</div></section>
+</body></html>

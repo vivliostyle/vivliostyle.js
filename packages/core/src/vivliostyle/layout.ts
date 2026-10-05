@@ -34,6 +34,7 @@ import * as CssCascade from "./css-cascade";
 import * as Css from "./css";
 import * as GeometryUtil from "./geometry-util";
 import * as LayoutHelper from "./layout-helper";
+import * as RubyEmphasis from "./ruby-emphasis";
 import * as LayoutProcessor from "./layout-processor";
 import * as PageFloats from "./page-floats";
 import * as Plugin from "./plugin";
@@ -2759,6 +2760,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     nodeContext: Vtree.NodeContext | null,
     checkPoints: Vtree.RenderedNodeContext[],
   ) {
+    RubyEmphasis.adjustAnnotationsForNodes(checkPoints, this.clientLayout);
     const hooks: Plugin.PostLayoutBlockHook[] = Plugin.getHooksForName(
       Plugin.HOOKS.POST_LAYOUT_BLOCK,
     );
@@ -2969,7 +2971,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         )
       ) {
         // img, ruby, inline-block, etc.
-        if (element.localName === "ruby" && element.firstChild) {
+        if (
+          (element.localName === "ruby" ||
+            (this.clientLayout.getElementComputedStyle(element).display ===
+              "ruby" &&
+              element.querySelector("[data-viv-ruby-end]"))) &&
+          element.firstChild
+        ) {
           // Fix for issue #985
           node = element.firstChild;
         }
@@ -3052,7 +3060,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.clientLayout,
       this.vertical,
     );
-
     for (let i = 0; i < boxes.length; i++) {
       arr.push(boxes[i]);
     }
@@ -3081,6 +3088,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.clientLayout,
         this.vertical,
       );
+      if (Base.browserType === "webkit") {
+        RubyEmphasis.includeRubyBaseInLineRects(
+          boxes,
+          node as Element,
+          this.clientLayout,
+          this.vertical,
+        );
+      }
     }
 
     for (let i = 0; i < boxes.length; i++) {
@@ -4964,12 +4979,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             cont = Task.newResult(true);
           }
           cont.then(() => {
-            if (LayoutHelper.isUsingBrowserColumnBreaking(this)) {
+            if (
+              LayoutHelper.isUsingBrowserColumnBreaking(this) ||
+              this.element.hasAttribute("data-viv-end-annotations")
+            ) {
+              this.element.removeAttribute("data-viv-end-annotations");
               // Fix multi-column boxes with `column-fill: auto` (Issue #1720, #1758)
               LayoutHelper.fixAutoFillMultiColumnBoxes(this);
 
               // Unset browser's multi-column (Issue #1637, #1747)
               LayoutHelper.unsetBrowserColumnBreaking(this);
+              RubyEmphasis.finishAnnotationLayout(
+                this.element,
+                this.clientLayout,
+              );
             }
             // Restore root column block-size if it was reduced by
             // footnotes/block-end-page-floats and table/multicol issue

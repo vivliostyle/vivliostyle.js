@@ -19,6 +19,7 @@
 import * as BreakPosition from "./break-position";
 import * as LayoutHelper from "./layout-helper";
 import * as Plugin from "./plugin";
+import * as RubyEmphasis from "./ruby-emphasis";
 import * as Task from "./task";
 import { FormattingContextType, Layout, LayoutProcessor, Vtree } from "./types";
 
@@ -195,6 +196,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     if (endOfColumn) {
       column.layoutContext.processFragmentedBlockEdge(nodeContext);
     }
+    RubyEmphasis.adjustAnnotationsForNodes([nodeContext], column.clientLayout);
     return Task.newResult(true);
   }
 }
