@@ -511,7 +511,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [text-decoration-line](https://www.w3.org/TR/css-text-decor-3/#text-decoration-line-property)
 - [text-decoration-style](https://www.w3.org/TR/css-text-decor-3/#text-decoration-style-property)
 - [text-emphasis](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-property)
-  - Chromiumでは、ページ・ルート段の先頭行のblock-start側の余分な行送りを、[ルビ](#css-ruby-layout-1)と同じ条件で補正します。FirefoxとWebKitではブラウザ本来の圏点配置を維持します。WebKitで圏点により段落内の行送りが増える問題は制限事項として残ります。block-end側の圏点でもページ・段に入る行数が減る場合があります。[Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604) を参照。
+  - Chromiumでは、ページ・ルート段の先頭行のblock-start側の余分な行送りを、[ルビ](#css-ruby-layout-1)と同じ先頭行・border・formatting contextの条件で補正します。加えて、対象ブロックのblock-start側のmarginとpaddingがゼロであり、圏点のあるテキストの算出された`line-height`が`normal`ではなく数値である必要があります。FirefoxとWebKitではブラウザ本来の圏点配置を維持します。WebKitで圏点により段落内の行送りが増える問題は制限事項として残ります。block-end側の圏点でもページ・段に入る行数が減る場合があります。[Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604) を参照。
 - [text-emphasis-color](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-color-property)
 - [text-emphasis-position](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-position-property)
 - [text-emphasis-style](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style-property)
@@ -593,7 +593,7 @@ Vivliostyle は CSS マルチカラムレイアウトをサポートしていま
 
 ほかのCSS機能と同様、ブラウザでサポートされているルビ関連のプロパティと値はすべて利用できます。ルビの配置と通常の行送りはブラウザのレイアウトに従います。
 
-以下の行送りの補正は、HTMLのルビと、`display: ruby`、`ruby-base`、`ruby-text`による単純なCSSルビが対象です。
+以下の行送りの補正は、HTMLのルビと、`display: ruby`、`ruby-base`、`ruby-text`による単純なCSSルビが対象です。ルビの算出された`line-height`が`normal`ではなく数値である必要があります。WebKitでは、補正対象のCSSルビはこれらのdisplay値を指定した`span`要素に限ります。
 
 行送りの補正（[Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604)）:
 

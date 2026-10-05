@@ -511,7 +511,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 - [text-decoration-line](https://www.w3.org/TR/css-text-decor-3/#text-decoration-line-property)
 - [text-decoration-style](https://www.w3.org/TR/css-text-decor-3/#text-decoration-style-property)
 - [text-emphasis](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-property)
-  - In Chromium, excess block-start leading can be reduced on the first line of a page or root column, under the same conditions as [ruby](#css-ruby-layout-1). Firefox and WebKit retain their native emphasis layout. In WebKit, emphasis can increase line spacing within a paragraph; this remains a limitation. End-side emphasis can also leave fewer lines in a page or column. See [Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604).
+  - In Chromium, excess block-start leading can be reduced on the first line of a page or root column, under the same first-line, border and formatting-context conditions as [ruby](#css-ruby-layout-1). The target block must also have zero block-start margin and padding, and the emphasized text must have a numeric computed `line-height` rather than `normal`. Firefox and WebKit retain their native emphasis layout. In WebKit, emphasis can increase line spacing within a paragraph; this remains a limitation. End-side emphasis can also leave fewer lines in a page or column. See [Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604).
 - [text-emphasis-color](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-color-property)
 - [text-emphasis-position](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-position-property)
 - [text-emphasis-style](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style-property)
@@ -593,7 +593,7 @@ Vivliostyle supports CSS multi-column layout, but the behavior differs depending
 
 As with other CSS features, all ruby-related properties and values supported by the browser are available. Ruby positioning and ordinary line spacing follow the browser's layout.
 
-The line-spacing adjustment below applies to HTML ruby and simple CSS ruby using `display: ruby`, `ruby-base` and `ruby-text`.
+The line-spacing adjustment below applies to HTML ruby and simple CSS ruby using `display: ruby`, `ruby-base` and `ruby-text`, when the ruby has a numeric computed `line-height` rather than `normal`. In WebKit, eligible CSS ruby is limited to `span` elements with these display values.
 
 Line-spacing adjustment ([Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604)):
 
