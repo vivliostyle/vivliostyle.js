@@ -142,3 +142,73 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align_vertical.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: Ruby broken pagination
+  file: ruby-text-emphasis/ruby-broken-pagination.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-broken-pagination.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-broken-pagination.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis line spacing (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis line spacing (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis start borders (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis start borders (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-start-border-vertical.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby margin reset and important opt-out (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-margin-reset-horizontal.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby margin reset and important opt-out (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-margin-reset-vertical.html
+  decision: expected
+  notes: ""
+  approvedViewer: git-fix-issue1604
+  actualLabel: git-fix-issue1604
+  actualUrl: https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false

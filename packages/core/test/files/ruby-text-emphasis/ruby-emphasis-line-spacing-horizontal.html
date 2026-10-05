@@ -12,6 +12,12 @@
 body, section, p { margin: 0; padding: 0; border: 0; }
 section + section { break-before: page; }
 p { widows: 1; orphans: 1; }
+/* Small generated images share the first line with ruby/emphasis. */
+[data-case="ruby"] p::before,
+[data-case="css-ruby"] p::before,
+[data-case="emphasis"] p::before {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16'%3E%3Cpath fill='%23468' d='M0 0L12 8L0 16Z'/%3E%3C/svg%3E");
+}
 
 .css-ruby { display: ruby; }
 .css-ruby-base { display: ruby-base; white-space: nowrap; }

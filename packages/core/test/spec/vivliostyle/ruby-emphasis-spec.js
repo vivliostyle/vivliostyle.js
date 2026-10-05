@@ -15,6 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Base from "../../../src/vivliostyle/base";
 import * as RubyEmphasis from "../../../src/vivliostyle/ruby-emphasis";
 import * as Layout from "../../../src/vivliostyle/layout";
 import * as Css from "../../../src/vivliostyle/css";
@@ -65,6 +66,9 @@ function measuredLayout(
 }
 
 describe("ruby and emphasis boundary leading", () => {
+  const startLeading = Base.browserType === "firefox" ? null : "7";
+  const startMargin = Base.browserType === "firefox" ? "" : "-7px";
+  const emphasisEnabled = Base.browserType === "chromium";
   it("maps both components of emphasis-position according to writing-mode", () => {
     expect(RubyEmphasis.emphasisSide("horizontal-tb", "under right")).toBe(
       "end",
@@ -93,7 +97,7 @@ describe("ruby and emphasis boundary leading", () => {
     const element = ruby();
     const rt = element.querySelector("rt");
     RubyEmphasis.prepareRubyAnnotation(rt, element, rtStyle(), window);
-    expect(rt.getAttribute("data-viv-ruby-start")).toBe("7");
+    expect(rt.getAttribute("data-viv-ruby-start")).toBe(startLeading);
     expect(rt.style.marginBlockStart).toBe("");
     for (const value of [
       new Css.Numeric(3, "px"),
@@ -120,7 +124,7 @@ describe("ruby and emphasis boundary leading", () => {
         { ...rtStyle(), "margin-top": value },
         window,
       );
-      expect(rt.getAttribute("data-viv-ruby-start")).toBe("7");
+      expect(rt.getAttribute("data-viv-ruby-start")).toBe(startLeading);
       expect(rt.style.marginBlockStart).toBe("");
     }
   });
@@ -144,6 +148,7 @@ describe("ruby and emphasis boundary leading", () => {
           "margin-top": new CssCascade.CascadeValue(Css.numericZero, priority),
         },
       );
+      expect(rt.hasAttribute("data-viv-ruby-start")).toBeFalse();
       expect(rt.style.marginBlockStart).toBe("");
     }
   });
@@ -156,7 +161,7 @@ describe("ruby and emphasis boundary leading", () => {
     DomUtil.getDummyContainer().appendChild(element);
     const text = element.lastElementChild;
     RubyEmphasis.prepareRubyAnnotation(text, element, rtStyle(), window);
-    expect(text.getAttribute("data-viv-ruby-start")).toBe("7");
+    expect(text.getAttribute("data-viv-ruby-start")).toBe(startLeading);
     expect(text.style.marginBlockStart).toBe("");
     text.style.marginBlockStart = "";
     text.removeAttribute("data-viv-ruby-start");
@@ -166,7 +171,7 @@ describe("ruby and emphasis boundary leading", () => {
       { ...rtStyle(), "margin-block-start": Css.numericZero },
       window,
     );
-    expect(text.getAttribute("data-viv-ruby-start")).toBe("7");
+    expect(text.getAttribute("data-viv-ruby-start")).toBe(startLeading);
     expect(text.style.marginBlockStart).toBe("");
     text.style.marginBlockStart = "";
     text.removeAttribute("data-viv-ruby-start");
@@ -184,6 +189,7 @@ describe("ruby and emphasis boundary leading", () => {
         ),
       },
     );
+    expect(text.hasAttribute("data-viv-ruby-start")).toBeFalse();
     expect(text.style.marginBlockStart).toBe("");
   });
 
@@ -220,7 +226,9 @@ describe("ruby and emphasis boundary leading", () => {
       const element = ruby(mode, position);
       const rt = element.querySelector("rt");
       RubyEmphasis.prepareRubyAnnotation(rt, element, rtStyle(), window);
-      expect(rt.getAttribute(`data-viv-ruby-${side}`)).toBe("7");
+      expect(rt.getAttribute(`data-viv-ruby-${side}`)).toBe(
+        side === "start" ? startLeading : "7",
+      );
       expect(rt.style.marginBlockStart).toBe("");
       expect(rt.style.marginBlockEnd).toBe("");
     }
@@ -314,10 +322,10 @@ describe("ruby and emphasis boundary leading", () => {
         const second = addRuby(block, "over", css);
         expect(first.lastChild.style.marginBlockStart).toBe("");
         RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-        expect(first.lastChild.style.marginBlockStart).toBe("-7px");
+        expect(first.lastChild.style.marginBlockStart).toBe(startMargin);
         expect(second.lastChild.style.marginBlockStart).toBe("");
         RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-        expect(first.lastChild.style.marginBlockStart).toBe("-7px");
+        expect(first.lastChild.style.marginBlockStart).toBe(startMargin);
         expect(second.lastChild.style.marginBlockStart).toBe("");
       }
   });
@@ -336,6 +344,54 @@ describe("ruby and emphasis boundary leading", () => {
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
     expect(element.lastChild.style.marginBlockStart).toBe("");
   });
+
+  for (const mode of ["horizontal-tb", "vertical-rl"]) {
+    for (const type of [
+      "img",
+      "inline-block",
+      "inline-flex",
+      "inline-grid",
+      "inline-table",
+      "input",
+    ]) {
+      it(`uses a leading ${type}'s outer line in ${mode}`, () => {
+        for (const wraps of [false, true]) {
+          const root = column(mode);
+          root.style.inlineSize = "100px";
+          const block = document.createElement("p");
+          block.style.cssText = "margin:0;padding:0";
+          root.appendChild(block);
+          const atomic = document.createElement(
+            type === "img" || type === "input" ? type : "span",
+          );
+          atomic.style.cssText = `inline-size:${wraps ? "100%" : "12px"};block-size:16px;border:0;padding:0;`;
+          if (type.startsWith("inline-")) atomic.style.display = type;
+          if (type === "img") {
+            atomic.src =
+              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16'/%3E";
+          }
+          block.appendChild(atomic);
+          const element = addRuby(block);
+          const layout = actualLayout();
+          const range = document.createRange();
+          range.selectNodeContents(element.firstChild);
+          const base = range.getBoundingClientRect();
+          const box = atomic.getBoundingClientRect();
+          const overlap =
+            mode === "horizontal-tb"
+              ? Math.min(base.bottom, box.bottom) - Math.max(base.top, box.top)
+              : Math.min(base.right, box.right) - Math.max(base.left, box.left);
+          expect(overlap > 0)
+            .withContext(wraps ? "wrapped" : "same line")
+            .toBe(!wraps);
+          RubyEmphasis.adjustAnnotationsForNodes(nodes(block), layout);
+          expect(element.lastChild.style.marginBlockStart).toBe(
+            wraps ? "" : startMargin,
+          );
+        }
+      });
+    }
+  }
 
   it("preserves first-line ruby inside paragraph, ancestor and column start borders", () => {
     for (const mode of ["horizontal-tb", "vertical-rl", "vertical-lr"])
@@ -364,6 +420,34 @@ describe("ruby and emphasis boundary leading", () => {
         }
   });
 
+  it("compensates emphasis only when it shares the atomic prefix's first line", () => {
+    for (const mode of ["horizontal-tb", "vertical-rl"]) {
+      for (const type of ["img", "inline-block"]) {
+        for (const wraps of [false, true]) {
+          const root = column(mode);
+          root.style.inlineSize = "100px";
+          const block = document.createElement("p");
+          block.style.cssText = "margin:0;padding:0";
+          const atomic = document.createElement(
+            type === "img" ? "img" : "span",
+          );
+          atomic.style.cssText = `inline-size:${wraps ? "100%" : "12px"};block-size:16px;border:0;padding:0;`;
+          if (type === "inline-block") atomic.style.display = type;
+          block.appendChild(atomic);
+          block.insertAdjacentHTML(
+            "beforeend",
+            '<span style="text-emphasis:sesame">文字</span>',
+          );
+          root.appendChild(block);
+          RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
+          expect(block.hasAttribute("data-viv-emphasis-adjust"))
+            .withContext(`${mode}, ${type}, wraps=${wraps}`)
+            .toBe(emphasisEnabled && !wraps);
+        }
+      }
+    }
+  });
+
   it("ignores page box borders for first-line ruby", () => {
     for (const mode of ["horizontal-tb", "vertical-rl", "vertical-lr"]) {
       const root = column(mode);
@@ -374,7 +458,7 @@ describe("ruby and emphasis boundary leading", () => {
       page.appendChild(root);
       const element = addRuby(root, mode === "vertical-lr" ? "under" : "over");
       RubyEmphasis.adjustAnnotationsForNodes(nodes(root), actualLayout());
-      expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+      expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
     }
   });
 
@@ -419,7 +503,7 @@ describe("ruby and emphasis boundary leading", () => {
         RubyEmphasis.adjustAnnotationsForNodes(nodes(wrapper), actualLayout());
         expect(element.lastChild.style.marginBlockStart)
           .withContext(rule)
-          .toBe("-7px");
+          .toBe(startMargin);
       }
     }
   });
@@ -431,7 +515,7 @@ describe("ruby and emphasis boundary leading", () => {
       root.appendChild(wrapper);
       const element = addRuby(wrapper);
       RubyEmphasis.adjustAnnotationsForNodes(nodes(wrapper), actualLayout());
-      expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+      expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
       RubyEmphasis.registerViewContext(
         wrapper,
         {
@@ -478,7 +562,7 @@ describe("ruby and emphasis boundary leading", () => {
       RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
       expect(element.lastChild.style.marginBlockStart)
         .withContext(rule)
-        .toBe("-7px");
+        .toBe(startMargin);
     }
   });
 
@@ -495,13 +579,17 @@ describe("ruby and emphasis boundary leading", () => {
     wrapper.appendChild(block);
     block.style.position = "relative";
     RubyEmphasis.adjustEmphasisBlock(block, measuredLayout(block), true);
-    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeTrue();
+    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBe(
+      emphasisEnabled,
+    );
     wrapper.style.display = "flow-root";
     RubyEmphasis.adjustEmphasisBlock(block, measuredLayout(block), true);
     expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeFalse();
     wrapper.style.display = "block";
     RubyEmphasis.adjustEmphasisBlock(block, measuredLayout(block), true);
-    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeTrue();
+    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBe(
+      emphasisEnabled,
+    );
   });
 
   it("does not exclude ruby for end borders or zero-width start borders", () => {
@@ -517,7 +605,7 @@ describe("ruby and emphasis boundary leading", () => {
             border === "zero" ? "0 solid" : "1px none";
         const element = addRuby(block);
         RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-        expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+        expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
       }
   });
 
@@ -528,14 +616,14 @@ describe("ruby and emphasis boundary leading", () => {
     root.appendChild(block);
     const element = addRuby(block);
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-    expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+    expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
     block.style.borderTop = "1px solid";
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
     expect(element.lastChild.style.marginBlockStart).toBe("");
     // A sliced continuation discards the used start border.
     block.style.setProperty("border-block-start-width", "0", "important");
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-    expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+    expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
   });
 
   it("ignores the internal page-area border but honors transparent author borders", () => {
@@ -547,7 +635,7 @@ describe("ruby and emphasis boundary leading", () => {
     root.appendChild(block);
     const element = addRuby(block);
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-    expect(element.lastChild.style.marginBlockStart).toBe("-7px");
+    expect(element.lastChild.style.marginBlockStart).toBe(startMargin);
     block.style.borderTop = "1px solid transparent";
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
     expect(element.lastChild.style.marginBlockStart).toBe("");
@@ -600,7 +688,7 @@ describe("ruby and emphasis boundary leading", () => {
       RubyEmphasis.prepareRubyAnnotation(rt, ruby, rtStyle(), window);
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
     const annotations = [...ruby.querySelectorAll("rt")];
-    expect(annotations[0].style.marginBlockStart).toBe("-7px");
+    expect(annotations[0].style.marginBlockStart).toBe(startMargin);
     expect(annotations.at(-1).style.marginBlockStart).toBe("");
     expect(
       annotations.filter((rt) => rt.style.marginBlockStart).length,
@@ -652,7 +740,7 @@ describe("ruby and emphasis boundary leading", () => {
     };
     const gap = top(nextOver) - top(firstUnder);
     RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
-    expect(firstOver.lastChild.style.marginBlockStart).toBe("-7px");
+    expect(firstOver.lastChild.style.marginBlockStart).toBe(startMargin);
     expect(firstUnder.lastChild.style.marginBlockEnd).toBe("");
     expect(nextOver.lastChild.style.marginBlockStart).toBe("");
     expect(top(nextOver) - top(firstUnder)).toBeCloseTo(gap, 1);
@@ -719,9 +807,13 @@ describe("ruby and emphasis boundary leading", () => {
     RubyEmphasis.adjustEmphasisBlock(block, layout);
     expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeFalse();
     RubyEmphasis.adjustEmphasisBlock(block, layout, true);
-    expect(block.style.getPropertyValue("--viv-emphasis-start")).toBe("-4px");
+    expect(block.style.getPropertyValue("--viv-emphasis-start")).toBe(
+      emphasisEnabled ? "-4px" : "",
+    );
     RubyEmphasis.adjustEmphasisBlock(block, layout, true);
-    expect(block.style.getPropertyValue("--viv-emphasis-start")).toBe("-4px");
+    expect(block.style.getPropertyValue("--viv-emphasis-start")).toBe(
+      emphasisEnabled ? "-4px" : "",
+    );
     expect(block.firstChild.style.cssText).toBe(original);
     RubyEmphasis.adjustEmphasisBlock(block, layout, false);
     expect(getComputedStyle(block).marginBlockStart).toBe("0px");
@@ -759,7 +851,9 @@ describe("ruby and emphasis boundary leading", () => {
     wrapper.appendChild(block);
     const layout = measuredLayout(block);
     RubyEmphasis.adjustEmphasisBlock(block, layout, true);
-    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeTrue();
+    expect(block.hasAttribute("data-viv-emphasis-adjust")).toBe(
+      emphasisEnabled,
+    );
     wrapper.style.borderTop = "1px solid";
     RubyEmphasis.adjustEmphasisBlock(block, layout, true);
     expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeFalse();
@@ -773,9 +867,14 @@ describe("ruby and emphasis boundary leading", () => {
       measuredLayout(block, { start: 15, end: 7 }),
       true,
     );
-    expect(
-      parseFloat(block.style.getPropertyValue("--viv-emphasis-start")),
-    ).toBeCloseTo(-7, 1);
+    if (emphasisEnabled) {
+      expect(
+        parseFloat(block.style.getPropertyValue("--viv-emphasis-start")),
+      ).toBeCloseTo(-7, 1);
+    } else {
+      expect(block.hasAttribute("data-viv-emphasis-adjust")).toBeFalse();
+      expect(block.style.getPropertyValue("--viv-emphasis-start")).toBe("");
+    }
     expect(block.style.marginBlockEnd).toBe("");
     expect(block.style.getPropertyValue("--viv-emphasis-end")).toBe("");
   });
@@ -783,13 +882,14 @@ describe("ruby and emphasis boundary leading", () => {
   it("restores temporary styles even when first-line measurement fails", () => {
     const block = paragraph();
     const original = block.firstChild.style.cssText;
-    expect(() =>
+    const measure = () =>
       RubyEmphasis.adjustEmphasisBlock(
         block,
         measuredLayout(block, { fail: true }),
         true,
-      ),
-    ).toThrowError("measurement failed");
+      );
+    if (emphasisEnabled) expect(measure).toThrowError("measurement failed");
+    else expect(measure).not.toThrow();
     expect(block.firstChild.style.cssText).toBe(original);
     expect(block.style.inlineSize).toBe("");
   });

@@ -233,14 +233,20 @@ export function adjustEmphasisBlock(
     if (
       element !== block &&
       childStyle.display !== "none" &&
-      !["inline", "ruby", "ruby-base", "ruby-text"].includes(childStyle.display)
+      !["inline", "ruby", "ruby-base", "ruby-text"].includes(
+        childStyle.display,
+      ) &&
+      !isAtomicInline(element, childStyle)
     ) {
-      return; // Do not compensate nested blocks, inline-blocks, rtc, etc. twice.
+      return; // Do not compensate nested blocks, rtc, etc. twice.
     }
     if (
       childStyle.textEmphasisStyle &&
       childStyle.textEmphasisStyle !== "none"
     ) {
+      // An unmarked atomic prefix can share the outer first line; emphasis
+      // inside its own formatting context needs separate measurement.
+      if (element !== block && isAtomicInline(element, childStyle)) return;
       if (childStyle.writingMode !== style.writingMode) {
         return;
       }
@@ -514,6 +520,19 @@ function baseRects(
   return rects;
 }
 
+/** Atomic inline boxes identify their outer line, not lines inside the box. */
+function isAtomicInline(element: Element, style: CSSStyleDeclaration): boolean {
+  return (
+    !!Base.mediaTags[element.localName] ||
+    ["input", "select", "textarea", "button", "meter", "progress"].includes(
+      element.localName,
+    ) ||
+    ["inline-block", "inline-flex", "inline-grid", "inline-table"].includes(
+      style.display,
+    )
+  );
+}
+
 function firstBase(
   column: HTMLElement,
   layout: Vtree.ClientLayout,
@@ -543,17 +562,15 @@ function firstBase(
       // A leading empty line is still the first line. Never move the next one up.
       return null;
     }
-    if (node.nodeType === 1 && Base.mediaTags[(node as Element).localName]) {
+    if (node.nodeType === 1) {
       const e = node as Element;
       const style = layout.getElementComputedStyle(e);
-      const rect = layout.getElementClientRect(e);
-      if (
-        !isOutOfFlow(e, style) &&
-        style.float === "none" &&
-        rect.width > 0 &&
-        rect.height > 0
-      )
-        return null;
+      if (isAtomicInline(e, style)) {
+        const rect = layout.getElementClientRect(e);
+        // Compare the annotation's base with this line. A small leading image
+        // can share it, while a width-filling box can push ruby to the next line.
+        if (rect.width > 0 && rect.height > 0) return { node, rect };
+      }
     }
     if (node.nodeType !== 3) continue;
     const rect = baseRects(node, layout)[0];

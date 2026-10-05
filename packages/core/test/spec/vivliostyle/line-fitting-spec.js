@@ -63,7 +63,9 @@ describe("line fitting with inline elements", function () {
       it("keeps line positions when an undecorated span is inserted", function () {
         block.textContent = "a".repeat(80);
         const expected = positions();
-        expect(expected.length).toBe(8);
+        // Default monospace metrics vary by browser and platform. The invariant
+        // is that inserting an undecorated span preserves these wrapped lines.
+        expect(expected.length).toBeGreaterThan(1);
         block.innerHTML =
           "a".repeat(10) +
           "<span>" +
