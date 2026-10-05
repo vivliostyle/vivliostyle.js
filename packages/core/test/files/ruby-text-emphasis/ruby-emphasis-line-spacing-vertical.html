@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1604: ruby/emphasis boundary leading. -->
+<html lang="ja"><meta charset="UTF-8"><title>Ruby and emphasis line spacing (vertical)</title>
+<style>
+.over { ruby-position: over; text-emphasis-position: over right; }
+.under { ruby-position: under; text-emphasis-position: under left; }
+.emphasis { text-emphasis: sesame; }
+/* A normal universal reset must not disable ruby leading compensation. */
+* { margin: 0; padding: 0; }
+@page { size: 244px 640px; margin: 20px; outline: 1px solid #b8d5e5; }
+:root { writing-mode: vertical-rl; font-size: 20px; line-height: 34px; column-count: 2; column-gap: 40px; column-fill: auto; }
+body, section, p { margin: 0; padding: 0; border: 0; }
+section + section { break-before: page; }
+p { widows: 1; orphans: 1; }
+/* Small generated images share the first line with ruby/emphasis. */
+[data-case="ruby"] p::before,
+[data-case="css-ruby"] p::before,
+[data-case="emphasis"] p::before {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16'%3E%3Cpath fill='%23468' d='M0 0L12 8L0 16Z'/%3E%3C/svg%3E");
+}
+
+.css-ruby { display: ruby; }
+.css-ruby-base { display: ruby-base; white-space: nowrap; }
+.css-ruby-text { display: ruby-text; font-size: 50%; line-height: 1; white-space: nowrap; text-emphasis: none; }
+</style>
+<body>
+<section data-case="ruby">
+<p>
+<span data-line="1" data-position="over">01 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="2" data-position="over">02 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="3" data-position="over">03 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="4" data-position="over">04 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="5" data-position="over">05 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="6" data-position="over">06 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="7" data-position="over">07 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="8" data-position="over">08 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="9" data-position="over">09 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span>
+</p>
+<p>
+<span data-line="10" data-position="over">10 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="11" data-position="over">11 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span>
+</p>
+</section>
+<section data-case="css-ruby">
+<p>
+<span data-line="1" data-position="over">01 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="2" data-position="over">02 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="3" data-position="over">03 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="4" data-position="over">04 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="5" data-position="over">05 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="6" data-position="over">06 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="7" data-position="over">07 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="8" data-position="over">08 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="9" data-position="over">09 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span>
+</p>
+<p>
+<span data-line="10" data-position="over">10 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="11" data-position="over">11 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span>
+</p>
+</section>
+<section data-case="emphasis">
+<p>
+<span data-line="1" data-position="over">01 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="2" data-position="over">02 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="3" data-position="over">03 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="4" data-position="over">04 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="5" data-position="over">05 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="6" data-position="over">06 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="7" data-position="over">07 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="8" data-position="over">08 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="9" data-position="over">09 <span class="emphasis over">圏点の行を確認</span></span>
+</p>
+<p>
+<span data-line="10" data-position="over">10 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="11" data-position="over">11 <span class="emphasis over">圏点の行を確認</span></span>
+</p>
+</section>
+<!-- Under ruby must retain complete labeled lines, including 06, when breaking. -->
+<section data-case="under-ruby">
+<p>
+<span data-line="1" data-position="under">01 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="2" data-position="under">02 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="3" data-position="under">03 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="4" data-position="under">04 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="5" data-position="under">05 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="6" data-position="under">06 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="7" data-position="under">07 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="8" data-position="under">08 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="9" data-position="under">09 HTML<ruby class="under">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span>
+</p>
+</section>
+<section data-case="under-emphasis">
+<p>
+<span data-line="1" data-position="under">01 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="2" data-position="under">02 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="3" data-position="under">03 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="4" data-position="under">04 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="5" data-position="under">05 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="6" data-position="under">06 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="7" data-position="under">07 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="8" data-position="under">08 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="9" data-position="under">09 <span class="emphasis under">圏点の行を確認</span></span>
+</p>
+</section>
+<!-- Preserve native spacing for opposing annotations within/across paragraphs. -->
+<section data-case="mixed">
+<p>
+<span data-line="1" data-position="under" data-both-sides="true">01 HTML<ruby class="over">ルビ<rt>るび</rt></ruby> CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span></span><br>
+<span data-line="2" data-position="over">02 HTML<ruby class="over">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="3" data-position="under">03 CSS<span class="css-ruby under"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span>
+</p>
+<p>
+<span data-line="4" data-position="over">04 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="5" data-position="under">05 HTML<ruby class="under">ルビ<rt>るび</rt></ruby>の行を確認</span><br>
+<span data-line="6" data-position="over">06 <span class="emphasis over">圏点の行を確認</span></span><br>
+<span data-line="7" data-position="under">07 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="8" data-position="over">08 CSS<span class="css-ruby over"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text">るび</span></span>の行を確認</span><br>
+<span data-line="9" data-position="under">09 <span class="emphasis under">圏点の行を確認</span></span><br>
+<span data-line="10" data-position="over">10 <span class="emphasis over">圏点の行を確認</span></span>
+</p>
+</section>
+</body></html>

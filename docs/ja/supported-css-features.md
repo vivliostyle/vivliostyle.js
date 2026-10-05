@@ -511,6 +511,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [text-decoration-line](https://www.w3.org/TR/css-text-decor-3/#text-decoration-line-property)
 - [text-decoration-style](https://www.w3.org/TR/css-text-decor-3/#text-decoration-style-property)
 - [text-emphasis](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-property)
+  - Chromiumでは、ページ・ルート段の先頭行のblock-start側の余分な行送りを、[ルビ](#css-ruby-layout-1)と同じ先頭行・border・formatting contextの条件で補正します。加えて、対象ブロックのblock-start側のmarginとpaddingがゼロであり、圏点のあるテキストの算出された`line-height`が`normal`ではなく数値である必要があります。FirefoxとWebKitではブラウザ本来の圏点配置を維持します。WebKitで圏点により段落内の行送りが増える問題は制限事項として残ります。block-end側の圏点でもページ・段に入る行数が減る場合があります。[Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604) を参照。
 - [text-emphasis-color](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-color-property)
 - [text-emphasis-position](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-position-property)
 - [text-emphasis-style](https://www.w3.org/TR/css-text-decor-3/#text-emphasis-style-property)
@@ -588,14 +589,17 @@ Vivliostyle は CSS マルチカラムレイアウトをサポートしていま
 - [transform-origin](https://www.w3.org/TR/css-transforms-1/#propdef-transform-origin)
 - [backface-visibility](https://www.w3.org/TR/css-transforms-2/#propdef-backface-visibility)
 
-<!--
 ### [CSS Ruby Layout 1](https://www.w3.org/TR/css-ruby-1/)
 
-- [display](https://www.w3.org/TR/css-ruby-1/#propdef-display)
-  - Values: `ruby | ruby-base | ruby-text | ruby-base-container | ruby-text-container`
-- [ruby-align](https://www.w3.org/TR/css-ruby-1/#propdef-ruby-align)
-- [ruby-position](https://www.w3.org/TR/css-ruby-1/#propdef-ruby-position)
--->
+ほかのCSS機能と同様、ブラウザでサポートされているルビ関連のプロパティと値はすべて利用できます。ルビの配置と通常の行送りはブラウザのレイアウトに従います。
+
+以下の行送りの補正は、HTMLのルビと、`display: ruby`、`ruby-base`、`ruby-text`による単純なCSSルビが対象です。ルビの算出された`line-height`が`normal`ではなく数値である必要があります。WebKitでは、補正対象のCSSルビはこれらのdisplay値を指定した`span`要素に限ります。
+
+行送りの補正（[Issue #1604](https://github.com/vivliostyle/vivliostyle.js/issues/1604)）:
+
+- ChromiumとWebKitでは、ページ・ルート段の先頭行のblock-start側だけを補正します。対象は文書のルートのblock formatting context内にあり、対象ブロックとその本文の祖先ボックスにblock-start側のborderがない場合です。page boxのborderはこの条件に含めません。Firefoxにはルビのマージン補正を加えません。
+- 非ルート段組などの別のformatting contextは、この補正の対象外です。WebKitのルビやChromiumの横書きunderルビでは段落境界の行間が広がる場合があり、block-end側の注釈でもページ・段に入る行数が減る場合があります。over／under側の注釈の重なりを防ぐために必要な行間は維持します。
+- 全称セレクタによるリセットなど、通常のゼロマージンでは補正を無効にしません。ブラウザ本来の行送りを維持するには、`rt`または`display: ruby-text`の要素に`margin-block-start: 0 !important`を指定してください。作者が指定した非ゼロのマージンは尊重します。
 
 <!--
 ### [CSS Mobile Text Size Adjustment 1](https://drafts.csswg.org/css-size-adjust-1/)

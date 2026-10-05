@@ -30,6 +30,8 @@ npx playwright install chromium --with-deps
 npx playwright install firefox webkit --with-deps
 ```
 
+Playwrightを更新した後は、そのバージョンに対応するブラウザのバイナリを取得するため、インストールコマンドを再実行してください。
+
 ## 基本的な実行
 
 全エントリを実行（デフォルト: canary vs stable）:

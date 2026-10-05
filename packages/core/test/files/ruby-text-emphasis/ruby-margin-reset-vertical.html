@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1604: first-line ruby margin resets and important opt-out. -->
+<html lang="ja"><meta charset="UTF-8"><title>Ruby margin reset and important opt-out (vertical)</title>
+<style>
+* { margin: 0; padding: 0; }
+:root { writing-mode: vertical-rl; }
+@page { size: 260px 640px; margin: 20px; }
+body { font-size: 20px; line-height: 34px; }
+section + section { break-before: page; }
+p { widows: 1; orphans: 1; white-space: nowrap; }
+.css-ruby { display: ruby; }
+.css-ruby-base { display: ruby-base; white-space: nowrap; }
+.css-ruby-text { display: ruby-text; font-size: 50%; line-height: 1; white-space: nowrap; text-emphasis: none; }
+.annotation { background: #bcecff; }
+[data-policy="zero"] .annotation { margin-block-start: 0; }
+[data-policy="important"] .annotation { margin-block-start: 0 !important; }
+[data-policy="nonzero"] .annotation { margin-block-start: 12px; }
+h2 { position: absolute; inset-block-end: 0; inset-inline-start: 0; font-size: 14px; line-height: 22px; }
+.overview p { font-size: 48px; line-height: 68px; background: #fff3df; }
+.overview .guide { white-space: normal; font-size: 14px; line-height: 22px; margin-block-start: 30px; }
+.overview::after { content: ""; position: absolute; inset-block-start: 68px; inset-inline: 0; border-block-start: 2px dashed #0077bb; }
+</style>
+<body>
+<section class="overview" data-policy="zero" data-expected="-10" data-side="start">
+<h2>通常ゼロ：先頭行は補正あり</h2>
+<p><span data-kind="html">HTML<ruby>ルビ<rt class="annotation">るび</rt></ruby></span> <span data-kind="css">CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text annotation">るび</span></span></span></p>
+<p class="guide">本文48px／行送り68px、ルビ24px。各ページの先頭行を同じ位置から比較してください。青破線はルビなしの1行分、薄いオレンジ色の背景は段落範囲、薄青はルビ文字の範囲。Firefoxでは通常ゼロにも負マージンを加えません。</p>
+</section>
+<section class="overview" data-policy="important" data-expected="0" data-side="start">
+<h2>重要ゼロ：0 !important</h2>
+<p><span data-kind="html">HTML<ruby>ルビ<rt class="annotation">るび</rt></ruby></span> <span data-kind="css">CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text annotation">るび</span></span></span></p>
+<p class="guide">本文48px／行送り68px、ルビ24px。各ページの先頭行を同じ位置から比較してください。青破線はルビなしの1行分、薄いオレンジ色の背景は段落範囲、薄青はルビ文字の範囲。Firefoxでは通常ゼロにも負マージンを加えません。</p>
+</section>
+<section class="overview" data-policy="nonzero" data-expected="12" data-side="start">
+<h2>非ゼロ：12px</h2>
+<p><span data-kind="html">HTML<ruby>ルビ<rt class="annotation">るび</rt></ruby></span> <span data-kind="css">CSS<span class="css-ruby"><span class="css-ruby-base">ルビ</span><span class="css-ruby-text annotation">るび</span></span></span></p>
+<p class="guide">本文48px／行送り68px、ルビ24px。各ページの先頭行を同じ位置から比較してください。青破線はルビなしの1行分、薄いオレンジ色の背景は段落範囲、薄青はルビ文字の範囲。Firefoxでは通常ゼロにも負マージンを加えません。</p>
+</section>
+</body></html>

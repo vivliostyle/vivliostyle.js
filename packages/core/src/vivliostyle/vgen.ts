@@ -33,6 +33,7 @@ import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
 import * as LayoutHelper from "./layout-helper";
+import * as RubyEmphasis from "./ruby-emphasis";
 import * as Logging from "./logging";
 import * as Matchers from "./matchers";
 import * as Net from "./net";
@@ -752,6 +753,7 @@ export class ViewFactory
     rtl: boolean,
     style: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
+    cascadedMargins?: { [key: string]: CssCascade.CascadeValue },
   ): boolean {
     const context = this.context;
     const cascMap = CssCascade.flattenCascadedStyle(
@@ -856,6 +858,28 @@ export class ViewFactory
       isLeftPage,
       transform,
     );
+
+    if (
+      cascadedMargins &&
+      computedStyle["display"] === Css.getName("ruby-text")
+    ) {
+      // Keep the winning margin's importance through the same physical/logical
+      // resolution as its value, including shorthand, layers and page sides.
+      const margins: { [key: string]: CssCascade.CascadeValue } = {};
+      for (const name in cascMap) {
+        if (name.startsWith("margin-")) {
+          margins[name] = cascMap[name];
+        }
+      }
+      CssCascade.convertToPhysical(
+        margins,
+        cascadedMargins,
+        vertical,
+        rtl,
+        isLeftPage,
+        (_name, value) => value,
+      );
+    }
 
     if (verticalChanged) {
       // The auto value of inline-size on vertical-in-horizontal or
@@ -1243,6 +1267,7 @@ export class ViewFactory
       );
     }
     const computedStyle: { [key: string]: Css.Val } = {};
+    const cascadedMargins: { [key: string]: CssCascade.CascadeValue } = {};
     const semanticFootnoteStyleAccess: SemanticFootnote.SemanticFootnoteStyleAccess =
       {
         getStyle: (target) => this.styler.getStyle(target, false),
@@ -1324,6 +1349,7 @@ export class ViewFactory
       nodeContext.direction === "rtl",
       elementStyle,
       computedStyle,
+      cascadedMargins,
     );
     if (
       floatReference &&
@@ -1831,6 +1857,17 @@ export class ViewFactory
       let tag = element.localName;
       let originalTag = tag;
       if (ns == Base.NS.XHTML) {
+        // WebKit recognizes these roles only on native HTML ruby elements.
+        // Render CSS ruby spans with those native elements.
+        if (Base.browserType === "webkit" && tag === "span") {
+          if (display === Css.getName("ruby")) {
+            tag = "ruby";
+          } else if (display === Css.getName("ruby-base")) {
+            tag = "rb";
+          } else if (display === Css.getName("ruby-text")) {
+            tag = "rt";
+          }
+        }
         if (xhtmlElementsRenderedAsDiv.has(tag)) {
           tag = "div";
         } else if (tag == "vide_") {
@@ -2327,6 +2364,25 @@ export class ViewFactory
 
         this.preprocessElementStyle(nodeContext, computedStyle);
         this.applyComputedStyles(result, computedStyle);
+        RubyEmphasis.registerViewContext(result, nodeContext, position);
+        if (computedStyle["ruby-position"]) {
+          result.setAttribute(
+            "data-viv-ruby-position",
+            computedStyle["ruby-position"].toString(),
+          );
+        }
+        RubyEmphasis.prepareRubyAnnotation(
+          result,
+          nodeContext.parent?.viewNode as HTMLElement | null,
+          computedStyle,
+          this.viewport.window,
+          nodeContext.parent?.sourceNode as Element | null,
+          (source) =>
+            CssCascade.getProp(styler.getStyle(source, false), "display")
+              ?.evaluate(this.context, "display")
+              .toString(),
+          cascadedMargins,
+        );
 
         if (nodeContext.inline) {
           if (!firstTime) {
