@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2167: text-emphasis-position specified on the root element
+     is ignored when the root element has a lang attribute matching the browser UA
+     stylesheet rules (e.g. [lang|=ja] { text-emphasis-position: over right } on
+     WebKit/Firefox). The root's inherited properties must win over UA styles on
+     the root element while still being inherited into the page context
+     (page-margin boxes). Expected in horizontal writing mode: emphasis marks
+     below the text. In vertical writing mode (vertical-rl): emphasis marks and
+     underline on the left side of the text (the UA default for lang="ja" puts
+     them on the right side, where underline position is only distinguishable
+     in vertical writing). -->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>text-emphasis-position at root with lang attribute (Issue #2167)</title>
+<style>
+@page {
+  size: 240mm 150mm;
+  margin: 10mm;
+  @bottom-center {
+    content: "ページコンテキストも under left のはず";
+    text-emphasis-style: sesame;
+    font-size: 12px;
+  }
+}
+:root {
+  text-emphasis-position: under left;
+  /* text-underline-position is also overridden by the UA stylesheet on
+     [lang|=ja] (right) and must win when specified on the root element.
+     The difference is visible in the vertical block below. */
+  text-underline-position: under;
+}
+p {
+  text-emphasis-style: sesame;
+}
+p.control {
+  text-emphasis-position: over right;
+}
+p.underline-test {
+  /* no emphasis marks so that the underline position is clearly visible */
+  text-emphasis-style: none;
+}
+.vertical {
+  writing-mode: vertical-rl;
+  height: 62mm;
+}
+</style>
+</head>
+<body>
+<p>横書き：圏点が下に付いてるはず（:root の under left が継承される）</p>
+<p class="control">横書き：この段落は over right 指定（対照：圏点が上に付く）</p>
+<div class="vertical">
+  <p>縦書き：圏点が左に付いてるはず</p>
+  <p class="control">縦書き：対照（over right 指定：右に付く）</p>
+  <p class="underline-test"><u>縦書き：下線も左のはず（UA の right だと右になる）</u></p>
+</div>
+</body>
+</html>
