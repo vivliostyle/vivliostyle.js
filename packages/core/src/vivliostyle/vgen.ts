@@ -3466,11 +3466,11 @@ export class ViewFactory
         );
         continue;
       }
-      if (
+      const inheritedPropsMovedToPageBox =
         isRoot &&
-        this.page.pageAreaElement &&
-        CssCascade.isInherited(propName)
-      ) {
+        !!this.page.pageAreaElement &&
+        CssCascade.isInherited(propName);
+      if (inheritedPropsMovedToPageBox) {
         // Fix for Issue #568
         Base.setCSSProperty(
           // the page area element is always nested in bleed box and container
@@ -3491,7 +3491,15 @@ export class ViewFactory
             value.toString(),
           );
         }
-      } else {
+      }
+      // The root element's inherited properties are moved to the page box
+      // (the page context inherits from the root element), but properties that
+      // UA stylesheets set with lang/dir attribute rules must also be set on
+      // the root's own view element, which has those attributes copied from
+      // the source root element. Otherwise the UA value matching the root's
+      // view element would win over the author's value and be inherited by
+      // all content. (Fix for issue #2167)
+      if (!inheritedPropsMovedToPageBox || uaLangDirInheritedProps[propName]) {
         Base.setCSSProperty(target, propName, value.toString());
       }
     }
@@ -4263,6 +4271,25 @@ export const propertiesNotPassedToDOM = {
   "footnote-policy": true,
   "margin-break": true,
   page: true,
+};
+
+/**
+ * Inherited properties that UA stylesheets set with rules matching the lang
+ * and dir attributes (e.g. `[lang|=ja] { text-emphasis-position: over right }`
+ * and `[lang|=ja] { text-underline-position: right }` from the css-text-decor-4
+ * default stylesheet, and the dir-attribute-to-direction mapping in HTML
+ * rendering). These attributes are copied from the source root element to its
+ * view element, so these properties must also be set on the root's view
+ * element when the root's inherited properties are moved to the page box
+ * (Issue #568), or the UA value would win over the author's value for all
+ * content (Issue #2167). Other inherited properties must not be set on the
+ * root's view element: parent-relative values (e.g. `font-size: larger`)
+ * declared on both nested elements would be resolved twice and compound.
+ */
+export const uaLangDirInheritedProps: { [key: string]: boolean } = {
+  "text-emphasis-position": true,
+  "text-underline-position": true,
+  direction: true,
 };
 
 export class DefaultClientLayout implements Vtree.ClientLayout {

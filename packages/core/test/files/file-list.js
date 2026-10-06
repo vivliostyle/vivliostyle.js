@@ -352,6 +352,11 @@ module.exports = [
         title:
           "Absolutely positioned rt at a page break (vertical, Issue #2162)",
       },
+      {
+        file: "ruby-text-emphasis/text-emphasis-position-root-lang.html",
+        title:
+          "text-emphasis-position at root with lang attribute (Issue #2167)",
+      },
     ],
   },
   {

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2167: inherited properties specified on the root element
+     are ignored when the root element has lang/dir attributes matching browser UA
+     stylesheet rules (e.g. `[lang|=ja] { text-emphasis-position: over right }` and
+     dir="rtl" mapping to direction: rtl), because the root's inherited properties
+     are moved to the page box (Issue #568) and the UA rules matching the root's
+     view element win over inheritance from the page box. The author's values must
+     win over the UA styles on the root element while still being inherited into
+     the page context (page-margin boxes).
+     Expected: text is left-aligned (the author `:root { direction: ltr }` beats
+     the dir="rtl" UA mapping), emphasis marks are below the text in horizontal
+     writing mode and on the left side in vertical writing mode (vertical-rl), and
+     the underline is on the left side in vertical writing mode
+     (text-underline-position: left). Unlike the lang-based UA rules (WebKit/
+     Firefox only), the dir-attribute rule exists in all browsers, so the
+     direction check also fails before the fix in the Chromium-based CI. -->
+<html lang="ja" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>text-emphasis-position at root with lang attribute (Issue #2167)</title>
+<style>
+@page {
+  size: 240mm 150mm;
+  margin: 10mm;
+  @bottom-center {
+    content: "ページコンテキストも under left のはず";
+    text-emphasis-style: sesame;
+    font-size: 12px;
+  }
+}
+:root {
+  /* direction is also set by the UA stylesheet from the dir attribute
+     (dir="rtl" gives direction: rtl) and must win when specified on the root
+     element. */
+  direction: ltr;
+  text-emphasis-position: under left;
+  /* text-underline-position is also overridden by the UA stylesheet on
+     [lang|=ja] (right) and must win when specified on the root element.
+     "left" is equivalent to "under" in horizontal writing mode and puts the
+     underline on the left side in vertical writing mode, where the
+     difference from the UA "right" is visible. */
+  text-underline-position: left;
+}
+p {
+  text-emphasis-style: sesame;
+}
+p.control {
+  text-emphasis-position: over right;
+}
+p.underline-test {
+  /* no emphasis marks so that the underline position is clearly visible */
+  text-emphasis-style: none;
+}
+.vertical {
+  writing-mode: vertical-rl;
+  height: 62mm;
+}
+</style>
+</head>
+<body>
+<p>方向：テキストは左寄せのはず（dir="rtl" でも :root の direction: ltr が優先される）</p>
+<p>横書き：圏点が下に付いてるはず（:root の under left が継承される）</p>
+<p class="control">横書き：この段落は over right 指定（対照：圏点が上に付く）</p>
+<div class="vertical">
+  <p>縦書き：圏点が左に付いてるはず</p>
+  <p class="control">縦書き：対照（over right 指定：右に付く）</p>
+  <p class="underline-test"><u>縦書き：下線も左のはず（UA の right だと右になる）</u></p>
+</div>
+</body>
+</html>
