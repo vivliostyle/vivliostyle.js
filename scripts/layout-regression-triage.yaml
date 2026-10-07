@@ -301,8 +301,8 @@
     the inherited font-size (`smaller`) and font-weight (`bolder`) are resolved
     against the footnote area instead of the source parent, so the letter-spacing
     of "Wide letters" is 32px instead of 26.667px and the footnote of "Weight
-    test" / "Weight test 2" is 700 instead of 900. The PR branch matches the
-    reference paragraphs.
+    test" / "Weight test 2" / "Weight test 3" is 700 instead of 900. The PR
+    branch matches the reference paragraphs.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -437,7 +437,8 @@
     of a `font-size` declared in a footnote is resolved against the root line
     height (20px) instead of the 40px line height of the source parent, so the
     letter-spacing of the footnote is 40px instead of the 80px of the inline
-    reference. The PR branch resolves it against the source parent, like
+    reference (also when the line height is computed, e.g.
+    `calc(2 * 20px)`). The PR branch resolves it against the source parent, like
     content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
@@ -460,8 +461,9 @@
     `:footnote-content { font-size: 0.9em }` as if the declaration of the
     source parent were a declaration of the element, so the region rule wins
     and the footnote is 18px instead of the inherited 20px. The PR branch
-    materializes `inherit` with the priority of its own declaration, so the
-    inline declaration wins and both footnotes are rendered like the browser
+    materializes `inherit` — and `unset`, which behaves the same for an
+    inherited property — with the priority of its own declaration, so the
+    inline declaration wins and the footnotes are rendered like the browser
     renders them in the flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
