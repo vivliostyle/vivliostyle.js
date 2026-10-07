@@ -3368,6 +3368,22 @@ describe("css-cascade", function () {
         ).toBe(20);
       });
 
+      it("resolves a math function inside an arithmetic expression", function () {
+        // `calc(clamp(10px, 20px, 30px) + 5px)`: the clamp() is reduced to its
+        // px value before the expression around it is evaluated.
+        const value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer(
+            "calc(clamp(10px, 20px, 30px) + 5px)",
+            null,
+          ),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(newContext(), value),
+        ).toBe(25);
+      });
+
       it("clamps a negative result to zero", function () {
         // font-size has a non-negative computed-value range, e.g. an element
         // with `font-size: calc(10px - 20px)` computes to 0px.

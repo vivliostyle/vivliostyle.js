@@ -3602,6 +3602,12 @@ export class ViewFactory
     if (val.endsWith("px")) {
       const parsedVal = parseFloat(val);
       if (!isNaN(parsedVal)) {
+        if (parsedVal === 0) {
+          // A zero length is serialized as `calc(0px - var(--viv-layoutUnitAdj))`
+          // and the browser clamps that to `0px`, so adding the adjustment back
+          // would turn an exact zero into 1/64px (or 1/60px).
+          return 0;
+        }
         return (
           Math.round(
             (parsedVal + this.viewport.layoutUnitAdj) *

@@ -1275,21 +1275,26 @@ function evaluateValueToPx(
     // `min(40px, max(1em, 20px))`.
     return evaluateMathFunctionToPx(context, value);
   }
-  const evaluated = evaluateCSSToCSS(context, value, "font-size");
+  // A math function can be embedded in an arithmetic expression, e.g. the
+  // clamp() of `calc(clamp(10px, 20px, 30px) + 5px)`. The expression evaluator
+  // only supports lengths and min()/max(), so those functions are reduced to
+  // their px value first.
+  const reduced = value.visit(new MathFunctionReducer(context));
+  const evaluated = evaluateCSSToCSS(context, reduced, "font-size");
   if (isAbsoluteLengthValue(evaluated)) {
     const numeric = evaluated as Css.Numeric;
     return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
   }
   if (
-    value instanceof Css.Numeric ||
-    value instanceof Css.Func ||
-    value instanceof Css.SpaceList
+    reduced instanceof Css.Numeric ||
+    reduced instanceof Css.Func ||
+    reduced instanceof Css.SpaceList
   ) {
     // A calc() expression evaluates a sum or product, which a plain value
     // (e.g. a math function argument) is not parsed as.
     const asCalc = evaluateCSSToCSS(
       context,
-      new Css.Func("calc", [value]),
+      new Css.Func("calc", [reduced]),
       "font-size",
     );
     if (isAbsoluteLengthValue(asCalc)) {
@@ -1298,6 +1303,28 @@ function evaluateValueToPx(
     }
   }
   return null;
+}
+
+/**
+ * Replace the `clamp()`/`min()`/`max()` functions of a value with their px
+ * value, from the innermost one outwards, so that the expression evaluator can
+ * evaluate the arithmetic expression around them.
+ */
+class MathFunctionReducer extends Css.FilterVisitor {
+  constructor(private readonly context: Exprs.Context) {
+    super();
+  }
+
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    if (isMathFunction(visited)) {
+      const px = evaluateMathFunctionToPx(this.context, visited);
+      if (px != null) {
+        return new Css.Numeric(px, "px");
+      }
+    }
+    return visited;
+  }
 }
 
 function isAbsoluteLengthValue(value: Css.Val): boolean {

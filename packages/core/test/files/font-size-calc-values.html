@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- Test case for Issue #2174 follow-up: font-size values that are not size keywords
-     (calc(), clamp(), a unitless zero, a negative calc() that the non-negative
-     range of font-size clamps to zero, and a keyword substituted from a custom
-     property) must also be resolved to numeric computed values, so that em units in
+     (calc(), clamp(), a math function embedded in an arithmetic expression, a
+     unitless zero, a negative calc() that the non-negative range of font-size
+     clamps to zero, and a keyword substituted from a custom property) must also be resolved to numeric computed values, so that em units in
      detached content (footnote) use the same font size as the browser does.
      In each paragraph the footnote "Wide" must have the same letter-spacing as the
      inline reference "Wide", which the browser resolves. -->
@@ -34,6 +34,9 @@
     /* negative terms of a math function stay signed:
        calc(-1em + 40px) = calc(-16px + 40px) = 24px */
     p.signed { font-size: calc(-1em + 40px); }
+    /* a math function inside an arithmetic expression:
+       calc(clamp(10px, 20px, 30px) + 5px) = 25px */
+    p.nested { font-size: calc(clamp(10px, 20px, 30px) + 5px); }
   </style>
 </head>
 <body>
@@ -43,6 +46,7 @@
   <p class="keyword">var(--upper-keyword): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="negative">calc(10px - 20px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="signed">calc(-1em + 40px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="nested">calc(clamp(10px, 20px, 30px) + 5px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p>In the footnotes at the page bottom, each "Wide" must have the same
     letter-spacing as the inline "Wide" of the same paragraph above.</p>
 </body>
