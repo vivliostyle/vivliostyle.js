@@ -3940,6 +3940,29 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("resolves the lh unit against a math function line height", function () {
+        // A math function such as `min(40px, 2em)` is valid, so the inherited
+        // line height is its computed 32px (the em refers to the 16px font size
+        // of the parent), not the preferred line height. (Review)
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(40px, 2em)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
       it("clamps a negative parent font size to zero", function () {
         var props = {
           "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),

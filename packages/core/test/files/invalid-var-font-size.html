@@ -11,7 +11,9 @@
      negative literal from a var() substitution, an unknown identifier, a
      dimension without a unit size (`--unit: 5s`) and a math function that
      computes a negative value, which is valid and is clamped to zero instead
-     of being inherited. -->
+     of being inherited. The same declaration in the normal flow must be
+     emitted as the computed 0px, not as a negative length that the browser
+     rejects (it would inherit the parent font size instead). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -26,6 +28,8 @@
     .dep .fn-calc { float: footnote; font-size: calc(10px - 20px); }
     .dep .fn-unit { float: footnote; --unit: 5s; font-size: var(--unit); letter-spacing: 2em; }
     .ref { font-size: 32px; letter-spacing: 2em; }
+    .neg-calc { font-size: calc(10px - 20px); } /* computed 0px */
+    .neg-ref { font-size: 0px; }
     .rem-test { width: 10rem; height: 6px; background: #9cf; }
     .rem-ref { width: 160px; height: 6px; background: #cfc; }
     a[role="doc-noteref"]::footnote-call { content: "[" counter(footnote) "]"; }
@@ -49,5 +53,9 @@
     is as wide as the green one (160px):</p>
   <div class="rem-test"></div>
   <div class="rem-ref"></div>
+  <p class="neg-calc">The negative <code>font-size: calc(10px - 20px)</code> of
+    this paragraph is clamped to 0, so this text must not be visible, like the
+    text of the reference paragraph with <code>font-size: 0px</code> below.</p>
+  <p class="neg-ref">Reference: 0px</p>
 </body>
 </html>

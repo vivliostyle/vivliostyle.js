@@ -1497,6 +1497,12 @@ export class InheritanceVisitor extends Css.FilterVisitor {
           value,
           parentFontSize,
         );
+        // `evaluateCSSToCSS()` only reduces `calc()`, so a valid math function
+        // such as `line-height: min(40px, 2em)` must be reduced to its px value
+        // here: otherwise an inherited line height falls back to the preferred
+        // line height for a detached descendant that resolves an `lh` unit.
+        // (Review)
+        value = value.visit(new MathFunctionReducer(this.context));
       }
       value = evaluateCSSToCSS(this.context, value, "line-height");
     }
@@ -5741,10 +5747,22 @@ export class CascadeInstance {
         // before the math functions are evaluated: a math function that
         // computes a negative value is valid and is clamped to zero below.
         // (Review)
-        const value =
+        let value =
           name === "font-size" && isNegativeLiteralFontSize(cascVal.value)
             ? Css.ident.unset
             : cascVal.value.visit(visitor);
+        if (
+          name === "font-size" &&
+          value instanceof Css.Numeric &&
+          value.num < 0
+        ) {
+          // A math function that computes a negative value is valid and its
+          // computed value is clamped to the non-negative range of `font-size`,
+          // but emitting the negative length would be rejected by the browser,
+          // which would inherit the parent font size instead of computing zero.
+          // (Review)
+          value = new Css.Numeric(0, value.unit);
+        }
         elementStyle[name] = cascVal.withValue(value);
       }
     }
