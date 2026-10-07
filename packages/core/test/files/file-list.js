@@ -227,6 +227,29 @@ module.exports = [
       },
       { file: "svg_properties.html", title: "SVG properties" },
       { file: "font_property.html", title: "Font property" },
+      {
+        file: "relative-font-keywords-root.html",
+        title: "Relative font keywords on the root element (Issue #2174)",
+      },
+      {
+        file: "relative-font-keywords-footnote.html",
+        title: "Relative font keywords in a footnote (Issue #2174)",
+      },
+      {
+        file: "absolute-font-size-keywords.html",
+        title:
+          "Absolute font size keywords with rem/rlh/em (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-calc-values.html",
+        title:
+          "calc()/clamp()/unitless font size in a footnote (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-in-footnote.html",
+        title:
+          "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

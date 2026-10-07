@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: the browser-resolved absolute font-size keywords
+     (e.g. small, large) must be resolved to numeric computed values, so that rem/rlh
+     units and em units in detached content (footnote) use the same font size as the
+     browser does. For the default 16px font size the browser table is:
+     xx-small 9 / x-small 10 / small 13 / medium 16 / large 18 / x-large 24 / xx-large 32 px. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Absolute font size keywords (Issue #2174 follow-up)</title>
+  <style>
+    @page {
+      size: 160mm 100mm; margin: 10mm;
+      /* 1rem = root font size = 18px (large) */
+      @top-center { content: "Margin box at 1rem"; font-size: 1rem; }
+    }
+    /* Browser: large = 18px, so 1rem = 18px and 1rlh = 18px x 1.5 = 27px */
+    :root { font-size: large; line-height: 1.5; }
+    .rem-test { width: 10rem; height: 6px; background: #9cf; } /* 180px */
+    .rem-ref { width: 180px; height: 6px; background: #cfc; }
+    .rlh-test { height: 1rlh; background: #9cf; } /* 27px */
+    .rlh-ref { height: 27px; background: #cfc; }
+    p.small { font-size: small; } /* 13px */
+    .fn { float: footnote; letter-spacing: 2em; } /* 13px x 2 = 26px */
+    p.fn-ref { font-size: 13px; letter-spacing: 26px; }
+    p { margin: 0.25em 0; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>Blue boxes: 10rem and 1rlh. Green boxes: 180px and 27px.</p>
+  <div class="rem-test"></div>
+  <div class="rem-ref"></div>
+  <div class="rlh-test"></div>
+  <div class="rlh-ref"></div>
+  <p class="small">Text at small (13px) with a footnote call<span class="fn">Wide</span>.</p>
+  <p class="fn-ref">Wide</p>
+  <p>This "Wide" is the reference for the footnote "Wide" at the page bottom
+    (both 26px letter-spacing); the margin box should be at 1rem = 18px.</p>
+</body>
+</html>

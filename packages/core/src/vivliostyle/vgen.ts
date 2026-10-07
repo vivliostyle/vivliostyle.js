@@ -1012,6 +1012,13 @@ export class ViewFactory
     // rules such as :footnote-content) authoritative over ancestor-derived
     // inherited values.
     const blockedInheritedByCurrent = new Set<string>();
+    // Whether the current element's font size (including region rules) wins
+    // over the inherited font size.
+    let currentDeclaresFontSize = false;
+    // Whether the current element's own cascaded style declares font-size.
+    const fontSizeFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "font-size")
+    );
     if (styles.length > 0) {
       const currentStyle = styles[0];
       const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
@@ -1032,7 +1039,21 @@ export class ViewFactory
           value !== Css.empty &&
           !Css.isRollbackValue(value)
         ) {
-          blockedInheritedByCurrent.add(name);
+          if (name === "font-size") {
+            // A relative font size (em/%/lh units, a calc() of them, or the
+            // relative keywords "larger"/"smaller") is resolved against the
+            // inherited value, so the inherited font size must still be
+            // accumulated. It is only the priority of the accumulated value
+            // that must not beat the declaration; see below. (Issue #2174)
+            currentDeclaresFontSize = true;
+          } else if (
+            // The relative font-weight keywords are resolved against the
+            // inherited weight, so keep accumulating it.
+            value !== Css.ident.bolder &&
+            value !== Css.ident.lighter
+          ) {
+            blockedInheritedByCurrent.add(name);
+          }
         }
       }
     }
@@ -1139,6 +1160,22 @@ export class ViewFactory
 
           props[name] = prop1;
         }
+      }
+    }
+    if (currentDeclaresFontSize && !fontSizeFromOwnStyle) {
+      const inheritedFontSize = props["font-size"] as
+        CssCascade.CascadeValue | undefined;
+      // The font size comes from a declaration that is not in the element's
+      // own cascaded style, e.g. a region rule such as
+      // `aside[role="doc-footnote"]:footnote-content { font-size: 0.9em }`.
+      // Such a declaration replaces the inherited value, so the inherited
+      // value is kept only as a low-priority placeholder (the same priority
+      // as the initial value the walk starts with). (Issue #2174)
+      if (inheritedFontSize) {
+        props["font-size"] = new CssCascade.CascadeValue(
+          inheritedFontSize.value,
+          0,
+        );
       }
     }
     for (const sname in elementStyle) {

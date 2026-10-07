@@ -1097,6 +1097,169 @@ export function chainActions(
   return action;
 }
 
+/**
+ * Check whether the value is the given CSS keyword. The CSS keywords are ASCII
+ * case-insensitive, and values substituted from a custom property (`var()`)
+ * are not canonicalized to lowercase by the validator, so the names are
+ * compared case-insensitively. (Issue #2174 follow-up)
+ */
+export function hasKeywordName(value: Css.Val, name: string): boolean {
+  return value instanceof Css.Ident && value.name.toLowerCase() === name;
+}
+
+/**
+ * Resolve the relative font-size keywords `larger`/`smaller` against the
+ * parent font-size, using the same factor (1.2) as browsers. (Issue #2174)
+ */
+export function resolveRelativeFontSizeKeyword(
+  ident: Css.Ident,
+  parentFontSize: number,
+): number {
+  return hasKeywordName(ident, "larger")
+    ? parentFontSize * 1.2
+    : parentFontSize / 1.2;
+}
+
+/**
+ * Resolve the relative font-weight keyword `bolder`/`lighter` against the
+ * inherited font weight, following the CSS Fonts 4 relative weights table.
+ */
+export function resolveRelativeFontWeight(
+  keyword: Css.Ident,
+  inheritedWeight: number,
+): number {
+  if (hasKeywordName(keyword, "bolder")) {
+    return inheritedWeight < 400 ? 400 : inheritedWeight < 600 ? 700 : 900;
+  }
+  return inheritedWeight < 600 ? 100 : inheritedWeight < 800 ? 400 : 700;
+}
+
+/**
+ * Absolute font-size keyword sizes as ratios of the default font size, using
+ * the same table as browsers: xx-small..xx-large = 9/10/13/16/18/24/32 px for
+ * the default 16px font size. Browsers scale this table with the default font
+ * size, which Vivliostyle models as `context.initialFontSize`.
+ * (Issue #2174 follow-up)
+ */
+const fontSizeKeywordRatios: { [keyword: string]: number } = {
+  "xx-small": 9 / 16,
+  "x-small": 10 / 16,
+  small: 13 / 16,
+  medium: 1,
+  large: 18 / 16,
+  "x-large": 24 / 16,
+  "xx-large": 32 / 16,
+};
+
+/**
+ * Resolve an absolute font-size keyword (e.g. "small") to px against the
+ * default font size. Returns null when the value is not an absolute keyword.
+ */
+export function resolveAbsoluteFontSizeKeyword(
+  value: Css.Val,
+  defaultFontSize: number,
+): number | null {
+  if (value instanceof Css.Ident) {
+    const ratio = fontSizeKeywordRatios[value.name.toLowerCase()];
+    if (ratio != null) {
+      return defaultFontSize * ratio;
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve a font-size value that is neither a keyword nor a Css.Numeric to px:
+ * a unitless number (valid for font-size only as zero, e.g. `font-size: 0`),
+ * a calc() expression, or a clamp()/min()/max() function. The em/% and
+ * viewport units in these values have already been converted to px by
+ * visitNumeric while the inherited values were accumulated, so an expression
+ * whose remaining units are all resolvable can be evaluated here. Returns null
+ * when the value cannot be resolved to a length. (Issue #2174 follow-up)
+ */
+function resolveFontSizeValueToPx(
+  context: Exprs.Context,
+  value: Css.Val,
+): number | null {
+  if (value instanceof Css.Num) {
+    return value.num * Exprs.defaultUnitSizes["px"];
+  }
+  if (value instanceof Css.Func) {
+    const name = value.name.toLowerCase();
+    if (name === "clamp" || name === "min" || name === "max") {
+      return evaluateMathFunctionToPx(context, value);
+    }
+  }
+  return evaluateValueToPx(context, value);
+}
+
+/**
+ * Evaluate a clamp()/min()/max() function of lengths, e.g. the font-size
+ * `clamp(1rem, 2vw + 1em, 3rem)`. Returns null when any argument cannot be
+ * resolved to px.
+ */
+function evaluateMathFunctionToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  const name = func.name.toLowerCase();
+  const isClamp = name === "clamp";
+  if (func.values.length === 0 || (isClamp && func.values.length !== 3)) {
+    return null;
+  }
+  const pxValues: number[] = [];
+  for (const value of func.values) {
+    const px = evaluateValueToPx(context, value);
+    if (px == null) {
+      return null;
+    }
+    pxValues.push(px);
+  }
+  if (isClamp) {
+    return Math.max(pxValues[0], Math.min(pxValues[1], pxValues[2]));
+  }
+  return name === "min" ? Math.min(...pxValues) : Math.max(...pxValues);
+}
+
+/**
+ * Evaluate a value that is expected to be a length in px, e.g. a single
+ * absolute length or a sum such as `2vw + 1em` that visitNumeric has already
+ * converted to `12.85px + 16px`. Returns null when it is not a resolvable
+ * absolute length.
+ */
+function evaluateValueToPx(
+  context: Exprs.Context,
+  value: Css.Val,
+): number | null {
+  const evaluated = evaluateCSSToCSS(context, value, "font-size");
+  if (isAbsoluteLengthValue(evaluated)) {
+    const numeric = evaluated as Css.Numeric;
+    return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+  }
+  if (
+    value instanceof Css.Numeric ||
+    value instanceof Css.Func ||
+    value instanceof Css.SpaceList
+  ) {
+    // A calc() expression evaluates a sum or product, which a plain value
+    // (e.g. a math function argument) is not parsed as.
+    const asCalc = evaluateCSSToCSS(
+      context,
+      new Css.Func("calc", [value]),
+      "font-size",
+    );
+    if (isAbsoluteLengthValue(asCalc)) {
+      const numeric = asCalc as Css.Numeric;
+      return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+    }
+  }
+  return null;
+}
+
+function isAbsoluteLengthValue(value: Css.Val): boolean {
+  return value instanceof Css.Numeric && Exprs.isAbsoluteLengthUnit(value.unit);
+}
+
 export class InheritanceVisitor extends Css.FilterVisitor {
   propName: string = "";
 
@@ -1113,15 +1276,43 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   private getFontSize() {
     const cascval = getProp(this.props, "font-size");
-    if (!cascval.value.isNumeric()) {
-      // FIXME: cascval may be Ident value e.g. "smaller"
+    const value = cascval.value;
+    const keywordSize = resolveAbsoluteFontSizeKeyword(
+      value,
+      this.context.initialFontSize,
+    );
+    if (keywordSize != null) {
+      return keywordSize;
+    }
+    if (!value.isNumeric()) {
+      const px = resolveFontSizeValueToPx(this.context, value);
+      if (px != null) {
+        return px;
+      }
+      // FIXME: cascval may be a value that cannot be resolved to a length
+      // here (the relative keywords "larger"/"smaller" are resolved in
+      // visitIdent, the absolute size keywords just above, and expressions
+      // that depend on an unresolved var() remain).
       return Exprs.defaultUnitSizes["em"];
     }
-    const n = cascval.value as Css.Numeric;
+    const n = value as Css.Numeric;
     if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
       throw new Error("Unexpected state");
     }
     return n.num * Exprs.defaultUnitSizes[n.unit];
+  }
+
+  private getFontWeight(): number {
+    // The accumulated value is the inherited (parent's) font weight, or the
+    // initial value 400 when no ancestor declared font-weight.
+    const value = getProp(this.props, "font-weight")?.value;
+    if (value instanceof Css.Num) {
+      return value.num;
+    }
+    if (value && hasKeywordName(value, "bold")) {
+      return 700;
+    }
+    return 400;
   }
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
@@ -1140,6 +1331,36 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       );
     }
     return numeric;
+  }
+
+  override visitIdent(ident: Css.Ident): Css.Val {
+    if (this.propName === "font-size") {
+      // Resolve the absolute size keywords (e.g. "small") against the default
+      // font size, and the relative keywords "larger"/"smaller" against the
+      // inherited font size, to numeric computed values, so that detached
+      // content (footnotes, page floats, running elements) and the root's
+      // inherited properties are not re-resolved per level. (Issue #2174)
+      const keywordSize = resolveAbsoluteFontSizeKeyword(
+        ident,
+        this.context.initialFontSize,
+      );
+      if (keywordSize != null) {
+        return new Css.Numeric(keywordSize, "px");
+      }
+      if (hasKeywordName(ident, "larger") || hasKeywordName(ident, "smaller")) {
+        return new Css.Numeric(
+          resolveRelativeFontSizeKeyword(ident, this.getFontSize()),
+          "px",
+        );
+      }
+    } else if (this.propName === "font-weight") {
+      if (hasKeywordName(ident, "bolder") || hasKeywordName(ident, "lighter")) {
+        return new Css.Int(
+          resolveRelativeFontWeight(ident, this.getFontWeight()),
+        );
+      }
+    }
+    return ident;
   }
 
   override visitExpr(expr: Css.Expr): Css.Val {

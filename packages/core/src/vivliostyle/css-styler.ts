@@ -674,8 +674,27 @@ export class Styler implements AbstractStyler {
       const val = this.resolveRootSizingCalc(evaluated);
       const fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
-      if (val instanceof Css.Numeric) {
-        let px = val.num;
+      // The absolute size keywords (e.g. "small") and the relative keywords
+      // ("larger"/"smaller") are relative to the default (initial) font size
+      // and must be resolved to a numeric root font size, so that all
+      // consumers (rem units, rlh, page context, the root element's own
+      // inherited properties) use the same value. (Issue #2174)
+      let px: number | null = CssCascade.resolveAbsoluteFontSizeKeyword(
+        val,
+        this.context.initialFontSize,
+      );
+      if (
+        px == null &&
+        (CssCascade.hasKeywordName(val, "larger") ||
+          CssCascade.hasKeywordName(val, "smaller"))
+      ) {
+        px = CssCascade.resolveRelativeFontSizeKeyword(
+          val as Css.Ident,
+          this.context.initialFontSize,
+        );
+      }
+      if (px == null && val instanceof Css.Numeric) {
+        px = val.num;
         switch (val.unit) {
           case "em":
           case "rem":
@@ -696,6 +715,8 @@ export class Styler implements AbstractStyler {
             isRelativeFontSize = fromRelativeCalc;
           }
         }
+      }
+      if (px != null) {
         this.context.rootFontSize = px;
         this.context.isRelativeRootFontSize = isRelativeFontSize;
       }

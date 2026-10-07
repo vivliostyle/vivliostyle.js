@@ -3131,4 +3131,412 @@ describe("css-cascade", function () {
       expect(resolved(style)).toBe(blue);
     });
   });
+
+  describe("font keywords", function () {
+    function cascadeValue(value) {
+      return new adapt_csscasc.CascadeValue(value, 0);
+    }
+
+    function newContext() {
+      return new adapt_exprs.Context(
+        new adapt_exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+    }
+
+    function resolveFontValue(props, propName, value) {
+      var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+      visitor.setPropName(propName);
+      return value.visit(visitor);
+    }
+
+    describe("resolveRelativeFontSizeKeyword", function () {
+      it("multiplies the parent font size by 1.2 for larger", function () {
+        expect(
+          adapt_csscasc.resolveRelativeFontSizeKeyword(
+            adapt_css.ident.larger,
+            16,
+          ),
+        ).toBe(19.2);
+      });
+
+      it("divides the parent font size by 1.2 for smaller", function () {
+        expect(
+          adapt_csscasc.resolveRelativeFontSizeKeyword(
+            adapt_css.ident.smaller,
+            16,
+          ),
+        ).toBeCloseTo(13.3333, 3);
+      });
+    });
+
+    describe("resolveAbsoluteFontSizeKeyword", function () {
+      it("maps the absolute size keywords to the browsers' table", function () {
+        var expected = {
+          "xx-small": 9,
+          "x-small": 10,
+          small: 13,
+          medium: 16,
+          large: 18,
+          "x-large": 24,
+          "xx-large": 32,
+        };
+        for (var keyword in expected) {
+          expect(
+            adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+              adapt_css.getName(keyword),
+              16,
+            ),
+          ).toBe(expected[keyword]);
+        }
+      });
+
+      it("scales with the default font size", function () {
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("small"),
+            20,
+          ),
+        ).toBeCloseTo(16.25, 3);
+      });
+
+      it("returns null for other values", function () {
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.ident.larger,
+            16,
+          ),
+        ).toBeNull();
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            new adapt_css.Numeric(1.5, "em"),
+            16,
+          ),
+        ).toBeNull();
+      });
+
+      it("matches the keywords case-insensitively", function () {
+        // A keyword substituted from a custom property (`var()`) is not
+        // canonicalized to lowercase by the validator. (Issue #2174 follow-up)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("LARGE"),
+            16,
+          ),
+        ).toBe(18);
+      });
+    });
+
+    describe("hasKeywordName", function () {
+      it("compares the keyword names case-insensitively", function () {
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.ident.larger, "larger"),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.getName("LARGER"), "larger"),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.ident.smaller, "larger"),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.hasKeywordName(
+            new adapt_css.Numeric(2, "em"),
+            "larger",
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("resolveRelativeFontWeight", function () {
+      var bolder = adapt_css.ident.bolder;
+      var lighter = adapt_css.ident.lighter;
+
+      it("maps bolder per the CSS Fonts 4 relative weights table", function () {
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 100)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 200)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 300)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 400)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 500)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 600)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 700)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 800)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 900)).toBe(900);
+      });
+
+      it("maps lighter per the CSS Fonts 4 relative weights table", function () {
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 100)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 200)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 300)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 400)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 500)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 600)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 700)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 800)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 900)).toBe(700);
+      });
+    });
+
+    describe("InheritanceVisitor", function () {
+      it("resolves font-size: larger against the accumulated parent size", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.ident.larger,
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(19.2);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-size: smaller against the accumulated parent size", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.ident.smaller,
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBeCloseTo(13.3333, 3);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves nested relative font-size keywords level by level", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("font-size");
+        props["font-size"] = cascadeValue(
+          adapt_css.ident.smaller.visit(visitor),
+        );
+        var resolved = adapt_css.ident.smaller.visit(visitor);
+        expect(resolved.num).toBeCloseTo(11.1111, 3);
+      });
+
+      it("uses the inherited font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(19.2, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(38.4);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-size: x-large against the default font size", function () {
+        var resolved = resolveFontValue(
+          {},
+          "font-size",
+          adapt_css.getName("x-large"),
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(24);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses an absolute size keyword as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(adapt_css.getName("small")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(26);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-weight: bolder against the inherited weight", function () {
+        var props = {
+          "font-weight": cascadeValue(new adapt_css.Int(700)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+
+      it("resolves font-weight: lighter against the inherited weight", function () {
+        var props = {
+          "font-weight": cascadeValue(new adapt_css.Int(400)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.lighter,
+        );
+        expect(resolved.num).toBe(100);
+      });
+
+      it("treats font-weight: bold as 700 when resolving bolder", function () {
+        var props = {
+          "font-weight": cascadeValue(adapt_css.ident.bold),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+
+      it("uses the initial weight 400 when no ancestor declared font-weight", function () {
+        var resolved = resolveFontValue(
+          {},
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(700);
+      });
+
+      it("leaves other keywords unchanged", function () {
+        var props = {};
+        expect(
+          resolveFontValue(props, "font-size", adapt_css.ident.solid),
+        ).toBe(adapt_css.ident.solid);
+        expect(resolveFontValue(props, "color", adapt_css.ident.larger)).toBe(
+          adapt_css.ident.larger,
+        );
+      });
+
+      it("uses a non-canonical size keyword as the em base", function () {
+        // `font-size: var(--x)` with `--x: SMALL` reaches the visitor without
+        // being canonicalized to lowercase by the validator, and CSS keywords
+        // are ASCII case-insensitive. (Issue #2174 follow-up)
+        var props = { "font-size": cascadeValue(adapt_css.getName("SMALL")) };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(26);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves a relative keyword coming from a custom property", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.getName("LARGER"),
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(19.2);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses font-size: 0 (a unitless number) as the em base", function () {
+        var props = { "font-size": cascadeValue(new adapt_css.Int(0)) };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(0);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a calc() font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("calc", [new adapt_css.Numeric(32, "px")]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a clamp() font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(16, "px"),
+              new adapt_css.Numeric(32, "px"),
+              new adapt_css.Numeric(48, "px"),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("evaluates a sum argument of a clamp() font-size", function () {
+        // `clamp(1rem, 1.5em + 8px, 3rem)` after the walk converted the
+        // relative units of the arguments to px.
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(16, "px"),
+              new adapt_css.SpaceList([
+                new adapt_css.Numeric(24, "px"),
+                new adapt_css.AnyToken("+"),
+                new adapt_css.Numeric(8, "px"),
+              ]),
+              new adapt_css.Numeric(48, "px"),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("keeps the default font size for a font-size that cannot be resolved", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("var", [new adapt_css.AnyToken("--missing")]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves bolder against a non-canonical bold weight", function () {
+        var props = {
+          "font-weight": cascadeValue(adapt_css.getName("BOLD")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+    });
+  });
 });
