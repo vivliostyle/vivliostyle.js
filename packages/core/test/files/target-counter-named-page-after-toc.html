@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2172: Named page lost on the page after a TOC page re-rendered for target-counter() -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>target-counter() named page after TOC (Issue #2172)</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 20mm;
+        @top-center {
+          content: "HEADER";
+        }
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      @page full {
+        margin: 0;
+        background: #fcc;
+        @top-center {
+          content: none;
+        }
+        @bottom-center {
+          content: none;
+        }
+      }
+      .toc a::after {
+        content: " ... " target-counter(attr(href url), page);
+      }
+      .opening {
+        page: full;
+        break-before: page;
+        height: 100vh;
+        box-sizing: border-box;
+        padding: 20mm;
+        background: #c66;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="toc">
+      <h1>Contents</h1>
+      <ol>
+        <li><a href="#c1">Chapter 1</a></li>
+        <li><a href="#c2">Chapter 2</a></li>
+      </ol>
+    </section>
+    <div class="opening" id="c1">
+      OPENING 1 (expected: "full" page, no margins, no header)
+    </div>
+    <section>
+      <p>Chapter 1 body (default page, page number 3).</p>
+    </section>
+    <div class="opening" id="c2">
+      OPENING 2 (expected: "full" page, no margins, no header)
+    </div>
+    <section>
+      <p>Chapter 2 body (default page, page number 5).</p>
+    </section>
+  </body>
+</html>
