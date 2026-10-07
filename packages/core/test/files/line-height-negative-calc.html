@@ -5,7 +5,11 @@
      paragraph with a 40px line height is therefore 0, not -60: materializing
      `-60px` would make the browser reject the declaration and inherit the 40px
      instead of applying zero. The footnote "Zero" must be rendered with the
-     0px line height of the inline reference, not with the 40px it inherits. -->
+     0px line height of the inline reference, not with the 40px it inherits.
+     The same difference is visible without a clamp: `calc(1lh - 30px)` is 10px
+     with the inherited 40px (the footnote "Ten"), while the pre-fix viewer
+     resolves the `lh` unit in the rendered context (the preferred line height
+     of the footnote area, 20px), which clamps to 0. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -18,16 +22,24 @@
       float: footnote;
       line-height: calc(1lh - 100px);
     }
+    .dep .fn-negative-mild {
+      float: footnote;
+      line-height: calc(1lh - 30px);
+    }
     .ref-negative { line-height: calc(1lh - 100px); }
+    .ref-negative-mild { line-height: calc(1lh - 30px); }
     ::footnote-marker { content: ""; }
   </style>
 </head>
 <body>
   <p class="dep">The footnote "Zero" below declares the same line height as the
     inline reference "Zero" of this paragraph (0px, the clamped result of
-    `calc(1lh - 100px)` with the inherited 40px), not the inherited 40px:
-    <span class="ref-negative">Zero</span></p>
-  <p class="dep">The footnote "Zero" is the one at the page bottom:
-    <span class="fn-negative">Zero</span></p>
+    `calc(1lh - 100px)` with the inherited 40px), not the inherited 40px, and
+    the footnote "Ten" is the same as the reference "Ten" (10px):
+    <span class="ref-negative">Zero</span>
+    <span class="ref-negative-mild">Ten</span></p>
+  <p class="dep">The footnotes of this paragraph are the ones at the page
+    bottom: <span class="fn-negative">Zero</span>
+    <span class="fn-negative-mild">Ten</span></p>
 </body>
 </html>
