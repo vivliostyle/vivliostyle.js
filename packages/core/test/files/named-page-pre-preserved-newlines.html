@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2172 (review): page starting at preserved newlines before a span inside a named-page pre -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Named page pre continuation at preserved newlines (Issue #2172)</title>
+    <style>
+      @page {
+        size: 300px;
+        margin: 36px;
+        @top-center {
+          content: "DEFAULT";
+        }
+      }
+      @page code {
+        background: #def;
+        @top-center {
+          content: "CODE";
+        }
+      }
+      pre {
+        page: code;
+        margin: 0;
+        font-size: 14px;
+        line-height: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <pre><span>line 1</span>
+
+<span>line 2</span>
+
+<span>line 3</span>
+
+<span>line 4</span>
+
+<span>line 5</span>
+
+<span>line 6</span>
+
+<span>line 7</span>
+
+<span>line 8</span>
+
+<span>line 9</span>
+
+<span>line 10</span>
+
+<span>line 11</span>
+
+<span>line 12</span>
+
+<span>line 13</span>
+
+<span>line 14</span>
+
+<span>line 15</span>
+
+<span>line 16</span>
+
+<span>line 17</span>
+
+<span>line 18</span>
+
+<span>line 19</span>
+
+<span>line 20</span>
+
+<span>line 21</span>
+
+<span>line 22</span>
+
+<span>line 23</span>
+
+<span>line 24</span>
+
+<span>line 25</span>
+
+<span>line 26</span>
+
+<span>line 27</span>
+
+<span>line 28</span>
+
+<span>line 29</span>
+
+<span>line 30</span></pre>
+    <p>After pre (expected: default page).</p>
+  </body>
+</html>

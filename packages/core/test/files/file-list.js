@@ -484,6 +484,11 @@ module.exports = [
         title: "target-counter() named page after TOC page (Issue #2172)",
       },
       {
+        file: "named-page-pre-preserved-newlines.html",
+        title:
+          "Named page pre continuation at preserved newlines before a span (Issue #2172)",
+      },
+      {
         file: "target-counter-named-pages-left-right.html",
         title: "target-counter() named pages with :left/:right (Issue #1497)",
       },
