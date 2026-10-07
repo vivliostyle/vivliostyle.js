@@ -4,6 +4,8 @@
      `letter-spacing` must use the inherited font-size when the parent's font-size is the
      relative keyword `smaller`, and `font-weight: bolder` must be resolved against the
      inherited weight (700 in a bold paragraph), not against the footnote area's weight.
+     This also applies when the keyword is substituted from a custom property
+     (`font-weight: var(--weight)` with `--weight: BOLDER`).
      The footnote texts must match the reference paragraphs below. -->
 <html lang="en">
 <head>
@@ -17,6 +19,9 @@
     p.ref { font-size: 13.3333px; letter-spacing: 26.6667px; }
     p.bold { font-weight: bold; } /* 700 */
     .fn2 { float: footnote; font-weight: bolder; } /* 700 -> 900 */
+    /* The keyword comes from a custom property, so it is not canonicalized */
+    :root { --weight: BOLDER; }
+    .fn3 { float: footnote; font-weight: var(--weight); } /* 700 -> 900 */
     p.wref { font-weight: 900; }
     ::footnote-marker { content: ""; }
   </style>
@@ -26,7 +31,10 @@
   <p class="ref">Wide letters</p>
   <p class="bold">Bold text with a footnote call<span class="fn2">Weight test</span>.</p>
   <p class="wref">Weight test</p>
+  <p class="bold">Bold text with a footnote call<span class="fn3">Weight test 2</span>.</p>
+  <p class="wref">Weight test 2</p>
   <p>The two lines "Wide letters" above should have exactly the same width, and the
-    two lines "Weight test" should have the same font weight (900).</p>
+    lines "Weight test" and "Weight test 2" should have the same font weight as the
+    references (900).</p>
 </body>
 </html>

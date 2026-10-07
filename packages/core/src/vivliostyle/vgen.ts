@@ -1048,9 +1048,10 @@ export class ViewFactory
             currentDeclaresFontSize = true;
           } else if (
             // The relative font-weight keywords are resolved against the
-            // inherited weight, so keep accumulating it.
-            value !== Css.ident.bolder &&
-            value !== Css.ident.lighter
+            // inherited weight, so keep accumulating it. A keyword coming from
+            // a custom property is not canonicalized, so compare names.
+            !CssCascade.hasKeywordName(value, "bolder") &&
+            !CssCascade.hasKeywordName(value, "lighter")
           ) {
             blockedInheritedByCurrent.add(name);
           }

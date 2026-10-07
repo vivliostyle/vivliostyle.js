@@ -1122,16 +1122,22 @@ export function resolveRelativeFontSizeKeyword(
 
 /**
  * Resolve the relative font-weight keyword `bolder`/`lighter` against the
- * inherited font weight, following the CSS Fonts 4 relative weights table.
+ * inherited font weight, following the CSS Fonts 4 relative weights table:
+ * `bolder` uses 400 for an inherited weight below 350, 700 below 550 and 900
+ * otherwise; `lighter` uses 100 (or the inherited weight when it is smaller
+ * than 100), 400 below 750 and 700 otherwise.
  */
 export function resolveRelativeFontWeight(
   keyword: Css.Ident,
   inheritedWeight: number,
 ): number {
   if (hasKeywordName(keyword, "bolder")) {
-    return inheritedWeight < 400 ? 400 : inheritedWeight < 600 ? 700 : 900;
+    return inheritedWeight < 350 ? 400 : inheritedWeight < 550 ? 700 : 900;
   }
-  return inheritedWeight < 600 ? 100 : inheritedWeight < 800 ? 400 : 700;
+  if (inheritedWeight < 550) {
+    return Math.min(inheritedWeight, 100);
+  }
+  return inheritedWeight < 750 ? 400 : 700;
 }
 
 /**
@@ -1184,13 +1190,15 @@ function resolveFontSizeValueToPx(
   if (value instanceof Css.Num) {
     return value.num * Exprs.defaultUnitSizes["px"];
   }
-  if (value instanceof Css.Func) {
-    const name = value.name.toLowerCase();
-    if (name === "clamp" || name === "min" || name === "max") {
-      return evaluateMathFunctionToPx(context, value);
-    }
+  if (value instanceof Css.Func && isMathFunction(value)) {
+    return evaluateMathFunctionToPx(context, value);
   }
   return evaluateValueToPx(context, value);
+}
+
+function isMathFunction(func: Css.Func): boolean {
+  const name = func.name.toLowerCase();
+  return name === "clamp" || name === "min" || name === "max";
 }
 
 /**
@@ -1231,6 +1239,11 @@ function evaluateValueToPx(
   context: Exprs.Context,
   value: Css.Val,
 ): number | null {
+  if (value instanceof Css.Func && isMathFunction(value)) {
+    // A nested math function, e.g. the inner max() of
+    // `min(40px, max(1em, 20px))`.
+    return evaluateMathFunctionToPx(context, value);
+  }
   const evaluated = evaluateCSSToCSS(context, value, "font-size");
   if (isAbsoluteLengthValue(evaluated)) {
     const numeric = evaluated as Css.Numeric;

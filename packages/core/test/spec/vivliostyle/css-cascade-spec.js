@@ -3277,6 +3277,22 @@ describe("css-cascade", function () {
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 800)).toBe(700);
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 900)).toBe(700);
       });
+
+      it("uses the cutoffs of the CSS Fonts 4 table for weights that are not multiples of 100", function () {
+        // Browsers (checked in Chromium and WebKit): bolder uses 400 below
+        // 350, 700 below 550 and 900 otherwise.
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 349)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 350)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 549)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 550)).toBe(900);
+        // lighter uses 100 below 550, 400 below 750 and 700 otherwise; a weight
+        // that is already lighter than 100 is kept.
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 549)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 550)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 749)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 750)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 99)).toBe(99);
+      });
     });
 
     describe("InheritanceVisitor", function () {
@@ -3508,6 +3524,29 @@ describe("css-cascade", function () {
           new adapt_css.Numeric(2, "em"),
         );
         expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a nested math function as the em base", function () {
+        // `min(40px, max(1em, 20px))` after the walk converted the relative
+        // units of the arguments to px.
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("min", [
+              new adapt_css.Numeric(40, "px"),
+              new adapt_css.Func("max", [
+                new adapt_css.Numeric(16, "px"),
+                new adapt_css.Numeric(20, "px"),
+              ]),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(40); // min(40px, max(16px, 20px)) = 20px
         expect(resolved.unit).toBe("px");
       });
 
