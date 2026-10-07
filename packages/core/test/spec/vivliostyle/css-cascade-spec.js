@@ -3526,6 +3526,18 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("uses the initial font size when the accumulated font-size was removed", function () {
+        // `font-size: initial` (e.g. `all: initial`) removes the accumulated
+        // value; the initial font size is medium. (Issue #1696)
+        var resolved = resolveFontValue(
+          {},
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
       it("resolves bolder against a non-canonical bold weight", function () {
         var props = {
           "font-weight": cascadeValue(adapt_css.getName("BOLD")),

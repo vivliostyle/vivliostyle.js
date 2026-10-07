@@ -1276,6 +1276,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   private getFontSize() {
     const cascval = getProp(this.props, "font-size");
+    if (!cascval) {
+      // The accumulated value is removed when `initial` (e.g. `font-size:
+      // initial` or `all: initial`) is processed. (Issue #1696)
+      return this.context.initialFontSize;
+    }
     const value = cascval.value;
     const keywordSize = resolveAbsoluteFontSizeKeyword(
       value,
