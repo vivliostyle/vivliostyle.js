@@ -1,4 +1,4 @@
-- id: "0153"
+- id: "0156"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -237,7 +237,79 @@
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-weight-math-function.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0123"
+- id: "0087"
+  category: General
+  title: "Invalid line-height from a var() substitution (Issue #2174 follow-up)"
+  file: invalid-var-line-height.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary renders the pre-fix result: the line height
+    that the var() substitution made invalid replaces the accumulated 40px, so
+    the footnote "One" resolves its `font-size: 1lh` to the preferred line
+    height (19.998px) instead of the 40px that the browser keeps when it rejects
+    the invalid declaration. The PR branch preserves the accumulated line height
+    for invalid substituted values (and lets such a declaration keep the
+    inherited value of its ancestors accumulated), so the footnote is rendered
+    at 39.998px like the inline reference of the normal flow.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-line-height.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-line-height.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0088"
+  category: General
+  title: "Negative computed line-height (Issue #2174 follow-up)"
+  file: line-height-negative-calc.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. In canary the `lh` unit of the footnote is
+    resolved in the rendered context (the preferred line height of the footnote
+    area, 19.9976px), so `calc(1lh - 30px)` clamps to 0 and the footnote "Ten"
+    differs from its inline reference (10px); the -60 of `calc(1lh - 100px)` is
+    clamped by the browser to 0 in both viewers. The PR branch resolves the `lh`
+    unit against the 40px line height of the source parent, so both footnotes
+    are rendered like their references, and it clamps the resolved value itself,
+    so that the -60 is not materialized as `-60px` (which the browser would
+    reject, inheriting the 40px instead of applying zero).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-negative-calc.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-negative-calc.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0089"
+  category: General
+  title: "font-size with a browser resolved unit (Issue #2174 follow-up)"
+  file: font-size-browser-unit.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager
+    conversion of the unit produced to the browser (`font-size: calc(NaNpx -
+    var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote
+    "ch" falls back to the inherited 15.998px while its inline reference renders
+    the `5ch` size (39.9918px). The PR branch preserves the value and leaves the
+    `em` values that depend on it to the browser, so the footnote is 39.9918px
+    like the reference.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0126"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
