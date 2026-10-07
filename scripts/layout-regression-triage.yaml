@@ -1,4 +1,4 @@
-- id: "0145"
+- id: "0146"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -28,13 +28,19 @@
     Follow-up of Issue #2174. stable and canary render the pre-fix result: the
     invalid `font-size: var(--invalid)` (5) of the footnote is not inherited but
     applied, so the footnote has no font size and its `letter-spacing: 2em` is
-    32px instead of the 64px of the reference paragraph, and the invalid
+    32px instead of the 64px of the reference paragraph, the invalid
+    `font-size: var(--negative)` (-10px) of a detached footnote makes it
+    `font-size: -10px`, which the browser clamps to 0, and the unknown
+    `font-size: nonsense` falls back to the synthetic parent (16px), so their
+    "Wide" is not as wide as the reference either, and the invalid
     `font-size: var(--negative)` (-10px) of the root element makes the root font
     size 0, so the blue 10rem box has no width instead of the 160px of the green
     reference box. A var() substitution is not revalidated, so the browser
     rejects such a declaration and keeps the font size that the element would
-    inherit; the PR branch renders the footnote like the reference (31.998px,
-    letter-spacing 64px) and the root keeps the initial 16px (10rem = 160px).
+    inherit; the PR branch renders the three "Wide" footnotes like the reference
+    (31.998px, letter-spacing 64px) and the root keeps the initial 16px
+    (10rem = 160px). The `font-size: calc(10px - 20px)` footnote is clamped to 0
+    in both viewers, because a computed negative value is valid.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -44,7 +50,30 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-size.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0115"
+- id: "0079"
+  category: General
+  title: "Root font size with a negative calc() (Issue #2174 follow-up)"
+  file: font-size-root-negative-calc.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    root font size is not resolved from the math function, so the rem unit falls
+    back to the initial 16px and the red 1rem box is as wide as the green 16px
+    box. A math function that computes a negative value is valid, so it is
+    clamped to the zero of the non-negative `font-size` range instead: the PR
+    branch renders the red box with no width. See invalid-var-font-size.html for
+    the invalid literal, which does not apply at all.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-negative-calc.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-negative-calc.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0116"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
