@@ -378,3 +378,48 @@
   errorSide: stable
   errorName: Error
   errorMessage: "Viewer error: TypeError: Cannot read properties of undefined (reading 'value')"
+- id: "0073"
+  category: General
+  title: "Root font size with a math function (Issue #2174 follow-up)"
+  file: font-size-calc-root.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable renders the pre-fix result: a root
+    font-size that is a math function (`clamp(10px, 20px, 30px)`) is not
+    resolved by the root sizing, so `rem` values and the page margin box use the
+    initial 16px (10rem = 160px, the margin box text at 16px). The PR branch
+    resolves the root font size to 20px (10rem = 200px, the same as the 200px
+    reference box, the margin box text at 20px).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-root.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-root.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0074"
+  category: General
+  title: "Root font size zero (Issue #2174 follow-up)"
+  file: font-size-root-zero.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable renders the pre-fix result: a root
+    font-size of unitless zero (`:root { font-size: 0 }`) is not resolved by the
+    root sizing and is then rejected by the truthiness checks, so `rem` values
+    and the page margin box use the initial 16px (the box is 16px wide and the
+    margin box text is visible at 16px). The PR branch resolves the root font
+    size to 0px like `font-size: 0px`, so the `1rem` box collapses and the
+    margin box text has a font size of 0.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-zero.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-zero.html&zoom=1&spread=false
+  diffPages:
+    - 1
