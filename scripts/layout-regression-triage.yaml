@@ -341,11 +341,12 @@
   decision: expected  # regression / expected / skip
   notes: >-
     Follow-up of Issue #2174. stable renders the pre-fix result: a font-size that
-    is not a size keyword (`calc()`, `clamp()`, a unitless zero, or a keyword
-    substituted from a custom property) is not resolved to a length, so the em
-    values of the footnote fall back to 16px (letter-spacing 32px) and differ
-    from the inline reference of each paragraph. The PR branch matches the
-    references.
+    is not a size keyword (`calc()`, `clamp()`, a unitless zero, a negative
+    `calc()` that the non-negative range of `font-size` clamps to zero, a
+    `calc()` with a signed term, or a keyword substituted from a custom
+    property) is not resolved to a length, so the em values of the footnote fall
+    back to 16px (letter-spacing 32px) and differ from the inline reference of
+    each paragraph. The PR branch matches the references.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -367,7 +368,8 @@
     `font-size: initial` footnote removes the accumulated font-size), so it
     cannot render it. The PR branch renders the page and resolves the font-size
     declared in the footnote against the source parent (48px/38.4px instead of
-    the root font size).
+    the root font size); the footnote with `font-size: initial` uses the initial
+    (medium) font size, not the inherited 20px.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
