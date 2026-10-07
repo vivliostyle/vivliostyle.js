@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: the `math` keyword of CSS Fonts 4 is a
+     valid font size that only the browser resolves, so a detached element that
+     declares it must keep it instead of a numeric size. The browser resolves
+     `math` against the context of the element itself, so the footnotes "Math"
+     must be rendered like the inline reference "Math", which is in a paragraph
+     with the font size of the footnote area, and not with the 32px that the
+     element inherits from its source parent. The same holds for the keyword
+     when a var() substitution puts it into the declaration: the substituted
+     value is valid and is preserved as well. The pre-fix viewer replaces the
+     keyword with the inherited 32px, so the footnotes are twice as large as
+     the reference. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>math font size keyword of a footnote (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    .ref-math { font-size: math; }
+    .dep { font-size: 32px; }
+    .dep .fn-math { float: footnote; font-size: math; }
+    .dep .fn-var { float: footnote; --m: math; font-size: var(--m); }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>The reference "Math" below is an inline element of this paragraph (the
+    font size of the footnote area), for which the browser resolves `math`:
+    <span class="ref-math">Math</span></p>
+  <p class="dep">The two footnotes "Math" must be rendered like the reference
+    "Math" above, not with the 32px of this paragraph:
+    <span class="fn-math">Math</span><span class="fn-var">Math</span></p>
+</body>
+</html>

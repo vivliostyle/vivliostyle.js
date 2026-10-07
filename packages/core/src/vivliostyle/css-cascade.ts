@@ -1191,6 +1191,21 @@ export function isValidFontWeight(num: number): boolean {
 }
 
 /**
+ * Whether a declared font-size value is valid although it cannot be resolved to
+ * a length here: a browser-supported value that the validator passes through,
+ * e.g. the `math` keyword (whose value depends on the math depth) or a unit
+ * that only the browser resolves such as `ch`. A value that a var()
+ * substitution made invalid and a value with an unresolved var() are not
+ * preserved. (Review)
+ */
+export function isValidUnresolvedFontSize(value: Css.Val): boolean {
+  return (
+    !CssValidator.containsVar(value) &&
+    CSS.supports("font-size", value.toString())
+  );
+}
+
+/**
  * Whether a declared font-weight value is invalid: `font-weight` accepts a
  * number in the 1-1000 range of CSS Fonts 4 and the keywords (the relative
  * `bolder`/`lighter` are resolved by the visitor), so every other
@@ -1375,6 +1390,108 @@ export function resolveLineHeightValueToPx(
   const evaluated = evaluateCSSToCSS(context, converted, "line-height");
   return isAbsoluteLengthValue(evaluated)
     ? (evaluated as Css.Numeric).num
+    : null;
+}
+
+/**
+ * Evaluate a clamp()/min()/max() function of numbers, e.g. the font-weight
+ * `min(900, 1000)`. Returns null when any argument cannot be resolved to a
+ * number.
+ */
+function evaluateMathFunctionToNumber(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  const name = func.name.toLowerCase();
+  const isClamp = name === "clamp";
+  if (func.values.length === 0 || (isClamp && func.values.length !== 3)) {
+    return null;
+  }
+  const numbers: number[] = [];
+  for (const value of func.values) {
+    const num = evaluateValueToNumber(context, value);
+    if (num == null) {
+      return null;
+    }
+    numbers.push(num);
+  }
+  if (isClamp) {
+    return Math.max(numbers[0], Math.min(numbers[1], numbers[2]));
+  }
+  return name === "min" ? Math.min(...numbers) : Math.max(...numbers);
+}
+
+/**
+ * Evaluate a value that is expected to be a number, e.g. a plain number or a
+ * sum such as `800 + 100`. Returns null when it is not a resolvable number.
+ */
+function evaluateValueToNumber(
+  context: Exprs.Context,
+  value: Css.Val,
+): number | null {
+  if (value instanceof Css.Func && isMathFunction(value)) {
+    // A nested math function, e.g. the inner max() of `min(900, max(100, 800))`.
+    return evaluateMathFunctionToNumber(context, value);
+  }
+  const evaluated = evaluateCSSToCSS(context, value, "font-weight");
+  if (evaluated instanceof Css.Num) {
+    return evaluated.num;
+  }
+  if (
+    value instanceof Css.Expr ||
+    value instanceof Css.Func ||
+    value instanceof Css.SpaceList
+  ) {
+    // A calc() expression evaluates a sum or product, which a plain value
+    // (e.g. a math function argument) is not parsed as.
+    const asCalc = evaluateCSSToCSS(
+      context,
+      new Css.Func("calc", [value]),
+      "font-weight",
+    );
+    if (asCalc instanceof Css.Num) {
+      return asCalc.num;
+    }
+  }
+  return null;
+}
+
+/**
+ * Replace the clamp()/min()/max() functions of a number value with their
+ * value, from the innermost one outwards, so that the expression evaluator can
+ * evaluate the arithmetic expression around them.
+ */
+class NumberMathFunctionReducer extends Css.FilterVisitor {
+  constructor(private readonly context: Exprs.Context) {
+    super();
+  }
+
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    if (isMathFunction(visited)) {
+      const num = evaluateMathFunctionToNumber(this.context, visited);
+      if (num != null) {
+        return new Css.Num(num);
+      }
+    }
+    return visited;
+  }
+}
+
+/**
+ * Evaluate a number-valued math function of `font-weight`, e.g. the
+ * `min(900, 1000)` or the `calc(650 + 50)` of a declaration, or the same value
+ * of an accumulated weight. Returns null when the value does not reduce to a
+ * (finite) number. (Review)
+ */
+export function evaluateFontWeightMathFunction(
+  context: Exprs.Context,
+  value: Css.Val,
+): Css.Num | null {
+  const reduced = value.visit(new NumberMathFunctionReducer(context));
+  const evaluated = evaluateCSSToCSS(context, reduced, "font-weight");
+  return evaluated instanceof Css.Num && Number.isFinite(evaluated.num)
+    ? evaluated
     : null;
 }
 
@@ -1612,8 +1729,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     const cascval = getProp(this.props, "font-weight");
     let value = cascval?.value;
     if (value instanceof Css.Expr || value instanceof Css.Func) {
-      // `font-weight` also accepts a function, e.g. `calc(650)`.
-      value = evaluateCSSToCSS(this.context, value, "font-weight");
+      // `font-weight` also accepts a function, e.g. `calc(650)` or
+      // `min(900, 1000)`, which `evaluateCSSToCSS()` alone does not reduce.
+      value =
+        evaluateFontWeightMathFunction(this.context, value) ??
+        evaluateCSSToCSS(this.context, value, "font-weight");
     }
     if (value instanceof Css.Num) {
       // A number outside the range of CSS Fonts 4, e.g. one that a var()
@@ -5831,18 +5951,29 @@ export class CascadeInstance {
           (name === "font-weight" && isInvalidFontWeight(cascVal.value))
             ? Css.ident.unset
             : cascVal.value.visit(visitor);
-        if (
-          name === "font-weight" &&
-          value instanceof Css.Num &&
-          !Css.isDefaultingValue(value)
-        ) {
-          // A weight that is not a literal, e.g. `calc(1200)`, is valid: the
-          // computed value is clamped to the range of CSS Fonts 4, while a
-          // non-finite result is invalid like a literal outside the range.
-          // (Review)
-          value = Number.isFinite(value.num)
-            ? new Css.Num(Math.min(1000, Math.max(1, value.num)))
-            : Css.ident.unset;
+        if (name === "font-weight") {
+          if (value instanceof Css.Func || value instanceof Css.Expr) {
+            // The validator passes browser-supported math functions through,
+            // e.g. `min(900, 1000)`, but `CalcFilterVisitor` only reduces
+            // `calc()`: reduce the other math functions here, before the range
+            // is validated. A function that does not reduce to a number, e.g.
+            // the `min(900px, 1em)` that a var() substitution put into the
+            // declaration, is invalid. (Review)
+            value =
+              evaluateFontWeightMathFunction(this.context, value) ??
+              Css.ident.unset;
+          }
+          if (value instanceof Css.Num) {
+            // A weight that is not a literal, e.g. `calc(1200)`, is valid: the
+            // computed value is clamped to the range of CSS Fonts 4, while a
+            // non-finite result is invalid like a literal outside the range.
+            // (Review)
+            value = Number.isFinite(value.num)
+              ? new Css.Num(Math.min(1000, Math.max(1, value.num)))
+              : Css.ident.unset;
+          } else if (isInvalidFontWeight(value)) {
+            value = Css.ident.unset;
+          }
         } else if (
           name === "font-size" &&
           value instanceof Css.Numeric &&

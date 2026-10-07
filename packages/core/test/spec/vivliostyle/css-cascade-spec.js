@@ -3463,7 +3463,7 @@ describe("css-cascade", function () {
         // into the declaration is invalid as well, while a math function is
         // allowed until it is evaluated. (Review)
         expect(
-          adapt_csscasc.isInvalidFontWeight(new adapt_css.Ident("nonsense")),
+          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("nonsense")),
         ).toBe(true);
         expect(
           adapt_csscasc.isInvalidFontWeight(new adapt_css.Numeric(700, "px")),
@@ -3487,6 +3487,74 @@ describe("css-cascade", function () {
         expect(
           adapt_csscasc.isInvalidFontWeight(
             new adapt_css.Func("calc", [new adapt_css.Num(650)]),
+          ),
+        ).toBe(false);
+      });
+
+      it("evaluates number valued math functions of a font weight", function () {
+        // The validator passes a browser-supported math function through, e.g.
+        // `min(900, 1000)`, which must be reduced before the range is
+        // validated: `getFontWeight()` and the cascade use this evaluation.
+        // (Review)
+        function evaluate(text) {
+          return adapt_csscasc.evaluateFontWeightMathFunction(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            ),
+          );
+        }
+        expect(evaluate("min(900, 1000)").num).toBe(900);
+        expect(evaluate("max(100, 800)").num).toBe(800);
+        expect(evaluate("clamp(100, 500, 900)").num).toBe(500);
+        expect(evaluate("calc(650 + 50)").num).toBe(700);
+        // not a number: an unsupported argument or a length
+        expect(evaluate("min(900px, 1em)")).toBe(null);
+        expect(evaluate("nonsense")).toBe(null);
+      });
+
+      it("keeps the rollback keywords of any casing", function () {
+        // A var() fallback such as `var(--missing, REVERT)` is not
+        // canonicalized, so the keywords must be compared case insensitively:
+        // they are not invalid weights, and the cascade resolves them as a
+        // rollback. (Review)
+        // The Ident constructor rejects a name that already exists, so the
+        // names must be looked up through getName().
+        expect(
+          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("REVERT")),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("REVERT-LAYER")),
+        ).toBe(false);
+        expect(adapt_css.isRollbackValue(adapt_css.getName("REVERT"))).toBe(
+          true,
+        );
+      });
+
+      it("preserves a valid font size that cannot be resolved here", function () {
+        // The validator passes browser-supported values through, e.g. the
+        // `math` keyword or a unit that only the browser resolves, so a
+        // detached element must keep them instead of inheriting a numeric
+        // value; a value that a substitution made invalid is not preserved.
+        // (Review)
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(adapt_css.getName("math")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            new adapt_css.Numeric(2, "ch"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            adapt_css.getName("nonsense"),
           ),
         ).toBe(false);
       });

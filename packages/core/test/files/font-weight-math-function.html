@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: `font-weight` accepts a math function
+     of CSS Values 4 (it is a `<number>`), so the function must be evaluated
+     before the 1-1000 range is validated and before a relative keyword is
+     resolved against the result. The footnotes "B" of the `min(900, 1000)`
+     paragraph must be as bold as the inline "B" of the same paragraph (900,
+     the weight of the paragraph itself), and a function whose result is out of
+     range must be clamped, while a function whose arguments are not numbers
+     (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
+     keeps the inherited weight. The pre-fix viewer leaves the function
+     unresolved, so the paragraph is 400 and "bolder" resolves to 700. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Font weight from a math function (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { font-weight: 400; }
+    .dep { font-weight: min(900, 1000); } /* 900 */
+    .dep .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    .dep .fn-own { float: footnote; font-weight: min(900, 1000); } /* 900 */
+    .dep .fn-clamp { float: footnote; font-weight: max(1000, 1200); } /* 1000 */
+    .ref-bolder { font-weight: bolder; } /* 900, bolder than 900 is 900 */
+    .ref-700 { font-weight: 700; }
+    .invalid { --m: min(900px, 1em); font-weight: var(--m); } /* invalid */
+    .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="dep">The three footnotes "B" below must be as bold as the inline
+    "B" of this paragraph, i.e. 900, the weight of the `min(900, 1000)`
+    paragraph itself:
+    <span class="ref-bolder">B</span><span class="fn-bolder">B</span>
+    <span class="fn-own">B</span><span class="fn-clamp">B</span></p>
+  <p class="invalid">A function whose arguments are lengths is invalid at
+    computed-value time, so this footnote must be
+    <span class="ref-700">B</span>, one step bolder than the 400 of this
+    paragraph: <span class="fn-bolder">B</span></p>
+</body>
+</html>

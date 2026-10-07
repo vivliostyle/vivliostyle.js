@@ -736,11 +736,23 @@ export function isDefaultingValue(value: Val | null | undefined): boolean {
  * to a declaration that lost (css-cascade-5 §7.3 Explicit Defaulting).
  */
 export function isRollbackValue(value: Val | null | undefined): boolean {
-  return (
+  if (
     value === ident.revert ||
     value === ident.revert_layer ||
     value === ident.revert_rule
-  );
+  ) {
+    return true;
+  }
+  // A keyword that a var() substitution or a var() fallback puts into a
+  // declaration is not canonicalized, and CSS keywords are case insensitive, so
+  // compare the name as well. (Review)
+  if (value instanceof Ident) {
+    const name = value.name.toLowerCase();
+    return (
+      name === "revert" || name === "revert-layer" || name === "revert-rule"
+    );
+  }
+  return false;
 }
 
 class RollbackValueVisitor extends Visitor {

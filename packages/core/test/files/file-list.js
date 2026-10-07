@@ -302,6 +302,14 @@ module.exports = [
         file: "line-height-lh-region-rule.html",
         title: "line-height: lh with a region rule (Issue #2174 follow-up)",
       },
+      {
+        file: "font-weight-math-function.html",
+        title: "Font weight from a math function (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-math-keyword.html",
+        title: "math font size keyword of a footnote (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

@@ -1276,7 +1276,11 @@ export class ViewFactory
               prop1 = prop1.withValue(new Css.Numeric(0, "px"));
             } else if (
               CssCascade.resolveFontSizeValueToPx(this.context, prop1.value) ==
-              null
+                null &&
+              // A valid value that cannot be resolved here, e.g. the `math`
+              // keyword or a unit that only the browser resolves, is preserved
+              // instead of being replaced by the inherited value. (Review)
+              !CssCascade.isValidUnresolvedFontSize(prop1.value)
             ) {
               const inheritedFontSize = CssCascade.getProp(props, name);
               if (inheritedFontSize) {
