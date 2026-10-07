@@ -2,7 +2,9 @@
 <!-- Test case for Issue #2174 follow-up: a root font-size that is a math function
      (clamp()/min()/max()) must be resolved to a numeric root font size, so that rem
      units, rlh and the page context use the same font size as the browser does.
-     clamp(10px, 20px, 30px) = 20px, so 10rem must be 200px. -->
+     The `em` argument of the clamp() is relative to the initial font size (16px),
+     because the root element has no parent: clamp(10px, 16px + 4px, 30px) = 20px,
+     so 10rem must be 200px. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,7 +15,7 @@
       /* 1rem = root font size = 20px (clamp) */
       @top-center { content: "Margin box at 1rem"; font-size: 1rem; }
     }
-    :root { font-size: clamp(10px, 20px, 30px); } /* 20px */
+    :root { font-size: clamp(10px, calc(1em + 4px), 30px); } /* 1em = 16px -> 20px */
     .rem-test { width: 10rem; height: 6px; background: #9cf; } /* 200px */
     .rem-ref { width: 200px; height: 6px; background: #cfc; }
     p { margin: 0.25em 0; }

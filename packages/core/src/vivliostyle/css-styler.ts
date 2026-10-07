@@ -718,11 +718,16 @@ export class Styler implements AbstractStyler {
       }
       if (px == null) {
         // A font size that is neither a keyword nor a Css.Numeric: a unitless
-        // zero, or a clamp()/min()/max() whose arguments are lengths that can
-        // be resolved here, e.g.
-        // `:root { font-size: clamp(10px, 20px, 30px) }`. (Issue #2174
-        // follow-up)
-        const resolved = CssCascade.resolveFontSizeValueToPx(this.context, val);
+        // zero, or a calc()/clamp()/min()/max() whose arguments are lengths
+        // that can be resolved here, e.g.
+        // `:root { font-size: clamp(10px, 20px, 30px) }`. The root element has
+        // no parent, so `em`/`%` arguments refer to the initial font size.
+        // (Issue #2174 follow-up)
+        const resolved = CssCascade.resolveFontSizeValueToPx(
+          this.context,
+          val,
+          this.context.initialFontSize,
+        );
         if (resolved != null) {
           px = resolved;
           if (val instanceof Css.Func) {

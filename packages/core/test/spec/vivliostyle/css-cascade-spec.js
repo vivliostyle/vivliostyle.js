@@ -3341,6 +3341,33 @@ describe("css-cascade", function () {
         ).toBe(24);
       });
 
+      it("resolves a clamp() that uses parent relative units", function () {
+        // At the root element (and while resolving it) the parent font size is
+        // the initial font size.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(1, "em"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(2, "em"),
+            ]),
+            16,
+          ),
+        ).toBe(20);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(50, "%"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(200, "%"),
+            ]),
+            16,
+          ),
+        ).toBe(20);
+      });
+
       it("returns null for a value that cannot be resolved", function () {
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(

@@ -1180,20 +1180,48 @@ export function resolveAbsoluteFontSizeKeyword(
  * a calc() expression, or a clamp()/min()/max() function. The em/% and
  * viewport units in these values have already been converted to px by
  * visitNumeric while the inherited values were accumulated, so an expression
- * whose remaining units are all resolvable can be evaluated here. Returns null
+ * whose remaining units are all resolvable can be evaluated here.
+ *
+ * `parentFontSize` is the font size that the `em`/`%` arguments refer to. It is
+ * only needed for a value that has not been through that conversion, e.g. the
+ * root font size, whose parent font size is the initial font size. Returns null
  * when the value cannot be resolved to a length. (Issue #2174 follow-up)
  */
 export function resolveFontSizeValueToPx(
   context: Exprs.Context,
   value: Css.Val,
+  parentFontSize?: number,
 ): number | null {
   if (value instanceof Css.Num) {
     return value.num * Exprs.defaultUnitSizes["px"];
+  }
+  if (parentFontSize != null && value instanceof Css.Func) {
+    value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);
   }
   if (value instanceof Css.Func && isMathFunction(value)) {
     return evaluateMathFunctionToPx(context, value);
   }
   return evaluateValueToPx(context, value);
+}
+
+/**
+ * Convert the parts of a font-size value that resolve against the inherited
+ * font size (`em`, `%`, and the units that such values resolve to) into px,
+ * using the given parent font size as that inherited value. The conversion of
+ * the walk is reused; the parts that do not depend on the parent font size are
+ * left for the caller.
+ */
+function convertParentRelativeFontSizeUnits(
+  context: Exprs.Context,
+  func: Css.Func,
+  parentFontSize: number,
+): Css.Val {
+  const parentProps = {
+    "font-size": new CascadeValue(new Css.Numeric(parentFontSize, "px"), 0),
+  } as ElementStyle;
+  const visitor = new InheritanceVisitor(parentProps, context);
+  visitor.setPropName("font-size");
+  return func.visit(visitor);
 }
 
 function isMathFunction(func: Css.Func): boolean {

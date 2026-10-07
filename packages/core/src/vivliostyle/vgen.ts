@@ -1019,6 +1019,13 @@ export class ViewFactory
     const fontSizeFromOwnStyle = !!(
       styles.length > 0 && CssCascade.getProp(styles[0], "font-size")
     );
+    // Whether the current element's relative font weight (including region
+    // rules) is resolved against the inherited weight.
+    let currentHasRelativeFontWeight = false;
+    // Whether the current element's own cascaded style declares font-weight.
+    const fontWeightFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "font-weight")
+    );
     if (styles.length > 0) {
       const currentStyle = styles[0];
       const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
@@ -1054,6 +1061,8 @@ export class ViewFactory
             !CssCascade.hasKeywordName(value, "lighter")
           ) {
             blockedInheritedByCurrent.add(name);
+          } else if (name === "font-weight") {
+            currentHasRelativeFontWeight = true;
           }
         }
       }
@@ -1175,6 +1184,22 @@ export class ViewFactory
       if (inheritedFontSize) {
         props["font-size"] = new CssCascade.CascadeValue(
           inheritedFontSize.value,
+          0,
+        );
+      }
+    }
+    if (currentHasRelativeFontWeight && !fontWeightFromOwnStyle) {
+      const inheritedFontWeight = props["font-weight"] as
+        CssCascade.CascadeValue | undefined;
+      // Likewise for a relative font weight (`bolder`/`lighter`) that comes
+      // from a declaration outside the element's own cascaded style, e.g.
+      // `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }`.
+      // The accumulated inherited weight is kept only as a low-priority
+      // placeholder, so that it cannot beat the declaration during the
+      // cascade. (Issue #2174)
+      if (inheritedFontWeight) {
+        props["font-weight"] = new CssCascade.CascadeValue(
+          inheritedFontWeight.value,
           0,
         );
       }

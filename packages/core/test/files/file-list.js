@@ -258,6 +258,10 @@ module.exports = [
         file: "font-size-root-zero.html",
         title: "Root font size zero (Issue #2174 follow-up)",
       },
+      {
+        file: "relative-font-weight-region-rule.html",
+        title: "Relative font weight in a region rule (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
