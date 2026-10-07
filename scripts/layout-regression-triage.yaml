@@ -1,3 +1,23 @@
+- id: "0134"
+  category: Cross-references
+  title: "target-counter() named page after TOC page (Issue #2172)"
+  file: target-counter-named-page-after-toc.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Fix for Issue #2172. canary renders the pre-fix result: page 2
+    ("OPENING 1") falls back to the default page (margins, HEADER, page
+    number) after the TOC page is re-rendered for target-counter(). The PR
+    branch renders it on the `full` named page, the same as "OPENING 2".
+  approvedViewer: git-fix-issue2172  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2172
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2172-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2172/packages/core/test/files/target-counter-named-page-after-toc.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2172/packages/core/test/files/target-counter-named-page-after-toc.html&zoom=1&spread=false
+  diffPages:
+    - 2
 - id: "0104"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
