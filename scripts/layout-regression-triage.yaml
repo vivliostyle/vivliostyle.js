@@ -302,7 +302,8 @@
     against the footnote area instead of the source parent, so the letter-spacing
     of "Wide letters" is 32px instead of 26.667px and the footnote of "Weight
     test" / "Weight test 2" / "Weight test 3" is 700 instead of 900. The PR
-    branch matches the reference paragraphs.
+    branch matches the reference paragraphs. "Weight test 4" inherits 950 from
+    its source parent, so `bolder` keeps 950 (stable: 900).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
