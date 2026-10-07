@@ -1,4 +1,4 @@
-- id: "0146"
+- id: "0148"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -75,7 +75,56 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-negative-calc.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0116"
+- id: "0080"
+  category: General
+  title: "Root font size from an invalid substituted unit (Issue #2174 follow-up)"
+  file: font-size-invalid-unit-root.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    root font size is resolved from the invalid substituted dimension `5s` as
+    5px (the unit has no size, so the value is left as it is), so the page is
+    rendered at 5px and the blue 1rem box is 5px wide instead of the 16px of the
+    green reference box. The declaration is invalid at computed-value time, so
+    the PR branch keeps the initial 16px of the root and the two boxes are as
+    wide as each other.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-invalid-unit-root.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-invalid-unit-root.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0081"
+  category: General
+  title: "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)"
+  file: defaulting-keyword-from-var.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: a
+    CSS-wide keyword that comes from a custom property is not canonicalized, so
+    `--x: INHERIT; color: var(--x)` is not recognized as `inherit`. The
+    declaration blocks the inherited value of the source parent, so the
+    footnote "Red" is rendered in the color of the page (black) instead of the
+    red of its source parent, and the "Wide" footnotes with
+    `--y: INHERIT; font-size: var(--y)` use the initial 16px instead of the 32px
+    of the source parent (`letter-spacing: 2em` is 32px instead of 64px). The
+    PR branch compares the keyword names case insensitively, so the footnotes
+    inherit the source parent values.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/defaulting-keyword-from-var.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/defaulting-keyword-from-var.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0118"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
