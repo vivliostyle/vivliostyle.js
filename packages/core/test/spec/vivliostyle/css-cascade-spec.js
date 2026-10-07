@@ -3727,6 +3727,28 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("resolves the lh unit against a computed line height", function () {
+        // `line-height: calc(2 * 20px)` stays a function while the inherited
+        // values are accumulated.
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(2 * 20px)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(40);
+        expect(resolved.unit).toBe("px");
+      });
+
       it("clamps a negative parent font size to zero", function () {
         var props = {
           "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),
@@ -3738,6 +3760,22 @@ describe("css-cascade", function () {
         );
         expect(resolved.num).toBe(0);
         expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves bolder against an accumulated weight that is a function", function () {
+        // `font-weight` accepts `calc(650)`, which stays a function while the
+        // inherited values are accumulated.
+        var props = {
+          "font-weight": cascadeValue(
+            new adapt_css.Func("calc", [new adapt_css.Num(650)]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
       });
 
       it("resolves bolder against a non-canonical bold weight", function () {

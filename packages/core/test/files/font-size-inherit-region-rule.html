@@ -4,9 +4,9 @@
      win over a declaration of a region rule (here `:footnote-content`) when its
      cascade priority is higher, instead of being compared as if the ancestor's
      declaration were a declaration of the element.
-     The footnote with the inline `font-size: inherit` must use the inherited
-     20px, while the footnote without a declaration uses the 0.9em of the region
-     rule. -->
+     The footnotes with the inline `font-size: inherit` (and `unset`, which is
+     the same for this inherited property) must use the inherited 20px, while
+     the footnote without a declaration uses the 0.9em of the region rule. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -21,11 +21,14 @@
 </head>
 <body>
   <p>All this body text is 20px. The first footnote declares
-    <code>font-size: inherit</code> inline and must be 20px as well; the second
-    one has no declaration and uses the 0.9em of the region rule.</p>
+    <code>font-size: inherit</code> inline and must be 20px as well, and so must
+    the third one with <code>font-size: unset</code>; the second one has no
+    declaration and uses the 0.9em of the region rule.</p>
   <p>A footnote call<a href="#fn1" role="doc-noteref"></a> follows here.</p>
   <aside id="fn1" role="doc-footnote" style="font-size: inherit">Inherit footnote</aside>
   <p>A footnote call<a href="#fn2" role="doc-noteref"></a> follows here.</p>
   <aside id="fn2" role="doc-footnote">Plain footnote</aside>
+  <p>A footnote call<a href="#fn3" role="doc-noteref"></a> follows here.</p>
+  <aside id="fn3" role="doc-footnote" style="font-size: unset">Unset footnote</aside>
 </body>
 </html>

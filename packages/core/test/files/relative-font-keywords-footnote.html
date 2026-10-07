@@ -5,7 +5,8 @@
      relative keyword `smaller`, and `font-weight: bolder` must be resolved against the
      inherited weight (700 in a bold paragraph), not against the footnote area's weight.
      This also applies when the keyword is substituted from a custom property
-     (`font-weight: var(--weight)` with `--weight: BOLDER`).
+     (`font-weight: var(--weight)` with `--weight: BOLDER`). A weight that is
+     declared with `calc()` must be evaluated before the keyword is resolved.
      The footnote texts must match the reference paragraphs below. -->
 <html lang="en">
 <head>
@@ -23,6 +24,9 @@
     :root { --weight: BOLDER; }
     .fn3 { float: footnote; font-weight: var(--weight); } /* 700 -> 900 */
     p.wref { font-weight: 900; }
+    /* `font-weight` accepts a function: bolder of 650 is 900 */
+    p.calcweight { font-weight: calc(650); }
+    .fn4 { float: footnote; font-weight: bolder; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
@@ -33,6 +37,8 @@
   <p class="wref">Weight test</p>
   <p class="bold">Bold text with a footnote call<span class="fn3">Weight test 2</span>.</p>
   <p class="wref">Weight test 2</p>
+  <p class="calcweight">Weight 650 with a footnote call<span class="fn4">Weight test 3</span>.</p>
+  <p class="wref">Weight test 3</p>
   <p>The two lines "Wide letters" above should have exactly the same width, and the
     lines "Weight test" and "Weight test 2" should have the same font weight as the
     references (900).</p>

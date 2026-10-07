@@ -18,11 +18,16 @@
     /* 1lh = the computed line height of the parent = 40px */
     .fn { float: footnote; font-size: 1lh; }
     .ref { font-size: 40px; }
+    /* the same, with a line height that is computed by calc() */
+    p.calc { line-height: calc(2 * 20px); }
+    .fn.calc-lh, .ref.calc-lh { font-size: 40px; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
 <body>
   <p>lh unit: <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="calc">lh unit with a computed line height:
+    <span class="ref calc-lh">Wide</span><span class="fn calc-lh">Wide</span></p>
   <p>The footnote at the page bottom must have the same letter-spacing as the
     inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
     line height of the root.</p>

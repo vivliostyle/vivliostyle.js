@@ -1133,7 +1133,12 @@ export class ViewFactory
           } else {
             delete props[name];
           }
-        } else if (prop.value === Css.ident.inherit) {
+        } else if (
+          prop.value === Css.ident.inherit ||
+          // `unset` is the same as `inherit` for the inherited properties that
+          // are processed here.
+          prop.value === Css.ident.unset
+        ) {
           const inherited = CssCascade.getProp(props, name);
           if (inherited) {
             // `inherit` is the inherited value. Materializing it with the
@@ -4735,7 +4740,7 @@ function getInlineStyle(element: Element | null): CSSStyleDeclaration | null {
  */
 function parseLayoutUnitAdjustedValue(val: string): number | null {
   const match =
-    /^calc\(\s*(-?\d*\.?\d+)px\s*-\s*var\(--viv-layoutUnitAdj\)/i.exec(
+    /^calc\(\s*(-?\d*\.?\d+(?:e[-+]?\d+)?)px\s*-\s*var\(--viv-layoutUnitAdj\)/i.exec(
       val.trim(),
     );
   if (!match) {

@@ -1386,8 +1386,13 @@ export class InheritanceVisitor extends Css.FilterVisitor {
    * null when it cannot be determined. (Issue #2174 follow-up)
    */
   private getInheritedLineHeightUnitSize(): number | null {
-    const value = getProp(this.props, "line-height")?.value;
+    let value = getProp(this.props, "line-height")?.value;
     const parentFontSize = this.getFontSize();
+    if (value instanceof Css.Expr || value instanceof Css.Func) {
+      // A computed line height, e.g. `line-height: calc(1.5 * 16px)`, which is
+      // still a function while the inherited values are accumulated.
+      value = evaluateCSSToCSS(this.context, value, "line-height");
+    }
     if (value instanceof Css.Num) {
       return value.num * parentFontSize;
     }
@@ -1416,7 +1421,12 @@ export class InheritanceVisitor extends Css.FilterVisitor {
   private getFontWeight(): number {
     // The accumulated value is the inherited (parent's) font weight, or the
     // initial value 400 when no ancestor declared font-weight.
-    const value = getProp(this.props, "font-weight")?.value;
+    const cascval = getProp(this.props, "font-weight");
+    let value = cascval?.value;
+    if (value instanceof Css.Expr || value instanceof Css.Func) {
+      // `font-weight` also accepts a function, e.g. `calc(650)`.
+      value = evaluateCSSToCSS(this.context, value, "font-weight");
+    }
     if (value instanceof Css.Num) {
       return value.num;
     }
