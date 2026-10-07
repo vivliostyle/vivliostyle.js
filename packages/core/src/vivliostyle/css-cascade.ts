@@ -1184,8 +1184,10 @@ export function resolveAbsoluteFontSizeKeyword(
  *
  * `parentFontSize` is the font size that the `em`/`%` arguments refer to. It is
  * only needed for a value that has not been through that conversion, e.g. the
- * root font size, whose parent font size is the initial font size. Returns null
- * when the value cannot be resolved to a length. (Issue #2174 follow-up)
+ * root font size, whose parent font size is the initial font size. A resolved
+ * value is clamped to the non-negative computed-value range of `font-size`.
+ * Returns null when the value cannot be resolved to a length. (Issue #2174
+ * follow-up)
  */
 export function resolveFontSizeValueToPx(
   context: Exprs.Context,
@@ -1193,15 +1195,16 @@ export function resolveFontSizeValueToPx(
   parentFontSize?: number,
 ): number | null {
   if (value instanceof Css.Num) {
-    return value.num * Exprs.defaultUnitSizes["px"];
+    return Math.max(0, value.num * Exprs.defaultUnitSizes["px"]);
   }
   if (parentFontSize != null && value instanceof Css.Func) {
     value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);
   }
-  if (value instanceof Css.Func && isMathFunction(value)) {
-    return evaluateMathFunctionToPx(context, value);
-  }
-  return evaluateValueToPx(context, value);
+  const px =
+    value instanceof Css.Func && isMathFunction(value)
+      ? evaluateMathFunctionToPx(context, value)
+      : evaluateValueToPx(context, value);
+  return px == null ? null : Math.max(0, px);
 }
 
 /**
@@ -1345,7 +1348,8 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
       throw new Error("Unexpected state");
     }
-    return n.num * Exprs.defaultUnitSizes[n.unit];
+    // `font-size` has a non-negative computed-value range.
+    return Math.max(0, n.num * Exprs.defaultUnitSizes[n.unit]);
   }
 
   private getFontWeight(): number {
@@ -1460,12 +1464,15 @@ export function convertFontSizeToPx(
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "px") {
-    return numeric;
-  } else if (unit === "%") {
-    return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
-  } else {
-    return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
+    // Keep the value as it is when it is already a valid length.
+    return num < 0 ? new Css.Numeric(0, "px") : numeric;
   }
+  const px =
+    unit === "%"
+      ? (num / 100) * (parentFontSize ?? 0)
+      : num * context.queryUnitSize(unit, false);
+  // `font-size` has a non-negative computed-value range.
+  return new Css.Numeric(Math.max(0, px), "px");
 }
 
 export type ActionTable = Map<string, CascadeAction>;

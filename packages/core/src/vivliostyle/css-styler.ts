@@ -742,6 +742,9 @@ export class Styler implements AbstractStyler {
         }
       }
       if (px != null) {
+        // `font-size` has a non-negative computed-value range, e.g.
+        // `calc(10px - 20px)` computes to 0px.
+        px = Math.max(0, px);
         this.context.rootFontSize = px;
         this.context.isRelativeRootFontSize = isRelativeFontSize;
       }

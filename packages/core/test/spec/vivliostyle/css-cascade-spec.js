@@ -3368,6 +3368,26 @@ describe("css-cascade", function () {
         ).toBe(20);
       });
 
+      it("clamps a negative result to zero", function () {
+        // font-size has a non-negative computed-value range, e.g. an element
+        // with `font-size: calc(10px - 20px)` computes to 0px.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("max", [
+              new adapt_css.Numeric(-30, "px"),
+              new adapt_css.Numeric(-10, "px"),
+            ]),
+          ),
+        ).toBe(0);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("calc", [new adapt_css.Numeric(-1, "px")]),
+          ),
+        ).toBe(0);
+      });
+
       it("returns null for a value that cannot be resolved", function () {
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(
@@ -3657,6 +3677,19 @@ describe("css-cascade", function () {
           new adapt_css.Numeric(2, "em"),
         );
         expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("clamps a negative parent font size to zero", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(0);
         expect(resolved.unit).toBe("px");
       });
 

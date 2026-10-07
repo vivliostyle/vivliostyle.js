@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!-- Test case for Issue #2174 follow-up: font-size values that are not size keywords
-     (calc(), clamp(), a unitless zero, and a keyword substituted from a custom
+     (calc(), clamp(), a unitless zero, a negative calc() that the non-negative
+     range of font-size clamps to zero, and a keyword substituted from a custom
      property) must also be resolved to numeric computed values, so that em units in
      detached content (footnote) use the same font size as the browser does.
      In each paragraph the footnote "Wide" must have the same letter-spacing as the
@@ -27,6 +28,9 @@
     p.zero { font-size: 0; }
     /* LARGE is ASCII case-insensitively "large" = 18px */
     p.keyword { font-size: var(--upper-keyword); }
+    /* a negative result is clamped to the non-negative range of font-size,
+       so this is 0px, like the computed value of the paragraph */
+    p.negative { font-size: calc(10px - 20px); }
   </style>
 </head>
 <body>
@@ -34,6 +38,7 @@
   <p class="clamp">clamp(): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="zero">font-size: 0: <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="keyword">var(--upper-keyword): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="negative">calc(10px - 20px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p>In the footnotes at the page bottom, each "Wide" must have the same
     letter-spacing as the inline "Wide" of the same paragraph above.</p>
 </body>

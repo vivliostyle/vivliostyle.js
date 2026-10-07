@@ -1056,13 +1056,16 @@ export class ViewFactory
           } else if (
             // The relative font-weight keywords are resolved against the
             // inherited weight, so keep accumulating it. A keyword coming from
-            // a custom property is not canonicalized, so compare names.
-            !CssCascade.hasKeywordName(value, "bolder") &&
-            !CssCascade.hasKeywordName(value, "lighter")
+            // a custom property is not canonicalized, so compare names. (Only
+            // `font-weight` has these keywords; the same identifier of another
+            // property, e.g. `font-family: bolder`, is an ordinary value.)
+            name === "font-weight" &&
+            (CssCascade.hasKeywordName(value, "bolder") ||
+              CssCascade.hasKeywordName(value, "lighter"))
           ) {
-            blockedInheritedByCurrent.add(name);
-          } else if (name === "font-weight") {
             currentHasRelativeFontWeight = true;
+          } else {
+            blockedInheritedByCurrent.add(name);
           }
         }
       }
