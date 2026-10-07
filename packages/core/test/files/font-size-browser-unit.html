@@ -3,9 +3,11 @@
      browser resolves, e.g. `5ch`, is valid and must be preserved on a detached
      element instead of being replaced by the inherited font size, and the
      values that depend on it must be left to the browser as well: the footnote
-     "ch" must be as large as the inline reference "ch" of the 16px paragraph,
-     and not the 32px of its source parent, which the pre-fix viewer uses
-     because it replaces the value with the inherited font size. -->
+     "ch" must be as large as the inline reference "ch" of the same paragraph,
+     which resolves the unit against the font metrics of the 32px source parent
+     (≈80px): a detached element must not resolve it in the synthetic parent it
+     is reparented into, and the pre-fix viewer rejects the invalid `NaNpx` it
+     materializes and falls back to the inherited 16px. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -13,18 +15,18 @@
   <style>
     @page { size: 140mm 100mm; margin: 10mm; }
     body { font-size: 16px; }
-    .ref-ch { font-size: 5ch; }
     .dep { font-size: 32px; }
+    .dep .ref-ch { font-size: 5ch; }
     .dep .fn-ch { float: footnote; font-size: 5ch; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
 <body>
-  <p>The reference "ch" below is an inline element of this 16px paragraph, so
-    `5ch` is five times the width of the "0" character of the font:
+  <p class="dep">The footnote "ch" must be rendered like this inline reference
+    "ch" of the same paragraph, i.e. with the font metrics of this 32px
+    paragraph (≈80px), not with the 16px of the footnote area:
     <span class="ref-ch">ch</span></p>
-  <p class="dep">The footnote "ch" must be rendered like the reference above,
-    not with the 32px of this paragraph:
+  <p class="dep">The footnote of this paragraph is the one at the page bottom:
     <span class="fn-ch">ch</span></p>
 </body>
 </html>

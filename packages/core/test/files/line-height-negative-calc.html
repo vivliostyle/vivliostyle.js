@@ -9,7 +9,9 @@
      The same difference is visible without a clamp: `calc(1lh - 30px)` is 10px
      with the inherited 40px (the footnote "Ten"), while the pre-fix viewer
      resolves the `lh` unit in the rendered context (the preferred line height
-     of the footnote area, 20px), which clamps to 0. -->
+     of the footnote area, 20px), which clamps to 0. The same clamp applies to
+     a math function without an `lh` unit: `calc(10px - 20px)` is 0px, not the
+     -10px that the browser would reject (which inherits the 40px). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -28,6 +30,8 @@
     }
     .ref-negative { line-height: calc(1lh - 100px); }
     .ref-negative-mild { line-height: calc(1lh - 30px); }
+    .dep .fn-negative-plain { float: footnote; line-height: calc(10px - 20px); }
+    .ref-negative-plain { line-height: calc(10px - 20px); }
     ::footnote-marker { content: ""; }
   </style>
 </head>
@@ -35,11 +39,14 @@
   <p class="dep">The footnote "Zero" below declares the same line height as the
     inline reference "Zero" of this paragraph (0px, the clamped result of
     `calc(1lh - 100px)` with the inherited 40px), not the inherited 40px, and
-    the footnote "Ten" is the same as the reference "Ten" (10px):
+    the footnote "Ten" is the same as the reference "Ten" (10px), and the
+    footnote "Plain" is the same as the reference "Plain" (0px):
     <span class="ref-negative">Zero</span>
-    <span class="ref-negative-mild">Ten</span></p>
+    <span class="ref-negative-mild">Ten</span>
+    <span class="ref-negative-plain">Plain</span></p>
   <p class="dep">The footnotes of this paragraph are the ones at the page
     bottom: <span class="fn-negative">Zero</span>
-    <span class="fn-negative-mild">Ten</span></p>
+    <span class="fn-negative-mild">Ten</span>
+    <span class="fn-negative-plain">Plain</span></p>
 </body>
 </html>

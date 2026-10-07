@@ -1,4 +1,4 @@
-- id: "0156"
+- id: "0157"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -309,7 +309,7 @@
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0126"
+- id: "0127"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html

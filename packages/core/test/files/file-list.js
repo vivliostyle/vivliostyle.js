@@ -323,6 +323,11 @@ module.exports = [
         file: "font-size-browser-unit.html",
         title: "font-size with a browser resolved unit (Issue #2174 follow-up)",
       },
+      {
+        file: "font-size-root-browser-unit.html",
+        title:
+          "Root font size from a browser resolved unit (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

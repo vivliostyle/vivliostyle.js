@@ -1218,15 +1218,20 @@ export function isValidUnresolvedFontSize(value: Css.Val): boolean {
 export function isInvalidLineHeight(value: Css.Val): boolean {
   if (
     value === Css.empty ||
-    value instanceof Css.Expr ||
-    value instanceof Css.Func ||
     CssValidator.containsVar(value) ||
     Css.isDefaultingValue(value) ||
     hasKeywordName(value, "normal")
   ) {
-    // Expressions are evaluated elsewhere and the CSS-wide keywords are
-    // materialized by the walk, so neither is invalid here.
+    // The CSS-wide keywords are materialized by the walk, and a value with an
+    // unresolved var() is not known to be invalid here.
     return false;
+  }
+  if (value instanceof Css.Expr || value instanceof Css.Func) {
+    // A math function is allowed until it is evaluated, but one that is invalid
+    // at computed-value time, e.g. the `min(10px, 2)` that a var() substitution
+    // put into the declaration, makes the browser reject the declaration and
+    // keep the inherited line height. (Review)
+    return !CSS.supports("line-height", value.toString());
   }
   if (value instanceof Css.Num) {
     return value.num < 0;
@@ -1282,6 +1287,41 @@ export function isInvalidFontWeight(value: Css.Val): boolean {
  */
 export function isNegativeLiteralFontSize(value: Css.Val): boolean {
   return value instanceof Css.Numeric && value.num < 0;
+}
+
+/**
+ * Whether a line height is a negative literal, e.g. the `-5px` that a var()
+ * substitution put into the declaration: the computed-value range of
+ * `line-height` is non-negative, so the browser rejects such a declaration and
+ * inherits the parent line height, while a math function that computes a
+ * negative value is valid and is clamped to zero instead. (Review)
+ */
+export function isNegativeLiteralLineHeight(value: Css.Val): boolean {
+  return (
+    (value instanceof Css.Numeric || value instanceof Css.Num) && value.num < 0
+  );
+}
+
+/**
+ * The size of a font relative unit that only the browser resolves, as a
+ * multiple of the font size of the element: the browsers resolve `ch` and `ex`
+ * to half of the font size and `cap`/`ic` to 0.7 and 1 times it for their
+ * default fonts (Chromium computes `1ch` of the default 16px font as 8px).
+ * Returns null for every other unit, including the ones that
+ * `Exprs.defaultUnitSizes` covers. (Review)
+ */
+export function browserFontRelativeUnitRatio(unit: string): number | null {
+  switch (unit) {
+    case "ch":
+    case "ex":
+      return 0.5;
+    case "cap":
+      return 0.7;
+    case "ic":
+      return 1;
+    default:
+      return null;
+  }
 }
 
 /**
@@ -1937,13 +1977,19 @@ export function convertFontSizeToPx(
     return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
   } else {
     const unitSize = context.queryUnitSize(unit, false);
-    // A unit that only the browser can resolve, e.g. `ch`, has no unit size
-    // here: the value is preserved as it is, so that the browser resolves it
-    // (and the values that depend on it) in the context of the element.
-    // (Review)
-    return Number.isFinite(unitSize)
-      ? new Css.Numeric(num * unitSize, "px")
-      : numeric;
+    if (Number.isFinite(unitSize)) {
+      return new Css.Numeric(num * unitSize, "px");
+    }
+    // A unit that only the browser resolves, e.g. `ch`: it is resolved against
+    // the font metrics of the element, which for detached content are the ones
+    // of the source parent. The value must not be left to the browser, which
+    // would resolve it against the synthetic parent it is rendered in, so the
+    // ratio of the default font is used with the parent font size. (Review)
+    const ratio = browserFontRelativeUnitRatio(unit);
+    if (ratio != null && parentFontSize != null) {
+      return new Css.Numeric(num * ratio * parentFontSize, "px");
+    }
+    return numeric;
   }
 }
 
@@ -6029,7 +6075,11 @@ export class CascadeInstance {
         // (Review)
         let value =
           (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
-          (name === "font-weight" && isInvalidFontWeight(cascVal.value))
+          (name === "font-weight" && isInvalidFontWeight(cascVal.value)) ||
+          // A negative literal line height is invalid like a negative literal
+          // font size, so the declaration becomes `unset` and the element
+          // inherits the parent line height, as the browser does. (Review)
+          (name === "line-height" && isNegativeLiteralLineHeight(cascVal.value))
             ? Css.ident.unset
             : cascVal.value.visit(visitor);
         if (name === "font-weight") {
@@ -6066,6 +6116,21 @@ export class CascadeInstance {
           // which would inherit the parent font size instead of computing zero.
           // (Review)
           value = new Css.Numeric(0, value.unit);
+        } else if (
+          name === "line-height" &&
+          (value instanceof Css.Numeric || value instanceof Css.Num) &&
+          value.num < 0
+        ) {
+          // A math function that computes a negative line height is valid and
+          // its computed value is clamped to the non-negative range of
+          // `line-height`: materializing the negative length would make the
+          // browser reject the declaration and inherit the parent line height
+          // instead of applying zero. A negative literal was turned into
+          // `unset` above, before the math functions were evaluated. (Review)
+          value =
+            value instanceof Css.Numeric
+              ? new Css.Numeric(0, value.unit)
+              : new Css.Num(0);
         }
         elementStyle[name] = cascVal.withValue(value);
       }

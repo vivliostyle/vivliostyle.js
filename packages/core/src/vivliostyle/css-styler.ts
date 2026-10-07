@@ -709,14 +709,26 @@ export class Styler implements AbstractStyler {
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
+            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
             if (unitSize) {
               px *= unitSize;
-            } else if (!CSS.supports("font-size", val.toString())) {
-              // An unsupported dimension, e.g. the `5s` that a var()
-              // substitution put into `font-size: var(--size)`, is invalid for
-              // `font-size`: the root element keeps the initial font size, as
-              // the browser does. A dimension that Vivliostyle resolves
-              // elsewhere (e.g. `2vw`) keeps its unit size. (Review)
+            } else if (ratio != null) {
+              // A unit that only the browser resolves, e.g. `ch`: the browser
+              // resolves it against the font metrics of its default font (the
+              // initial font size, because the root element has no parent), so
+              // the ratio must not be left as the raw number of the value.
+              // (Review)
+              px *= ratio * this.context.initialFontSize;
+            } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
+              // The unit size of a viewport relative unit, e.g. `2vw`, must not
+              // be left as the raw number either. (Review)
+              px *= this.context.queryUnitSize(val.unit, true);
+            } else {
+              // Any other dimension is not a length that Vivliostyle can
+              // resolve here, e.g. the `5s` that a var() substitution put into
+              // `font-size: var(--size)`: the root element keeps the initial
+              // font size rather than treating the number as pixels, as the
+              // browser keeps it for an invalid value. (Review)
               px = null;
             }
             isRelativeFontSize = fromRelativeCalc;
@@ -789,11 +801,22 @@ export class Styler implements AbstractStyler {
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
+            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
             if (unitSize) {
               px = val.num * unitSize;
-            } else if (!CSS.supports("line-height", val.toString())) {
-              // An unsupported dimension is invalid for `line-height` as well,
-              // so the root line height keeps its default. (Review)
+            } else if (ratio != null) {
+              // As above: a unit that only the browser resolves is relative to
+              // the font size of the root element, not to the raw number.
+              // (Review)
+              px =
+                val.num *
+                ratio *
+                (rootFontSize ?? this.context.initialFontSize);
+            } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
+              px = val.num * this.context.queryUnitSize(val.unit, true);
+            } else {
+              // An unsupported dimension keeps the default root line height,
+              // as the browser keeps it for an invalid value. (Review)
               px = null;
             }
           }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root font size with a unit that only
+     the browser resolves, e.g. `5ch`, must not be treated as the raw number of
+     the value (`5px`), which would corrupt every `rem` value, the page context
+     and the margin boxes. The browsers resolve `ch` against the font metrics of
+     their default font, which is the initial font size for the root element, so
+     `5ch` is 40px and `5rem` is 200px: the two boxes of this page must have the
+     same width. The root line height of a `5ch` value is 100px (the `ch` unit
+     of a line height refers to the root font size, which is 5ch of the initial
+     font itself), so the line height of the reference must match as well. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Root font size from a browser resolved unit (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    :root { font-size: 5ch; line-height: 5ch; }
+    body { margin: 0; }
+    .rem { width: 5rem; height: 10px; background: #333; }
+    .px { width: 200px; height: 10px; background: #999; }
+    .lh-rem { line-height: 100px; }
+    .lh-lh { line-height: 1lh; }
+  </style>
+</head>
+<body>
+  <p>The two bars below must have the same width (200px): the first is sized in
+    `rem`, which resolves against the 40px root font size of `5ch`, and the
+    second is the explicit reference.</p>
+  <div class="rem"></div>
+  <div class="px"></div>
+  <p class="lh-rem">One line</p>
+  <p class="lh-lh">One line</p>
+</body>
+</html>

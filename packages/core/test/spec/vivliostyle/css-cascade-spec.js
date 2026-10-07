@@ -3459,33 +3459,103 @@ describe("css-cascade", function () {
             new adapt_css.Func("calc", [new adapt_css.Num(2)]),
           ),
         ).toBe(false);
+        // A math function that the browser rejects at computed-value time is
+        // invalid as well: the element keeps the inherited line height.
+        // (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(10px, 2)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(1lh - 100px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("browserFontRelativeUnitRatio", function () {
+      it("reports the ratio of the units that only the browser resolves", function () {
+        // The browsers resolve these units against the font metrics of their
+        // default font (Chromium computes `1ch` and `1ex` of the default 16px
+        // font as 8px and 7.18px), so a detached element must not resolve them
+        // in the synthetic parent it is reparented into. (Review)
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ch")).toBe(0.5);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.5);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.7);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ic")).toBe(1);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("em")).toBe(null);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("px")).toBe(null);
+      });
+    });
+
+    describe("isNegativeLiteralLineHeight", function () {
+      it("detects the negative literals of a line height", function () {
+        // A negative literal is invalid and makes the element inherit the
+        // parent line height, while a math function that computes a negative
+        // value is valid and is clamped to zero. (Review)
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            new adapt_css.Numeric(-5, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(new adapt_css.Num(-2)),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            new adapt_css.Numeric(2, "em"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
       });
     });
 
     describe("convertFontSizeToPx", function () {
-      it("leaves a unit that only the browser resolves", function () {
-        // `2ch` has no unit size here, so the value is preserved as it is and
-        // the browser resolves it (and the values that depend on it) in the
-        // context of the element, instead of the walk replacing it with the
-        // inherited font size. (Review)
-        var converted = adapt_csscasc.convertFontSizeToPx(
-          new adapt_css.Numeric(2, "ch"),
-          16,
+      it("resolves a unit that only the browser resolves against the parent", function () {
+        // `ch` has no unit size here, so it is resolved with the ratio of the
+        // default font and the font size of the parent — for detached content
+        // that is the source parent whose metrics the element would use before
+        // it is reparented, not the synthetic parent it is rendered in.
+        // Without a parent font size the value is preserved and resolved by
+        // the browser. (Review)
+        var fromParent = adapt_csscasc.convertFontSizeToPx(
+          new adapt_css.Numeric(5, "ch"),
+          32,
           newContext(),
         );
-        expect(converted.num).toBe(2);
-        expect(converted.unit).toBe("ch");
+        expect(fromParent.num).toBe(80);
+        expect(fromParent.unit).toBe("px");
+        var kept = adapt_csscasc.convertFontSizeToPx(
+          new adapt_css.Numeric(5, "ch"),
+          null,
+          newContext(),
+        );
+        expect(kept.num).toBe(5);
+        expect(kept.unit).toBe("ch");
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(
             newContext(),
             new adapt_css.Numeric(2, "ch"),
           ),
         ).toBe(null);
-        expect(
-          adapt_csscasc.isValidUnresolvedFontSize(
-            new adapt_css.Numeric(2, "ch"),
-          ),
-        ).toBe(true);
       });
     });
 
