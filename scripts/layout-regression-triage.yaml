@@ -31,7 +31,9 @@
     32px instead of the 64px of the reference paragraph, the invalid
     `font-size: var(--negative)` (-10px) of a detached footnote makes it
     `font-size: -10px`, which the browser clamps to 0, so its
-    `letter-spacing: 2em` is -20px, and the invalid
+    `letter-spacing: 2em` is -20px, the substituted dimension without a unit
+    size (`--unit: 5s`) is converted to `NaNpx`, so that footnote has no font
+    size at all, and the invalid
     `font-size: var(--negative)` (-10px) of the root element makes the width of
     the blue 10rem box drop (it becomes the full page width) instead of the
     160px of the green reference box. A var() substitution is not revalidated,
@@ -569,7 +571,12 @@
     height (20px) instead of the 40px line height of the source parent, so the
     letter-spacing of the footnote is 40px instead of the 80px of the inline
     reference (also when the line height is computed, e.g.
-    `calc(2 * 20px)` or `calc(150%)`). The PR branch resolves it against the
+    `calc(2 * 20px)` or `calc(150%)`). The line height of an ancestor can be an
+    `lh` unit itself, e.g. `line-height: 1lh` on the source parent of a
+    footnote: it resolved to the 30px line height of its own parent, and the
+    footnote that resolves `1lh` against it fell back to the 20px of the root
+    instead of the 60px letter-spacing of the inline reference. The PR branch
+    resolves those ancestor values level by level and the lh unit against the
     source parent, like content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
