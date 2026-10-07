@@ -266,3 +266,115 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
+- id: "0068"
+  category: General
+  title: "Relative font keywords on the root element (Issue #2174)"
+  file: relative-font-keywords-root.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Fix for Issue #2174. stable renders the pre-fix result: the relative font
+    keyword on the root element is resolved once by Vivliostyle and once more by
+    the browser (23.04px instead of 19.2px), so all pages and the number of lines
+    differ. The PR branch resolves the keyword to the numeric computed value
+    (19.2px, 13 lines per page) that the expected values in the test page show.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-root.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-root.html&zoom=1&spread=false
+  diffPages:
+    - 1
+    - 2
+    - 3
+    - 4
+- id: "0069"
+  category: General
+  title: "Relative font keywords in a footnote (Issue #2174)"
+  file: relative-font-keywords-footnote.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Fix for Issue #2174. stable renders the pre-fix result for the footnote:
+    the inherited font-size (`smaller`) and font-weight (`bolder`) are resolved
+    against the footnote area instead of the source parent, so the letter-spacing
+    of "Wide letters" is 32px instead of 26.667px and the footnote of "Weight
+    test" / "Weight test 2" is 700 instead of 900. The PR branch matches the
+    reference paragraphs.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-footnote.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-footnote.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0070"
+  category: General
+  title: "Absolute font size keywords with rem/rlh/em (Issue #2174 follow-up)"
+  file: absolute-font-size-keywords.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable renders the pre-fix result: with
+    `:root { font-size: large }` the `rem`/`rlh` units and the page margin box
+    stay at 16px instead of 18px, and the em values of the footnote are resolved
+    against 16px instead of 13px. The PR branch matches the numeric expected
+    values in the test page (180px, 27px, 26px, 1rem = 18px).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keywords.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keywords.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0071"
+  category: General
+  title: "calc()/clamp()/unitless font size in a footnote (Issue #2174 follow-up)"
+  file: font-size-calc-values.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable renders the pre-fix result: a font-size that
+    is not a size keyword (`calc()`, `clamp()`, a unitless zero, or a keyword
+    substituted from a custom property) is not resolved to a length, so the em
+    values of the footnote fall back to 16px (letter-spacing 32px) and differ
+    from the inline reference of each paragraph. The PR branch matches the
+    references.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-values.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-values.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0072"
+  category: General
+  title: "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)"
+  file: font-size-in-footnote.html
+  type: error
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable aborts the layout of this test page with
+    `TypeError: Cannot read properties of undefined (reading 'value')` (the
+    `font-size: initial` footnote removes the accumulated font-size), so it
+    cannot render it. The PR branch renders the page and resolves the font-size
+    declared in the footnote against the source parent (48px/38.4px instead of
+    the root font size).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-in-footnote.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-in-footnote.html&zoom=1&spread=false
+  errorSide: stable
+  errorName: Error
+  errorMessage: "Viewer error: TypeError: Cannot read properties of undefined (reading 'value')"
