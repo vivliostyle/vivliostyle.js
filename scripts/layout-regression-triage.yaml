@@ -1,4 +1,4 @@
-- id: "0150"
+- id: "0151"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -183,7 +183,32 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keyword-xxx-large.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0120"
+- id: "0084"
+  category: General
+  title: "line-height: lh with a region rule (Issue #2174 follow-up)"
+  file: line-height-lh-region-rule.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    line height that the footnote inherits is kept for resolving the `lh` unit
+    of the declaration of the region rule, but with its original cascade
+    priority, so the `!important` declaration of the body wins over the
+    `line-height: 2lh` of `:footnote-content` and the footnote has a line height
+    of 40px instead of the 80px of the declaration of the region rule. The PR
+    branch keeps the inherited value only as a low-priority placeholder, so the
+    declaration of the region rule wins and resolves its `lh` unit against the
+    inherited 40px.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-lh-region-rule.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-lh-region-rule.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0121"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
