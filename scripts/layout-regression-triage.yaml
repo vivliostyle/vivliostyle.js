@@ -140,12 +140,13 @@
   notes: >-
     Follow-up of Issue #2174. stable and canary render the pre-fix result: a
     font weight that a var() substitution makes invalid is not revalidated, so
-    the invalid number replaces the inherited 700 of the page. The footnote
-    whose own weight is `var(--z)` (`0`) is emitted with that number, and the
-    relative keyword of the other footnote is resolved against it, so the
-    footnote "B" is 400 instead of the 900 of the inline reference (the browser
-    rejects the invalid declarations and keeps the inherited weight, which
-    makes "B" bolder than 700 and "Z" 700).
+    the invalid number replaces the inherited 700 of the source parent and the
+    relative keyword of a detached descendant is not resolved against it. The
+    footnote "B" is 700 and the footnote "Z" is 400, the weights that they
+    inherit from the footnote area of the page, while the browser rejects the
+    invalid declarations and keeps the inherited 700 of the source parent: the
+    PR branch renders "B" 900 (bolder than 700, like the inline reference) and
+    "Z" 700.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
