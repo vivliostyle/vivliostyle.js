@@ -1226,7 +1226,11 @@ export function resolveFontSizeValueToPx(
     value instanceof Css.Func && isMathFunction(value)
       ? evaluateMathFunctionToPx(context, value)
       : evaluateValueToPx(context, value);
-  return px == null ? null : Math.max(0, px);
+  // A conversion of a dimension that has no unit size, e.g. the `5s` that a
+  // var() substitution put into `font-size: var(--size)`, is not a length
+  // (`NaN`), so the declaration is invalid and the element inherits the parent
+  // font size. (Review)
+  return px == null || !Number.isFinite(px) ? null : Math.max(0, px);
 }
 
 /**

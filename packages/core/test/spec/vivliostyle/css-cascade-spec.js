@@ -3380,6 +3380,33 @@ describe("css-cascade", function () {
         ).toBe(0);
       });
 
+      it("rejects a dimension without a unit size", function () {
+        // `font-size: var(--size)` with `--size: 5s` is invalid at
+        // computed-value time, so the declaration is rejected and the element
+        // inherits the parent font size instead of resolving NaN. (Review)
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+            16,
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(NaN, "px"),
+            16,
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(Infinity, "px"),
+            16,
+          ),
+        ).toBe(null);
+      });
+
       it("detects a negative literal font size", function () {
         // A negative literal length is invalid for `font-size`, unlike a math
         // function that computes a negative value: the cascade turns it into

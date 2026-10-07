@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a CSS-wide keyword that a var()
+     substitution puts into a declaration is not canonicalized, so `INHERIT` and
+     `UNSET` are still the CSS-wide keywords (they are case insensitive). A
+     detached element that declares `color: var(--x)` with `--x: INHERIT` must
+     inherit the color of its source parent, not the color of the page, and
+     `font-size: var(--y)` with `--y: INHERIT` / `UNSET` must inherit the font
+     size of the source parent, so the footnotes match the reference. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    CSS-wide keyword from a var() substitution (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { color: #000; }
+    .dep { color: #c00; font-size: 32px; }
+    .dep .fn-inherit { float: footnote; --x: INHERIT; color: var(--x); }
+    .dep .fn-size { float: footnote; --y: INHERIT; font-size: var(--y); letter-spacing: 2em; }
+    .dep .fn-unset { float: footnote; --z: UNSET; font-size: var(--z); letter-spacing: 2em; }
+    .ref { font-size: 32px; letter-spacing: 2em; }
+  </style>
+</head>
+<body>
+  <p class="dep">The color of the footnote "Red" must be inherited from this
+    red paragraph, not from the page, and this is the reference for the font
+    size below: <span class="ref">Wide</span><span class="fn-inherit">Red</span></p>
+  <p class="dep">The two footnotes "Wide" must inherit the 32px of this
+    paragraph as well:<span class="fn-size">Wide</span><span class="fn-unset">Wide</span></p>
+</body>
+</html>

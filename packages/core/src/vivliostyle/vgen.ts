@@ -1041,8 +1041,11 @@ export class ViewFactory
         const value = flattenedCurrentStyle[name].evaluate(this.context, name);
         if (
           value &&
-          value !== Css.ident.inherit &&
-          value !== Css.ident.unset &&
+          // A CSS-wide keyword that comes from a custom property is not
+          // canonicalized, so compare the names: `--x: INHERIT; color:
+          // var(--x)` must not block the inherited value. (Review)
+          !CssCascade.hasKeywordName(value, "inherit") &&
+          !CssCascade.hasKeywordName(value, "unset") &&
           value !== Css.empty &&
           !Css.isRollbackValue(value)
         ) {
@@ -1115,7 +1118,7 @@ export class ViewFactory
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
-        if (prop.value === Css.ident.initial) {
+        if (CssCascade.hasKeywordName(prop.value, "initial")) {
           // `initial` means use the CSS initial value, not inherit from
           // ancestor. This is needed for `all: initial` to work on elements
           // detached from their source parent (e.g. footnotes). (Issue #1696)
@@ -1133,10 +1136,13 @@ export class ViewFactory
             delete props[name];
           }
         } else if (
-          prop.value === Css.ident.inherit ||
+          // The keywords are compared by name, because a keyword that comes
+          // from a custom property is not canonicalized, e.g.
+          // `--x: INHERIT; color: var(--x)`. (Review)
+          CssCascade.hasKeywordName(prop.value, "inherit") ||
           // `unset` is the same as `inherit` for the inherited properties that
           // are processed here.
-          prop.value === Css.ident.unset
+          CssCascade.hasKeywordName(prop.value, "unset")
         ) {
           const inherited = CssCascade.getProp(props, name);
           if (inherited) {
@@ -1170,20 +1176,23 @@ export class ViewFactory
               new Css.Numeric(this.context.rootLineHeight, "px"),
             );
           } else if (
-            i === 0 &&
             name === "line-height" &&
             prop.value instanceof Css.Numeric &&
             prop.value.unit === "lh"
           ) {
-            // line-height with lh unit on current element. A `font-size` with
-            // an lh unit is left to the inheritance visitor, which resolves it
-            // against the line height that was accumulated for the source
-            // parent. (Issue #2174 follow-up)
-            const lhUnitSize = this.getLineHeightUnitSize(
-              name,
-              fontSize,
-              lineHeight,
-            );
+            // line-height with an lh unit, which refers to the line height of
+            // the parent. On the current element it is the line height of the
+            // rendered parent, and on a source ancestor the line height that
+            // was accumulated for its own parent: resolved level by level, a
+            // detached descendant that resolves an lh unit of its own finds a
+            // length instead of falling back to the root line height. A
+            // `font-size` with an lh unit is left to the inheritance visitor,
+            // which resolves it against the line height that was accumulated
+            // for the source parent. (Issue #2174 follow-up, Review)
+            const lhUnitSize =
+              i === 0
+                ? this.getLineHeightUnitSize(name, fontSize, lineHeight)
+                : inheritanceVisitor.getInheritedLineHeight();
             if (lhUnitSize != null) {
               prop1 = prop.withValue(
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),

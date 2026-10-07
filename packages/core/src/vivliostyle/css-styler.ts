@@ -711,10 +711,22 @@ export class Styler implements AbstractStyler {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
             if (unitSize) {
               px *= unitSize;
+            } else if (!CSS.supports("font-size", val.toString())) {
+              // An unsupported dimension, e.g. the `5s` that a var()
+              // substitution put into `font-size: var(--size)`, is invalid for
+              // `font-size`: the root element keeps the initial font size, as
+              // the browser does. A dimension that Vivliostyle resolves
+              // elsewhere (e.g. `2vw`) keeps its unit size. (Review)
+              px = null;
             }
             isRelativeFontSize = fromRelativeCalc;
           }
         }
+      }
+      if (px != null && !Number.isFinite(px)) {
+        // A conversion that produced a non-finite value must not become the
+        // root font size either. (Review)
+        px = null;
       }
       if (px == null) {
         // A font size that is neither a keyword nor a Css.Numeric: a unitless
@@ -762,27 +774,31 @@ export class Styler implements AbstractStyler {
       if (val instanceof Css.Num) {
         rootLineHeight = val.num * rootFontSize;
       } else if (val instanceof Css.Numeric) {
-        let px = val.num;
+        let px: number | null = val.num;
         switch (val.unit) {
           case "em":
           case "rem":
-            px *= rootFontSize;
+            px = val.num * rootFontSize;
             break;
           case "%":
-            px *= rootFontSize / 100;
+            px = (val.num * rootFontSize) / 100;
             break;
           case "lh":
           case "rlh":
-            px *= this.context.rootLineHeight;
+            px = val.num * this.context.rootLineHeight;
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
             if (unitSize) {
-              px *= unitSize;
+              px = val.num * unitSize;
+            } else if (!CSS.supports("line-height", val.toString())) {
+              // An unsupported dimension is invalid for `line-height` as well,
+              // so the root line height keeps its default. (Review)
+              px = null;
             }
           }
         }
-        rootLineHeight = px;
+        rootLineHeight = px != null && Number.isFinite(px) ? px : null;
       }
     }
     this.context.rootLineHeight =

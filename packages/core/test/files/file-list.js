@@ -279,6 +279,16 @@ module.exports = [
         file: "font-size-root-negative-calc.html",
         title: "Root font size with a negative calc() (Issue #2174 follow-up)",
       },
+      {
+        file: "font-size-invalid-unit-root.html",
+        title:
+          "Root font size from an invalid substituted unit (Issue #2174 follow-up)",
+      },
+      {
+        file: "defaulting-keyword-from-var.html",
+        title:
+          "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
