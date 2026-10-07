@@ -262,6 +262,14 @@ module.exports = [
         file: "relative-font-weight-region-rule.html",
         title: "Relative font weight in a region rule (Issue #2174 follow-up)",
       },
+      {
+        file: "font-size-lh-unit-in-footnote.html",
+        title: "lh unit of a detached font-size (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-inherit-region-rule.html",
+        title: "font-size: inherit with a region rule (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

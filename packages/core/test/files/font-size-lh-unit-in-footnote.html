@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: the `lh` unit of a font-size declared in
+     detached content (a footnote) must be resolved against the computed line
+     height of the source parent, as it is for content in the normal flow, not
+     against the line height of the page.
+     The footnote "Wide" must have the same letter-spacing as the inline "Wide"
+     of the same paragraph, whose font size is 1lh = the parent's 40px. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>lh unit of a detached font-size (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    html, body { font-size: 16px; }
+    body { margin: 0; }
+    p { line-height: 40px; margin: 0.4em 0; }
+    .fn, .ref { letter-spacing: 2em; }
+    /* 1lh = the computed line height of the parent = 40px */
+    .fn { float: footnote; font-size: 1lh; }
+    .ref { font-size: 40px; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>lh unit: <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p>The footnote at the page bottom must have the same letter-spacing as the
+    inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
+    line height of the root.</p>
+</body>
+</html>

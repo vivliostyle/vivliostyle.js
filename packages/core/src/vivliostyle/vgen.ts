@@ -1133,6 +1133,19 @@ export class ViewFactory
           } else {
             delete props[name];
           }
+        } else if (prop.value === Css.ident.inherit) {
+          const inherited = CssCascade.getProp(props, name);
+          if (inherited) {
+            // `inherit` is the inherited value. Materializing it with the
+            // priority of this declaration lets it compete with a declaration
+            // that is not in the element's own cascaded style, e.g. a region
+            // rule, as any other declaration of the element would. (Issue
+            // #2174)
+            props[name] = new CssCascade.CascadeValue(
+              inherited.value,
+              prop.priority,
+            );
+          }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
@@ -1159,10 +1172,14 @@ export class ViewFactory
             );
           } else if (
             i === 0 &&
+            name === "line-height" &&
             prop.value instanceof Css.Numeric &&
             prop.value.unit === "lh"
           ) {
-            // line-height with lh unit on current element
+            // line-height with lh unit on current element. A `font-size` with
+            // an lh unit is left to the inheritance visitor, which resolves it
+            // against the line height that was accumulated for the source
+            // parent. (Issue #2174 follow-up)
             const lhUnitSize = this.getLineHeightUnitSize(
               name,
               fontSize,
@@ -3598,15 +3615,23 @@ export class ViewFactory
    * @param val CSS value string
    * @returns parsed and adjusted value in px, or null if cannot parse as "px" unit, e.g. "normal"
    */
-  private parsePlusLayoutUnitAdj(val: string): number | null {
+  private parsePlusLayoutUnitAdj(
+    val: string,
+    inlineVal?: string | null,
+  ): number | null {
     if (val.endsWith("px")) {
       const parsedVal = parseFloat(val);
       if (!isNaN(parsedVal)) {
         if (parsedVal === 0) {
-          // A zero length is serialized as `calc(0px - var(--viv-layoutUnitAdj))`
-          // and the browser clamps that to `0px`, so adding the adjustment back
-          // would turn an exact zero into 1/64px (or 1/60px).
-          return 0;
+          // A length is serialized as `calc(<length> - var(--viv-layoutUnitAdj))`,
+          // and when the result is negative the browser clamps it to `0px`.
+          // Adding the adjustment back would then turn an exact zero into
+          // 1/64px (or 1/60px), so the length in front of the adjustment is
+          // used instead.
+          const base = inlineVal
+            ? parseLayoutUnitAdjustedValue(inlineVal)
+            : null;
+          return base != null && base > 0 ? base : 0;
         }
         return (
           Math.round(
@@ -3628,16 +3653,23 @@ export class ViewFactory
     const pageContextStyle = pageContextElement
       ? this.viewport.window.getComputedStyle(pageContextElement)
       : null;
+    const inlineStyle = getInlineStyle(pageContextElement);
     const fontSize =
       // A font size of 0 is valid and must not fall through to the defaults.
       (pageContextStyle
-        ? this.parsePlusLayoutUnitAdj(pageContextStyle.fontSize)
+        ? this.parsePlusLayoutUnitAdj(
+            pageContextStyle.fontSize,
+            inlineStyle?.fontSize,
+          )
         : null) ??
       this.context.rootFontSize ??
       this.context.initialFontSize;
     const lineHeight =
       (pageContextStyle &&
-        this.parsePlusLayoutUnitAdj(pageContextStyle.lineHeight)) ||
+        this.parsePlusLayoutUnitAdj(
+          pageContextStyle.lineHeight,
+          inlineStyle?.lineHeight,
+        )) ||
       this.context.rootLineHeight ||
       fontSize * this.context.pref.lineHeight;
     return { fontSize, lineHeight };
@@ -3648,20 +3680,27 @@ export class ViewFactory
     fallback: { fontSize: number | null; lineHeight: number | null },
   ): { fontSize: number | null; lineHeight: number | null } {
     const style = this.viewport.window.getComputedStyle(element);
+    const inlineStyle = getInlineStyle(element);
     const fontSize =
-      this.parsePlusLayoutUnitAdj(style.fontSize) ?? fallback.fontSize;
+      this.parsePlusLayoutUnitAdj(style.fontSize, inlineStyle?.fontSize) ??
+      fallback.fontSize;
     const lineHeight =
-      this.parsePlusLayoutUnitAdj(style.lineHeight) ??
+      this.parsePlusLayoutUnitAdj(style.lineHeight, inlineStyle?.lineHeight) ??
       fallback.lineHeight ??
       (fontSize != null ? fontSize * this.context.pref.lineHeight : null);
     return { fontSize, lineHeight };
   }
 
-  private getParentViewStyle(): CSSStyleDeclaration | null {
+  private getParentViewNode(): Element | null {
     return this.nodeContext?.parent?.viewNode?.nodeType === 1
-      ? this.viewport.window.getComputedStyle(
-          this.nodeContext.parent.viewNode as Element,
-        )
+      ? (this.nodeContext.parent.viewNode as Element)
+      : null;
+  }
+
+  private getParentViewStyle(): CSSStyleDeclaration | null {
+    const parentNode = this.getParentViewNode();
+    return parentNode
+      ? this.viewport.window.getComputedStyle(parentNode)
       : null;
   }
 
@@ -3669,16 +3708,23 @@ export class ViewFactory
     fontSize: number | null;
     lineHeight: number | null;
   } {
+    const inlineStyle = getInlineStyle(this.getParentViewNode());
     return {
       fontSize:
         this.computedStyleParentFontSizeOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize)
+          ? this.parsePlusLayoutUnitAdj(
+              parentStyle.fontSize,
+              inlineStyle?.fontSize,
+            )
           : this.context.rootFontSize),
       lineHeight:
         this.computedStyleParentLineHeightOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight)
+          ? this.parsePlusLayoutUnitAdj(
+              parentStyle.lineHeight,
+              inlineStyle?.lineHeight,
+            )
           : this.context.rootLineHeight),
     };
   }
@@ -4673,4 +4719,28 @@ export function addImageFetchersToPage(val: Css.Val, page: Vtree.Page): void {
       addImageFetchersToPage(v, page);
     }
   }
+}
+
+/**
+ * The inline style declaration of an element, or null when it has none.
+ */
+function getInlineStyle(element: Element | null): CSSStyleDeclaration | null {
+  return element ? ((element as HTMLElement).style ?? null) : null;
+}
+
+/**
+ * The length in front of the layout unit adjustment of a serialized
+ * `calc(<length>px - var(--viv-layoutUnitAdj))`, or null when the value does
+ * not have that form. (Issue #2174 follow-up)
+ */
+function parseLayoutUnitAdjustedValue(val: string): number | null {
+  const match =
+    /^calc\(\s*(-?\d*\.?\d+)px\s*-\s*var\(--viv-layoutUnitAdj\)/i.exec(
+      val.trim(),
+    );
+  if (!match) {
+    return null;
+  }
+  const parsed = parseFloat(match[1]);
+  return isNaN(parsed) ? null : parsed;
 }

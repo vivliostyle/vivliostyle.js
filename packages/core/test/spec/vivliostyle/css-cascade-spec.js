@@ -3696,6 +3696,37 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("resolves the lh unit of a font-size against the inherited line height", function () {
+        // For `font-size`, the `lh` unit refers to the computed line height of
+        // the parent, which is accumulated as `line-height` of the source
+        // parent. (Issue #2174 follow-up)
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(new adapt_css.Numeric(40, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(40);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves the lh unit of a font-size against a multiplier line height", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(20, "px")),
+          "line-height": cascadeValue(new adapt_css.Num(1.5)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(30);
+        expect(resolved.unit).toBe("px");
+      });
+
       it("clamps a negative parent font size to zero", function () {
         var props = {
           "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),

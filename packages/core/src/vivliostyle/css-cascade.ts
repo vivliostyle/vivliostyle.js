@@ -1379,6 +1379,40 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     return Math.max(0, n.num * Exprs.defaultUnitSizes[n.unit]);
   }
 
+  /**
+   * The line height that the `lh` unit of a `font-size` refers to: the computed
+   * line height of the parent, i.e. of the value that was accumulated for the
+   * parent before the font size of the current element is processed. Returns
+   * null when it cannot be determined. (Issue #2174 follow-up)
+   */
+  private getInheritedLineHeightUnitSize(): number | null {
+    const value = getProp(this.props, "line-height")?.value;
+    const parentFontSize = this.getFontSize();
+    if (value instanceof Css.Num) {
+      return value.num * parentFontSize;
+    }
+    if (value instanceof Css.Numeric) {
+      switch (value.unit) {
+        case "em":
+        case "%":
+          return (
+            (value.unit === "%" ? value.num / 100 : value.num) * parentFontSize
+          );
+        case "lh":
+        case "rlh":
+          // The line height of the parent is relative to the line height of the
+          // parent of the parent, which is not accumulated here.
+          return null;
+        default: {
+          const unitSize = Exprs.defaultUnitSizes[value.unit];
+          return unitSize ? value.num * unitSize : null;
+        }
+      }
+    }
+    // No line-height or `normal`: the multiplier of the preferred line height.
+    return this.context.pref.lineHeight * parentFontSize;
+  }
+
   private getFontWeight(): number {
     // The accumulated value is the inherited (parent's) font weight, or the
     // initial value 400 when no ancestor declared font-weight.
@@ -1394,7 +1428,12 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (this.propName === "font-size") {
-      return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
+      return convertFontSizeToPx(
+        numeric,
+        this.getFontSize(),
+        this.context,
+        this.getInheritedLineHeightUnitSize(),
+      );
     } else if (
       numeric.unit === "em" ||
       numeric.unit === "rem" ||
@@ -1471,6 +1510,7 @@ export function convertFontSizeToPx(
   numeric: Css.Numeric,
   parentFontSize: number | null,
   context: Exprs.Context,
+  inheritedLineHeight?: number | null,
 ): Css.Numeric {
   // FIXME: This fallback to 0 is obviously an invalid value. A null arrives
   // from reading back the computed style of an element whose view is detached
@@ -1483,6 +1523,11 @@ export function convertFontSizeToPx(
   // AttachedPageFloatLayoutContext.invalidate(). That trial is discarded. The
   // real DOM is built again while attached to the document, and the invalid
   // value does not reach the rendered result.
+  if (numeric.unit === "lh" && inheritedLineHeight != null) {
+    // For `font-size`, the `lh` unit refers to the computed line height of the
+    // parent. (Issue #2174 follow-up)
+    return new Css.Numeric(numeric.num * inheritedLineHeight, "px");
+  }
   numeric = convertFontRelativeLengthToPx(
     numeric,
     parentFontSize ?? 0,

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: `font-size: inherit` on the element of
+     detached content (a footnote) is a declaration of the element, so it must
+     win over a declaration of a region rule (here `:footnote-content`) when its
+     cascade priority is higher, instead of being compared as if the ancestor's
+     declaration were a declaration of the element.
+     The footnote with the inline `font-size: inherit` must use the inherited
+     20px, while the footnote without a declaration uses the 0.9em of the region
+     rule. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>font-size: inherit with a region rule (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 90mm; margin: 10mm; }
+    @footnote { margin-block-start: 0.5em; }
+    body { font-size: 20px; }
+    aside[role="doc-footnote"]:footnote-content { font-size: 0.9em; }
+    a[role="doc-noteref"]::footnote-call { content: "[" counter(footnote) "]"; }
+  </style>
+</head>
+<body>
+  <p>All this body text is 20px. The first footnote declares
+    <code>font-size: inherit</code> inline and must be 20px as well; the second
+    one has no declaration and uses the 0.9em of the region rule.</p>
+  <p>A footnote call<a href="#fn1" role="doc-noteref"></a> follows here.</p>
+  <aside id="fn1" role="doc-footnote" style="font-size: inherit">Inherit footnote</aside>
+  <p>A footnote call<a href="#fn2" role="doc-noteref"></a> follows here.</p>
+  <aside id="fn2" role="doc-footnote">Plain footnote</aside>
+</body>
+</html>
