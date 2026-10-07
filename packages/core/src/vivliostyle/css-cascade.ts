@@ -1202,7 +1202,10 @@ export function resolveFontSizeValueToPx(
   parentFontSize?: number,
 ): number | null {
   if (value instanceof Css.Num) {
-    return Math.max(0, value.num * Exprs.defaultUnitSizes["px"]);
+    // Only a unitless zero is a valid font-size. Any other unitless number,
+    // e.g. one that a var() substitution put into the declaration, is rejected
+    // by the browser, which inherits the parent font size instead.
+    return value.num === 0 ? 0 : null;
   }
   if (parentFontSize != null && value instanceof Css.Func) {
     value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);

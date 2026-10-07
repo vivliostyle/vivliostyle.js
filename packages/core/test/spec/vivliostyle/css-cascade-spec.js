@@ -3321,6 +3321,24 @@ describe("css-cascade", function () {
         ).toBe(0);
       });
 
+      it("does not resolve a nonzero unitless number", function () {
+        // Only a unitless zero is a valid `font-size`; a var() substitution
+        // can carry any other number, and a browser rejects such a declaration
+        // and inherits the parent font size instead.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Num(5),
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Int(5),
+          ),
+        ).toBe(null);
+      });
+
       it("resolves a clamp() of absolute lengths", function () {
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(
