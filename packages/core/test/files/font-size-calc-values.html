@@ -31,6 +31,9 @@
     /* a negative result is clamped to the non-negative range of font-size,
        so this is 0px, like the computed value of the paragraph */
     p.negative { font-size: calc(10px - 20px); }
+    /* negative terms of a math function stay signed:
+       calc(-1em + 40px) = calc(-16px + 40px) = 24px */
+    p.signed { font-size: calc(-1em + 40px); }
   </style>
 </head>
 <body>
@@ -39,6 +42,7 @@
   <p class="zero">font-size: 0: <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="keyword">var(--upper-keyword): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="negative">calc(10px - 20px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="signed">calc(-1em + 40px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p>In the footnotes at the page bottom, each "Wide" must have the same
     letter-spacing as the inline "Wide" of the same paragraph above.</p>
 </body>

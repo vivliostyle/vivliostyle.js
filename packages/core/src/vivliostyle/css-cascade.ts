@@ -1464,15 +1464,12 @@ export function convertFontSizeToPx(
   const unit = numeric.unit;
   const num = numeric.num;
   if (unit === "px") {
-    // Keep the value as it is when it is already a valid length.
-    return num < 0 ? new Css.Numeric(0, "px") : numeric;
+    return numeric;
+  } else if (unit === "%") {
+    return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
+  } else {
+    return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
   }
-  const px =
-    unit === "%"
-      ? (num / 100) * (parentFontSize ?? 0)
-      : num * context.queryUnitSize(unit, false);
-  // `font-size` has a non-negative computed-value range.
-  return new Css.Numeric(Math.max(0, px), "px");
 }
 
 export type ActionTable = Map<string, CascadeAction>;

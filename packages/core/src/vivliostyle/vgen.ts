@@ -1119,7 +1119,20 @@ export class ViewFactory
           // `initial` means use the CSS initial value, not inherit from
           // ancestor. This is needed for `all: initial` to work on elements
           // detached from their source parent (e.g. footnotes). (Issue #1696)
-          delete props[name];
+          if (name === "font-size") {
+            // Removing the accumulated value of an inherited property makes
+            // the element inherit from the synthetic view parent instead of
+            // using the initial value, so the initial font size is
+            // materialized: `font-size: initial` is the (medium) initial font
+            // size, which is also the base of its dependent values.
+            // (Issue #2174 follow-up)
+            props[name] = new CssCascade.CascadeValue(
+              new Css.Numeric(this.context.initialFontSize, "px"),
+              prop.priority,
+            );
+          } else {
+            delete props[name];
+          }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
