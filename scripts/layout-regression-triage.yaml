@@ -1,4 +1,4 @@
-- id: "0148"
+- id: "0149"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -131,7 +131,31 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/defaulting-keyword-from-var.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0118"
+- id: "0082"
+  category: General
+  title: "Invalid font weight from a var() substitution (Issue #2174 follow-up)"
+  file: invalid-var-font-weight.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: a
+    font weight that a var() substitution makes invalid is not revalidated, so
+    the invalid number replaces the inherited 700 of the page. The footnote
+    whose own weight is `var(--z)` (`0`) is emitted with that number, and the
+    relative keyword of the other footnote is resolved against it, so the
+    footnote "B" is 400 instead of the 900 of the inline reference (the browser
+    rejects the invalid declarations and keeps the inherited weight, which
+    makes "B" bolder than 700 and "Z" 700).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-weight.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-weight.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0119"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
@@ -584,10 +608,14 @@
     that is a math function, e.g. `min(40px, 2em)`, was not reduced either: the
     footnote that resolves `1lh` against it used the 20px of the root line
     height (letter-spacing 40px) instead of the 32px of the math function
-    (letter-spacing 64px). The PR branch resolves those ancestor values level by
-    level, reduces the math functions of an inherited line height to px, and
-    resolves the lh unit against the source parent, like content in the normal
-    flow.
+    (letter-spacing 64px). An own line height of a detached element that is a
+    math function with `lh`, e.g. `line-height: max(1lh, 5px)` on the footnote,
+    was not resolved either: the footnote had the 20px of the preferred line
+    height instead of the 40px of its source parent. The PR branch resolves
+    those ancestor values level by level, reduces the math functions of an
+    inherited line height to px, replaces the `lh` unit of such a value with the
+    line height that the element inherits, and resolves the lh unit against the
+    source parent, like content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
