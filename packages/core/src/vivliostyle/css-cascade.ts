@@ -1397,7 +1397,16 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     const parentFontSize = this.getFontSize();
     if (value instanceof Css.Expr || value instanceof Css.Func) {
       // A computed line height, e.g. `line-height: calc(1.5 * 16px)`, which is
-      // still a function while the inherited values are accumulated.
+      // still a function while the inherited values are accumulated. A
+      // percentage of it refers to the font size of the element itself, so it
+      // is converted before the expression is evaluated.
+      if (value instanceof Css.Func) {
+        value = convertParentRelativeFontSizeUnits(
+          this.context,
+          value,
+          parentFontSize,
+        );
+      }
       value = evaluateCSSToCSS(this.context, value, "line-height");
     }
     if (value instanceof Css.Num) {

@@ -3757,6 +3757,28 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("resolves the lh unit against a percentage computed line height", function () {
+        // The percentage of a computed `line-height` refers to the font size of
+        // the element itself, so `calc(150%)` of 20px is 30px.
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(20, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(150%)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(30);
+        expect(resolved.unit).toBe("px");
+      });
+
       it("clamps a negative parent font size to zero", function () {
         var props = {
           "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),

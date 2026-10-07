@@ -4,7 +4,8 @@
      height of the source parent, as it is for content in the normal flow, not
      against the line height of the page.
      The footnote "Wide" must have the same letter-spacing as the inline "Wide"
-     of the same paragraph, whose font size is 1lh = the parent's 40px. -->
+     of the same paragraph, whose font size is 1lh = the parent's line height
+     (40px, or 24px when the line height is `calc(150%)`). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -21,6 +22,10 @@
     /* the same, with a line height that is computed by calc() */
     p.calc { line-height: calc(2 * 20px); }
     .fn.calc-lh, .ref.calc-lh { font-size: 40px; }
+    /* the same, with a percentage based computed line height: 150% of 16px */
+    p.calc-pct { line-height: calc(150%); }
+    .fn.pct-lh { font-size: 1lh; }
+    .ref.pct-lh { font-size: 24px; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
@@ -28,8 +33,11 @@
   <p>lh unit: <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="calc">lh unit with a computed line height:
     <span class="ref calc-lh">Wide</span><span class="fn calc-lh">Wide</span></p>
+  <p class="calc-pct">lh unit with a percentage computed line height:
+    <span class="ref pct-lh">Wide</span><span class="fn pct-lh">Wide</span></p>
   <p>The footnote at the page bottom must have the same letter-spacing as the
     inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
-    line height of the root.</p>
+    line height of the root. For the third paragraph it is the 24px of
+    `calc(150%)`.</p>
 </body>
 </html>
