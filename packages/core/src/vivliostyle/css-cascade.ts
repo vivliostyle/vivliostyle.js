@@ -1191,14 +1191,38 @@ export function isValidFontWeight(num: number): boolean {
 }
 
 /**
- * Whether a declared font-weight value is a number outside the range of CSS
- * Fonts 4. Such a value is invalid: the browser rejects the declaration and the
- * element inherits the parent font weight, e.g. when a var() substitution puts
- * such a number into the declaration. A math function that computes a value
- * outside the range is valid and is clamped instead. (Review)
+ * Whether a declared font-weight value is invalid: `font-weight` accepts a
+ * number in the 1-1000 range of CSS Fonts 4 and the keywords (the relative
+ * `bolder`/`lighter` are resolved by the visitor), so every other
+ * post-substitution form, e.g. the `nonsense` or `700px` that a var()
+ * substitution put into the declaration, is rejected by the browser, which
+ * inherits the parent font weight. A math function is valid and is validated
+ * after it has been evaluated (a value outside the range is clamped, a
+ * non-finite one is rejected). (Review)
  */
 export function isInvalidFontWeight(value: Css.Val): boolean {
-  return value instanceof Css.Num && !isValidFontWeight(value.num);
+  if (value instanceof Css.Num) {
+    return !isValidFontWeight(value.num);
+  }
+  if (value instanceof Css.Ident) {
+    if (value === Css.empty || Css.isRollbackValue(value)) {
+      // Not a value of this property: it is handled elsewhere.
+      return false;
+    }
+    return !(
+      hasKeywordName(value, "normal") ||
+      hasKeywordName(value, "bold") ||
+      hasKeywordName(value, "bolder") ||
+      hasKeywordName(value, "lighter") ||
+      // The CSS-wide keywords are handled by the walk of the detached content;
+      // compare the names, because a keyword that comes from a custom property
+      // is not canonicalized.
+      hasKeywordName(value, "initial") ||
+      hasKeywordName(value, "inherit") ||
+      hasKeywordName(value, "unset")
+    );
+  }
+  return !(value instanceof Css.Func || value instanceof Css.Expr);
 }
 
 /**

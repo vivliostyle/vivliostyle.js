@@ -6,7 +6,9 @@
      `bolder` is resolved against the inherited 700, i.e. 900), and the
      footnote "Z", whose own weight is invalid, must keep the inherited 700.
      The pre-fix viewer replaces the inherited weight with the invalid number,
-     so "B" is 400 and "Z" is 0. -->
+     so "B" is 400 and "Z" is 0. The invalid value can take other forms as well,
+     e.g. an unknown keyword (`nonsense`) or a dimension (`700px`), which must be
+     rejected like a number outside the range. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -20,6 +22,13 @@
     .dep { --w: -10; font-weight: var(--w); }
     .dep .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
     .dep .fn-invalid { float: footnote; --z: 0; font-weight: var(--z); } /* 700 */
+    /* invalid in other forms as well: an unknown keyword and a dimension */
+    .dep-ident { --w2: nonsense; font-weight: var(--w2); }
+    .dep-px { --u: 700px; font-weight: var(--u); }
+    .dep-ident .fn-bolder2, .dep-px .fn-bolder2 {
+      float: footnote;
+      font-weight: bolder; /* 900 */
+    }
     .ref-bolder { font-weight: bolder; } /* 900 */
     ::footnote-marker { content: ""; }
   </style>
@@ -32,5 +41,10 @@
     <span class="fn-invalid">Z</span></p>
   <p>Both footnotes at the page bottom must have the weights of the references
     above: 900 for "B" and 700 for "Z".</p>
+  <p class="dep-ident">An unknown keyword is invalid as well, so the footnote
+    "B" must be 900 again like this inline "B":
+    <span class="ref-bolder">B</span><span class="fn-bolder2">B</span></p>
+  <p class="dep-px">So must a dimension: the footnote "B" below is 900 too:
+    <span class="fn-bolder2">B</span></p>
 </body>
 </html>

@@ -3457,6 +3457,40 @@ describe("css-cascade", function () {
         );
       });
 
+      it("rejects every invalid post-substitution font weight form", function () {
+        // `font-weight` accepts a number in the 1-1000 range and the keywords,
+        // so an unknown keyword or a dimension that a var() substitution puts
+        // into the declaration is invalid as well, while a math function is
+        // allowed until it is evaluated. (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(new adapt_css.Ident("nonsense")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(new adapt_css.Numeric(700, "px")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(new adapt_css.Numeric(1, "em")),
+        ).toBe(true);
+        for (const keyword of [
+          "normal",
+          "bold",
+          "bolder",
+          "lighter",
+          "initial",
+          "inherit",
+          "unset",
+        ]) {
+          expect(
+            adapt_csscasc.isInvalidFontWeight(adapt_css.getName(keyword)),
+          ).toBe(false);
+        }
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            new adapt_css.Func("calc", [new adapt_css.Num(650)]),
+          ),
+        ).toBe(false);
+      });
+
       it("detects a negative literal font size", function () {
         // A negative literal length is invalid for `font-size`, unlike a math
         // function that computes a negative value: the cascade turns it into

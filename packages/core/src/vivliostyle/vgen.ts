@@ -1019,6 +1019,13 @@ export class ViewFactory
     const fontSizeFromOwnStyle = !!(
       styles.length > 0 && CssCascade.getProp(styles[0], "font-size")
     );
+    // Whether the current element's line height (including region rules) uses
+    // the `lh` unit, which is resolved against the inherited line height.
+    let currentDeclaresLineHeight = false;
+    // Whether the current element's own cascaded style declares line-height.
+    const lineHeightFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "line-height")
+    );
     // Whether the current element's relative font weight (including region
     // rules) is resolved against the inherited weight.
     let currentHasRelativeFontWeight = false;
@@ -1059,11 +1066,13 @@ export class ViewFactory
           } else if (
             // An `lh` unit of a line height refers to the line height of the
             // parent, so the inherited line height must still be accumulated as
-            // well. (Review)
+            // well. The declaration replaces the accumulated value, but only
+            // the priority of the accumulated value is lowered below when the
+            // declaration is not in the element's own cascaded style. (Review)
             name === "line-height" &&
             CssCascade.usesLineHeightUnit(value)
           ) {
-            // nothing to do: the declaration replaces the accumulated value
+            currentDeclaresLineHeight = true;
           } else if (
             // The relative font-weight keywords are resolved against the
             // inherited weight, so keep accumulating it. A keyword coming from
@@ -1303,6 +1312,25 @@ export class ViewFactory
       if (inheritedFontSize) {
         props["font-size"] = new CssCascade.CascadeValue(
           inheritedFontSize.value,
+          0,
+        );
+      }
+    }
+    if (currentDeclaresLineHeight && !lineHeightFromOwnStyle) {
+      const inheritedLineHeight = props["line-height"] as
+        CssCascade.CascadeValue | undefined;
+      // A line height that uses the `lh` unit needs the inherited line height to
+      // resolve the unit, but when the declaration comes from outside the
+      // element's own cascaded style, e.g. a region rule such as
+      // `aside[role="doc-footnote"]:footnote-content { line-height: 1lh }`, the
+      // inherited value is kept only as a low-priority placeholder, so that it
+      // cannot beat the declaration of the region rule (an `!important` value
+      // of an ancestor would otherwise win). Only the priority is affected: as
+      // for the font size above, the declaration of the region rule resolves in
+      // the context that it is rendered in. (Review)
+      if (inheritedLineHeight) {
+        props["line-height"] = new CssCascade.CascadeValue(
+          inheritedLineHeight.value,
           0,
         );
       }

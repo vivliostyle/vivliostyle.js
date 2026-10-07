@@ -298,6 +298,10 @@ module.exports = [
         file: "absolute-font-size-keyword-xxx-large.html",
         title: "xxx-large absolute font size keyword (Issue #2174 follow-up)",
       },
+      {
+        file: "line-height-lh-region-rule.html",
+        title: "line-height: lh with a region rule (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
