@@ -934,7 +934,13 @@ export class StyleInstance
       // new in-flow element begins, so recover the containing normal-flow
       // element from the raw offset instead of jumping to the next element.
       const nodeAtOffset = this.xmldoc.getNodeByOffset(pageStartOffset);
-      if (!Vtree.canIgnore(nodeAtOffset)) {
+      // Issue #2172: an offset in inter-element whitespace (e.g. a page end
+      // after a target-counter() rerender) resolves to the following element,
+      // where the page actually starts; there is no deferred text to recover.
+      const isFollowingElement =
+        nodeAtOffset.nodeType === Node.ELEMENT_NODE &&
+        this.xmldoc.getElementOffset(nodeAtOffset as Element) > pageStartOffset;
+      if (!isFollowingElement && !Vtree.canIgnore(nodeAtOffset)) {
         let currentElement =
           nodeAtOffset.nodeType === Node.ELEMENT_NODE
             ? (nodeAtOffset as Element)
