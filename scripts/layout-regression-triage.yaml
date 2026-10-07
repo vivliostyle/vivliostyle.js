@@ -248,10 +248,12 @@
     that the var() substitution made invalid replaces the accumulated 40px, so
     the footnote "One" resolves its `font-size: 1lh` to the preferred line
     height (19.998px) instead of the 40px that the browser keeps when it rejects
-    the invalid declaration. The PR branch preserves the accumulated line height
-    for invalid substituted values (and lets such a declaration keep the
-    inherited value of its ancestors accumulated), so the footnote is rendered
-    at 39.998px like the inline reference of the normal flow.
+    the invalid declaration. The invalid value can be an unknown identifier or,
+    as the second footnote covers, a math function that is invalid at
+    computed-value time (`min(10px, 2)`). The PR branch preserves the
+    accumulated line height for such values (and lets such a declaration keep
+    the inherited value of its ancestors accumulated), so both footnotes are
+    rendered at 39.998px like the inline reference of the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -272,11 +274,14 @@
     resolved in the rendered context (the preferred line height of the footnote
     area, 19.9976px), so `calc(1lh - 30px)` clamps to 0 and the footnote "Ten"
     differs from its inline reference (10px); the -60 of `calc(1lh - 100px)` is
-    clamped by the browser to 0 in both viewers. The PR branch resolves the `lh`
-    unit against the 40px line height of the source parent, so both footnotes
-    are rendered like their references, and it clamps the resolved value itself,
-    so that the -60 is not materialized as `-60px` (which the browser would
-    reject, inheriting the 40px instead of applying zero).
+    clamped by the browser to 0 in both viewers, and the -10 that canary
+    materializes for `calc(10px - 20px)` (instead of clamping it) reaches the
+    browser as an invalid declaration, which clamps it to 0 as well. The PR
+    branch resolves the `lh` unit against the 40px line height of the source
+    parent, so the footnotes are rendered like their references, and it clamps
+    the resolved values itself: "Zero" and "Plain" are 0px, and the -60 is not
+    materialized as `-60px` (which the browser would reject, inheriting the 40px
+    instead of applying zero).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -297,9 +302,10 @@
     conversion of the unit produced to the browser (`font-size: calc(NaNpx -
     var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote
     "ch" falls back to the inherited 15.998px while its inline reference renders
-    the `5ch` size (39.9918px). The PR branch preserves the value and leaves the
-    `em` values that depend on it to the browser, so the footnote is 39.9918px
-    like the reference.
+    the `5ch` size of the 32px source parent (79.9918px). The PR branch resolves
+    the unit with the ratio of the default font and the font size of the source
+    parent, so the footnote is 79.998px like the reference and is not resolved
+    in the 16px footnote area it is reparented into.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -307,6 +313,31 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0090"
+  category: General
+  title: "Root font size from a browser resolved unit (Issue #2174 follow-up)"
+  file: font-size-root-browser-unit.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary treats the raw number of a root font size
+    that only the browser resolves as pixels: `:root { font-size: 5ch }` sets
+    the root font size to 5px, so the box sized in `rem` is 25px wide instead of
+    the 200px of the explicit reference, and the root line height of
+    `line-height: 5ch` is resolved from the raw number as well (the element that
+    resolves `1lh` is 39.998px high instead of the 100px of its reference). The
+    PR branch resolves `ch` with the ratio of the default font (the initial font
+    size is the basis of the root element), so the root font size is 40px, the
+    `rem` box matches the 200px reference, and the root line height is 100px.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
   diffPages:
     - 1
 - id: "0127"
