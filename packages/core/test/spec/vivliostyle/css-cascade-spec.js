@@ -3357,18 +3357,16 @@ describe("css-cascade", function () {
         ).toBe(0);
       });
 
-      it("does not resolve a negative literal length", function () {
-        // A negative length is invalid for `font-size`; a var() substitution
-        // can put one into the declaration, and the browser then keeps the
-        // font size that the element would inherit, while a math expression
-        // that computes a negative value is clamped to zero.
+      it("clamps a negative value to zero", function () {
+        // `font-size` has a non-negative computed-value range, so a math
+        // expression that computes a negative value is clamped to zero.
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(
             newContext(),
             new adapt_css.Numeric(-10, "px"),
             16,
           ),
-        ).toBe(null);
+        ).toBe(0);
         expect(
           adapt_csscasc.resolveFontSizeValueToPx(
             newContext(),
@@ -3380,6 +3378,32 @@ describe("css-cascade", function () {
             16,
           ),
         ).toBe(0);
+      });
+
+      it("detects a negative literal font size", function () {
+        // A negative literal length is invalid for `font-size`, unlike a math
+        // function that computes a negative value: the cascade turns it into
+        // `unset`, which the walk materializes as the inherited font size.
+        // (Review)
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            new adapt_css.Numeric(-10, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            new adapt_css.Numeric(0, "px"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
       });
 
       it("resolves math functions whose name is not lowercase", function () {

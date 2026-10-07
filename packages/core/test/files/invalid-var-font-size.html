@@ -7,7 +7,10 @@
      invalid `font-size: var(--invalid)` (5) is ignored, so the footnote
      inherits the 32px of the source parent, and the invalid
      `font-size: var(--negative)` (-10px) of the root is ignored, so 10rem stays
-     160px. -->
+     160px. The other footnotes are detached with an invalid value as well: a
+     negative literal from a var() substitution, an unknown identifier and a
+     math function that computes a negative value, which is valid and is clamped
+     to zero instead of being inherited. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,6 +20,9 @@
     :root { --invalid: 5; --negative: -10px; font-size: var(--negative); }
     .dep { font-size: 32px; }
     .dep .fn { float: footnote; font-size: var(--invalid); letter-spacing: 2em; }
+    .dep .fn-neg { float: footnote; font-size: var(--negative); letter-spacing: 2em; }
+    .dep .fn-ident { float: footnote; font-size: nonsense; letter-spacing: 2em; }
+    .dep .fn-calc { float: footnote; font-size: calc(10px - 20px); }
     .ref { font-size: 32px; letter-spacing: 2em; }
     .rem-test { width: 10rem; height: 6px; background: #9cf; }
     .rem-ref { width: 160px; height: 6px; background: #cfc; }
@@ -26,7 +32,13 @@
 <body>
   <p class="dep">The invalid <code>font-size: var(--invalid)</code> of this
     footnote must be ignored, so it keeps the inherited 32px and its "Wide"
-    has the same letter-spacing as the reference below:<span class="fn">Wide</span></p>
+    has the same letter-spacing as the reference below:<span class="fn">Wide</span>
+    Also the invalid negative <code>font-size: var(--negative)</code> and the
+    unknown <code>font-size: nonsense</code> are ignored, so these footnotes
+    keep the inherited 32px and their "Wide" is as wide as the reference
+    too:<span class="fn-neg">Wide</span><span class="fn-ident">Wide</span>
+    The <code>font-size: calc(10px - 20px)</code> of this footnote is clamped to
+    0 instead, so it has no visible text:<span class="fn-calc">Gone</span></p>
   <p class="ref">Wide</p>
   <p>The invalid <code>font-size: var(--negative)</code> of the root must be
     ignored as well, so the root keeps the initial 16px and the blue box (10rem)

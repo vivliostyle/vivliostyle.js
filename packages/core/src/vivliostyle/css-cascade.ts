@@ -1182,6 +1182,18 @@ export function resolveAbsoluteFontSizeKeyword(
 }
 
 /**
+ * Whether a declared font-size value is a negative literal length. Such a value
+ * is outside the non-negative range of `font-size`, so it is invalid: the
+ * browser rejects the declaration and the element inherits the parent font
+ * size, e.g. when a var() substitution puts such a length into the declaration.
+ * A math function that computes a negative value is valid instead and is
+ * clamped to zero. (Review)
+ */
+export function isNegativeLiteralFontSize(value: Css.Val): boolean {
+  return value instanceof Css.Numeric && value.num < 0;
+}
+
+/**
  * Resolve a font-size value that is neither a keyword nor a Css.Numeric to px:
  * a unitless number (valid for font-size only as zero, e.g. `font-size: 0`),
  * a calc() expression, or a clamp()/min()/max() function. The em/% and
@@ -1206,13 +1218,6 @@ export function resolveFontSizeValueToPx(
     // e.g. one that a var() substitution put into the declaration, is rejected
     // by the browser, which inherits the parent font size instead.
     return value.num === 0 ? 0 : null;
-  }
-  if (value instanceof Css.Numeric && value.num < 0) {
-    // A negative literal length is invalid for font-size, e.g. one that a
-    // var() substitution introduced into the declaration; the browser rejects
-    // the declaration and the font size it would inherit is kept. A negative
-    // result of a math expression is clamped to zero instead, below.
-    return null;
   }
   if (parentFontSize != null && value instanceof Css.Func) {
     value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);
@@ -5725,7 +5730,18 @@ export class CascadeInstance {
         }
       } else if (isPropName(name) && !Css.isCustomPropName(name)) {
         const cascVal = getProp(elementStyle, name);
-        elementStyle[name] = cascVal.withValue(cascVal.value.visit(visitor));
+        // A negative literal length is invalid for `font-size` (its range is
+        // non-negative), e.g. one that a var() substitution introduced into the
+        // declaration. The browser rejects such a declaration and inherits the
+        // parent font size, so the declaration is turned into `unset` here,
+        // before the math functions are evaluated: a math function that
+        // computes a negative value is valid and is clamped to zero below.
+        // (Review)
+        const value =
+          name === "font-size" && isNegativeLiteralFontSize(cascVal.value)
+            ? Css.ident.unset
+            : cascVal.value.visit(visitor);
+        elementStyle[name] = cascVal.withValue(value);
       }
     }
   }

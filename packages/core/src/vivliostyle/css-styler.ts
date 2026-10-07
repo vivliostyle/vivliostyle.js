@@ -693,7 +693,7 @@ export class Styler implements AbstractStyler {
           this.context.initialFontSize,
         );
       }
-      if (px == null && val instanceof Css.Numeric && val.num >= 0) {
+      if (px == null && val instanceof Css.Numeric) {
         px = val.num;
         switch (val.unit) {
           case "em":

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root font-size that is a math
+     function computing a negative value is clamped to zero, because `font-size`
+     has a non-negative computed-value range. `calc(10px - 20px)` = -10px, which
+     is clamped to 0px, so 1rem is 0 and the box with the red outline has no
+     width while it is 16px wide when the root font size falls back to the
+     initial font size (a literal `-10px`, which is invalid, does not apply at
+     all: see invalid-var-font-size.html). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Root font size with a negative calc() (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 120mm 80mm; margin: 10mm; }
+    :root { font-size: calc(10px - 20px); } /* clamped to 0px */
+    .rem-box {
+      width: 1rem; /* 0px */
+      height: 20px;
+      outline: 1px solid #f00;
+    }
+    .ref-box {
+      width: 16px; /* the initial font size, which must not be used */
+      height: 20px;
+      outline: 1px solid #090;
+    }
+    .px-text { font-size: 20px; }
+  </style>
+</head>
+<body>
+  <p class="px-text">
+    The red box (1rem) must be narrower than the green one (16px), because the
+    negative calc() is clamped to 0.
+  </p>
+  <div class="rem-box"></div>
+  <div class="ref-box"></div>
+</body>
+</html>

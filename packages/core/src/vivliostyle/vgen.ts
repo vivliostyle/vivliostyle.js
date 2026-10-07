@@ -1218,22 +1218,30 @@ export class ViewFactory
             prop1 = prop.filterValue(inheritanceVisitor);
           }
 
-          if (
-            name === "font-size" &&
-            !prop1.value.isNumeric() &&
-            !(prop1.value instanceof Css.Ident) &&
-            CssCascade.resolveFontSizeValueToPx(this.context, prop1.value) ==
+          if (name === "font-size") {
+            // `initial`, `inherit` and `unset` are handled above and the
+            // keywords are resolved by the visitor, so every other value is
+            // either a length or invalid. An invalid one, e.g. a unitless
+            // number, an unknown identifier or a negative length that a var()
+            // substitution put into the declaration, is rejected by the
+            // browser, which inherits the parent font size instead; keep the
+            // value that was accumulated for the source parent, so that the
+            // dependent values of the element are not resolved against the
+            // initial font size. (Review)
+            if (prop1.value instanceof Css.Numeric && prop1.value.num < 0) {
+              // `font-size` has a non-negative computed-value range, so a
+              // negative value is clamped to zero. A negative literal length
+              // is invalid instead and is turned into `unset` by the cascade,
+              // which the walk materializes as the inherited font size.
+              prop1 = prop1.withValue(new Css.Numeric(0, "px"));
+            } else if (
+              CssCascade.resolveFontSizeValueToPx(this.context, prop1.value) ==
               null
-          ) {
-            // An invalid font size, e.g. one that a var() substitution put
-            // into the declaration, is rejected by the browser, which inherits
-            // the parent font size instead. Keep the value that was
-            // accumulated for the source parent, so that the dependent values
-            // of the element are not resolved against the initial font size.
-            // (Review)
-            const inheritedFontSize = CssCascade.getProp(props, name);
-            if (inheritedFontSize) {
-              prop1 = prop1.withValue(inheritedFontSize.value);
+            ) {
+              const inheritedFontSize = CssCascade.getProp(props, name);
+              if (inheritedFontSize) {
+                prop1 = prop1.withValue(inheritedFontSize.value);
+              }
             }
           }
 
