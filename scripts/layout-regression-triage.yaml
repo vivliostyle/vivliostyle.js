@@ -1,4 +1,4 @@
-- id: "0151"
+- id: "0153"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -211,7 +211,33 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-lh-region-rule.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0121"
+- id: "0085"
+  category: General
+  title: "Font weight from a math function (Issue #2174 follow-up)"
+  file: font-weight-math-function.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary renders the pre-fix result: the weight of
+    the `min(900, 1000)` paragraph is preserved by the validator but never
+    evaluated, so the value is unresolved when a detached element resolves
+    `bolder` against it — the footnote "B" of that paragraph is 700, while the
+    inline reference "B" of the same paragraph is 900. The PR branch evaluates
+    number valued math functions like `calc()` and resolves the relative
+    keyword against the result, so the footnote is 900 as well, and it clamps
+    the result of a function like `max(1000, 1200)` to 1000 (canary and the PR
+    branch agree on the clamps and on the invalid `min(900px, 1em)`, whose
+    footnote keeps the inherited 700).
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-weight-math-function.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-weight-math-function.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0123"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
