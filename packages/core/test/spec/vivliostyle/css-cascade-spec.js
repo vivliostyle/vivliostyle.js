@@ -3285,6 +3285,13 @@ describe("css-cascade", function () {
         expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 350)).toBe(700);
         expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 549)).toBe(700);
         expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 550)).toBe(900);
+        // A heavier inherited weight than 900 is kept as it is (the numeric
+        // range of font-weight goes up to 1000).
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 901)).toBe(901);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 950)).toBe(950);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 1000)).toBe(
+          1000,
+        );
         // lighter uses 100 below 550, 400 below 750 and 700 otherwise; a weight
         // that is already lighter than 100 is kept.
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 549)).toBe(100);
@@ -3292,6 +3299,7 @@ describe("css-cascade", function () {
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 749)).toBe(400);
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 750)).toBe(700);
         expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 99)).toBe(99);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 1)).toBe(1);
       });
     });
 

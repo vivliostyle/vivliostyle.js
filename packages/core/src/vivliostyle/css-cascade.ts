@@ -1124,15 +1124,22 @@ export function resolveRelativeFontSizeKeyword(
  * Resolve the relative font-weight keyword `bolder`/`lighter` against the
  * inherited font weight, following the CSS Fonts 4 relative weights table:
  * `bolder` uses 400 for an inherited weight below 350, 700 below 550 and 900
- * otherwise; `lighter` uses 100 (or the inherited weight when it is smaller
- * than 100), 400 below 750 and 700 otherwise.
+ * up to 900, while a heavier inherited weight (up to 1000) is kept as it is;
+ * `lighter` uses 100 (or the inherited weight when it is smaller than 100),
+ * 400 below 750 and 700 otherwise.
  */
 export function resolveRelativeFontWeight(
   keyword: Css.Ident,
   inheritedWeight: number,
 ): number {
   if (hasKeywordName(keyword, "bolder")) {
-    return inheritedWeight < 350 ? 400 : inheritedWeight < 550 ? 700 : 900;
+    if (inheritedWeight < 350) {
+      return 400;
+    }
+    if (inheritedWeight < 550) {
+      return 700;
+    }
+    return inheritedWeight > 900 ? inheritedWeight : 900;
   }
   if (inheritedWeight < 550) {
     return Math.min(inheritedWeight, 100);

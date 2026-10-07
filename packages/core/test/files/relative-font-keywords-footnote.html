@@ -6,7 +6,8 @@
      inherited weight (700 in a bold paragraph), not against the footnote area's weight.
      This also applies when the keyword is substituted from a custom property
      (`font-weight: var(--weight)` with `--weight: BOLDER`). A weight that is
-     declared with `calc()` must be evaluated before the keyword is resolved.
+     declared with `calc()` must be evaluated before the keyword is resolved,
+     and a weight above 900 must be kept as it is by `bolder`.
      The footnote texts must match the reference paragraphs below. -->
 <html lang="en">
 <head>
@@ -27,6 +28,9 @@
     /* `font-weight` accepts a function: bolder of 650 is 900 */
     p.calcweight { font-weight: calc(650); }
     .fn4 { float: footnote; font-weight: bolder; }
+    /* a weight above 900 is kept as it is by bolder */
+    p.heavy { font-weight: 950; }
+    .fn5 { float: footnote; font-weight: bolder; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
@@ -39,8 +43,11 @@
   <p class="wref">Weight test 2</p>
   <p class="calcweight">Weight 650 with a footnote call<span class="fn4">Weight test 3</span>.</p>
   <p class="wref">Weight test 3</p>
+  <p class="heavy">Weight 950 with a footnote call<span class="fn5">Weight test 4</span>.</p>
+  <p class="heavy">Weight test 4</p>
   <p>The two lines "Wide letters" above should have exactly the same width, and the
-    lines "Weight test" and "Weight test 2" should have the same font weight as the
-    references (900).</p>
+    lines "Weight test" / "Weight test 2" / "Weight test 3" should have the same
+    font weight as their references (900). "Weight test 4" inherits 950, so `bolder`
+    keeps 950.</p>
 </body>
 </html>

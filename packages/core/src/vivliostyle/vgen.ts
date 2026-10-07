@@ -3670,12 +3670,14 @@ export class ViewFactory
       this.context.rootFontSize ??
       this.context.initialFontSize;
     const lineHeight =
-      (pageContextStyle &&
-        this.parsePlusLayoutUnitAdj(
-          pageContextStyle.lineHeight,
-          inlineStyle?.lineHeight,
-        )) ||
-      this.context.rootLineHeight ||
+      // A line height of 0 is valid and must not fall through to the defaults.
+      (pageContextStyle
+        ? this.parsePlusLayoutUnitAdj(
+            pageContextStyle.lineHeight,
+            inlineStyle?.lineHeight,
+          )
+        : null) ??
+      this.context.rootLineHeight ??
       fontSize * this.context.pref.lineHeight;
     return { fontSize, lineHeight };
   }
