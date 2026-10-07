@@ -1183,7 +1183,7 @@ export function resolveAbsoluteFontSizeKeyword(
  * whose remaining units are all resolvable can be evaluated here. Returns null
  * when the value cannot be resolved to a length. (Issue #2174 follow-up)
  */
-function resolveFontSizeValueToPx(
+export function resolveFontSizeValueToPx(
   context: Exprs.Context,
   value: Css.Val,
 ): number | null {

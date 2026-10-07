@@ -166,4 +166,16 @@ describe("exprs", function () {
       });
     });
   });
+
+  describe("font size", function () {
+    it("uses a root font size of zero", function () {
+      // A root font size of 0 is valid (`:root { font-size: 0 }`) and must not
+      // fall back to the initial font size. (Issue #2174 follow-up)
+      const zeroFontSizeContext = new Exprs.Context(scope, 800, 600, 16, 20);
+      zeroFontSizeContext.rootFontSize = 0;
+      expect(zeroFontSizeContext.fontSize()).toBe(0);
+      expect(zeroFontSizeContext.queryUnitSize("em", false)).toBe(0);
+      expect(zeroFontSizeContext.queryUnitSize("rem", false)).toBe(0);
+    });
+  });
 });

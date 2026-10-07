@@ -1113,7 +1113,7 @@ export class ViewFactory
             name === "font-size" &&
             i === styles.length - 1 &&
             this.context.isRelativeRootFontSize &&
-            this.context.rootFontSize
+            this.context.rootFontSize != null
           ) {
             // Fix for issue #608, #549
             prop1 = new CssCascade.CascadeValue(
@@ -3575,9 +3575,11 @@ export class ViewFactory
       ? this.viewport.window.getComputedStyle(pageContextElement)
       : null;
     const fontSize =
-      (pageContextStyle &&
-        this.parsePlusLayoutUnitAdj(pageContextStyle.fontSize)) ||
-      this.context.rootFontSize ||
+      // A font size of 0 is valid and must not fall through to the defaults.
+      (pageContextStyle
+        ? this.parsePlusLayoutUnitAdj(pageContextStyle.fontSize)
+        : null) ??
+      this.context.rootFontSize ??
       this.context.initialFontSize;
     const lineHeight =
       (pageContextStyle &&

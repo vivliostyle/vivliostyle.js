@@ -1035,7 +1035,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       if (
         name === "font-size" &&
         context.isRelativeRootFontSize &&
-        context.rootFontSize
+        context.rootFontSize != null
       ) {
         val = new Css.Numeric(context.rootFontSize, "px");
       } else {

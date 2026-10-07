@@ -359,7 +359,7 @@ export class Context {
     this.initialFontSize = fontSize;
     this.rootLineHeight = rootLineHeight;
     this.fontSize = function () {
-      if (this.rootFontSize) {
+      if (this.rootFontSize != null) {
         return this.rootFontSize;
       } else {
         return fontSize;

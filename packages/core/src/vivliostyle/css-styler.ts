@@ -716,6 +716,26 @@ export class Styler implements AbstractStyler {
           }
         }
       }
+      if (px == null) {
+        // A font size that is neither a keyword nor a Css.Numeric: a unitless
+        // zero, or a clamp()/min()/max() whose arguments are lengths that can
+        // be resolved here, e.g.
+        // `:root { font-size: clamp(10px, 20px, 30px) }`. (Issue #2174
+        // follow-up)
+        const resolved = CssCascade.resolveFontSizeValueToPx(this.context, val);
+        if (resolved != null) {
+          px = resolved;
+          if (val instanceof Css.Func) {
+            // As for a calc() that the root sizing could resolve, the root
+            // element must use this value. (Issues #608, #549)
+            isRelativeFontSize = true;
+          } else {
+            // A unitless zero, which is an absolute length like `0px`, so the
+            // root element uses it directly.
+            isRelativeFontSize = false;
+          }
+        }
+      }
       if (px != null) {
         this.context.rootFontSize = px;
         this.context.isRelativeRootFontSize = isRelativeFontSize;

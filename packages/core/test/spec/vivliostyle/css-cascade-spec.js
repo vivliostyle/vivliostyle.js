@@ -3295,6 +3295,62 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("resolveFontSizeValueToPx", function () {
+      it("resolves a unitless zero to 0", function () {
+        // `font-size: 0` is a Css.Num (not a Css.Numeric) and must be treated
+        // as the absolute length `0px`.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Int(0),
+          ),
+        ).toBe(0);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Num(0),
+          ),
+        ).toBe(0);
+      });
+
+      it("resolves a clamp() of absolute lengths", function () {
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(10, "px"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(30, "px"),
+            ]),
+          ),
+        ).toBe(20);
+      });
+
+      it("resolves a clamp() that uses root font relative units", function () {
+        // When the root font size is not known yet (as in the root sizing
+        // itself), 1rem is the initial font size.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(1, "rem"),
+              new adapt_css.Numeric(24, "px"),
+              new adapt_css.Numeric(3, "rem"),
+            ]),
+          ),
+        ).toBe(24);
+      });
+
+      it("returns null for a value that cannot be resolved", function () {
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("var", [new adapt_css.AnyToken("--missing")]),
+          ),
+        ).toBeNull();
+      });
+    });
+
     describe("InheritanceVisitor", function () {
       it("resolves font-size: larger against the accumulated parent size", function () {
         var props = {

@@ -250,6 +250,14 @@ module.exports = [
         title:
           "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)",
       },
+      {
+        file: "font-size-calc-root.html",
+        title: "Root font size with a math function (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-root-zero.html",
+        title: "Root font size zero (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
