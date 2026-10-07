@@ -1182,6 +1182,25 @@ export function resolveAbsoluteFontSizeKeyword(
 }
 
 /**
+ * Whether a font weight number is in the range of CSS Fonts 4, which accepts
+ * `<number [1,1000]>` (or the `normal`/`bold` keywords). (Review)
+ */
+export function isValidFontWeight(num: number): boolean {
+  return Number.isFinite(num) && num >= 1 && num <= 1000;
+}
+
+/**
+ * Whether a declared font-weight value is a number outside the range of CSS
+ * Fonts 4. Such a value is invalid: the browser rejects the declaration and the
+ * element inherits the parent font weight, e.g. when a var() substitution puts
+ * such a number into the declaration. A math function that computes a value
+ * outside the range is valid and is clamped instead. (Review)
+ */
+export function isInvalidFontWeight(value: Css.Val): boolean {
+  return value instanceof Css.Num && !isValidFontWeight(value.num);
+}
+
+/**
  * Whether a declared font-size value is a negative literal length. Such a value
  * is outside the non-negative range of `font-size`, so it is invalid: the
  * browser rejects the declaration and the element inherits the parent font
@@ -1284,6 +1303,22 @@ export function usesLineHeightUnit(value: Css.Val): boolean {
 }
 
 /**
+ * Replace the `lh` units of a value with px, using the line height that the
+ * element inherits. (Review)
+ */
+class LineHeightUnitReplacer extends Css.FilterVisitor {
+  constructor(private readonly inheritedLineHeight: number) {
+    super();
+  }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    return numeric.unit === "lh"
+      ? new Css.Numeric(numeric.num * this.inheritedLineHeight, "px")
+      : numeric;
+  }
+}
+
+/**
  * Resolve a computed line-height value that uses the `lh` unit, e.g.
  * `line-height: calc(1lh + 10px)`, against the line height that the element
  * inherits. Returns null when the value cannot be resolved to a length.
@@ -1295,12 +1330,23 @@ export function resolveLineHeightValueToPx(
   parentFontSize: number,
   inheritedLineHeight: number,
 ): number | null {
-  const converted = convertParentRelativeFontSizeUnits(
+  // The `lh` unit of a line height refers to the line height that the element
+  // inherits, which the walk accumulates for the source parent. The visitor
+  // converts the other parent relative units, but it leaves `lh` alone for a
+  // property other than `font-size`. (Review)
+  func = func.visit(
+    new LineHeightUnitReplacer(inheritedLineHeight),
+  ) as Css.Func;
+  let converted = convertParentRelativeFontSizeUnits(
     context,
     func,
     parentFontSize,
     inheritedLineHeight,
   );
+  // `evaluateCSSToCSS()` only reduces `calc()`, so the other math functions,
+  // e.g. the `max(1lh, 40px)` of a line height, must be reduced to px here.
+  // (Review)
+  converted = converted.visit(new MathFunctionReducer(context));
   const evaluated = evaluateCSSToCSS(context, converted, "line-height");
   return isAbsoluteLengthValue(evaluated)
     ? (evaluated as Css.Numeric).num
@@ -1500,9 +1546,13 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         // `evaluateCSSToCSS()` only reduces `calc()`, so a valid math function
         // such as `line-height: min(40px, 2em)` must be reduced to its px value
         // here: otherwise an inherited line height falls back to the preferred
-        // line height for a detached descendant that resolves an `lh` unit.
-        // (Review)
-        value = value.visit(new MathFunctionReducer(this.context));
+        // line height for a detached descendant that resolves an `lh` unit. An
+        // `lh` unit of this value refers to the line height of the level above,
+        // which is not known here, so such a value is left unresolved instead
+        // of using the placeholder size of the unit. (Review)
+        if (!usesLineHeightUnit(value)) {
+          value = value.visit(new MathFunctionReducer(this.context));
+        }
       }
       value = evaluateCSSToCSS(this.context, value, "line-height");
     }
@@ -1541,7 +1591,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       value = evaluateCSSToCSS(this.context, value, "font-weight");
     }
     if (value instanceof Css.Num) {
-      return value.num;
+      // A number outside the range of CSS Fonts 4, e.g. one that a var()
+      // substitution put into the declaration, is invalid: the element inherits
+      // the parent font weight, so it must not become the base of a relative
+      // keyword. (Review)
+      return isValidFontWeight(value.num) ? value.num : 400;
     }
     if (value && hasKeywordName(value, "bold")) {
       return 700;
@@ -5748,10 +5802,23 @@ export class CascadeInstance {
         // computes a negative value is valid and is clamped to zero below.
         // (Review)
         let value =
-          name === "font-size" && isNegativeLiteralFontSize(cascVal.value)
+          (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
+          (name === "font-weight" && isInvalidFontWeight(cascVal.value))
             ? Css.ident.unset
             : cascVal.value.visit(visitor);
         if (
+          name === "font-weight" &&
+          value instanceof Css.Num &&
+          !Css.isDefaultingValue(value)
+        ) {
+          // A weight that is not a literal, e.g. `calc(1200)`, is valid: the
+          // computed value is clamped to the range of CSS Fonts 4, while a
+          // non-finite result is invalid like a literal outside the range.
+          // (Review)
+          value = Number.isFinite(value.num)
+            ? new Css.Num(Math.min(1000, Math.max(1, value.num)))
+            : Css.ident.unset;
+        } else if (
           name === "font-size" &&
           value instanceof Css.Numeric &&
           value.num < 0

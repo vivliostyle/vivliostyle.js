@@ -1057,6 +1057,14 @@ export class ViewFactory
             // that must not beat the declaration; see below. (Issue #2174)
             currentDeclaresFontSize = true;
           } else if (
+            // An `lh` unit of a line height refers to the line height of the
+            // parent, so the inherited line height must still be accumulated as
+            // well. (Review)
+            name === "line-height" &&
+            CssCascade.usesLineHeightUnit(value)
+          ) {
+            // nothing to do: the declaration replaces the accumulated value
+          } else if (
             // The relative font-weight keywords are resolved against the
             // inherited weight, so keep accumulating it. A keyword coming from
             // a custom property is not canonicalized, so compare names. (Only
@@ -1225,6 +1233,20 @@ export class ViewFactory
             }
           } else if (!Css.isCustomPropName(name)) {
             prop1 = prop.filterValue(inheritanceVisitor);
+          }
+
+          if (name === "font-weight") {
+            // A weight that a var() substitution made invalid is rejected by
+            // the browser, which keeps the inherited weight, so the accumulated
+            // weight must not be replaced by it: a relative keyword
+            // (`bolder`/`lighter`) of a detached descendant is resolved against
+            // the inherited weight. (Review)
+            if (CssCascade.isInvalidFontWeight(prop1.value)) {
+              const inheritedFontWeight = CssCascade.getProp(props, name);
+              if (inheritedFontWeight) {
+                prop1 = prop1.withValue(inheritedFontWeight.value);
+              }
+            }
           }
 
           if (name === "font-size") {
@@ -3743,13 +3765,63 @@ export class ViewFactory
     const style = this.viewport.window.getComputedStyle(element);
     const inlineStyle = getInlineStyle(element);
     const fontSize =
-      this.parsePlusLayoutUnitAdj(style.fontSize, inlineStyle?.fontSize) ??
-      fallback.fontSize;
+      this.parsePlusLayoutUnitAdj(
+        style.fontSize,
+        this.getLayoutUnitAdjustedBase(
+          element,
+          inlineStyle?.fontSize,
+          "fontSize",
+        ),
+      ) ?? fallback.fontSize;
     const lineHeight =
-      this.parsePlusLayoutUnitAdj(style.lineHeight, inlineStyle?.lineHeight) ??
+      this.parsePlusLayoutUnitAdj(
+        style.lineHeight,
+        this.getLayoutUnitAdjustedBase(
+          element,
+          inlineStyle?.lineHeight,
+          "lineHeight",
+        ),
+      ) ??
       fallback.lineHeight ??
       (fontSize != null ? fontSize * this.context.pref.lineHeight : null);
     return { fontSize, lineHeight };
+  }
+
+  /**
+   * The inline declaration that the given inline value of an element has to be
+   * read with to recover a length that the browser rounded down to zero: the
+   * value of the element itself, or, because an element without a declaration
+   * of its own inherits the length, the one of the nearest ancestor that has a
+   * generated declaration. A declaration that is not an adjusted length, e.g.
+   * `font-size: 0`, is kept, so that it cannot be replaced by an ancestor
+   * value. (Review)
+   */
+  private getLayoutUnitAdjustedBase(
+    element: Element | null,
+    inlineVal: string | null | undefined,
+    propName: "fontSize" | "lineHeight",
+  ): string | null {
+    if (inlineVal) {
+      return parseLayoutUnitAdjustedValue(inlineVal) != null ? inlineVal : null;
+    }
+    for (
+      let node: Element | null = element?.parentElement ?? null;
+      node;
+      node = node.parentElement
+    ) {
+      // Only a chain in which the length rounded down to zero everywhere can
+      // have inherited it from a generated declaration further up; an ancestor
+      // whose computed value is not zero declares a length of its own.
+      const computed = this.viewport.window.getComputedStyle(node)[propName];
+      if (!(computed === "normal" || parseFloat(computed) === 0)) {
+        return null;
+      }
+      const inline = getInlineStyle(node)?.[propName];
+      if (inline) {
+        return parseLayoutUnitAdjustedValue(inline) != null ? inline : null;
+      }
+    }
+    return null;
   }
 
   private getParentViewNode(): Element | null {
@@ -3769,14 +3841,19 @@ export class ViewFactory
     fontSize: number | null;
     lineHeight: number | null;
   } {
-    const inlineStyle = getInlineStyle(this.getParentViewNode());
+    const parentNode = this.getParentViewNode();
+    const inlineStyle = getInlineStyle(parentNode);
     return {
       fontSize:
         this.computedStyleParentFontSizeOverride ??
         (parentStyle
           ? this.parsePlusLayoutUnitAdj(
               parentStyle.fontSize,
-              inlineStyle?.fontSize,
+              this.getLayoutUnitAdjustedBase(
+                parentNode,
+                inlineStyle?.fontSize,
+                "fontSize",
+              ),
             )
           : this.context.rootFontSize),
       lineHeight:
@@ -3784,7 +3861,11 @@ export class ViewFactory
         (parentStyle
           ? this.parsePlusLayoutUnitAdj(
               parentStyle.lineHeight,
-              inlineStyle?.lineHeight,
+              this.getLayoutUnitAdjustedBase(
+                parentNode,
+                inlineStyle?.lineHeight,
+                "lineHeight",
+              ),
             )
           : this.context.rootLineHeight),
     };

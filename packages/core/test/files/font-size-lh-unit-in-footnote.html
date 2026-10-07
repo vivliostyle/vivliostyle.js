@@ -28,6 +28,12 @@
     .anc-outer { line-height: 30px; }
     .anc { line-height: 1lh; }
     .ref.anc-lh { font-size: 30px; }
+    /* an own line height that is a math function with lh: max(1lh, 5px) = the
+       40px line height of the source parent */
+    p.lh-own { line-height: 40px; }
+    .fn.own-lh { line-height: max(1lh, 5px); }
+    .ref.own-lh { line-height: max(1lh, 5px); background: #eee; }
+    .fn.own-lh { background: #eee; }
     /* the same, with an inherited line height that is a math function:
        min(40px, 2em) = the smaller of 40px and 32px = 32px */
     p.lh-math { line-height: min(40px, 2em); }
@@ -45,16 +51,20 @@
     <span class="ref calc-lh">Wide</span><span class="fn calc-lh">Wide</span></p>
   <div class="anc-outer"><p class="anc">lh unit on an ancestor:
     <span class="ref anc-lh">Wide</span><span class="fn anc-lh">Wide</span></p></div>
+  <p class="lh-own">lh unit of an own line height:
+    <span class="ref own-lh">Wide</span><span class="fn own-lh">Wide</span></p>
   <p class="lh-math">lh unit with a math function line height:
     <span class="ref lh-math">Wide</span><span class="fn lh-math">Wide</span></p>
   <p class="calc-pct">lh unit with a percentage computed line height:
     <span class="ref pct-lh">Wide</span><span class="fn pct-lh">Wide</span></p>
   <p>The footnote at the page bottom must have the same letter-spacing as the
     inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
-    line height of the root. For the third paragraph it is the 24px of
-    `calc(150%)`, for the paragraph whose ancestor declares
+    line height of the root. For the paragraph with the percentage computed
+    line height it is the 24px of `calc(150%)`, for the paragraph whose ancestor declares
     `line-height: 1lh` it is the 30px of that ancestor, and for the paragraph
     with `line-height: min(40px, 2em)` it is the 32px that the math function
-    computes.</p>
+    computes. The paragraph with `line-height: max(1lh, 5px)` on the footnote
+    itself (the grey "Wide" boxes) has a line height of 40px, the line height
+    of its source parent.</p>
 </body>
 </html>

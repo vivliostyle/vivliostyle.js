@@ -3407,6 +3407,37 @@ describe("css-cascade", function () {
         ).toBe(null);
       });
 
+      it("detects an invalid font weight number", function () {
+        // CSS Fonts 4 accepts a weight in the 1-1000 range; a number outside
+        // it, e.g. one that a var() substitution put into the declaration, is
+        // invalid, while a math function that computes such a value is clamped.
+        // (Review)
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(-10))).toBe(
+          true,
+        );
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(0))).toBe(
+          true,
+        );
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1001))).toBe(
+          true,
+        );
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(NaN))).toBe(
+          true,
+        );
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1))).toBe(
+          false,
+        );
+        expect(
+          adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(700.5)),
+        ).toBe(false);
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1000))).toBe(
+          false,
+        );
+        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Int(700))).toBe(
+          false,
+        );
+      });
+
       it("detects a negative literal font size", function () {
         // A negative literal length is invalid for `font-size`, unlike a math
         // function that computes a negative value: the cascade turns it into
@@ -3938,6 +3969,23 @@ describe("css-cascade", function () {
         );
         expect(resolved.num).toBe(30);
         expect(resolved.unit).toBe("px");
+      });
+
+      it("reduces a math function that uses the lh unit", function () {
+        // `line-height: max(1lh, 5px)` on a detached element: the `lh` unit
+        // refers to the line height that the element inherits (10px), so the
+        // value is 10px and not the 5px of the placeholder unit size. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("max(1lh, 5px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 10),
+        ).toBe(10);
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(40);
       });
 
       it("resolves the lh unit against a math function line height", function () {

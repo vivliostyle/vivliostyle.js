@@ -289,6 +289,11 @@ module.exports = [
         title:
           "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)",
       },
+      {
+        file: "invalid-var-font-weight.html",
+        title:
+          "Invalid font weight from a var() substitution (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
