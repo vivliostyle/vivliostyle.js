@@ -146,7 +146,9 @@
     inherit from the footnote area of the page, while the browser rejects the
     invalid declarations and keeps the inherited 700 of the source parent: the
     PR branch renders "B" 900 (bolder than 700, like the inline reference) and
-    "Z" 700.
+    "Z" 700. The same holds for the invalid forms that the page adds, an
+    unknown keyword (`nonsense`) and a dimension (`700px`): both footnotes
+    resolve `bolder` to 700 in the canary viewer and to 900 in the PR branch.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -190,15 +192,16 @@
   type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    line height that the footnote inherits is kept for resolving the `lh` unit
-    of the declaration of the region rule, but with its original cascade
-    priority, so the `!important` declaration of the body wins over the
-    `line-height: 2lh` of `:footnote-content` and the footnote has a line height
-    of 40px instead of the 80px of the declaration of the region rule. The PR
-    branch keeps the inherited value only as a low-priority placeholder, so the
-    declaration of the region rule wins and resolves its `lh` unit against the
-    inherited 40px.
+    Follow-up of Issue #2174. The footnote must have the 80px of
+    `line-height: 2lh` (2 x the inherited 40px), the declaration of the region
+    rule, and not the 40px of the `!important` declaration of the body. stable
+    and canary render 80px as well, because they do not keep the inherited line
+    height at all, but the state of the PR branch before this fix did: keeping
+    the inherited line height for resolving `lh` also kept its original cascade
+    priority, so the `!important` declaration of the body won and the footnote
+    had 40px. The PR branch keeps the inherited value only as a low-priority
+    placeholder, so the declaration of the region rule wins (verified in the
+    dev viewer: 79.998px with `line-height: calc(80px - ...)`).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
