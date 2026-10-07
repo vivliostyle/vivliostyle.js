@@ -1180,7 +1180,12 @@ export class ViewFactory
       // `aside[role="doc-footnote"]:footnote-content { font-size: 0.9em }`.
       // Such a declaration replaces the inherited value, so the inherited
       // value is kept only as a low-priority placeholder (the same priority
-      // as the initial value the walk starts with). (Issue #2174)
+      // as the initial value the walk starts with). Only the priority is
+      // affected: a declaration of a region rule resolves in the context that
+      // it is rendered in, as the styles of the `@page` margin boxes do and as
+      // the default `font-size: 0.9em` of Vivliostyle's own footnote styles
+      // relies on; it is not resolved against the source parent, unlike a
+      // declaration of the element itself. (Issue #2174)
       if (inheritedFontSize) {
         props["font-size"] = new CssCascade.CascadeValue(
           inheritedFontSize.value,
@@ -1196,7 +1201,9 @@ export class ViewFactory
       // `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }`.
       // The accumulated inherited weight is kept only as a low-priority
       // placeholder, so that it cannot beat the declaration during the
-      // cascade. (Issue #2174)
+      // cascade. As for the font size above, only the priority is affected:
+      // the declaration of the region rule resolves in the context that it is
+      // rendered in. (Issue #2174)
       if (inheritedFontWeight) {
         props["font-weight"] = new CssCascade.CascadeValue(
           inheritedFontWeight.value,
