@@ -386,11 +386,12 @@
   decision: expected  # regression / expected / skip
   notes: >-
     Follow-up of Issue #2174. stable renders the pre-fix result: a root
-    font-size that is a math function (`clamp(10px, 20px, 30px)`) is not
-    resolved by the root sizing, so `rem` values and the page margin box use the
-    initial 16px (10rem = 160px, the margin box text at 16px). The PR branch
-    resolves the root font size to 20px (10rem = 200px, the same as the 200px
-    reference box, the margin box text at 20px).
+    font-size that is a math function (`clamp(10px, calc(1em + 4px), 30px)`,
+    whose `em` argument is relative to the initial font size for the root
+    element) is not resolved by the root sizing, so `rem` values and the page
+    margin box use the initial 16px (10rem = 160px, the margin box text at
+    16px). The PR branch resolves the root font size to 20px (10rem = 200px,
+    the same as the 200px reference box, the margin box text at 20px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
