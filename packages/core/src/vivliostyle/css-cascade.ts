@@ -1149,10 +1149,10 @@ export function resolveRelativeFontWeight(
 
 /**
  * Absolute font-size keyword sizes as ratios of the default font size, using
- * the same table as browsers: xx-small..xx-large = 9/10/13/16/18/24/32 px for
- * the default 16px font size. Browsers scale this table with the default font
- * size, which Vivliostyle models as `context.initialFontSize`.
- * (Issue #2174 follow-up)
+ * the same table as browsers: xxx-small is not a keyword of CSS Fonts 4, and
+ * xx-small..xxx-large = 9/10/13/16/18/24/32/48 px for the default 16px font
+ * size. Browsers scale this table with the default font size, which Vivliostyle
+ * models as `context.initialFontSize`. (Issue #2174 follow-up, Review)
  */
 const fontSizeKeywordRatios: { [keyword: string]: number } = {
   "xx-small": 9 / 16,
@@ -1162,6 +1162,7 @@ const fontSizeKeywordRatios: { [keyword: string]: number } = {
   large: 18 / 16,
   "x-large": 24 / 16,
   "xx-large": 32 / 16,
+  "xxx-large": 48 / 16,
 };
 
 /**

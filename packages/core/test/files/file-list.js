@@ -294,6 +294,10 @@ module.exports = [
         title:
           "Invalid font weight from a var() substitution (Issue #2174 follow-up)",
       },
+      {
+        file: "absolute-font-size-keyword-xxx-large.html",
+        title: "xxx-large absolute font size keyword (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

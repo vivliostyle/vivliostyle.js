@@ -3183,6 +3183,7 @@ describe("css-cascade", function () {
           large: 18,
           "x-large": 24,
           "xx-large": 32,
+          "xxx-large": 48,
         };
         for (var keyword in expected) {
           expect(
@@ -3192,6 +3193,24 @@ describe("css-cascade", function () {
             ),
           ).toBe(expected[keyword]);
         }
+      });
+
+      it("resolves xxx-large, which CSS Fonts 4 added", function () {
+        // Modern browsers accept `xxx-large`, so the validator passes it
+        // through and it must not stay an identifier: it is three times the
+        // default font size. (Review)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xxx-large"),
+            16,
+          ),
+        ).toBe(48);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xxx-large"),
+            20,
+          ),
+        ).toBe(60);
       });
 
       it("scales with the default font size", function () {
