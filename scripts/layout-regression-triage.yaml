@@ -1,4 +1,4 @@
-- id: "0149"
+- id: "0150"
   category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
@@ -156,7 +156,32 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-weight.html&zoom=1&spread=false
   diffPages:
     - 1
-- id: "0119"
+- id: "0083"
+  category: General
+  title: "xxx-large absolute font size keyword (Issue #2174 follow-up)"
+  file: absolute-font-size-keyword-xxx-large.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    keyword table of the resolver omits `xxx-large` (which CSS Fonts 4 added and
+    which browsers compute as 48px), so the keyword stays an identifier and the
+    font size that Vivliostyle uses internally is the initial 16px: the margin
+    box at 1rem and the font size that a detached descendant inherits are
+    16px instead of the 48px of the browser. The PR branch resolves the keyword
+    like the other absolute keywords (three times the default font size), so the
+    blue 10rem box is as wide as the 480px reference and the footnote has the
+    96px letter-spacing of the inline reference.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keyword-xxx-large.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keyword-xxx-large.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0120"
   category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
