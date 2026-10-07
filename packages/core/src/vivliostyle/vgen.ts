@@ -1126,9 +1126,8 @@ export class ViewFactory
             // materialized: `font-size: initial` is the (medium) initial font
             // size, which is also the base of its dependent values.
             // (Issue #2174 follow-up)
-            props[name] = new CssCascade.CascadeValue(
+            props[name] = prop.withValue(
               new Css.Numeric(this.context.initialFontSize, "px"),
-              prop.priority,
             );
           } else {
             delete props[name];
@@ -1146,10 +1145,7 @@ export class ViewFactory
             // that is not in the element's own cascaded style, e.g. a region
             // rule, as any other declaration of the element would. (Issue
             // #2174)
-            props[name] = new CssCascade.CascadeValue(
-              inherited.value,
-              prop.priority,
-            );
+            props[name] = prop.withValue(inherited.value);
           }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
@@ -1159,9 +1155,8 @@ export class ViewFactory
             this.context.rootFontSize != null
           ) {
             // Fix for issue #608, #549
-            prop1 = new CssCascade.CascadeValue(
+            prop1 = prop.withValue(
               new Css.Numeric(this.context.rootFontSize, "px"),
-              prop.priority,
             );
           } else if (
             name === "line-height" &&
@@ -1171,9 +1166,8 @@ export class ViewFactory
               this.context.isRootLineHeightFromRelativeCalc)
           ) {
             // line-height with lh or rlh unit on root element
-            prop1 = new CssCascade.CascadeValue(
+            prop1 = prop.withValue(
               new Css.Numeric(this.context.rootLineHeight, "px"),
-              prop.priority,
             );
           } else if (
             i === 0 &&
@@ -1191,9 +1185,8 @@ export class ViewFactory
               lineHeight,
             );
             if (lhUnitSize != null) {
-              prop1 = new CssCascade.CascadeValue(
+              prop1 = prop.withValue(
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),
-                prop.priority,
               );
             }
           } else if (!Css.isCustomPropName(name)) {

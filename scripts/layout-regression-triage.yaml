@@ -427,6 +427,30 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-zero.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0075"
+  category: General
+  title: "Relative font weight in a region rule (Issue #2174 follow-up)"
+  file: relative-font-weight-region-rule.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. The CI comparison of the PR preview with the
+    released viewer reports no difference for this file, and the three viewers
+    render the footnote at the 400 that `lighter` resolves to (verified in the
+    browser: dev, canary and the release). The record keeps that expectation
+    explicit: the region declaration
+    `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }` must
+    win over the accumulated inherited weight of the source parent, which is
+    declared with `!important` here, while the keyword is still resolved against
+    that inherited weight. An earlier state of this PR resolved the keyword but
+    let the inherited weight win, which rendered the footnote at 700.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-weight-region-rule.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-weight-region-rule.html&zoom=1&spread=false
 - id: "0076"
   category: General
   title: "lh unit of a detached font-size (Issue #2174 follow-up)"

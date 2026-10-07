@@ -7686,10 +7686,11 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
   override visitFunc(func: Css.Func): Css.Val {
     // convert func args
     let value = super.visitFunc(func);
-    if (func.name !== "calc") {
+    // A function name is matched case-insensitively, e.g. `CALC(2em)`.
+    if (func.name.toLowerCase() !== "calc") {
       return value;
     }
-    const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
+    const exprText = value.toString().replace(/^calc\b/i, "-epubx-expr");
     if (this.hasUnresolvableUnit(exprText)) {
       return value;
     }

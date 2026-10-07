@@ -3321,6 +3321,37 @@ describe("css-cascade", function () {
         ).toBe(0);
       });
 
+      it("resolves math functions whose name is not lowercase", function () {
+        // A function name is matched case-insensitively, e.g. `CALC(2em)`.
+        var parse = (text) =>
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        // The parser lowercases the name of a parsed value (`calc`), so the
+        // comparison of the visitor is covered with a hand-built function.
+        expect(parse("CALC(2em)").toString()).toBe("calc(2em)");
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("CALC", [new adapt_css.Numeric(2, "em")]),
+            16,
+          ),
+        ).toBe(32);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("CLAMP", [
+              new adapt_css.Numeric(10, "px"),
+              new adapt_css.Numeric(2, "em"),
+              new adapt_css.Numeric(30, "px"),
+            ]),
+            16,
+          ),
+        ).toBe(30);
+      });
+
       it("does not resolve a nonzero unitless number", function () {
         // Only a unitless zero is a valid `font-size`; a var() substitution
         // can carry any other number, and a browser rejects such a declaration
