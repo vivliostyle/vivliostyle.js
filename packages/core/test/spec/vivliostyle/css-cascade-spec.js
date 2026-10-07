@@ -3303,6 +3303,42 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("usesLineHeightUnit", function () {
+      it("detects the lh unit of a value", function () {
+        var parse = (text) =>
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        expect(
+          adapt_csscasc.usesLineHeightUnit(parse("calc(1lh + 10px)")),
+        ).toBe(true);
+        expect(adapt_csscasc.usesLineHeightUnit(parse("calc(2 * 20px)"))).toBe(
+          false,
+        );
+        expect(adapt_csscasc.usesLineHeightUnit(new adapt_css.Num(1.5))).toBe(
+          false,
+        );
+      });
+    });
+
+    describe("resolveLineHeightValueToPx", function () {
+      it("resolves the lh unit against the inherited line height", function () {
+        // `line-height: calc(1lh + 10px)` with a 40px line height of the
+        // parent is 50px, not 26px (the preferred line height of 16px is
+        // 19.2px, which the lh unit must not fall back to).
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(1lh + 10px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(50);
+      });
+    });
+
     describe("resolveFontSizeValueToPx", function () {
       it("resolves a unitless zero to 0", function () {
         // `font-size: 0` is a Css.Num (not a Css.Numeric) and must be treated
@@ -3317,6 +3353,31 @@ describe("css-cascade", function () {
           adapt_csscasc.resolveFontSizeValueToPx(
             newContext(),
             new adapt_css.Num(0),
+          ),
+        ).toBe(0);
+      });
+
+      it("does not resolve a negative literal length", function () {
+        // A negative length is invalid for `font-size`; a var() substitution
+        // can put one into the declaration, and the browser then keeps the
+        // font size that the element would inherit, while a math expression
+        // that computes a negative value is clamped to zero.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(-10, "px"),
+            16,
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+            16,
           ),
         ).toBe(0);
       });

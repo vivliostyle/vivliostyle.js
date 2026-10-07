@@ -270,6 +270,11 @@ module.exports = [
         file: "font-size-inherit-region-rule.html",
         title: "font-size: inherit with a region rule (Issue #2174 follow-up)",
       },
+      {
+        file: "invalid-var-font-size.html",
+        title:
+          "Invalid font sizes from a var() substitution (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

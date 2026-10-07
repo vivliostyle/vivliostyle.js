@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a font size that a var() substitution
+     makes invalid must behave like it does in the browser. The declaration is
+     rejected, so the element keeps the font size that it inherits, and a root
+     element keeps the initial font size instead of using the invalid value.
+     The footnote below must be rendered like the reference paragraph: the
+     invalid `font-size: var(--invalid)` (5) is ignored, so the footnote
+     inherits the 32px of the source parent, and the invalid
+     `font-size: var(--negative)` (-10px) of the root is ignored, so 10rem stays
+     160px. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invalid font sizes from a var() substitution (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    :root { --invalid: 5; --negative: -10px; font-size: var(--negative); }
+    .dep { font-size: 32px; }
+    .dep .fn { float: footnote; font-size: var(--invalid); letter-spacing: 2em; }
+    .ref { font-size: 32px; letter-spacing: 2em; }
+    .rem-test { width: 10rem; height: 6px; background: #9cf; }
+    .rem-ref { width: 160px; height: 6px; background: #cfc; }
+    a[role="doc-noteref"]::footnote-call { content: "[" counter(footnote) "]"; }
+  </style>
+</head>
+<body>
+  <p class="dep">The invalid <code>font-size: var(--invalid)</code> of this
+    footnote must be ignored, so it keeps the inherited 32px and its "Wide"
+    has the same letter-spacing as the reference below:<span class="fn">Wide</span></p>
+  <p class="ref">Wide</p>
+  <p>The invalid <code>font-size: var(--negative)</code> of the root must be
+    ignored as well, so the root keeps the initial 16px and the blue box (10rem)
+    is as wide as the green one (160px):</p>
+  <div class="rem-test"></div>
+  <div class="rem-ref"></div>
+</body>
+</html>

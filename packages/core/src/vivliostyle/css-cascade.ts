@@ -1207,6 +1207,13 @@ export function resolveFontSizeValueToPx(
     // by the browser, which inherits the parent font size instead.
     return value.num === 0 ? 0 : null;
   }
+  if (value instanceof Css.Numeric && value.num < 0) {
+    // A negative literal length is invalid for font-size, e.g. one that a
+    // var() substitution introduced into the declaration; the browser rejects
+    // the declaration and the font size it would inherit is kept. A negative
+    // result of a math expression is clamped to zero instead, below.
+    return null;
+  }
   if (parentFontSize != null && value instanceof Css.Func) {
     value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);
   }
@@ -1228,13 +1235,67 @@ function convertParentRelativeFontSizeUnits(
   context: Exprs.Context,
   func: Css.Func,
   parentFontSize: number,
+  parentLineHeight?: number,
 ): Css.Val {
   const parentProps = {
     "font-size": new CascadeValue(new Css.Numeric(parentFontSize, "px"), 0),
   } as ElementStyle;
+  if (parentLineHeight != null) {
+    // The `lh` unit refers to the line height of the parent, so that it does
+    // not fall back to the preferred line height. (Review)
+    parentProps["line-height"] = new CascadeValue(
+      new Css.Numeric(parentLineHeight, "px"),
+      0,
+    );
+  }
   const visitor = new InheritanceVisitor(parentProps, context);
   visitor.setPropName("font-size");
   return func.visit(visitor);
+}
+
+class LineHeightUnitVisitor extends Css.FilterVisitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    if (numeric.unit === "lh") {
+      this.found = true;
+    }
+    return numeric;
+  }
+}
+
+/**
+ * Whether a value uses the `lh` unit, which refers to the line height of the
+ * parent and is not accumulated in a detached subtree. (Review)
+ */
+export function usesLineHeightUnit(value: Css.Val): boolean {
+  const visitor = new LineHeightUnitVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+/**
+ * Resolve a computed line-height value that uses the `lh` unit, e.g.
+ * `line-height: calc(1lh + 10px)`, against the line height that the element
+ * inherits. Returns null when the value cannot be resolved to a length.
+ * (Review)
+ */
+export function resolveLineHeightValueToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+  parentFontSize: number,
+  inheritedLineHeight: number,
+): number | null {
+  const converted = convertParentRelativeFontSizeUnits(
+    context,
+    func,
+    parentFontSize,
+    inheritedLineHeight,
+  );
+  const evaluated = evaluateCSSToCSS(context, converted, "line-height");
+  return isAbsoluteLengthValue(evaluated)
+    ? (evaluated as Css.Numeric).num
+    : null;
 }
 
 function isMathFunction(func: Css.Func): boolean {
@@ -1355,6 +1416,15 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     this.propName = name;
   }
 
+  /**
+   * The font size in px that the accumulated values inherit, i.e. the font size
+   * of the parent. (Used by the walk to resolve the `lh` unit of a computed
+   * line height. Review)
+   */
+  getInheritedFontSize(): number {
+    return this.getFontSize();
+  }
+
   private getFontSize() {
     const cascval = getProp(this.props, "font-size");
     if (!cascval) {
@@ -1395,6 +1465,15 @@ export class InheritanceVisitor extends Css.FilterVisitor {
    * parent before the font size of the current element is processed. Returns
    * null when it cannot be determined. (Issue #2174 follow-up)
    */
+  /**
+   * The line height in px that the accumulated values inherit, i.e. the line
+   * height of the parent. (Used by the walk to resolve the `lh` unit of a
+   * computed line height. Review)
+   */
+  getInheritedLineHeight(): number | null {
+    return this.getInheritedLineHeightUnitSize();
+  }
+
   private getInheritedLineHeightUnitSize(): number | null {
     let value = getProp(this.props, "line-height")?.value;
     const parentFontSize = this.getFontSize();

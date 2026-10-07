@@ -1189,8 +1189,52 @@ export class ViewFactory
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),
               );
             }
+          } else if (
+            name === "line-height" &&
+            prop.value instanceof Css.Func &&
+            CssCascade.usesLineHeightUnit(prop.value)
+          ) {
+            // A computed line height whose `lh` unit refers to the line height
+            // of the parent, e.g. `line-height: calc(1lh + 10px)`. It is
+            // resolved here, level by level, against the line height that was
+            // accumulated for the parent so far, so that the unit does not
+            // fall back to the preferred line height when a descendant
+            // resolves its own `lh` unit. (Review)
+            const inheritedLineHeight =
+              inheritanceVisitor.getInheritedLineHeight();
+            const inheritedFontSize = inheritanceVisitor.getInheritedFontSize();
+            if (inheritedLineHeight != null && inheritedFontSize != null) {
+              const px = CssCascade.resolveLineHeightValueToPx(
+                this.context,
+                prop.value,
+                inheritedFontSize,
+                inheritedLineHeight,
+              );
+              if (px != null) {
+                prop1 = prop.withValue(new Css.Numeric(px, "px"));
+              }
+            }
           } else if (!Css.isCustomPropName(name)) {
             prop1 = prop.filterValue(inheritanceVisitor);
+          }
+
+          if (
+            name === "font-size" &&
+            !prop1.value.isNumeric() &&
+            !(prop1.value instanceof Css.Ident) &&
+            CssCascade.resolveFontSizeValueToPx(this.context, prop1.value) ==
+              null
+          ) {
+            // An invalid font size, e.g. one that a var() substitution put
+            // into the declaration, is rejected by the browser, which inherits
+            // the parent font size instead. Keep the value that was
+            // accumulated for the source parent, so that the dependent values
+            // of the element are not resolved against the initial font size.
+            // (Review)
+            const inheritedFontSize = CssCascade.getProp(props, name);
+            if (inheritedFontSize) {
+              prop1 = prop1.withValue(inheritedFontSize.value);
+            }
           }
 
           if (name === "font-size") {
