@@ -1070,7 +1070,11 @@ export class ViewFactory
             // the priority of the accumulated value is lowered below when the
             // declaration is not in the element's own cascaded style. (Review)
             name === "line-height" &&
-            CssCascade.usesLineHeightUnit(value)
+            (CssCascade.usesLineHeightUnit(value) ||
+              // A line height that the browser rejects is inherited as well,
+              // so the inherited line height must still be accumulated for a
+              // descendant that resolves the `lh` unit. (Review)
+              CssCascade.isInvalidLineHeight(value))
           ) {
             currentDeclaresLineHeight = true;
           } else if (
@@ -1254,6 +1258,21 @@ export class ViewFactory
               const inheritedFontWeight = CssCascade.getProp(props, name);
               if (inheritedFontWeight) {
                 prop1 = prop1.withValue(inheritedFontWeight.value);
+              }
+            }
+          }
+
+          if (name === "line-height") {
+            // A line height that a var() substitution made invalid is rejected
+            // by the browser, which keeps the inherited line height, so the
+            // accumulated value must not be replaced by it: a descendant that
+            // resolves the `lh` unit (`font-size: 1lh`) then uses the line
+            // height it inherits instead of the preferred line height.
+            // (Review)
+            if (CssCascade.isInvalidLineHeight(prop1.value)) {
+              const inheritedLineHeight = CssCascade.getProp(props, name);
+              if (inheritedLineHeight) {
+                prop1 = prop1.withValue(inheritedLineHeight.value);
               }
             }
           }

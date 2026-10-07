@@ -310,6 +310,19 @@ module.exports = [
         file: "font-size-math-keyword.html",
         title: "math font size keyword of a footnote (Issue #2174 follow-up)",
       },
+      {
+        file: "invalid-var-line-height.html",
+        title:
+          "Invalid line-height from a var() substitution (Issue #2174 follow-up)",
+      },
+      {
+        file: "line-height-negative-calc.html",
+        title: "Negative computed line-height (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-browser-unit.html",
+        title: "font-size with a browser resolved unit (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

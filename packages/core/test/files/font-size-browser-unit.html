@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a font size with a unit that only the
+     browser resolves, e.g. `5ch`, is valid and must be preserved on a detached
+     element instead of being replaced by the inherited font size, and the
+     values that depend on it must be left to the browser as well: the footnote
+     "ch" must be as large as the inline reference "ch" of the 16px paragraph,
+     and not the 32px of its source parent, which the pre-fix viewer uses
+     because it replaces the value with the inherited font size. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>font-size with a browser resolved unit (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { font-size: 16px; }
+    .ref-ch { font-size: 5ch; }
+    .dep { font-size: 32px; }
+    .dep .fn-ch { float: footnote; font-size: 5ch; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>The reference "ch" below is an inline element of this 16px paragraph, so
+    `5ch` is five times the width of the "0" character of the font:
+    <span class="ref-ch">ch</span></p>
+  <p class="dep">The footnote "ch" must be rendered like the reference above,
+    not with the 32px of this paragraph:
+    <span class="fn-ch">ch</span></p>
+</body>
+</html>

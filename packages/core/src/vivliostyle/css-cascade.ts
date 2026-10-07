@@ -687,10 +687,14 @@ function isRolledBackBy(
   candidate: CascadeValue,
   reverting: CascadeValue,
 ): boolean {
-  switch (reverting.value) {
-    case Css.ident.revert_rule:
+  // The kind has to be dispatched case-insensitively as well: a value that a
+  // var() substitution puts into the declaration is not canonicalized, and
+  // mixing the kinds up would drop declarations of the wrong origins or rules.
+  // (Review)
+  switch (Css.getRollbackKind(reverting.value)) {
+    case "revert-rule":
       return candidate.ruleId === reverting.ruleId;
-    case Css.ident.revert_layer:
+    case "revert-layer":
       // `revert-layer` rolls back to the layers *before* the current one, so
       // the current layer and every later one drop out — including the
       // important declarations of later layers, which outrank the current
@@ -1206,6 +1210,34 @@ export function isValidUnresolvedFontSize(value: Css.Val): boolean {
 }
 
 /**
+ * Whether a declared line height is invalid: `line-height` accepts `normal`, a
+ * non-negative number or a non-negative length or percentage, so any other
+ * post-substitution value is rejected by the browser, which keeps the inherited
+ * line height. (Review)
+ */
+export function isInvalidLineHeight(value: Css.Val): boolean {
+  if (
+    value === Css.empty ||
+    value instanceof Css.Expr ||
+    value instanceof Css.Func ||
+    CssValidator.containsVar(value) ||
+    Css.isDefaultingValue(value) ||
+    hasKeywordName(value, "normal")
+  ) {
+    // Expressions are evaluated elsewhere and the CSS-wide keywords are
+    // materialized by the walk, so neither is invalid here.
+    return false;
+  }
+  if (value instanceof Css.Num) {
+    return value.num < 0;
+  }
+  if (value instanceof Css.Numeric) {
+    return value.num < 0 || !CSS.supports("line-height", value.toString());
+  }
+  return value instanceof Css.Ident;
+}
+
+/**
  * Whether a declared font-weight value is invalid: `font-weight` accepts a
  * number in the 1-1000 range of CSS Fonts 4 and the keywords (the relative
  * `bolder`/`lighter` are resolved by the visitor), so every other
@@ -1388,8 +1420,13 @@ export function resolveLineHeightValueToPx(
   // (Review)
   converted = converted.visit(new MathFunctionReducer(context));
   const evaluated = evaluateCSSToCSS(context, converted, "line-height");
+  // `line-height` has a non-negative computed-value range, so a math function
+  // that computes below zero is clamped: `calc(1lh - 100px)` with a 40px
+  // inherited line height is 0, and materializing the -60 that the expression
+  // evaluates to would make the browser reject the declaration and inherit the
+  // 40px instead of applying zero. (Review)
   return isAbsoluteLengthValue(evaluated)
-    ? (evaluated as Css.Numeric).num
+    ? Math.max(0, (evaluated as Css.Numeric).num)
     : null;
 }
 
@@ -1615,14 +1652,15 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   /**
    * The font size in px that the accumulated values inherit, i.e. the font size
-   * of the parent. (Used by the walk to resolve the `lh` unit of a computed
-   * line height. Review)
+   * of the parent, or null when it is a value that only the browser resolves,
+   * e.g. the `math` keyword or the `ch` unit. (Used by the walk to resolve the
+   * `lh` unit of a computed line height. Review)
    */
-  getInheritedFontSize(): number {
+  getInheritedFontSize(): number | null {
     return this.getFontSize();
   }
 
-  private getFontSize() {
+  private getFontSize(): number | null {
     const cascval = getProp(this.props, "font-size");
     if (!cascval) {
       // The accumulated value is removed when `initial` (e.g. `font-size:
@@ -1642,6 +1680,13 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       if (px != null) {
         return px;
       }
+      if (isValidUnresolvedFontSize(value)) {
+        // A valid value that only the browser resolves, e.g. the `math`
+        // keyword, has no size in px here: the values that depend on it are
+        // left to the browser as well, which resolves them against the
+        // computed size instead of the inherited fallback. (Review)
+        return null;
+      }
       // FIXME: cascval may be a value that cannot be resolved to a length
       // here (the relative keywords "larger"/"smaller" are resolved in
       // visitIdent, the absolute size keywords just above, and expressions
@@ -1650,7 +1695,8 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     }
     const n = value as Css.Numeric;
     if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
-      throw new Error("Unexpected state");
+      // A unit that only the browser resolves, e.g. `ch`: see above. (Review)
+      return null;
     }
     // `font-size` has a non-negative computed-value range.
     return Math.max(0, n.num * Exprs.defaultUnitSizes[n.unit]);
@@ -1674,6 +1720,11 @@ export class InheritanceVisitor extends Css.FilterVisitor {
   private getInheritedLineHeightUnitSize(): number | null {
     let value = getProp(this.props, "line-height")?.value;
     const parentFontSize = this.getFontSize();
+    if (parentFontSize == null) {
+      // The inherited font size is a value that only the browser resolves, so
+      // the line height that the value depends on is not known here. (Review)
+      return null;
+    }
     if (value instanceof Css.Expr || value instanceof Css.Func) {
       // A computed line height, e.g. `line-height: calc(1.5 * 16px)`, which is
       // still a function while the inherited values are accumulated. A
@@ -1750,9 +1801,19 @@ export class InheritanceVisitor extends Css.FilterVisitor {
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (this.propName === "font-size") {
+      const parentFontSize = this.getFontSize();
+      if (
+        parentFontSize == null &&
+        (numeric.unit === "em" || numeric.unit === "%")
+      ) {
+        // The value is relative to an inherited font size that only the
+        // browser resolves, so it is preserved as it is and resolved by the
+        // browser in the same context. (Review)
+        return numeric;
+      }
       return convertFontSizeToPx(
         numeric,
-        this.getFontSize(),
+        parentFontSize,
         this.context,
         this.getInheritedLineHeightUnitSize(),
       );
@@ -1762,9 +1823,16 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       numeric.unit === "lh" ||
       numeric.unit === "rlh"
     ) {
+      const parentFontSize = this.getFontSize();
+      if (parentFontSize == null && numeric.unit === "em") {
+        // As above: the `em` unit of a dependent property must not be
+        // resolved against the inherited fallback when the element's own font
+        // size is a value that only the browser resolves. (Review)
+        return numeric;
+      }
       return convertFontRelativeLengthToPx(
         numeric,
-        this.getFontSize(),
+        parentFontSize ?? 0,
         this.context,
       );
     }
@@ -1786,10 +1854,16 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         return new Css.Numeric(keywordSize, "px");
       }
       if (hasKeywordName(ident, "larger") || hasKeywordName(ident, "smaller")) {
-        return new Css.Numeric(
-          resolveRelativeFontSizeKeyword(ident, this.getFontSize()),
-          "px",
-        );
+        const parentFontSize = this.getFontSize();
+        if (parentFontSize != null) {
+          return new Css.Numeric(
+            resolveRelativeFontSizeKeyword(ident, parentFontSize),
+            "px",
+          );
+        }
+        // The inherited font size is a value that only the browser resolves:
+        // the keyword is preserved and resolved by the browser against its
+        // own computed size. (Review)
       }
     } else if (this.propName === "font-weight") {
       if (hasKeywordName(ident, "bolder") || hasKeywordName(ident, "lighter")) {
@@ -1862,7 +1936,14 @@ export function convertFontSizeToPx(
   } else if (unit === "%") {
     return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
   } else {
-    return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
+    const unitSize = context.queryUnitSize(unit, false);
+    // A unit that only the browser can resolve, e.g. `ch`, has no unit size
+    // here: the value is preserved as it is, so that the browser resolves it
+    // (and the values that depend on it) in the context of the element.
+    // (Review)
+    return Number.isFinite(unitSize)
+      ? new Css.Numeric(num * unitSize, "px")
+      : numeric;
   }
 }
 

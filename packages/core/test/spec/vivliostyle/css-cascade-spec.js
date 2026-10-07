@@ -3130,6 +3130,58 @@ describe("css-cascade", function () {
 
       expect(resolved(style)).toBe(blue);
     });
+
+    // A keyword that a var() substitution puts into a declaration is not
+    // canonicalized, so the rollback kind has to be dispatched
+    // case-insensitively: mixing the kinds up would drop the declarations of
+    // the wrong origins or rules. (Review)
+    it("rolls a mixed-case revert-layer back to the previous layer", function () {
+      var tree = new adapt_csscasc.CascadeLayerTree();
+      var first = tree.register(null, ["first"]);
+      var second = tree.register(null, ["second"]);
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, first);
+      declare(
+        style,
+        adapt_css.getName("REVERT-LAYER"),
+        adapt_cssparse.SPECIFICITY_AUTHOR,
+        second,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("keeps the declarations of other rules for a mixed-case revert-rule", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, null, 1);
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR + 1, null, 2);
+      declare(
+        style,
+        adapt_css.getName("Revert-Rule"),
+        adapt_cssparse.SPECIFICITY_AUTHOR + 2,
+        null,
+        2,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("reports the kind of a rollback keyword of any casing", function () {
+      expect(adapt_css.getRollbackKind(adapt_css.ident.revert)).toBe("revert");
+      expect(adapt_css.getRollbackKind(adapt_css.ident.revert_layer)).toBe(
+        "revert-layer",
+      );
+      expect(adapt_css.getRollbackKind(adapt_css.getName("REVERT-UNIT"))).toBe(
+        null,
+      );
+      expect(adapt_css.getRollbackKind(adapt_css.getName("REVERT-RULE"))).toBe(
+        "revert-rule",
+      );
+      expect(adapt_css.getRollbackKind(new adapt_css.Num(1))).toBe(null);
+      expect(adapt_css.isRollbackValue(adapt_css.getName("Revert-Layer"))).toBe(
+        true,
+      );
+    });
   });
 
   describe("font keywords", function () {
@@ -3355,6 +3407,113 @@ describe("css-cascade", function () {
         expect(
           adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
         ).toBe(50);
+      });
+
+      it("clamps a negative result to the non-negative range", function () {
+        // `line-height: calc(1lh - 100px)` with a 40px inherited line height
+        // computes to -60, which the non-negative computed-value range of
+        // `line-height` clamps to 0. Materializing `-60px` would make the
+        // browser reject the declaration and inherit the 40px instead of
+        // applying zero. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(1lh - 100px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(0);
+      });
+    });
+
+    describe("isInvalidLineHeight", function () {
+      it("rejects the post-substitution forms the browser rejects", function () {
+        // `line-height` accepts `normal`, a non-negative number or a
+        // non-negative length or percentage, so an unknown keyword or a
+        // dimension that a var() substitution put into the declaration is
+        // rejected by the browser, which keeps the inherited line height. A
+        // math function is allowed until it is evaluated. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(adapt_css.getName("nonsense")),
+        ).toBe(true);
+        expect(adapt_csscasc.isInvalidLineHeight(new adapt_css.Num(-1))).toBe(
+          true,
+        );
+        expect(
+          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(-5, "px")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(5, "s")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(adapt_css.getName("normal")),
+        ).toBe(false);
+        expect(adapt_csscasc.isInvalidLineHeight(new adapt_css.Num(1.5))).toBe(
+          false,
+        );
+        expect(
+          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(2, "em")),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            new adapt_css.Func("calc", [new adapt_css.Num(2)]),
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("convertFontSizeToPx", function () {
+      it("leaves a unit that only the browser resolves", function () {
+        // `2ch` has no unit size here, so the value is preserved as it is and
+        // the browser resolves it (and the values that depend on it) in the
+        // context of the element, instead of the walk replacing it with the
+        // inherited font size. (Review)
+        var converted = adapt_csscasc.convertFontSizeToPx(
+          new adapt_css.Numeric(2, "ch"),
+          16,
+          newContext(),
+        );
+        expect(converted.num).toBe(2);
+        expect(converted.unit).toBe("ch");
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(2, "ch"),
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            new adapt_css.Numeric(2, "ch"),
+          ),
+        ).toBe(true);
+      });
+    });
+
+    describe("InheritanceVisitor with an unresolved font size", function () {
+      function visitorWithFontSize(value) {
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(value, 0),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("text-indent");
+        return visitor;
+      }
+
+      it("leaves an em value to the browser when the size is unresolved", function () {
+        // The font size of the element is a unit that only the browser
+        // resolves, so a dependent `em` value must not be resolved against the
+        // inherited fallback: it is preserved and resolved by the browser
+        // against the computed size. (Review)
+        var em = new adapt_css.Numeric(1, "em");
+        var kept = visitorWithFontSize(
+          new adapt_css.Numeric(5, "ch"),
+        ).visitNumeric(em);
+        expect(kept).toBe(em);
+        var converted = visitorWithFontSize(
+          new adapt_css.Numeric(32, "px"),
+        ).visitNumeric(new adapt_css.Numeric(1, "em"));
+        expect(converted.num).toBe(32);
+        expect(converted.unit).toBe("px");
       });
     });
 

@@ -735,24 +735,28 @@ export function isDefaultingValue(value: Val | null | undefined): boolean {
  * Whether the value is one of the CSS-wide keywords that roll the cascade back
  * to a declaration that lost (css-cascade-5 §7.3 Explicit Defaulting).
  */
+export type RollbackKind = "revert" | "revert-layer" | "revert-rule";
+
+/**
+ * The rollback keyword that `value` is, or `null` when it is not one. The kind
+ * decides which declarations a rollback drops, so the comparison must be
+ * insensitive to the casing that a var() substitution preserves. (Review)
+ */
+export function getRollbackKind(
+  value: Val | null | undefined,
+): RollbackKind | null {
+  if (!(value instanceof Ident)) {
+    return null;
+  }
+  const name = value.name.toLowerCase();
+  if (name === "revert" || name === "revert-layer" || name === "revert-rule") {
+    return name;
+  }
+  return null;
+}
+
 export function isRollbackValue(value: Val | null | undefined): boolean {
-  if (
-    value === ident.revert ||
-    value === ident.revert_layer ||
-    value === ident.revert_rule
-  ) {
-    return true;
-  }
-  // A keyword that a var() substitution or a var() fallback puts into a
-  // declaration is not canonicalized, and CSS keywords are case insensitive, so
-  // compare the name as well. (Review)
-  if (value instanceof Ident) {
-    const name = value.name.toLowerCase();
-    return (
-      name === "revert" || name === "revert-layer" || name === "revert-rule"
-    );
-  }
-  return false;
+  return getRollbackKind(value) != null;
 }
 
 class RollbackValueVisitor extends Visitor {
