@@ -713,11 +713,11 @@ export class Styler implements AbstractStyler {
             if (unitSize) {
               px *= unitSize;
             } else if (ratio != null) {
-              // A unit that only the browser resolves, e.g. `ch`: the browser
-              // resolves it against the font metrics of its default font (the
-              // initial font size, because the root element has no parent), so
-              // the ratio must not be left as the raw number of the value.
-              // (Review)
+              // A unit that only the browser resolves, e.g. `ch`: its metric is
+              // not obtainable here, so the assumption of CSS Values 4 for such
+              // a unit is used against the initial font size, which is the font
+              // size of the root element (it has no parent), and the raw number
+              // of the value must not be treated as pixels. (Review)
               px *= ratio * this.context.initialFontSize;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               // The unit size of a viewport relative unit, e.g. `2vw`, must not

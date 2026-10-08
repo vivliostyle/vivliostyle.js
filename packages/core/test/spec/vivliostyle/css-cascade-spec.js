@@ -3485,13 +3485,14 @@ describe("css-cascade", function () {
 
     describe("browserFontRelativeUnitRatio", function () {
       it("reports the ratio of the units that only the browser resolves", function () {
-        // The browsers resolve these units against the font metrics of their
-        // default font (Chromium computes `1ch` and `1ex` of the default 16px
-        // font as 8px and 7.18px), so a detached element must not resolve them
-        // in the synthetic parent it is reparented into. (Review)
+        // The metrics of these units are not obtainable before the source
+        // document is laid out, so CSS Values 4 §6.1 is followed: `ch` and `ex`
+        // must be assumed to be 0.5em and `ic` 1em when their metric cannot be
+        // determined. `cap` has no numeric assumption there, so the typical cap
+        // height of the Latin fonts is used. (Review)
         expect(adapt_csscasc.browserFontRelativeUnitRatio("ch")).toBe(0.5);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.45);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.66);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.5);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.7);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("ic")).toBe(1);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("em")).toBe(null);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("px")).toBe(null);

@@ -303,9 +303,9 @@
     var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote
     "ch" falls back to the inherited 15.998px while its inline reference renders
     the `5ch` size of the 32px source parent (79.9918px). The PR branch resolves
-    the unit with the ratio of the default font and the font size of the source
-    parent, so the footnote is 79.998px like the reference and is not resolved
-    in the 16px footnote area it is reparented into.
+    the unit with the CSS assumption of 0.5em for the “0” glyph and the font
+    size of the source parent, so the footnote is 79.998px like the reference
+    and is not resolved in the 16px footnote area it is reparented into.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -328,7 +328,7 @@
     the 200px of the explicit reference, and the root line height of
     `line-height: 5ch` is resolved from the raw number as well (the element that
     resolves `1lh` is 39.998px high instead of the 100px of its reference). The
-    PR branch resolves `ch` with the ratio of the default font (the initial font
+    PR branch resolves `ch` with the CSS assumption of 0.5em (the initial font
     size is the basis of the root element), so the root font size is 40px, the
     `rem` box matches the 200px reference, and the root line height is 100px.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
