@@ -812,6 +812,12 @@ export class Styler implements AbstractStyler {
                 val.num *
                 ratio *
                 (rootFontSize ?? this.context.initialFontSize);
+              // The assumed size is the one the root element uses: the browser
+              // would resolve the unit with the real metrics of its font and
+              // the root line height of this context (which the `rlh` unit and
+              // the page context use) would differ from the rendered one.
+              // (Review)
+              fromRelativeCalc = true;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               px = val.num * this.context.queryUnitSize(val.unit, true);
             } else {
