@@ -3870,7 +3870,16 @@ export class ViewFactory
     propName: "fontSize" | "lineHeight",
   ): string | null {
     if (inlineVal) {
-      return parseLayoutUnitAdjustedValue(inlineVal) != null ? inlineVal : null;
+      if (parseLayoutUnitAdjustedValue(inlineVal) != null) {
+        return inlineVal;
+      }
+      // A CSS-wide value that means inheritance, e.g. the `font-size: inherit`
+      // of this element itself, is not a length of its own: the search
+      // continues with the ancestors, as it does for such a value of one of
+      // them. (Review)
+      if (!/^(inherit|unset)$/i.test(inlineVal.trim())) {
+        return null;
+      }
     }
     for (
       let node: Element | null = element?.parentElement ?? null;

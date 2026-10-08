@@ -1237,6 +1237,12 @@ export function evaluatesToNaN(
   ) {
     return false;
   }
+  if (/infinity|nan/i.test(value.toString())) {
+    // A calculation that already contains a number that is not finite, e.g.
+    // the `calc(exp(1000))` that a length cannot represent, is not evaluable
+    // here: the expression language would take the token for a name.
+    return false;
+  }
   const visitor = new CalcFilterVisitor(context, true);
   // The expression evaluator reduces a math function when it is the
   // calculation of a `calc()`, so the value is wrapped like the callers of the
@@ -1888,6 +1894,32 @@ class MathFunctionReducer extends Css.FilterVisitor {
     return px != null ? new Css.Numeric(px, "px") : visited;
   }
 }
+
+/**
+ * Whether an expression of the expression language is a single call to a math
+ * function of CSS Values 4 that returns a `<number>` whatever its arguments
+ * are. The other functions keep the type of their arguments (`abs()`, `mod()`,
+ * `rem()`, `round()` and the `clamp()`/`min()`/`max()` family), and this
+ * language converts every dimension to a number, so the result of such a call
+ * must not be materialized as a length even when its argument is one:
+ * `calc(sign(20px))` is the unitless number 1, which a property that needs a
+ * length, e.g. `width`, rejects. (Review)
+ */
+function isNumberCalculation(expr: Exprs.Val): boolean {
+  return (
+    expr instanceof Exprs.Call &&
+    NUMBER_MATH_FUNCTION_NAMES.includes(expr.qualifiedName.toLowerCase())
+  );
+}
+
+const NUMBER_MATH_FUNCTION_NAMES = [
+  "exp",
+  "hypot",
+  "log",
+  "pow",
+  "sign",
+  "sqrt",
+];
 
 /**
  * The math functions of CSS Values 4, other than `clamp()`/`min()`/`max()`,
@@ -6491,6 +6523,18 @@ export class CascadeInstance {
           // (Review)
           value = new Css.Numeric(0, value.unit);
         } else if (
+          (name === "font-size" || name === "line-height") &&
+          (value instanceof Css.Numeric || value instanceof Css.Num) &&
+          !Number.isFinite(value.num)
+        ) {
+          // A length cannot be an infinity, and the token `Infinity` is not
+          // CSS at all: the browser clamps an overflowing calculation such as
+          // `calc(exp(1000))` itself, so the original declaration is preserved
+          // for it to clamp — a stored infinity would propagate into the root
+          // sizes and into the line height that a detached descendant resolves
+          // an `lh` unit against. (Review)
+          value = cascVal.value;
+        } else if (
           name === "line-height" &&
           (value instanceof Css.Numeric || value instanceof Css.Num) &&
           value.num < 0
@@ -8574,11 +8618,15 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
         if (typeof exprResult === "number" && isNaN(exprResult)) {
           this.evaluatedToNaN = true;
         } else if (typeof exprResult === "number") {
-          const isLength = this.isLengthExpr(exprText);
+          const numberCalculation = isNumberCalculation(exprVal.expr);
+          const isLength = !numberCalculation && this.isLengthExpr(exprText);
           if (isLength && Number.isFinite(exprResult)) {
             // length value
             value = new Css.Numeric(exprResult, "px");
-          } else if (!isLength && !/\d[a-z]/i.test(exprText)) {
+          } else if (
+            !isLength &&
+            (numberCalculation || !/\d[a-z]/i.test(exprText))
+          ) {
             // unitless number, which may be an infinity: a number valued
             // property such as `font-weight` clamps it to its range, while a
             // length cannot be represented as one — `calc(exp(1000) * 1px)`

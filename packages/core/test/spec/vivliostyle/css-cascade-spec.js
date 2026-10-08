@@ -4748,6 +4748,34 @@ describe("css-cascade", function () {
         expect(evaluated.toString()).toContain("calc");
       });
 
+      it("keeps a unitless calculation a number, not a length", function () {
+        // The math functions of CSS Values 4 that return a `<number>`, e.g.
+        // `sign()`, are evaluated as unitless numbers by this language, which
+        // converts every dimension to a number: `calc(sign(20px))` is the
+        // number 1, and materializing `1px` would make a property that needs a
+        // length, e.g. `width`, accept a value that the browser rejects. A
+        // function that keeps the type of its argument stays a length.
+        // (Review)
+        function evaluate(text, propName) {
+          return adapt_csscasc
+            .evaluateCSSToCSS(
+              newContext(),
+              adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              propName,
+            )
+            .toString();
+        }
+        expect(evaluate("calc(sign(20px))", "width")).toBe("1");
+        expect(evaluate("calc(abs(-20px))", "width")).toBe("20px");
+        expect(evaluate("calc(sign(20px) * 1px)", "width")).toBe("1px");
+        expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5");
+        expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
+      });
+
       it("uses the initial font size when the accumulated font-size was removed", function () {
         // `font-size: initial` (e.g. `all: initial`) removes the accumulated
         // value; the initial font size is medium. (Issue #1696)

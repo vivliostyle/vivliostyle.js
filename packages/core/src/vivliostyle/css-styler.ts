@@ -804,7 +804,12 @@ export class Styler implements AbstractStyler {
       fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Num) {
-        rootLineHeight = val.num * rootFontSize;
+        // An overflowing calculation, e.g. `line-height: calc(exp(1000))`, is
+        // clamped by the browser: an infinite root line height would propagate
+        // into every `rlh` unit and into the page context instead. (Review)
+        rootLineHeight = Number.isFinite(val.num * rootFontSize)
+          ? val.num * rootFontSize
+          : null;
       } else if (val instanceof Css.Numeric) {
         let px: number | null = val.num;
         switch (val.unit) {
