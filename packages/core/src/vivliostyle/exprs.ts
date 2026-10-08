@@ -340,6 +340,7 @@ function numericArgs(
   args: unknown[],
   min: number,
   max: number,
+  allowNaN = false,
 ): number[] | null {
   if (args.length < min || args.length > max) {
     return null;
@@ -350,8 +351,11 @@ function numericArgs(
     // it to its range, and a nested call such as the `abs()` of
     // `font-weight: abs(exp(1000))` must keep it as well. Only a NaN, a
     // keyword (e.g. the `<rounding-strategy>` of `round()`) and anything that
-    // is not a number at all make the call unevaluable. (Review)
-    if (typeof arg !== "number" || Number.isNaN(arg)) {
+    // is not a number at all make the call unevaluable. A call whose own
+    // function defines how a NaN combines with the other arguments, e.g.
+    // `hypot()` where an infinite argument takes precedence, accepts a NaN.
+    // (Review)
+    if (typeof arg !== "number" || (Number.isNaN(arg) && !allowNaN)) {
       return null;
     }
     numbers.push(arg);
@@ -482,7 +486,10 @@ export function log(...args: unknown[]): number {
 
 /** The `hypot()` of CSS Values 4. (Review) */
 export function hypot(...args: unknown[]): number {
-  const numbers = numericArgs(args, 1, Infinity);
+  // An infinite argument takes precedence over a `NaN` one, as `Math.hypot()`
+  // implements it: `hypot(exp(1000), log(-1))` is +∞, so a `font-weight` that
+  // uses the call is clamped to 1000 instead of inheriting. (Review)
+  const numbers = numericArgs(args, 1, Infinity, true);
   return numbers ? result(Math.hypot(...numbers)) : NaN;
 }
 

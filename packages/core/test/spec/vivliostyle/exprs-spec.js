@@ -110,6 +110,12 @@ describe("exprs", function () {
       // that would leave the value unresolved. (Review)
       expect(call("abs", Infinity)).toBe(Infinity);
       expect(call("hypot", Infinity, 3)).toBe(Infinity);
+      // An infinite argument of `hypot()` takes precedence over a NaN one, as
+      // `Math.hypot()` implements it, so a font-weight that uses the call is
+      // clamped to 1000 instead of inheriting. (Review)
+      expect(call("hypot", Infinity, NaN)).toBe(Infinity);
+      expectResult(call("hypot", NaN, 3), NaN);
+      expectResult(call("hypot", NaN), NaN);
       expect(call("pow", 10, 1000)).toBe(Infinity);
       // The argument ranges of CSS Values 4 §10.3.1 for the stepped values:
       // an infinite step rounds a finite value to zero (and an infinite value

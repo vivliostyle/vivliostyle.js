@@ -14,15 +14,20 @@
      of CSS Fonts 4 (1000) like any other out of range result, so a detached
      descendant that uses a relative keyword resolves against 1000 as well.
      The infinity survives a nested call, e.g. `abs(exp(1000))`, which must be
-     1000 for such a paragraph and for its footnote's `bolder` too, and it is
+     1000 for such a paragraph and for its footnote's `bolder` too, it is
      clamped when the calculation is wrapped in a `calc()`, e.g.
-     `calc(exp(1000))`. A function
+     `calc(exp(1000))`, and it is kept when another argument of `hypot()` is a
+     `NaN`, e.g. `hypot(exp(1000), log(-1))`, whose infinite argument takes
+     precedence. A function
      whose result is not a number, e.g. `log(100, 0)`, is invalid at
      computed-value time: the paragraph keeps the 700 that it inherits from its
      parent, so the `bolder` of its footnote is 900 (the pre-fix viewer resolves
      the keyword against the fallback 400 and renders 700).
-     The pre-fix viewer leaves such functions unresolved, so the paragraph is
-     400 and "bolder" resolves to 700. -->
+     The pre-fix viewers leave the functions unresolved in the reconstructed
+     inheritance basis of a detached descendant, so its `bolder` resolves
+     against the fallback 400 and the footnote is 700; the paragraph itself
+     renders the value that the browser computes for the function there
+     (`min(900, 1000)` is 900, `exp(1000)` is clamped to 1000). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -61,6 +66,11 @@
     /* the same infinity wrapped in a `calc()`, which the cascade clamps with
        the same range: `calc(exp(1000))` is 1000, and a relative keyword of a
        footnote resolves against it (bolder than 1000 is 1000) */
+    /* an infinite argument of `hypot()` takes precedence over a `NaN` one
+       (CSS Values 4), so the calculation is 1000 as well */
+    .dep-hypot { font-weight: hypot(exp(1000), log(-1)); } /* 1000 */
+    .dep-hypot .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-hypot { font-weight: hypot(exp(1000), log(-1)); } /* 1000 */
     .dep-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
     .dep-inf-calc .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
@@ -103,6 +113,11 @@
     `font-weight: log(100, 0)` computes to NaN and the browser keeps the
     inherited weight:
     <span class="fn-bolder">B</span></p></div>
+  <p class="dep-hypot">The footnote "B" below must be as bold as this inline
+    <span class="ref-hypot">B</span>, i.e. the 1000 that
+    `hypot(exp(1000), log(-1))` computes: an infinite argument takes precedence
+    over the `NaN` one, which a `font-weight` clamps to its range:
+    <span class="fn-bolder">B</span></p>
   <p class="dep-inf-calc">The footnote "B" below must be as bold as this inline
     <span class="ref-inf-calc">B</span>, i.e. the 1000 that
     `calc(exp(1000))` computes for the range of CSS Fonts 4, and the relative

@@ -1182,6 +1182,14 @@ export class ViewFactory
             // rule, as any other declaration of the element would. (Issue
             // #2174)
             props[name] = prop.withValue(inherited.value);
+          } else {
+            // No source ancestor declares the property, so the value that the
+            // element inherits is the initial one. Materializing `initial`
+            // instead of leaving the declaration out makes the generated node
+            // use that value rather than the one of the synthetic view parent,
+            // e.g. a `color: inherit` footnote under a region rule such as
+            // `:footnote-content { color: red }`. (Review)
+            props[name] = prop.withValue(Css.ident.initial);
           }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
@@ -3878,7 +3886,16 @@ export class ViewFactory
       }
       const inline = getInlineStyle(node)?.[propName];
       if (inline) {
-        return parseLayoutUnitAdjustedValue(inline) != null ? inline : null;
+        if (parseLayoutUnitAdjustedValue(inline) != null) {
+          return inline;
+        }
+        // A CSS-wide value that means inheritance, e.g. the `font-size:
+        // inherit` of an element whose own length is the rounded down one, is
+        // not a length of its own: the search continues with the ancestors,
+        // whose chain rounded down to zero as well. (Review)
+        if (!/^(inherit|unset)$/i.test(inline.trim())) {
+          return null;
+        }
       }
     }
     return null;
