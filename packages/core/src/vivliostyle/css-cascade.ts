@@ -1494,25 +1494,22 @@ export function resolveLineHeightValueToPx(
   func = func.visit(
     new LineHeightUnitReplacer(inheritedLineHeight),
   ) as Css.Func;
-  let converted = convertParentRelativeFontSizeUnits(
+  const converted = convertParentRelativeFontSizeUnits(
     context,
     func,
     parentFontSize,
     inheritedLineHeight,
   );
-  // `evaluateCSSToCSS()` only reduces `calc()`, so the other math functions,
-  // e.g. the `max(1lh, 40px)` of a line height, must be reduced to px here.
-  // (Review)
-  converted = converted.visit(new MathFunctionReducer(context));
-  const evaluated = evaluateCSSToCSS(context, converted, "line-height");
+  // `evaluateValueToPx()` reduces the math functions of the value (including
+  // the other functions of CSS Values 4, e.g. the `round(1lh, 7px)` that has
+  // become `round(40px, 7px)` here) and the arithmetic around them. (Review)
+  const px = evaluateValueToPx(context, converted);
   // `line-height` has a non-negative computed-value range, so a math function
   // that computes below zero is clamped: `calc(1lh - 100px)` with a 40px
   // inherited line height is 0, and materializing the -60 that the expression
   // evaluates to would make the browser reject the declaration and inherit the
   // 40px instead of applying zero. (Review)
-  return isAbsoluteLengthValue(evaluated)
-    ? Math.max(0, (evaluated as Css.Numeric).num)
-    : null;
+  return px != null ? Math.max(0, px) : null;
 }
 
 /**
@@ -1714,12 +1711,65 @@ class MathFunctionReducer extends Css.FilterVisitor {
     const visited = super.visitFunc(func) as Css.Func;
     if (isMathFunction(visited)) {
       const px = evaluateMathFunctionToPx(this.context, visited);
-      if (px != null) {
-        return new Css.Numeric(px, "px");
-      }
+      return px != null ? new Css.Numeric(px, "px") : visited;
     }
-    return visited;
+    // The other math functions of CSS Values 4 are evaluated by the expression
+    // evaluator, which the `calc()` wrapper of this helper makes reduce them:
+    // a value such as the `round(40px, 7px)` of an ancestor line height must
+    // not stay unresolved, or a detached descendant that resolves the `lh`
+    // unit against it would use the line height of the synthetic parent. The
+    // evaluation does not visit the value through this reducer again, so it
+    // cannot recurse. (Review)
+    const px = evaluateOtherMathFunctionToPx(this.context, visited);
+    return px != null ? new Css.Numeric(px, "px") : visited;
   }
+}
+
+/**
+ * The math functions of CSS Values 4, other than `clamp()`/`min()`/`max()`,
+ * that the expression evaluator evaluates. A function that is not one of them,
+ * e.g. a `translate()`, is not attempted.
+ */
+function isOtherMathFunction(func: Css.Func): boolean {
+  return OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase());
+}
+
+const OTHER_MATH_FUNCTION_NAMES = [
+  "abs",
+  "exp",
+  "hypot",
+  "log",
+  "mod",
+  "pow",
+  "rem",
+  "round",
+  "sign",
+  "sqrt",
+];
+
+/**
+ * Evaluate a math function of CSS Values 4 that is not a `clamp()`/`min()`/
+ * `max()`, e.g. `round(40px, 7px)`, to px. The expression evaluator knows the
+ * functions of CSS Values 4, but it needs the function to be the calculation
+ * of a `calc()`. Returns null when the value does not reduce. (Review)
+ */
+function evaluateOtherMathFunctionToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  if (!isOtherMathFunction(func)) {
+    return null;
+  }
+  const evaluated = evaluateCSSToCSS(
+    context,
+    new Css.Func("calc", [func]),
+    "font-size",
+  );
+  if (!isAbsoluteLengthValue(evaluated)) {
+    return null;
+  }
+  const numeric = evaluated as Css.Numeric;
+  return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
 }
 
 function isAbsoluteLengthValue(value: Css.Val): boolean {

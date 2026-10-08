@@ -165,12 +165,12 @@ export class LexicalScope {
       // line height that a detached descendant resolves against, instead of
       // leaving the whole value to the browser, which would resolve it in the
       // synthetic parent that the element is reparented into. (Review)
-      builtIns["abs"] = Math.abs;
-      builtIns["sign"] = Math.sign;
-      builtIns["hypot"] = Math.hypot;
-      builtIns["pow"] = Math.pow;
-      builtIns["exp"] = Math.exp;
-      builtIns["rem"] = (a: number, b: number) => a % b;
+      builtIns["abs"] = abs;
+      builtIns["sign"] = sign;
+      builtIns["hypot"] = hypot;
+      builtIns["pow"] = pow;
+      builtIns["exp"] = exp;
+      builtIns["rem"] = rem;
       builtIns["letterbox"] = letterbox;
       builtIns["css-string"] = cssString;
       builtIns["css-name"] = cssIdent;
@@ -326,15 +326,57 @@ export function needUnitConversion(unit: string): boolean {
 }
 
 /**
+ * The arguments of a math function of CSS Values 4 that this expression
+ * language evaluates: each of them must have been evaluated to a finite number
+ * (every dimension is converted to px by this language, and a keyword, such as
+ * the `<rounding-strategy>` of `round()`, becomes a media name, which is not a
+ * number) and their number must be one that the function accepts. Returns null
+ * when the call must not be evaluated: the caller then keeps the value
+ * unresolved and the browser resolves it. (Review)
+ */
+function numericArgs(
+  args: unknown[],
+  min: number,
+  max: number,
+): number[] | null {
+  if (args.length < min || args.length > max) {
+    return null;
+  }
+  const numbers: number[] = [];
+  for (const arg of args) {
+    if (typeof arg !== "number" || !Number.isFinite(arg)) {
+      return null;
+    }
+    numbers.push(arg);
+  }
+  return numbers;
+}
+
+/** The result of a built-in, or NaN to leave the value unresolved. (Review) */
+function result(value: number): number {
+  return Number.isFinite(value) ? value : NaN;
+}
+
+/**
  * The `round()` of the stepped value functions of CSS Values 4: with a step,
  * the value is rounded to the nearest integer multiple of it (a value exactly
  * between two multiples is rounded up, which is the default `nearest`
- * strategy); without one, to the nearest integer. The `<rounding-strategy>`
- * keyword cannot be represented in this expression language, so a value that
- * uses one is left to the browser. (Review)
+ * strategy); without one, to the nearest integer. A call with a rounding
+ * strategy or with an argument that is not a number is left to the browser:
+ * this expression language cannot represent the strategy keyword, which it
+ * evaluates to a media name. (Review)
  */
-export function round(value: number, step?: number): number {
-  return step == null ? Math.round(value) : Math.round(value / step) * step;
+export function round(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 2);
+  if (!numbers) {
+    return NaN;
+  }
+  const [value, step] = numbers;
+  return step == null
+    ? result(Math.round(value))
+    : step === 0
+      ? NaN
+      : result(Math.round(value / step) * step);
 }
 
 /**
@@ -342,21 +384,81 @@ export function round(value: number, step?: number): number {
  * the congruence modulo of the `%` operator of this expression language and of
  * its `rem()`. (Review)
  */
-export function mod(a: number, b: number): number {
-  return a - b * Math.floor(a / b);
+export function mod(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  if (!numbers || numbers[1] === 0) {
+    return NaN;
+  }
+  const [a, b] = numbers;
+  return result(a - b * Math.floor(a / b));
 }
 
-/** The `log()` of CSS Values 4: the natural logarithm of the base, or of e. (Review) */
-export function log(value: number, base?: number): number {
-  return base == null ? Math.log(value) : Math.log(value) / Math.log(base);
+/**
+ * The `rem()` of CSS Values 4: the result has the sign of the dividend, like
+ * the `%` operator of this expression language. (Review)
+ */
+export function rem(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  if (!numbers || numbers[1] === 0) {
+    return NaN;
+  }
+  const [a, b] = numbers;
+  return result(a % b);
+}
+
+/** The `log()` of CSS Values 4: the natural logarithm, or the given base. (Review) */
+export function log(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 2);
+  if (!numbers) {
+    return NaN;
+  }
+  const [value, base] = numbers;
+  return result(
+    base == null ? Math.log(value) : Math.log(value) / Math.log(base),
+  );
+}
+
+/** The `hypot()` of CSS Values 4. (Review) */
+export function hypot(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, Infinity);
+  return numbers ? result(Math.hypot(...numbers)) : NaN;
 }
 
 /**
  * The `clamp()` of CSS Values 4: `max(MIN, min(VAL, MAX))`, so that the minimum
  * takes precedence when the bounds are reversed. (Review)
  */
-export function clamp(min: number, value: number, max: number): number {
-  return Math.max(min, Math.min(value, max));
+export function clamp(...args: unknown[]): number {
+  const numbers = numericArgs(args, 3, 3);
+  if (!numbers) {
+    return NaN;
+  }
+  const [min, value, max] = numbers;
+  return result(Math.max(min, Math.min(value, max)));
+}
+
+/** The `abs()` of CSS Values 4. (Review) */
+export function abs(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? result(Math.abs(numbers[0])) : NaN;
+}
+
+/** The `sign()` of CSS Values 4, which returns a number. (Review) */
+export function sign(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? Math.sign(numbers[0]) : NaN;
+}
+
+/** The `pow()` of CSS Values 4. (Review) */
+export function pow(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  return numbers ? result(Math.pow(numbers[0], numbers[1])) : NaN;
+}
+
+/** The `exp()` of CSS Values 4. (Review) */
+export function exp(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? result(Math.exp(numbers[0])) : NaN;
 }
 
 export type ScopeContext = Map<string, Result>;

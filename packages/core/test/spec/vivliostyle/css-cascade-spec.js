@@ -3503,6 +3503,11 @@ describe("css-cascade", function () {
         // invalid and the element inherits. (Review)
         expect(resolve("round(20px, 7)")).toBe(null);
         expect(resolve("sign(20px)")).toBe(null);
+        // A call whose shape this engine cannot evaluate, e.g. the
+        // <rounding-strategy> of round() (an argument that is not a number),
+        // is left unresolved as well: the browser resolves it. (Review)
+        expect(resolve("round(up, 20px, 7px)")).toBe(null);
+        expect(resolve("round(up, 20px)")).toBe(null);
         expect(resolve("round(20px, 7px)")).toBe(21);
         expect(resolve("abs(-20px)")).toBe(20);
         // A function that is valid inside an arithmetic expression: the number
@@ -3538,6 +3543,33 @@ describe("css-cascade", function () {
           newContext(),
         ).getInheritedLineHeight();
       }
+
+      it("reduces the math functions of an inherited line height", function () {
+        // An ancestor line height that is a math function of CSS Values 4,
+        // e.g. `round(40px, 7px)` = 42px, must be resolved as well: a
+        // descendant that resolves the `lh` unit against it would otherwise
+        // use the line height of the synthetic parent. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(40px, 7px)", null),
+              "",
+            ),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(42);
+      });
 
       it("resolves an absolute line height without the inherited font size", function () {
         // The inherited font size may be a value that only the browser
@@ -4453,6 +4485,21 @@ describe("css-cascade", function () {
         );
         expect(resolved.num).toBe(30);
         expect(resolved.unit).toBe("px");
+      });
+
+      it("reduces the other math functions of CSS Values 4", function () {
+        // The `lh` unit is replaced by px before the value is evaluated, and
+        // the math functions of CSS Values 4 are evaluated as well: a value
+        // that stayed unresolved would let a detached descendant resolve the
+        // unit in the synthetic parent. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("round(1lh, 7px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(42);
       });
 
       it("reduces a math function that uses the lh unit", function () {

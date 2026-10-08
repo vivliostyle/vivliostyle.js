@@ -12,7 +12,11 @@
      from the source parent (2 x 40px = 80px), not to the line height of the
      footnote area it is rendered in. An ancestor whose font size is a value
      that only the browser resolves (`font-size: math`) must not make an
-     absolute line height of that ancestor unknown. -->
+     absolute line height of that ancestor unknown. The math functions of CSS
+     Values 4 are evaluated as well, so an own `line-height: round(1lh, 7px)`
+     is the 42px that the function computes from the inherited 40px, and a
+     footnote resolves `font-size: 1lh` against the 42px of an ancestor with
+     `line-height: round(40px, 7px)`. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -39,6 +43,16 @@
     .fn.own-lh { line-height: max(1lh, 5px); }
     .ref.own-lh { line-height: max(1lh, 5px); background: #eee; }
     .fn.own-lh { background: #eee; }
+    /* an own line height that is a math function of CSS Values 4:
+       round(1lh, 7px) = round(40px, 7px) = 42px */
+    p.own-round-lh { line-height: 40px; }
+    .fn.own-round-lh { line-height: round(1lh, 7px); background: #eee; }
+    .ref.own-round-lh { line-height: 42px; background: #eee; }
+    /* an ancestor line height that is a math function of CSS Values 4, which a
+       footnote resolves its `font-size: 1lh` against */
+    p.math-round { line-height: round(40px, 7px); }
+    .fn.math-round-lh { font-size: 1lh; }
+    .ref.math-round-lh { font-size: 42px; }
     /* an own line height: 2lh = 2 x the 40px line height of the source parent */
     p.own-2lh { line-height: 40px; }
     .fn.own-2lh { line-height: 2lh; background: #eee; }
@@ -66,6 +80,10 @@
     <span class="ref anc-lh">Wide</span><span class="fn anc-lh">Wide</span></p></div>
   <p class="lh-own">lh unit of an own line height:
     <span class="ref own-lh">Wide</span><span class="fn own-lh">Wide</span></p>
+  <p class="own-round-lh">an own line height with a math function:
+    <span class="ref own-round-lh">Wide</span><span class="fn own-round-lh">Wide</span></p>
+  <p class="math-round">an ancestor line height with a math function:
+    <span class="ref math-round-lh">Wide</span><span class="fn math-round-lh">Wide</span></p>
   <p class="own-2lh">an own line height with the lh unit:
     <span class="ref own-2lh">Wide</span><span class="fn own-2lh">Wide</span></p>
   <p class="math-anc">an ancestor whose font size only the browser resolves:
@@ -80,10 +98,12 @@
     line height it is the 24px of `calc(150%)`, for the paragraph whose ancestor declares
     `line-height: 1lh` it is the 30px of that ancestor, and for the paragraph
     with `line-height: min(40px, 2em)` it is the 32px that the math function
-    computes. The paragraphs with `line-height: max(1lh, 5px)` and with
-    `line-height: 2lh` on the footnote itself (the grey "Wide" boxes) have a
-    line height of 40px and 80px, the line height of their source parent and
-    its double. The paragraph whose own font size is `math` (which only the
+    computes. The paragraphs with `line-height: max(1lh, 5px)`,
+    `line-height: round(1lh, 7px)` and with `line-height: 2lh` on the footnote
+    itself (the grey "Wide" boxes) have a line height of 40px, 42px and 80px,
+    the line height of their source parent and the results of the functions
+    there, and the paragraph with `line-height: round(40px, 7px)` is 42px, so
+    the footnote with `font-size: 1lh` is 42px as well. The paragraph whose own font size is `math` (which only the
     browser resolves) has an absolute line height of 40px, so the footnote with
     `font-size: 1lh` is 40px as well.</p>
 </body>

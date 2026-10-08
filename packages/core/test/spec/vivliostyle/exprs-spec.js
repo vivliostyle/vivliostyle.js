@@ -72,6 +72,17 @@ describe("exprs", function () {
       expect(call("clamp", 30, 20, 10)).toBe(30);
       expect(call("clamp", 10, 20, 30)).toBe(20);
       expect(call("clamp", 10, 5, 30)).toBe(10);
+      // An argument that is not a number (the <rounding-strategy> keyword of
+      // round() becomes a media name in this language) and an argument count
+      // that the function does not accept make the call unevaluable, so that
+      // the value is left to the browser instead of producing a wrong one.
+      // (Review)
+      expectResult(call("round", false, 20, 7), NaN);
+      expectResult(call("round", false, 20), NaN);
+      expectResult(call("round", 20, 7, 3), NaN);
+      expectResult(call("clamp", 10, 20), NaN);
+      expectResult(call("log", 100, 10, 2), NaN);
+      expectResult(call("round", 20, 0), NaN);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
     });
