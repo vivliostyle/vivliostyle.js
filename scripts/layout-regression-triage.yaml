@@ -936,7 +936,12 @@
     `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of the 10px of
     the clamped zero (20px), and a line height that is a function of unitless
     numbers, e.g. `min(1, 2)`, was not resolved at all, so that footnote was
-    19.992px (40px) instead of the 16px of the number (32px). The PR branch
+    19.992px (40px) instead of the 16px of the number (32px). A line height in
+    an internal viewport unit (`line-height: 2pvw`) is 2% of the width of the
+    `160mm` page box (12.0925px), which the pre-fix viewers render but do not
+    use as the basis of the `lh` unit: that footnote was 19.992px (40px)
+    instead of the 12.0925px of the paragraph (24.19px), like its reference.
+    The PR branch
     resolves those ancestor values level by level against
     the font size of the level that the value belongs to, reduces the math
     functions of a line height to px, replaces the `lh` unit of such a value
