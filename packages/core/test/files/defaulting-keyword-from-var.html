@@ -5,12 +5,17 @@
      detached element that declares `color: var(--x)` with `--x: INHERIT` must
      inherit the color of its source parent, not the color of the page, and
      `font-size: var(--y)` with `--y: INHERIT` / `UNSET` must inherit the font
-     size of the source parent, so the footnotes match the reference. A `REVERT`
-     that a var() substitution puts into a declaration is not an invalid value
-     either: it rolls the declaration back, so the UA default of a `strong` is
-     restored and the footnote is as bold as the inline `strong`, while the
-     pre-fix viewer treats the substituted keyword as invalid and inherits the
-     weight of the source parent instead. -->
+     size of the source parent, so the footnotes match the reference. A rollback
+     keyword that a `var()` fallback substitutes is not an invalid value either:
+     the fallback becomes the whole value of the declaration, which rolls back,
+     so the UA default of a `strong` is restored and the footnote is as bold as
+     the inline `strong`, while the pre-fix viewer treats the substituted
+     keyword as invalid and inherits the weight of the source parent instead.
+     (A CSS-wide keyword written directly as the value of a custom property is
+     a different case: the keyword applies to the custom property itself, so
+     the `var()` reference is invalid and the property keeps the inherited
+     value; this engine substitutes such a keyword into the declaration
+     instead, which is a known limitation of the custom property resolution.) -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -25,8 +30,9 @@
     .dep .fn-size { float: footnote; --y: INHERIT; font-size: var(--y); letter-spacing: 2em; }
     .dep .fn-unset { float: footnote; --z: UNSET; font-size: var(--z); letter-spacing: 2em; }
     .ref { font-size: 32px; letter-spacing: 2em; }
-    /* a rollback from a var() substitution restores the UA weight of strong */
-    .dep strong.fn-revert { float: footnote; --r: REVERT; font-weight: var(--r); }
+    /* a rollback that a var() fallback substitutes restores the UA weight of
+       strong, since the fallback becomes the whole value of the declaration */
+    .dep strong.fn-revert { float: footnote; font-weight: var(--r, REVERT); }
     .dep strong.fn-revert-kw { float: footnote; font-weight: revert; }
   </style>
 </head>
