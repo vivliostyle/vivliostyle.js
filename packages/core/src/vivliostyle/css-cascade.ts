@@ -1587,10 +1587,12 @@ export function evaluateFontWeightMathFunction(
   value: Css.Val,
 ): Css.Num | null {
   const reduced = value.visit(new NumberMathFunctionReducer(context));
-  const evaluated = evaluateCSSToCSS(context, reduced, "font-weight");
-  return evaluated instanceof Css.Num && Number.isFinite(evaluated.num)
-    ? evaluated
-    : null;
+  // `evaluateValueToNumber()` also evaluates a function that is not wrapped in
+  // a `calc()`, e.g. the `round(650, 100)` of a declaration, which the
+  // expression evaluator resolves through the math functions of CSS Values 4.
+  // (Review)
+  const num = evaluateValueToNumber(context, reduced);
+  return num != null && Number.isFinite(num) ? new Css.Num(num) : null;
 }
 
 function isMathFunction(func: Css.Func): boolean {

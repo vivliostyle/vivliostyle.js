@@ -31,7 +31,9 @@
     /* a function that the browser evaluates: 700 */
     .dep-round { font-weight: round(650, 100); }
     .dep-round .fn-own { float: footnote; font-weight: round(650, 100); } /* 700 */
+    .dep-round .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
     .ref-round { font-weight: round(650, 100); } /* 700 */
+    .ref-bolder-under-round { font-weight: bolder; } /* 900 */
     .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
     ::footnote-marker { content: ""; }
   </style>
@@ -45,8 +47,10 @@
   <p class="dep-round">The footnote "B" below must be as bold as this inline
     <span class="ref-round">B</span>, i.e. the 700 that the browser computes for
     `round(650, 100)`, not the 400 of the initial weight or the 700 of a
-    fallback:
-    <span class="fn-own">B</span></p>
+    fallback, and the relative keyword of the second footnote must resolve
+    against that 700, like this inline <span class="ref-bolder-under-round">B</span>
+    (900):
+    <span class="fn-own">B</span><span class="fn-bolder">B</span></p>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be
     <span class="ref-700">B</span>, one step bolder than the 400 of this

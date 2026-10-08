@@ -47,6 +47,43 @@ describe("exprs", function () {
     return new Exprs.MediaName(scope, false, name);
   }
 
+  describe("math functions of CSS Values 4", function () {
+    function call(name, ...args) {
+      return context
+        .evalCall(
+          scope,
+          name,
+          args.map((arg) => new Exprs.Const(scope, arg)),
+          false,
+        )
+        .evaluate(context);
+    }
+
+    it("evaluates the stepped value functions", function () {
+      // The values are evaluated in px by this expression language, so the
+      // functions that an engine needs to resolve a CSS value are registered:
+      // round() takes an optional step, mod() has the sign of the divisor and
+      // rem() the sign of the dividend. (Review)
+      expect(call("round", 20.5)).toBe(21);
+      expect(call("round", 20, 7)).toBe(21);
+      expect(call("round", 25, 7)).toBe(28);
+      expect(call("mod", 20, 7)).toBe(6);
+      expect(call("mod", -1, 8)).toBe(7);
+      expect(call("rem", -1, 8)).toBe(-1);
+    });
+
+    it("evaluates the exponential and trigonometric functions", function () {
+      expect(call("abs", -20)).toBe(20);
+      expect(call("sign", -3)).toBe(-1);
+      expect(call("hypot", 3, 4)).toBe(5);
+      expect(call("pow", 2, 3)).toBe(8);
+      expect(call("log", 100, 10)).toBeCloseTo(2, 10);
+      expect(call("exp", 0)).toBe(1);
+      expect(call("sqrt", 16)).toBe(4);
+      expect(call("clamp", 10, 20, 30)).toBe(20);
+    });
+  });
+
   describe("media feature tests", function () {
     it("evaluates value-less features in a boolean context", function () {
       expect(

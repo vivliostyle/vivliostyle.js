@@ -151,10 +151,26 @@ export class LexicalScope {
       const builtIns = this.builtIns;
       builtIns["floor"] = Math.floor;
       builtIns["ceil"] = Math.ceil;
-      builtIns["round"] = Math.round;
+      builtIns["round"] = round;
+      builtIns["mod"] = mod;
+      builtIns["log"] = log;
+      builtIns["clamp"] = clamp;
       builtIns["sqrt"] = Math.sqrt;
       builtIns["min"] = Math.min;
       builtIns["max"] = Math.max;
+      // The math functions of CSS Values 4, which the calculations of a CSS
+      // value can use: the values are evaluated in px by this expression
+      // language, so a function of them returns the px value of the CSS
+      // function. Completing the set lets the engine resolve a font size or a
+      // line height that a detached descendant resolves against, instead of
+      // leaving the whole value to the browser, which would resolve it in the
+      // synthetic parent that the element is reparented into. (Review)
+      builtIns["abs"] = Math.abs;
+      builtIns["sign"] = Math.sign;
+      builtIns["hypot"] = Math.hypot;
+      builtIns["pow"] = Math.pow;
+      builtIns["exp"] = Math.exp;
+      builtIns["rem"] = (a: number, b: number) => a % b;
       builtIns["letterbox"] = letterbox;
       builtIns["css-string"] = cssString;
       builtIns["css-name"] = cssIdent;
@@ -307,6 +323,37 @@ export function needUnitConversion(unit: string): boolean {
     default:
       return false;
   }
+}
+
+/**
+ * The `round()` of the stepped value functions of CSS Values 4: with a step,
+ * the value is rounded to the nearest integer multiple of it (a value exactly
+ * between two multiples is rounded up, which is the default `nearest`
+ * strategy); without one, to the nearest integer. The `<rounding-strategy>`
+ * keyword cannot be represented in this expression language, so a value that
+ * uses one is left to the browser. (Review)
+ */
+export function round(value: number, step?: number): number {
+  return step == null ? Math.round(value) : Math.round(value / step) * step;
+}
+
+/**
+ * The `mod()` of CSS Values 4: the result has the sign of the divisor, unlike
+ * the congruence modulo of the `%` operator of this expression language and of
+ * its `rem()`. (Review)
+ */
+export function mod(a: number, b: number): number {
+  return a - b * Math.floor(a / b);
+}
+
+/** The `log()` of CSS Values 4: the natural logarithm of the base, or of e. (Review) */
+export function log(value: number, base?: number): number {
+  return base == null ? Math.log(value) : Math.log(value) / Math.log(base);
+}
+
+/** The `clamp()` of CSS Values 4. (Review) */
+export function clamp(min: number, value: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
 
 export type ScopeContext = Map<string, Result>;

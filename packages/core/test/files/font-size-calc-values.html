@@ -37,6 +37,10 @@
     /* a math function inside an arithmetic expression:
        calc(clamp(10px, 20px, 30px) + 5px) = 25px */
     p.nested { font-size: calc(clamp(10px, 20px, 30px) + 5px); }
+    /* the math functions of CSS Values 4 that an engine has to evaluate to
+       know the computed size: round(20px, 7px) = 21px */
+    p.math { font-size: round(20px, 7px); }
+    .fn.own-size, .ref.own-size { font-size: 2em; letter-spacing: 0; }
   </style>
 </head>
 <body>
@@ -47,7 +51,12 @@
   <p class="negative">calc(10px - 20px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="signed">calc(-1em + 40px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="nested">calc(clamp(10px, 20px, 30px) + 5px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="math">round(20px, 7px) with a relative font size:
+    <span class="ref own-size">2em</span><span class="fn own-size">2em</span></p>
   <p>In the footnotes at the page bottom, each "Wide" must have the same
-    letter-spacing as the inline "Wide" of the same paragraph above.</p>
+    letter-spacing as the inline "Wide" of the same paragraph above, and the
+    footnote "2em" of the `round()` paragraph must be as large as its inline
+    reference: the value of the math function is the base of the relative size
+    (2 x 21px = 42px), not the font size of the footnote area (32px).</p>
 </body>
 </html>

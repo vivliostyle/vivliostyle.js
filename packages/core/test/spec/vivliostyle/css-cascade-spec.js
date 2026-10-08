@@ -3842,6 +3842,12 @@ describe("css-cascade", function () {
         // not a number: an unsupported argument or a length
         expect(evaluate("min(900px, 1em)")).toBe(null);
         expect(evaluate("nonsense")).toBe(null);
+        // The math functions of CSS Values 4 are evaluated as well, so that a
+        // relative keyword of a detached descendant resolves against the
+        // computed weight of the parent: round(650, 100) is 700 and
+        // abs(-650) is 650. (Review)
+        expect(evaluate("round(650, 100)").num).toBe(700);
+        expect(evaluate("abs(-650)").num).toBe(650);
       });
 
       it("keeps the rollback keywords of any casing", function () {
