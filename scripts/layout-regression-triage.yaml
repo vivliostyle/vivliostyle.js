@@ -49,7 +49,11 @@
     division by `Math.log(0) === -Infinity`, so that footnote is 0px as well
     (letter-spacing 32px); the PR branch treats them as the invalid declarations
     they are, so those footnotes keep the inherited 32px and their
-    letter-spacing is 64px like the reference too. The unknown
+    letter-spacing is 64px like the reference too. The same function wrapped in
+    a `calc()` (`--rc: calc(round(20px, 7))`) is 19.992px there (letter-spacing
+    40px) because the calculation is evaluated with the number as px, while the
+    PR branch keeps the inherited 32px (64px), as it does for the declaration
+    without the `calc()`. The unknown
     `font-size: nonsense` footnote and the
     `font-size: calc(10px - 20px)` footnote are 0 or inherited in both viewers,
     because an unknown keyword is rejected during parsing and a computed
@@ -260,7 +264,12 @@
     call as well, e.g. the `abs(exp(1000))` of the last paragraph: both
     renderers clamp the paragraph to 1000 (canary serializes the infinity,
     which the browser clamps), while the footnote "B" that resolves `bolder`
-    against it is 700 in canary and 1000 in the PR branch.
+    against it is 700 in canary and 1000 in the PR branch. A weight whose
+    computation is not a number, e.g. `log(100, 0)`, is invalid at
+    computed-value time as well: the paragraph keeps the 700 that it inherits
+    from its parent and canary resolves the `bolder` of its footnote against
+    the fallback 400 (700), while the PR branch renders the footnote 900 like
+    its inline reference.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -915,7 +924,18 @@
     preferred line height of the root font size there, so the footnote with
     `font-size: 1rlh` is 19.992px (letter-spacing 40px) instead of the 41.992px
     of its `42px` reference (84px), while the PR branch resolves the root line
-    height with the same resolver as the inherited ones and matches it. The PR branch resolves those ancestor values level by level against
+    height with the same resolver as the inherited ones and matches it. A line
+    height whose computation is not a number, e.g. `log(100, 0)`, is turned
+    into the zero length `calc(0)` by the pre-fix viewers, so the footnote with
+    `font-size: 1lh` was 19.992px (letter-spacing 40px) instead of the 42px
+    that the paragraph inherits from the root (84px), like its reference. A
+    line height that computes below zero, e.g. `min(-10px, -20px)`, was
+    recorded as the -20px of the calculation, so the footnote with
+    `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of the 10px of
+    the clamped zero (20px), and a line height that is a function of unitless
+    numbers, e.g. `min(1, 2)`, was not resolved at all, so that footnote was
+    19.992px (40px) instead of the 16px of the number (32px). The PR branch
+    resolves those ancestor values level by level against
     the font size of the level that the value belongs to, reduces the math
     functions of a line height to px, replaces the `lh` unit of such a value
     with the line height that the element inherits, and resolves the lh unit
