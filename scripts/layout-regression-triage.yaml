@@ -441,6 +441,7 @@
     root of the test carries the purple of the body, 128,0,128), while the PR
     branch keeps the `initial` declaration and renders it in the initial black
     like the elements of the normal flow, which the browser resolves itself.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
     https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/all-shorthand.html&zoom=1&spread=false
