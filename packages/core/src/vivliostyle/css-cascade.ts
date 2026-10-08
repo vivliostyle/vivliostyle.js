@@ -1304,19 +1304,22 @@ export function isNegativeLiteralLineHeight(value: Css.Val): boolean {
 
 /**
  * The size of a font relative unit that only the browser resolves, as a
- * multiple of the font size of the element: the browsers resolve `ch` and `ex`
- * to half of the font size and `cap`/`ic` to 0.7 and 1 times it for their
- * default fonts (Chromium computes `1ch` of the default 16px font as 8px).
- * Returns null for every other unit, including the ones that
- * `Exprs.defaultUnitSizes` covers. (Review)
+ * multiple of the font size. These units come from the glyph metrics of the
+ * actual font, which this engine cannot obtain before the layout of the source
+ * document runs, so the ratios of the default fonts are used — as the absolute
+ * size keyword table does: Chromium computes `1ch`, `1ex`, `1cap` and `1ic` of
+ * its default 16px font as 8px, 7.18px, 10.59px and 16px. Returns null for
+ * every other unit, including the ones `Exprs.defaultUnitSizes` covers.
+ * (Review)
  */
 export function browserFontRelativeUnitRatio(unit: string): number | null {
   switch (unit) {
     case "ch":
-    case "ex":
       return 0.5;
+    case "ex":
+      return 0.45;
     case "cap":
-      return 0.7;
+      return 0.66;
     case "ic":
       return 1;
     default:

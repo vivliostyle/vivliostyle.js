@@ -3490,8 +3490,8 @@ describe("css-cascade", function () {
         // font as 8px and 7.18px), so a detached element must not resolve them
         // in the synthetic parent it is reparented into. (Review)
         expect(adapt_csscasc.browserFontRelativeUnitRatio("ch")).toBe(0.5);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.5);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.7);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.45);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.66);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("ic")).toBe(1);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("em")).toBe(null);
         expect(adapt_csscasc.browserFontRelativeUnitRatio("px")).toBe(null);
