@@ -1022,7 +1022,7 @@
   decision: expected  # regression / expected / skip
   notes: >-
     Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    paragraph with `line-height: 1rlh` has the preferred 1.2 x 16px = 19.2px
+    paragraph with `line-height: 1rlh` has the preferred 1.25 x 16px = 20px
     root line height instead of the 16px that the `min(1, 2)` root declaration
     computes (the number is the multiplier of the 16px font size of the root
     element). The PR branch records the 16px for the `rlh` unit and the page
