@@ -16,7 +16,10 @@
      Values 4 are evaluated as well, so an own `line-height: round(1lh, 7px)`
      is the 42px that the function computes from the inherited 40px, and a
      footnote resolves `font-size: 1lh` against the 42px of an ancestor with
-     `line-height: round(40px, 7px)`. -->
+     `line-height: round(40px, 7px)`, and the root line height itself can be
+     such a function: `font-size: 1rlh` of a footnote must be the 42px that the
+     function computes for the root (the pre-fix viewer keeps the preferred
+     line height there). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -24,6 +27,11 @@
   <style>
     @page { size: 160mm 100mm; margin: 10mm; }
     html, body { font-size: 16px; }
+    /* the root line height can be a math function of CSS Values 4:
+       round(40px, 7px) = 42px, the basis of the `rlh` unit */
+    :root { line-height: round(40px, 7px); }
+    .fn.rlh { font-size: 1rlh; }
+    .ref.rlh { font-size: 42px; }
     body { margin: 0; }
     p { line-height: 40px; margin: 0.4em 0; }
     .fn, .ref { letter-spacing: 2em; }
@@ -84,6 +92,8 @@
     <span class="ref own-round-lh">Wide</span><span class="fn own-round-lh">Wide</span></p>
   <p class="math-round">an ancestor line height with a math function:
     <span class="ref math-round-lh">Wide</span><span class="fn math-round-lh">Wide</span></p>
+  <p class="rlh-root">a font size in the root line height (1rlh = 42px):
+    <span class="ref rlh">Wide</span><span class="fn rlh">Wide</span></p>
   <p class="own-2lh">an own line height with the lh unit:
     <span class="ref own-2lh">Wide</span><span class="fn own-2lh">Wide</span></p>
   <p class="math-anc">an ancestor whose font size only the browser resolves:

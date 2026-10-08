@@ -822,6 +822,24 @@ export class Styler implements AbstractStyler {
           }
         }
         rootLineHeight = px != null && Number.isFinite(px) ? px : null;
+      } else if (val instanceof Css.Func) {
+        // A math function of CSS Values 4 that is not a `calc()`, e.g.
+        // `:root { line-height: round(40px, 7px) }` or `min(40px, 2em)`:
+        // `resolveRootSizingCalc()` only reduces a `calc()`, so the value is
+        // reduced with the resolver that the inherited line heights use, which
+        // also knows those functions. The `em`/`%` arguments of the root
+        // element refer to its own font size, and its `lh`/`rlh` to the line
+        // height that is being resolved (the root has no parent). (Review)
+        const resolved = CssCascade.resolveLineHeightValueToPx(
+          this.context,
+          val,
+          rootFontSize,
+          this.context.rootLineHeight,
+        );
+        if (resolved != null) {
+          rootLineHeight = resolved;
+          fromRelativeCalc = true;
+        }
       }
     }
     this.context.rootLineHeight =
