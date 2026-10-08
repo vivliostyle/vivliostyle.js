@@ -7,8 +7,11 @@
      the weight of the paragraph itself), and a function whose result is out of
      range must be clamped, while a function whose arguments are not numbers
      (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
-     keeps the inherited weight. The pre-fix viewer leaves the function
-     unresolved, so the paragraph is 400 and "bolder" resolves to 700. -->
+     keeps the inherited weight. A function that this engine does not evaluate
+     itself, e.g. `round(650, 100)`, is valid and is left to the browser, which
+     computes 700: such a declaration must not be dropped. The pre-fix viewer
+     leaves the function unresolved, so the paragraph is 400 and "bolder"
+     resolves to 700. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -25,6 +28,10 @@
     .ref-bolder { font-weight: bolder; } /* 900, bolder than 900 is 900 */
     .ref-700 { font-weight: 700; }
     .invalid { --m: min(900px, 1em); font-weight: var(--m); } /* invalid */
+    /* a function that the browser evaluates: 700 */
+    .dep-round { font-weight: round(650, 100); }
+    .dep-round .fn-own { float: footnote; font-weight: round(650, 100); } /* 700 */
+    .ref-round { font-weight: round(650, 100); } /* 700 */
     .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
     ::footnote-marker { content: ""; }
   </style>
@@ -35,6 +42,11 @@
     paragraph itself:
     <span class="ref-bolder">B</span><span class="fn-bolder">B</span>
     <span class="fn-own">B</span><span class="fn-clamp">B</span></p>
+  <p class="dep-round">The footnote "B" below must be as bold as this inline
+    <span class="ref-round">B</span>, i.e. the 700 that the browser computes for
+    `round(650, 100)`, not the 400 of the initial weight or the 700 of a
+    fallback:
+    <span class="fn-own">B</span></p>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be
     <span class="ref-700">B</span>, one step bolder than the 400 of this

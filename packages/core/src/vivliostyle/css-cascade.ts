@@ -1274,7 +1274,15 @@ export function isInvalidFontWeight(value: Css.Val): boolean {
       hasKeywordName(value, "unset")
     );
   }
-  return !(value instanceof Css.Func || value instanceof Css.Expr);
+  if (value instanceof Css.Func || value instanceof Css.Expr) {
+    // A math function is valid as long as the browser accepts it: a function
+    // that is invalid at computed-value time, e.g. the `min(900px, 1em)` that a
+    // var() substitution put into the declaration, is rejected, while one whose
+    // value this engine does not evaluate, e.g. `round(650, 100)`, is left for
+    // the browser. (Review)
+    return !CSS.supports("font-weight", value.toString());
+  }
+  return true;
 }
 
 /**
@@ -1763,19 +1771,44 @@ export class InheritanceVisitor extends Css.FilterVisitor {
    */
   /**
    * The line height in px that the accumulated values inherit, i.e. the line
-   * height of the parent. (Used by the walk to resolve the `lh` unit of a
-   * computed line height. Review)
+   * height of the parent. A relative value among them is resolved against
+   * `parentFontSize` — the font size of the parent, which the font-relative
+   * units of a line height refer to — defaulting to the font size that the
+   * visitor currently sees, which is the parent's while a `font-size` value is
+   * processed and the current level's own when a `line-height` value is. (Used
+   * by the walk to resolve the `lh` unit of a computed line height. Review)
    */
-  getInheritedLineHeight(): number | null {
-    return this.getInheritedLineHeightUnitSize();
+  getInheritedLineHeight(parentFontSize?: number | null): number | null {
+    return this.getInheritedLineHeightUnitSize(parentFontSize);
   }
 
-  private getInheritedLineHeightUnitSize(): number | null {
+  private getInheritedLineHeightUnitSize(
+    parentFontSize: number | null = this.getFontSize(),
+  ): number | null {
     let value = getProp(this.props, "line-height")?.value;
-    const parentFontSize = this.getFontSize();
+    if (value instanceof Css.Numeric) {
+      const unit = value.unit;
+      if (
+        unit !== "em" &&
+        unit !== "rem" &&
+        unit !== "%" &&
+        unit !== "lh" &&
+        unit !== "rlh" &&
+        Exprs.defaultUnitSizes[unit] != null
+      ) {
+        // An absolute line height, e.g. `line-height: 40px`, does not depend
+        // on the font size, so it is resolved before one is required: an
+        // inherited font size that only the browser resolves, e.g. the `math`
+        // keyword of an ancestor, must not make such a line height unknown.
+        // (Review)
+        return value.num * Exprs.defaultUnitSizes[unit];
+      }
+    }
     if (parentFontSize == null) {
-      // The inherited font size is a value that only the browser resolves, so
-      // the line height that the value depends on is not known here. (Review)
+      // Every remaining value is relative to a font size: a number and
+      // `normal` to the inherited one, `em`/`%` to the same, and `rem`/`rlh`
+      // to the root ones. That font size is a value that only the browser
+      // resolves here, so the line height is not known either. (Review)
       return null;
     }
     if (value instanceof Css.Expr || value instanceof Css.Func) {
@@ -6101,12 +6134,13 @@ export class CascadeInstance {
             // The validator passes browser-supported math functions through,
             // e.g. `min(900, 1000)`, but `CalcFilterVisitor` only reduces
             // `calc()`: reduce the other math functions here, before the range
-            // is validated. A function that does not reduce to a number, e.g.
-            // the `min(900px, 1em)` that a var() substitution put into the
-            // declaration, is invalid. (Review)
+            // is validated. A supported function that does not reduce to a
+            // number, e.g. `round(650, 100)`, is kept and evaluated by the
+            // browser; only a function that the browser rejects, e.g. the
+            // `min(900px, 1em)` that a var() substitution put into the
+            // declaration, is invalid (`isInvalidFontWeight` below). (Review)
             value =
-              evaluateFontWeightMathFunction(this.context, value) ??
-              Css.ident.unset;
+              evaluateFontWeightMathFunction(this.context, value) ?? value;
           }
           if (value instanceof Css.Num) {
             // A weight that is not a literal, e.g. `calc(1200)`, is valid: the

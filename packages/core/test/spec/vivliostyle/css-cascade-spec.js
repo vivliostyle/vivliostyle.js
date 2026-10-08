@@ -3499,6 +3499,58 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("getInheritedLineHeight", function () {
+      function inheritedLineHeight(fontSize, lineHeight) {
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(fontSize, 0),
+          "line-height": new adapt_csscasc.CascadeValue(lineHeight, 0),
+        };
+        return new adapt_csscasc.InheritanceVisitor(
+          props,
+          newContext(),
+        ).getInheritedLineHeight();
+      }
+
+      it("resolves an absolute line height without the inherited font size", function () {
+        // The inherited font size may be a value that only the browser
+        // resolves, e.g. the `math` keyword of an ancestor; an absolute line
+        // height does not depend on it, so a descendant that resolves the `lh`
+        // unit still finds a length. A relative line height needs the font
+        // size, so it stays unknown. (Review)
+        expect(
+          inheritedLineHeight(
+            adapt_css.getName("math"),
+            new adapt_css.Numeric(40, "px"),
+          ),
+        ).toBe(40);
+        expect(
+          inheritedLineHeight(
+            adapt_css.getName("math"),
+            new adapt_css.Num(1.5),
+          ),
+        ).toBe(null);
+        // A relative line height is resolved against the given parent font
+        // size, which is the metric that the font-relative units refer to.
+        // (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            new adapt_css.Num(1.5),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(32),
+        ).toBe(48);
+      });
+    });
+
     describe("isNegativeLiteralLineHeight", function () {
       it("detects the negative literals of a line height", function () {
         // A negative literal is invalid and makes the element inherit the
@@ -3719,6 +3771,27 @@ describe("css-cascade", function () {
             new adapt_css.Func("calc", [new adapt_css.Num(650)]),
           ),
         ).toBe(false);
+        // A supported function that this engine does not evaluate, e.g.
+        // `round(650, 100)`, is valid: the browser computes it, so the
+        // declaration must not be dropped. (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(650, 100)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(900px, 1em)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
       });
 
       it("evaluates number valued math functions of a font weight", function () {

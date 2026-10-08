@@ -7,7 +7,12 @@
      of the same paragraph, whose font size is 1lh = the parent's line height
      (40px, or 24px when the line height is `calc(150%)`). The line height of an
      ancestor can be an `lh` unit itself, e.g. `line-height: 1lh` on the parent
-     paragraph, which refers to the line height of its own parent (30px). -->
+     paragraph, which refers to the line height of its own parent (30px), and
+     an own `line-height: 2lh` of a footnote refers to the 40px that it inherits
+     from the source parent (2 x 40px = 80px), not to the line height of the
+     footnote area it is rendered in. An ancestor whose font size is a value
+     that only the browser resolves (`font-size: math`) must not make an
+     absolute line height of that ancestor unknown. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -34,6 +39,14 @@
     .fn.own-lh { line-height: max(1lh, 5px); }
     .ref.own-lh { line-height: max(1lh, 5px); background: #eee; }
     .fn.own-lh { background: #eee; }
+    /* an own line height: 2lh = 2 x the 40px line height of the source parent */
+    p.own-2lh { line-height: 40px; }
+    .fn.own-2lh { line-height: 2lh; background: #eee; }
+    .ref.own-2lh { line-height: 80px; background: #eee; }
+    /* an ancestor whose font size only the browser resolves */
+    p.math-anc { font-size: math; line-height: 40px; }
+    .fn.math-anc-lh { font-size: 1lh; }
+    .ref.math-anc-lh { font-size: 40px; }
     /* the same, with an inherited line height that is a math function:
        min(40px, 2em) = the smaller of 40px and 32px = 32px */
     p.lh-math { line-height: min(40px, 2em); }
@@ -53,6 +66,10 @@
     <span class="ref anc-lh">Wide</span><span class="fn anc-lh">Wide</span></p></div>
   <p class="lh-own">lh unit of an own line height:
     <span class="ref own-lh">Wide</span><span class="fn own-lh">Wide</span></p>
+  <p class="own-2lh">an own line height with the lh unit:
+    <span class="ref own-2lh">Wide</span><span class="fn own-2lh">Wide</span></p>
+  <p class="math-anc">an ancestor whose font size only the browser resolves:
+    <span class="ref math-anc-lh">Wide</span><span class="fn math-anc-lh">Wide</span></p>
   <p class="lh-math">lh unit with a math function line height:
     <span class="ref lh-math">Wide</span><span class="fn lh-math">Wide</span></p>
   <p class="calc-pct">lh unit with a percentage computed line height:
@@ -63,8 +80,11 @@
     line height it is the 24px of `calc(150%)`, for the paragraph whose ancestor declares
     `line-height: 1lh` it is the 30px of that ancestor, and for the paragraph
     with `line-height: min(40px, 2em)` it is the 32px that the math function
-    computes. The paragraph with `line-height: max(1lh, 5px)` on the footnote
-    itself (the grey "Wide" boxes) has a line height of 40px, the line height
-    of its source parent.</p>
+    computes. The paragraphs with `line-height: max(1lh, 5px)` and with
+    `line-height: 2lh` on the footnote itself (the grey "Wide" boxes) have a
+    line height of 40px and 80px, the line height of their source parent and
+    its double. The paragraph whose own font size is `math` (which only the
+    browser resolves) has an absolute line height of 40px, so the footnote with
+    `font-size: 1lh` is 40px as well.</p>
 </body>
 </html>

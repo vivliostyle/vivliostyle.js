@@ -1124,6 +1124,11 @@ export class ViewFactory
       propList.sort(Css.processingOrderFn);
       let fontSize: Css.Val | undefined;
       let lineHeight: Css.Val | undefined;
+      // The font size of the level above, which a relative line height that was
+      // accumulated so far is resolved against: the font-relative units of a
+      // line height refer to the parent's metrics, and this level's own font
+      // size has not been applied here yet. (Review)
+      const parentFontSize = inheritanceVisitor.getInheritedFontSize();
 
       for (const name of propList) {
         if (
@@ -1202,18 +1207,18 @@ export class ViewFactory
             prop.value.unit === "lh"
           ) {
             // line-height with an lh unit, which refers to the line height of
-            // the parent. On the current element it is the line height of the
-            // rendered parent, and on a source ancestor the line height that
-            // was accumulated for its own parent: resolved level by level, a
-            // detached descendant that resolves an lh unit of its own finds a
-            // length instead of falling back to the root line height. A
+            // the parent. The line height that was accumulated for the parent
+            // is used for the current element and for a source ancestor alike:
+            // on detached content the rendered parent is the synthetic one
+            // (e.g. the footnote area), whose line height is not the one that
+            // the element inherits in the source document. Resolved level by
+            // level, a detached descendant that resolves an lh unit of its own
+            // finds a length instead of falling back to the root line height. A
             // `font-size` with an lh unit is left to the inheritance visitor,
             // which resolves it against the line height that was accumulated
             // for the source parent. (Issue #2174 follow-up, Review)
             const lhUnitSize =
-              i === 0
-                ? this.getLineHeightUnitSize(name, fontSize, lineHeight)
-                : inheritanceVisitor.getInheritedLineHeight();
+              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
             if (lhUnitSize != null) {
               prop1 = prop.withValue(
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),
@@ -1231,7 +1236,7 @@ export class ViewFactory
             // fall back to the preferred line height when a descendant
             // resolves its own `lh` unit. (Review)
             const inheritedLineHeight =
-              inheritanceVisitor.getInheritedLineHeight();
+              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
             const inheritedFontSize = inheritanceVisitor.getInheritedFontSize();
             if (inheritedLineHeight != null && inheritedFontSize != null) {
               const px = CssCascade.resolveLineHeightValueToPx(
