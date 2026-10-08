@@ -1951,6 +1951,20 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         // the keyword is preserved and resolved by the browser against its
         // own computed size. (Review)
       }
+      if (hasKeywordName(ident, "math")) {
+        // The math font size depends on the mathematical context of the
+        // element: it is 1em of the inherited font size for the depths that
+        // this engine represents (`math-depth` is not supported, so a deeper
+        // context, in which the browser scales the size down, is not modelled
+        // here). It is resolved like `1em`, so that a detached element uses
+        // the font size of its source parent instead of the one of the
+        // synthetic parent that the browser would resolve the keyword in
+        // after the element is reparented. (Review)
+        const parentFontSize = this.getFontSize();
+        if (parentFontSize != null) {
+          return new Css.Numeric(parentFontSize, "px");
+        }
+      }
     } else if (this.propName === "font-weight") {
       if (hasKeywordName(ident, "bolder") || hasKeywordName(ident, "lighter")) {
         return new Css.Int(

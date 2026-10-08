@@ -3612,6 +3612,32 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("InheritanceVisitor of the math font size", function () {
+      it("resolves the math keyword against the inherited font size", function () {
+        // The math font size is 1em of the inherited font size for the depths
+        // that this engine represents, so a detached element uses the font
+        // size of its source parent instead of the one of the synthetic parent
+        // that the browser resolves the keyword in. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(32, "px"),
+            0,
+          ),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("font-size");
+        var resolved = visitor.visitIdent(adapt_css.getName("math"));
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+        // The keyword of another property, e.g. `font-family: math`, is an
+        // ordinary value.
+        visitor.setPropName("font-family");
+        expect(visitor.visitIdent(adapt_css.getName("math"))).toBe(
+          adapt_css.getName("math"),
+        );
+      });
+    });
+
     describe("InheritanceVisitor with an unresolved font size", function () {
       function visitorWithFontSize(value) {
         var props = {

@@ -1,34 +1,33 @@
 <!DOCTYPE html>
-<!-- Test case for Issue #2174 follow-up: the `math` keyword of CSS Fonts 4 is a
-     valid font size that only the browser resolves, so a detached element that
-     declares it must keep it instead of a numeric size. The browser resolves
-     `math` against the context of the element itself, so the footnotes "Math"
-     must be rendered like the inline reference "Math", which is in a paragraph
-     with the font size of the footnote area, and not with the 32px that the
-     element inherits from its source parent. The same holds for the keyword
-     when a var() substitution puts it into the declaration: the substituted
-     value is valid and is preserved as well. The pre-fix viewer replaces the
-     keyword with the inherited 32px, so the footnotes are twice as large as
-     the reference. -->
+<!-- Test case for Issue #2174 follow-up: the `math` keyword of CSS Fonts 4 is
+     resolved by the browser from the mathematical context of the element, which
+     is 1em of the inherited font size for the depths that Vivliostyle
+     represents (`math-depth` is not supported, so a deeper context, in which
+     the browser scales the size down, is left to the browser). A detached
+     element that declares the keyword must therefore use the font size of its
+     source parent, not the one of the footnote area that the browser resolves
+     it in after the element is reparented: the footnotes "Math" must be
+     rendered like the inline `1em` reference of the same paragraph. The same
+     holds when a var() substitution puts the keyword into the declaration. In
+     the pre-fix viewer the footnotes were 16px, the size of the footnote area,
+     instead of the 32px of their source parent. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>math font size keyword of a footnote (Issue #2174 follow-up)</title>
   <style>
     @page { size: 140mm 100mm; margin: 10mm; }
-    .ref-math { font-size: math; }
     .dep { font-size: 32px; }
+    .dep .ref-em { font-size: 1em; }
     .dep .fn-math { float: footnote; font-size: math; }
     .dep .fn-var { float: footnote; --m: math; font-size: var(--m); }
     ::footnote-marker { content: ""; }
   </style>
 </head>
 <body>
-  <p>The reference "Math" below is an inline element of this paragraph (the
-    font size of the footnote area), for which the browser resolves `math`:
-    <span class="ref-math">Math</span></p>
-  <p class="dep">The two footnotes "Math" must be rendered like the reference
-    "Math" above, not with the 32px of this paragraph:
+  <p class="dep">The two footnotes "Math" must be as large as this inline
+    "Math" (the `math` font size is 1em of the source parent, i.e. 32px, not
+    the 16px of the footnote area): <span class="ref-em">Math</span>
     <span class="fn-math">Math</span><span class="fn-var">Math</span></p>
 </body>
 </html>
