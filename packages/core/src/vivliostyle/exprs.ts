@@ -351,9 +351,12 @@ export function log(value: number, base?: number): number {
   return base == null ? Math.log(value) : Math.log(value) / Math.log(base);
 }
 
-/** The `clamp()` of CSS Values 4. (Review) */
+/**
+ * The `clamp()` of CSS Values 4: `max(MIN, min(VAL, MAX))`, so that the minimum
+ * takes precedence when the bounds are reversed. (Review)
+ */
 export function clamp(min: number, value: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
+  return Math.max(min, Math.min(value, max));
 }
 
 export type ScopeContext = Map<string, Result>;

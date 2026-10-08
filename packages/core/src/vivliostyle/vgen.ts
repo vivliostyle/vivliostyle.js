@@ -3754,7 +3754,7 @@ export class ViewFactory
    */
   private parsePlusLayoutUnitAdj(
     val: string,
-    inlineVal?: string | null,
+    inlineVal?: () => string | null | undefined,
   ): number | null {
     if (val.endsWith("px")) {
       const parsedVal = parseFloat(val);
@@ -3764,10 +3764,12 @@ export class ViewFactory
           // and when the result is negative the browser clamps it to `0px`.
           // Adding the adjustment back would then turn an exact zero into
           // 1/64px (or 1/60px), so the length in front of the adjustment is
-          // used instead.
-          const base = inlineVal
-            ? parseLayoutUnitAdjustedValue(inlineVal)
-            : null;
+          // used instead. The declaration is only looked up for a zero value:
+          // the lookup may walk the ancestors, and a value that is not zero
+          // does not need it. (Review)
+          const inline = inlineVal?.() ?? null;
+          const base =
+            inline != null ? parseLayoutUnitAdjustedValue(inline) : null;
           return base != null && base > 0 ? base : 0;
         }
         return (
@@ -3796,7 +3798,7 @@ export class ViewFactory
       (pageContextStyle
         ? this.parsePlusLayoutUnitAdj(
             pageContextStyle.fontSize,
-            inlineStyle?.fontSize,
+            () => inlineStyle?.fontSize,
           )
         : null) ??
       this.context.rootFontSize ??
@@ -3806,7 +3808,7 @@ export class ViewFactory
       (pageContextStyle
         ? this.parsePlusLayoutUnitAdj(
             pageContextStyle.lineHeight,
-            inlineStyle?.lineHeight,
+            () => inlineStyle?.lineHeight,
           )
         : null) ??
       this.context.rootLineHeight ??
@@ -3821,8 +3823,7 @@ export class ViewFactory
     const style = this.viewport.window.getComputedStyle(element);
     const inlineStyle = getInlineStyle(element);
     const fontSize =
-      this.parsePlusLayoutUnitAdj(
-        style.fontSize,
+      this.parsePlusLayoutUnitAdj(style.fontSize, () =>
         this.getLayoutUnitAdjustedBase(
           element,
           inlineStyle?.fontSize,
@@ -3830,8 +3831,7 @@ export class ViewFactory
         ),
       ) ?? fallback.fontSize;
     const lineHeight =
-      this.parsePlusLayoutUnitAdj(
-        style.lineHeight,
+      this.parsePlusLayoutUnitAdj(style.lineHeight, () =>
         this.getLayoutUnitAdjustedBase(
           element,
           inlineStyle?.lineHeight,
@@ -3903,8 +3903,7 @@ export class ViewFactory
       fontSize:
         this.computedStyleParentFontSizeOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(
-              parentStyle.fontSize,
+          ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize, () =>
               this.getLayoutUnitAdjustedBase(
                 parentNode,
                 inlineStyle?.fontSize,
@@ -3915,8 +3914,7 @@ export class ViewFactory
       lineHeight:
         this.computedStyleParentLineHeightOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(
-              parentStyle.lineHeight,
+          ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight, () =>
               this.getLayoutUnitAdjustedBase(
                 parentNode,
                 inlineStyle?.lineHeight,

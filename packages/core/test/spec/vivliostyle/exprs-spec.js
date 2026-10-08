@@ -68,6 +68,10 @@ describe("exprs", function () {
       expect(call("round", 20, 7)).toBe(21);
       expect(call("round", 25, 7)).toBe(28);
       expect(call("mod", 20, 7)).toBe(6);
+      // The minimum takes precedence when the bounds of clamp() are reversed.
+      expect(call("clamp", 30, 20, 10)).toBe(30);
+      expect(call("clamp", 10, 20, 30)).toBe(20);
+      expect(call("clamp", 10, 5, 30)).toBe(10);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
     });

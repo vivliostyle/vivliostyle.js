@@ -3483,6 +3483,34 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("isSupportedFunctionValue", function () {
+      function resolve(text) {
+        return adapt_csscasc.resolveFontSizeValueToPx(
+          newContext(),
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          ),
+        );
+      }
+
+      it("rejects a function whose type the property does not accept", function () {
+        // The math functions of CSS Values 4 are evaluated as numbers of the
+        // expression language, which cannot see that `round()` rounds a length
+        // to a multiple of a number (invalid) or that `sign()` returns a number
+        // instead of a length, so the browser decides: the declaration is
+        // invalid and the element inherits. (Review)
+        expect(resolve("round(20px, 7)")).toBe(null);
+        expect(resolve("sign(20px)")).toBe(null);
+        expect(resolve("round(20px, 7px)")).toBe(21);
+        expect(resolve("abs(-20px)")).toBe(20);
+        // A function that is valid inside an arithmetic expression: the number
+        // that sign() returns is multiplied by a length.
+        expect(resolve("calc(sign(20px) * 20px)")).toBe(20);
+      });
+    });
+
     describe("browserFontRelativeUnitRatio", function () {
       it("reports the ratio of the units that only the browser resolves", function () {
         // The metrics of these units are not obtainable before the source

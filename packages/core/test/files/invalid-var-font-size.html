@@ -11,7 +11,10 @@
      negative literal from a var() substitution, an unknown identifier, a
      dimension without a unit size (`--unit: 5s`) and a math function that
      computes a negative value, which is valid and is clamped to zero instead
-     of being inherited. The same declaration in the normal flow must be
+     of being inherited. A math function of the CSS Values 4 family that the
+     browser rejects — `round(20px, 7)`, which rounds a length to a multiple of
+     a number, and `sign(20px)`, which returns a number — is invalid as well,
+     so those footnotes keep the inherited 32px too. The same declaration in the normal flow must be
      emitted as the computed 0px, not as a negative length that the browser
      rejects (it would inherit the parent font size instead). -->
 <html lang="en">
@@ -27,6 +30,8 @@
     .dep .fn-ident { float: footnote; font-size: nonsense; letter-spacing: 2em; }
     .dep .fn-calc { float: footnote; font-size: calc(10px - 20px); }
     .dep .fn-unit { float: footnote; --unit: 5s; font-size: var(--unit); letter-spacing: 2em; }
+    .dep .fn-round { float: footnote; --r: round(20px, 7); font-size: var(--r); letter-spacing: 2em; }
+    .dep .fn-sign { float: footnote; --sg: sign(20px); font-size: var(--sg); letter-spacing: 2em; }
     .ref { font-size: 32px; letter-spacing: 2em; }
     .neg-calc { font-size: calc(10px - 20px); } /* computed 0px */
     .neg-ref { font-size: 0px; }
@@ -46,7 +51,11 @@
     The <code>font-size: calc(10px - 20px)</code> of this footnote is clamped to
     0 instead, so it has no visible text:<span class="fn-calc">Gone</span>
     The invalid <code>font-size: var(--unit)</code> (<code>5s</code>) must be
-    ignored too:<span class="fn-unit">Wide</span></p>
+    ignored too:<span class="fn-unit">Wide</span>
+    The <code>font-size: var(--r)</code> (<code>round(20px, 7)</code>) and
+    <code>font-size: var(--sg)</code> (<code>sign(20px)</code>) are invalid math
+    functions, so these footnotes keep the inherited 32px as well:
+    <span class="fn-round">Wide</span><span class="fn-sign">Wide</span></p>
   <p class="ref">Wide</p>
   <p>The invalid <code>font-size: var(--negative)</code> of the root must be
     ignored as well, so the root keeps the initial 16px and the blue box (10rem)

@@ -1286,6 +1286,24 @@ export function isInvalidFontWeight(value: Css.Val): boolean {
 }
 
 /**
+ * Whether a function value is valid for a property in the sense of the
+ * browser. The math functions of CSS Values 4 are evaluated by this engine as
+ * numbers of its expression language, which converts every dimension to px, so
+ * a function whose arguments or result have a type that the property does not
+ * accept — e.g. the `round(20px, 7)` that rounds a length to a multiple of a
+ * number, or the number that `sign()` returns — must not become a computed
+ * value here: such a declaration is invalid, and the element inherits. A
+ * value that is not a function is valid as far as this check is concerned.
+ * (Review)
+ */
+function isSupportedFunctionValue(propName: string, value: Css.Val): boolean {
+  return (
+    !(value instanceof Css.Func || value instanceof Css.Expr) ||
+    CSS.supports(propName, value.toString())
+  );
+}
+
+/**
  * Whether a declared font-size value is a negative literal length. Such a value
  * is outside the non-negative range of `font-size`, so it is invalid: the
  * browser rejects the declaration and the element inherits the parent font
@@ -1365,6 +1383,9 @@ export function resolveFontSizeValueToPx(
   value: Css.Val,
   parentFontSize?: number,
 ): number | null {
+  if (!isSupportedFunctionValue("font-size", value)) {
+    return null;
+  }
   if (value instanceof Css.Num) {
     // Only a unitless zero is a valid font-size. Any other unitless number,
     // e.g. one that a var() substitution put into the declaration, is rejected
@@ -1463,6 +1484,9 @@ export function resolveLineHeightValueToPx(
   parentFontSize: number,
   inheritedLineHeight: number,
 ): number | null {
+  if (!isSupportedFunctionValue("line-height", func)) {
+    return null;
+  }
   // The `lh` unit of a line height refers to the line height that the element
   // inherits, which the walk accumulates for the source parent. The visitor
   // converts the other parent relative units, but it leaves `lh` alone for a
@@ -1586,6 +1610,9 @@ export function evaluateFontWeightMathFunction(
   context: Exprs.Context,
   value: Css.Val,
 ): Css.Num | null {
+  if (!isSupportedFunctionValue("font-weight", value)) {
+    return null;
+  }
   const reduced = value.visit(new NumberMathFunctionReducer(context));
   // `evaluateValueToNumber()` also evaluates a function that is not wrapped in
   // a `calc()`, e.g. the `round(650, 100)` of a declaration, which the
