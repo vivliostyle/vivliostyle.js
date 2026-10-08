@@ -226,8 +226,9 @@
     number valued math functions like `calc()` and resolves the relative
     keyword against the result, so the footnote is 900 as well, and it clamps
     the result of a function like `max(1000, 1200)` to 1000 (canary and the PR
-    branch agree on the clamps and on the invalid `min(900px, 1em)`, whose
-    footnote keeps the inherited 700).
+    branch agree on the clamps, on the invalid `min(900px, 1em)`, whose footnote
+    keeps the inherited 700, and on a function that the engine leaves to the
+    browser, e.g. `round(650, 100)`, which is 700 in both).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -796,11 +797,17 @@
     (letter-spacing 64px). An own line height of a detached element that is a
     math function with `lh`, e.g. `line-height: max(1lh, 5px)` on the footnote,
     was not resolved either: the footnote had the 20px of the preferred line
-    height instead of the 40px of its source parent. The PR branch resolves
-    those ancestor values level by level, reduces the math functions of an
-    inherited line height to px, replaces the `lh` unit of such a value with the
-    line height that the element inherits, and resolves the lh unit against the
-    source parent, like content in the normal flow.
+    height instead of the 40px of its source parent. A bare `line-height: 2lh`
+    on the footnote itself was resolved against the 20px of the footnote area
+    (40px) instead of the 40px that it inherits (80px), and an ancestor whose
+    font size only the browser resolves (`font-size: math`) made the absolute
+    line height of that ancestor unknown, so the footnote with `font-size: 1lh`
+    was 20px instead of the 40px of the paragraph. The PR branch resolves those
+    ancestor values level by level against the font size of the level that the
+    value belongs to, reduces the math functions of an inherited line height to
+    px, replaces the `lh` unit of such a value with the line height that the
+    element inherits, and resolves the lh unit against the source parent, like
+    content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
