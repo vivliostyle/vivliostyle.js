@@ -344,7 +344,12 @@ function numericArgs(
   }
   const numbers: number[] = [];
   for (const arg of args) {
-    if (typeof arg !== "number" || !Number.isFinite(arg)) {
+    // An infinity is a number that the calculation keeps: the property clamps
+    // it to its range, and a nested call such as the `abs()` of
+    // `font-weight: abs(exp(1000))` must keep it as well. Only a NaN, a
+    // keyword (e.g. the `<rounding-strategy>` of `round()`) and anything that
+    // is not a number at all make the call unevaluable. (Review)
+    if (typeof arg !== "number" || Number.isNaN(arg)) {
       return null;
     }
     numbers.push(arg);
@@ -387,6 +392,11 @@ export function round(...args: unknown[]): number {
   if (step === 0) {
     return NaN;
   }
+  if (!Number.isFinite(step)) {
+    // An infinite step: a finite value rounds to zero (the `nearest`
+    // strategy of CSS Values 4 §10.3.1), while an infinite value is NaN.
+    return Number.isFinite(value) ? (value >= 0 ? 0 : -0) : NaN;
+  }
   const interval = Math.abs(step);
   return result(Math.round(value / interval) * interval);
 }
@@ -402,7 +412,28 @@ export function mod(...args: unknown[]): number {
     return NaN;
   }
   const [a, b] = numbers;
+  if (!Number.isFinite(b)) {
+    return moduloOfInfiniteDivisor(a, b, true);
+  }
   return result(a - b * Math.floor(a / b));
+}
+
+/**
+ * The result of `mod()`/`rem()` with an infinite divisor: A is returned as it
+ * is, except that `mod()` is NaN when A has the opposite sign of B, including
+ * an oppositely signed zero (CSS Values 4 §10.3.1). (Review)
+ */
+function moduloOfInfiniteDivisor(a: number, b: number, isMod: boolean): number {
+  if (!Number.isFinite(a)) {
+    return NaN;
+  }
+  if (isMod) {
+    const aSign = a === 0 ? (Object.is(a, -0) ? -1 : 1) : Math.sign(a);
+    if (aSign !== Math.sign(b)) {
+      return NaN;
+    }
+  }
+  return a;
 }
 
 /**
@@ -415,6 +446,9 @@ export function rem(...args: unknown[]): number {
     return NaN;
   }
   const [a, b] = numbers;
+  if (!Number.isFinite(b)) {
+    return moduloOfInfiniteDivisor(a, b, false);
+  }
   return result(a % b);
 }
 

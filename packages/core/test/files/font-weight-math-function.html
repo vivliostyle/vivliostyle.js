@@ -13,6 +13,8 @@
      that overflows to an infinity, e.g. `exp(1000)`, is clamped to the range
      of CSS Fonts 4 (1000) like any other out of range result, so a detached
      descendant that uses a relative keyword resolves against 1000 as well.
+     The infinity survives a nested call, e.g. `abs(exp(1000))`, which must be
+     1000 for such a paragraph and for its footnote's `bolder` too.
      The pre-fix viewer leaves such functions unresolved, so the paragraph is
      400 and "bolder" resolves to 700. -->
 <html lang="en">
@@ -37,11 +39,15 @@
     .dep-round .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
     /* a calculation that overflows to an infinity is clamped to the range of
        CSS Fonts 4 (1000), so a relative keyword of a footnote resolves against
-       1000: `bolder` than 1000 is 1000 */
+       1000: `bolder` than 1000 is 1000. The infinity survives a nested call,
+       e.g. the `abs()` of `abs(exp(1000))` */
     .dep-inf { font-weight: exp(1000); } /* 1000 */
     .dep-inf .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf { font-weight: exp(1000); } /* 1000 */
     .ref-bolder-under-inf { font-weight: bolder; } /* 1000 */
+    .dep-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
+    .dep-inf-nested .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
     .ref-round { font-weight: round(650, 100); } /* 700 */
     .ref-bolder-under-round { font-weight: bolder; } /* 900 */
     .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
@@ -67,6 +73,10 @@
     must resolve against that 1000, like this inline
     <span class="ref-bolder-under-inf">B</span> (1000):
     <span class="fn-bolder">B</span>
+    <span class="fn-bolder">B</span></p>
+  <p class="dep-inf-nested">The footnote "B" below must be as bold as this
+    inline <span class="ref-inf-nested">B</span>, i.e. the 1000 of
+    `abs(exp(1000))`, whose infinity survives the nested `abs()`:
     <span class="fn-bolder">B</span></p>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be

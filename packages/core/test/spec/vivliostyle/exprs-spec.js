@@ -105,6 +105,24 @@ describe("exprs", function () {
       expect(call("pow", 10, 1000)).toBe(Infinity);
       expect(call("log", 0)).toBe(-Infinity);
       expect(call("log", 0, 0.5)).toBe(Infinity);
+      // An infinity survives a nested call, so that a number valued property
+      // can clamp it to its range: `abs(exp(1000))` is an infinity, not a NaN
+      // that would leave the value unresolved. (Review)
+      expect(call("abs", Infinity)).toBe(Infinity);
+      expect(call("hypot", Infinity, 3)).toBe(Infinity);
+      expect(call("pow", 10, 1000)).toBe(Infinity);
+      // The argument ranges of CSS Values 4 §10.3.1 for the stepped values:
+      // an infinite step rounds a finite value to zero (and an infinite value
+      // to NaN), and an infinite divisor returns the value itself, except for
+      // a `mod()` whose value has the opposite sign. (Review)
+      expect(call("round", 3.5, Infinity)).toBe(0);
+      expect(call("round", Infinity, 7)).toBe(Infinity);
+      expectResult(call("round", Infinity, Infinity), NaN);
+      expect(call("rem", 7, Infinity)).toBe(7);
+      expect(call("mod", 7, Infinity)).toBe(7);
+      expectResult(call("mod", -7, Infinity), NaN);
+      expectResult(call("mod", -7, -Infinity), -7);
+      expectResult(call("mod", Infinity, 7), NaN);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
     });
