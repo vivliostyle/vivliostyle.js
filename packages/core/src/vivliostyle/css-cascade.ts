@@ -1504,12 +1504,17 @@ export function resolveLineHeightValueToPx(
   // the other functions of CSS Values 4, e.g. the `round(1lh, 7px)` that has
   // become `round(40px, 7px)` here) and the arithmetic around them. (Review)
   const px = evaluateValueToPx(context, converted);
+  // A length cannot be an infinity, and the browser clamps such a calculation
+  // itself, so it is left unresolved (as a font size is). (Review)
+  if (px == null || !Number.isFinite(px)) {
+    return null;
+  }
   // `line-height` has a non-negative computed-value range, so a math function
   // that computes below zero is clamped: `calc(1lh - 100px)` with a 40px
   // inherited line height is 0, and materializing the -60 that the expression
   // evaluates to would make the browser reject the declaration and inherit the
   // 40px instead of applying zero. (Review)
-  return px != null ? Math.max(0, px) : null;
+  return Math.max(0, px);
 }
 
 /**
@@ -1616,7 +1621,14 @@ export function evaluateFontWeightMathFunction(
   // expression evaluator resolves through the math functions of CSS Values 4.
   // (Review)
   const num = evaluateValueToNumber(context, reduced);
-  return num != null && Number.isFinite(num) ? new Css.Num(num) : null;
+  if (num == null || Number.isNaN(num)) {
+    return null;
+  }
+  // A calculation that overflows to an infinity is clamped to the range of
+  // CSS Fonts 4, like any other out of range result: `font-weight: exp(1000)`
+  // is 1000 for the element itself and for a detached descendant whose
+  // relative keyword resolves against it. (Review)
+  return new Css.Num(Math.min(1000, Math.max(1, num)));
 }
 
 function isMathFunction(func: Css.Func): boolean {
@@ -1675,7 +1687,11 @@ function evaluateValueToPx(
   const evaluated = evaluateCSSToCSS(context, reduced, "font-size");
   if (isAbsoluteLengthValue(evaluated)) {
     const numeric = evaluated as Css.Numeric;
-    return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+    const px = numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+    // A length cannot be an infinity (an overflowing calculation is clamped
+    // by the browser), and a dimension without a unit size is not a length
+    // at all. (Review)
+    return Number.isFinite(px) ? px : null;
   }
   if (
     reduced instanceof Css.Numeric ||
@@ -1691,7 +1707,8 @@ function evaluateValueToPx(
     );
     if (isAbsoluteLengthValue(asCalc)) {
       const numeric = asCalc as Css.Numeric;
-      return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+      const px = numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+      return Number.isFinite(px) ? px : null;
     }
   }
   return null;

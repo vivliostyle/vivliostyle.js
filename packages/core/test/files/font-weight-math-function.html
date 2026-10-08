@@ -9,9 +9,12 @@
      (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
      keeps the inherited weight. A function that uses the other math functions
      of CSS Values 4, e.g. `round(650, 100)`, is evaluated as well (700), so a
-     relative keyword under it must resolve against that result. The pre-fix
-     viewer leaves the function unresolved, so the paragraph is 400 and
-     "bolder" resolves to 700. -->
+     relative keyword under it must resolve against that result. A calculation
+     that overflows to an infinity, e.g. `exp(1000)`, is clamped to the range
+     of CSS Fonts 4 (1000) like any other out of range result, so a detached
+     descendant that uses a relative keyword resolves against 1000 as well.
+     The pre-fix viewer leaves such functions unresolved, so the paragraph is
+     400 and "bolder" resolves to 700. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -32,6 +35,13 @@
     .dep-round { font-weight: round(650, 100); }
     .dep-round .fn-own { float: footnote; font-weight: round(650, 100); } /* 700 */
     .dep-round .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    /* a calculation that overflows to an infinity is clamped to the range of
+       CSS Fonts 4 (1000), so a relative keyword of a footnote resolves against
+       1000: `bolder` than 1000 is 1000 */
+    .dep-inf { font-weight: exp(1000); } /* 1000 */
+    .dep-inf .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf { font-weight: exp(1000); } /* 1000 */
+    .ref-bolder-under-inf { font-weight: bolder; } /* 1000 */
     .ref-round { font-weight: round(650, 100); } /* 700 */
     .ref-bolder-under-round { font-weight: bolder; } /* 900 */
     .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
@@ -51,6 +61,13 @@
     against that 700, like this inline <span class="ref-bolder-under-round">B</span>
     (900):
     <span class="fn-own">B</span><span class="fn-bolder">B</span></p>
+  <p class="dep-inf">The footnote "B" below must be as bold as this inline
+    <span class="ref-inf">B</span>, i.e. the 1000 that `exp(1000)` computes for
+    the range of CSS Fonts 4, and the relative keyword of the second footnote
+    must resolve against that 1000, like this inline
+    <span class="ref-bolder-under-inf">B</span> (1000):
+    <span class="fn-bolder">B</span>
+    <span class="fn-bolder">B</span></p>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be
     <span class="ref-700">B</span>, one step bolder than the 400 of this

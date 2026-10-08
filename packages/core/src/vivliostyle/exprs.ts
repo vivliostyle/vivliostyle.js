@@ -352,9 +352,15 @@ function numericArgs(
   return numbers;
 }
 
-/** The result of a built-in, or NaN to leave the value unresolved. (Review) */
+/**
+ * The result of a built-in, or NaN to leave the value unresolved. An infinity
+ * is kept: CSS Values 4 preserves it through the calculation and clamps it to
+ * the computed-value range of the property (e.g. `font-weight: exp(1000)` is
+ * 1000), so the callers that cannot represent one reject it themselves.
+ * (Review)
+ */
 function result(value: number): number {
-  return Number.isFinite(value) ? value : NaN;
+  return Number.isNaN(value) ? NaN : value;
 }
 
 /**

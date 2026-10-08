@@ -1149,17 +1149,21 @@ export class ViewFactory
           // ancestor. This is needed for `all: initial` to work on elements
           // detached from their source parent (e.g. footnotes). (Issue #1696)
           if (name === "font-size") {
-            // Removing the accumulated value of an inherited property makes
-            // the element inherit from the synthetic view parent instead of
-            // using the initial value, so the initial font size is
-            // materialized: `font-size: initial` is the (medium) initial font
-            // size, which is also the base of its dependent values.
-            // (Issue #2174 follow-up)
+            // The initial font size is materialized as a length, because it is
+            // the base of the dependent values of the element, e.g. an `em`
+            // unit of another declaration: `font-size: initial` is the (medium)
+            // initial font size. (Issue #2174 follow-up)
             props[name] = prop.withValue(
               new Css.Numeric(this.context.initialFontSize, "px"),
             );
           } else {
-            delete props[name];
+            // The keyword itself is kept as the accumulated value. Removing it
+            // would make the detached element inherit from the synthetic view
+            // parent instead of using the initial value, e.g.
+            // `color: initial` under a footnote area that inherits the color
+            // of the page would be rendered in that color instead of the
+            // initial one. (Review)
+            props[name] = prop;
           }
         } else if (
           // The keywords are compared by name, because a keyword that comes

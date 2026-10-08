@@ -3908,6 +3908,13 @@ describe("css-cascade", function () {
         // abs(-650) is 650. (Review)
         expect(evaluate("round(650, 100)").num).toBe(700);
         expect(evaluate("abs(-650)").num).toBe(650);
+        // A calculation that overflows to an infinity is clamped to the range
+        // of CSS Fonts 4 instead of being left unresolved: `exp(1000)` is
+        // 1000, which a detached descendant that uses `bolder` resolves
+        // against. (Review)
+        expect(evaluate("exp(1000)").num).toBe(1000);
+        // ... and a result below the range is clamped to its minimum.
+        expect(evaluate("min(0, 100)").num).toBe(1);
       });
 
       it("keeps the rollback keywords of any casing", function () {

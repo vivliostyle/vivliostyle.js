@@ -98,6 +98,13 @@ describe("exprs", function () {
       expectResult(call("log", 100, -10), NaN);
       expectResult(call("log", 100, 1), NaN);
       expect(call("log", 100, 0.5)).toBeLessThan(0);
+      // An overflowing calculation is an infinity, which CSS preserves and
+      // clamps to the range of the property: the callers that cannot
+      // represent one reject it, the others clamp it. (Review)
+      expect(call("exp", 1000)).toBe(Infinity);
+      expect(call("pow", 10, 1000)).toBe(Infinity);
+      expect(call("log", 0)).toBe(-Infinity);
+      expect(call("log", 0, 0.5)).toBe(Infinity);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
     });

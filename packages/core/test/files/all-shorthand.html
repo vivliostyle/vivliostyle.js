@@ -8,6 +8,12 @@
   size: 600px 800px;
   margin: 50px;
 }
+/* The page context (and with it the footnote area) is outside the body, so the
+   color of the body does not reach it: the root carries it as well. An element
+   with `all: initial` must not take that color, it must use the initial one. */
+:root {
+  color: #800080;
+}
 body {
   font-family: serif;
   font-size: 16px;
