@@ -264,7 +264,12 @@
     call as well, e.g. the `abs(exp(1000))` of the last paragraph: both
     renderers clamp the paragraph to 1000 (canary serializes the infinity,
     which the browser clamps), while the footnote "B" that resolves `bolder`
-    against it is 700 in canary and 1000 in the PR branch. A weight whose
+    against it is 700 in canary and 1000 in the PR branch. The same is true
+    when the calculation is wrapped in a `calc()` (`font-weight:
+    calc(exp(1000))`): canary renders the paragraph 1000 (the browser clamps
+    the infinity) but resolves the `bolder` of its footnote against the
+    fallback 400 (700), while the PR branch clamps it to 1000 like the direct
+    form and renders the footnote 1000 as well. A weight whose
     computation is not a number, e.g. `log(100, 0)`, is invalid at
     computed-value time as well: the paragraph keeps the 700 that it inherits
     from its parent and canary resolves the `bolder` of its footnote against
