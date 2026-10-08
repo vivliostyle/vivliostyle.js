@@ -7,11 +7,11 @@
      the weight of the paragraph itself), and a function whose result is out of
      range must be clamped, while a function whose arguments are not numbers
      (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
-     keeps the inherited weight. A function that this engine does not evaluate
-     itself, e.g. `round(650, 100)`, is valid and is left to the browser, which
-     computes 700: such a declaration must not be dropped. The pre-fix viewer
-     leaves the function unresolved, so the paragraph is 400 and "bolder"
-     resolves to 700. -->
+     keeps the inherited weight. A function that uses the other math functions
+     of CSS Values 4, e.g. `round(650, 100)`, is evaluated as well (700), so a
+     relative keyword under it must resolve against that result. The pre-fix
+     viewer leaves the function unresolved, so the paragraph is 400 and
+     "bolder" resolves to 700. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -45,8 +45,8 @@
     <span class="ref-bolder">B</span><span class="fn-bolder">B</span>
     <span class="fn-own">B</span><span class="fn-clamp">B</span></p>
   <p class="dep-round">The footnote "B" below must be as bold as this inline
-    <span class="ref-round">B</span>, i.e. the 700 that the browser computes for
-    `round(650, 100)`, not the 400 of the initial weight or the 700 of a
+    <span class="ref-round">B</span>, i.e. the 700 that `round(650, 100)`
+    computes, not the 400 of the initial weight or the 700 of a
     fallback, and the relative keyword of the second footnote must resolve
     against that 700, like this inline <span class="ref-bolder-under-round">B</span>
     (900):

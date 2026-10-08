@@ -87,7 +87,7 @@ describe("exprs", function () {
       expect(call("rem", -1, 8)).toBe(-1);
     });
 
-    it("evaluates the exponential and trigonometric functions", function () {
+    it("evaluates the sign-related and exponential functions", function () {
       expect(call("abs", -20)).toBe(20);
       expect(call("sign", -3)).toBe(-1);
       expect(call("hypot", 3, 4)).toBe(5);
