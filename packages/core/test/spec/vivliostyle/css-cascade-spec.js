@@ -3549,6 +3549,31 @@ describe("css-cascade", function () {
             new adapt_css.Numeric(5, "s"),
           ),
         ).toBe(true);
+        // The internal unit is checked as the length it is: a value that mixes
+        // types and an unknown function stay invalid, so that the walk keeps
+        // the inherited line height for them, as the browser does. (Review)
+        function parse(text) {
+          return adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        }
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("min(2pvw, 1)"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("foo(2pvw)")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("calc(2pvw + 1px)"),
+          ),
+        ).toBe(false);
       });
 
       it("rejects a function whose result is not a number", function () {
@@ -3679,6 +3704,38 @@ describe("css-cascade", function () {
             newContext(),
           ).getInheritedLineHeight(),
         ).toBe(42);
+      });
+
+      it("resolves a line height in a unit that only the browser resolves", function () {
+        // The `ch`/`ex`/`cap`/`ic` units come from the metrics of the font,
+        // which this engine cannot obtain: the assumptions of CSS Values 4 are
+        // used against the font size of the element, as the root sizing does,
+        // so that a footnote that resolves `1lh` against such a line height
+        // does not fall back to the root line height. `5ch` of a 16px font is
+        // 5 x 0.5em x 16px = 40px, and `5rem`/`5rlh` are not affected. (Review)
+        function inherited(text) {
+          var props = {
+            "font-size": new adapt_csscasc.CascadeValue(
+              new adapt_css.Numeric(16, "px"),
+              0,
+            ),
+            "line-height": new adapt_csscasc.CascadeValue(
+              new adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              0,
+            ),
+          };
+          return new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight();
+        }
+        expect(inherited("5ch")).toBe(40);
+        expect(inherited("5ic")).toBe(80);
+        expect(inherited("2.5ex")).toBe(20);
       });
 
       it("resolves a line height in an internal viewport unit", function () {
@@ -4134,6 +4191,10 @@ describe("css-cascade", function () {
         // 1000, which a detached descendant that uses `bolder` resolves
         // against. (Review)
         expect(evaluate("exp(1000)").num).toBe(1000);
+        // ... the same when the calculation is wrapped in a `calc()`, whose
+        // result the cascade clamps with the same range. (Review)
+        expect(evaluate("calc(exp(1000))").num).toBe(1000);
+        expect(evaluate("calc(log(100, 0))")).toBe(null);
         // ... and a result below the range is clamped to its minimum.
         expect(evaluate("min(0, 100)").num).toBe(1);
       });
@@ -4169,23 +4230,53 @@ describe("css-cascade", function () {
         // value; a value that a substitution made invalid is not preserved.
         // (Review)
         expect(
-          adapt_csscasc.isValidUnresolvedFontSize(adapt_css.getName("math")),
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_css.getName("math"),
+          ),
         ).toBe(true);
         expect(
           adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
             new adapt_css.Numeric(2, "ch"),
           ),
         ).toBe(true);
         expect(
           adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
             new adapt_css.Numeric(5, "s"),
           ),
         ).toBe(false);
         expect(
           adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
             adapt_css.getName("nonsense"),
           ),
         ).toBe(false);
+        // A supported function whose computation is not a number, e.g.
+        // `round(20px, 0px)`, is invalid at computed-value time, so the element
+        // keeps the value that the source parent accumulated instead of the
+        // declaration. (Review)
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(20px, 0px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(20px, 7px)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
       });
 
       it("detects a negative literal font size", function () {

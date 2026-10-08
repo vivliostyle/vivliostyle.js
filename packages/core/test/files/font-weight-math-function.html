@@ -14,7 +14,9 @@
      of CSS Fonts 4 (1000) like any other out of range result, so a detached
      descendant that uses a relative keyword resolves against 1000 as well.
      The infinity survives a nested call, e.g. `abs(exp(1000))`, which must be
-     1000 for such a paragraph and for its footnote's `bolder` too. A function
+     1000 for such a paragraph and for its footnote's `bolder` too, and it is
+     clamped when the calculation is wrapped in a `calc()`, e.g.
+     `calc(exp(1000))`. A function
      whose result is not a number, e.g. `log(100, 0)`, is invalid at
      computed-value time: the paragraph keeps the 700 that it inherits from its
      parent, so the `bolder` of its footnote is 900 (the pre-fix viewer resolves
@@ -56,6 +58,12 @@
     .nan-parent .dep-nan { font-weight: log(100, 0); }
     .nan-parent .dep-nan .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
     .nan-parent .ref-bolder { font-weight: bolder; } /* 900 */
+    /* the same infinity wrapped in a `calc()`, which the cascade clamps with
+       the same range: `calc(exp(1000))` is 1000, and a relative keyword of a
+       footnote resolves against it (bolder than 1000 is 1000) */
+    .dep-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
+    .dep-inf-calc .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
     .dep-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
     .dep-inf-nested .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
@@ -95,6 +103,11 @@
     `font-weight: log(100, 0)` computes to NaN and the browser keeps the
     inherited weight:
     <span class="fn-bolder">B</span></p></div>
+  <p class="dep-inf-calc">The footnote "B" below must be as bold as this inline
+    <span class="ref-inf-calc">B</span>, i.e. the 1000 that
+    `calc(exp(1000))` computes for the range of CSS Fonts 4, and the relative
+    keyword of the footnote must resolve against that 1000:
+    <span class="fn-bolder">B</span></p>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be
     <span class="ref-700">B</span>, one step bolder than the 400 of this

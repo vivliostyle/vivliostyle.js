@@ -777,6 +777,14 @@ export class Styler implements AbstractStyler {
           }
         }
       }
+      // A font size that is neither a keyword nor resolvable here, e.g. the
+      // `round(up, 20px, 7px)` whose rounding strategy this engine does not
+      // evaluate, is left to the browser, which keeps the declaration and
+      // computes the value: the root font size that this context records stays
+      // the initial one, so `rem`, the page context and the margin boxes use a
+      // different metric than the rendered root element. Known limitation:
+      // materializing the computed value of the browser would need the
+      // rendered size. (Review)
       if (px != null) {
         // `font-size` has a non-negative computed-value range, e.g.
         // `calc(10px - 20px)` computes to 0px.
@@ -867,6 +875,11 @@ export class Styler implements AbstractStyler {
           rootLineHeight = resolved;
           fromRelativeCalc = true;
         }
+        // A value that is not resolvable here is left to the browser, as the
+        // root font size above: the root line height that this context records
+        // stays the preferred one, and `rlh` and the page context use a
+        // different metric than the rendered root element. Known limitation,
+        // as above. (Review)
       }
     }
     this.context.rootLineHeight =

@@ -1308,7 +1308,7 @@ export class ViewFactory
               // A valid value that cannot be resolved here, e.g. the `math`
               // keyword or a unit that only the browser resolves, is preserved
               // instead of being replaced by the inherited value. (Review)
-              !CssCascade.isValidUnresolvedFontSize(prop1.value)
+              !CssCascade.isValidUnresolvedFontSize(this.context, prop1.value)
             ) {
               const inheritedFontSize = CssCascade.getProp(props, name);
               if (inheritedFontSize) {

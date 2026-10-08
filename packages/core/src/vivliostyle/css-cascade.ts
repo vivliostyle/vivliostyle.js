@@ -1202,9 +1202,18 @@ export function isValidFontWeight(num: number): boolean {
  * substitution made invalid and a value with an unresolved var() are not
  * preserved. (Review)
  */
-export function isValidUnresolvedFontSize(value: Css.Val): boolean {
+export function isValidUnresolvedFontSize(
+  context: Exprs.Context,
+  value: Css.Val,
+): boolean {
   return (
     !CssValidator.containsVar(value) &&
+    // A supported function whose computation is not a number, e.g. the
+    // `round(20px, 0px)` of a declaration, is not a value that only the
+    // browser resolves: it is invalid at computed-value time, so the element
+    // keeps the font size that the source parent accumulated, as the browser
+    // inherits it. (Review)
+    !evaluatesToNaN(context, value) &&
     CSS.supports("font-size", value.toString())
   );
 }
@@ -1262,14 +1271,12 @@ export function isInvalidLineHeight(
     // put into the declaration, makes the browser reject the declaration and
     // keep the inherited line height. `CSS.supports()` only knows the syntax,
     // so a supported function whose result is not a number, e.g.
-    // `log(100, 0)`, is detected by evaluating it. A value that uses one of the
-    // internal viewport units of this engine is not invalid: the browser does
-    // not know those units, while this engine resolves them, e.g. the
-    // `line-height: 2pvw` of an element whose line height a detached
-    // descendant resolves an `lh` unit against. (Review)
+    // `log(100, 0)`, is detected by evaluating it. The internal viewport units
+    // of this engine are treated as the lengths they are, because the browser
+    // does not know them, while a value that mixes types (`min(2pvw, 1)`) or
+    // uses an unknown function is rejected like any other. (Review)
     return (
-      (!CSS.supports("line-height", value.toString()) &&
-        !containsInternalViewportUnit(value)) ||
+      !CSS.supports("line-height", checkableText(value)) ||
       evaluatesToNaN(context, value)
     );
   }
@@ -1277,11 +1284,7 @@ export function isInvalidLineHeight(
     return value.num < 0;
   }
   if (value instanceof Css.Numeric) {
-    return (
-      value.num < 0 ||
-      (!CSS.supports("line-height", value.toString()) &&
-        !containsInternalViewportUnit(value))
-    );
+    return value.num < 0 || !CSS.supports("line-height", checkableText(value));
   }
   return value instanceof Css.Ident;
 }
@@ -1372,33 +1375,22 @@ function isFunctionRejectedByBrowser(
   value: Css.Val,
 ): boolean {
   return (
-    value instanceof Css.Func &&
-    !CSS.supports(propName, value.toString()) &&
-    !containsInternalViewportUnit(value)
+    value instanceof Css.Func && !CSS.supports(propName, checkableText(value))
   );
 }
 
 /**
- * Whether a value uses one of the internal viewport units of this engine
- * (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin`, `pvmax`), which a browser does not
- * know: `CSS.supports()` rejects a declaration that uses one, although this
- * engine resolves it, e.g. against the size of the page box. (Review)
+ * The value in the form that `CSS.supports()` can check: the internal viewport
+ * units of this engine (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin`, `pvmax`) are
+ * replaced by a length, because a browser does not know those units although
+ * this engine resolves them, e.g. against the size of the page box. A
+ * declaration that uses one is a valid length for a browser, so the syntax and
+ * the types of the value are checked as if it were written with such a length:
+ * a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown function, e.g.
+ * `foo(2pvw)`, stay invalid. (Review)
  */
-function containsInternalViewportUnit(value: Css.Val): boolean {
-  const visitor = new InternalViewportUnitVisitor();
-  value.visit(visitor);
-  return visitor.found;
-}
-
-class InternalViewportUnitVisitor extends Css.FilterVisitor {
-  found = false;
-
-  override visitNumeric(numeric: Css.Numeric): Css.Val {
-    if (/^pv/i.test(numeric.unit)) {
-      this.found = true;
-    }
-    return numeric;
-  }
+function checkableText(value: Css.Val): string {
+  return value.toString().replace(/-?\d*\.?\d+pv(?:min|max|[whbi])\b/gi, "1px");
 }
 
 /**
@@ -1992,7 +1984,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       if (px != null) {
         return px;
       }
-      if (isValidUnresolvedFontSize(value)) {
+      if (isValidUnresolvedFontSize(this.context, value)) {
         // A valid value that only the browser resolves, e.g. the `math`
         // keyword, has no size in px here: the values that depend on it are
         // left to the browser as well, which resolves them against the
@@ -2135,7 +2127,19 @@ export class InheritanceVisitor extends Css.FilterVisitor {
           return null;
         default: {
           const unitSize = Exprs.defaultUnitSizes[value.unit];
-          return unitSize ? clampComputed(value.num * unitSize) : null;
+          if (unitSize) {
+            return clampComputed(value.num * unitSize);
+          }
+          const ratio = browserFontRelativeUnitRatio(value.unit);
+          // A unit that only the browser resolves, e.g. the `ch` of
+          // `line-height: 5ch`, has no unit size here: the assumption of CSS
+          // Values 4 is used against the font size of the element, as the root
+          // sizing does, so that a detached descendant that resolves an `lh`
+          // unit against such a line height does not fall back to the root
+          // line height. (Review)
+          return ratio != null
+            ? clampComputed(value.num * ratio * parentFontSize)
+            : null;
         }
       }
     }
@@ -6465,12 +6469,13 @@ export class CascadeInstance {
           }
           if (value instanceof Css.Num) {
             // A weight that is not a literal, e.g. `calc(1200)`, is valid: the
-            // computed value is clamped to the range of CSS Fonts 4, while a
-            // non-finite result is invalid like a literal outside the range.
-            // (Review)
-            value = Number.isFinite(value.num)
-              ? new Css.Num(Math.min(1000, Math.max(1, value.num)))
-              : Css.ident.unset;
+            // computed value is clamped to the range of CSS Fonts 4, which
+            // includes an overflowing calculation such as
+            // `calc(exp(1000))`, while a result that is not a number is
+            // invalid like a literal outside the range. (Review)
+            value = Number.isNaN(value.num)
+              ? Css.ident.unset
+              : new Css.Num(Math.min(1000, Math.max(1, value.num)));
           } else if (isInvalidFontWeight(this.context, value)) {
             value = Css.ident.unset;
           }
