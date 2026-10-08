@@ -388,13 +388,13 @@
     the 200px of the explicit reference. The PR branch resolves `ch` with the
     CSS assumption of 0.5em (the initial font size is the basis of the root
     element), so the root font size is 40px and the `rem` box matches the 200px
-    reference. The `ch` of a line height is the one unit that the browser
-    resolves with its real metric in both viewers: the root line height is the
-    `5ch` of the root font size (measured 131.359px in the branch, where the
-    font size of the root is 40px, and 52.55px in canary, where the page keeps
-    the 16px), and the paragraph that resolves `1lh` has the same height as the
-    paragraph that declares the same `5ch` (measured 131.359px and 52.5547px
-    against 131.359px and 52.5522px).
+    reference. The root line height, `line-height: 5ch`, is resolved with the
+    assumption of CSS Values 4 as well, and the value is the one the root
+    element uses (it is materialized like a resolved calc()), so the `rlh`
+    unit, the page context and the rendered root line height come from the
+    same metric: the paragraph that resolves `1lh` is 99.992px like its 100px
+    reference in the branch, while the pre-fix viewers resolve `1lh` against
+    the real metric of the font (52.5547px for the page they keep at 16px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
