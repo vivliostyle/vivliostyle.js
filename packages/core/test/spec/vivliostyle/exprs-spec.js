@@ -125,6 +125,13 @@ describe("exprs", function () {
       expectResult(call("mod", Infinity, 7), NaN);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
+      // A remainder of zero carries the sign of the divisor as well, which the
+      // subtraction alone loses for a negative divisor: `mod(0, -8)` must be
+      // `-0`, so that a nested calculation (e.g. the `1 / mod(0, -8)` of an
+      // expression) sees `-Infinity` rather than `+Infinity`. (Review)
+      expect(Object.is(call("mod", 0, -8), -0)).toBe(true);
+      expect(Object.is(call("mod", 0, 8), 0)).toBe(true);
+      expect(Object.is(call("mod", -16, -8), -0)).toBe(true);
     });
 
     it("evaluates the sign-related and exponential functions", function () {

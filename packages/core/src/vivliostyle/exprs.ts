@@ -327,12 +327,14 @@ export function needUnitConversion(unit: string): boolean {
 
 /**
  * The arguments of a math function of CSS Values 4 that this expression
- * language evaluates: each of them must have been evaluated to a finite number
- * (every dimension is converted to px by this language, and a keyword, such as
- * the `<rounding-strategy>` of `round()`, becomes a media name, which is not a
- * number) and their number must be one that the function accepts. Returns null
- * when the call must not be evaluated: the caller then keeps the value
- * unresolved and the browser resolves it. (Review)
+ * language evaluates: each of them must have been evaluated to a number other
+ * than `NaN` (every dimension is converted to px by this language, and a
+ * keyword, such as the `<rounding-strategy>` of `round()`, becomes a media
+ * name, which is not a number; a number that overflows to an infinity is kept,
+ * because the property clamps it to its range) and their number must be one
+ * that the function accepts. Returns null when the call must not be evaluated:
+ * the caller then keeps the value unresolved and the browser resolves it.
+ * (Review)
  */
 function numericArgs(
   args: unknown[],
@@ -415,7 +417,12 @@ export function mod(...args: unknown[]): number {
   if (!Number.isFinite(b)) {
     return moduloOfInfiniteDivisor(a, b, true);
   }
-  return result(a - b * Math.floor(a / b));
+  const remainder = a - b * Math.floor(a / b);
+  // A remainder of zero has the sign of the divisor as well. The subtraction
+  // above loses it for a negative divisor (`mod(0, -8)` becomes `+0`), which a
+  // nested calculation can observe, e.g. as `1 / mod(0, -8)` being `-Infinity`
+  // instead of `+Infinity`. (Review)
+  return result(remainder === 0 && b < 0 ? -0 : remainder);
 }
 
 /**

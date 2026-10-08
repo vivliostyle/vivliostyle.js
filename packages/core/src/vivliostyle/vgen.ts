@@ -1074,7 +1074,7 @@ export class ViewFactory
               // A line height that the browser rejects is inherited as well,
               // so the inherited line height must still be accumulated for a
               // descendant that resolves the `lh` unit. (Review)
-              CssCascade.isInvalidLineHeight(value))
+              CssCascade.isInvalidLineHeight(this.context, value))
           ) {
             currentDeclaresLineHeight = true;
           } else if (
@@ -1263,7 +1263,7 @@ export class ViewFactory
             // weight must not be replaced by it: a relative keyword
             // (`bolder`/`lighter`) of a detached descendant is resolved against
             // the inherited weight. (Review)
-            if (CssCascade.isInvalidFontWeight(prop1.value)) {
+            if (CssCascade.isInvalidFontWeight(this.context, prop1.value)) {
               const inheritedFontWeight = CssCascade.getProp(props, name);
               if (inheritedFontWeight) {
                 prop1 = prop1.withValue(inheritedFontWeight.value);
@@ -1278,7 +1278,7 @@ export class ViewFactory
             // resolves the `lh` unit (`font-size: 1lh`) then uses the line
             // height it inherits instead of the preferred line height.
             // (Review)
-            if (CssCascade.isInvalidLineHeight(prop1.value)) {
+            if (CssCascade.isInvalidLineHeight(this.context, prop1.value)) {
               const inheritedLineHeight = CssCascade.getProp(props, name);
               if (inheritedLineHeight) {
                 prop1 = prop1.withValue(inheritedLineHeight.value);

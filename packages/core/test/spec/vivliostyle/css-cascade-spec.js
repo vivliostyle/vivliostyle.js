@@ -3409,6 +3409,20 @@ describe("css-cascade", function () {
         ).toBe(50);
       });
 
+      it("resolves a function of unitless numbers against the font size", function () {
+        // `min(1, 2)` is the number 1, which is a valid line height: its
+        // computed value is the number multiplied by the font size of the
+        // element (16px here), not an unresolved length. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("min(1, 2)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(16);
+      });
+
       it("clamps a negative result to the non-negative range", function () {
         // `line-height: calc(1lh - 100px)` with a 40px inherited line height
         // computes to -60, which the non-negative computed-value range of
@@ -3434,28 +3448,50 @@ describe("css-cascade", function () {
         // rejected by the browser, which keeps the inherited line height. A
         // math function is allowed until it is evaluated. (Review)
         expect(
-          adapt_csscasc.isInvalidLineHeight(adapt_css.getName("nonsense")),
-        ).toBe(true);
-        expect(adapt_csscasc.isInvalidLineHeight(new adapt_css.Num(-1))).toBe(
-          true,
-        );
-        expect(
-          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(-5, "px")),
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_css.getName("nonsense"),
+          ),
         ).toBe(true);
         expect(
-          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(5, "s")),
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Num(-1),
+          ),
         ).toBe(true);
         expect(
-          adapt_csscasc.isInvalidLineHeight(adapt_css.getName("normal")),
-        ).toBe(false);
-        expect(adapt_csscasc.isInvalidLineHeight(new adapt_css.Num(1.5))).toBe(
-          false,
-        );
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(-5, "px"),
+          ),
+        ).toBe(true);
         expect(
-          adapt_csscasc.isInvalidLineHeight(new adapt_css.Numeric(2, "em")),
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_css.getName("normal"),
+          ),
         ).toBe(false);
         expect(
           adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Num(1.5),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(2, "em"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
             new adapt_css.Func("calc", [new adapt_css.Num(2)]),
           ),
         ).toBe(false);
@@ -3464,6 +3500,7 @@ describe("css-cascade", function () {
         // (Review)
         expect(
           adapt_csscasc.isInvalidLineHeight(
+            newContext(),
             adapt_cssparse.parseValue(
               new adapt_exprs.LexicalScope(null),
               new adapt_csstok.Tokenizer("min(10px, 2)", null),
@@ -3473,11 +3510,53 @@ describe("css-cascade", function () {
         ).toBe(true);
         expect(
           adapt_csscasc.isInvalidLineHeight(
+            newContext(),
             adapt_cssparse.parseValue(
               new adapt_exprs.LexicalScope(null),
               new adapt_csstok.Tokenizer("calc(1lh - 100px)", null),
               "",
             ),
+          ),
+        ).toBe(false);
+      });
+
+      it("rejects a function whose result is not a number", function () {
+        // `CSS.supports()` only knows the syntax, so a supported function that
+        // computes `NaN`, e.g. `log(100, 0)`, is not detected by it: such a
+        // declaration is invalid at computed-value time as well, and the
+        // browser keeps the inherited line height. A function whose value is a
+        // number, e.g. `min(1, 2)`, is valid. (Review)
+        function parse(text) {
+          return adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        }
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("log(100, 0)")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("round(40px, 0)"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("min(1, 2)")),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("round(40px, 7px)"),
+          ),
+        ).toBe(false);
+        // A value that this engine cannot evaluate, e.g. one with a unit that
+        // only the browser resolves, is not known to be invalid. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("min(1ch, 2px)"),
           ),
         ).toBe(false);
       });
@@ -3569,6 +3648,35 @@ describe("css-cascade", function () {
             newContext(),
           ).getInheritedLineHeight(),
         ).toBe(42);
+      });
+
+      it("clamps a negative computed line height to zero", function () {
+        // `line-height: min(-10px, -20px)` computes to -20px, which the
+        // non-negative computed-value range of `line-height` clamps to 0: a
+        // descendant that resolves `calc(1lh + 10px)` against it computes 10px,
+        // not 0px from the -20px of the calculation. (Review)
+        function inherited(text) {
+          var props = {
+            "font-size": new adapt_csscasc.CascadeValue(
+              new adapt_css.Numeric(16, "px"),
+              0,
+            ),
+            "line-height": new adapt_csscasc.CascadeValue(
+              adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              0,
+            ),
+          };
+          return new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight();
+        }
+        expect(inherited("min(-10px, -20px)")).toBe(0);
+        expect(inherited("min(1, 2)")).toBe(16);
       });
 
       it("resolves an absolute line height without the inherited font size", function () {
@@ -3799,30 +3907,48 @@ describe("css-cascade", function () {
         // it, e.g. one that a var() substitution put into the declaration, is
         // invalid, while a math function that computes such a value is clamped.
         // (Review)
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(-10))).toBe(
-          true,
-        );
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(0))).toBe(
-          true,
-        );
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1001))).toBe(
-          true,
-        );
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(NaN))).toBe(
-          true,
-        );
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1))).toBe(
-          false,
-        );
         expect(
-          adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(700.5)),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(-10),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(newContext(), new adapt_css.Num(0)),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(1001),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(NaN),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(newContext(), new adapt_css.Num(1)),
         ).toBe(false);
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Num(1000))).toBe(
-          false,
-        );
-        expect(adapt_csscasc.isInvalidFontWeight(new adapt_css.Int(700))).toBe(
-          false,
-        );
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(700.5),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(1000),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Int(700),
+          ),
+        ).toBe(false);
       });
 
       it("rejects every invalid post-substitution font weight form", function () {
@@ -3831,13 +3957,22 @@ describe("css-cascade", function () {
         // into the declaration is invalid as well, while a math function is
         // allowed until it is evaluated. (Review)
         expect(
-          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("nonsense")),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("nonsense"),
+          ),
         ).toBe(true);
         expect(
-          adapt_csscasc.isInvalidFontWeight(new adapt_css.Numeric(700, "px")),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Numeric(700, "px"),
+          ),
         ).toBe(true);
         expect(
-          adapt_csscasc.isInvalidFontWeight(new adapt_css.Numeric(1, "em")),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Numeric(1, "em"),
+          ),
         ).toBe(true);
         for (const keyword of [
           "normal",
@@ -3849,11 +3984,15 @@ describe("css-cascade", function () {
           "unset",
         ]) {
           expect(
-            adapt_csscasc.isInvalidFontWeight(adapt_css.getName(keyword)),
+            adapt_csscasc.isInvalidFontWeight(
+              newContext(),
+              adapt_css.getName(keyword),
+            ),
           ).toBe(false);
         }
         expect(
           adapt_csscasc.isInvalidFontWeight(
+            newContext(),
             new adapt_css.Func("calc", [new adapt_css.Num(650)]),
           ),
         ).toBe(false);
@@ -3862,6 +4001,7 @@ describe("css-cascade", function () {
         // declaration must not be dropped. (Review)
         expect(
           adapt_csscasc.isInvalidFontWeight(
+            newContext(),
             adapt_cssparse.parseValue(
               new adapt_exprs.LexicalScope(null),
               new adapt_csstok.Tokenizer("round(650, 100)", null),
@@ -3871,9 +4011,24 @@ describe("css-cascade", function () {
         ).toBe(false);
         expect(
           adapt_csscasc.isInvalidFontWeight(
+            newContext(),
             adapt_cssparse.parseValue(
               new adapt_exprs.LexicalScope(null),
               new adapt_csstok.Tokenizer("min(900px, 1em)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
+        // A supported function whose result is not a number, e.g.
+        // `log(100, 0)`, is invalid as well: the browser keeps the inherited
+        // weight, which a relative keyword of a descendant must resolve
+        // against. (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("log(100, 0)", null),
               "",
             ),
           ),
@@ -3925,10 +4080,16 @@ describe("css-cascade", function () {
         // The Ident constructor rejects a name that already exists, so the
         // names must be looked up through getName().
         expect(
-          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("REVERT")),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("REVERT"),
+          ),
         ).toBe(false);
         expect(
-          adapt_csscasc.isInvalidFontWeight(adapt_css.getName("REVERT-LAYER")),
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("REVERT-LAYER"),
+          ),
         ).toBe(false);
         expect(adapt_css.isRollbackValue(adapt_css.getName("REVERT"))).toBe(
           true,
