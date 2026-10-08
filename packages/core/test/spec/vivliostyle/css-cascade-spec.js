@@ -4776,6 +4776,12 @@ describe("css-cascade", function () {
         // here. (Review)
         expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5px");
         expect(evaluate("calc(hypot(3, 4))", "width")).toBe("5");
+        // A value that is not finite is serialized as the JavaScript name and
+        // evaluated again by the checks of a declaration, e.g.
+        // `evaluatesToNaN()`: the name is a constant, not an undefined name.
+        // (Review)
+        expect(evaluate("calc(Infinity)", "width")).toBe("Infinity");
+        expect(evaluate("calc(NaN)", "width")).toBe("calc(NaN)");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
       });
 
