@@ -728,7 +728,12 @@ export class Styler implements AbstractStyler {
               // The unit size of a viewport relative unit, e.g. `2vw`, must not
               // be left as the raw number either, and the root element must use
               // the resolved size like above: the internal units of this engine
-              // (`pv*`) are not CSS that a browser can resolve. (Review)
+              // (`pv*`) are not CSS that a browser can resolve. A plain
+              // viewport relative unit is normally already converted to a px
+              // length by `fontSize.evaluate()` (the page size is not known
+              // while the root sizes are determined, so the viewer viewport
+              // provides the unit size), so this branch only applies to a unit
+              // that survives the evaluation. (Review)
               px *= this.context.queryUnitSize(val.unit, true);
               isRelativeFontSize = true;
             } else {
@@ -827,6 +832,15 @@ export class Styler implements AbstractStyler {
               fromRelativeCalc = true;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               px = val.num * this.context.queryUnitSize(val.unit, true);
+              // The root element must use this resolved size: an internal unit
+              // such as `2pvw` is not CSS that a browser can resolve, and the
+              // `rlh` unit and the page context use this value. A plain
+              // viewport relative unit is normally already converted to a px
+              // length by `lineHeight.evaluate()`, because the page size is not
+              // known while the root sizes are determined (the viewer viewport
+              // provides the unit size), so this branch only applies to a unit
+              // that survives the evaluation. (Review)
+              fromRelativeCalc = true;
             } else {
               // An unsupported dimension keeps the default root line height,
               // as the browser keeps it for an invalid value. (Review)
