@@ -2033,12 +2033,24 @@ export class InheritanceVisitor extends Css.FilterVisitor {
       if (hasKeywordName(ident, "math")) {
         // The math font size depends on the mathematical context of the
         // element: it is 1em of the inherited font size for the depths that
-        // this engine represents (`math-depth` is not supported, so a deeper
-        // context, in which the browser scales the size down, is not modelled
-        // here). It is resolved like `1em`, so that a detached element uses
-        // the font size of its source parent instead of the one of the
-        // synthetic parent that the browser would resolve the keyword in
-        // after the element is reparented. (Review)
+        // this engine represents, which is the value of a depth 0 element, so
+        // it is resolved like `1em` and a detached element uses the font size
+        // of its source parent instead of the one of the synthetic parent that
+        // the browser would resolve the keyword in after the element is
+        // reparented. A well formed MathML document keeps that meaning: the
+        // `math` keyword of the `math` element is depth 0, and the deeper
+        // elements take their scaling from the user agent stylesheet
+        // (`math-depth: add(1)`), which this cascade does not see, so they are
+        // resolved by the browser against the font size that is resolved here
+        // (measured: an exponent of a footnote is 0.71em of its base, like its
+        // inline reference). A `math` that an author declares on an element of
+        // a deeper depth is the one case that is not modelled here: the
+        // materialized 1em makes a relative value of a detached descendant
+        // larger than the browser would compute it (measured: a footnote
+        // inside an element whose `font-size: math` has
+        // `math-depth: add(1)` is 64px, twice the 1em of 32px, instead of the
+        // 45.4px that the browser computes from the 22.7px). `math-depth` is
+        // not supported by this engine. (Review)
         const parentFontSize = this.getFontSize();
         if (parentFontSize != null) {
           return new Css.Numeric(parentFontSize, "px");
