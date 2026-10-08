@@ -842,12 +842,19 @@
     (40px) instead of the 40px that it inherits (80px), and an ancestor whose
     font size only the browser resolves (`font-size: math`) made the absolute
     line height of that ancestor unknown, so the footnote with `font-size: 1lh`
-    was 20px instead of the 40px of the paragraph. The PR branch resolves those
-    ancestor values level by level against the font size of the level that the
-    value belongs to, reduces the math functions of an inherited line height to
-    px, replaces the `lh` unit of such a value with the line height that the
-    element inherits, and resolves the lh unit against the source parent, like
-    content in the normal flow.
+    was 20px instead of the 40px of the paragraph. A line height that is one of
+    the other math functions of CSS Values 4, e.g. `round(40px, 7px)` of the
+    source parent, was not reduced either: the footnote that resolves `1lh`
+    against it used the 20px of the root line height (letter-spacing 40px)
+    instead of the 42px that the function computes (letter-spacing 84px), and
+    an own `line-height: round(1lh, 7px)` of the footnote was left to the
+    browser, which resolved its `lh` against the 21px line height of the
+    footnote area instead of the 42px computed from the 40px of the source
+    parent. The PR branch resolves those ancestor values level by level against
+    the font size of the level that the value belongs to, reduces the math
+    functions of a line height to px, replaces the `lh` unit of such a value
+    with the line height that the element inherits, and resolves the lh unit
+    against the source parent, like content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
