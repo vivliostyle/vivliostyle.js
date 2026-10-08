@@ -1583,7 +1583,7 @@ class DimensionVisitor extends Css.FilterVisitor {
   }
 }
 
-function isUnitlessNumberValue(value: Css.Val): boolean {
+export function isUnitlessNumberValue(value: Css.Val): boolean {
   const visitor = new DimensionVisitor();
   value.visit(visitor);
   return !visitor.found;
@@ -1899,9 +1899,10 @@ class MathFunctionReducer extends Css.FilterVisitor {
  * Whether an expression of the expression language is a single call to a math
  * function of CSS Values 4 that returns a `<number>` whatever its arguments
  * are. The other functions keep the type of their arguments (`abs()`, `mod()`,
- * `rem()`, `round()` and the `clamp()`/`min()`/`max()` family), and this
- * language converts every dimension to a number, so the result of such a call
- * must not be materialized as a length even when its argument is one:
+ * `rem()`, `round()` and the `clamp()`/`min()`/`max()` family, and `hypot()`,
+ * which computes to the common type of its arguments), and this language
+ * converts every dimension to a number, so the result of such a call must not
+ * be materialized as a length even when its argument is one:
  * `calc(sign(20px))` is the unitless number 1, which a property that needs a
  * length, e.g. `width`, rejects. (Review)
  */
@@ -1912,14 +1913,7 @@ function isNumberCalculation(expr: Exprs.Val): boolean {
   );
 }
 
-const NUMBER_MATH_FUNCTION_NAMES = [
-  "exp",
-  "hypot",
-  "log",
-  "pow",
-  "sign",
-  "sqrt",
-];
+const NUMBER_MATH_FUNCTION_NAMES = ["exp", "log", "pow", "sign", "sqrt"];
 
 /**
  * The math functions of CSS Values 4, other than `clamp()`/`min()`/`max()`,

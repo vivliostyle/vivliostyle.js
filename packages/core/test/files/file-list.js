@@ -1766,4 +1766,14 @@ module.exports = [
       },
     ],
   },
+  {
+    category: "Issue #2174 follow-up (root line height)",
+    files: [
+      {
+        file: "line-height-root-unitless-function.html",
+        title:
+          "Root line height from a math function of numbers (Issue #2174 follow-up)",
+      },
+    ],
+  },
 ];

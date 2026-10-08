@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root line height that is a math
+     function of unitless numbers, e.g. `:root { line-height: min(1, 2) }`, is
+     a `<number>`, whose computed value is the number multiplied by the font
+     size of the element. The root element keeps the declaration, as it does
+     for a plain `line-height: 1`, so the number is what descendants inherit:
+     the paragraph "Number" with a 32px font size has a 32px line height, the
+     same as the explicit reference "Number". The px value that this engine
+     resolves for the root line height (16px) is what the `rlh` unit and the
+     page context use: the paragraph with `line-height: 1rlh` has the
+     same height as the explicit 16px reference, not the preferred
+     1.2 x 16px = 19.2px that the pre-fix viewers use for the `rlh` unit. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Root line height from a math function of numbers (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    :root { font-size: 16px; line-height: min(1, 2); }
+    body { margin: 0; }
+    p { margin: 0; }
+    .number { font-size: 32px; background: #ddd; }
+    .ref-number { font-size: 32px; line-height: 32px; background: #eee; }
+    .rlh { line-height: 1rlh; background: #ddd; }
+    .ref-rlh { line-height: 16px; background: #eee; }
+  </style>
+</head>
+<body>
+  <p>The two paragraphs below must have the same height: the first is the
+    explicit 32px line height of its 32px font size, and the second one
+    inherits the unitless `min(1, 2)` number of the root element, which is the
+    same 32px for that font size.</p>
+  <p class="ref-number">Two lines<br>of the same text</p>
+  <p class="number">Two lines<br>of the same text</p>
+  <p>The two paragraphs below must have the same height as well: the first is
+    the explicit 16px that this engine resolves for the root line height, and
+    the second one is the `1rlh` that refers to it.</p>
+  <p class="ref-rlh">Two lines<br>of the same text</p>
+  <p class="rlh">Two lines<br>of the same text</p>
+</body>
+</html>

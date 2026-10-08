@@ -990,3 +990,52 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-inherit-region-rule.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0175"
+  category: Leader
+  title: Table of Contents with leader()
+  file: leader/toc-leader.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Noise, not a change of this PR: one run of the comparison reported 370
+    differing pixels (diffRatio 0.00044) on the leader dots of the "Named
+    pages" TOC line, where the dots differ by about one pixel of phase while
+    the text and the page numbers are identical. The same comparison re-run
+    with the same viewers found no difference at all, so the entry records a
+    sub-pixel rendering difference of the leader dots; if it reappears, the
+    dot phase is flagged again for a decision instead of masking a change of
+    this test.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0429"
+  category: "Issue #2174 follow-up (root line height)"
+  title: "Root line height from a math function of numbers (Issue #2174 follow-up)"
+  file: line-height-root-unitless-function.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    paragraph with `line-height: 1rlh` has the preferred 1.2 x 16px = 19.2px
+    root line height instead of the 16px that the `min(1, 2)` root declaration
+    computes (the number is the multiplier of the 16px font size of the root
+    element). The PR branch records the 16px for the `rlh` unit and the page
+    context, while the root element keeps the declaration, so the paragraphs
+    that inherit the number, e.g. the one with a 32px font size, keep the
+    multiplier of their own font size like the browsers do instead of the
+    materialized 16px that replacing the root declaration would give them.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-root-unitless-function.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-root-unitless-function.html&zoom=1&spread=false
+  diffPages:
+    - 1

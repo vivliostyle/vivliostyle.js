@@ -4772,7 +4772,10 @@ describe("css-cascade", function () {
         expect(evaluate("calc(sign(20px))", "width")).toBe("1");
         expect(evaluate("calc(abs(-20px))", "width")).toBe("20px");
         expect(evaluate("calc(sign(20px) * 1px)", "width")).toBe("1px");
-        expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5");
+        // `hypot()` computes to the common type of its arguments, a length
+        // here. (Review)
+        expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5px");
+        expect(evaluate("calc(hypot(3, 4))", "width")).toBe("5");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
       });
 

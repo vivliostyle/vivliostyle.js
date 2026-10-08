@@ -878,7 +878,13 @@ export class Styler implements AbstractStyler {
         );
         if (resolved != null) {
           rootLineHeight = resolved;
-          fromRelativeCalc = true;
+          // A function of unitless numbers, e.g. the `min(1, 2)` of
+          // `:root { line-height: min(1, 2) }`, is a `<number>`: its computed
+          // value is a multiplier of the font size, so the root element keeps
+          // the declaration, as it does for a plain unitless number. Only the
+          // recorded root line height is in px, for `rlh` and the page
+          // context. (Review)
+          fromRelativeCalc = !CssCascade.isUnitlessNumberValue(val);
         }
         // A value that is not resolvable here is left to the browser, as the
         // root font size above: the root line height that this context records
