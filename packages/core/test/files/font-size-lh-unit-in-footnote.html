@@ -78,9 +78,12 @@
     .fn.pct-lh { font-size: 1lh; }
     .ref.pct-lh { font-size: 24px; }
     /* a line height whose computation is not a number, e.g. `log(100, 0)`, is
-       invalid at computed-value time: the paragraph keeps the 42px line height
-       that it inherits from the root, and a footnote that resolves `1lh`
-       against it is 42px as well */
+       invalid at computed-value time: the browser keeps the 42px line height
+       that the paragraph inherits from the root, and the footnote that
+       resolves `1lh` against it is 42px as well. (The paragraph's own
+       declaration is materialized as `calc(0)` by this engine, as it is by the
+       pre-fix viewers; that is not what the `1lh` basis of the footnote uses.
+       Review) */
     p.nan-lh { line-height: log(100, 0); }
     .fn.nan-lh { font-size: 1lh; }
     .ref.nan-lh { font-size: 42px; }

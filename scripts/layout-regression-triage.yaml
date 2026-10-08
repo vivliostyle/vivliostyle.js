@@ -925,10 +925,12 @@
     `font-size: 1rlh` is 19.992px (letter-spacing 40px) instead of the 41.992px
     of its `42px` reference (84px), while the PR branch resolves the root line
     height with the same resolver as the inherited ones and matches it. A line
-    height whose computation is not a number, e.g. `log(100, 0)`, is turned
-    into the zero length `calc(0)` by the pre-fix viewers, so the footnote with
-    `font-size: 1lh` was 19.992px (letter-spacing 40px) instead of the 42px
-    that the paragraph inherits from the root (84px), like its reference. A
+    height whose computation is not a number, e.g. `log(100, 0)`, is
+    materialized as the zero length `calc(0)` by both viewers (the paragraph
+    keeps the 42px that it inherits in a browser), while the footnote that
+    resolves `1lh` against it was 19.992px (letter-spacing 40px) in the pre-fix
+    ones instead of the 42px that the declaration keeps in a browser (84px),
+    like its reference. A
     line height that computes below zero, e.g. `min(-10px, -20px)`, was
     recorded as the -20px of the calculation, so the footnote with
     `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of the 10px of
