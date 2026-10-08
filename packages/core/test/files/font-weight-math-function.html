@@ -2,10 +2,11 @@
 <!-- Test case for Issue #2174 follow-up: `font-weight` accepts a math function
      of CSS Values 4 (it is a `<number>`), so the function must be evaluated
      before the 1-1000 range is validated and before a relative keyword is
-     resolved against the result. The footnotes "B" of the `min(900, 1000)`
-     paragraph must be as bold as the inline "B" of the same paragraph (900,
-     the weight of the paragraph itself), and a function whose result is out of
-     range must be clamped, while a function whose arguments are not numbers
+     resolved against the result. The first two footnotes "B" of the
+     `min(900, 1000)` paragraph must be as bold as the inline "B" of the same
+     paragraph (900, the weight of the paragraph itself), and the third one,
+     whose own function is out of range, must be clamped to 1000, while a
+     function whose arguments are not numbers
      (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
      keeps the inherited weight. A function that uses the other math functions
      of CSS Values 4, e.g. `round(650, 100)`, is evaluated as well (700), so a
@@ -84,9 +85,10 @@
   </style>
 </head>
 <body>
-  <p class="dep">The three footnotes "B" below must be as bold as the inline
-    "B" of this paragraph, i.e. 900, the weight of the `min(900, 1000)`
-    paragraph itself:
+  <p class="dep">The first two footnotes "B" below must be as bold as the
+    inline "B" of this paragraph, i.e. 900, the weight of the
+    `min(900, 1000)` paragraph itself, and the third one must be 1000, the
+    result of its own `max(1000, 1200)` clamped to the range of CSS Fonts 4:
     <span class="ref-bolder">B</span><span class="fn-bolder">B</span>
     <span class="fn-own">B</span><span class="fn-clamp">B</span></p>
   <p class="dep-round">The footnote "B" below must be as bold as this inline
