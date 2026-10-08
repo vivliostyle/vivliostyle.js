@@ -3520,6 +3520,37 @@ describe("css-cascade", function () {
         ).toBe(false);
       });
 
+      it("accepts the internal viewport units of this engine", function () {
+        // A browser does not know the `pv*` units of this engine, so
+        // `CSS.supports()` rejects a declaration that uses one, although this
+        // engine resolves it: `line-height: 2pvw` is a valid line height here,
+        // and a descendant that resolves an `lh` unit against it must not get
+        // the line height of an ancestor instead. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(2, "pvw"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(2pvw + 1px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        // A dimension that this engine does not resolve either is invalid.
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(true);
+      });
+
       it("rejects a function whose result is not a number", function () {
         // `CSS.supports()` only knows the syntax, so a supported function that
         // computes `NaN`, e.g. `log(100, 0)`, is not detected by it: such a
@@ -3648,6 +3679,41 @@ describe("css-cascade", function () {
             newContext(),
           ).getInheritedLineHeight(),
         ).toBe(42);
+      });
+
+      it("resolves a line height in an internal viewport unit", function () {
+        // The `pvw` unit of this engine is 1% of the page box width, which the
+        // context of this spec gives as its 800px viewport: the footnote that
+        // resolves `1lh` against `line-height: 2pvw` uses the 16px of the unit
+        // rather than the preferred line height. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(2, "pvw"),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(16);
+        // ... also when the inherited font size is a value that only the
+        // browser resolves.
+        props["font-size"] = new adapt_csscasc.CascadeValue(
+          adapt_css.getName("math"),
+          0,
+        );
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(16);
       });
 
       it("clamps a negative computed line height to zero", function () {

@@ -1262,9 +1262,14 @@ export function isInvalidLineHeight(
     // put into the declaration, makes the browser reject the declaration and
     // keep the inherited line height. `CSS.supports()` only knows the syntax,
     // so a supported function whose result is not a number, e.g.
-    // `log(100, 0)`, is detected by evaluating it. (Review)
+    // `log(100, 0)`, is detected by evaluating it. A value that uses one of the
+    // internal viewport units of this engine is not invalid: the browser does
+    // not know those units, while this engine resolves them, e.g. the
+    // `line-height: 2pvw` of an element whose line height a detached
+    // descendant resolves an `lh` unit against. (Review)
     return (
-      !CSS.supports("line-height", value.toString()) ||
+      (!CSS.supports("line-height", value.toString()) &&
+        !containsInternalViewportUnit(value)) ||
       evaluatesToNaN(context, value)
     );
   }
@@ -1272,7 +1277,11 @@ export function isInvalidLineHeight(
     return value.num < 0;
   }
   if (value instanceof Css.Numeric) {
-    return value.num < 0 || !CSS.supports("line-height", value.toString());
+    return (
+      value.num < 0 ||
+      (!CSS.supports("line-height", value.toString()) &&
+        !containsInternalViewportUnit(value))
+    );
   }
   return value instanceof Css.Ident;
 }
@@ -1365,8 +1374,31 @@ function isFunctionRejectedByBrowser(
   return (
     value instanceof Css.Func &&
     !CSS.supports(propName, value.toString()) &&
-    !/\dpv/i.test(value.toString())
+    !containsInternalViewportUnit(value)
   );
+}
+
+/**
+ * Whether a value uses one of the internal viewport units of this engine
+ * (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin`, `pvmax`), which a browser does not
+ * know: `CSS.supports()` rejects a declaration that uses one, although this
+ * engine resolves it, e.g. against the size of the page box. (Review)
+ */
+function containsInternalViewportUnit(value: Css.Val): boolean {
+  const visitor = new InternalViewportUnitVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+class InternalViewportUnitVisitor extends Css.FilterVisitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    if (/^pv/i.test(numeric.unit)) {
+      this.found = true;
+    }
+    return numeric;
+  }
 }
 
 /**
@@ -2026,6 +2058,14 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         // keyword of an ancestor, must not make such a line height unknown.
         // (Review)
         return value.num * Exprs.defaultUnitSizes[unit];
+      }
+      if (Exprs.isViewportRelativeLengthUnit(unit)) {
+        // A viewport relative line height, e.g. the `line-height: 2pvw` that a
+        // detached descendant resolves an `lh` unit against, does not depend on
+        // the font size either, and the unit size of the internal units is
+        // known to this engine only: a declaration that the browser rejects
+        // (it does not know `pv*`) must not make the basis unknown. (Review)
+        return value.num * this.context.queryUnitSize(unit, false);
       }
     }
     if (parentFontSize == null) {

@@ -19,7 +19,19 @@
      `line-height: round(40px, 7px)`, and the root line height itself can be
      such a function: `font-size: 1rlh` of a footnote must be the 42px that the
      function computes for the root (the pre-fix viewer keeps the preferred
-     line height there). -->
+     line height there).
+     A line height that computes to nothing that can be materialized must not
+     make the basis of the `lh` unit wrong either: a function whose result is
+     not a number (`log(100, 0)`) leaves the 42px that the paragraph inherits
+     from the root (the declaration itself is materialized as `calc(0)` by this
+     engine and by the pre-fix viewers alike), a function that computes below
+     zero (`min(-10px, -20px)`) is clamped to 0, and a function of unitless
+     numbers (`min(1, 2)`) is the number 1, i.e. the 16px font size of the
+     paragraph. A line height in an internal viewport unit of this engine
+     (`2pvw`) is 2% of the width of the page box (12.094px), which only this
+     engine resolves: the pre-fix viewers used the preferred line height for
+     the `1lh` basis there instead of the 12.0925px of the paragraph,
+     letter-spacing 24.19px). -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -92,6 +104,12 @@
     p.zero-lh { line-height: min(-10px, -20px); }
     .fn.zero-lh { font-size: calc(1lh + 10px); }
     .ref.zero-lh { font-size: 10px; }
+    /* a line height in an internal viewport unit of this engine: 2pvw is 2%
+       of the 160mm width of the page box (12.094px at 96dpi), which this
+       engine resolves although a browser does not know the unit */
+    p.pvw-lh { line-height: 2pvw; }
+    .fn.pvw-lh { font-size: 1lh; }
+    .ref.pvw-lh { font-size: 12.095px; }
     /* a math function of unitless numbers is a number: min(1, 2) = 1, which is
        the 16px font size of the paragraph */
     p.num-lh { line-height: min(1, 2); }
@@ -126,6 +144,9 @@
     <span class="ref nan-lh">Wide</span><span class="fn nan-lh">Wide</span></p>
   <p class="zero-lh">lh unit with a line height that computes below zero:
     <span class="ref zero-lh">Wide</span><span class="fn zero-lh">Wide</span></p>
+  <p class="pvw-lh">lh unit with a line height in the internal page viewport
+    unit (2pvw):
+    <span class="ref pvw-lh">Wide</span><span class="fn pvw-lh">Wide</span></p>
   <p class="num-lh">lh unit with a line height that is a unitless function:
     <span class="ref num-lh">Wide</span><span class="fn num-lh">Wide</span></p>
   <p>The footnote at the page bottom must have the same letter-spacing as the
@@ -141,6 +162,12 @@
     there, and the paragraph with `line-height: round(40px, 7px)` is 42px, so
     the footnote with `font-size: 1lh` is 42px as well. The paragraph whose own font size is `math` (which only the
     browser resolves) has an absolute line height of 40px, so the footnote with
-    `font-size: 1lh` is 40px as well.</p>
+    `font-size: 1lh` is 40px as well. The paragraph whose line height computes
+    to NaN keeps the 42px that it inherits from the root (so its footnote is
+    42px), the paragraph with `line-height: min(-10px, -20px)` has the 0px that
+    the non-negative range clamps the function to (so its footnote with
+    `calc(1lh + 10px)` is 10px), the paragraph with `line-height: min(1, 2)`
+    has the 16px of the number 1, and the paragraph with the internal viewport
+    unit `line-height: 2pvw` has the 12.094px of 2% of the page box.</p>
 </body>
 </html>
