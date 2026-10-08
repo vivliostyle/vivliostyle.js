@@ -44,9 +44,12 @@
     the property does not accept (`round(20px, 7)`, which rounds a length to a
     multiple of a number, and `sign(20px)`, which returns a number) are
     evaluated by the pre-fix viewers as if the numbers were px, so those
-    footnotes are 21px or 1px there (0px in canary); the PR branch treats them
-    as the invalid declarations they are, so those footnotes keep the inherited
-    32px and their letter-spacing is 64px like the reference too. The unknown
+    footnotes are 21px or 1px there (0px in canary), and
+    `log(100, 0)`, whose base must make the result NaN, is the finite -0 of the
+    division by `Math.log(0) === -Infinity`, so that footnote is 0px as well
+    (letter-spacing 32px); the PR branch treats them as the invalid declarations
+    they are, so those footnotes keep the inherited 32px and their
+    letter-spacing is 64px like the reference too. The unknown
     `font-size: nonsense` footnote and the
     `font-size: calc(10px - 20px)` footnote are 0 or inherited in both viewers,
     because an unknown keyword is rejected during parsing and a computed
@@ -128,7 +131,15 @@
     `--y: INHERIT; font-size: var(--y)` use the initial 16px instead of the 32px
     of the source parent (`letter-spacing: 2em` is 32px instead of 64px). The
     PR branch compares the keyword names case insensitively, so the footnotes
-    inherit the source parent values.
+    inherit the source parent values. The two "Bold" footnotes, whose rollback
+    keyword comes from a `var()` fallback, are 700 in every viewer (the keyword
+    becomes the whole value of the declaration, which rolls back to the UA
+    weight of the `strong`), so they carry no difference; a CSS-wide keyword
+    written directly as the value of a custom property is a known limitation of
+    this engine (the browsers apply it to the custom property itself, so the
+    reference is invalid at computed-value time and the property keeps the
+    inherited value — measured 400 for a `strong` of a paragraph at 400, while
+    every viewer of this test renders the UA weight 700).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -721,8 +732,13 @@
     engine does not evaluate, e.g. `round(20px, 7px)` (21px), is not resolved
     either, so the relative `font-size: 2em` of the footnote is resolved in the
     footnote area: it is 32px in canary instead of the 42px of the inline
-    reference. The PR branch resolves the math functions of CSS Values 4 and
-    matches the references.
+    reference. The step of a `round()` can be negative: the pre-fix viewers
+    leave the value to the browser, which computes the 7px of the upper
+    multiple of the interval but resolves the `letter-spacing: 2em` of the
+    footnote against the 16px of the footnote area (32px instead of the
+    reference's 14px), while the PR branch evaluates the function itself (the
+    division by the negative step gave the -0 that was materialized as a zero
+    size before this round) and matches the reference.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
