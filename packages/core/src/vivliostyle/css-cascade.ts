@@ -1577,6 +1577,17 @@ class LineHeightUnitReplacer extends Css.FilterVisitor {
 class DimensionVisitor extends Css.FilterVisitor {
   found = false;
 
+  override visitFunc(func: Css.Func): Css.Val {
+    // The arguments of a function that returns a `<number>` whatever its
+    // arguments are, e.g. the `20px` of `sign(20px)`, are a number and not a
+    // length: they do not make the surrounding value a length, so the
+    // arguments are not visited. (Review)
+    if (NUMBER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())) {
+      return func;
+    }
+    return super.visitFunc(func);
+  }
+
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     this.found = true;
     return numeric;
@@ -1914,6 +1925,22 @@ function isNumberCalculation(expr: Exprs.Val): boolean {
 }
 
 const NUMBER_MATH_FUNCTION_NAMES = ["exp", "log", "pow", "sign", "sqrt"];
+
+const NUMBER_MATH_FUNCTION_ARGUMENTS_RE = new RegExp(
+  `\\b(?:${NUMBER_MATH_FUNCTION_NAMES.join("|")})\\s*\\([^()]*\\)`,
+  "gi",
+);
+
+/**
+ * The text of a calculation without the arguments of the math functions that
+ * return a `<number>` whatever their arguments are, e.g. the `20px` of
+ * `sign(20px)`: such a dimension belongs to a number and must not make the
+ * calculation look like a length. One level at a time, so the arguments of a
+ * nested function are removed as well. (Review)
+ */
+function withoutNumberMathFunctionArguments(text: string): string {
+  return text.replace(NUMBER_MATH_FUNCTION_ARGUMENTS_RE, "()");
+}
 
 /**
  * The math functions of CSS Values 4, other than `clamp()`/`min()`/`max()`,
@@ -8620,13 +8647,19 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
           this.evaluatedToNaN = true;
         } else if (typeof exprResult === "number") {
           const numberCalculation = isNumberCalculation(exprVal.expr);
-          const isLength = !numberCalculation && this.isLengthExpr(exprText);
+          // The dimensions of the arguments of a function that returns a
+          // `<number>` whatever its arguments are, e.g. the `20px` of
+          // `sign(20px)`, are numbers and not lengths, so only the dimensions
+          // outside such a function say whether the calculation is a length.
+          // (Review)
+          const typeText = withoutNumberMathFunctionArguments(exprText);
+          const isLength = !numberCalculation && this.isLengthExpr(typeText);
           if (isLength && Number.isFinite(exprResult)) {
             // length value
             value = new Css.Numeric(exprResult, "px");
           } else if (
             !isLength &&
-            (numberCalculation || !/\d[a-z]/i.test(exprText))
+            (numberCalculation || !/\d[a-z]/i.test(typeText))
           ) {
             // unitless number, which may be an infinity: a number valued
             // property such as `font-weight` clamps it to its range, while a

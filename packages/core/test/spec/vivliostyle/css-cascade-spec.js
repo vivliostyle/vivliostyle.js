@@ -3423,6 +3423,23 @@ describe("css-cascade", function () {
         ).toBe(16);
       });
 
+      it("resolves a number-returning function of a dimension", function () {
+        // `min(sign(20px), 2)` is the number 1: the dimension of the argument
+        // of `sign()` belongs to a number and does not make the function a
+        // length, so the computed line height is the number multiplied by the
+        // font size of the element (16px here), and an element that declares
+        // such a function (e.g. the root element) keeps the declaration
+        // instead of a fixed px value. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("min(sign(20px), 2)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(16);
+      });
+
       it("clamps a negative result to the non-negative range", function () {
         // `line-height: calc(1lh - 100px)` with a 40px inherited line height
         // computes to -60, which the non-negative computed-value range of
@@ -4782,6 +4799,11 @@ describe("css-cascade", function () {
         // (Review)
         expect(evaluate("calc(Infinity)", "width")).toBe("Infinity");
         expect(evaluate("calc(NaN)", "width")).toBe("calc(NaN)");
+        // The dimension of an argument of a number-returning function is not a
+        // dimension of the calculation: `sign(20px)` is the number 1 even
+        // through a function that keeps the type of its arguments. (Review)
+        expect(evaluate("calc(min(sign(20px), 2))", "width")).toBe("1");
+        expect(evaluate("calc(abs(sign(20px)))", "width")).toBe("1");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
       });
 
