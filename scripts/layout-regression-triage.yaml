@@ -878,7 +878,12 @@
     an own `line-height: round(1lh, 7px)` of the footnote was left to the
     browser, which resolved its `lh` against the 21px line height of the
     footnote area instead of the 42px computed from the 40px of the source
-    parent. The PR branch resolves those ancestor values level by level against
+    parent. The root line height of this fixture is such a function as well
+    (`:root { line-height: round(40px, 7px) }`): the pre-fix viewers keep the
+    preferred line height of the root font size there, so the footnote with
+    `font-size: 1rlh` is 19.992px (letter-spacing 40px) instead of the 41.992px
+    of its `42px` reference (84px), while the PR branch resolves the root line
+    height with the same resolver as the inherited ones and matches it. The PR branch resolves those ancestor values level by level against
     the font size of the level that the value belongs to, reduces the math
     functions of a line height to px, replaces the `lh` unit of such a value
     with the line height that the element inherits, and resolves the lh unit
