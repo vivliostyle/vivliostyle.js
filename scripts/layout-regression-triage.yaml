@@ -263,7 +263,12 @@
     font size is 1em of the inherited font size for the depths that this engine
     represents; `math-depth` is not supported, so a deeper context is not
     modelled). The PR branch resolves the keyword like `1em` of the source
-    parent, so both footnotes are 32px like the inline `1em` reference.
+    parent, so both footnotes are 32px like the inline `1em` reference. The
+    scaling of a deeper context comes from the user agent stylesheet
+    (`math-depth: add(1)`) and is applied by the browser, so the exponent of a
+    footnote is 0.71em of the resolved 32px (22.71px) in both viewers, like its
+    inline reference; only a `math` that an author declares on an element of a
+    deeper depth is not modelled, because `math-depth` is not supported.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -337,11 +342,14 @@
     Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager
     conversion of the unit produced to the browser (`font-size: calc(NaNpx -
     var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote
-    "ch" falls back to the inherited 15.998px while its inline reference renders
-    the `5ch` size of the 32px source parent (79.9918px). The PR branch resolves
-    the unit with the CSS assumption of 0.5em for the “0” glyph and the font
-    size of the source parent, so the footnote is 79.998px like the reference
-    and is not resolved in the 16px footnote area it is reparented into.
+    "ch" falls back to the inherited 16px (measured 15.9922px) of the footnote
+    area. The PR branch resolves the unit with the CSS assumption of 0.5em for
+    the "0" glyph and the font size of the source parent, so the footnote is
+    80px like the `80px` reference of the same paragraph (measured 79.998px),
+    not the 16px of the footnote area that it is reparented into: the assumed
+    size is an approximation of the real metric, which the fixture shows as
+    well (the inline `5ch` of the same 32px paragraph is 105.079px in both
+    viewers, since the browser resolves it against the font itself).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -361,12 +369,16 @@
     Follow-up of Issue #2174. canary treats the raw number of a root font size
     that only the browser resolves as pixels: `:root { font-size: 5ch }` sets
     the root font size to 5px, so the box sized in `rem` is 25px wide instead of
-    the 200px of the explicit reference, and the root line height of
-    `line-height: 5ch` is resolved from the raw number as well (the element that
-    resolves `1lh` is 39.998px high instead of the 100px of its reference). The
-    PR branch resolves `ch` with the CSS assumption of 0.5em (the initial font
-    size is the basis of the root element), so the root font size is 40px, the
-    `rem` box matches the 200px reference, and the root line height is 100px.
+    the 200px of the explicit reference. The PR branch resolves `ch` with the
+    CSS assumption of 0.5em (the initial font size is the basis of the root
+    element), so the root font size is 40px and the `rem` box matches the 200px
+    reference. The `ch` of a line height is the one unit that the browser
+    resolves with its real metric in both viewers: the root line height is the
+    `5ch` of the root font size (measured 131.359px in the branch, where the
+    font size of the root is 40px, and 52.55px in canary, where the page keeps
+    the 16px), and the paragraph that resolves `1lh` has the same height as the
+    paragraph that declares the same `5ch` (measured 131.359px and 52.5547px
+    against 131.359px and 52.5522px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
