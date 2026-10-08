@@ -83,6 +83,21 @@ describe("exprs", function () {
       expectResult(call("clamp", 10, 20), NaN);
       expectResult(call("log", 100, 10, 2), NaN);
       expectResult(call("round", 20, 0), NaN);
+      // The sign of the step does not matter: the multiples of a negative
+      // step are the multiples of its absolute value, and a value exactly
+      // between two of them is rounded up. (Review)
+      expect(call("round", 3.5, -7)).toBe(7);
+      expect(call("round", 3.5, 7)).toBe(7);
+      expect(call("round", 10.5, -7)).toBe(14);
+      // A step that is zero makes the result NaN, a negative one does not.
+      expectResult(call("round", 20, -0), NaN);
+      // A base of 1, 0 or a negative number makes the logarithm NaN, which
+      // the division would not: log(100, 0) was the -0 of dividing by
+      // Math.log(0) === -Infinity. (Review)
+      expectResult(call("log", 100, 0), NaN);
+      expectResult(call("log", 100, -10), NaN);
+      expectResult(call("log", 100, 1), NaN);
+      expect(call("log", 100, 0.5)).toBeLessThan(0);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
     });

@@ -5,7 +5,9 @@
      clamps to zero, and a keyword substituted from a custom property) must also be resolved to numeric computed values, so that em units in
      detached content (footnote) use the same font size as the browser does.
      In each paragraph the footnote "Wide" must have the same letter-spacing as the
-     inline reference "Wide", which the browser resolves. -->
+     inline reference "Wide", which the browser resolves. The step of a
+     `round()` can be negative: `round(3.5px, -7px)` is the 7px of the upper
+     multiple of the interval, not the -0 of dividing by the negative step. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -40,6 +42,9 @@
     /* the math functions of CSS Values 4 that an engine has to evaluate to
        know the computed size: round(20px, 7px) = 21px */
     p.math { font-size: round(20px, 7px); }
+    /* a negative step: round(3.5px, -7px) is the 7px of the upper multiple of
+       the 7px interval, not the -0 that dividing by the negative step gives */
+    p.math-negative-step { font-size: round(3.5px, -7px); }
     .fn.own-size, .ref.own-size { font-size: 2em; letter-spacing: 0; }
   </style>
 </head>
@@ -53,6 +58,8 @@
   <p class="nested">calc(clamp(10px, 20px, 30px) + 5px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p class="math">round(20px, 7px) with a relative font size:
     <span class="ref own-size">2em</span><span class="fn own-size">2em</span></p>
+  <p class="math-negative-step">round(3.5px, -7px) = 7px:
+    <span class="ref">Wide</span><span class="fn">Wide</span></p>
   <p>In the footnotes at the page bottom, each "Wide" must have the same
     letter-spacing as the inline "Wide" of the same paragraph above, and the
     footnote "2em" of the `round()` paragraph must be as large as its inline

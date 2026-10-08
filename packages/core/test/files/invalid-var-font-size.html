@@ -14,7 +14,9 @@
      of being inherited. A math function of the CSS Values 4 family that the
      browser rejects — `round(20px, 7)`, which rounds a length to a multiple of
      a number, and `sign(20px)`, which returns a number — is invalid as well,
-     so those footnotes keep the inherited 32px too. The same declaration in the normal flow must be
+     so those footnotes keep the inherited 32px too, and so is `log(100, 0)`,
+     whose base must make the result NaN instead of the finite -0 that the
+     division gives. The same declaration in the normal flow must be
      emitted as the computed 0px, not as a negative length that the browser
      rejects (it would inherit the parent font size instead). -->
 <html lang="en">
@@ -32,6 +34,7 @@
     .dep .fn-unit { float: footnote; --unit: 5s; font-size: var(--unit); letter-spacing: 2em; }
     .dep .fn-round { float: footnote; --r: round(20px, 7); font-size: var(--r); letter-spacing: 2em; }
     .dep .fn-sign { float: footnote; --sg: sign(20px); font-size: var(--sg); letter-spacing: 2em; }
+    .dep .fn-log { float: footnote; --lb: log(100, 0); font-size: var(--lb); letter-spacing: 2em; }
     .ref { font-size: 32px; letter-spacing: 2em; }
     .neg-calc { font-size: calc(10px - 20px); } /* computed 0px */
     .neg-ref { font-size: 0px; }
@@ -55,7 +58,10 @@
     The <code>font-size: var(--r)</code> (<code>round(20px, 7)</code>) and
     <code>font-size: var(--sg)</code> (<code>sign(20px)</code>) are invalid math
     functions, so these footnotes keep the inherited 32px as well:
-    <span class="fn-round">Wide</span><span class="fn-sign">Wide</span></p>
+    <span class="fn-round">Wide</span><span class="fn-sign">Wide</span>
+    The <code>font-size: var(--lb)</code> (<code>log(100, 0)</code>) is invalid
+    as well, because a base of 0 must make the result NaN instead of the -0 of
+    the division:<span class="fn-log">Wide</span></p>
   <p class="ref">Wide</p>
   <p>The invalid <code>font-size: var(--negative)</code> of the root must be
     ignored as well, so the root keeps the initial 16px and the blue box (10rem)

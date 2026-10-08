@@ -364,7 +364,10 @@ function result(value: number): number {
  * strategy); without one, to the nearest integer. A call with a rounding
  * strategy or with an argument that is not a number is left to the browser:
  * this expression language cannot represent the strategy keyword, which it
- * evaluates to a media name. (Review)
+ * evaluates to a media name. The sign of the step does not matter: its
+ * multiples are the multiples of its absolute value, so `round(3.5px, -7px)`
+ * is the 7px of the upper multiple, not the -0 that dividing by the negative
+ * step gives. (Review)
  */
 export function round(...args: unknown[]): number {
   const numbers = numericArgs(args, 1, 2);
@@ -372,11 +375,14 @@ export function round(...args: unknown[]): number {
     return NaN;
   }
   const [value, step] = numbers;
-  return step == null
-    ? result(Math.round(value))
-    : step === 0
-      ? NaN
-      : result(Math.round(value / step) * step);
+  if (step == null) {
+    return result(Math.round(value));
+  }
+  if (step === 0) {
+    return NaN;
+  }
+  const interval = Math.abs(step);
+  return result(Math.round(value / interval) * interval);
 }
 
 /**
@@ -406,13 +412,22 @@ export function rem(...args: unknown[]): number {
   return result(a % b);
 }
 
-/** The `log()` of CSS Values 4: the natural logarithm, or the given base. (Review) */
+/**
+ * The `log()` of CSS Values 4: the natural logarithm, or the given base. A
+ * base of 1, 0 or a negative number makes the result NaN (§10.5.1), which the
+ * division would not: `Math.log(0)` is -Infinity and the quotient of a
+ * positive value by it is the finite -0, which a caller would materialize as a
+ * zero, and a base of 1 gives an infinity. (Review)
+ */
 export function log(...args: unknown[]): number {
   const numbers = numericArgs(args, 1, 2);
   if (!numbers) {
     return NaN;
   }
   const [value, base] = numbers;
+  if (base != null && (base <= 0 || base === 1)) {
+    return NaN;
+  }
   return result(
     base == null ? Math.log(value) : Math.log(value) / Math.log(base),
   );
