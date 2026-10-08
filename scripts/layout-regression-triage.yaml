@@ -269,7 +269,11 @@
     calc(exp(1000))`): canary renders the paragraph 1000 (the browser clamps
     the infinity) but resolves the `bolder` of its footnote against the
     fallback 400 (700), while the PR branch clamps it to 1000 like the direct
-    form and renders the footnote 1000 as well. A weight whose
+    form and renders the footnote 1000 as well. The same holds for
+    `hypot(exp(1000), log(-1))`, whose infinite argument takes precedence over
+    the `NaN` one: the paragraph is 1000 in both viewers (canary serializes the
+    infinity, which the browser clamps), while the `bolder` of its footnote is
+    700 in canary and 1000 in the PR branch. A weight whose
     computation is not a number, e.g. `log(100, 0)`, is invalid at
     computed-value time as well: the paragraph keeps the 700 that it inherits
     from its parent and canary resolves the `bolder` of its footnote against
