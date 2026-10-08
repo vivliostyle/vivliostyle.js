@@ -5,9 +5,12 @@
      and the margin boxes. The browsers resolve `ch` against the font metrics of
      their default font, which is the initial font size for the root element, so
      `5ch` is 40px and `5rem` is 200px: the two boxes of this page must have the
-     same width. The root line height of a `5ch` value is 100px (the `ch` unit
-     of a line height refers to the root font size, which is 5ch of the initial
-     font itself), so the line height of the reference must match as well. -->
+     same width. The root line height is the `5ch` that the root declares: a
+     `ch` of a line height is resolved by the browser with the real metrics of
+     its default font (≈131px for the 40px root font size, while the assumption
+     of 0.5em would give 100px), so a paragraph that declares the same `5ch`
+     and a paragraph that declares `1lh`, the line height that it inherits,
+     must have the same height. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -18,7 +21,7 @@
     body { margin: 0; }
     .rem { width: 5rem; height: 10px; background: #333; }
     .px { width: 200px; height: 10px; background: #999; }
-    .lh-rem { line-height: 100px; }
+    .lh-ch { line-height: 5ch; }
     .lh-lh { line-height: 1lh; }
   </style>
 </head>
@@ -28,7 +31,10 @@
     second is the explicit reference.</p>
   <div class="rem"></div>
   <div class="px"></div>
-  <p class="lh-rem">One line</p>
+  <p>The two one line paragraphs below must have the same height: the first
+    declares the `5ch` of the root line height itself, and the second the
+    `1lh` that it inherits.</p>
+  <p class="lh-ch">One line</p>
   <p class="lh-lh">One line</p>
 </body>
 </html>

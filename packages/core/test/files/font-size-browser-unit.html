@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <!-- Test case for Issue #2174 follow-up: a font size with a unit that only the
-     browser resolves, e.g. `5ch`, is valid and must be preserved on a detached
-     element instead of being replaced by the inherited font size, and the
-     values that depend on it must be left to the browser as well: the footnote
-     "ch" must be as large as the inline reference "ch" of the same paragraph,
-     which resolves the unit against the font metrics of the 32px source parent
-     (≈80px): a detached element must not resolve it in the synthetic parent it
-     is reparented into, and the pre-fix viewer rejects the invalid `NaNpx` it
-     materializes and falls back to the inherited 16px. -->
+     browser resolves, e.g. `5ch`, must not make a detached element fall back to
+     the inherited size of the synthetic parent it is reparented into. This
+     engine cannot obtain the glyph metrics of the font before the document is
+     laid out, so it resolves the unit with the assumption of CSS Values 4 §6.1
+     (the `0` glyph of `ch` is 0.5em): the footnote "ch" must be the 5 x 0.5 x
+     32px = 80px that the inline `80px` reference "ch" of the same paragraph
+     shows (the grey "ch"), not the 16px of the footnote area, and a value that
+     depends on the unit must use that size as its basis. The inline `5ch`
+     reference (the plain "ch") shows the real metric of the font (≈105px),
+     which differs from the assumption; the pre-fix viewer, which converts the
+     unit eagerly, rejects the invalid `NaNpx` it materializes and falls back
+     to the 16px of the footnote area. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,14 +21,18 @@
     body { font-size: 16px; }
     .dep { font-size: 32px; }
     .dep .ref-ch { font-size: 5ch; }
+    .dep .ref-assumed { font-size: 80px; background: #eee; }
     .dep .fn-ch { float: footnote; font-size: 5ch; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
 <body>
-  <p class="dep">The footnote "ch" must be rendered like this inline reference
-    "ch" of the same paragraph, i.e. with the font metrics of this 32px
-    paragraph (≈80px), not with the 16px of the footnote area:
+  <p class="dep">The footnote "ch" must be rendered like the grey reference
+    "ch" of the same paragraph, i.e. with the assumed 0.5em of this 32px
+    paragraph (5 x 0.5 x 32px = 80px), not with the 16px of the footnote area:
+    <span class="ref-assumed">ch</span>, while the plain "ch" is the same value
+    resolved by the browser with the real metric of the font (≈105px), which
+    this engine cannot know before the document is laid out:
     <span class="ref-ch">ch</span></p>
   <p class="dep">The footnote of this paragraph is the one at the page bottom:
     <span class="fn-ch">ch</span></p>

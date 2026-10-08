@@ -5,8 +5,11 @@
      The footnote "B" must therefore be as bold as the inline reference (its
      `bolder` is resolved against the inherited 700, i.e. 900), and the
      footnote "Z", whose own weight is invalid, must keep the inherited 700.
-     The pre-fix viewer replaces the inherited weight with the invalid number,
-     so "B" is 400 and "Z" is 0. The invalid value can take other forms as well,
+     The pre-fix viewer resolves the relative keyword of the detached footnote
+     against the weight that the footnote area inherits instead of the weight
+     of the source parent, so "B" is 700, and it does not revalidate the
+     invalid number, so "Z" is the 400 of the footnote area instead of 700.
+     The invalid value can take other forms as well,
      e.g. an unknown keyword (`nonsense`) or a dimension (`700px`), which must be
      rejected like a number outside the range. -->
 <html lang="en">
