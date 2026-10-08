@@ -2143,7 +2143,12 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     const clampComputed = (lineHeight: number): number =>
       computedValue ? Math.max(0, lineHeight) : lineHeight;
     if (value instanceof Css.Num) {
-      return clampComputed(value.num * parentFontSize);
+      // A number that is not finite cannot be a line height: it is left
+      // unknown instead of propagating an infinity into the `lh` unit.
+      // (Review)
+      return Number.isFinite(value.num)
+        ? clampComputed(value.num * parentFontSize)
+        : null;
     }
     if (value instanceof Css.Numeric) {
       switch (value.unit) {
@@ -6523,16 +6528,18 @@ export class CascadeInstance {
           // (Review)
           value = new Css.Numeric(0, value.unit);
         } else if (
-          (name === "font-size" || name === "line-height") &&
+          // `font-weight` is the property whose range this engine applies to an
+          // overflowing calculation itself (`evaluateFontWeightMathFunction`
+          // below), so every other property keeps the declaration: the token
+          // `Infinity` is not CSS at all, and the browser clamps such a
+          // calculation, e.g. `opacity: calc(exp(1000))` to 1, while a stored
+          // infinity would propagate into the root sizes and into the line
+          // height that a detached descendant resolves an `lh` unit against.
+          // (Review)
+          name !== "font-weight" &&
           (value instanceof Css.Numeric || value instanceof Css.Num) &&
           !Number.isFinite(value.num)
         ) {
-          // A length cannot be an infinity, and the token `Infinity` is not
-          // CSS at all: the browser clamps an overflowing calculation such as
-          // `calc(exp(1000))` itself, so the original declaration is preserved
-          // for it to clamp — a stored infinity would propagate into the root
-          // sizes and into the line height that a detached descendant resolves
-          // an `lh` unit against. (Review)
           value = cascVal.value;
         } else if (
           name === "line-height" &&
