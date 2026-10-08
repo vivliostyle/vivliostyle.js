@@ -16,7 +16,11 @@
      a number, and `sign(20px)`, which returns a number — is invalid as well,
      so those footnotes keep the inherited 32px too, and so is `log(100, 0)`,
      whose base must make the result NaN instead of the finite -0 that the
-     division gives. The same declaration in the normal flow must be
+     division gives. A math function that a var() substitution wrapped in a
+     `calc()` must not be made valid by the evaluation either: the footnote
+     with `calc(round(20px, 7))` keeps the inherited 32px, as the browser
+     rejects the declaration, while evaluating the function would turn it
+     into 21px. The same declaration in the normal flow must be
      emitted as the computed 0px, not as a negative length that the browser
      rejects (it would inherit the parent font size instead). -->
 <html lang="en">
@@ -33,6 +37,7 @@
     .dep .fn-calc { float: footnote; font-size: calc(10px - 20px); }
     .dep .fn-unit { float: footnote; --unit: 5s; font-size: var(--unit); letter-spacing: 2em; }
     .dep .fn-round { float: footnote; --r: round(20px, 7); font-size: var(--r); letter-spacing: 2em; }
+    .dep .fn-round-calc { float: footnote; --rc: calc(round(20px, 7)); font-size: var(--rc); letter-spacing: 2em; }
     .dep .fn-sign { float: footnote; --sg: sign(20px); font-size: var(--sg); letter-spacing: 2em; }
     .dep .fn-log { float: footnote; --lb: log(100, 0); font-size: var(--lb); letter-spacing: 2em; }
     .ref { font-size: 32px; letter-spacing: 2em; }
@@ -55,6 +60,10 @@
     0 instead, so it has no visible text:<span class="fn-calc">Gone</span>
     The invalid <code>font-size: var(--unit)</code> (<code>5s</code>) must be
     ignored too:<span class="fn-unit">Wide</span>
+    The <code>font-size: var(--rc)</code> (<code>calc(round(20px, 7))</code>)
+    is invalid like the one without the `calc()`, which the math functions of
+    this engine must not evaluate into a valid 21px:
+    <span class="fn-round-calc">Wide</span>
     The <code>font-size: var(--r)</code> (<code>round(20px, 7)</code>) and
     <code>font-size: var(--sg)</code> (<code>sign(20px)</code>) are invalid math
     functions, so these footnotes keep the inherited 32px as well:

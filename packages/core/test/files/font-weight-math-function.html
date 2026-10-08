@@ -14,7 +14,11 @@
      of CSS Fonts 4 (1000) like any other out of range result, so a detached
      descendant that uses a relative keyword resolves against 1000 as well.
      The infinity survives a nested call, e.g. `abs(exp(1000))`, which must be
-     1000 for such a paragraph and for its footnote's `bolder` too.
+     1000 for such a paragraph and for its footnote's `bolder` too. A function
+     whose result is not a number, e.g. `log(100, 0)`, is invalid at
+     computed-value time: the paragraph keeps the 700 that it inherits from its
+     parent, so the `bolder` of its footnote is 900 (the pre-fix viewer resolves
+     the keyword against the fallback 400 and renders 700).
      The pre-fix viewer leaves such functions unresolved, so the paragraph is
      400 and "bolder" resolves to 700. -->
 <html lang="en">
@@ -45,6 +49,13 @@
     .dep-inf .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf { font-weight: exp(1000); } /* 1000 */
     .ref-bolder-under-inf { font-weight: bolder; } /* 1000 */
+    /* a weight that computes to NaN, e.g. `log(100, 0)`, is invalid at
+       computed-value time: the paragraph keeps the 700 that it inherits from
+       its parent, and a footnote that resolves `bolder` against it is 900 */
+    .nan-parent { font-weight: 700; }
+    .nan-parent .dep-nan { font-weight: log(100, 0); }
+    .nan-parent .dep-nan .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    .nan-parent .ref-bolder { font-weight: bolder; } /* 900 */
     .dep-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
     .dep-inf-nested .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
@@ -78,6 +89,12 @@
     inline <span class="ref-inf-nested">B</span>, i.e. the 1000 of
     `abs(exp(1000))`, whose infinity survives the nested `abs()`:
     <span class="fn-bolder">B</span></p>
+  <div class="nan-parent"><p class="dep-nan">The footnote "B" below must be as
+    bold as this inline <span class="ref-bolder">B</span>, i.e. the 700 that
+    this paragraph inherits from its parent, because its own
+    `font-weight: log(100, 0)` computes to NaN and the browser keeps the
+    inherited weight:
+    <span class="fn-bolder">B</span></p></div>
   <p class="invalid">A function whose arguments are lengths is invalid at
     computed-value time, so this footnote must be
     <span class="ref-700">B</span>, one step bolder than the 400 of this

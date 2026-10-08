@@ -77,6 +77,23 @@
     p.calc-pct { line-height: calc(150%); }
     .fn.pct-lh { font-size: 1lh; }
     .ref.pct-lh { font-size: 24px; }
+    /* a line height whose computation is not a number, e.g. `log(100, 0)`, is
+       invalid at computed-value time: the paragraph keeps the 42px line height
+       that it inherits from the root, and a footnote that resolves `1lh`
+       against it is 42px as well */
+    p.nan-lh { line-height: log(100, 0); }
+    .fn.nan-lh { font-size: 1lh; }
+    .ref.nan-lh { font-size: 42px; }
+    /* a math function that computes below zero is clamped to zero, as the
+       non-negative computed-value range of `line-height` requires: 0px + 10px */
+    p.zero-lh { line-height: min(-10px, -20px); }
+    .fn.zero-lh { font-size: calc(1lh + 10px); }
+    .ref.zero-lh { font-size: 10px; }
+    /* a math function of unitless numbers is a number: min(1, 2) = 1, which is
+       the 16px font size of the paragraph */
+    p.num-lh { line-height: min(1, 2); }
+    .fn.num-lh { font-size: 1lh; }
+    .ref.num-lh { font-size: 16px; }
     ::footnote-marker { content: ""; }
   </style>
 </head>
@@ -102,6 +119,12 @@
     <span class="ref lh-math">Wide</span><span class="fn lh-math">Wide</span></p>
   <p class="calc-pct">lh unit with a percentage computed line height:
     <span class="ref pct-lh">Wide</span><span class="fn pct-lh">Wide</span></p>
+  <p class="nan-lh">lh unit with a line height that computes to NaN:
+    <span class="ref nan-lh">Wide</span><span class="fn nan-lh">Wide</span></p>
+  <p class="zero-lh">lh unit with a line height that computes below zero:
+    <span class="ref zero-lh">Wide</span><span class="fn zero-lh">Wide</span></p>
+  <p class="num-lh">lh unit with a line height that is a unitless function:
+    <span class="ref num-lh">Wide</span><span class="fn num-lh">Wide</span></p>
   <p>The footnote at the page bottom must have the same letter-spacing as the
     inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
     line height of the root. For the paragraph with the percentage computed
