@@ -249,9 +249,14 @@
     `font-weight: round(650, 100)` is 700 in both, but the relative keyword
     `bolder` of its footnote resolves against the fallback 400 in canary (700)
     and against the 700 of the paragraph in the PR branch (900), like the
-    inline reference; the engine now evaluates the math functions of CSS
+    inline reference; the engine evaluates the math functions of CSS
     Values 4 (`round()`, `mod()`, `abs()`, …), so their results are available
-    as the basis of a relative value.
+    as the basis of a relative keyword. A calculation that overflows to an
+    infinity, e.g. `exp(1000)`, is the 1000 that the range of CSS Fonts 4
+    clamps it to; canary leaves it unresolved, so the footnote "B" of that
+    paragraph resolves `bolder` against the fallback 400 and is 700, while the
+    inline references of the paragraph are 1000 and the PR branch renders the
+    footnotes 1000 as well.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -397,6 +402,29 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
+  diffPages:
+    - 1
+- id: "0116"
+  category: General
+  title: "all shorthand property"
+  file: all-shorthand.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    `all: initial` also resets the inherited properties of a detached element,
+    e.g. the footnote of this test. Removing the property from the accumulated
+    values of the inheritance walk made such an element inherit from the
+    synthetic view parent instead of using the initial value: canary renders
+    the footnote "footnote text ..." in the color of the footnote area (the
+    root of the test carries the purple of the body, 128,0,128), while the PR
+    branch keeps the `initial` declaration and renders it in the initial black
+    like the elements of the normal flow, which the browser resolves itself.
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/all-shorthand.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/all-shorthand.html&zoom=1&spread=false
   diffPages:
     - 1
 - id: "0127"
