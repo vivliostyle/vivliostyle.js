@@ -712,17 +712,25 @@ export class Styler implements AbstractStyler {
             const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
             if (unitSize) {
               px *= unitSize;
+              isRelativeFontSize = fromRelativeCalc;
             } else if (ratio != null) {
               // A unit that only the browser resolves, e.g. `ch`: its metric is
               // not obtainable here, so the assumption of CSS Values 4 for such
               // a unit is used against the initial font size, which is the font
               // size of the root element (it has no parent), and the raw number
-              // of the value must not be treated as pixels. (Review)
+              // of the value must not be treated as pixels. The root element
+              // must use this assumed size as well, or it would render the real
+              // metric of the font while `rem` and the page context use the
+              // assumption. (Review)
               px *= ratio * this.context.initialFontSize;
+              isRelativeFontSize = true;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               // The unit size of a viewport relative unit, e.g. `2vw`, must not
-              // be left as the raw number either. (Review)
+              // be left as the raw number either, and the root element must use
+              // the resolved size like above: the internal units of this engine
+              // (`pv*`) are not CSS that a browser can resolve. (Review)
               px *= this.context.queryUnitSize(val.unit, true);
+              isRelativeFontSize = true;
             } else {
               // Any other dimension is not a length that Vivliostyle can
               // resolve here, e.g. the `5s` that a var() substitution put into
@@ -731,7 +739,6 @@ export class Styler implements AbstractStyler {
               // browser keeps it for an invalid value. (Review)
               px = null;
             }
-            isRelativeFontSize = fromRelativeCalc;
           }
         }
       }

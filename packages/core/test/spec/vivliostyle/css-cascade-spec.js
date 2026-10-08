@@ -4407,6 +4407,29 @@ describe("css-cascade", function () {
         expect(resolved.unit).toBe("px");
       });
 
+      it("leaves an overflowing length calculation to the browser", function () {
+        // `calc(exp(1000) * 1px)` computes to an infinity, which no length can
+        // represent: materializing it would serialize the invalid
+        // `Infinitypx`, so the value is left to the browser, which clamps the
+        // calculation to its range. (Review)
+        var value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(exp(1000) * 1px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(newContext(), value, 16),
+        ).toBe(null);
+        // The evaluated value is still the calc(), not a length of an
+        // infinity that serializes as `Infinitypx`. (Review)
+        var evaluated = adapt_csscasc.evaluateCSSToCSS(
+          newContext(),
+          value,
+          "font-size",
+        );
+        expect(evaluated.toString()).toContain("calc");
+      });
+
       it("uses the initial font size when the accumulated font-size was removed", function () {
         // `font-size: initial` (e.g. `all: initial`) removes the accumulated
         // value; the initial font size is medium. (Issue #1696)

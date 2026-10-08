@@ -8359,11 +8359,17 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       try {
         const exprResult = exprVal.expr.evaluate(this.context);
         if (typeof exprResult === "number" && !isNaN(exprResult)) {
-          if (this.isLengthExpr(exprText)) {
+          const isLength = this.isLengthExpr(exprText);
+          if (isLength && Number.isFinite(exprResult)) {
             // length value
             value = new Css.Numeric(exprResult, "px");
-          } else if (!/\d[a-z]/i.test(exprText)) {
-            // unitless number
+          } else if (!isLength && !/\d[a-z]/i.test(exprText)) {
+            // unitless number, which may be an infinity: a number valued
+            // property such as `font-weight` clamps it to its range, while a
+            // length cannot be represented as one — `calc(exp(1000) * 1px)`
+            // would be serialized as the invalid `Infinitypx` — so an
+            // overflowing length keeps the calc() for the browser to clamp.
+            // (Review)
             value = new Css.Num(exprResult);
           }
           // otherwise, keep the original calc() expression
