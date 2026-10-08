@@ -40,7 +40,14 @@
     so the browser rejects such a declaration and keeps the font size that the
     element would inherit; the PR branch renders the "Wide" footnotes like the
     reference (31.998px, letter-spacing 64px) and the root keeps the initial
-    16px (10rem = 160px). The unknown `font-size: nonsense` footnote and the
+    16px (10rem = 160px). The two math functions of CSS Values 4 whose types
+    the property does not accept (`round(20px, 7)`, which rounds a length to a
+    multiple of a number, and `sign(20px)`, which returns a number) are
+    evaluated by the pre-fix viewers as if the numbers were px, so those
+    footnotes are 21px or 1px there (0px in canary); the PR branch treats them
+    as the invalid declarations they are, so those footnotes keep the inherited
+    32px and their letter-spacing is 64px like the reference too. The unknown
+    `font-size: nonsense` footnote and the
     `font-size: calc(10px - 20px)` footnote are 0 or inherited in both viewers,
     because an unknown keyword is rejected during parsing and a computed
     negative value is clamped instead; they guard the walk. The same
