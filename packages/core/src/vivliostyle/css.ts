@@ -723,12 +723,37 @@ export const processingOrder = {
 };
 
 export function isDefaultingValue(value: Val | null | undefined): boolean {
-  return (
-    value === ident.inherit ||
-    value === ident.initial ||
-    value === ident.unset ||
-    isRollbackValue(value)
-  );
+  if (value instanceof Ident) {
+    // The comparison is insensitive to the casing that a var() substitution
+    // preserves, as the browser parses the CSS-wide keywords. (Review)
+    const name = value.name.toLowerCase();
+    if (name === "inherit" || name === "initial" || name === "unset") {
+      return true;
+    }
+  }
+  return isRollbackValue(value);
+}
+
+/**
+ * The canonical value of a CSS-wide keyword, or the value itself: a var()
+ * substitution preserves the casing of the custom property, while the rest of
+ * the cascade compares these keywords with the canonical identifiers by
+ * identity (`isDefaultingValue()`, the declarations of the inheritance walk,
+ * the float and blockification logic). (Review)
+ */
+export function canonicalWideKeyword(value: Val): Val {
+  if (!(value instanceof Ident)) {
+    return value;
+  }
+  switch (value.name.toLowerCase()) {
+    case "inherit":
+      return ident.inherit;
+    case "initial":
+      return ident.initial;
+    case "unset":
+      return ident.unset;
+  }
+  return value;
 }
 
 /**

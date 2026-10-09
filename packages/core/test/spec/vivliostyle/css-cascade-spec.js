@@ -3225,6 +3225,48 @@ describe("css-cascade", function () {
       });
     });
 
+    describe("CSS-wide keywords", function () {
+      it("recognizes them whatever the casing is", function () {
+        // A var() substitution preserves the casing of the custom property,
+        // e.g. the `INITIAL` of `float: var(--missing, INITIAL)`, which the
+        // browser treats as `initial`. (Review)
+        ["inherit", "INHERIT", "Initial", "unset", "UNSET"].forEach((name) => {
+          expect(adapt_css.isDefaultingValue(adapt_css.getName(name))).toBe(
+            true,
+          );
+        });
+        ["revert", "REVERT", "revert-layer"].forEach((name) => {
+          expect(adapt_css.isDefaultingValue(adapt_css.getName(name))).toBe(
+            true,
+          );
+        });
+        expect(adapt_css.isDefaultingValue(adapt_css.getName("auto"))).toBe(
+          false,
+        );
+        expect(adapt_css.isDefaultingValue(null)).toBe(false);
+      });
+
+      it("maps the keywords of a substitution to the canonical ones", function () {
+        // The rest of the cascade compares these keywords with the canonical
+        // identifiers by identity. (Review)
+        expect(
+          adapt_css.canonicalWideKeyword(adapt_css.getName("INHERIT")),
+        ).toBe(adapt_css.ident.inherit);
+        expect(
+          adapt_css.canonicalWideKeyword(adapt_css.getName("Initial")),
+        ).toBe(adapt_css.ident.initial);
+        expect(adapt_css.canonicalWideKeyword(adapt_css.getName("UNSET"))).toBe(
+          adapt_css.ident.unset,
+        );
+        // Anything else is kept, a rollback keyword included (its checks are
+        // insensitive to the casing already).
+        const revert = adapt_css.getName("REVERT");
+        expect(adapt_css.canonicalWideKeyword(revert)).toBe(revert);
+        const numeric = new adapt_css.Numeric(1, "px");
+        expect(adapt_css.canonicalWideKeyword(numeric)).toBe(numeric);
+      });
+    });
+
     describe("resolveAbsoluteFontSizeKeyword", function () {
       it("maps the absolute size keywords to the browsers' table", function () {
         var expected = {
@@ -4838,6 +4880,14 @@ describe("css-cascade", function () {
         // (Review)
         expect(evaluate("calc(Infinity)", "width")).toBe("Infinity");
         expect(evaluate("calc(NaN)", "width")).toBe("calc(NaN)");
+        // A calculation with a keyword that this engine cannot evaluate as a
+        // number, e.g. the `<rounding-strategy>` of `round(up, 650, 100)`, is
+        // valid CSS that the browser computes: it is left as it is instead of
+        // being parsed (the parser would report the keyword as a syntax error)
+        // and must not be treated as a calculation that computes NaN. (Review)
+        expect(evaluate("calc(round(up, 650, 100))", "font-weight")).toBe(
+          "calc(round(up,650,100))",
+        );
         // The dimension of an argument of a number-returning function is not a
         // dimension of the calculation: `sign(20px)` is the number 1 even
         // through a function that keeps the type of its arguments. (Review)

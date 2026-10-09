@@ -8572,7 +8572,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     }
     const varVal = this.getVarValue(name);
     if (varVal) {
-      return varVal;
+      return Css.canonicalWideKeyword(varVal);
     }
     if (
       this.currentCustomPropertyName &&
@@ -8587,7 +8587,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       return Css.empty;
     }
     if (func.values.length === 2) {
-      return func.values[1];
+      return Css.canonicalWideKeyword(func.values[1]);
     } else {
       return new Css.CommaList(func.values.slice(1));
     }
@@ -8633,6 +8633,34 @@ export class VarFilterVisitor extends Css.FilterVisitor {
 }
 
 /**
+ * Whether a value contains a keyword, which this expression language cannot
+ * evaluate as a number, e.g. the `<rounding-strategy>` of
+ * `round(up, 650, 100)` (a keyword becomes a media name, which is not a
+ * number). A value that contains one is valid CSS that the browser computes:
+ * the calculation is left to the browser instead of being parsed here (the
+ * parser would report the keyword as a syntax error) and must not be treated
+ * as a calculation that computes NaN. The numeric keywords of CSS Values 4
+ * (`infinity`, `NaN`) are numbers for the evaluator. (Review)
+ */
+class KeywordVisitor extends Css.Visitor {
+  found = false;
+
+  override visitIdent(ident: Css.Ident): Css.Val | null {
+    const name = ident.name.toLowerCase();
+    if (name !== "infinity" && name !== "nan") {
+      this.found = true;
+    }
+    return null;
+  }
+}
+
+function hasUnevaluableKeyword(value: Css.Val): boolean {
+  const visitor = new KeywordVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+/**
  * Convert calc() to its value
  */
 export class CalcFilterVisitor extends Css.FilterVisitor {
@@ -8662,7 +8690,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       return value;
     }
     const exprText = value.toString().replace(/^calc\b/i, "-epubx-expr");
-    if (this.hasUnresolvableUnit(exprText)) {
+    if (this.hasUnresolvableUnit(exprText) || hasUnevaluableKeyword(value)) {
       return value;
     }
     const exprVal = CssParser.parseValue(
