@@ -8721,8 +8721,18 @@ class KeywordVisitor extends Css.Visitor {
   found = false;
 
   override visitIdent(ident: Css.Ident): Css.Val | null {
+    // The numeric constants of CSS Values 4 §10.7 are values of the
+    // calculation, not keywords that the parser cannot handle: `pi` and `e`
+    // are resolved by `Exprs.Context.evalName()` (together with the serialized
+    // `Infinity`/`NaN`), so they must not make the calculation unevaluable.
+    // (Review)
     const name = ident.name.toLowerCase();
-    if (name !== "infinity" && name !== "nan") {
+    if (
+      name !== "infinity" &&
+      name !== "nan" &&
+      name !== "pi" &&
+      name !== "e"
+    ) {
       this.found = true;
     }
     return null;

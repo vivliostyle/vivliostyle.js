@@ -427,12 +427,20 @@ export function mod(...args: unknown[]): number {
   if (!Number.isFinite(b)) {
     return moduloOfInfiniteDivisor(a, b, true);
   }
-  const remainder = a - b * Math.floor(a / b);
-  // A remainder of zero has the sign of the divisor as well. The subtraction
-  // above loses it for a negative divisor (`mod(0, -8)` becomes `+0`), which a
-  // nested calculation can observe, e.g. as `1 / mod(0, -8)` being `-Infinity`
-  // instead of `+Infinity`. (Review)
-  return result(remainder === 0 && b < 0 ? -0 : remainder);
+  // The formula `a - b * Math.floor(a / b)` overflows for operands as far
+  // apart as `mod(1e308, 1e-308)`, where `a / b` is infinite: the remainder of
+  // a modulus must stay finite and be smaller than the divisor in magnitude,
+  // which the `%` operator guarantees (JavaScript computes about 3.5e-309 for
+  // the example). `%` takes the sign of the dividend, so the divisor is added
+  // when the signs differ, which gives the sign that `mod()` requires. (Review)
+  const remainder = a % b;
+  // A remainder of zero has the sign of the divisor as well (`mod(0, -8)` is
+  // `-0`, which a nested calculation can observe, e.g. as `1 / mod(0, -8)`
+  // being `-Infinity` instead of `+Infinity`). (Review)
+  if (remainder === 0) {
+    return result(b < 0 ? -0 : 0);
+  }
+  return result(remainder < 0 !== b < 0 ? remainder + b : remainder);
 }
 
 /**
@@ -679,12 +687,20 @@ export class Context {
     // it. Such a value is evaluated again when the declaration is validated
     // afterwards, e.g. by `evaluatesToNaN()`, and the `nan` of CSS Values 4 is
     // represented as `NaN` in the same way: recognize both, or the evaluation
-    // fails with an undefined name. (Review)
+    // fails with an undefined name. The other numeric constants of CSS Values
+    // 4 §10.7.1 are recognized here as well, so that a declaration that uses
+    // `pi` or `e`, e.g. `line-height: calc(pi * 10px)`, resolves in the
+    // inheritance walk as well (the calculation keyword guard lets those two
+    // names through). (Review)
     switch (qualifiedName.toLowerCase()) {
       case "infinity":
         return new Const(scope, Number.POSITIVE_INFINITY);
       case "nan":
         return new Const(scope, Number.NaN);
+      case "pi":
+        return new Const(scope, Math.PI);
+      case "e":
+        return new Const(scope, Math.E);
     }
     throw new Error(`Name '${qualifiedName}' is undefined`);
   }

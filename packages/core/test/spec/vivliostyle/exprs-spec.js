@@ -140,6 +140,21 @@ describe("exprs", function () {
       expectResult(call("mod", Infinity, 7), NaN);
       expect(call("mod", -1, 8)).toBe(7);
       expect(call("rem", -1, 8)).toBe(-1);
+      // A modulus of operands as far apart as `mod(1e308, 1e-308)` stays
+      // finite: the formula `a - b * Math.floor(a / b)` overflows there (`a /
+      // b` is infinite), while the remainder of `%` is smaller than the
+      // divisor in magnitude. (Review)
+      var tinyMod = call("mod", 1e308, 1e-308);
+      expect(Number.isFinite(tinyMod)).toBe(true);
+      expect(Math.abs(tinyMod)).toBeLessThan(1e-308);
+      expect(tinyMod).toBe(1e308 % 1e-308);
+      // The sign rules are unchanged: `mod()` takes the sign of the divisor,
+      // and a remainder of zero takes it as well.
+      expect(call("mod", -7, 3)).toBe(2);
+      expect(call("mod", 7, -3)).toBe(-2);
+      expect(call("mod", -7, -3)).toBe(-1);
+      expect(Object.is(call("mod", -8, 8), 0)).toBe(true);
+      expect(Object.is(call("mod", 8, -8), -0)).toBe(true);
       // A remainder of zero carries the sign of the divisor as well, which the
       // subtraction alone loses for a negative divisor: `mod(0, -8)` must be
       // `-0`, so that a nested calculation (e.g. the `1 / mod(0, -8)` of an

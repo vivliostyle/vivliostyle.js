@@ -968,6 +968,13 @@
     so those footnotes with `font-size: 1lh` were 47.992px (letter-spacing
     96px) and 79.998px (160px) instead of the 24px and 40px of their
     references (48px and 80px).
+    A line height that uses the numeric constants of CSS Values 4 §10.7.1
+    (`line-height: calc(pi * 10px)` and `calc(e * 10px)`) was left unresolved as
+    well: the footnote that resolves `1lh` against it used the preferred line
+    height (19.992px, letter-spacing 40px) instead of the 31.4159px and
+    27.1828px of the constants (63px and 54px), while the PR branch resolves the
+    names with `Exprs.Context.evalName()` and lets them through the calculation
+    keyword guard.
     The PR branch
     resolves those ancestor values level by level against
     the font size of the level that the value belongs to, reduces the math
