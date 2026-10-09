@@ -3943,8 +3943,10 @@ describe("css-cascade", function () {
         // The computed value of a percentage line height is the length of the
         // element that declares it, so the accumulated value must be that
         // length: the `150%` declared at 16px is the 24px that a descendant
-        // inherits, not the percentage of the 32px of an intervening level.
-        // A function keeps only its percentages converted, so a function of
+        // inherits, not the percentage of the 32px of an intervening level,
+        // and a unit whose metric only the browser resolves is the assumed
+        // size of the declaring level (`5ch` = 5 x 0.5em x 16px = 40px).
+        // A function keeps only those values converted, so a function of
         // unitless numbers stays the multiplier that it is, and the
         // percentages of another property are unchanged. (Review)
         var props = {
@@ -3970,6 +3972,8 @@ describe("css-cascade", function () {
         expect(accumulated("line-height", "min(200%, 40px)")).toBe(
           "min(32px,40px)",
         );
+        expect(accumulated("line-height", "5ch")).toBe("40px");
+        expect(accumulated("line-height", "2ic")).toBe("32px");
         expect(accumulated("line-height", "calc(1.5)")).toBe("calc(1.5)");
         expect(accumulated("line-height", "1.5")).toBe("1.5");
         expect(accumulated("width", "150%")).toBe("150%");

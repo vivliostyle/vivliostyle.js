@@ -5,10 +5,12 @@
      against the line height of the page.
      The footnote "Wide" must have the same letter-spacing as the inline "Wide"
      of the same paragraph, whose font size is 1lh = the parent's line height
-     (40px, or 24px when the line height is `calc(150%)`). A percentage line
-     height is resolved where it is declared, so it is the same 24px although
-     an intervening level has a larger font size (32px), as a plain `150%` and
-     a computed `calc(150%)` are. The line height of an
+     (40px, or 24px when the line height is `calc(150%)`). A line height whose
+     computed value is a length is resolved where it is declared, so a
+     percentage (`150%`, `calc(150%)`) is the same 24px and a `5ch` the same
+     assumed 40px although an intervening level has the larger font size of
+     32px, while a unitless number stays the multiplier that it is. The line
+     height of an
      ancestor can be an `lh` unit itself, e.g. `line-height: 1lh` on the parent
      paragraph, which refers to the line height of its own parent (30px), and
      an own `line-height: 2lh` of a footnote refers to the 40px that it inherits
@@ -101,6 +103,12 @@
     .calc-pct-anc { line-height: calc(150%); }
     .fn.calc-pct-anc-lh { font-size: 1lh; }
     .ref.calc-pct-anc-lh { font-size: 24px; }
+    /* the same, for a unit whose metric only the browser resolves: `5ch` of
+       the 16px font size of the level that declares it is the assumed 40px
+       (0.5em per `ch`, CSS Values 4 §6.1), not the 80px of the level below */
+    .ch-anc { line-height: 5ch; }
+    .fn.ch-anc-lh { font-size: 1lh; }
+    .ref.ch-anc-lh { font-size: 40px; }
     /* a line height whose computation is not a number, e.g. `log(100, 0)`, is
        invalid at computed-value time: the browser keeps the 42px line height
        that the paragraph inherits from the root, and the footnote that
@@ -158,6 +166,9 @@
   <div class="calc-pct-anc"><div class="pct-mid">a computed percentage line height above
     a level with a larger font size:
     <span class="ref calc-pct-anc-lh">Wide</span><span class="fn calc-pct-anc-lh">Wide</span></div></div>
+  <div class="ch-anc"><div class="pct-mid">a line height in a unit whose metric only the
+    browser resolves, above a level with a larger font size:
+    <span class="ref ch-anc-lh">Wide</span><span class="fn ch-anc-lh">Wide</span></div></div>
   <p class="nan-lh">lh unit with a line height that computes to NaN:
     <span class="ref nan-lh">Wide</span><span class="fn nan-lh">Wide</span></p>
   <p class="zero-lh">lh unit with a line height that computes below zero:
@@ -190,6 +201,8 @@
     percentage line heights (150% and `calc(150%)`) declared above a level with
     the larger font size of 32px are the 24px of the 16px font size of the
     level that declares them, not the 48px of the level below, so their
-    footnotes with `font-size: 1lh` are 24px as well.</p>
+    footnotes with `font-size: 1lh` are 24px as well, and the `5ch` of such a
+    level is the assumed 40px (0.5em of the 16px, the metric assumption of CSS
+    Values 4), not the 80px of the level below.</p>
 </body>
 </html>

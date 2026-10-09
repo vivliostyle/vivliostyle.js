@@ -2305,18 +2305,25 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         parentFontSize ?? 0,
         this.context,
       );
-    } else if (this.propName === "line-height" && numeric.unit === "%") {
+    } else if (this.propName === "line-height") {
       // A percentage of a line height refers to the font size of the element
-      // that declares it, and its computed value is that length, which a
-      // descendant inherits: the accumulated value must not keep the
-      // percentage, or a detached descendant that resolves an `lh` unit would
-      // use the percentage of its own font size — e.g. the `calc(150%)` of an
-      // ancestor at 16px is 24px, not the 48px of an intervening level at 32px.
-      // A function keeps only its percentages converted, so a function of
-      // unitless numbers stays the multiplier that it is. (Review)
+      // that declares it, and the computed value of a percentage or of a unit
+      // whose metric only the browser resolves (`ch`, `ex`, `cap`, `ic`) is
+      // that length, which a descendant inherits: the accumulated value must
+      // not keep the relative unit, or a detached descendant would resolve it
+      // against its own font size — e.g. the `calc(150%)` of an ancestor at
+      // 16px is 24px, not the 48px of an intervening level at 32px, and the
+      // `5ch` of that ancestor is the 40px of the assumed metric (CSS Values 4
+      // §6.1, as for a font size), not the 80px of the level below. A function
+      // keeps only those values converted, so a function of unitless numbers
+      // stays the multiplier that it is. (Review)
+      const ratio =
+        numeric.unit === "%"
+          ? 0.01
+          : browserFontRelativeUnitRatio(numeric.unit);
       const fontSize = this.getFontSize();
-      if (fontSize != null) {
-        return new Css.Numeric((numeric.num / 100) * fontSize, "px");
+      if (ratio != null && fontSize != null) {
+        return new Css.Numeric(numeric.num * ratio * fontSize, "px");
       }
     }
     return numeric;
