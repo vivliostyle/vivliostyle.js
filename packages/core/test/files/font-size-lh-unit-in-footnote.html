@@ -192,8 +192,10 @@
     the footnote with `font-size: 1lh` is 42px as well. The paragraph whose own font size is `math` (which only the
     browser resolves) has an absolute line height of 40px, so the footnote with
     `font-size: 1lh` is 40px as well. The paragraph whose line height computes
-    to NaN keeps the 42px that it inherits from the root (so its footnote is
-    42px), the paragraph with `line-height: min(-10px, -20px)` has the 0px that
+    to NaN is invalid for this engine, so the 42px that it inherits from the
+    root are the basis of the `lh` unit of its footnote (42px; the browsers
+    censor the NaN result of the declaration itself to 0px), the paragraph with
+    `line-height: min(-10px, -20px)` has the 0px that
     the non-negative range clamps the function to (so its footnote with
     `calc(1lh + 10px)` is 10px), the paragraph with `line-height: min(1, 2)`
     has the 16px of the number 1, and the paragraph with the internal viewport

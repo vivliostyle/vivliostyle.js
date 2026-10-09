@@ -936,11 +936,15 @@
     of its `42px` reference (84px), while the PR branch resolves the root line
     height with the same resolver as the inherited ones and matches it. A line
     height whose computation is not a number, e.g. `log(100, 0)`, is
-    materialized as the zero length `calc(0)` by both viewers (the paragraph
-    keeps the 42px that it inherits in a browser), while the footnote that
-    resolves `1lh` against it was 19.992px (letter-spacing 40px) in the pre-fix
-    ones instead of the 42px that the declaration keeps in a browser (84px),
-    like its reference. A
+    materialized as the zero length `calc(0)` by both viewers, while the
+    footnote that resolves `1lh` against it was 19.992px (letter-spacing 40px)
+    in the pre-fix ones instead of the 42px that the PR branch keeps as the
+    basis (84px, like its reference): this engine treats such a declaration as
+    invalid, so the inherited line height stays the basis of the `lh` unit. The
+    browsers instead censor a NaN result to 0px at the top level of a
+    calculation (CSS Values 4 §10.9.2, measured in Chromium and WebKit), which
+    would make an `lh` based font size collapse; the difference is a known
+    approximation of this branch. A
     line height that computes below zero, e.g. `min(-10px, -20px)`, was
     recorded as the -20px of the calculation, so the footnote with
     `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of the 10px of
@@ -1005,16 +1009,16 @@
   title: Table of Contents with leader()
   file: leader/toc-leader.html
   type: difference
-  decision: expected  # regression / expected / skip
+  decision: skip  # regression / expected / skip
   notes: >-
     Noise, not a change of this PR: one run of the comparison reported 370
     differing pixels (diffRatio 0.00044) on the leader dots of the "Named
     pages" TOC line, where the dots differ by about one pixel of phase while
     the text and the page numbers are identical. The same comparison re-run
     with the same viewers found no difference at all, so the entry records a
-    sub-pixel rendering difference of the leader dots; if it reappears, the
-    dot phase is flagged again for a decision instead of masking a change of
-    this test.
+    sub-pixel rendering difference of the leader dots, which the workflow
+    classifies as `skip` (noise or irrelevant); if it reappears, the dot phase
+    is reviewed again instead of masking a change of this test.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-

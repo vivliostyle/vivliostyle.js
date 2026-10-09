@@ -4281,19 +4281,24 @@ describe("css-cascade", function () {
           ),
         ).toBe(true);
         // A supported function whose result is not a number, e.g.
-        // `log(100, 0)`, is invalid as well: the browser keeps the inherited
-        // weight, which a relative keyword of a descendant must resolve
-        // against. (Review)
-        expect(
-          adapt_csscasc.isInvalidFontWeight(
+        // `log(100, 0)`, and the `NaN` constant are invalid as well: this
+        // engine keeps the inherited weight, which a relative keyword of a
+        // descendant must resolve against. (The browsers accept such a
+        // declaration and censor the `NaN` to zero, which the range of CSS
+        // Fonts 4 turns into the weight 1; the difference of that basis is
+        // recorded with the limitations of the pull request. Review)
+        function invalidFontWeight(text) {
+          return adapt_csscasc.isInvalidFontWeight(
             newContext(),
             adapt_cssparse.parseValue(
               new adapt_exprs.LexicalScope(null),
-              new adapt_csstok.Tokenizer("log(100, 0)", null),
+              new adapt_csstok.Tokenizer(text, null),
               "",
             ),
-          ),
-        ).toBe(true);
+          );
+        }
+        expect(invalidFontWeight("log(100, 0)")).toBe(true);
+        expect(invalidFontWeight("calc(NaN)")).toBe(true);
       });
 
       it("evaluates number valued math functions of a font weight", function () {

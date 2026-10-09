@@ -1267,10 +1267,18 @@ export function evaluatesToNaN(
   ) {
     return false;
   }
-  if (/infinity|nan/i.test(value.toString())) {
-    // A calculation that already contains a number that is not finite, e.g.
-    // the `calc(exp(1000))` that a length cannot represent, is not evaluable
-    // here: the expression language would take the token for a name.
+  if (/infinity/i.test(value.toString())) {
+    // A value that already contains an infinite number, e.g. the
+    // `calc(exp(1000))` that a length cannot represent, is not what this check
+    // looks for: the name is a constant of the evaluator
+    // (`Exprs.Context.evalName()`) and the browsers clamp such a calculation
+    // rather than discard it. A `NaN` in the text is deliberately not
+    // short-circuited: the constant and a `NaN` that a function computes are
+    // the same value for the browsers, so both are reported here and the
+    // declarations that depend on it inherit, like the other invalid values.
+    // (The browsers censor a `NaN` to zero where the type matches the property
+    // instead; this engine keeps the inherited value for the basis values of
+    // detached content, see the limitations of the pull request. Review)
     return false;
   }
   const visitor = new CalcFilterVisitor(context, true);
