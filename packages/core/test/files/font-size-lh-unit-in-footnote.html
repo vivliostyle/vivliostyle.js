@@ -5,7 +5,10 @@
      against the line height of the page.
      The footnote "Wide" must have the same letter-spacing as the inline "Wide"
      of the same paragraph, whose font size is 1lh = the parent's line height
-     (40px, or 24px when the line height is `calc(150%)`). The line height of an
+     (40px, or 24px when the line height is `calc(150%)`). A percentage line
+     height is resolved where it is declared, so it is the same 24px although
+     an intervening level has a larger font size (32px), as a plain `150%` and
+     a computed `calc(150%)` are. The line height of an
      ancestor can be an `lh` unit itself, e.g. `line-height: 1lh` on the parent
      paragraph, which refers to the line height of its own parent (30px), and
      an own `line-height: 2lh` of a footnote refers to the 40px that it inherits
@@ -89,6 +92,15 @@
     p.calc-pct { line-height: calc(150%); }
     .fn.pct-lh { font-size: 1lh; }
     .ref.pct-lh { font-size: 24px; }
+    /* a percentage line height is a length of the element that declares it:
+       150% of 16px = 24px, not 150% of the 32px of the level below it */
+    .pct-anc { line-height: 150%; }
+    .pct-mid { font-size: 32px; }
+    .fn.pct-anc-lh { font-size: 1lh; }
+    .ref.pct-anc-lh { font-size: 24px; }
+    .calc-pct-anc { line-height: calc(150%); }
+    .fn.calc-pct-anc-lh { font-size: 1lh; }
+    .ref.calc-pct-anc-lh { font-size: 24px; }
     /* a line height whose computation is not a number, e.g. `log(100, 0)`, is
        invalid at computed-value time: the browser keeps the 42px line height
        that the paragraph inherits from the root, and the footnote that
@@ -140,6 +152,12 @@
     <span class="ref lh-math">Wide</span><span class="fn lh-math">Wide</span></p>
   <p class="calc-pct">lh unit with a percentage computed line height:
     <span class="ref pct-lh">Wide</span><span class="fn pct-lh">Wide</span></p>
+  <div class="pct-anc"><div class="pct-mid">a percentage line height declared above a
+    level with a larger font size:
+    <span class="ref pct-anc-lh">Wide</span><span class="fn pct-anc-lh">Wide</span></div></div>
+  <div class="calc-pct-anc"><div class="pct-mid">a computed percentage line height above
+    a level with a larger font size:
+    <span class="ref calc-pct-anc-lh">Wide</span><span class="fn calc-pct-anc-lh">Wide</span></div></div>
   <p class="nan-lh">lh unit with a line height that computes to NaN:
     <span class="ref nan-lh">Wide</span><span class="fn nan-lh">Wide</span></p>
   <p class="zero-lh">lh unit with a line height that computes below zero:
@@ -168,6 +186,10 @@
     the non-negative range clamps the function to (so its footnote with
     `calc(1lh + 10px)` is 10px), the paragraph with `line-height: min(1, 2)`
     has the 16px of the number 1, and the paragraph with the internal viewport
-    unit `line-height: 2pvw` has the 12.094px of 2% of the page box.</p>
+    unit `line-height: 2pvw` has the 12.094px of 2% of the page box. The
+    percentage line heights (150% and `calc(150%)`) declared above a level with
+    the larger font size of 32px are the 24px of the 16px font size of the
+    level that declares them, not the 48px of the level below, so their
+    footnotes with `font-size: 1lh` are 24px as well.</p>
 </body>
 </html>

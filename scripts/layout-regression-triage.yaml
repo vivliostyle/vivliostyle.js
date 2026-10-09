@@ -951,6 +951,13 @@
     `160mm` page box (12.0925px), which the pre-fix viewers render but do not
     use as the basis of the `lh` unit: that footnote was 19.992px (40px)
     instead of the 12.0925px of the paragraph (24.19px), like its reference.
+    A percentage line height is the length of the element that declares it, so
+    the `150%` and the `calc(150%)` declared by a level whose font size is 16px
+    are the 24px that a footnote inherits, also when an intervening level has
+    the larger font size of 32px: the earlier rounds of the PR branch kept the
+    percentage in the accumulated value and resolved it level by level, so
+    those footnotes with `font-size: 1lh` were 47.992px (letter-spacing 96px)
+    instead of the 24px of their references (48px).
     The PR branch
     resolves those ancestor values level by level against
     the font size of the level that the value belongs to, reduces the math

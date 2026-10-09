@@ -3938,6 +3938,42 @@ describe("css-cascade", function () {
           ).getInheritedLineHeight(32),
         ).toBe(48);
       });
+
+      it("materializes a percentage line height where it is declared", function () {
+        // The computed value of a percentage line height is the length of the
+        // element that declares it, so the accumulated value must be that
+        // length: the `150%` declared at 16px is the 24px that a descendant
+        // inherits, not the percentage of the 32px of an intervening level.
+        // A function keeps only its percentages converted, so a function of
+        // unitless numbers stays the multiplier that it is, and the
+        // percentages of another property are unchanged. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        function accumulated(propName, text) {
+          visitor.setPropName(propName);
+          return adapt_cssparse
+            .parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            )
+            .visit(visitor)
+            .toString();
+        }
+        expect(accumulated("line-height", "150%")).toBe("24px");
+        expect(accumulated("line-height", "calc(150%)")).toBe("calc(24px)");
+        expect(accumulated("line-height", "min(200%, 40px)")).toBe(
+          "min(32px,40px)",
+        );
+        expect(accumulated("line-height", "calc(1.5)")).toBe("calc(1.5)");
+        expect(accumulated("line-height", "1.5")).toBe("1.5");
+        expect(accumulated("width", "150%")).toBe("150%");
+      });
     });
 
     describe("isNegativeLiteralLineHeight", function () {
