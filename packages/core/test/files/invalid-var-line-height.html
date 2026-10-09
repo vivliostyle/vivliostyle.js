@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a line-height that a var()
+     substitution makes invalid is rejected by the browser, which keeps the
+     inherited line height (40px from the body), so the accumulated value must
+     not be replaced by the invalid one. The footnote "One", whose font size is
+     `1lh`, must therefore be as large as the inline reference "One", which
+     resolves the same unit against the same inherited line height. The pre-fix
+     viewer treats the invalid value as if it were `normal`, so the footnote is
+     20px instead of 40px. The same happens for an invalid substituted function
+     such as `min(10px, 2)`, which the browser rejects at computed-value
+     time. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Invalid line-height from a var() substitution (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { font-size: 16px; line-height: 40px; }
+    /* invalid: the browser rejects the declaration and inherits the 40px */
+    .dep { --lh: nonsense; line-height: var(--lh); }
+    .dep .fn-lh { float: footnote; font-size: 1lh; }
+    .dep .fn-lh-func { float: footnote; --lf: min(10px, 2); line-height: var(--lf); font-size: 1lh; }
+    .ref-lh .one-lh { font-size: 1lh; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="dep">The footnote "One" below must be as large as this inline
+    reference "One" (the 40px line height that this paragraph inherits,
+    although it declares an invalid line height):
+    <span class="fn-lh">One</span><span class="fn-lh-func">One</span></p>
+  <p class="ref-lh">The reference of the normal flow resolves the same
+    `font-size: 1lh` against the inherited 40px line height:
+    <span class="one-lh">One</span></p>
+</body>
+</html>

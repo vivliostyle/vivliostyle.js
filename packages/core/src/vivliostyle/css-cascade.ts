@@ -687,10 +687,14 @@ function isRolledBackBy(
   candidate: CascadeValue,
   reverting: CascadeValue,
 ): boolean {
-  switch (reverting.value) {
-    case Css.ident.revert_rule:
+  // The kind has to be dispatched case-insensitively as well: a value that a
+  // var() substitution puts into the declaration is not canonicalized, and
+  // mixing the kinds up would drop declarations of the wrong origins or rules.
+  // (Review)
+  switch (Css.getRollbackKind(reverting.value)) {
+    case "revert-rule":
       return candidate.ruleId === reverting.ruleId;
-    case Css.ident.revert_layer:
+    case "revert-layer":
       // `revert-layer` rolls back to the layers *before* the current one, so
       // the current layer and every later one drop out — including the
       // important declarations of later layers, which outrank the current
@@ -1097,6 +1101,979 @@ export function chainActions(
   return action;
 }
 
+/**
+ * Check whether the value is the given CSS keyword. The CSS keywords are ASCII
+ * case-insensitive, and values substituted from a custom property (`var()`)
+ * are not canonicalized to lowercase by the validator, so the names are
+ * compared case-insensitively. (Issue #2174 follow-up)
+ */
+export function hasKeywordName(value: Css.Val, name: string): boolean {
+  return value instanceof Css.Ident && value.name.toLowerCase() === name;
+}
+
+/**
+ * Resolve the relative font-size keywords `larger`/`smaller` against the
+ * parent font-size, using the same factor (1.2) as browsers. (Issue #2174)
+ */
+export function resolveRelativeFontSizeKeyword(
+  ident: Css.Ident,
+  parentFontSize: number,
+): number {
+  return hasKeywordName(ident, "larger")
+    ? parentFontSize * 1.2
+    : parentFontSize / 1.2;
+}
+
+/**
+ * Resolve the relative font-weight keyword `bolder`/`lighter` against the
+ * inherited font weight, following the CSS Fonts 4 relative weights table:
+ * `bolder` uses 400 for an inherited weight below 350, 700 below 550 and 900
+ * up to 900, while a heavier inherited weight (up to 1000) is kept as it is;
+ * `lighter` uses 100 (or the inherited weight when it is smaller than 100),
+ * 400 below 750 and 700 otherwise.
+ */
+export function resolveRelativeFontWeight(
+  keyword: Css.Ident,
+  inheritedWeight: number,
+): number {
+  if (hasKeywordName(keyword, "bolder")) {
+    if (inheritedWeight < 350) {
+      return 400;
+    }
+    if (inheritedWeight < 550) {
+      return 700;
+    }
+    return inheritedWeight > 900 ? inheritedWeight : 900;
+  }
+  if (inheritedWeight < 550) {
+    return Math.min(inheritedWeight, 100);
+  }
+  return inheritedWeight < 750 ? 400 : 700;
+}
+
+/**
+ * The absolute font-size keywords in the order of the tables below: the rows
+ * of the table are the default font size in px (9 to 16, the range that the
+ * engines have a table for) and the columns are xx-small..xxx-large. The
+ * engines share this table (Blink `font_size_functions.cc`, Gecko
+ * `to_length_without_context` and its `nsRuleNode::CalcFontPointSize`, WebKit
+ * `StyleFontSizeFunctions.cpp`), e.g. the 16px row is 9/10/13/16/18/24/32/48 px;
+ * `xxx-small` is not a keyword of CSS Fonts 4. The quirks mode table of the
+ * engines and the table of the fixed default size, which a monospace element
+ * uses, are not modelled. CSS Fonts 4 gives the factors of
+ * `fontSizeKeywordFactors` as a guideline for the table, and the engines use
+ * exactly those factors, with 8/9 rounded to 0.89, when the default font size
+ * is outside the table; `medium` is then the default font size. Vivliostyle
+ * models the default font size as `context.initialFontSize`. (Issue #2174
+ * follow-up, Review)
+ */
+const fontSizeKeywordNames = [
+  "xx-small",
+  "x-small",
+  "small",
+  "medium",
+  "large",
+  "x-large",
+  "xx-large",
+  "xxx-large",
+];
+
+const fontSizeKeywordTable = [
+  [9, 9, 9, 9, 11, 14, 18, 27],
+  [9, 9, 9, 10, 12, 15, 20, 30],
+  [9, 9, 10, 11, 13, 17, 22, 33],
+  [9, 9, 10, 12, 14, 18, 24, 36],
+  [9, 10, 12, 13, 16, 20, 26, 39],
+  [9, 10, 12, 14, 17, 21, 28, 42],
+  [9, 10, 13, 15, 18, 23, 30, 45],
+  [9, 10, 13, 16, 18, 24, 32, 48],
+];
+
+// The scaling factors of CSS Fonts 4, in the order of the keywords, as the
+// engines apply them: 3/5, 3/4, 8/9 (rounded to 0.89), 1, 6/5, 3/2, 2/1, 3/1.
+const fontSizeKeywordFactors = [0.6, 0.75, 0.89, 1, 1.2, 1.5, 2, 3];
+
+/**
+ * Resolve an absolute font-size keyword (e.g. "small") to px against the
+ * default font size. Returns null when the value is not an absolute keyword.
+ */
+export function resolveAbsoluteFontSizeKeyword(
+  value: Css.Val,
+  defaultFontSize: number,
+): number | null {
+  if (value instanceof Css.Ident) {
+    const index = fontSizeKeywordNames.indexOf(value.name.toLowerCase());
+    if (index < 0) {
+      return null;
+    }
+    // The engines look the table up with a rounded default font size and apply
+    // the factors to the exact one. (Review)
+    const rounded = Math.round(defaultFontSize);
+    return rounded >= 9 && rounded <= 16
+      ? fontSizeKeywordTable[rounded - 9][index]
+      : defaultFontSize * fontSizeKeywordFactors[index];
+  }
+  return null;
+}
+
+/**
+ * Whether a font weight number is in the range of CSS Fonts 4, which accepts
+ * `<number [1,1000]>` (or the `normal`/`bold` keywords). (Review)
+ */
+export function isValidFontWeight(num: number): boolean {
+  return Number.isFinite(num) && num >= 1 && num <= 1000;
+}
+
+/**
+ * Whether a declared font-size value is valid although it cannot be resolved to
+ * a length here: a browser-supported value that the validator passes through,
+ * e.g. the `math` keyword (whose value depends on the math depth) or a unit
+ * that only the browser resolves such as `ch`. A value that a var()
+ * substitution made invalid and a value with an unresolved var() are not
+ * preserved. (Review)
+ */
+export function isValidUnresolvedFontSize(
+  context: Exprs.Context,
+  value: Css.Val,
+): boolean {
+  return (
+    !CssValidator.containsVar(value) &&
+    // A supported function whose computation is not a number, e.g. the
+    // `round(20px, 0px)` of a declaration, is not a value that only the
+    // browser resolves: it is invalid at computed-value time, so the element
+    // keeps the font size that the source parent accumulated, as the browser
+    // inherits it. (Review)
+    !evaluatesToNaN(context, value) &&
+    CSS.supports("font-size", value.toString())
+  );
+}
+
+/**
+ * Whether a value is a calculation of a supported math function that evaluates
+ * to `NaN`, e.g. the `log(100, 0)` or the `round(40px, 0)` of a declaration:
+ * the browser accepts such a declaration but its computed value is not a
+ * number, which makes the declaration invalid at computed-value time, so the
+ * property inherits the parent's value. A value that this engine cannot
+ * evaluate, e.g. one with a unit that only the browser resolves, is not
+ * reported: it may well become a number in the browser. (Review)
+ */
+export function evaluatesToNaN(
+  context: Exprs.Context,
+  value: Css.Val,
+): boolean {
+  if (
+    !(value instanceof Css.Func || value instanceof Css.Expr) ||
+    CssValidator.containsVar(value)
+  ) {
+    return false;
+  }
+  if (/infinity/i.test(value.toString())) {
+    // A value that already contains an infinite number, e.g. the
+    // `calc(exp(1000))` that a length cannot represent, is not what this check
+    // looks for: the name is a constant of the evaluator
+    // (`Exprs.Context.evalName()`) and the browsers clamp such a calculation
+    // rather than discard it. A `NaN` in the text is deliberately not
+    // short-circuited: the constant and a `NaN` that a function computes are
+    // the same value for the browsers, so both are reported here and the
+    // declarations that depend on it inherit, like the other invalid values.
+    // (The browsers censor a `NaN` to zero where the type matches the property
+    // instead; this engine keeps the inherited value for the basis values of
+    // detached content, see the limitations of the pull request. Review)
+    return false;
+  }
+  const visitor = new CalcFilterVisitor(context, true);
+  // The expression evaluator reduces a math function when it is the
+  // calculation of a `calc()`, so the value is wrapped like the callers of the
+  // number and length resolvers wrap it.
+  new Css.Func("calc", [value]).visit(visitor);
+  return visitor.evaluatedToNaN;
+}
+
+/**
+ * Whether a declared line height is invalid: `line-height` accepts `normal`, a
+ * non-negative number or a non-negative length or percentage, so any other
+ * post-substitution value is rejected by the browser, which keeps the inherited
+ * line height. (Review)
+ */
+export function isInvalidLineHeight(
+  context: Exprs.Context,
+  value: Css.Val,
+): boolean {
+  if (
+    value === Css.empty ||
+    CssValidator.containsVar(value) ||
+    Css.isDefaultingValue(value) ||
+    hasKeywordName(value, "normal")
+  ) {
+    // The CSS-wide keywords are materialized by the walk, and a value with an
+    // unresolved var() is not known to be invalid here.
+    return false;
+  }
+  if (value instanceof Css.Expr || value instanceof Css.Func) {
+    // A math function is allowed until it is evaluated, but one that is invalid
+    // at computed-value time, e.g. the `min(10px, 2)` that a var() substitution
+    // put into the declaration, makes the browser reject the declaration and
+    // keep the inherited line height. `CSS.supports()` only knows the syntax,
+    // so a supported function whose result is not a number, e.g.
+    // `log(100, 0)`, is detected by evaluating it. The internal viewport units
+    // of this engine are treated as the lengths they are, because the browser
+    // does not know them, while a value that mixes types (`min(2pvw, 1)`) or
+    // uses an unknown function is rejected like any other. (Review)
+    return (
+      !CSS.supports("line-height", checkableText(value)) ||
+      evaluatesToNaN(context, value)
+    );
+  }
+  if (value instanceof Css.Num) {
+    return value.num < 0;
+  }
+  if (value instanceof Css.Numeric) {
+    return value.num < 0 || !CSS.supports("line-height", checkableText(value));
+  }
+  return value instanceof Css.Ident;
+}
+
+/**
+ * Whether a declared font-weight value is invalid: `font-weight` accepts a
+ * number in the 1-1000 range of CSS Fonts 4 and the keywords (the relative
+ * `bolder`/`lighter` are resolved by the visitor), so every other
+ * post-substitution form, e.g. the `nonsense` or `700px` that a var()
+ * substitution put into the declaration, is rejected by the browser, which
+ * inherits the parent font weight. A math function is valid and is validated
+ * after it has been evaluated (a value outside the range is clamped, one whose
+ * result is not a number, e.g. `log(100, 0)`, is invalid). (Review)
+ */
+export function isInvalidFontWeight(
+  context: Exprs.Context,
+  value: Css.Val,
+): boolean {
+  if (value instanceof Css.Num) {
+    return !isValidFontWeight(value.num);
+  }
+  if (value instanceof Css.Ident) {
+    if (value === Css.empty || Css.isRollbackValue(value)) {
+      // Not a value of this property: it is handled elsewhere.
+      return false;
+    }
+    return !(
+      hasKeywordName(value, "normal") ||
+      hasKeywordName(value, "bold") ||
+      hasKeywordName(value, "bolder") ||
+      hasKeywordName(value, "lighter") ||
+      // The CSS-wide keywords are handled by the walk of the detached content;
+      // compare the names, because a keyword that comes from a custom property
+      // is not canonicalized.
+      hasKeywordName(value, "initial") ||
+      hasKeywordName(value, "inherit") ||
+      hasKeywordName(value, "unset")
+    );
+  }
+  if (value instanceof Css.Func || value instanceof Css.Expr) {
+    // A math function is valid as long as the browser accepts it: a function
+    // that is invalid at computed-value time, e.g. the `min(900px, 1em)` that a
+    // var() substitution put into the declaration, is rejected, while one whose
+    // value this engine does not evaluate, e.g. `round(650, 100)`, is left for
+    // the browser. A supported function whose result is not a number, e.g.
+    // `log(100, 0)`, is invalid as well: the element inherits the parent font
+    // weight, which a relative keyword of a descendant must resolve against.
+    // (Review)
+    return (
+      !CSS.supports("font-weight", value.toString()) ||
+      evaluatesToNaN(context, value)
+    );
+  }
+  return true;
+}
+
+/**
+ * Whether a function value is valid for a property in the sense of the
+ * browser. The math functions of CSS Values 4 are evaluated by this engine as
+ * numbers of its expression language, which converts every dimension to px, so
+ * a function whose arguments or result have a type that the property does not
+ * accept — e.g. the `round(20px, 7)` that rounds a length to a multiple of a
+ * number, or the number that `sign()` returns — must not become a computed
+ * value here: such a declaration is invalid, and the element inherits. A
+ * value that is not a function is valid as far as this check is concerned.
+ * (Review)
+ */
+function isSupportedFunctionValue(propName: string, value: Css.Val): boolean {
+  return (
+    !(value instanceof Css.Func || value instanceof Css.Expr) ||
+    CSS.supports(propName, value.toString())
+  );
+}
+
+/**
+ * Whether a function value is one that the browser rejects for the property,
+ * while the math functions of this engine could evaluate it: e.g. the
+ * `calc(round(20px, 7))` that a var() substitution put into a declaration,
+ * whose `round()` step has a type that the property does not accept. Such a
+ * declaration is invalid at computed-value time, so the browser keeps the
+ * inherited value, and this engine must not make it valid by evaluating the
+ * function. A function with an internal viewport unit (`pv*`) is not such a
+ * value: the browser does not know those units, while this engine resolves
+ * them. (Review)
+ */
+function isFunctionRejectedByBrowser(
+  propName: string,
+  value: Css.Val,
+): boolean {
+  return (
+    value instanceof Css.Func && !CSS.supports(propName, checkableText(value))
+  );
+}
+
+/**
+ * Whether every function of the value is one of the math functions of CSS
+ * Values 4 that this engine evaluates: `calc()`, `min()`, `max()`, `clamp()`
+ * and the functions of `OTHER_MATH_FUNCTION_NAMES`. Only such a value is
+ * checked against the target property before it is evaluated, because the
+ * browser may reject a function that this engine resolves itself, e.g. the
+ * `leader()` of a `content` declaration or the `pv*` units that
+ * `checkableText()` covers. (Review)
+ */
+class MathFunctionVisitor extends Css.Visitor {
+  isMath = true;
+
+  override visitFunc(func: Css.Func): Css.Val | null {
+    if (
+      func.name.toLowerCase() !== "calc" &&
+      func.name.toLowerCase() !== "min" &&
+      func.name.toLowerCase() !== "max" &&
+      func.name.toLowerCase() !== "clamp" &&
+      !OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())
+    ) {
+      this.isMath = false;
+    } else if (this.isMath) {
+      this.visitValues(func.values);
+    }
+    return null;
+  }
+}
+
+function isMathFunctionValue(value: Css.Val): boolean {
+  const visitor = new MathFunctionVisitor();
+  value.visit(visitor);
+  return visitor.isMath;
+}
+
+/**
+ * The value in the form that `CSS.supports()` can check: the internal page
+ * viewport units of this engine are replaced by a length, as
+ * `Css.withoutPageViewportUnits()` does, because a browser does not know those
+ * units although this engine resolves them, e.g. against the size of the page
+ * box. A declaration that uses one is a valid length for a browser, so the
+ * syntax and the types of the value are checked as if it were written with
+ * such a length: a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown
+ * function, e.g. `foo(2pvw)`, stay invalid. (Review)
+ */
+function checkableText(value: Css.Val): string {
+  return Css.withoutPageViewportUnits(value.toString());
+}
+
+/**
+ * Whether a declared font-size value is a negative literal length. Such a value
+ * is outside the non-negative range of `font-size`, so it is invalid: the
+ * browser rejects the declaration and the element inherits the parent font
+ * size, e.g. when a var() substitution puts such a length into the declaration.
+ * A math function that computes a negative value is valid instead and is
+ * clamped to zero. (Review)
+ */
+export function isNegativeLiteralFontSize(value: Css.Val): boolean {
+  return value instanceof Css.Numeric && value.num < 0;
+}
+
+/**
+ * Whether a line height is a negative literal, e.g. the `-5px` that a var()
+ * substitution put into the declaration: the computed-value range of
+ * `line-height` is non-negative, so the browser rejects such a declaration and
+ * inherits the parent line height, while a math function that computes a
+ * negative value is valid and is clamped to zero instead. (Review)
+ */
+export function isNegativeLiteralLineHeight(value: Css.Val): boolean {
+  return (
+    (value instanceof Css.Numeric || value instanceof Css.Num) && value.num < 0
+  );
+}
+
+/**
+ * The size of a font relative unit that only the browser resolves, as a
+ * multiple of the font size. These units come from the glyph metrics of the
+ * actual font, which this engine cannot obtain before the source document is
+ * laid out, and which differ with the font, the platform and the user settings,
+ * so the assumptions of CSS Values 4 §6.1 are used: it defines them for the
+ * cases where it is "impossible or impractical to determine" the metric (the
+ * `0` glyph of `ch` and the x-height of `ex` are assumed to be 0.5em, and the
+ * ideographic advance of `ic` is 1em). Only the cap height of `cap` has no
+ * numeric assumption there ("the font's ascent must be used", which is not
+ * obtainable here either), so the typical cap height of the Latin fonts is
+ * used, about 0.7em (0.57em for Courier, 0.73em for Verdana). Returns null for
+ * every other unit, including the ones `Exprs.defaultUnitSizes` covers.
+ * (Review)
+ */
+export function browserFontRelativeUnitRatio(unit: string): number | null {
+  switch (unit) {
+    case "ch":
+    case "ex":
+      // "In the cases where it is impossible or impractical to determine the
+      // measure of the “0” glyph, it must be assumed to be 0.5em wide" and
+      // "In the cases where it is impossible or impractical to determine the
+      // x-height, a value of 0.5em must be assumed."
+      return 0.5;
+    case "cap":
+      return 0.7;
+    case "ic":
+      // "In the cases where it is impossible or impractical to determine the
+      // ideographic advance measure, it must be assumed to be 1em."
+      return 1;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Resolve a font-size value that is neither a keyword nor a Css.Numeric to px:
+ * a unitless number (valid for font-size only as zero, e.g. `font-size: 0`),
+ * a calc() expression, or a clamp()/min()/max() function. The em/% and
+ * viewport units in these values have already been converted to px by
+ * visitNumeric while the inherited values were accumulated, so an expression
+ * whose remaining units are all resolvable can be evaluated here.
+ *
+ * `parentFontSize` is the font size that the `em`/`%` arguments refer to. It is
+ * only needed for a value that has not been through that conversion, e.g. the
+ * root font size, whose parent font size is the initial font size. A resolved
+ * value is clamped to the non-negative computed-value range of `font-size`.
+ * Returns null when the value cannot be resolved to a length. (Issue #2174
+ * follow-up)
+ */
+export function resolveFontSizeValueToPx(
+  context: Exprs.Context,
+  value: Css.Val,
+  parentFontSize?: number,
+): number | null {
+  if (!isSupportedFunctionValue("font-size", value)) {
+    return null;
+  }
+  if (value instanceof Css.Num) {
+    // Only a unitless zero is a valid font-size. Any other unitless number,
+    // e.g. one that a var() substitution put into the declaration, is rejected
+    // by the browser, which inherits the parent font size instead.
+    return value.num === 0 ? 0 : null;
+  }
+  if (parentFontSize != null && value instanceof Css.Func) {
+    value = convertParentRelativeFontSizeUnits(context, value, parentFontSize);
+  }
+  const px =
+    value instanceof Css.Func && isMathFunction(value)
+      ? evaluateMathFunctionToPx(context, value)
+      : evaluateValueToPx(context, value);
+  // A conversion of a dimension that has no unit size, e.g. the `5s` that a
+  // var() substitution put into `font-size: var(--size)`, is not a length
+  // (`NaN`), so the declaration is invalid and the element inherits the parent
+  // font size. (Review)
+  return px == null || !Number.isFinite(px) ? null : Math.max(0, px);
+}
+
+/**
+ * Convert the parts of a font-size value that resolve against the inherited
+ * font size (`em`, `%`, and the units that such values resolve to) into px,
+ * using the given parent font size as that inherited value. The conversion of
+ * the walk is reused; the parts that do not depend on the parent font size are
+ * left for the caller.
+ */
+function convertParentRelativeFontSizeUnits(
+  context: Exprs.Context,
+  func: Css.Func,
+  parentFontSize: number,
+  parentLineHeight?: number,
+): Css.Val {
+  const parentProps = {
+    "font-size": new CascadeValue(new Css.Numeric(parentFontSize, "px"), 0),
+  } as ElementStyle;
+  if (parentLineHeight != null) {
+    // The `lh` unit refers to the line height of the parent, so that it does
+    // not fall back to the preferred line height. (Review)
+    parentProps["line-height"] = new CascadeValue(
+      new Css.Numeric(parentLineHeight, "px"),
+      0,
+    );
+  }
+  const visitor = new InheritanceVisitor(parentProps, context);
+  visitor.setPropName("font-size");
+  return func.visit(visitor);
+}
+
+class LineHeightUnitVisitor extends Css.FilterVisitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    if (numeric.unit === "lh") {
+      this.found = true;
+    }
+    return numeric;
+  }
+}
+
+/**
+ * Whether a value uses the `lh` unit, which refers to the line height of the
+ * parent and is not accumulated in a detached subtree. (Review)
+ */
+export function usesLineHeightUnit(value: Css.Val): boolean {
+  const visitor = new LineHeightUnitVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+/**
+ * Replace the `lh` units of a value with px, using the line height that the
+ * element inherits. (Review)
+ */
+class LineHeightUnitReplacer extends Css.FilterVisitor {
+  constructor(private readonly inheritedLineHeight: number) {
+    super();
+  }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    return numeric.unit === "lh"
+      ? new Css.Numeric(numeric.num * this.inheritedLineHeight, "px")
+      : numeric;
+  }
+}
+
+/**
+ * Whether a value is a unitless number: a value that contains a dimension, e.g.
+ * the `1px` of `min(1px, 2px)`, is a length instead. This engine converts every
+ * dimension to px while a value is accumulated, so a `Css.Numeric` in a value
+ * here means such a length. (Review)
+ */
+class DimensionVisitor extends Css.FilterVisitor {
+  found = false;
+
+  override visitFunc(func: Css.Func): Css.Val {
+    // The arguments of a function that returns a `<number>` whatever its
+    // arguments are, e.g. the `20px` of `sign(20px)`, are a number and not a
+    // length: they do not make the surrounding value a length, so the
+    // arguments are not visited. (Review)
+    if (NUMBER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())) {
+      return func;
+    }
+    return super.visitFunc(func);
+  }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    this.found = true;
+    return numeric;
+  }
+}
+
+export function isUnitlessNumberValue(value: Css.Val): boolean {
+  const visitor = new DimensionVisitor();
+  value.visit(visitor);
+  return !visitor.found;
+}
+
+/**
+ * The px value of a math function of unitless numbers, e.g. the `min(1, 2)` of
+ * `line-height: min(1, 2)`: `line-height` accepts a `<number>`, whose computed
+ * value is the number multiplied by the font size of the element (`fontSize`),
+ * and a function that this engine evaluates but that is not a length is such a
+ * number. Returns null when the value is not such a function or evaluates to a
+ * value that is not a finite number. (Review)
+ */
+function resolveUnitlessLineHeightFunctionToPx(
+  context: Exprs.Context,
+  value: Css.Val,
+  fontSize: number,
+): number | null {
+  if (!(value instanceof Css.Func) || !isUnitlessNumberValue(value)) {
+    return null;
+  }
+  const num = evaluateValueToNumber(context, value);
+  if (num == null || !Number.isFinite(num)) {
+    return null;
+  }
+  // `line-height` has a non-negative computed-value range, as a length has.
+  return Math.max(0, num * fontSize);
+}
+
+/**
+ * Resolve a computed line-height value that uses the `lh` unit, e.g.
+ * `line-height: calc(1lh + 10px)`, against the line height that the element
+ * inherits. Returns null when the value cannot be resolved to a length.
+ * (Review)
+ */
+export function resolveLineHeightValueToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+  parentFontSize: number,
+  inheritedLineHeight: number,
+): number | null {
+  if (!isSupportedFunctionValue("line-height", func)) {
+    return null;
+  }
+  // The `lh` unit of a line height refers to the line height that the element
+  // inherits, which the walk accumulates for the source parent. The visitor
+  // converts the other parent relative units, but it leaves `lh` alone for a
+  // property other than `font-size`. (Review)
+  func = func.visit(
+    new LineHeightUnitReplacer(inheritedLineHeight),
+  ) as Css.Func;
+  const converted = convertParentRelativeFontSizeUnits(
+    context,
+    func,
+    parentFontSize,
+    inheritedLineHeight,
+  );
+  // `evaluateValueToPx()` reduces the math functions of the value (including
+  // the other functions of CSS Values 4, e.g. the `round(1lh, 7px)` that has
+  // become `round(40px, 7px)` here) and the arithmetic around them. (Review)
+  const px = evaluateValueToPx(context, converted);
+  if (px == null) {
+    // A function of unitless numbers, e.g. `min(1, 2)`, is not a length: it is
+    // a number, whose computed line height is the number multiplied by the
+    // font size of the element. (Review)
+    return resolveUnitlessLineHeightFunctionToPx(
+      context,
+      converted,
+      parentFontSize,
+    );
+  }
+  // A length cannot be an infinity, and the browser clamps such a calculation
+  // itself, so it is left unresolved (as a font size is). (Review)
+  if (!Number.isFinite(px)) {
+    return null;
+  }
+  // `line-height` has a non-negative computed-value range, so a math function
+  // that computes below zero is clamped: `calc(1lh - 100px)` with a 40px
+  // inherited line height is 0, and materializing the -60 that the expression
+  // evaluates to would make the browser reject the declaration and inherit the
+  // 40px instead of applying zero. (Review)
+  return Math.max(0, px);
+}
+
+/**
+ * Evaluate a clamp()/min()/max() function of numbers, e.g. the font-weight
+ * `min(900, 1000)`. Returns null when any argument cannot be resolved to a
+ * number.
+ */
+function evaluateMathFunctionToNumber(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  const name = func.name.toLowerCase();
+  const isClamp = name === "clamp";
+  if (func.values.length === 0 || (isClamp && func.values.length !== 3)) {
+    return null;
+  }
+  const numbers: number[] = [];
+  for (const value of func.values) {
+    const num = evaluateValueToNumber(context, value);
+    if (num == null) {
+      return null;
+    }
+    numbers.push(num);
+  }
+  if (isClamp) {
+    return Math.max(numbers[0], Math.min(numbers[1], numbers[2]));
+  }
+  return name === "min" ? Math.min(...numbers) : Math.max(...numbers);
+}
+
+/**
+ * Evaluate a value that is expected to be a number, e.g. a plain number or a
+ * sum such as `800 + 100`. Returns null when it is not a resolvable number.
+ */
+function evaluateValueToNumber(
+  context: Exprs.Context,
+  value: Css.Val,
+): number | null {
+  if (value instanceof Css.Func && isMathFunction(value)) {
+    // A nested math function, e.g. the inner max() of `min(900, max(100, 800))`.
+    return evaluateMathFunctionToNumber(context, value);
+  }
+  const evaluated = evaluateCSSToCSS(context, value, "font-weight");
+  if (evaluated instanceof Css.Num) {
+    return evaluated.num;
+  }
+  if (
+    value instanceof Css.Expr ||
+    value instanceof Css.Func ||
+    value instanceof Css.SpaceList
+  ) {
+    // A calc() expression evaluates a sum or product, which a plain value
+    // (e.g. a math function argument) is not parsed as.
+    const asCalc = evaluateCSSToCSS(
+      context,
+      new Css.Func("calc", [value]),
+      "font-weight",
+    );
+    if (asCalc instanceof Css.Num) {
+      return asCalc.num;
+    }
+  }
+  return null;
+}
+
+/**
+ * Replace the clamp()/min()/max() functions of a number value with their
+ * value, from the innermost one outwards, so that the expression evaluator can
+ * evaluate the arithmetic expression around them.
+ */
+class NumberMathFunctionReducer extends Css.FilterVisitor {
+  constructor(private readonly context: Exprs.Context) {
+    super();
+  }
+
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    if (isMathFunction(visited)) {
+      const num = evaluateMathFunctionToNumber(this.context, visited);
+      if (num != null) {
+        return new Css.Num(num);
+      }
+    }
+    return visited;
+  }
+}
+
+/**
+ * Evaluate a number-valued math function of `font-weight`, e.g. the
+ * `min(900, 1000)` or the `calc(650 + 50)` of a declaration, or the same value
+ * of an accumulated weight. Returns null when the value does not reduce to a
+ * number other than `NaN`; a number outside the range of CSS Fonts 4, which an
+ * overflowing calculation such as `exp(1000)` is as well, is clamped to the
+ * range. (Review)
+ */
+export function evaluateFontWeightMathFunction(
+  context: Exprs.Context,
+  value: Css.Val,
+): Css.Num | null {
+  if (!isSupportedFunctionValue("font-weight", value)) {
+    return null;
+  }
+  const reduced = value.visit(new NumberMathFunctionReducer(context));
+  // `evaluateValueToNumber()` also evaluates a function that is not wrapped in
+  // a `calc()`, e.g. the `round(650, 100)` of a declaration, which the
+  // expression evaluator resolves through the math functions of CSS Values 4.
+  // (Review)
+  const num = evaluateValueToNumber(context, reduced);
+  if (num == null || Number.isNaN(num)) {
+    return null;
+  }
+  // A calculation that overflows to an infinity is clamped to the range of
+  // CSS Fonts 4, like any other out of range result: `font-weight: exp(1000)`
+  // is 1000 for the element itself and for a detached descendant whose
+  // relative keyword resolves against it. (Review)
+  return new Css.Num(Math.min(1000, Math.max(1, num)));
+}
+
+function isMathFunction(func: Css.Func): boolean {
+  const name = func.name.toLowerCase();
+  return name === "clamp" || name === "min" || name === "max";
+}
+
+/**
+ * Evaluate a clamp()/min()/max() function of lengths, e.g. the font-size
+ * `clamp(1rem, 2vw + 1em, 3rem)`. Returns null when any argument cannot be
+ * resolved to px.
+ */
+function evaluateMathFunctionToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  const name = func.name.toLowerCase();
+  const isClamp = name === "clamp";
+  if (func.values.length === 0 || (isClamp && func.values.length !== 3)) {
+    return null;
+  }
+  const pxValues: number[] = [];
+  for (const value of func.values) {
+    const px = evaluateValueToPx(context, value);
+    if (px == null) {
+      return null;
+    }
+    pxValues.push(px);
+  }
+  if (isClamp) {
+    return Math.max(pxValues[0], Math.min(pxValues[1], pxValues[2]));
+  }
+  return name === "min" ? Math.min(...pxValues) : Math.max(...pxValues);
+}
+
+/**
+ * Evaluate a value that is expected to be a length in px, e.g. a single
+ * absolute length or a sum such as `2vw + 1em` that visitNumeric has already
+ * converted to `12.85px + 16px`. Returns null when it is not a resolvable
+ * absolute length.
+ */
+function evaluateValueToPx(
+  context: Exprs.Context,
+  value: Css.Val,
+): number | null {
+  if (value instanceof Css.Func && isMathFunction(value)) {
+    // A nested math function, e.g. the inner max() of
+    // `min(40px, max(1em, 20px))`.
+    return evaluateMathFunctionToPx(context, value);
+  }
+  // A math function can be embedded in an arithmetic expression, e.g. the
+  // clamp() of `calc(clamp(10px, 20px, 30px) + 5px)`. The expression evaluator
+  // only supports lengths and min()/max(), so those functions are reduced to
+  // their px value first.
+  const reduced = value.visit(new MathFunctionReducer(context));
+  const evaluated = evaluateCSSToCSS(context, reduced, "font-size");
+  if (isAbsoluteLengthValue(evaluated)) {
+    const numeric = evaluated as Css.Numeric;
+    const px = numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+    // A length cannot be an infinity (an overflowing calculation is clamped
+    // by the browser), and a dimension without a unit size is not a length
+    // at all. (Review)
+    return Number.isFinite(px) ? px : null;
+  }
+  if (
+    reduced instanceof Css.Numeric ||
+    reduced instanceof Css.Func ||
+    reduced instanceof Css.SpaceList
+  ) {
+    // A calc() expression evaluates a sum or product, which a plain value
+    // (e.g. a math function argument) is not parsed as.
+    const asCalc = evaluateCSSToCSS(
+      context,
+      new Css.Func("calc", [reduced]),
+      "font-size",
+    );
+    if (isAbsoluteLengthValue(asCalc)) {
+      const numeric = asCalc as Css.Numeric;
+      const px = numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+      return Number.isFinite(px) ? px : null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Replace the `clamp()`/`min()`/`max()` functions of a value with their px
+ * value, from the innermost one outwards, so that the expression evaluator can
+ * evaluate the arithmetic expression around them.
+ */
+class MathFunctionReducer extends Css.FilterVisitor {
+  constructor(private readonly context: Exprs.Context) {
+    super();
+  }
+
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    if (isMathFunction(visited)) {
+      const px = evaluateMathFunctionToPx(this.context, visited);
+      return px != null ? new Css.Numeric(px, "px") : visited;
+    }
+    // The other math functions of CSS Values 4 are evaluated by the expression
+    // evaluator, which the `calc()` wrapper of this helper makes reduce them:
+    // a value such as the `round(40px, 7px)` of an ancestor line height must
+    // not stay unresolved, or a detached descendant that resolves the `lh`
+    // unit against it would use the line height of the synthetic parent. The
+    // evaluation does not visit the value through this reducer again, so it
+    // cannot recurse. (Review)
+    const px = evaluateOtherMathFunctionToPx(this.context, visited);
+    return px != null ? new Css.Numeric(px, "px") : visited;
+  }
+}
+
+/**
+ * Whether an expression of the expression language is a single call to a math
+ * function of CSS Values 4 that returns a `<number>` whatever its arguments
+ * are. The other functions keep the type of their arguments (`abs()`, `mod()`,
+ * `rem()`, `round()` and the `clamp()`/`min()`/`max()` family, and `hypot()`,
+ * which computes to the common type of its arguments), and this language
+ * converts every dimension to a number, so the result of such a call must not
+ * be materialized as a length even when its argument is one:
+ * `calc(sign(20px))` is the unitless number 1, which a property that needs a
+ * length, e.g. `width`, rejects. (Review)
+ */
+function isNumberCalculation(expr: Exprs.Val): boolean {
+  return (
+    expr instanceof Exprs.Call &&
+    NUMBER_MATH_FUNCTION_NAMES.includes(expr.qualifiedName.toLowerCase())
+  );
+}
+
+const NUMBER_MATH_FUNCTION_NAMES = ["exp", "log", "pow", "sign", "sqrt"];
+
+/**
+ * Replace the arguments of the math functions that return a `<number>`
+ * whatever their arguments are with nothing, e.g. the `20px` of `sign(20px)`:
+ * such a dimension belongs to a number and must not make the calculation look
+ * like a length. The value is visited structurally, so the arguments of a
+ * nested call, e.g. the `abs(20px)` of `2 * sign(abs(20px))`, are opaque as
+ * well. (Review)
+ */
+class NumberFunctionArgumentRemover extends Css.FilterVisitor {
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    return NUMBER_MATH_FUNCTION_NAMES.includes(visited.name.toLowerCase())
+      ? new Css.Func(visited.name, [])
+      : visited;
+  }
+}
+
+/**
+ * The text of a calculation in which the arguments of those functions are
+ * removed, which is the text that its type is inferred from. (Review)
+ */
+function withoutNumberMathFunctionArguments(value: Css.Val): string {
+  return value.visit(new NumberFunctionArgumentRemover()).toString();
+}
+
+/**
+ * The math functions of CSS Values 4, other than `clamp()`/`min()`/`max()`,
+ * that the expression evaluator evaluates. A function that is not one of them,
+ * e.g. a `translate()`, is not attempted.
+ */
+function isOtherMathFunction(func: Css.Func): boolean {
+  return OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase());
+}
+
+const OTHER_MATH_FUNCTION_NAMES = [
+  "abs",
+  "exp",
+  "hypot",
+  "log",
+  "mod",
+  "pow",
+  "rem",
+  "round",
+  "sign",
+  "sqrt",
+];
+
+/**
+ * Evaluate a math function of CSS Values 4 that is not a `clamp()`/`min()`/
+ * `max()`, e.g. `round(40px, 7px)`, to px. The expression evaluator knows the
+ * functions of CSS Values 4, but it needs the function to be the calculation
+ * of a `calc()`. Returns null when the value does not reduce. (Review)
+ */
+function evaluateOtherMathFunctionToPx(
+  context: Exprs.Context,
+  func: Css.Func,
+): number | null {
+  if (!isOtherMathFunction(func)) {
+    return null;
+  }
+  const evaluated = evaluateCSSToCSS(
+    context,
+    new Css.Func("calc", [func]),
+    "font-size",
+  );
+  if (!isAbsoluteLengthValue(evaluated)) {
+    return null;
+  }
+  const numeric = evaluated as Css.Numeric;
+  return numeric.num * Exprs.defaultUnitSizes[numeric.unit];
+}
+
+function isAbsoluteLengthValue(value: Css.Val): boolean {
+  return value instanceof Css.Numeric && Exprs.isAbsoluteLengthUnit(value.unit);
+}
+
 export class InheritanceVisitor extends Css.FilterVisitor {
   propName: string = "";
 
@@ -1111,35 +2088,349 @@ export class InheritanceVisitor extends Css.FilterVisitor {
     this.propName = name;
   }
 
-  private getFontSize() {
+  /**
+   * The font size in px that the accumulated values inherit, i.e. the font size
+   * of the parent, or null when it is a value that only the browser resolves,
+   * e.g. the `math` keyword or the `ch` unit. (Used by the walk to resolve the
+   * `lh` unit of a computed line height. Review)
+   */
+  getInheritedFontSize(): number | null {
+    return this.getFontSize();
+  }
+
+  private getFontSize(): number | null {
     const cascval = getProp(this.props, "font-size");
-    if (!cascval.value.isNumeric()) {
-      // FIXME: cascval may be Ident value e.g. "smaller"
+    if (!cascval) {
+      // The accumulated value is removed when `initial` (e.g. `font-size:
+      // initial` or `all: initial`) is processed. (Issue #1696)
+      return this.context.initialFontSize;
+    }
+    const value = cascval.value;
+    const keywordSize = resolveAbsoluteFontSizeKeyword(
+      value,
+      this.context.initialFontSize,
+    );
+    if (keywordSize != null) {
+      return keywordSize;
+    }
+    if (!value.isNumeric()) {
+      const px = resolveFontSizeValueToPx(this.context, value);
+      if (px != null) {
+        return px;
+      }
+      if (isValidUnresolvedFontSize(this.context, value)) {
+        // A valid value that only the browser resolves, e.g. the `math`
+        // keyword, has no size in px here: the values that depend on it are
+        // left to the browser as well, which resolves them against the
+        // computed size instead of the inherited fallback. (Review)
+        return null;
+      }
+      // FIXME: cascval may be a value that cannot be resolved to a length
+      // here (the relative keywords "larger"/"smaller" are resolved in
+      // visitIdent, the absolute size keywords just above, and expressions
+      // that depend on an unresolved var() remain).
       return Exprs.defaultUnitSizes["em"];
     }
-    const n = cascval.value as Css.Numeric;
+    const n = value as Css.Numeric;
     if (!Exprs.isAbsoluteLengthUnit(n.unit)) {
-      throw new Error("Unexpected state");
+      // A unit that only the browser resolves, e.g. `ch`: see above. (Review)
+      return null;
     }
-    return n.num * Exprs.defaultUnitSizes[n.unit];
+    // `font-size` has a non-negative computed-value range.
+    return Math.max(0, n.num * Exprs.defaultUnitSizes[n.unit]);
+  }
+
+  /**
+   * The line height that the `lh` unit of a `font-size` refers to: the computed
+   * line height of the parent, i.e. of the value that was accumulated for the
+   * parent before the font size of the current element is processed. Returns
+   * null when it cannot be determined. (Issue #2174 follow-up)
+   */
+  /**
+   * The line height in px that the accumulated values inherit, i.e. the line
+   * height of the parent. A relative value among them is resolved against
+   * `parentFontSize` — the font size of the parent, which the font-relative
+   * units of a line height refer to — defaulting to the font size that the
+   * visitor currently sees, which is the parent's while a `font-size` value is
+   * processed and the current level's own when a `line-height` value is. (Used
+   * by the walk to resolve the `lh` unit of a computed line height. Review)
+   */
+  getInheritedLineHeight(parentFontSize?: number | null): number | null {
+    return this.getInheritedLineHeightUnitSize(parentFontSize);
+  }
+
+  private getInheritedLineHeightUnitSize(
+    parentFontSize: number | null = this.getFontSize(),
+  ): number | null {
+    let value = getProp(this.props, "line-height")?.value;
+    // Whether the value is a function of this engine that has been reduced to
+    // a number or a length here: such a computed value is clamped to the
+    // non-negative range of `line-height`, while a negative literal is invalid
+    // and the browser inherits the parent line height instead. (Review)
+    let computedValue = false;
+    if (value instanceof Css.Numeric) {
+      const unit = value.unit;
+      if (
+        unit !== "em" &&
+        unit !== "rem" &&
+        unit !== "%" &&
+        unit !== "lh" &&
+        unit !== "rlh" &&
+        Exprs.defaultUnitSizes[unit] != null
+      ) {
+        // An absolute line height, e.g. `line-height: 40px`, does not depend
+        // on the font size, so it is resolved before one is required: an
+        // inherited font size that only the browser resolves, e.g. the `math`
+        // keyword of an ancestor, must not make such a line height unknown.
+        // (Review)
+        return value.num * Exprs.defaultUnitSizes[unit];
+      }
+      if (Exprs.isViewportRelativeLengthUnit(unit)) {
+        // A viewport relative line height, e.g. the `line-height: 2pvw` that a
+        // detached descendant resolves an `lh` unit against, does not depend on
+        // the font size either, and the unit size of the internal units is
+        // known to this engine only: a declaration that the browser rejects
+        // (it does not know `pv*`) must not make the basis unknown. (Review)
+        return value.num * this.context.queryUnitSize(unit, false);
+      }
+    }
+    if (parentFontSize == null) {
+      // Every remaining value is relative to a font size: a number and
+      // `normal` to the inherited one, `em`/`%` to the same, and `rem`/`rlh`
+      // to the root ones. That font size is a value that only the browser
+      // resolves here, so the line height is not known either. (Review)
+      return null;
+    }
+    if (value instanceof Css.Expr || value instanceof Css.Func) {
+      computedValue = true;
+      // A computed line height, e.g. `line-height: calc(1.5 * 16px)`, which is
+      // still a function while the inherited values are accumulated. A
+      // percentage of it refers to the font size of the element itself, so it
+      // is converted before the expression is evaluated.
+      if (value instanceof Css.Func) {
+        value = convertParentRelativeFontSizeUnits(
+          this.context,
+          value,
+          parentFontSize,
+        );
+        // A function of unitless numbers, e.g. `min(1, 2)`, is a number rather
+        // than a length: it is not reduced by the visitors below, so it is
+        // resolved here, or an inherited line height would fall back to the
+        // preferred one. (Review)
+        const numPx = resolveUnitlessLineHeightFunctionToPx(
+          this.context,
+          value,
+          parentFontSize,
+        );
+        if (numPx != null) {
+          return numPx;
+        }
+        // `evaluateCSSToCSS()` only reduces `calc()`, so a valid math function
+        // such as `line-height: min(40px, 2em)` must be reduced to its px value
+        // here: otherwise an inherited line height falls back to the preferred
+        // line height for a detached descendant that resolves an `lh` unit. An
+        // `lh` unit of this value refers to the line height of the level above,
+        // which is not known here, so such a value is left unresolved instead
+        // of using the placeholder size of the unit. (Review)
+        if (!usesLineHeightUnit(value)) {
+          value = value.visit(new MathFunctionReducer(this.context));
+        }
+      }
+      value = evaluateCSSToCSS(this.context, value, "line-height");
+    }
+    // A computed value that is below zero is clamped, as `line-height` has a
+    // non-negative computed-value range: `min(-10px, -20px)` is 0, and a
+    // detached descendant that resolves an `lh` unit against it must use that
+    // zero rather than the -20px of the calculation. (Review)
+    const clampComputed = (lineHeight: number): number =>
+      computedValue ? Math.max(0, lineHeight) : lineHeight;
+    if (value instanceof Css.Num) {
+      // A number that is not finite cannot be a line height: it is left
+      // unknown instead of propagating an infinity into the `lh` unit.
+      // (Review)
+      return Number.isFinite(value.num)
+        ? clampComputed(value.num * parentFontSize)
+        : null;
+    }
+    if (value instanceof Css.Numeric) {
+      switch (value.unit) {
+        case "em":
+        case "%":
+          return clampComputed(
+            (value.unit === "%" ? value.num / 100 : value.num) * parentFontSize,
+          );
+        case "lh":
+        case "rlh":
+          // The line height of the parent is relative to the line height of the
+          // parent of the parent, which is not accumulated here.
+          return null;
+        default: {
+          const unitSize = Exprs.defaultUnitSizes[value.unit];
+          if (unitSize) {
+            return clampComputed(value.num * unitSize);
+          }
+          const ratio = browserFontRelativeUnitRatio(value.unit);
+          // A unit that only the browser resolves, e.g. the `ch` of
+          // `line-height: 5ch`, has no unit size here: the assumption of CSS
+          // Values 4 is used against the font size of the element, as the root
+          // sizing does, so that a detached descendant that resolves an `lh`
+          // unit against such a line height does not fall back to the root
+          // line height. (Review)
+          return ratio != null
+            ? clampComputed(value.num * ratio * parentFontSize)
+            : null;
+        }
+      }
+    }
+    // No line-height or `normal`: the multiplier of the preferred line height.
+    return this.context.pref.lineHeight * parentFontSize;
+  }
+
+  private getFontWeight(): number {
+    // The accumulated value is the inherited (parent's) font weight, or the
+    // initial value 400 when no ancestor declared font-weight.
+    const cascval = getProp(this.props, "font-weight");
+    let value = cascval?.value;
+    if (value instanceof Css.Expr || value instanceof Css.Func) {
+      // `font-weight` also accepts a function, e.g. `calc(650)` or
+      // `min(900, 1000)`, which `evaluateCSSToCSS()` alone does not reduce.
+      value =
+        evaluateFontWeightMathFunction(this.context, value) ??
+        evaluateCSSToCSS(this.context, value, "font-weight");
+    }
+    if (value instanceof Css.Num) {
+      // A number outside the range of CSS Fonts 4, e.g. one that a var()
+      // substitution put into the declaration, is invalid: the element inherits
+      // the parent font weight, so it must not become the base of a relative
+      // keyword. (Review)
+      return isValidFontWeight(value.num) ? value.num : 400;
+    }
+    if (value && hasKeywordName(value, "bold")) {
+      return 700;
+    }
+    return 400;
   }
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     if (this.propName === "font-size") {
-      return convertFontSizeToPx(numeric, this.getFontSize(), this.context);
+      const parentFontSize = this.getFontSize();
+      if (
+        parentFontSize == null &&
+        (numeric.unit === "em" || numeric.unit === "%")
+      ) {
+        // The value is relative to an inherited font size that only the
+        // browser resolves, so it is preserved as it is and resolved by the
+        // browser in the same context. (Review)
+        return numeric;
+      }
+      return convertFontSizeToPx(
+        numeric,
+        parentFontSize,
+        this.context,
+        this.getInheritedLineHeightUnitSize(),
+      );
     } else if (
       numeric.unit === "em" ||
       numeric.unit === "rem" ||
       numeric.unit === "lh" ||
       numeric.unit === "rlh"
     ) {
+      const parentFontSize = this.getFontSize();
+      if (parentFontSize == null && numeric.unit === "em") {
+        // As above: the `em` unit of a dependent property must not be
+        // resolved against the inherited fallback when the element's own font
+        // size is a value that only the browser resolves. (Review)
+        return numeric;
+      }
       return convertFontRelativeLengthToPx(
         numeric,
-        this.getFontSize(),
+        parentFontSize ?? 0,
         this.context,
       );
+    } else if (this.propName === "line-height") {
+      // A percentage of a line height refers to the font size of the element
+      // that declares it, and the computed value of a percentage or of a unit
+      // whose metric only the browser resolves (`ch`, `ex`, `cap`, `ic`) is
+      // that length, which a descendant inherits: the accumulated value must
+      // not keep the relative unit, or a detached descendant would resolve it
+      // against its own font size — e.g. the `calc(150%)` of an ancestor at
+      // 16px is 24px, not the 48px of an intervening level at 32px, and the
+      // `5ch` of that ancestor is the 40px of the assumed metric (CSS Values 4
+      // §6.1, as for a font size), not the 80px of the level below. A function
+      // keeps only those values converted, so a function of unitless numbers
+      // stays the multiplier that it is. (Review)
+      const ratio =
+        numeric.unit === "%"
+          ? 0.01
+          : browserFontRelativeUnitRatio(numeric.unit);
+      const fontSize = this.getFontSize();
+      if (ratio != null && fontSize != null) {
+        return new Css.Numeric(numeric.num * ratio * fontSize, "px");
+      }
     }
     return numeric;
+  }
+
+  override visitIdent(ident: Css.Ident): Css.Val {
+    if (this.propName === "font-size") {
+      // Resolve the absolute size keywords (e.g. "small") against the default
+      // font size, and the relative keywords "larger"/"smaller" against the
+      // inherited font size, to numeric computed values, so that detached
+      // content (footnotes, page floats, running elements) and the root's
+      // inherited properties are not re-resolved per level. (Issue #2174)
+      const keywordSize = resolveAbsoluteFontSizeKeyword(
+        ident,
+        this.context.initialFontSize,
+      );
+      if (keywordSize != null) {
+        return new Css.Numeric(keywordSize, "px");
+      }
+      if (hasKeywordName(ident, "larger") || hasKeywordName(ident, "smaller")) {
+        const parentFontSize = this.getFontSize();
+        if (parentFontSize != null) {
+          return new Css.Numeric(
+            resolveRelativeFontSizeKeyword(ident, parentFontSize),
+            "px",
+          );
+        }
+        // The inherited font size is a value that only the browser resolves:
+        // the keyword is preserved and resolved by the browser against its
+        // own computed size. (Review)
+      }
+      if (hasKeywordName(ident, "math")) {
+        // The math font size depends on the mathematical context of the
+        // element: it is 1em of the inherited font size for the depths that
+        // this engine represents, which is the value of a depth 0 element, so
+        // it is resolved like `1em` and a detached element uses the font size
+        // of its source parent instead of the one of the synthetic parent that
+        // the browser would resolve the keyword in after the element is
+        // reparented. A well formed MathML document keeps that meaning: the
+        // `math` keyword of the `math` element is depth 0, and the deeper
+        // elements take their scaling from the user agent stylesheet
+        // (`math-depth: add(1)`), which this cascade does not see, so they are
+        // resolved by the browser against the font size that is resolved here
+        // (measured: an exponent of a footnote is 0.71em of its base, like its
+        // inline reference). A `math` that an author declares on an element of
+        // a deeper depth is the one case that is not modelled here: the
+        // materialized 1em makes a relative value of a detached descendant
+        // larger than the browser would compute it (measured: a footnote
+        // inside an element whose `font-size: math` has
+        // `math-depth: add(1)` is 64px, twice the 1em of 32px, instead of the
+        // 45.4px that the browser computes from the 22.7px). `math-depth` is
+        // not supported by this engine. (Review)
+        const parentFontSize = this.getFontSize();
+        if (parentFontSize != null) {
+          return new Css.Numeric(parentFontSize, "px");
+        }
+      }
+    } else if (this.propName === "font-weight") {
+      if (hasKeywordName(ident, "bolder") || hasKeywordName(ident, "lighter")) {
+        return new Css.Int(
+          resolveRelativeFontWeight(ident, this.getFontWeight()),
+        );
+      }
+    }
+    return ident;
   }
 
   override visitExpr(expr: Css.Expr): Css.Val {
@@ -1173,6 +2464,7 @@ export function convertFontSizeToPx(
   numeric: Css.Numeric,
   parentFontSize: number | null,
   context: Exprs.Context,
+  inheritedLineHeight?: number | null,
 ): Css.Numeric {
   // FIXME: This fallback to 0 is obviously an invalid value. A null arrives
   // from reading back the computed style of an element whose view is detached
@@ -1185,6 +2477,11 @@ export function convertFontSizeToPx(
   // AttachedPageFloatLayoutContext.invalidate(). That trial is discarded. The
   // real DOM is built again while attached to the document, and the invalid
   // value does not reach the rendered result.
+  if (numeric.unit === "lh" && inheritedLineHeight != null) {
+    // For `font-size`, the `lh` unit refers to the computed line height of the
+    // parent. (Issue #2174 follow-up)
+    return new Css.Numeric(numeric.num * inheritedLineHeight, "px");
+  }
   numeric = convertFontRelativeLengthToPx(
     numeric,
     parentFontSize ?? 0,
@@ -1197,7 +2494,21 @@ export function convertFontSizeToPx(
   } else if (unit === "%") {
     return new Css.Numeric((num / 100) * (parentFontSize ?? 0), "px");
   } else {
-    return new Css.Numeric(num * context.queryUnitSize(unit, false), "px");
+    const unitSize = context.queryUnitSize(unit, false);
+    if (Number.isFinite(unitSize)) {
+      return new Css.Numeric(num * unitSize, "px");
+    }
+    // A unit that only the browser resolves, e.g. `ch`: it would be resolved
+    // against the font metrics of the element, which for detached content are
+    // the ones of the source parent, so the value must not be left to the
+    // browser, which would resolve it against the synthetic parent it is
+    // rendered in. The metric is not obtainable here, so the assumption of CSS
+    // Values 4 for such a unit is used with the parent font size. (Review)
+    const ratio = browserFontRelativeUnitRatio(unit);
+    if (ratio != null && parentFontSize != null) {
+      return new Css.Numeric(num * ratio * parentFontSize, "px");
+    }
+    return numeric;
   }
 }
 
@@ -5274,7 +6585,105 @@ export class CascadeInstance {
         }
       } else if (isPropName(name) && !Css.isCustomPropName(name)) {
         const cascVal = getProp(elementStyle, name);
-        elementStyle[name] = cascVal.withValue(cascVal.value.visit(visitor));
+        // A negative literal length is invalid for `font-size` (its range is
+        // non-negative), e.g. one that a var() substitution introduced into the
+        // declaration. The browser rejects such a declaration and inherits the
+        // parent font size, so the declaration is turned into `unset` here,
+        // before the math functions are evaluated: a math function that
+        // computes a negative value is valid and is clamped to zero below.
+        // (Review)
+        // A math function that the browser rejects for the property, e.g. the
+        // `calc(round(20px))` whose one-argument `round()` is a number and not
+        // a length, or the `calc(round(20px, 7))` that a var() substitution
+        // put into a `font-size` declaration, is invalid at computed-value
+        // time: the browser keeps the inherited value (or the initial one), so
+        // the declaration is turned into `unset` here rather than being made
+        // valid by the math functions that this engine evaluates below. Only a
+        // value of the math functions of CSS Values 4 is checked: a function
+        // that this engine resolves while the browser does not know it must
+        // not be rejected. (Review)
+        const rejectedFunction =
+          isMathFunctionValue(cascVal.value) &&
+          isFunctionRejectedByBrowser(name, cascVal.value);
+        let value =
+          (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
+          (name === "font-weight" &&
+            isInvalidFontWeight(this.context, cascVal.value)) ||
+          // A negative literal line height is invalid like a negative literal
+          // font size, so the declaration becomes `unset` and the element
+          // inherits the parent line height, as the browser does. (Review)
+          (name === "line-height" &&
+            isNegativeLiteralLineHeight(cascVal.value)) ||
+          rejectedFunction
+            ? Css.ident.unset
+            : cascVal.value.visit(visitor);
+        if (name === "font-weight") {
+          if (value instanceof Css.Func || value instanceof Css.Expr) {
+            // The validator passes browser-supported math functions through,
+            // e.g. `min(900, 1000)`, but `CalcFilterVisitor` only reduces
+            // `calc()`: reduce the other math functions here, before the range
+            // is validated. A supported function that does not reduce to a
+            // number, e.g. `round(650, 100)`, is kept and evaluated by the
+            // browser; only a function that the browser rejects, e.g. the
+            // `min(900px, 1em)` that a var() substitution put into the
+            // declaration, is invalid (`isInvalidFontWeight` below). (Review)
+            value =
+              evaluateFontWeightMathFunction(this.context, value) ?? value;
+          }
+          if (value instanceof Css.Num) {
+            // A weight that is not a literal, e.g. `calc(1200)`, is valid: the
+            // computed value is clamped to the range of CSS Fonts 4, which
+            // includes an overflowing calculation such as
+            // `calc(exp(1000))`, while a result that is not a number is
+            // invalid like a literal outside the range. (Review)
+            value = Number.isNaN(value.num)
+              ? Css.ident.unset
+              : new Css.Num(Math.min(1000, Math.max(1, value.num)));
+          } else if (isInvalidFontWeight(this.context, value)) {
+            value = Css.ident.unset;
+          }
+        } else if (
+          name === "font-size" &&
+          value instanceof Css.Numeric &&
+          value.num < 0
+        ) {
+          // A math function that computes a negative value is valid and its
+          // computed value is clamped to the non-negative range of `font-size`,
+          // but emitting the negative length would be rejected by the browser,
+          // which would inherit the parent font size instead of computing zero.
+          // (Review)
+          value = new Css.Numeric(0, value.unit);
+        } else if (
+          // `font-weight` is the property whose range this engine applies to an
+          // overflowing calculation itself (`evaluateFontWeightMathFunction`
+          // below), so every other property keeps the declaration: the token
+          // `Infinity` is not CSS at all, and the browser clamps such a
+          // calculation, e.g. `opacity: calc(exp(1000))` to 1, while a stored
+          // infinity would propagate into the root sizes and into the line
+          // height that a detached descendant resolves an `lh` unit against.
+          // (Review)
+          name !== "font-weight" &&
+          (value instanceof Css.Numeric || value instanceof Css.Num) &&
+          !Number.isFinite(value.num)
+        ) {
+          value = cascVal.value;
+        } else if (
+          name === "line-height" &&
+          (value instanceof Css.Numeric || value instanceof Css.Num) &&
+          value.num < 0
+        ) {
+          // A math function that computes a negative line height is valid and
+          // its computed value is clamped to the non-negative range of
+          // `line-height`: materializing the negative length would make the
+          // browser reject the declaration and inherit the parent line height
+          // instead of applying zero. A negative literal was turned into
+          // `unset` above, before the math functions were evaluated. (Review)
+          value =
+            value instanceof Css.Numeric
+              ? new Css.Numeric(0, value.unit)
+              : new Css.Num(0);
+        }
+        elementStyle[name] = cascVal.withValue(value);
       }
     }
   }
@@ -7238,7 +8647,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
     }
     const varVal = this.getVarValue(name);
     if (varVal) {
-      return varVal;
+      return Css.canonicalWideKeyword(varVal);
     }
     if (
       this.currentCustomPropertyName &&
@@ -7253,7 +8662,7 @@ export class VarFilterVisitor extends Css.FilterVisitor {
       return Css.empty;
     }
     if (func.values.length === 2) {
-      return func.values[1];
+      return Css.canonicalWideKeyword(func.values[1]);
     } else {
       return new Css.CommaList(func.values.slice(1));
     }
@@ -7299,9 +8708,56 @@ export class VarFilterVisitor extends Css.FilterVisitor {
 }
 
 /**
+ * Whether a value contains a keyword, which this expression language cannot
+ * evaluate as a number, e.g. the `<rounding-strategy>` of
+ * `round(up, 650, 100)` (a keyword becomes a media name, which is not a
+ * number). A value that contains one is valid CSS that the browser computes:
+ * the calculation is left to the browser instead of being parsed here (the
+ * parser would report the keyword as a syntax error) and must not be treated
+ * as a calculation that computes NaN. The numeric keywords of CSS Values 4
+ * (`infinity`, `NaN`) are numbers for the evaluator. (Review)
+ */
+class KeywordVisitor extends Css.Visitor {
+  found = false;
+
+  override visitIdent(ident: Css.Ident): Css.Val | null {
+    // The numeric constants of CSS Values 4 §10.7 are values of the
+    // calculation, not keywords that the parser cannot handle: `pi` and `e`
+    // are resolved by `Exprs.Context.evalName()` (together with the serialized
+    // `Infinity`/`NaN`), so they must not make the calculation unevaluable.
+    // (Review)
+    const name = ident.name.toLowerCase();
+    if (
+      name !== "infinity" &&
+      name !== "nan" &&
+      name !== "pi" &&
+      name !== "e"
+    ) {
+      this.found = true;
+    }
+    return null;
+  }
+}
+
+function hasUnevaluableKeyword(value: Css.Val): boolean {
+  const visitor = new KeywordVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+/**
  * Convert calc() to its value
  */
 export class CalcFilterVisitor extends Css.FilterVisitor {
+  /**
+   * Whether a calculation of the value that this visitor evaluated is `NaN`,
+   * i.e. a supported function whose computed value is not a number, e.g. the
+   * `log(100, 0)` of a declaration. Such a declaration is invalid at
+   * computed-value time, so the property inherits, which the callers that
+   * accumulate a value for a dependent property need to know. (Review)
+   */
+  evaluatedToNaN = false;
+
   constructor(
     public context: Exprs.Context,
     public resolveViewportUnit?: boolean,
@@ -7314,11 +8770,12 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
   override visitFunc(func: Css.Func): Css.Val {
     // convert func args
     let value = super.visitFunc(func);
-    if (func.name !== "calc") {
+    // A function name is matched case-insensitively, e.g. `CALC(2em)`.
+    if (func.name.toLowerCase() !== "calc") {
       return value;
     }
-    const exprText = value.toString().replace(/^calc\b/, "-epubx-expr");
-    if (this.hasUnresolvableUnit(exprText)) {
+    const exprText = value.toString().replace(/^calc\b/i, "-epubx-expr");
+    if (this.hasUnresolvableUnit(exprText) || hasUnevaluableKeyword(value)) {
       return value;
     }
     const exprVal = CssParser.parseValue(
@@ -7329,12 +8786,30 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
     if (exprVal instanceof Css.Expr) {
       try {
         const exprResult = exprVal.expr.evaluate(this.context);
-        if (typeof exprResult === "number" && !isNaN(exprResult)) {
-          if (this.isLengthExpr(exprText)) {
+        if (typeof exprResult === "number" && isNaN(exprResult)) {
+          this.evaluatedToNaN = true;
+        } else if (typeof exprResult === "number") {
+          const numberCalculation = isNumberCalculation(exprVal.expr);
+          // The dimensions of the arguments of a function that returns a
+          // `<number>` whatever its arguments are, e.g. the `20px` of
+          // `sign(20px)`, are numbers and not lengths, so only the dimensions
+          // outside such a function say whether the calculation is a length.
+          // (Review)
+          const typeText = withoutNumberMathFunctionArguments(value);
+          const isLength = !numberCalculation && this.isLengthExpr(typeText);
+          if (isLength && Number.isFinite(exprResult)) {
             // length value
             value = new Css.Numeric(exprResult, "px");
-          } else if (!/\d[a-z]/i.test(exprText)) {
-            // unitless number
+          } else if (
+            !isLength &&
+            (numberCalculation || !/\d[a-z]/i.test(typeText))
+          ) {
+            // unitless number, which may be an infinity: a number valued
+            // property such as `font-weight` clamps it to its range, while a
+            // length cannot be represented as one — `calc(exp(1000) * 1px)`
+            // would be serialized as the invalid `Infinitypx` — so an
+            // overflowing length keeps the calc() for the browser to clamp.
+            // (Review)
             value = new Css.Num(exprResult);
           }
           // otherwise, keep the original calc() expression

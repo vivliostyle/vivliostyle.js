@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: `xxx-large` is an absolute font-size
+     keyword that modern browsers accept (CSS Fonts 4) and compute as three
+     times the default font size, i.e. 48px for the default 16px, so it must be
+     resolved to a numeric computed value like the other absolute keywords: the
+     root `rem` unit and the `em` units of detached content (footnote) depend on
+     it. The pre-fix resolver's table omitted the keyword, so the root font
+     size stayed 16px and a detached descendant fell back to 16px as well
+     (measured in the dev viewer; stable and canary render that pre-fix
+     result). The PR branch resolves the keyword to the 48px of the browser
+     table, the new last entry of the default-size row that
+     `absolute-font-size-keywords.html` documents. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    xxx-large absolute font size keyword (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page {
+      size: 160mm 100mm; margin: 10mm;
+      /* 1rem = root font size = 48px (xxx-large) */
+      @top-center { content: "Margin box at 1rem"; font-size: 1rem; }
+    }
+    :root { font-size: xxx-large; } /* browser: 3 x 16px = 48px */
+    .rem-test { width: 10rem; height: 6px; background: #9cf; } /* 480px */
+    .rem-ref { width: 480px; height: 6px; background: #cfc; }
+    .dep { font-size: 32px; }
+    /* the keyword is absolute: 48px, not the 32px of the source parent */
+    .dep .fn { float: footnote; font-size: xxx-large; letter-spacing: 2em; }
+    .ref { font-size: 48px; letter-spacing: 96px; }
+    p { margin: 0.25em 0; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>The root <code>font-size: xxx-large</code> must be resolved to the 48px of
+    the browser, so the blue box (10rem) is as wide as the green one (480px)
+    and the margin box is at 1rem = 48px:</p>
+  <div class="rem-test"></div>
+  <div class="rem-ref"></div>
+  <p class="dep">The footnote <code>font-size: xxx-large</code> must be the
+    48px of the keyword as well, not the 32px of its source parent, so its
+    "Wide" has the same letter-spacing as the reference below:<span class="fn">Wide</span></p>
+  <p class="ref">Wide</p>
+</body>
+</html>

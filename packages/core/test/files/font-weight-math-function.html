@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: `font-weight` accepts a math function
+     of CSS Values 4 (it is a `<number>`), so the function must be evaluated
+     before the 1-1000 range is validated and before a relative keyword is
+     resolved against the result. The first two footnotes "B" of the
+     `min(900, 1000)` paragraph must be as bold as the inline "B" of the same
+     paragraph (900, the weight of the paragraph itself), and the third one,
+     whose own function is out of range, must be clamped to 1000, while a
+     function whose arguments are not numbers
+     (e.g. `min(900px, 1em)`) is invalid at computed-value time, so the footnote
+     keeps the inherited weight. A function that uses the other math functions
+     of CSS Values 4, e.g. `round(650, 100)`, is evaluated as well (700), so a
+     relative keyword under it must resolve against that result. A calculation
+     that overflows to an infinity, e.g. `exp(1000)`, is clamped to the range
+     of CSS Fonts 4 (1000) like any other out of range result, so a detached
+     descendant that uses a relative keyword resolves against 1000 as well.
+     The infinity survives a nested call, e.g. `abs(exp(1000))`, which must be
+     1000 for such a paragraph and for its footnote's `bolder` too, it is
+     clamped when the calculation is wrapped in a `calc()`, e.g.
+     `calc(exp(1000))`, and it is kept when another argument of `hypot()` is a
+     `NaN`, e.g. `hypot(exp(1000), log(-1))`, whose infinite argument takes
+     precedence. A function
+     whose result is not a number, e.g. `log(100, 0)`, is treated as invalid by
+     this engine: the paragraph keeps the 700 that it inherits from its parent,
+     so the `bolder` of its footnote is 900 (the pre-fix viewer resolves the
+     keyword against the fallback 400 and renders 700). The browsers instead
+     accept such a declaration and censor the `NaN` to 0, which the range of
+     CSS Fonts 4 turns into the weight 1 — a relative keyword resolves to 400
+     from 1 there — so this expectation documents the model of this engine, not
+     the CSS result of the browsers; the difference is recorded with the
+     limitations of the pull request (item 10).
+     The pre-fix viewers leave the functions unresolved in the reconstructed
+     inheritance basis of a detached descendant, so its `bolder` resolves
+     against the fallback 400 and the footnote is 700; the paragraph itself
+     renders the value that the browser computes for the function there
+     (`min(900, 1000)` is 900, `exp(1000)` is clamped to 1000). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Font weight from a math function (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { font-weight: 400; }
+    .dep { font-weight: min(900, 1000); } /* 900 */
+    .dep .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    .dep .fn-own { float: footnote; font-weight: min(900, 1000); } /* 900 */
+    .dep .fn-clamp { float: footnote; font-weight: max(1000, 1200); } /* 1000 */
+    .ref-bolder { font-weight: bolder; } /* 900, bolder than 900 is 900 */
+    .ref-700 { font-weight: 700; }
+    .invalid { --m: min(900px, 1em); font-weight: var(--m); } /* invalid */
+    /* a function that the browser evaluates: 700 */
+    .dep-round { font-weight: round(650, 100); }
+    .dep-round .fn-own { float: footnote; font-weight: round(650, 100); } /* 700 */
+    .dep-round .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    /* a calculation that overflows to an infinity is clamped to the range of
+       CSS Fonts 4 (1000), so a relative keyword of a footnote resolves against
+       1000: `bolder` than 1000 is 1000. The infinity survives a nested call,
+       e.g. the `abs()` of `abs(exp(1000))` */
+    .dep-inf { font-weight: exp(1000); } /* 1000 */
+    .dep-inf .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf { font-weight: exp(1000); } /* 1000 */
+    .ref-bolder-under-inf { font-weight: bolder; } /* 1000 */
+    /* a weight that computes to NaN, e.g. `log(100, 0)`, is treated as invalid
+       by this engine: the paragraph keeps the 700 that it inherits from its
+       parent, and a footnote that resolves `bolder` against it is 900 (the
+       browsers censor the NaN to 0, i.e. weight 1, which `bolder` resolves to
+       400 from; see the limitations) */
+    .nan-parent { font-weight: 700; }
+    .nan-parent .dep-nan { font-weight: log(100, 0); }
+    .nan-parent .dep-nan .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
+    .nan-parent .ref-bolder { font-weight: bolder; } /* 900 */
+    /* the same infinity wrapped in a `calc()`, which the cascade clamps with
+       the same range: `calc(exp(1000))` is 1000, and a relative keyword of a
+       footnote resolves against it (bolder than 1000 is 1000) */
+    /* an infinite argument of `hypot()` takes precedence over a `NaN` one
+       (CSS Values 4), so the calculation is 1000 as well */
+    .dep-hypot { font-weight: hypot(exp(1000), log(-1)); } /* 1000 */
+    .dep-hypot .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-hypot { font-weight: hypot(exp(1000), log(-1)); } /* 1000 */
+    .dep-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
+    .dep-inf-calc .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf-calc { font-weight: calc(exp(1000)); } /* 1000 */
+    .dep-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
+    .dep-inf-nested .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
+    .ref-inf-nested { font-weight: abs(exp(1000)); } /* 1000 */
+    .ref-round { font-weight: round(650, 100); } /* 700 */
+    .ref-bolder-under-round { font-weight: bolder; } /* 900 */
+    .invalid .fn-bolder { float: footnote; font-weight: bolder; } /* 700 */
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="dep">The first two footnotes "B" below must be as bold as the
+    inline "B" of this paragraph, i.e. 900, the weight of the
+    `min(900, 1000)` paragraph itself, and the third one must be 1000, the
+    result of its own `max(1000, 1200)` clamped to the range of CSS Fonts 4:
+    <span class="ref-bolder">B</span><span class="fn-bolder">B</span>
+    <span class="fn-own">B</span><span class="fn-clamp">B</span></p>
+  <p class="dep-round">The footnote "B" below must be as bold as this inline
+    <span class="ref-round">B</span>, i.e. the 700 that `round(650, 100)`
+    computes, not the 400 of the initial weight or the 700 of a
+    fallback, and the relative keyword of the second footnote must resolve
+    against that 700, like this inline <span class="ref-bolder-under-round">B</span>
+    (900):
+    <span class="fn-own">B</span><span class="fn-bolder">B</span></p>
+  <p class="dep-inf">The footnote "B" below must be as bold as this inline
+    <span class="ref-inf">B</span>, i.e. the 1000 that `exp(1000)` computes for
+    the range of CSS Fonts 4, and the relative keyword of the second footnote
+    must resolve against that 1000, like this inline
+    <span class="ref-bolder-under-inf">B</span> (1000):
+    <span class="fn-bolder">B</span>
+    <span class="fn-bolder">B</span></p>
+  <p class="dep-inf-nested">The footnote "B" below must be as bold as this
+    inline <span class="ref-inf-nested">B</span>, i.e. the 1000 of
+    `abs(exp(1000))`, whose infinity survives the nested `abs()`:
+    <span class="fn-bolder">B</span></p>
+  <div class="nan-parent"><p class="dep-nan">The footnote "B" below must be as
+    bold as this inline <span class="ref-bolder">B</span>, i.e. the 900 that
+    the 700 gives, which this paragraph inherits from its parent: this engine
+    treats its own `font-weight: log(100, 0)` as an invalid declaration and
+    keeps the inherited weight (the browsers censor the `NaN` to the weight 1
+    instead, so a relative keyword resolves to 400 there; the difference is
+    recorded with the limitations):
+    <span class="fn-bolder">B</span></p></div>
+  <p class="dep-hypot">The footnote "B" below must be as bold as this inline
+    <span class="ref-hypot">B</span>, i.e. the 1000 that
+    `hypot(exp(1000), log(-1))` computes: an infinite argument takes precedence
+    over the `NaN` one, which a `font-weight` clamps to its range:
+    <span class="fn-bolder">B</span></p>
+  <p class="dep-inf-calc">The footnote "B" below must be as bold as this inline
+    <span class="ref-inf-calc">B</span>, i.e. the 1000 that
+    `calc(exp(1000))` computes for the range of CSS Fonts 4, and the relative
+    keyword of the footnote must resolve against that 1000:
+    <span class="fn-bolder">B</span></p>
+  <p class="invalid">A function whose arguments are lengths is invalid at
+    computed-value time, so this footnote must be
+    <span class="ref-700">B</span>, one step bolder than the 400 of this
+    paragraph: <span class="fn-bolder">B</span></p>
+</body>
+</html>

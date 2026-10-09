@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a relative font weight (bolder/lighter)
+     declared by a region rule (here `:footnote-content`) applies to the footnote
+     content and must win over the inherited font weight of the source parent,
+     even when the source parent declares that weight with `!important`. The
+     inherited weight is only accumulated to resolve the keyword, so it must not
+     beat the declaration during the cascade.
+     The footnote text at the page bottom must be rendered with the weight that
+     `lighter` resolves to (400), not with the inherited 700 of the body. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Relative font weight in a region rule (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 90mm; margin: 10mm; }
+    @footnote { margin-block-start: 1em; }
+    /* The inherited weight has a higher cascade priority than the region rule */
+    body { font-weight: 700 !important; }
+    aside[role="doc-footnote"]:footnote-content { font-weight: lighter; }
+    a[role="doc-noteref"]::footnote-call { content: "[" counter(footnote) "]"; }
+    aside[role="doc-footnote"]::footnote-marker { content: none; }
+  </style>
+</head>
+<body>
+  <p>All this body text is bold (700). The footnote text at the page bottom must
+    not be bold: the relative weight `lighter` of the region rule
+    `aside[role="doc-footnote"]:footnote-content` applies to it.</p>
+  <p>A footnote call<a href="#fn" role="doc-noteref"></a> follows here.</p>
+  <aside id="fn" role="doc-footnote">Footnote text</aside>
+</body>
+</html>

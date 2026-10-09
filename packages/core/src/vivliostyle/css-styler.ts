@@ -674,8 +674,27 @@ export class Styler implements AbstractStyler {
       const val = this.resolveRootSizingCalc(evaluated);
       const fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
-      if (val instanceof Css.Numeric) {
-        let px = val.num;
+      // The absolute size keywords (e.g. "small") and the relative keywords
+      // ("larger"/"smaller") are relative to the default (initial) font size
+      // and must be resolved to a numeric root font size, so that all
+      // consumers (rem units, rlh, page context, the root element's own
+      // inherited properties) use the same value. (Issue #2174)
+      let px: number | null = CssCascade.resolveAbsoluteFontSizeKeyword(
+        val,
+        this.context.initialFontSize,
+      );
+      if (
+        px == null &&
+        (CssCascade.hasKeywordName(val, "larger") ||
+          CssCascade.hasKeywordName(val, "smaller"))
+      ) {
+        px = CssCascade.resolveRelativeFontSizeKeyword(
+          val as Css.Ident,
+          this.context.initialFontSize,
+        );
+      }
+      if (px == null && val instanceof Css.Numeric) {
+        px = val.num;
         switch (val.unit) {
           case "em":
           case "rem":
@@ -690,12 +709,86 @@ export class Styler implements AbstractStyler {
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
+            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
             if (unitSize) {
               px *= unitSize;
+              isRelativeFontSize = fromRelativeCalc;
+            } else if (ratio != null) {
+              // A unit that only the browser resolves, e.g. `ch`: its metric is
+              // not obtainable here, so the assumption of CSS Values 4 for such
+              // a unit is used against the initial font size, which is the font
+              // size of the root element (it has no parent), and the raw number
+              // of the value must not be treated as pixels. The root element
+              // must use this assumed size as well, or it would render the real
+              // metric of the font while `rem` and the page context use the
+              // assumption. (Review)
+              px *= ratio * this.context.initialFontSize;
+              isRelativeFontSize = true;
+            } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
+              // The unit size of a viewport relative unit, e.g. `2vw`, must not
+              // be left as the raw number either, and the root element must use
+              // the resolved size like above: the internal units of this engine
+              // (`pv*`) are not CSS that a browser can resolve. A plain
+              // viewport relative unit is normally already converted to a px
+              // length by `fontSize.evaluate()` (the page size is not known
+              // while the root sizes are determined, so the viewer viewport
+              // provides the unit size), so this branch only applies to a unit
+              // that survives the evaluation. (Review)
+              px *= this.context.queryUnitSize(val.unit, true);
+              isRelativeFontSize = true;
+            } else {
+              // Any other dimension is not a length that Vivliostyle can
+              // resolve here, e.g. the `5s` that a var() substitution put into
+              // `font-size: var(--size)`: the root element keeps the initial
+              // font size rather than treating the number as pixels, as the
+              // browser keeps it for an invalid value. (Review)
+              px = null;
             }
-            isRelativeFontSize = fromRelativeCalc;
           }
         }
+      }
+      if (px != null && !Number.isFinite(px)) {
+        // A conversion that produced a non-finite value must not become the
+        // root font size either. (Review)
+        px = null;
+      }
+      if (px == null) {
+        // A font size that is neither a keyword nor a Css.Numeric: a unitless
+        // zero, or a calc()/clamp()/min()/max() whose arguments are lengths
+        // that can be resolved here, e.g.
+        // `:root { font-size: clamp(10px, 20px, 30px) }`. The root element has
+        // no parent, so `em`/`%` arguments refer to the initial font size.
+        // (Issue #2174 follow-up)
+        const resolved = CssCascade.resolveFontSizeValueToPx(
+          this.context,
+          val,
+          this.context.initialFontSize,
+        );
+        if (resolved != null) {
+          px = resolved;
+          if (val instanceof Css.Func) {
+            // As for a calc() that the root sizing could resolve, the root
+            // element must use this value. (Issues #608, #549)
+            isRelativeFontSize = true;
+          } else {
+            // A unitless zero, which is an absolute length like `0px`, so the
+            // root element uses it directly.
+            isRelativeFontSize = false;
+          }
+        }
+      }
+      // A font size that is neither a keyword nor resolvable here, e.g. the
+      // `round(up, 20px, 7px)` whose rounding strategy this engine does not
+      // evaluate, is left to the browser, which keeps the declaration and
+      // computes the value: the root font size that this context records stays
+      // the initial one, so `rem`, the page context and the margin boxes use a
+      // different metric than the rendered root element. Known limitation:
+      // materializing the computed value of the browser would need the
+      // rendered size. (Review)
+      if (px != null) {
+        // `font-size` has a non-negative computed-value range, e.g.
+        // `calc(10px - 20px)` computes to 0px.
+        px = Math.max(0, px);
         this.context.rootFontSize = px;
         this.context.isRelativeRootFontSize = isRelativeFontSize;
       }
@@ -711,29 +804,93 @@ export class Styler implements AbstractStyler {
       fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Num) {
-        rootLineHeight = val.num * rootFontSize;
+        // An overflowing calculation, e.g. `line-height: calc(exp(1000))`, is
+        // clamped by the browser: an infinite root line height would propagate
+        // into every `rlh` unit and into the page context instead. (Review)
+        rootLineHeight = Number.isFinite(val.num * rootFontSize)
+          ? val.num * rootFontSize
+          : null;
       } else if (val instanceof Css.Numeric) {
-        let px = val.num;
+        let px: number | null = val.num;
         switch (val.unit) {
           case "em":
           case "rem":
-            px *= rootFontSize;
+            px = val.num * rootFontSize;
             break;
           case "%":
-            px *= rootFontSize / 100;
+            px = (val.num * rootFontSize) / 100;
             break;
           case "lh":
           case "rlh":
-            px *= this.context.rootLineHeight;
+            px = val.num * this.context.rootLineHeight;
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
+            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
             if (unitSize) {
-              px *= unitSize;
+              px = val.num * unitSize;
+            } else if (ratio != null) {
+              // As above: a unit that only the browser resolves is relative to
+              // the font size of the root element, not to the raw number.
+              // (Review)
+              px =
+                val.num *
+                ratio *
+                (rootFontSize ?? this.context.initialFontSize);
+              // The assumed size is the one the root element uses: the browser
+              // would resolve the unit with the real metrics of its font and
+              // the root line height of this context (which the `rlh` unit and
+              // the page context use) would differ from the rendered one.
+              // (Review)
+              fromRelativeCalc = true;
+            } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
+              px = val.num * this.context.queryUnitSize(val.unit, true);
+              // The root element must use this resolved size: an internal unit
+              // such as `2pvw` is not CSS that a browser can resolve, and the
+              // `rlh` unit and the page context use this value. A plain
+              // viewport relative unit is normally already converted to a px
+              // length by `lineHeight.evaluate()`, because the page size is not
+              // known while the root sizes are determined (the viewer viewport
+              // provides the unit size), so this branch only applies to a unit
+              // that survives the evaluation. (Review)
+              fromRelativeCalc = true;
+            } else {
+              // An unsupported dimension keeps the default root line height,
+              // as the browser keeps it for an invalid value. (Review)
+              px = null;
             }
           }
         }
-        rootLineHeight = px;
+        rootLineHeight = px != null && Number.isFinite(px) ? px : null;
+      } else if (val instanceof Css.Func) {
+        // A math function of CSS Values 4 that is not a `calc()`, e.g.
+        // `:root { line-height: round(40px, 7px) }` or `min(40px, 2em)`:
+        // `resolveRootSizingCalc()` only reduces a `calc()`, so the value is
+        // reduced with the resolver that the inherited line heights use, which
+        // also knows those functions. The `em`/`%` arguments of the root
+        // element refer to its own font size, and its `lh`/`rlh` to the line
+        // height that is being resolved (the root has no parent). (Review)
+        const resolved = CssCascade.resolveLineHeightValueToPx(
+          this.context,
+          val,
+          rootFontSize,
+          this.context.rootLineHeight,
+        );
+        if (resolved != null) {
+          rootLineHeight = resolved;
+          // A function of unitless numbers, e.g. the `min(1, 2)` of
+          // `:root { line-height: min(1, 2) }`, is a `<number>`: its computed
+          // value is a multiplier of the font size, so the root element keeps
+          // the declaration, as it does for a plain unitless number. Only the
+          // recorded root line height is in px, for `rlh` and the page
+          // context. (Review)
+          fromRelativeCalc = !CssCascade.isUnitlessNumberValue(val);
+        }
+        // A value that is not resolvable here is left to the browser, as the
+        // root font size above: the root line height that this context records
+        // stays the preferred one, and `rlh` and the page context use a
+        // different metric than the rendered root element. Known limitation,
+        // as above. (Review)
       }
     }
     this.context.rootLineHeight =

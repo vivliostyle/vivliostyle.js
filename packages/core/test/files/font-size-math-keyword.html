@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: the `math` keyword of CSS Fonts 4 is
+     resolved by the browser from the mathematical context of the element, which
+     is 1em of the inherited font size for the depths that Vivliostyle
+     represents (`math-depth` is not supported, so a deeper context, in which
+     the browser scales the size down, is left to the browser). A detached
+     element that declares the keyword must therefore use the font size of its
+     source parent, not the one of the footnote area that the browser resolves
+     it in after the element is reparented: the footnotes "Math" must be
+     rendered like the inline `1em` reference of the same paragraph. The same
+     holds when a var() substitution puts the keyword into the declaration. In
+     the pre-fix viewer the footnotes were 16px, the size of the footnote area,
+     instead of the 32px of their source parent. The mathematical context of a
+     deeper element is not lost either: the scaling of an exponent comes from
+     the user agent stylesheet (`math-depth: add(1)`) and is applied by the
+     browser to the font size that is resolved here, so the exponent "2" of a
+     footnote must be the same 0.71em of the 32px base as the inline one. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>math font size keyword of a footnote (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    .dep { font-size: 32px; }
+    .dep .ref-em { font-size: 1em; }
+    .dep .fn-math { float: footnote; font-size: math; }
+    .dep .fn-var { float: footnote; --m: math; font-size: var(--m); }
+    .dep .fn-mathml { float: footnote; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="dep">The two footnotes "Math" must be as large as this inline
+    "Math" (the `math` font size is 1em of the source parent, i.e. 32px, not
+    the 16px of the footnote area): <span class="ref-em">Math</span>
+    <span class="fn-math">Math</span><span class="fn-var">Math</span></p>
+  <p class="dep">The exponent "2" of the footnote at the page bottom must have
+    the size that this inline exponent has (0.71em of the 32px base, ≈22.7px,
+    the scaling that the browser applies to the font size this engine
+    resolves):
+    <math><msup><mi>x</mi><mn class="ref-sup">2</mn></msup></math>
+    <span class="fn-mathml"><math><msup><mi>y</mi><mn class="fn-sup">2</mn></msup></math></span></p>
+</body>
+</html>

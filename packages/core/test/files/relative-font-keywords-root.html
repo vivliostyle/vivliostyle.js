@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174: relative font keywords on the root element must be
+     resolved to a numeric computed value once, not re-resolved per level. The root's
+     inherited properties are set on both the page box and the layout box, which are
+     nested during layout measurement, so `larger` was resolved twice (16px x 1.2 x 1.2
+     = 23.04px instead of 19.2px) and content was measured bigger than it is rendered. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Relative font keywords on the root element (Issue #2174)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    /* 16px (initial) x 1.2 = 19.2px, and bolder of the initial 400 = 700 */
+    :root { font-size: larger; font-weight: bolder; }
+    body { margin: 0; }
+    /* 19.2px x 1.2 = 23.04px per line, so 13 lines fit in the page area
+       (80mm = 302.36px); with the buggy 23.04px font only 10 lines fit. */
+    .lines > div { line-height: 1.2; }
+  </style>
+</head>
+<body>
+  <div class="lines">
+    <div>Line 01: larger must stay 19.2px</div>
+    <div>Line 02: larger must stay 19.2px</div>
+    <div>Line 03: larger must stay 19.2px</div>
+    <div>Line 04: larger must stay 19.2px</div>
+    <div>Line 05: larger must stay 19.2px</div>
+    <div>Line 06: larger must stay 19.2px</div>
+    <div>Line 07: larger must stay 19.2px</div>
+    <div>Line 08: larger must stay 19.2px</div>
+    <div>Line 09: larger must stay 19.2px</div>
+    <div>Line 10: larger must stay 19.2px</div>
+    <div>Line 11: larger must stay 19.2px</div>
+    <div>Line 12: larger must stay 19.2px</div>
+    <div>Line 13: larger must stay 19.2px</div>
+    <div>Line 14: larger must stay 19.2px</div>
+    <div>Line 15: larger must stay 19.2px</div>
+    <div>Line 16: larger must stay 19.2px</div>
+    <div>Line 17: larger must stay 19.2px</div>
+    <div>Line 18: larger must stay 19.2px</div>
+    <div>Line 19: larger must stay 19.2px</div>
+    <div>Line 20: larger must stay 19.2px</div>
+    <div>Line 21: larger must stay 19.2px</div>
+    <div>Line 22: larger must stay 19.2px</div>
+    <div>Line 23: larger must stay 19.2px</div>
+    <div>Line 24: larger must stay 19.2px</div>
+    <div>Line 25: larger must stay 19.2px</div>
+    <div>Line 26: larger must stay 19.2px</div>
+    <div>Line 27: larger must stay 19.2px</div>
+    <div>Line 28: larger must stay 19.2px</div>
+    <div>Line 29: larger must stay 19.2px</div>
+    <div>Line 30: larger must stay 19.2px</div>
+    <div>Line 31: larger must stay 19.2px</div>
+    <div>Line 32: larger must stay 19.2px</div>
+    <div>Line 33: larger must stay 19.2px</div>
+    <div>Line 34: larger must stay 19.2px</div>
+    <div>Line 35: larger must stay 19.2px</div>
+    <div>Line 36: larger must stay 19.2px</div>
+    <div>Line 37: larger must stay 19.2px</div>
+    <div>Line 38: larger must stay 19.2px</div>
+    <div>Line 39: larger must stay 19.2px</div>
+    <div>Line 40: larger must stay 19.2px</div>
+  </div>
+</body>
+</html>

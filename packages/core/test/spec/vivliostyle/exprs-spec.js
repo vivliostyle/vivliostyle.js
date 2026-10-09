@@ -47,6 +47,135 @@ describe("exprs", function () {
     return new Exprs.MediaName(scope, false, name);
   }
 
+  describe("math functions of CSS Values 4", function () {
+    function call(name, ...args) {
+      return context
+        .evalCall(
+          scope,
+          name,
+          args.map((arg) => new Exprs.Const(scope, arg)),
+          false,
+        )
+        .evaluate(context);
+    }
+
+    it("evaluates the stepped value functions", function () {
+      // The values are evaluated in px by this expression language, so the
+      // functions that an engine needs to resolve a CSS value are registered:
+      // round() takes an optional step, mod() has the sign of the divisor and
+      // rem() the sign of the dividend. (Review)
+      expect(call("round", 20.5)).toBe(21);
+      expect(call("round", 20, 7)).toBe(21);
+      expect(call("round", 25, 7)).toBe(28);
+      expect(call("mod", 20, 7)).toBe(6);
+      // The minimum takes precedence when the bounds of clamp() are reversed.
+      expect(call("clamp", 30, 20, 10)).toBe(30);
+      expect(call("clamp", 10, 20, 30)).toBe(20);
+      expect(call("clamp", 10, 5, 30)).toBe(10);
+      // An argument that is not a number (the <rounding-strategy> keyword of
+      // round() becomes a media name in this language) and an argument count
+      // that the function does not accept make the call unevaluable, so that
+      // the value is left to the browser instead of producing a wrong one.
+      // (Review)
+      expectResult(call("round", false, 20, 7), NaN);
+      expectResult(call("round", false, 20), NaN);
+      expectResult(call("round", 20, 7, 3), NaN);
+      expectResult(call("clamp", 10, 20), NaN);
+      expectResult(call("log", 100, 10, 2), NaN);
+      expectResult(call("round", 20, 0), NaN);
+      // The sign of the step does not matter: the multiples of a negative
+      // step are the multiples of its absolute value, and a value exactly
+      // between two of them is rounded up. (Review)
+      expect(call("round", 3.5, -7)).toBe(7);
+      expect(call("round", 3.5, 7)).toBe(7);
+      expect(call("round", 10.5, -7)).toBe(14);
+      // A step that is zero makes the result NaN, a negative one does not.
+      expectResult(call("round", 20, -0), NaN);
+      // A base of 1, 0 or a negative number makes the logarithm NaN, which
+      // the division would not: log(100, 0) was the -0 of dividing by
+      // Math.log(0) === -Infinity. (Review)
+      expectResult(call("log", 100, 0), NaN);
+      expectResult(call("log", 100, -10), NaN);
+      expectResult(call("log", 100, 1), NaN);
+      expect(call("log", 100, 0.5)).toBeLessThan(0);
+      // An overflowing calculation is an infinity, which CSS preserves and
+      // clamps to the range of the property: the callers that cannot
+      // represent one reject it, the others clamp it. (Review)
+      expect(call("exp", 1000)).toBe(Infinity);
+      expect(call("pow", 10, 1000)).toBe(Infinity);
+      expect(call("log", 0)).toBe(-Infinity);
+      expect(call("log", 0, 0.5)).toBe(Infinity);
+      // An infinity survives a nested call, so that a number valued property
+      // can clamp it to its range: `abs(exp(1000))` is an infinity, not a NaN
+      // that would leave the value unresolved. (Review)
+      expect(call("abs", Infinity)).toBe(Infinity);
+      expect(call("hypot", Infinity, 3)).toBe(Infinity);
+      // An infinite argument of `hypot()` takes precedence over a NaN one, as
+      // `Math.hypot()` implements it, so a font-weight that uses the call is
+      // clamped to 1000 instead of inheriting. (Review)
+      expect(call("hypot", Infinity, NaN)).toBe(Infinity);
+      expectResult(call("hypot", NaN, 3), NaN);
+      expectResult(call("hypot", NaN), NaN);
+      expect(call("pow", 10, 1000)).toBe(Infinity);
+      // The argument ranges of CSS Values 4 §10.3.1 for the stepped values:
+      // an infinite step rounds a finite value to zero (and an infinite value
+      // to NaN), and an infinite divisor returns the value itself, except for
+      // a `mod()` whose value has the opposite sign. (Review)
+      expect(call("round", 3.5, Infinity)).toBe(0);
+      expect(call("round", Infinity, 7)).toBe(Infinity);
+      expectResult(call("round", Infinity, Infinity), NaN);
+      // An infinite step returns `0⁻` for a negative value and for `0⁻`
+      // itself (CSS Values 4 §10.3.1), which a comparison with zero would take
+      // for positive: `1 / round(-0, infinity)` must be -Infinity, and a
+      // nested `round(-0, infinity)` of such a division stays `0⁻`. (Review)
+      expect(Object.is(call("round", -0, Infinity), -0)).toBe(true);
+      expect(Object.is(call("round", -0, -Infinity), -0)).toBe(true);
+      expect(Object.is(1 / call("round", -0, Infinity), -Infinity)).toBe(true);
+      expect(Object.is(call("round", -3.5, Infinity), -0)).toBe(true);
+      expect(Object.is(call("round", 3.5, Infinity), 0)).toBe(true);
+      expect(call("rem", 7, Infinity)).toBe(7);
+      expect(call("mod", 7, Infinity)).toBe(7);
+      expectResult(call("mod", -7, Infinity), NaN);
+      expectResult(call("mod", -7, -Infinity), -7);
+      expectResult(call("mod", Infinity, 7), NaN);
+      expect(call("mod", -1, 8)).toBe(7);
+      expect(call("rem", -1, 8)).toBe(-1);
+      // A modulus of operands as far apart as `mod(1e308, 1e-308)` stays
+      // finite: the formula `a - b * Math.floor(a / b)` overflows there (`a /
+      // b` is infinite), while the remainder of `%` is smaller than the
+      // divisor in magnitude. (Review)
+      var tinyMod = call("mod", 1e308, 1e-308);
+      expect(Number.isFinite(tinyMod)).toBe(true);
+      expect(Math.abs(tinyMod)).toBeLessThan(1e-308);
+      expect(tinyMod).toBe(1e308 % 1e-308);
+      // The sign rules are unchanged: `mod()` takes the sign of the divisor,
+      // and a remainder of zero takes it as well.
+      expect(call("mod", -7, 3)).toBe(2);
+      expect(call("mod", 7, -3)).toBe(-2);
+      expect(call("mod", -7, -3)).toBe(-1);
+      expect(Object.is(call("mod", -8, 8), 0)).toBe(true);
+      expect(Object.is(call("mod", 8, -8), -0)).toBe(true);
+      // A remainder of zero carries the sign of the divisor as well, which the
+      // subtraction alone loses for a negative divisor: `mod(0, -8)` must be
+      // `-0`, so that a nested calculation (e.g. the `1 / mod(0, -8)` of an
+      // expression) sees `-Infinity` rather than `+Infinity`. (Review)
+      expect(Object.is(call("mod", 0, -8), -0)).toBe(true);
+      expect(Object.is(call("mod", 0, 8), 0)).toBe(true);
+      expect(Object.is(call("mod", -16, -8), -0)).toBe(true);
+    });
+
+    it("evaluates the sign-related and exponential functions", function () {
+      expect(call("abs", -20)).toBe(20);
+      expect(call("sign", -3)).toBe(-1);
+      expect(call("hypot", 3, 4)).toBe(5);
+      expect(call("pow", 2, 3)).toBe(8);
+      expect(call("log", 100, 10)).toBeCloseTo(2, 10);
+      expect(call("exp", 0)).toBe(1);
+      expect(call("sqrt", 16)).toBe(4);
+      expect(call("clamp", 10, 20, 30)).toBe(20);
+    });
+  });
+
   describe("media feature tests", function () {
     it("evaluates value-less features in a boolean context", function () {
       expect(
@@ -164,6 +293,37 @@ describe("exprs", function () {
           );
         });
       });
+    });
+  });
+
+  describe("font size", function () {
+    it("uses a root font size of zero", function () {
+      // A root font size of 0 is valid (`:root { font-size: 0 }`) and must not
+      // fall back to the initial font size. (Issue #2174 follow-up)
+      const zeroFontSizeContext = new Exprs.Context(scope, 800, 600, 16, 20);
+      zeroFontSizeContext.rootFontSize = 0;
+      expect(zeroFontSizeContext.fontSize()).toBe(0);
+      expect(zeroFontSizeContext.queryUnitSize("em", false)).toBe(0);
+      expect(zeroFontSizeContext.queryUnitSize("rem", false)).toBe(0);
+    });
+  });
+
+  describe("non-finite numbers", function () {
+    it("resolves the names that such a value is serialized as", function () {
+      // This engine represents a value that is not finite with the JavaScript
+      // name: `Css.Num(Infinity)` is serialized as `Infinity`, and such a
+      // value is evaluated again when a declaration is validated afterwards,
+      // e.g. by `evaluatesToNaN()`. The `nan` of CSS Values 4 is represented
+      // as `NaN` in the same way. (Review)
+      expectResult(
+        context.evalName(scope, "Infinity").evaluate(context),
+        Infinity,
+      );
+      expectResult(
+        context.evalName(scope, "infinity").evaluate(context),
+        Infinity,
+      );
+      expectResult(context.evalName(scope, "NaN").evaluate(context), NaN);
     });
   });
 });

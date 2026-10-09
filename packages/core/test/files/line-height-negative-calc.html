@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a line height that is a math function
+     computing below zero is valid, and the non-negative computed-value range of
+     `line-height` clamps it to 0. `calc(1lh - 100px)` of a footnote inside a
+     paragraph with a 40px line height is therefore 0, not -60: materializing
+     `-60px` would make the browser reject the declaration and inherit the 40px
+     instead of applying zero. The footnote "Zero" must be rendered with the
+     0px line height of the inline reference, not with the 40px it inherits.
+     The same difference is visible without a clamp: `calc(1lh - 30px)` is 10px
+     with the inherited 40px (the footnote "Ten"), while the pre-fix viewer
+     resolves the `lh` unit in the rendered context (the preferred line height
+     of the footnote area, 20px), which clamps to 0. The same clamp applies to
+     a math function without an `lh` unit: `calc(10px - 20px)` is 0px, not the
+     -10px that the browser would reject (which inherits the 40px). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Negative computed line-height (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    body { font-size: 16px; }
+    .dep { line-height: 40px; }
+    .dep .fn-negative {
+      float: footnote;
+      line-height: calc(1lh - 100px);
+    }
+    .dep .fn-negative-mild {
+      float: footnote;
+      line-height: calc(1lh - 30px);
+    }
+    .ref-negative { line-height: calc(1lh - 100px); }
+    .ref-negative-mild { line-height: calc(1lh - 30px); }
+    .dep .fn-negative-plain { float: footnote; line-height: calc(10px - 20px); }
+    .ref-negative-plain { line-height: calc(10px - 20px); }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="dep">The footnote "Zero" below declares the same line height as the
+    inline reference "Zero" of this paragraph (0px, the clamped result of
+    `calc(1lh - 100px)` with the inherited 40px), not the inherited 40px, and
+    the footnote "Ten" is the same as the reference "Ten" (10px), and the
+    footnote "Plain" is the same as the reference "Plain" (0px):
+    <span class="ref-negative">Zero</span>
+    <span class="ref-negative-mild">Ten</span>
+    <span class="ref-negative-plain">Plain</span></p>
+  <p class="dep">The footnotes of this paragraph are the ones at the page
+    bottom: <span class="fn-negative">Zero</span>
+    <span class="fn-negative-mild">Ten</span>
+    <span class="fn-negative-plain">Plain</span></p>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: font-size values that are not size keywords
+     (calc(), clamp(), a math function embedded in an arithmetic expression, a
+     unitless zero, a negative calc() that the non-negative range of font-size
+     clamps to zero, and a keyword substituted from a custom property) must also be resolved to numeric computed values, so that em units in
+     detached content (footnote) use the same font size as the browser does.
+     In each paragraph the footnote "Wide" must have the same letter-spacing as the
+     inline reference "Wide", which the browser resolves. The step of a
+     `round()` can be negative: `round(3.5px, -7px)` is the 7px of the upper
+     multiple of the interval, not the -0 of dividing by the negative step. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>calc()/clamp()/unitless font-size in detached content (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    html, body { font-size: 16px; }
+    body { margin: 0; }
+    p { margin: 0.4em 0; }
+    :root { --upper-keyword: LARGE; }
+    .fn, .ref { letter-spacing: 2em; }
+    .fn { float: footnote; }
+    ::footnote-marker { content: ""; }
+
+    /* calc(2em) = 32px, so the em base of the footnote must be 32px */
+    p.calc { font-size: calc(2em); }
+    /* clamp(1rem, 1.5em + 8px, 3rem) = clamp(16px, 32px, 48px) = 32px */
+    p.clamp { font-size: clamp(1rem, 1.5em + 8px, 3rem); }
+    /* a unitless zero is valid for font-size */
+    p.zero { font-size: 0; }
+    /* LARGE is ASCII case-insensitively "large" = 18px */
+    p.keyword { font-size: var(--upper-keyword); }
+    /* a negative result is clamped to the non-negative range of font-size,
+       so this is 0px, like the computed value of the paragraph */
+    p.negative { font-size: calc(10px - 20px); }
+    /* negative terms of a math function stay signed:
+       calc(-1em + 40px) = calc(-16px + 40px) = 24px */
+    p.signed { font-size: calc(-1em + 40px); }
+    /* a math function inside an arithmetic expression:
+       calc(clamp(10px, 20px, 30px) + 5px) = 25px */
+    p.nested { font-size: calc(clamp(10px, 20px, 30px) + 5px); }
+    /* the math functions of CSS Values 4 that an engine has to evaluate to
+       know the computed size: round(20px, 7px) = 21px */
+    p.math { font-size: round(20px, 7px); }
+    /* a negative step: round(3.5px, -7px) is the 7px of the upper multiple of
+       the 7px interval, not the -0 that dividing by the negative step gives */
+    p.math-negative-step { font-size: round(3.5px, -7px); }
+    .fn.own-size, .ref.own-size { font-size: 2em; letter-spacing: 0; }
+  </style>
+</head>
+<body>
+  <p class="calc">calc(2em): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="clamp">clamp(): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="zero">font-size: 0: <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="keyword">var(--upper-keyword): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="negative">calc(10px - 20px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="signed">calc(-1em + 40px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="nested">calc(clamp(10px, 20px, 30px) + 5px): <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="math">round(20px, 7px) with a relative font size:
+    <span class="ref own-size">2em</span><span class="fn own-size">2em</span></p>
+  <p class="math-negative-step">round(3.5px, -7px) = 7px:
+    <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p>In the footnotes at the page bottom, each "Wide" must have the same
+    letter-spacing as the inline "Wide" of the same paragraph above, and the
+    footnote "2em" of the `round()` paragraph must be as large as its inline
+    reference: the value of the math function is the base of the relative size
+    (2 x 21px = 42px), not the font size of the footnote area (32px).</p>
+</body>
+</html>

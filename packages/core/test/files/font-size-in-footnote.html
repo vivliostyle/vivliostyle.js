@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a font-size declared on the element of
+     detached content (a footnote) must be resolved against the source parent, as
+     if the element were still in the source tree, not against the font size of the
+     page (the root font size). Also checks that `font-size: initial` uses the
+     initial font size (not the inherited one) and does not abort the layout.
+     The footnote "Wide" must match the inline reference "Wide" of the same
+     paragraph, which the browser resolves. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>font-size declared in detached content (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    /* The root font size differs from the font size of the source parent
+       below, so a page-based resolve would be visible. */
+    html { font-size: 20px; }
+    body { margin: 0; }
+    p { margin: 0.4em 0; }
+    .parent { font-size: 32px; }
+    .fn, .ref { letter-spacing: 2em; }
+    .fn { float: footnote; }
+    ::footnote-marker { content: ""; }
+
+    /* 1.5 x 32px = 48px, so the em base of the footnote must be 48px */
+    .em { font-size: 1.5em; }
+    /* 120% of 32px = 38.4px */
+    .percent { font-size: 120%; }
+  </style>
+</head>
+<body>
+  <p class="parent">em: <span class="ref em">Wide</span><span class="fn em">Wide</span></p>
+  <p class="parent">percent: <span class="ref percent">Wide</span><span class="fn percent">Wide</span></p>
+  <p class="parent">initial: <span class="fn" style="font-size: initial">Wide</span></p>
+  <p>In the footnotes at the page bottom, each "Wide" must have the same
+    letter-spacing as the inline "Wide" of the same paragraph above. The
+    "initial" footnote must be rendered without aborting the layout, with the
+    initial (medium) font size and a letter-spacing of 2em of it.</p>
+</body>
+</html>

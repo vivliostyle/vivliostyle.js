@@ -227,6 +227,107 @@ module.exports = [
       },
       { file: "svg_properties.html", title: "SVG properties" },
       { file: "font_property.html", title: "Font property" },
+      {
+        file: "relative-font-keywords-root.html",
+        title: "Relative font keywords on the root element (Issue #2174)",
+      },
+      {
+        file: "relative-font-keywords-footnote.html",
+        title: "Relative font keywords in a footnote (Issue #2174)",
+      },
+      {
+        file: "absolute-font-size-keywords.html",
+        title:
+          "Absolute font size keywords with rem/rlh/em (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-calc-values.html",
+        title:
+          "calc()/clamp()/unitless font size in a footnote (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-in-footnote.html",
+        title:
+          "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-calc-root.html",
+        title: "Root font size with a math function (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-root-zero.html",
+        title: "Root font size zero (Issue #2174 follow-up)",
+      },
+      {
+        file: "relative-font-weight-region-rule.html",
+        title: "Relative font weight in a region rule (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-lh-unit-in-footnote.html",
+        title: "lh unit of a detached font-size (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-inherit-region-rule.html",
+        title: "font-size: inherit with a region rule (Issue #2174 follow-up)",
+      },
+      {
+        file: "invalid-var-font-size.html",
+        title:
+          "Invalid font sizes from a var() substitution (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-root-negative-calc.html",
+        title: "Root font size with a negative calc() (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-invalid-unit-root.html",
+        title:
+          "Root font size from an invalid substituted unit (Issue #2174 follow-up)",
+      },
+      {
+        file: "defaulting-keyword-from-var.html",
+        title:
+          "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)",
+      },
+      {
+        file: "invalid-var-font-weight.html",
+        title:
+          "Invalid font weight from a var() substitution (Issue #2174 follow-up)",
+      },
+      {
+        file: "absolute-font-size-keyword-xxx-large.html",
+        title: "xxx-large absolute font size keyword (Issue #2174 follow-up)",
+      },
+      {
+        file: "line-height-lh-region-rule.html",
+        title: "line-height: lh with a region rule (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-weight-math-function.html",
+        title: "Font weight from a math function (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-math-keyword.html",
+        title: "math font size keyword of a footnote (Issue #2174 follow-up)",
+      },
+      {
+        file: "invalid-var-line-height.html",
+        title:
+          "Invalid line-height from a var() substitution (Issue #2174 follow-up)",
+      },
+      {
+        file: "line-height-negative-calc.html",
+        title: "Negative computed line-height (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-browser-unit.html",
+        title: "font-size with a browser resolved unit (Issue #2174 follow-up)",
+      },
+      {
+        file: "font-size-root-browser-unit.html",
+        title:
+          "Root font size from a browser resolved unit (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
@@ -1662,6 +1763,16 @@ module.exports = [
       {
         file: "device-cmyk/test.html",
         title: "device-cmyk() function",
+      },
+    ],
+  },
+  {
+    category: "Issue #2174 follow-up (root line height)",
+    files: [
+      {
+        file: "line-height-root-unitless-function.html",
+        title:
+          "Root line height from a math function of numbers (Issue #2174 follow-up)",
       },
     ],
   },

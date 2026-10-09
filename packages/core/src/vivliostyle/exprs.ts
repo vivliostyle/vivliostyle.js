@@ -151,10 +151,26 @@ export class LexicalScope {
       const builtIns = this.builtIns;
       builtIns["floor"] = Math.floor;
       builtIns["ceil"] = Math.ceil;
-      builtIns["round"] = Math.round;
+      builtIns["round"] = round;
+      builtIns["mod"] = mod;
+      builtIns["log"] = log;
+      builtIns["clamp"] = clamp;
       builtIns["sqrt"] = Math.sqrt;
       builtIns["min"] = Math.min;
       builtIns["max"] = Math.max;
+      // The math functions of CSS Values 4, which the calculations of a CSS
+      // value can use: the values are evaluated in px by this expression
+      // language, so a function of them returns the px value of the CSS
+      // function. Completing the set lets the engine resolve a font size or a
+      // line height that a detached descendant resolves against, instead of
+      // leaving the whole value to the browser, which would resolve it in the
+      // synthetic parent that the element is reparented into. (Review)
+      builtIns["abs"] = abs;
+      builtIns["sign"] = sign;
+      builtIns["hypot"] = hypot;
+      builtIns["pow"] = pow;
+      builtIns["exp"] = exp;
+      builtIns["rem"] = rem;
       builtIns["letterbox"] = letterbox;
       builtIns["css-string"] = cssString;
       builtIns["css-name"] = cssIdent;
@@ -309,6 +325,225 @@ export function needUnitConversion(unit: string): boolean {
   }
 }
 
+/**
+ * The arguments of a math function of CSS Values 4 that this expression
+ * language evaluates: each of them must have been evaluated to a number other
+ * than `NaN` (every dimension is converted to px by this language, and a
+ * keyword, such as the `<rounding-strategy>` of `round()`, becomes a media
+ * name, which is not a number; a number that overflows to an infinity is kept,
+ * because the property clamps it to its range) and their number must be one
+ * that the function accepts. Returns null when the call must not be evaluated:
+ * the caller then keeps the value unresolved and the browser resolves it.
+ * (Review)
+ */
+function numericArgs(
+  args: unknown[],
+  min: number,
+  max: number,
+  allowNaN = false,
+): number[] | null {
+  if (args.length < min || args.length > max) {
+    return null;
+  }
+  const numbers: number[] = [];
+  for (const arg of args) {
+    // An infinity is a number that the calculation keeps: the property clamps
+    // it to its range, and a nested call such as the `abs()` of
+    // `font-weight: abs(exp(1000))` must keep it as well. Only a NaN, a
+    // keyword (e.g. the `<rounding-strategy>` of `round()`) and anything that
+    // is not a number at all make the call unevaluable. A call whose own
+    // function defines how a NaN combines with the other arguments, e.g.
+    // `hypot()` where an infinite argument takes precedence, accepts a NaN.
+    // (Review)
+    if (typeof arg !== "number" || (Number.isNaN(arg) && !allowNaN)) {
+      return null;
+    }
+    numbers.push(arg);
+  }
+  return numbers;
+}
+
+/**
+ * The result of a built-in, or NaN to leave the value unresolved. An infinity
+ * is kept: CSS Values 4 preserves it through the calculation and clamps it to
+ * the computed-value range of the property (e.g. `font-weight: exp(1000)` is
+ * 1000), so the callers that cannot represent one reject it themselves.
+ * (Review)
+ */
+function result(value: number): number {
+  return Number.isNaN(value) ? NaN : value;
+}
+
+/**
+ * The `round()` of the stepped value functions of CSS Values 4: with a step,
+ * the value is rounded to the nearest integer multiple of it (a value exactly
+ * between two multiples is rounded up, which is the default `nearest`
+ * strategy); without one, to the nearest integer. A call with a rounding
+ * strategy or with an argument that is not a number is left to the browser:
+ * this expression language cannot represent the strategy keyword, which it
+ * evaluates to a media name. The sign of the step does not matter: its
+ * multiples are the multiples of its absolute value, so `round(3.5px, -7px)`
+ * is the 7px of the upper multiple, not the -0 that dividing by the negative
+ * step gives. (Review)
+ */
+export function round(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 2);
+  if (!numbers) {
+    return NaN;
+  }
+  const [value, step] = numbers;
+  if (step == null) {
+    return result(Math.round(value));
+  }
+  if (step === 0) {
+    return NaN;
+  }
+  if (!Number.isFinite(step)) {
+    // An infinite step: a finite value rounds to zero (the `nearest`
+    // strategy of CSS Values 4 §10.3.1), while an infinite value is NaN. The
+    // rule returns `0⁻` for a negative value *and* for `0⁻` itself, which a
+    // comparison with zero would take for positive: a nested calculation can
+    // observe the sign, e.g. `1 / round(-0, infinity)` is -Infinity. (Review)
+    if (!Number.isFinite(value)) {
+      return NaN;
+    }
+    return value < 0 || Object.is(value, -0) ? -0 : 0;
+  }
+  const interval = Math.abs(step);
+  return result(Math.round(value / interval) * interval);
+}
+
+/**
+ * The `mod()` of CSS Values 4: the result has the sign of the divisor, unlike
+ * the congruence modulo of the `%` operator of this expression language and of
+ * its `rem()`. (Review)
+ */
+export function mod(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  if (!numbers || numbers[1] === 0) {
+    return NaN;
+  }
+  const [a, b] = numbers;
+  if (!Number.isFinite(b)) {
+    return moduloOfInfiniteDivisor(a, b, true);
+  }
+  // The formula `a - b * Math.floor(a / b)` overflows for operands as far
+  // apart as `mod(1e308, 1e-308)`, where `a / b` is infinite: the remainder of
+  // a modulus must stay finite and be smaller than the divisor in magnitude,
+  // which the `%` operator guarantees (JavaScript computes about 3.5e-309 for
+  // the example). `%` takes the sign of the dividend, so the divisor is added
+  // when the signs differ, which gives the sign that `mod()` requires. (Review)
+  const remainder = a % b;
+  // A remainder of zero has the sign of the divisor as well (`mod(0, -8)` is
+  // `-0`, which a nested calculation can observe, e.g. as `1 / mod(0, -8)`
+  // being `-Infinity` instead of `+Infinity`). (Review)
+  if (remainder === 0) {
+    return result(b < 0 ? -0 : 0);
+  }
+  return result(remainder < 0 !== b < 0 ? remainder + b : remainder);
+}
+
+/**
+ * The result of `mod()`/`rem()` with an infinite divisor: A is returned as it
+ * is, except that `mod()` is NaN when A has the opposite sign of B, including
+ * an oppositely signed zero (CSS Values 4 §10.3.1). (Review)
+ */
+function moduloOfInfiniteDivisor(a: number, b: number, isMod: boolean): number {
+  if (!Number.isFinite(a)) {
+    return NaN;
+  }
+  if (isMod) {
+    const aSign = a === 0 ? (Object.is(a, -0) ? -1 : 1) : Math.sign(a);
+    if (aSign !== Math.sign(b)) {
+      return NaN;
+    }
+  }
+  return a;
+}
+
+/**
+ * The `rem()` of CSS Values 4: the result has the sign of the dividend, like
+ * the `%` operator of this expression language. (Review)
+ */
+export function rem(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  if (!numbers || numbers[1] === 0) {
+    return NaN;
+  }
+  const [a, b] = numbers;
+  if (!Number.isFinite(b)) {
+    return moduloOfInfiniteDivisor(a, b, false);
+  }
+  return result(a % b);
+}
+
+/**
+ * The `log()` of CSS Values 4: the natural logarithm, or the given base. A
+ * base of 1, 0 or a negative number makes the result NaN (§10.5.1), which the
+ * division would not: `Math.log(0)` is -Infinity and the quotient of a
+ * positive value by it is the finite -0, which a caller would materialize as a
+ * zero, and a base of 1 gives an infinity. (Review)
+ */
+export function log(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 2);
+  if (!numbers) {
+    return NaN;
+  }
+  const [value, base] = numbers;
+  if (base != null && (base <= 0 || base === 1)) {
+    return NaN;
+  }
+  return result(
+    base == null ? Math.log(value) : Math.log(value) / Math.log(base),
+  );
+}
+
+/** The `hypot()` of CSS Values 4. (Review) */
+export function hypot(...args: unknown[]): number {
+  // An infinite argument takes precedence over a `NaN` one, as `Math.hypot()`
+  // implements it: `hypot(exp(1000), log(-1))` is +∞, so a `font-weight` that
+  // uses the call is clamped to 1000 instead of inheriting. (Review)
+  const numbers = numericArgs(args, 1, Infinity, true);
+  return numbers ? result(Math.hypot(...numbers)) : NaN;
+}
+
+/**
+ * The `clamp()` of CSS Values 4: `max(MIN, min(VAL, MAX))`, so that the minimum
+ * takes precedence when the bounds are reversed. (Review)
+ */
+export function clamp(...args: unknown[]): number {
+  const numbers = numericArgs(args, 3, 3);
+  if (!numbers) {
+    return NaN;
+  }
+  const [min, value, max] = numbers;
+  return result(Math.max(min, Math.min(value, max)));
+}
+
+/** The `abs()` of CSS Values 4. (Review) */
+export function abs(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? result(Math.abs(numbers[0])) : NaN;
+}
+
+/** The `sign()` of CSS Values 4, which returns a number. (Review) */
+export function sign(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? Math.sign(numbers[0]) : NaN;
+}
+
+/** The `pow()` of CSS Values 4. (Review) */
+export function pow(...args: unknown[]): number {
+  const numbers = numericArgs(args, 2, 2);
+  return numbers ? result(Math.pow(numbers[0], numbers[1])) : NaN;
+}
+
+/** The `exp()` of CSS Values 4. (Review) */
+export function exp(...args: unknown[]): number {
+  const numbers = numericArgs(args, 1, 1);
+  return numbers ? result(Math.exp(numbers[0])) : NaN;
+}
+
 export type ScopeContext = Map<string, Result>;
 
 /**
@@ -359,7 +594,7 @@ export class Context {
     this.initialFontSize = fontSize;
     this.rootLineHeight = rootLineHeight;
     this.fontSize = function () {
-      if (this.rootFontSize) {
+      if (this.rootFontSize != null) {
         return this.rootFontSize;
       } else {
         return fontSize;
@@ -444,6 +679,28 @@ export class Context {
         }
       }
       s = s.parent;
+    }
+    // This engine represents a value that is not finite with the JavaScript
+    // name: `Css.Num(Infinity)` serializes as `Infinity`, e.g. the value that
+    // `evaluateFontWeightMathFunction()` materializes for
+    // `font-weight: calc(exp(1000))` before the range of CSS Fonts 4 clamps
+    // it. Such a value is evaluated again when the declaration is validated
+    // afterwards, e.g. by `evaluatesToNaN()`, and the `nan` of CSS Values 4 is
+    // represented as `NaN` in the same way: recognize both, or the evaluation
+    // fails with an undefined name. The other numeric constants of CSS Values
+    // 4 §10.7.1 are recognized here as well, so that a declaration that uses
+    // `pi` or `e`, e.g. `line-height: calc(pi * 10px)`, resolves in the
+    // inheritance walk as well (the calculation keyword guard lets those two
+    // names through). (Review)
+    switch (qualifiedName.toLowerCase()) {
+      case "infinity":
+        return new Const(scope, Number.POSITIVE_INFINITY);
+      case "nan":
+        return new Const(scope, Number.NaN);
+      case "pi":
+        return new Const(scope, Math.PI);
+      case "e":
+        return new Const(scope, Math.E);
     }
     throw new Error(`Name '${qualifiedName}' is undefined`);
   }

@@ -42,6 +42,13 @@
         width: calc(20pvi - 15px);
       }
 
+      /* a math function with an internal page viewport unit: the engine
+         resolves the unit against the page box and the browser the function */
+      div.min {
+        background: orange;
+        width: min(20pvw - 15px, 2000px);
+      }
+
       div:nth-of-type(4) {
         background: aqua;
         height: 25pvh;
@@ -81,5 +88,11 @@
     </p>
     <div>height: 25pvmin</div>
     <div>height: 25pvmax</div>
+    <hr />
+    <p>
+      The next block must have the same width as the
+      <code>calc(20pvw - 15px)</code> one above:
+    </p>
+    <div class="min">width: min(20pvw - 15px, 2000px)</div>
   </body>
 </html>

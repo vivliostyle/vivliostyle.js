@@ -1012,6 +1012,27 @@ export class ViewFactory
     // rules such as :footnote-content) authoritative over ancestor-derived
     // inherited values.
     const blockedInheritedByCurrent = new Set<string>();
+    // Whether the current element's font size (including region rules) wins
+    // over the inherited font size.
+    let currentDeclaresFontSize = false;
+    // Whether the current element's own cascaded style declares font-size.
+    const fontSizeFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "font-size")
+    );
+    // Whether the current element's line height (including region rules) uses
+    // the `lh` unit, which is resolved against the inherited line height.
+    let currentDeclaresLineHeight = false;
+    // Whether the current element's own cascaded style declares line-height.
+    const lineHeightFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "line-height")
+    );
+    // Whether the current element's relative font weight (including region
+    // rules) is resolved against the inherited weight.
+    let currentHasRelativeFontWeight = false;
+    // Whether the current element's own cascaded style declares font-weight.
+    const fontWeightFromOwnStyle = !!(
+      styles.length > 0 && CssCascade.getProp(styles[0], "font-weight")
+    );
     if (styles.length > 0) {
       const currentStyle = styles[0];
       const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
@@ -1027,12 +1048,49 @@ export class ViewFactory
         const value = flattenedCurrentStyle[name].evaluate(this.context, name);
         if (
           value &&
-          value !== Css.ident.inherit &&
-          value !== Css.ident.unset &&
+          // A CSS-wide keyword that comes from a custom property is not
+          // canonicalized, so compare the names: `--x: INHERIT; color:
+          // var(--x)` must not block the inherited value. (Review)
+          !CssCascade.hasKeywordName(value, "inherit") &&
+          !CssCascade.hasKeywordName(value, "unset") &&
           value !== Css.empty &&
           !Css.isRollbackValue(value)
         ) {
-          blockedInheritedByCurrent.add(name);
+          if (name === "font-size") {
+            // A relative font size (em/%/lh units, a calc() of them, or the
+            // relative keywords "larger"/"smaller") is resolved against the
+            // inherited value, so the inherited font size must still be
+            // accumulated. It is only the priority of the accumulated value
+            // that must not beat the declaration; see below. (Issue #2174)
+            currentDeclaresFontSize = true;
+          } else if (
+            // An `lh` unit of a line height refers to the line height of the
+            // parent, so the inherited line height must still be accumulated as
+            // well. The declaration replaces the accumulated value, but only
+            // the priority of the accumulated value is lowered below when the
+            // declaration is not in the element's own cascaded style. (Review)
+            name === "line-height" &&
+            (CssCascade.usesLineHeightUnit(value) ||
+              // A line height that the browser rejects is inherited as well,
+              // so the inherited line height must still be accumulated for a
+              // descendant that resolves the `lh` unit. (Review)
+              CssCascade.isInvalidLineHeight(this.context, value))
+          ) {
+            currentDeclaresLineHeight = true;
+          } else if (
+            // The relative font-weight keywords are resolved against the
+            // inherited weight, so keep accumulating it. A keyword coming from
+            // a custom property is not canonicalized, so compare names. (Only
+            // `font-weight` has these keywords; the same identifier of another
+            // property, e.g. `font-family: bolder`, is an ordinary value.)
+            name === "font-weight" &&
+            (CssCascade.hasKeywordName(value, "bolder") ||
+              CssCascade.hasKeywordName(value, "lighter"))
+          ) {
+            currentHasRelativeFontWeight = true;
+          } else {
+            blockedInheritedByCurrent.add(name);
+          }
         }
       }
     }
@@ -1066,6 +1124,11 @@ export class ViewFactory
       propList.sort(Css.processingOrderFn);
       let fontSize: Css.Val | undefined;
       let lineHeight: Css.Val | undefined;
+      // The font size of the level above, which a relative line height that was
+      // accumulated so far is resolved against: the font-relative units of a
+      // line height refer to the parent's metrics, and this level's own font
+      // size has not been applied here yet. (Review)
+      const parentFontSize = inheritanceVisitor.getInheritedFontSize();
 
       for (const name of propList) {
         if (
@@ -1081,22 +1144,63 @@ export class ViewFactory
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
-        if (prop.value === Css.ident.initial) {
+        if (CssCascade.hasKeywordName(prop.value, "initial")) {
           // `initial` means use the CSS initial value, not inherit from
           // ancestor. This is needed for `all: initial` to work on elements
           // detached from their source parent (e.g. footnotes). (Issue #1696)
-          delete props[name];
+          if (name === "font-size") {
+            // The initial font size is materialized as a length, because it is
+            // the base of the dependent values of the element, e.g. an `em`
+            // unit of another declaration: `font-size: initial` is the (medium)
+            // initial font size. (Issue #2174 follow-up)
+            props[name] = prop.withValue(
+              new Css.Numeric(this.context.initialFontSize, "px"),
+            );
+          } else {
+            // The keyword itself is kept as the accumulated value. Removing it
+            // would make the detached element inherit from the synthetic view
+            // parent instead of using the initial value, e.g.
+            // `color: initial` under a footnote area that inherits the color
+            // of the page would be rendered in that color instead of the
+            // initial one. (Review)
+            props[name] = prop;
+          }
+        } else if (
+          // The keywords are compared by name, because a keyword that comes
+          // from a custom property is not canonicalized, e.g.
+          // `--x: INHERIT; color: var(--x)`. (Review)
+          CssCascade.hasKeywordName(prop.value, "inherit") ||
+          // `unset` is the same as `inherit` for the inherited properties that
+          // are processed here.
+          CssCascade.hasKeywordName(prop.value, "unset")
+        ) {
+          const inherited = CssCascade.getProp(props, name);
+          if (inherited) {
+            // `inherit` is the inherited value. Materializing it with the
+            // priority of this declaration lets it compete with a declaration
+            // that is not in the element's own cascaded style, e.g. a region
+            // rule, as any other declaration of the element would. (Issue
+            // #2174)
+            props[name] = prop.withValue(inherited.value);
+          } else {
+            // No source ancestor declares the property, so the value that the
+            // element inherits is the initial one. Materializing `initial`
+            // instead of leaving the declaration out makes the generated node
+            // use that value rather than the one of the synthetic view parent,
+            // e.g. a `color: inherit` footnote under a region rule such as
+            // `:footnote-content { color: red }`. (Review)
+            props[name] = prop.withValue(Css.ident.initial);
+          }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
             name === "font-size" &&
             i === styles.length - 1 &&
             this.context.isRelativeRootFontSize &&
-            this.context.rootFontSize
+            this.context.rootFontSize != null
           ) {
             // Fix for issue #608, #549
-            prop1 = new CssCascade.CascadeValue(
+            prop1 = prop.withValue(
               new Css.Numeric(this.context.rootFontSize, "px"),
-              prop.priority,
             );
           } else if (
             name === "line-height" &&
@@ -1106,29 +1210,119 @@ export class ViewFactory
               this.context.isRootLineHeightFromRelativeCalc)
           ) {
             // line-height with lh or rlh unit on root element
-            prop1 = new CssCascade.CascadeValue(
+            prop1 = prop.withValue(
               new Css.Numeric(this.context.rootLineHeight, "px"),
-              prop.priority,
             );
           } else if (
-            i === 0 &&
+            name === "line-height" &&
             prop.value instanceof Css.Numeric &&
             prop.value.unit === "lh"
           ) {
-            // line-height with lh unit on current element
-            const lhUnitSize = this.getLineHeightUnitSize(
-              name,
-              fontSize,
-              lineHeight,
-            );
+            // line-height with an lh unit, which refers to the line height of
+            // the parent. The line height that was accumulated for the parent
+            // is used for the current element and for a source ancestor alike:
+            // on detached content the rendered parent is the synthetic one
+            // (e.g. the footnote area), whose line height is not the one that
+            // the element inherits in the source document. Resolved level by
+            // level, a detached descendant that resolves an lh unit of its own
+            // finds a length instead of falling back to the root line height. A
+            // `font-size` with an lh unit is left to the inheritance visitor,
+            // which resolves it against the line height that was accumulated
+            // for the source parent. (Issue #2174 follow-up, Review)
+            const lhUnitSize =
+              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
             if (lhUnitSize != null) {
-              prop1 = new CssCascade.CascadeValue(
+              prop1 = prop.withValue(
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),
-                prop.priority,
               );
+            }
+          } else if (
+            name === "line-height" &&
+            prop.value instanceof Css.Func &&
+            CssCascade.usesLineHeightUnit(prop.value)
+          ) {
+            // A computed line height whose `lh` unit refers to the line height
+            // of the parent, e.g. `line-height: calc(1lh + 10px)`. It is
+            // resolved here, level by level, against the line height that was
+            // accumulated for the parent so far, so that the unit does not
+            // fall back to the preferred line height when a descendant
+            // resolves its own `lh` unit. (Review)
+            const inheritedLineHeight =
+              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+            const inheritedFontSize = inheritanceVisitor.getInheritedFontSize();
+            if (inheritedLineHeight != null && inheritedFontSize != null) {
+              const px = CssCascade.resolveLineHeightValueToPx(
+                this.context,
+                prop.value,
+                inheritedFontSize,
+                inheritedLineHeight,
+              );
+              if (px != null) {
+                prop1 = prop.withValue(new Css.Numeric(px, "px"));
+              }
             }
           } else if (!Css.isCustomPropName(name)) {
             prop1 = prop.filterValue(inheritanceVisitor);
+          }
+
+          if (name === "font-weight") {
+            // A weight that a var() substitution made invalid is rejected by
+            // the browser, which keeps the inherited weight, so the accumulated
+            // weight must not be replaced by it: a relative keyword
+            // (`bolder`/`lighter`) of a detached descendant is resolved against
+            // the inherited weight. (Review)
+            if (CssCascade.isInvalidFontWeight(this.context, prop1.value)) {
+              const inheritedFontWeight = CssCascade.getProp(props, name);
+              if (inheritedFontWeight) {
+                prop1 = prop1.withValue(inheritedFontWeight.value);
+              }
+            }
+          }
+
+          if (name === "line-height") {
+            // A line height that a var() substitution made invalid is rejected
+            // by the browser, which keeps the inherited line height, so the
+            // accumulated value must not be replaced by it: a descendant that
+            // resolves the `lh` unit (`font-size: 1lh`) then uses the line
+            // height it inherits instead of the preferred line height.
+            // (Review)
+            if (CssCascade.isInvalidLineHeight(this.context, prop1.value)) {
+              const inheritedLineHeight = CssCascade.getProp(props, name);
+              if (inheritedLineHeight) {
+                prop1 = prop1.withValue(inheritedLineHeight.value);
+              }
+            }
+          }
+
+          if (name === "font-size") {
+            // `initial`, `inherit` and `unset` are handled above and the
+            // keywords are resolved by the visitor, so every other value is
+            // either a length or invalid. An invalid one, e.g. a unitless
+            // number, an unknown identifier or a negative length that a var()
+            // substitution put into the declaration, is rejected by the
+            // browser, which inherits the parent font size instead; keep the
+            // value that was accumulated for the source parent, so that the
+            // dependent values of the element are not resolved against the
+            // initial font size. (Review)
+            if (prop1.value instanceof Css.Numeric && prop1.value.num < 0) {
+              // `font-size` has a non-negative computed-value range, so a
+              // negative value is clamped to zero. A negative literal length
+              // is invalid instead and is turned into `unset` by the cascade,
+              // which the walk materializes as the inherited font size.
+              prop1 = prop1.withValue(new Css.Numeric(0, "px"));
+            } else if (
+              CssCascade.resolveFontSizeValueToPx(this.context, prop1.value) ==
+                null &&
+              // A valid value that cannot be resolved here, e.g. the `math`
+              // keyword or a unit that only the browser resolves, is preserved
+              // instead of being replaced by the inherited value. (Review)
+              !CssCascade.isValidUnresolvedFontSize(this.context, prop1.value)
+            ) {
+              const inheritedFontSize = CssCascade.getProp(props, name);
+              if (inheritedFontSize) {
+                prop1 = prop1.withValue(inheritedFontSize.value);
+              }
+            }
           }
 
           if (name === "font-size") {
@@ -1139,6 +1333,64 @@ export class ViewFactory
 
           props[name] = prop1;
         }
+      }
+    }
+    if (currentDeclaresFontSize && !fontSizeFromOwnStyle) {
+      const inheritedFontSize = props["font-size"] as
+        CssCascade.CascadeValue | undefined;
+      // The font size comes from a declaration that is not in the element's
+      // own cascaded style, e.g. a region rule such as
+      // `aside[role="doc-footnote"]:footnote-content { font-size: 0.9em }`.
+      // Such a declaration replaces the inherited value, so the inherited
+      // value is kept only as a low-priority placeholder (the same priority
+      // as the initial value the walk starts with). Only the priority is
+      // affected: a declaration of a region rule resolves in the context that
+      // it is rendered in, as the styles of the `@page` margin boxes do and as
+      // the default `font-size: 0.9em` of Vivliostyle's own footnote styles
+      // relies on; it is not resolved against the source parent, unlike a
+      // declaration of the element itself. (Issue #2174)
+      if (inheritedFontSize) {
+        props["font-size"] = new CssCascade.CascadeValue(
+          inheritedFontSize.value,
+          0,
+        );
+      }
+    }
+    if (currentDeclaresLineHeight && !lineHeightFromOwnStyle) {
+      const inheritedLineHeight = props["line-height"] as
+        CssCascade.CascadeValue | undefined;
+      // A line height that uses the `lh` unit needs the inherited line height to
+      // resolve the unit, but when the declaration comes from outside the
+      // element's own cascaded style, e.g. a region rule such as
+      // `aside[role="doc-footnote"]:footnote-content { line-height: 1lh }`, the
+      // inherited value is kept only as a low-priority placeholder, so that it
+      // cannot beat the declaration of the region rule (an `!important` value
+      // of an ancestor would otherwise win). Only the priority is affected: as
+      // for the font size above, the declaration of the region rule resolves in
+      // the context that it is rendered in. (Review)
+      if (inheritedLineHeight) {
+        props["line-height"] = new CssCascade.CascadeValue(
+          inheritedLineHeight.value,
+          0,
+        );
+      }
+    }
+    if (currentHasRelativeFontWeight && !fontWeightFromOwnStyle) {
+      const inheritedFontWeight = props["font-weight"] as
+        CssCascade.CascadeValue | undefined;
+      // Likewise for a relative font weight (`bolder`/`lighter`) that comes
+      // from a declaration outside the element's own cascaded style, e.g.
+      // `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }`.
+      // The accumulated inherited weight is kept only as a low-priority
+      // placeholder, so that it cannot beat the declaration during the
+      // cascade. As for the font size above, only the priority is affected:
+      // the declaration of the region rule resolves in the context that it is
+      // rendered in. (Issue #2174)
+      if (inheritedFontWeight) {
+        props["font-weight"] = new CssCascade.CascadeValue(
+          inheritedFontWeight.value,
+          0,
+        );
       }
     }
     for (const sname in elementStyle) {
@@ -3512,10 +3764,26 @@ export class ViewFactory
    * @param val CSS value string
    * @returns parsed and adjusted value in px, or null if cannot parse as "px" unit, e.g. "normal"
    */
-  private parsePlusLayoutUnitAdj(val: string): number | null {
+  private parsePlusLayoutUnitAdj(
+    val: string,
+    inlineVal?: () => string | null | undefined,
+  ): number | null {
     if (val.endsWith("px")) {
       const parsedVal = parseFloat(val);
       if (!isNaN(parsedVal)) {
+        if (parsedVal === 0) {
+          // A length is serialized as `calc(<length> - var(--viv-layoutUnitAdj))`,
+          // and when the result is negative the browser clamps it to `0px`.
+          // Adding the adjustment back would then turn an exact zero into
+          // 1/64px (or 1/60px), so the length in front of the adjustment is
+          // used instead. The declaration is only looked up for a zero value:
+          // the lookup may walk the ancestors, and a value that is not zero
+          // does not need it. (Review)
+          const inline = inlineVal?.() ?? null;
+          const base =
+            inline != null ? parseLayoutUnitAdjustedValue(inline) : null;
+          return base != null && base > 0 ? base : 0;
+        }
         return (
           Math.round(
             (parsedVal + this.viewport.layoutUnitAdj) *
@@ -3536,15 +3804,26 @@ export class ViewFactory
     const pageContextStyle = pageContextElement
       ? this.viewport.window.getComputedStyle(pageContextElement)
       : null;
+    const inlineStyle = getInlineStyle(pageContextElement);
     const fontSize =
-      (pageContextStyle &&
-        this.parsePlusLayoutUnitAdj(pageContextStyle.fontSize)) ||
-      this.context.rootFontSize ||
+      // A font size of 0 is valid and must not fall through to the defaults.
+      (pageContextStyle
+        ? this.parsePlusLayoutUnitAdj(
+            pageContextStyle.fontSize,
+            () => inlineStyle?.fontSize,
+          )
+        : null) ??
+      this.context.rootFontSize ??
       this.context.initialFontSize;
     const lineHeight =
-      (pageContextStyle &&
-        this.parsePlusLayoutUnitAdj(pageContextStyle.lineHeight)) ||
-      this.context.rootLineHeight ||
+      // A line height of 0 is valid and must not fall through to the defaults.
+      (pageContextStyle
+        ? this.parsePlusLayoutUnitAdj(
+            pageContextStyle.lineHeight,
+            () => inlineStyle?.lineHeight,
+          )
+        : null) ??
+      this.context.rootLineHeight ??
       fontSize * this.context.pref.lineHeight;
     return { fontSize, lineHeight };
   }
@@ -3554,20 +3833,93 @@ export class ViewFactory
     fallback: { fontSize: number | null; lineHeight: number | null },
   ): { fontSize: number | null; lineHeight: number | null } {
     const style = this.viewport.window.getComputedStyle(element);
+    const inlineStyle = getInlineStyle(element);
     const fontSize =
-      this.parsePlusLayoutUnitAdj(style.fontSize) ?? fallback.fontSize;
+      this.parsePlusLayoutUnitAdj(style.fontSize, () =>
+        this.getLayoutUnitAdjustedBase(
+          element,
+          inlineStyle?.fontSize,
+          "fontSize",
+        ),
+      ) ?? fallback.fontSize;
     const lineHeight =
-      this.parsePlusLayoutUnitAdj(style.lineHeight) ??
+      this.parsePlusLayoutUnitAdj(style.lineHeight, () =>
+        this.getLayoutUnitAdjustedBase(
+          element,
+          inlineStyle?.lineHeight,
+          "lineHeight",
+        ),
+      ) ??
       fallback.lineHeight ??
       (fontSize != null ? fontSize * this.context.pref.lineHeight : null);
     return { fontSize, lineHeight };
   }
 
-  private getParentViewStyle(): CSSStyleDeclaration | null {
+  /**
+   * The inline declaration that the given inline value of an element has to be
+   * read with to recover a length that the browser rounded down to zero: the
+   * value of the element itself, or, because an element without a declaration
+   * of its own inherits the length, the one of the nearest ancestor that has a
+   * generated declaration. A declaration that is not an adjusted length, e.g.
+   * `font-size: 0`, is kept, so that it cannot be replaced by an ancestor
+   * value. (Review)
+   */
+  private getLayoutUnitAdjustedBase(
+    element: Element | null,
+    inlineVal: string | null | undefined,
+    propName: "fontSize" | "lineHeight",
+  ): string | null {
+    if (inlineVal) {
+      if (parseLayoutUnitAdjustedValue(inlineVal) != null) {
+        return inlineVal;
+      }
+      // A CSS-wide value that means inheritance, e.g. the `font-size: inherit`
+      // of this element itself, is not a length of its own: the search
+      // continues with the ancestors, as it does for such a value of one of
+      // them. (Review)
+      if (!/^(inherit|unset)$/i.test(inlineVal.trim())) {
+        return null;
+      }
+    }
+    for (
+      let node: Element | null = element?.parentElement ?? null;
+      node;
+      node = node.parentElement
+    ) {
+      // Only a chain in which the length rounded down to zero everywhere can
+      // have inherited it from a generated declaration further up; an ancestor
+      // whose computed value is not zero declares a length of its own.
+      const computed = this.viewport.window.getComputedStyle(node)[propName];
+      if (!(computed === "normal" || parseFloat(computed) === 0)) {
+        return null;
+      }
+      const inline = getInlineStyle(node)?.[propName];
+      if (inline) {
+        if (parseLayoutUnitAdjustedValue(inline) != null) {
+          return inline;
+        }
+        // A CSS-wide value that means inheritance, e.g. the `font-size:
+        // inherit` of an element whose own length is the rounded down one, is
+        // not a length of its own: the search continues with the ancestors,
+        // whose chain rounded down to zero as well. (Review)
+        if (!/^(inherit|unset)$/i.test(inline.trim())) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  private getParentViewNode(): Element | null {
     return this.nodeContext?.parent?.viewNode?.nodeType === 1
-      ? this.viewport.window.getComputedStyle(
-          this.nodeContext.parent.viewNode as Element,
-        )
+      ? (this.nodeContext.parent.viewNode as Element)
+      : null;
+  }
+
+  private getParentViewStyle(): CSSStyleDeclaration | null {
+    const parentNode = this.getParentViewNode();
+    return parentNode
+      ? this.viewport.window.getComputedStyle(parentNode)
       : null;
   }
 
@@ -3575,16 +3927,30 @@ export class ViewFactory
     fontSize: number | null;
     lineHeight: number | null;
   } {
+    const parentNode = this.getParentViewNode();
+    const inlineStyle = getInlineStyle(parentNode);
     return {
       fontSize:
         this.computedStyleParentFontSizeOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize)
+          ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize, () =>
+              this.getLayoutUnitAdjustedBase(
+                parentNode,
+                inlineStyle?.fontSize,
+                "fontSize",
+              ),
+            )
           : this.context.rootFontSize),
       lineHeight:
         this.computedStyleParentLineHeightOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight)
+          ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight, () =>
+              this.getLayoutUnitAdjustedBase(
+                parentNode,
+                inlineStyle?.lineHeight,
+                "lineHeight",
+              ),
+            )
           : this.context.rootLineHeight),
     };
   }
@@ -4579,4 +4945,28 @@ export function addImageFetchersToPage(val: Css.Val, page: Vtree.Page): void {
       addImageFetchersToPage(v, page);
     }
   }
+}
+
+/**
+ * The inline style declaration of an element, or null when it has none.
+ */
+function getInlineStyle(element: Element | null): CSSStyleDeclaration | null {
+  return element ? ((element as HTMLElement).style ?? null) : null;
+}
+
+/**
+ * The length in front of the layout unit adjustment of a serialized
+ * `calc(<length>px - var(--viv-layoutUnitAdj))`, or null when the value does
+ * not have that form. (Issue #2174 follow-up)
+ */
+function parseLayoutUnitAdjustedValue(val: string): number | null {
+  const match =
+    /^calc\(\s*(-?\d*\.?\d+(?:e[-+]?\d+)?)px\s*-\s*var\(--viv-layoutUnitAdj\)/i.exec(
+      val.trim(),
+    );
+  if (!match) {
+    return null;
+  }
+  const parsed = parseFloat(match[1]);
+  return isNaN(parsed) ? null : parsed;
 }

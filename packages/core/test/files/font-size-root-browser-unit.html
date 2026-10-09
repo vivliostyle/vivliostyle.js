@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root font size with a unit that only
+     the browser resolves, e.g. `5ch`, must not be treated as the raw number of
+     the value (`5px`), which would corrupt every `rem` value, the page context
+     and the margin boxes. The browsers resolve `ch` against the font metrics of
+     their default font, which is the initial font size for the root element, so
+     `5ch` is 40px and `5rem` is 200px: the two boxes of this page must have the
+     same width. The root line height is the `5ch` that the root declares, and
+     it is resolved with the same assumption (5 x 0.5em x 40px = 100px), so
+     that the value this engine records for the `rlh` unit and the page context
+     is the one the root element renders; a paragraph that declares the same
+     `5ch` and a paragraph that declares `1lh`, the line height that it
+     inherits, must have the same height (measured: both are 100px in the
+     branch, while the pre-fix viewers resolve `5ch` with the real metric of
+     the font). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Root font size from a browser resolved unit (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 100mm; margin: 10mm; }
+    :root { font-size: 5ch; line-height: 5ch; }
+    body { margin: 0; }
+    .rem { width: 5rem; height: 10px; background: #333; }
+    .px { width: 200px; height: 10px; background: #999; }
+    .lh-ch { line-height: 100px; }
+    .lh-lh { line-height: 1lh; }
+  </style>
+</head>
+<body>
+  <p>The two bars below must have the same width (200px): the first is sized in
+    `rem`, which resolves against the 40px root font size of `5ch`, and the
+    second is the explicit reference.</p>
+  <div class="rem"></div>
+  <div class="px"></div>
+  <p>The two one line paragraphs below must have the same height: the first
+    is the explicit 100px that the root line height resolves to, and the second
+    the `1lh` that it inherits.</p>
+  <p class="lh-ch">One line</p>
+  <p class="lh-lh">One line</p>
+</body>
+</html>

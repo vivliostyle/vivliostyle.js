@@ -631,6 +631,8 @@ export const ident: { [key: string]: Ident } = {
   block: getName("block"),
   block_end: getName("block-end"),
   block_start: getName("block-start"),
+  bold: getName("bold"),
+  bolder: getName("bolder"),
   both: getName("both"),
   bottom: getName("bottom"),
   border_box: getName("border-box"),
@@ -661,8 +663,10 @@ export const ident: { [key: string]: Ident } = {
   inside: getName("inside"),
   keep: getName("keep"),
   landscape: getName("landscape"),
+  larger: getName("larger"),
   left: getName("left"),
   line: getName("line"),
+  lighter: getName("lighter"),
   list_item: getName("list-item"),
   ltr: getName("ltr"),
   manual: getName("manual"),
@@ -682,6 +686,7 @@ export const ident: { [key: string]: Ident } = {
   right: getName("right"),
   same: getName("same"),
   scale: getName("scale"),
+  smaller: getName("smaller"),
   snap_block: getName("snap-block"),
   snap_inline: getName("snap-inline"),
   solid: getName("solid"),
@@ -717,25 +722,82 @@ export const processingOrder = {
   color: 3,
 };
 
+const PAGE_VIEWPORT_UNIT =
+  /-?(?:\d+(?:\.\d+)?|\.\d+)(?:e[-+]?\d+)?pv(?:min|max|[whbi])\b/gi;
+
+/**
+ * The serialized value in the form that a browser can parse: the internal page
+ * viewport units of this engine (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin` and
+ * `pvmax`) are replaced by a length, because a browser does not know those
+ * units although this engine resolves them, e.g. against the size of the page
+ * box. Only the units are replaced, so the rest of the value is checked as
+ * written: a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown
+ * function, e.g. `foo(2pvw)`, stay invalid. (Review)
+ */
+export function withoutPageViewportUnits(text: string): string {
+  return text.replace(PAGE_VIEWPORT_UNIT, "1px");
+}
+
 export function isDefaultingValue(value: Val | null | undefined): boolean {
-  return (
-    value === ident.inherit ||
-    value === ident.initial ||
-    value === ident.unset ||
-    isRollbackValue(value)
-  );
+  if (value instanceof Ident) {
+    // The comparison is insensitive to the casing that a var() substitution
+    // preserves, as the browser parses the CSS-wide keywords. (Review)
+    const name = value.name.toLowerCase();
+    if (name === "inherit" || name === "initial" || name === "unset") {
+      return true;
+    }
+  }
+  return isRollbackValue(value);
+}
+
+/**
+ * The canonical value of a CSS-wide keyword, or the value itself: a var()
+ * substitution preserves the casing of the custom property, while the rest of
+ * the cascade compares these keywords with the canonical identifiers by
+ * identity (`isDefaultingValue()`, the declarations of the inheritance walk,
+ * the float and blockification logic). (Review)
+ */
+export function canonicalWideKeyword(value: Val): Val {
+  if (!(value instanceof Ident)) {
+    return value;
+  }
+  switch (value.name.toLowerCase()) {
+    case "inherit":
+      return ident.inherit;
+    case "initial":
+      return ident.initial;
+    case "unset":
+      return ident.unset;
+  }
+  return value;
 }
 
 /**
  * Whether the value is one of the CSS-wide keywords that roll the cascade back
  * to a declaration that lost (css-cascade-5 §7.3 Explicit Defaulting).
  */
+export type RollbackKind = "revert" | "revert-layer" | "revert-rule";
+
+/**
+ * The rollback keyword that `value` is, or `null` when it is not one. The kind
+ * decides which declarations a rollback drops, so the comparison must be
+ * insensitive to the casing that a var() substitution preserves. (Review)
+ */
+export function getRollbackKind(
+  value: Val | null | undefined,
+): RollbackKind | null {
+  if (!(value instanceof Ident)) {
+    return null;
+  }
+  const name = value.name.toLowerCase();
+  if (name === "revert" || name === "revert-layer" || name === "revert-rule") {
+    return name;
+  }
+  return null;
+}
+
 export function isRollbackValue(value: Val | null | undefined): boolean {
-  return (
-    value === ident.revert ||
-    value === ident.revert_layer ||
-    value === ident.revert_rule
-  );
+  return getRollbackKind(value) != null;
 }
 
 class RollbackValueVisitor extends Visitor {

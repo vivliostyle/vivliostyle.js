@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root font-size that a var()
+     substitution makes an unsupported dimension (a time, not a length) is
+     invalid, so the root element keeps the initial font size, as the browser
+     does. `--size: 5s` must not set the root font size to 5px, so 1rem must be
+     the 16px of the reference box. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    Root font size from an invalid substituted unit (Issue #2174 follow-up)
+  </title>
+  <style>
+    @page { size: 120mm 80mm; margin: 10mm; }
+    :root { --size: 5s; font-size: var(--size); }
+    .rem-box { width: 1rem; height: 20px; background: #9cf; } /* 16px */
+    .ref-box { width: 16px; height: 20px; background: #cfc; }
+  </style>
+</head>
+<body>
+  <p>The invalid <code>font-size: var(--size)</code> (<code>5s</code>) of the
+    root must be ignored, so the root keeps the initial 16px and the blue box
+    (1rem) is as wide as the green one (16px):</p>
+  <div class="rem-box"></div>
+  <div class="ref-box"></div>
+</body>
+</html>

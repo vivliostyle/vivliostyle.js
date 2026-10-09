@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174: relative font keywords in detached content (footnote) must
+     be resolved to numeric computed values against the inherited values. The em unit of
+     `letter-spacing` must use the inherited font-size when the parent's font-size is the
+     relative keyword `smaller`, and `font-weight: bolder` must be resolved against the
+     inherited weight (700 in a bold paragraph), not against the footnote area's weight.
+     This also applies when the keyword is substituted from a custom property
+     (`font-weight: var(--weight)` with `--weight: BOLDER`). A weight that is
+     declared with `calc()` must be evaluated before the keyword is resolved,
+     and a weight above 900 must be kept as it is by `bolder`.
+     The footnote texts must match the reference paragraphs below. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Relative font keywords in a footnote (Issue #2174)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    p.small { font-size: smaller; } /* 16px / 1.2 = 13.333px */
+    .fn { float: footnote; letter-spacing: 2em; } /* 13.333px x 2 = 26.667px */
+    /* Reference: the same text with numeric values (13.333px and 26.667px) */
+    p.ref { font-size: 13.3333px; letter-spacing: 26.6667px; }
+    p.bold { font-weight: bold; } /* 700 */
+    .fn2 { float: footnote; font-weight: bolder; } /* 700 -> 900 */
+    /* The keyword comes from a custom property, so it is not canonicalized */
+    :root { --weight: BOLDER; }
+    .fn3 { float: footnote; font-weight: var(--weight); } /* 700 -> 900 */
+    p.wref { font-weight: 900; }
+    /* `font-weight` accepts a function: bolder of 650 is 900 */
+    p.calcweight { font-weight: calc(650); }
+    .fn4 { float: footnote; font-weight: bolder; }
+    /* a weight above 900 is kept as it is by bolder */
+    p.heavy { font-weight: 950; }
+    .fn5 { float: footnote; font-weight: bolder; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p class="small">Text with a footnote call<span class="fn">Wide letters</span>.</p>
+  <p class="ref">Wide letters</p>
+  <p class="bold">Bold text with a footnote call<span class="fn2">Weight test</span>.</p>
+  <p class="wref">Weight test</p>
+  <p class="bold">Bold text with a footnote call<span class="fn3">Weight test 2</span>.</p>
+  <p class="wref">Weight test 2</p>
+  <p class="calcweight">Weight 650 with a footnote call<span class="fn4">Weight test 3</span>.</p>
+  <p class="wref">Weight test 3</p>
+  <p class="heavy">Weight 950 with a footnote call<span class="fn5">Weight test 4</span>.</p>
+  <p class="heavy">Weight test 4</p>
+  <p>The two lines "Wide letters" above should have exactly the same width, and the
+    lines "Weight test" / "Weight test 2" / "Weight test 3" should have the same
+    font weight as their references (900). "Weight test 4" inherits 950, so `bolder`
+    keeps 950.</p>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: the `lh` unit of a font-size declared in
+     detached content (a footnote) must be resolved against the computed line
+     height of the source parent, as it is for content in the normal flow, not
+     against the line height of the page.
+     The footnote "Wide" must have the same letter-spacing as the inline "Wide"
+     of the same paragraph, whose font size is 1lh = the parent's line height
+     (40px, or 24px when the line height is `calc(150%)`). A line height whose
+     computed value is a length is resolved where it is declared, so a
+     percentage (`150%`, `calc(150%)`) is the same 24px and a `5ch` the same
+     assumed 40px although an intervening level has the larger font size of
+     32px, while a unitless number stays the multiplier that it is. The line
+     height of an
+     ancestor can be an `lh` unit itself, e.g. `line-height: 1lh` on the parent
+     paragraph, which refers to the line height of its own parent (30px), and
+     an own `line-height: 2lh` of a footnote refers to the 40px that it inherits
+     from the source parent (2 x 40px = 80px), not to the line height of the
+     footnote area it is rendered in. An ancestor whose font size is a value
+     that only the browser resolves (`font-size: math`) must not make an
+     absolute line height of that ancestor unknown. The math functions of CSS
+     Values 4 are evaluated as well, so an own `line-height: round(1lh, 7px)`
+     is the 42px that the function computes from the inherited 40px, and a
+     footnote resolves `font-size: 1lh` against the 42px of an ancestor with
+     `line-height: round(40px, 7px)`, and the root line height itself can be
+     such a function: `font-size: 1rlh` of a footnote must be the 42px that the
+     function computes for the root (the pre-fix viewer keeps the preferred
+     line height there).
+     A line height that computes to nothing that can be materialized must not
+     make the basis of the `lh` unit wrong either: a function whose result is
+     not a number (`log(100, 0)`) leaves the 42px that the paragraph inherits
+     from the root (the declaration itself is materialized as `calc(0)` by this
+     engine and by the pre-fix viewers alike), a function that computes below
+     zero (`min(-10px, -20px)`) is clamped to 0, and a function of unitless
+     numbers (`min(1, 2)`) is the number 1, i.e. the 16px font size of the
+     paragraph, and a line height that uses the numeric constants of CSS
+     Values 4 §10.7.1 is resolved as well (`calc(pi * 10px)` is the 31.4159px
+     that the browser computes, so the footnote that resolves `1lh` against it
+     is 31.4159px instead of the preferred line height). A line height in an
+     internal viewport unit of this engine
+     (`2pvw`) is 2% of the width of the page box (12.094px), which only this
+     engine resolves: the pre-fix viewers used the preferred line height for
+     the `1lh` basis there instead of the 12.0925px of the paragraph,
+     letter-spacing 24.19px). -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>lh unit of a detached font-size (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 160mm 100mm; margin: 10mm; }
+    html, body { font-size: 16px; }
+    /* the root line height can be a math function of CSS Values 4:
+       round(40px, 7px) = 42px, the basis of the `rlh` unit */
+    :root { line-height: round(40px, 7px); }
+    .fn.rlh { font-size: 1rlh; }
+    .ref.rlh { font-size: 42px; }
+    body { margin: 0; }
+    p { line-height: 40px; margin: 0.4em 0; }
+    .fn, .ref { letter-spacing: 2em; }
+    /* 1lh = the computed line height of the parent = 40px */
+    .fn { float: footnote; font-size: 1lh; }
+    .ref { font-size: 40px; }
+    /* the same, with a line height that is computed by calc() */
+    p.calc { line-height: calc(2 * 20px); }
+    .ref.calc-lh { font-size: 40px; }
+    /* an ancestor with a line height that is an lh unit: 1lh = 30px */
+    .anc-outer { line-height: 30px; }
+    .anc { line-height: 1lh; }
+    .ref.anc-lh { font-size: 30px; }
+    /* an own line height that is a math function with lh: max(1lh, 5px) = the
+       40px line height of the source parent */
+    p.lh-own { line-height: 40px; }
+    .fn.own-lh { line-height: max(1lh, 5px); }
+    .ref.own-lh { line-height: max(1lh, 5px); background: #eee; }
+    .fn.own-lh { background: #eee; }
+    /* an own line height that is a math function of CSS Values 4:
+       round(1lh, 7px) = round(40px, 7px) = 42px */
+    p.own-round-lh { line-height: 40px; }
+    .fn.own-round-lh { line-height: round(1lh, 7px); background: #eee; }
+    .ref.own-round-lh { line-height: 42px; background: #eee; }
+    /* an ancestor line height that is a math function of CSS Values 4, which a
+       footnote resolves its `font-size: 1lh` against */
+    p.math-round { line-height: round(40px, 7px); }
+    .fn.math-round-lh { font-size: 1lh; }
+    .ref.math-round-lh { font-size: 42px; }
+    /* an own line height: 2lh = 2 x the 40px line height of the source parent */
+    p.own-2lh { line-height: 40px; }
+    .fn.own-2lh { line-height: 2lh; background: #eee; }
+    .ref.own-2lh { line-height: 80px; background: #eee; }
+    /* an ancestor whose font size only the browser resolves */
+    p.math-anc { font-size: math; line-height: 40px; }
+    .fn.math-anc-lh { font-size: 1lh; }
+    .ref.math-anc-lh { font-size: 40px; }
+    /* the same, with an inherited line height that is a math function:
+       min(40px, 2em) = the smaller of 40px and 32px = 32px */
+    p.lh-math { line-height: min(40px, 2em); }
+    .ref.lh-math { font-size: 32px; }
+    /* the same, with a percentage based computed line height: 150% of 16px */
+    p.calc-pct { line-height: calc(150%); }
+    .fn.pct-lh { font-size: 1lh; }
+    .ref.pct-lh { font-size: 24px; }
+    /* a percentage line height is a length of the element that declares it:
+       150% of 16px = 24px, not 150% of the 32px of the level below it */
+    .pct-anc { line-height: 150%; }
+    .pct-mid { font-size: 32px; }
+    .fn.pct-anc-lh { font-size: 1lh; }
+    .ref.pct-anc-lh { font-size: 24px; }
+    .calc-pct-anc { line-height: calc(150%); }
+    .fn.calc-pct-anc-lh { font-size: 1lh; }
+    .ref.calc-pct-anc-lh { font-size: 24px; }
+    /* the same, for a unit whose metric only the browser resolves: `5ch` of
+       the 16px font size of the level that declares it is the assumed 40px
+       (0.5em per `ch`, CSS Values 4 §6.1), not the 80px of the level below */
+    .ch-anc { line-height: 5ch; }
+    .fn.ch-anc-lh { font-size: 1lh; }
+    .ref.ch-anc-lh { font-size: 40px; }
+    /* a line height whose computation is not a number, e.g. `log(100, 0)`, is
+       invalid at computed-value time: the browser keeps the 42px line height
+       that the paragraph inherits from the root, and the footnote that
+       resolves `1lh` against it is 42px as well. (The paragraph's own
+       declaration is materialized as `calc(0)` by this engine, as it is by the
+       pre-fix viewers; that is not what the `1lh` basis of the footnote uses.
+       Review) */
+    p.nan-lh { line-height: log(100, 0); }
+    .fn.nan-lh { font-size: 1lh; }
+    .ref.nan-lh { font-size: 42px; }
+    /* a math function that computes below zero is clamped to zero, as the
+       non-negative computed-value range of `line-height` requires: 0px + 10px */
+    p.zero-lh { line-height: min(-10px, -20px); }
+    .fn.zero-lh { font-size: calc(1lh + 10px); }
+    .ref.zero-lh { font-size: 10px; }
+    /* a line height in the numeric constants of CSS Values 4 §10.7.1:
+       `calc(pi * 10px)` is 31.4159px, and `calc(e * 10px)` is 27.1828px */
+    p.pi-lh { line-height: calc(pi * 10px); }
+    .fn.pi-lh { font-size: 1lh; }
+    .ref.pi-lh { font-size: 31.416px; }
+    p.e-lh { line-height: calc(e * 10px); }
+    .fn.e-lh { font-size: 1lh; }
+    .ref.e-lh { font-size: 27.183px; }
+    /* a line height in an internal viewport unit of this engine: 2pvw is 2%
+       of the 160mm width of the page box (12.094px at 96dpi), which this
+       engine resolves although a browser does not know the unit */
+    p.pvw-lh { line-height: 2pvw; }
+    .fn.pvw-lh { font-size: 1lh; }
+    .ref.pvw-lh { font-size: 12.095px; }
+    /* a math function of unitless numbers is a number: min(1, 2) = 1, which is
+       the 16px font size of the paragraph */
+    p.num-lh { line-height: min(1, 2); }
+    .fn.num-lh { font-size: 1lh; }
+    .ref.num-lh { font-size: 16px; }
+    ::footnote-marker { content: ""; }
+  </style>
+</head>
+<body>
+  <p>lh unit: <span class="ref">Wide</span><span class="fn">Wide</span></p>
+  <p class="calc">lh unit with a computed line height:
+    <span class="ref calc-lh">Wide</span><span class="fn calc-lh">Wide</span></p>
+  <div class="anc-outer"><p class="anc">lh unit on an ancestor:
+    <span class="ref anc-lh">Wide</span><span class="fn anc-lh">Wide</span></p></div>
+  <p class="lh-own">lh unit of an own line height:
+    <span class="ref own-lh">Wide</span><span class="fn own-lh">Wide</span></p>
+  <p class="own-round-lh">an own line height with a math function:
+    <span class="ref own-round-lh">Wide</span><span class="fn own-round-lh">Wide</span></p>
+  <p class="math-round">an ancestor line height with a math function:
+    <span class="ref math-round-lh">Wide</span><span class="fn math-round-lh">Wide</span></p>
+  <p class="rlh-root">a font size in the root line height (1rlh = 42px):
+    <span class="ref rlh">Wide</span><span class="fn rlh">Wide</span></p>
+  <p class="own-2lh">an own line height with the lh unit:
+    <span class="ref own-2lh">Wide</span><span class="fn own-2lh">Wide</span></p>
+  <p class="math-anc">an ancestor whose font size only the browser resolves:
+    <span class="ref math-anc-lh">Wide</span><span class="fn math-anc-lh">Wide</span></p>
+  <p class="lh-math">lh unit with a math function line height:
+    <span class="ref lh-math">Wide</span><span class="fn lh-math">Wide</span></p>
+  <p class="calc-pct">lh unit with a percentage computed line height:
+    <span class="ref pct-lh">Wide</span><span class="fn pct-lh">Wide</span></p>
+  <div class="pct-anc"><div class="pct-mid">a percentage line height declared above a
+    level with a larger font size:
+    <span class="ref pct-anc-lh">Wide</span><span class="fn pct-anc-lh">Wide</span></div></div>
+  <div class="calc-pct-anc"><div class="pct-mid">a computed percentage line height above
+    a level with a larger font size:
+    <span class="ref calc-pct-anc-lh">Wide</span><span class="fn calc-pct-anc-lh">Wide</span></div></div>
+  <div class="ch-anc"><div class="pct-mid">a line height in a unit whose metric only the
+    browser resolves, above a level with a larger font size:
+    <span class="ref ch-anc-lh">Wide</span><span class="fn ch-anc-lh">Wide</span></div></div>
+  <p class="nan-lh">lh unit with a line height that computes to NaN:
+    <span class="ref nan-lh">Wide</span><span class="fn nan-lh">Wide</span></p>
+  <p class="zero-lh">lh unit with a line height that computes below zero:
+    <span class="ref zero-lh">Wide</span><span class="fn zero-lh">Wide</span></p>
+  <p class="pi-lh">lh unit with a line height in the numeric constant pi
+    (`pi * 10px`):
+    <span class="ref pi-lh">Wide</span><span class="fn pi-lh">Wide</span></p>
+  <p class="e-lh">lh unit with a line height in the numeric constant e
+    (`e * 10px`):
+    <span class="ref e-lh">Wide</span><span class="fn e-lh">Wide</span></p>
+  <p class="pvw-lh">lh unit with a line height in the internal page viewport
+    unit (2pvw):
+    <span class="ref pvw-lh">Wide</span><span class="fn pvw-lh">Wide</span></p>
+  <p class="num-lh">lh unit with a line height that is a unitless function:
+    <span class="ref num-lh">Wide</span><span class="fn num-lh">Wide</span></p>
+  <p>The footnote at the page bottom must have the same letter-spacing as the
+    inline "Wide" above: 1lh is the 40px line height of the paragraph, not the
+    line height of the root. For the paragraph with the percentage computed
+    line height it is the 24px of `calc(150%)`, for the paragraph whose ancestor declares
+    `line-height: 1lh` it is the 30px of that ancestor, and for the paragraph
+    with `line-height: min(40px, 2em)` it is the 32px that the math function
+    computes. The paragraphs with `line-height: max(1lh, 5px)`,
+    `line-height: round(1lh, 7px)` and with `line-height: 2lh` on the footnote
+    itself (the grey "Wide" boxes) have a line height of 40px, 42px and 80px,
+    the line height of their source parent and the results of the functions
+    there, and the paragraph with `line-height: round(40px, 7px)` is 42px, so
+    the footnote with `font-size: 1lh` is 42px as well. The paragraph whose own font size is `math` (which only the
+    browser resolves) has an absolute line height of 40px, so the footnote with
+    `font-size: 1lh` is 40px as well. The paragraph whose line height computes
+    to NaN is invalid for this engine, so the 42px that it inherits from the
+    root are the basis of the `lh` unit of its footnote (42px; the browsers
+    censor the NaN result of the declaration itself to 0px), the paragraph with
+    `line-height: min(-10px, -20px)` has the 0px that
+    the non-negative range clamps the function to (so its footnote with
+    `calc(1lh + 10px)` is 10px), the paragraph with `line-height: min(1, 2)`
+    has the 16px of the number 1, and the paragraph with the internal viewport
+    unit `line-height: 2pvw` has the 12.094px of 2% of the page box, and the
+    constants `pi`/`e` of CSS Values 4 give the 31.4159px and 27.1828px of
+    `calc(pi * 10px)` and `calc(e * 10px)`. The
+    percentage line heights (150% and `calc(150%)`) declared above a level with
+    the larger font size of 32px are the 24px of the 16px font size of the
+    level that declares them, not the 48px of the level below, so their
+    footnotes with `font-size: 1lh` are 24px as well, and the `5ch` of such a
+    level is the assumed 40px (0.5em of the 16px, the metric assumption of CSS
+    Values 4), not the 80px of the level below.</p>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a line height with the `lh` unit that
+     comes from a region rule (here `:footnote-content`) needs the line height
+     that the element inherits to resolve the unit, but the inherited
+     declaration is not a declaration of the element: it must not win over the
+     declaration of the region rule, even when it is `!important`. The footnote
+     must therefore have the 80px of `line-height: 2lh` (2 x the inherited 40px),
+     not the 40px of the important ancestor declaration. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>line-height: 2lh with a region rule (Issue #2174 follow-up)</title>
+  <style>
+    @page { size: 140mm 90mm; margin: 10mm; }
+    @footnote { margin-block-start: 0.5em; }
+    body { line-height: 40px !important; font-size: 20px; }
+    aside[role="doc-footnote"]:footnote-content { line-height: 2lh; }
+    a[role="doc-noteref"]::footnote-call { content: "[" counter(footnote) "]"; }
+  </style>
+</head>
+<body>
+  <p>All this body text has a line height of 40px, declared with
+    <code>!important</code>. The footnote declares
+    <code>line-height: 2lh</code> in the region rule <code>:footnote-content</code>,
+    which is a declaration of the footnote itself and must win over the
+    inherited declaration: its line height is 2 x 40px = 80px, so its text
+    occupies two lines of the footnote area.</p>
+  <p>A footnote call<a href="#fn1" role="doc-noteref"></a> follows here.</p>
+  <aside id="fn1" role="doc-footnote">Region line height</aside>
+</body>
+</html>

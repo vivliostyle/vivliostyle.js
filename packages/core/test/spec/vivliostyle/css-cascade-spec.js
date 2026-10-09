@@ -2578,6 +2578,89 @@ describe("css-cascade", function () {
     });
   });
 
+  describe("applyCalcFilter validity of a math function", function () {
+    function newContext() {
+      return new adapt_exprs.Context(
+        new adapt_exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+    }
+
+    function parseValue(cssText) {
+      return adapt_cssparse.parseValue(
+        new adapt_exprs.LexicalScope(null),
+        new adapt_csstok.Tokenizer(cssText, null),
+        "",
+      );
+    }
+
+    function applyCalcFilter(style) {
+      var cascadeInstance = {
+        context: newContext(),
+        root: document.createElement("div"),
+        scope: new adapt_exprs.LexicalScope(null),
+      };
+      cascadeInstance.applyCalcFilter =
+        adapt_csscasc.CascadeInstance.prototype.applyCalcFilter;
+      cascadeInstance.applyCalcFilter(style, cascadeInstance.context);
+      return style;
+    }
+
+    it("does not make a math function that the browser rejects valid", function () {
+      // `calc(round(20px))` is invalid for a length, because the one-argument
+      // `round()` is a `<number>` (CSS Values 4 §10.3), and
+      // `calc(mod(20px, 7))` mixes a length and a number: the browser rejects
+      // such a declaration and keeps the initial value, so this engine must
+      // not turn it into the evaluated length. The evaluation is generic (it
+      // also serves the values that only this engine resolves), so the
+      // original function is checked against the property first. (Review)
+      var style = {
+        width: new adapt_csscasc.CascadeValue(
+          parseValue("calc(round(20px))"),
+          1,
+        ),
+        "margin-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(mod(20px, 7))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["width"].value.toString()).toBe("unset");
+      expect(style["margin-left"].value.toString()).toBe("unset");
+    });
+
+    it("evaluates a math function that the browser accepts", function () {
+      var style = {
+        width: new adapt_csscasc.CascadeValue(
+          parseValue("calc(round(20px, 7px))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["width"].value.toString()).toBe("21px");
+    });
+
+    it("keeps a function that only this engine resolves", function () {
+      // A value of a function that the browser does not know, e.g. the
+      // `leader()` of a `content` declaration, is not a math function: the
+      // check against the property must not reject it. The internal page
+      // viewport units are checked as the lengths they are. (Review)
+      var style = {
+        content: new adapt_csscasc.CascadeValue(
+          parseValue("leader(dotted)"),
+          1,
+        ),
+        width: new adapt_csscasc.CascadeValue(parseValue("min(2pvw, 50px)"), 1),
+      };
+      applyCalcFilter(style);
+      expect(style["content"].value.toString()).toBe("leader(dotted)");
+      expect(style["width"].value.toString()).toBe("min(2pvw,50px)");
+    });
+  });
+
   describe("VarFilterVisitor regression coverage", function () {
     function parseValue(cssText) {
       return adapt_cssparse.parseValue(
@@ -3129,6 +3212,2007 @@ describe("css-cascade", function () {
       );
 
       expect(resolved(style)).toBe(blue);
+    });
+
+    // A keyword that a var() substitution puts into a declaration is not
+    // canonicalized, so the rollback kind has to be dispatched
+    // case-insensitively: mixing the kinds up would drop the declarations of
+    // the wrong origins or rules. (Review)
+    it("rolls a mixed-case revert-layer back to the previous layer", function () {
+      var tree = new adapt_csscasc.CascadeLayerTree();
+      var first = tree.register(null, ["first"]);
+      var second = tree.register(null, ["second"]);
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, first);
+      declare(
+        style,
+        adapt_css.getName("REVERT-LAYER"),
+        adapt_cssparse.SPECIFICITY_AUTHOR,
+        second,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("keeps the declarations of other rules for a mixed-case revert-rule", function () {
+      var style = {};
+      declare(style, green, adapt_cssparse.SPECIFICITY_AUTHOR, null, 1);
+      declare(style, red, adapt_cssparse.SPECIFICITY_AUTHOR + 1, null, 2);
+      declare(
+        style,
+        adapt_css.getName("Revert-Rule"),
+        adapt_cssparse.SPECIFICITY_AUTHOR + 2,
+        null,
+        2,
+      );
+
+      expect(resolved(style)).toBe(green);
+    });
+
+    it("reports the kind of a rollback keyword of any casing", function () {
+      expect(adapt_css.getRollbackKind(adapt_css.ident.revert)).toBe("revert");
+      expect(adapt_css.getRollbackKind(adapt_css.ident.revert_layer)).toBe(
+        "revert-layer",
+      );
+      expect(adapt_css.getRollbackKind(adapt_css.getName("REVERT-UNIT"))).toBe(
+        null,
+      );
+      expect(adapt_css.getRollbackKind(adapt_css.getName("REVERT-RULE"))).toBe(
+        "revert-rule",
+      );
+      expect(adapt_css.getRollbackKind(new adapt_css.Num(1))).toBe(null);
+      expect(adapt_css.isRollbackValue(adapt_css.getName("Revert-Layer"))).toBe(
+        true,
+      );
+    });
+  });
+
+  describe("font keywords", function () {
+    function cascadeValue(value) {
+      return new adapt_csscasc.CascadeValue(value, 0);
+    }
+
+    function newContext() {
+      return new adapt_exprs.Context(
+        new adapt_exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+    }
+
+    function resolveFontValue(props, propName, value) {
+      var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+      visitor.setPropName(propName);
+      return value.visit(visitor);
+    }
+
+    describe("resolveRelativeFontSizeKeyword", function () {
+      it("multiplies the parent font size by 1.2 for larger", function () {
+        expect(
+          adapt_csscasc.resolveRelativeFontSizeKeyword(
+            adapt_css.ident.larger,
+            16,
+          ),
+        ).toBe(19.2);
+      });
+
+      it("divides the parent font size by 1.2 for smaller", function () {
+        expect(
+          adapt_csscasc.resolveRelativeFontSizeKeyword(
+            adapt_css.ident.smaller,
+            16,
+          ),
+        ).toBeCloseTo(13.3333, 3);
+      });
+    });
+
+    describe("CSS-wide keywords", function () {
+      it("recognizes them whatever the casing is", function () {
+        // A var() substitution preserves the casing of the custom property,
+        // e.g. the `INITIAL` of `float: var(--missing, INITIAL)`, which the
+        // browser treats as `initial`. (Review)
+        ["inherit", "INHERIT", "Initial", "unset", "UNSET"].forEach((name) => {
+          expect(adapt_css.isDefaultingValue(adapt_css.getName(name))).toBe(
+            true,
+          );
+        });
+        ["revert", "REVERT", "revert-layer"].forEach((name) => {
+          expect(adapt_css.isDefaultingValue(adapt_css.getName(name))).toBe(
+            true,
+          );
+        });
+        expect(adapt_css.isDefaultingValue(adapt_css.getName("auto"))).toBe(
+          false,
+        );
+        expect(adapt_css.isDefaultingValue(null)).toBe(false);
+      });
+
+      it("maps the keywords of a substitution to the canonical ones", function () {
+        // The rest of the cascade compares these keywords with the canonical
+        // identifiers by identity. (Review)
+        expect(
+          adapt_css.canonicalWideKeyword(adapt_css.getName("INHERIT")),
+        ).toBe(adapt_css.ident.inherit);
+        expect(
+          adapt_css.canonicalWideKeyword(adapt_css.getName("Initial")),
+        ).toBe(adapt_css.ident.initial);
+        expect(adapt_css.canonicalWideKeyword(adapt_css.getName("UNSET"))).toBe(
+          adapt_css.ident.unset,
+        );
+        // Anything else is kept, a rollback keyword included (its checks are
+        // insensitive to the casing already).
+        const revert = adapt_css.getName("REVERT");
+        expect(adapt_css.canonicalWideKeyword(revert)).toBe(revert);
+        const numeric = new adapt_css.Numeric(1, "px");
+        expect(adapt_css.canonicalWideKeyword(numeric)).toBe(numeric);
+      });
+    });
+
+    describe("resolveAbsoluteFontSizeKeyword", function () {
+      it("maps the absolute size keywords to the browsers' table", function () {
+        var expected = {
+          "xx-small": 9,
+          "x-small": 10,
+          small: 13,
+          medium: 16,
+          large: 18,
+          "x-large": 24,
+          "xx-large": 32,
+          "xxx-large": 48,
+        };
+        for (var keyword in expected) {
+          expect(
+            adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+              adapt_css.getName(keyword),
+              16,
+            ),
+          ).toBe(expected[keyword]);
+        }
+      });
+
+      it("resolves xxx-large, which CSS Fonts 4 added", function () {
+        // Modern browsers accept `xxx-large`, so the validator passes it
+        // through and it must not stay an identifier: it is three times the
+        // default font size. (Review)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xxx-large"),
+            16,
+          ),
+        ).toBe(48);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xxx-large"),
+            20,
+          ),
+        ).toBe(60);
+      });
+
+      it("uses the browsers' table for the usual default sizes", function () {
+        // The engines look the keyword up in a table when the default font
+        // size is 9..16px: with a 12px default, `small` is 10px and not the
+        // 13/16 x 12px = 9.75px of a linear scaling. (Review)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("small"),
+            12,
+          ),
+        ).toBe(10);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("x-large"),
+            12,
+          ),
+        ).toBe(18);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xx-large"),
+            12,
+          ),
+        ).toBe(24);
+      });
+
+      it("uses the browsers' factors outside the table range", function () {
+        // Outside 9..16px the engines apply the factors of CSS Fonts 4, with
+        // 8/9 rounded to 0.89: with a 20px default, `small` is 0.89 x 20px =
+        // 17.8px and `large` is 1.2 x 20px = 24px. (Review)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("small"),
+            20,
+          ),
+        ).toBeCloseTo(17.8, 3);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("large"),
+            20,
+          ),
+        ).toBeCloseTo(24, 3);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xx-small"),
+            20,
+          ),
+        ).toBeCloseTo(12, 3);
+      });
+
+      it("returns null for other values", function () {
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.ident.larger,
+            16,
+          ),
+        ).toBeNull();
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            new adapt_css.Numeric(1.5, "em"),
+            16,
+          ),
+        ).toBeNull();
+      });
+
+      it("matches the keywords case-insensitively", function () {
+        // A keyword substituted from a custom property (`var()`) is not
+        // canonicalized to lowercase by the validator. (Issue #2174 follow-up)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("LARGE"),
+            16,
+          ),
+        ).toBe(18);
+      });
+    });
+
+    describe("hasKeywordName", function () {
+      it("compares the keyword names case-insensitively", function () {
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.ident.larger, "larger"),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.getName("LARGER"), "larger"),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.hasKeywordName(adapt_css.ident.smaller, "larger"),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.hasKeywordName(
+            new adapt_css.Numeric(2, "em"),
+            "larger",
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("resolveRelativeFontWeight", function () {
+      var bolder = adapt_css.ident.bolder;
+      var lighter = adapt_css.ident.lighter;
+
+      it("maps bolder per the CSS Fonts 4 relative weights table", function () {
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 100)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 200)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 300)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 400)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 500)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 600)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 700)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 800)).toBe(900);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 900)).toBe(900);
+      });
+
+      it("maps lighter per the CSS Fonts 4 relative weights table", function () {
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 100)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 200)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 300)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 400)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 500)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 600)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 700)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 800)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 900)).toBe(700);
+      });
+
+      it("uses the cutoffs of the CSS Fonts 4 table for weights that are not multiples of 100", function () {
+        // Browsers (checked in Chromium and WebKit): bolder uses 400 below
+        // 350, 700 below 550 and 900 otherwise.
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 349)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 350)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 549)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 550)).toBe(900);
+        // A heavier inherited weight than 900 is kept as it is (the numeric
+        // range of font-weight goes up to 1000).
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 901)).toBe(901);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 950)).toBe(950);
+        expect(adapt_csscasc.resolveRelativeFontWeight(bolder, 1000)).toBe(
+          1000,
+        );
+        // lighter uses 100 below 550, 400 below 750 and 700 otherwise; a weight
+        // that is already lighter than 100 is kept.
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 549)).toBe(100);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 550)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 749)).toBe(400);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 750)).toBe(700);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 99)).toBe(99);
+        expect(adapt_csscasc.resolveRelativeFontWeight(lighter, 1)).toBe(1);
+      });
+    });
+
+    describe("usesLineHeightUnit", function () {
+      it("detects the lh unit of a value", function () {
+        var parse = (text) =>
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        expect(
+          adapt_csscasc.usesLineHeightUnit(parse("calc(1lh + 10px)")),
+        ).toBe(true);
+        expect(adapt_csscasc.usesLineHeightUnit(parse("calc(2 * 20px)"))).toBe(
+          false,
+        );
+        expect(adapt_csscasc.usesLineHeightUnit(new adapt_css.Num(1.5))).toBe(
+          false,
+        );
+      });
+    });
+
+    describe("resolveLineHeightValueToPx", function () {
+      it("resolves the lh unit against the inherited line height", function () {
+        // `line-height: calc(1lh + 10px)` with a 40px line height of the
+        // parent is 50px, not 26px (the preferred line height of 16px is
+        // 19.2px, which the lh unit must not fall back to).
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(1lh + 10px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(50);
+      });
+
+      it("resolves a function of unitless numbers against the font size", function () {
+        // `min(1, 2)` is the number 1, which is a valid line height: its
+        // computed value is the number multiplied by the font size of the
+        // element (16px here), not an unresolved length. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("min(1, 2)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(16);
+      });
+
+      it("resolves a number-returning function of a dimension", function () {
+        // `min(sign(20px), 2)` is the number 1: the dimension of the argument
+        // of `sign()` belongs to a number and does not make the function a
+        // length, so the computed line height is the number multiplied by the
+        // font size of the element (16px here), and an element that declares
+        // such a function (e.g. the root element) keeps the declaration
+        // instead of a fixed px value. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("min(sign(20px), 2)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(16);
+      });
+
+      it("clamps a negative result to the non-negative range", function () {
+        // `line-height: calc(1lh - 100px)` with a 40px inherited line height
+        // computes to -60, which the non-negative computed-value range of
+        // `line-height` clamps to 0. Materializing `-60px` would make the
+        // browser reject the declaration and inherit the 40px instead of
+        // applying zero. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(1lh - 100px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(0);
+      });
+    });
+
+    describe("isInvalidLineHeight", function () {
+      it("rejects the post-substitution forms the browser rejects", function () {
+        // `line-height` accepts `normal`, a non-negative number or a
+        // non-negative length or percentage, so an unknown keyword or a
+        // dimension that a var() substitution put into the declaration is
+        // rejected by the browser, which keeps the inherited line height. A
+        // math function is allowed until it is evaluated. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_css.getName("nonsense"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Num(-1),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(-5, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_css.getName("normal"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Num(1.5),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(2, "em"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Func("calc", [new adapt_css.Num(2)]),
+          ),
+        ).toBe(false);
+        // A math function that the browser rejects at computed-value time is
+        // invalid as well: the element keeps the inherited line height.
+        // (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(10px, 2)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(1lh - 100px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+      });
+
+      it("accepts the internal viewport units of this engine", function () {
+        // A browser does not know the `pv*` units of this engine, so
+        // `CSS.supports()` rejects a declaration that uses one, although this
+        // engine resolves it: `line-height: 2pvw` is a valid line height here,
+        // and a descendant that resolves an `lh` unit against it must not get
+        // the line height of an ancestor instead. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(2, "pvw"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(2pvw + 1px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        // A dimension that this engine does not resolve either is invalid.
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(true);
+        // The internal unit is checked as the length it is: a value that mixes
+        // types and an unknown function stay invalid, so that the walk keeps
+        // the inherited line height for them, as the browser does. (Review)
+        function parse(text) {
+          return adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        }
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("min(2pvw, 1)"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("foo(2pvw)")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("calc(2pvw + 1px)"),
+          ),
+        ).toBe(false);
+      });
+
+      it("rejects a function whose result is not a number", function () {
+        // `CSS.supports()` only knows the syntax, so a supported function that
+        // computes `NaN`, e.g. `log(100, 0)`, is not detected by it: such a
+        // declaration is invalid at computed-value time as well, and the
+        // browser keeps the inherited line height. A function whose value is a
+        // number, e.g. `min(1, 2)`, is valid. (Review)
+        function parse(text) {
+          return adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        }
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("log(100, 0)")),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("round(40px, 0)"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(newContext(), parse("min(1, 2)")),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("round(40px, 7px)"),
+          ),
+        ).toBe(false);
+        // A value that this engine cannot evaluate, e.g. one with a unit that
+        // only the browser resolves, is not known to be invalid. (Review)
+        expect(
+          adapt_csscasc.isInvalidLineHeight(
+            newContext(),
+            parse("min(1ch, 2px)"),
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("isSupportedFunctionValue", function () {
+      function resolve(text) {
+        return adapt_csscasc.resolveFontSizeValueToPx(
+          newContext(),
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          ),
+        );
+      }
+
+      it("rejects a function whose type the property does not accept", function () {
+        // The math functions of CSS Values 4 are evaluated as numbers of the
+        // expression language, which cannot see that `round()` rounds a length
+        // to a multiple of a number (invalid) or that `sign()` returns a number
+        // instead of a length, so the browser decides: the declaration is
+        // invalid and the element inherits. (Review)
+        expect(resolve("round(20px, 7)")).toBe(null);
+        expect(resolve("sign(20px)")).toBe(null);
+        // A call whose shape this engine cannot evaluate, e.g. the
+        // <rounding-strategy> of round() (an argument that is not a number),
+        // is left unresolved as well: the browser resolves it. (Review)
+        expect(resolve("round(up, 20px, 7px)")).toBe(null);
+        expect(resolve("round(up, 20px)")).toBe(null);
+        expect(resolve("round(20px, 7px)")).toBe(21);
+        expect(resolve("abs(-20px)")).toBe(20);
+        // A function that is valid inside an arithmetic expression: the number
+        // that sign() returns is multiplied by a length.
+        expect(resolve("calc(sign(20px) * 20px)")).toBe(20);
+      });
+    });
+
+    describe("browserFontRelativeUnitRatio", function () {
+      it("reports the ratio of the units that only the browser resolves", function () {
+        // The metrics of these units are not obtainable before the source
+        // document is laid out, so CSS Values 4 §6.1 is followed: `ch` and `ex`
+        // must be assumed to be 0.5em and `ic` 1em when their metric cannot be
+        // determined. `cap` has no numeric assumption there, so the typical cap
+        // height of the Latin fonts is used. (Review)
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ch")).toBe(0.5);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.5);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.7);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("ic")).toBe(1);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("em")).toBe(null);
+        expect(adapt_csscasc.browserFontRelativeUnitRatio("px")).toBe(null);
+      });
+    });
+
+    describe("getInheritedLineHeight", function () {
+      function inheritedLineHeight(fontSize, lineHeight) {
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(fontSize, 0),
+          "line-height": new adapt_csscasc.CascadeValue(lineHeight, 0),
+        };
+        return new adapt_csscasc.InheritanceVisitor(
+          props,
+          newContext(),
+        ).getInheritedLineHeight();
+      }
+
+      it("reduces the math functions of an inherited line height", function () {
+        // An ancestor line height that is a math function of CSS Values 4,
+        // e.g. `round(40px, 7px)` = 42px, must be resolved as well: a
+        // descendant that resolves the `lh` unit against it would otherwise
+        // use the line height of the synthetic parent. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(40px, 7px)", null),
+              "",
+            ),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(42);
+      });
+
+      it("resolves a line height in a unit that only the browser resolves", function () {
+        // The `ch`/`ex`/`cap`/`ic` units come from the metrics of the font,
+        // which this engine cannot obtain: the assumptions of CSS Values 4 are
+        // used against the font size of the element, as the root sizing does,
+        // so that a footnote that resolves `1lh` against such a line height
+        // does not fall back to the root line height. `5ch` of a 16px font is
+        // 5 x 0.5em x 16px = 40px, and `5rem`/`5rlh` are not affected. (Review)
+        function inherited(text) {
+          var props = {
+            "font-size": new adapt_csscasc.CascadeValue(
+              new adapt_css.Numeric(16, "px"),
+              0,
+            ),
+            "line-height": new adapt_csscasc.CascadeValue(
+              new adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              0,
+            ),
+          };
+          return new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight();
+        }
+        expect(inherited("5ch")).toBe(40);
+        expect(inherited("5ic")).toBe(80);
+        expect(inherited("2.5ex")).toBe(20);
+      });
+
+      it("resolves a line height in an internal viewport unit", function () {
+        // The `pvw` unit of this engine is 1% of the page box width, which the
+        // context of this spec gives as its 800px viewport: the footnote that
+        // resolves `1lh` against `line-height: 2pvw` uses the 16px of the unit
+        // rather than the preferred line height. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(2, "pvw"),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(16);
+        // ... also when the inherited font size is a value that only the
+        // browser resolves.
+        props["font-size"] = new adapt_csscasc.CascadeValue(
+          adapt_css.getName("math"),
+          0,
+        );
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(),
+        ).toBe(16);
+      });
+
+      it("clamps a negative computed line height to zero", function () {
+        // `line-height: min(-10px, -20px)` computes to -20px, which the
+        // non-negative computed-value range of `line-height` clamps to 0: a
+        // descendant that resolves `calc(1lh + 10px)` against it computes 10px,
+        // not 0px from the -20px of the calculation. (Review)
+        function inherited(text) {
+          var props = {
+            "font-size": new adapt_csscasc.CascadeValue(
+              new adapt_css.Numeric(16, "px"),
+              0,
+            ),
+            "line-height": new adapt_csscasc.CascadeValue(
+              adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              0,
+            ),
+          };
+          return new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight();
+        }
+        expect(inherited("min(-10px, -20px)")).toBe(0);
+        expect(inherited("min(1, 2)")).toBe(16);
+      });
+
+      it("resolves an absolute line height without the inherited font size", function () {
+        // The inherited font size may be a value that only the browser
+        // resolves, e.g. the `math` keyword of an ancestor; an absolute line
+        // height does not depend on it, so a descendant that resolves the `lh`
+        // unit still finds a length. A relative line height needs the font
+        // size, so it stays unknown. (Review)
+        expect(
+          inheritedLineHeight(
+            adapt_css.getName("math"),
+            new adapt_css.Numeric(40, "px"),
+          ),
+        ).toBe(40);
+        expect(
+          inheritedLineHeight(
+            adapt_css.getName("math"),
+            new adapt_css.Num(1.5),
+          ),
+        ).toBe(null);
+        // A relative line height is resolved against the given parent font
+        // size, which is the metric that the font-relative units refer to.
+        // (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+          "line-height": new adapt_csscasc.CascadeValue(
+            new adapt_css.Num(1.5),
+            0,
+          ),
+        };
+        expect(
+          new adapt_csscasc.InheritanceVisitor(
+            props,
+            newContext(),
+          ).getInheritedLineHeight(32),
+        ).toBe(48);
+      });
+
+      it("materializes a percentage line height where it is declared", function () {
+        // The computed value of a percentage line height is the length of the
+        // element that declares it, so the accumulated value must be that
+        // length: the `150%` declared at 16px is the 24px that a descendant
+        // inherits, not the percentage of the 32px of an intervening level,
+        // and a unit whose metric only the browser resolves is the assumed
+        // size of the declaring level (`5ch` = 5 x 0.5em x 16px = 40px).
+        // A function keeps only those values converted, so a function of
+        // unitless numbers stays the multiplier that it is, and the
+        // percentages of another property are unchanged. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(16, "px"),
+            0,
+          ),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        function accumulated(propName, text) {
+          visitor.setPropName(propName);
+          return adapt_cssparse
+            .parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            )
+            .visit(visitor)
+            .toString();
+        }
+        expect(accumulated("line-height", "150%")).toBe("24px");
+        expect(accumulated("line-height", "calc(150%)")).toBe("calc(24px)");
+        expect(accumulated("line-height", "min(200%, 40px)")).toBe(
+          "min(32px,40px)",
+        );
+        expect(accumulated("line-height", "5ch")).toBe("40px");
+        expect(accumulated("line-height", "2ic")).toBe("32px");
+        expect(accumulated("line-height", "calc(1.5)")).toBe("calc(1.5)");
+        expect(accumulated("line-height", "1.5")).toBe("1.5");
+        expect(accumulated("width", "150%")).toBe("150%");
+      });
+    });
+
+    describe("isNegativeLiteralLineHeight", function () {
+      it("detects the negative literals of a line height", function () {
+        // A negative literal is invalid and makes the element inherit the
+        // parent line height, while a math function that computes a negative
+        // value is valid and is clamped to zero. (Review)
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            new adapt_css.Numeric(-5, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(new adapt_css.Num(-2)),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            new adapt_css.Numeric(2, "em"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isNegativeLiteralLineHeight(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe("convertFontSizeToPx", function () {
+      it("resolves a unit that only the browser resolves against the parent", function () {
+        // `ch` has no unit size here, so it is resolved with the ratio of the
+        // default font and the font size of the parent — for detached content
+        // that is the source parent whose metrics the element would use before
+        // it is reparented, not the synthetic parent it is rendered in.
+        // Without a parent font size the value is preserved and resolved by
+        // the browser. (Review)
+        var fromParent = adapt_csscasc.convertFontSizeToPx(
+          new adapt_css.Numeric(5, "ch"),
+          32,
+          newContext(),
+        );
+        expect(fromParent.num).toBe(80);
+        expect(fromParent.unit).toBe("px");
+        var kept = adapt_csscasc.convertFontSizeToPx(
+          new adapt_css.Numeric(5, "ch"),
+          null,
+          newContext(),
+        );
+        expect(kept.num).toBe(5);
+        expect(kept.unit).toBe("ch");
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(2, "ch"),
+          ),
+        ).toBe(null);
+      });
+    });
+
+    describe("InheritanceVisitor of the math font size", function () {
+      it("resolves the math keyword against the inherited font size", function () {
+        // The math font size is 1em of the inherited font size for the depths
+        // that this engine represents, so a detached element uses the font
+        // size of its source parent instead of the one of the synthetic parent
+        // that the browser resolves the keyword in. (Review)
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(
+            new adapt_css.Numeric(32, "px"),
+            0,
+          ),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("font-size");
+        var resolved = visitor.visitIdent(adapt_css.getName("math"));
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+        // The keyword of another property, e.g. `font-family: math`, is an
+        // ordinary value.
+        visitor.setPropName("font-family");
+        expect(visitor.visitIdent(adapt_css.getName("math"))).toBe(
+          adapt_css.getName("math"),
+        );
+      });
+    });
+
+    describe("InheritanceVisitor with an unresolved font size", function () {
+      function visitorWithFontSize(value) {
+        var props = {
+          "font-size": new adapt_csscasc.CascadeValue(value, 0),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("text-indent");
+        return visitor;
+      }
+
+      it("leaves an em value to the browser when the size is unresolved", function () {
+        // The font size of the element is a unit that only the browser
+        // resolves, so a dependent `em` value must not be resolved against the
+        // inherited fallback: it is preserved and resolved by the browser
+        // against the computed size. (Review)
+        var em = new adapt_css.Numeric(1, "em");
+        var kept = visitorWithFontSize(
+          new adapt_css.Numeric(5, "ch"),
+        ).visitNumeric(em);
+        expect(kept).toBe(em);
+        var converted = visitorWithFontSize(
+          new adapt_css.Numeric(32, "px"),
+        ).visitNumeric(new adapt_css.Numeric(1, "em"));
+        expect(converted.num).toBe(32);
+        expect(converted.unit).toBe("px");
+      });
+    });
+
+    describe("resolveFontSizeValueToPx", function () {
+      it("resolves a unitless zero to 0", function () {
+        // `font-size: 0` is a Css.Num (not a Css.Numeric) and must be treated
+        // as the absolute length `0px`.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Int(0),
+          ),
+        ).toBe(0);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Num(0),
+          ),
+        ).toBe(0);
+      });
+
+      it("clamps a negative value to zero", function () {
+        // `font-size` has a non-negative computed-value range, so a math
+        // expression that computes a negative value is clamped to zero.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(-10, "px"),
+            16,
+          ),
+        ).toBe(0);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+            16,
+          ),
+        ).toBe(0);
+      });
+
+      it("rejects a dimension without a unit size", function () {
+        // `font-size: var(--size)` with `--size: 5s` is invalid at
+        // computed-value time, so the declaration is rejected and the element
+        // inherits the parent font size instead of resolving NaN. (Review)
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+            16,
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(NaN, "px"),
+            16,
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Numeric(Infinity, "px"),
+            16,
+          ),
+        ).toBe(null);
+      });
+
+      it("detects an invalid font weight number", function () {
+        // CSS Fonts 4 accepts a weight in the 1-1000 range; a number outside
+        // it, e.g. one that a var() substitution put into the declaration, is
+        // invalid, while a math function that computes such a value is clamped.
+        // (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(-10),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(newContext(), new adapt_css.Num(0)),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(1001),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(NaN),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(newContext(), new adapt_css.Num(1)),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(700.5),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Num(1000),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Int(700),
+          ),
+        ).toBe(false);
+      });
+
+      it("rejects every invalid post-substitution font weight form", function () {
+        // `font-weight` accepts a number in the 1-1000 range and the keywords,
+        // so an unknown keyword or a dimension that a var() substitution puts
+        // into the declaration is invalid as well, while a math function is
+        // allowed until it is evaluated. (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("nonsense"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Numeric(700, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Numeric(1, "em"),
+          ),
+        ).toBe(true);
+        for (const keyword of [
+          "normal",
+          "bold",
+          "bolder",
+          "lighter",
+          "initial",
+          "inherit",
+          "unset",
+        ]) {
+          expect(
+            adapt_csscasc.isInvalidFontWeight(
+              newContext(),
+              adapt_css.getName(keyword),
+            ),
+          ).toBe(false);
+        }
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            new adapt_css.Func("calc", [new adapt_css.Num(650)]),
+          ),
+        ).toBe(false);
+        // A supported function that this engine does not evaluate, e.g.
+        // `round(650, 100)`, is valid: the browser computes it, so the
+        // declaration must not be dropped. (Review)
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(650, 100)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(900px, 1em)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
+        // A supported function whose result is not a number, e.g.
+        // `log(100, 0)`, and the `NaN` constant are invalid as well: this
+        // engine keeps the inherited weight, which a relative keyword of a
+        // descendant must resolve against. (The browsers accept such a
+        // declaration and censor the `NaN` to zero, which the range of CSS
+        // Fonts 4 turns into the weight 1; the difference of that basis is
+        // recorded with the limitations of the pull request. Review)
+        function invalidFontWeight(text) {
+          return adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            ),
+          );
+        }
+        expect(invalidFontWeight("log(100, 0)")).toBe(true);
+        expect(invalidFontWeight("calc(NaN)")).toBe(true);
+      });
+
+      it("evaluates number valued math functions of a font weight", function () {
+        // The validator passes a browser-supported math function through, e.g.
+        // `min(900, 1000)`, which must be reduced before the range is
+        // validated: `getFontWeight()` and the cascade use this evaluation.
+        // (Review)
+        function evaluate(text) {
+          return adapt_csscasc.evaluateFontWeightMathFunction(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            ),
+          );
+        }
+        expect(evaluate("min(900, 1000)").num).toBe(900);
+        expect(evaluate("max(100, 800)").num).toBe(800);
+        expect(evaluate("clamp(100, 500, 900)").num).toBe(500);
+        expect(evaluate("calc(650 + 50)").num).toBe(700);
+        // not a number: an unsupported argument or a length
+        expect(evaluate("min(900px, 1em)")).toBe(null);
+        expect(evaluate("nonsense")).toBe(null);
+        // The math functions of CSS Values 4 are evaluated as well, so that a
+        // relative keyword of a detached descendant resolves against the
+        // computed weight of the parent: round(650, 100) is 700 and
+        // abs(-650) is 650. (Review)
+        expect(evaluate("round(650, 100)").num).toBe(700);
+        expect(evaluate("abs(-650)").num).toBe(650);
+        // A calculation that overflows to an infinity is clamped to the range
+        // of CSS Fonts 4 instead of being left unresolved: `exp(1000)` is
+        // 1000, which a detached descendant that uses `bolder` resolves
+        // against. (Review)
+        expect(evaluate("exp(1000)").num).toBe(1000);
+        // ... the same when the calculation is wrapped in a `calc()`, whose
+        // result the cascade clamps with the same range. (Review)
+        expect(evaluate("calc(exp(1000))").num).toBe(1000);
+        expect(evaluate("calc(log(100, 0))")).toBe(null);
+        // ... and a result below the range is clamped to its minimum.
+        expect(evaluate("min(0, 100)").num).toBe(1);
+      });
+
+      it("keeps the rollback keywords of any casing", function () {
+        // A var() fallback such as `var(--missing, REVERT)` is not
+        // canonicalized, so the keywords must be compared case insensitively:
+        // they are not invalid weights, and the cascade resolves them as a
+        // rollback. (Review)
+        // The Ident constructor rejects a name that already exists, so the
+        // names must be looked up through getName().
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("REVERT"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isInvalidFontWeight(
+            newContext(),
+            adapt_css.getName("REVERT-LAYER"),
+          ),
+        ).toBe(false);
+        expect(adapt_css.isRollbackValue(adapt_css.getName("REVERT"))).toBe(
+          true,
+        );
+      });
+
+      it("preserves a valid font size that cannot be resolved here", function () {
+        // The validator passes browser-supported values through, e.g. the
+        // `math` keyword or a unit that only the browser resolves, so a
+        // detached element must keep them instead of inheriting a numeric
+        // value; a value that a substitution made invalid is not preserved.
+        // (Review)
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_css.getName("math"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            new adapt_css.Numeric(2, "ch"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            new adapt_css.Numeric(5, "s"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_css.getName("nonsense"),
+          ),
+        ).toBe(false);
+        // A supported function whose computation is not a number, e.g.
+        // `round(20px, 0px)`, is invalid at computed-value time, so the element
+        // keeps the value that the source parent accumulated instead of the
+        // declaration. (Review)
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(20px, 0px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isValidUnresolvedFontSize(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("round(20px, 7px)", null),
+              "",
+            ),
+          ),
+        ).toBe(true);
+      });
+
+      it("detects a negative literal font size", function () {
+        // A negative literal length is invalid for `font-size`, unlike a math
+        // function that computes a negative value: the cascade turns it into
+        // `unset`, which the walk materializes as the inherited font size.
+        // (Review)
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            new adapt_css.Numeric(-10, "px"),
+          ),
+        ).toBe(true);
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            new adapt_css.Numeric(0, "px"),
+          ),
+        ).toBe(false);
+        expect(
+          adapt_csscasc.isNegativeLiteralFontSize(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(10px - 20px)", null),
+              "",
+            ),
+          ),
+        ).toBe(false);
+      });
+
+      it("resolves math functions whose name is not lowercase", function () {
+        // A function name is matched case-insensitively, e.g. `CALC(2em)`.
+        var parse = (text) =>
+          adapt_cssparse.parseValue(
+            new adapt_exprs.LexicalScope(null),
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          );
+        // The parser lowercases the name of a parsed value (`calc`), so the
+        // comparison of the visitor is covered with a hand-built function.
+        expect(parse("CALC(2em)").toString()).toBe("calc(2em)");
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("CALC", [new adapt_css.Numeric(2, "em")]),
+            16,
+          ),
+        ).toBe(32);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("CLAMP", [
+              new adapt_css.Numeric(10, "px"),
+              new adapt_css.Numeric(2, "em"),
+              new adapt_css.Numeric(30, "px"),
+            ]),
+            16,
+          ),
+        ).toBe(30);
+      });
+
+      it("does not resolve a nonzero unitless number", function () {
+        // Only a unitless zero is a valid `font-size`; a var() substitution
+        // can carry any other number, and a browser rejects such a declaration
+        // and inherits the parent font size instead.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Num(5),
+          ),
+        ).toBe(null);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Int(5),
+          ),
+        ).toBe(null);
+      });
+
+      it("resolves a clamp() of absolute lengths", function () {
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(10, "px"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(30, "px"),
+            ]),
+          ),
+        ).toBe(20);
+      });
+
+      it("resolves a clamp() that uses root font relative units", function () {
+        // When the root font size is not known yet (as in the root sizing
+        // itself), 1rem is the initial font size.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(1, "rem"),
+              new adapt_css.Numeric(24, "px"),
+              new adapt_css.Numeric(3, "rem"),
+            ]),
+          ),
+        ).toBe(24);
+      });
+
+      it("resolves a clamp() that uses parent relative units", function () {
+        // At the root element (and while resolving it) the parent font size is
+        // the initial font size.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(1, "em"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(2, "em"),
+            ]),
+            16,
+          ),
+        ).toBe(20);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(50, "%"),
+              new adapt_css.Numeric(20, "px"),
+              new adapt_css.Numeric(200, "%"),
+            ]),
+            16,
+          ),
+        ).toBe(20);
+      });
+
+      it("resolves a math function inside an arithmetic expression", function () {
+        // `calc(clamp(10px, 20px, 30px) + 5px)`: the clamp() is reduced to its
+        // px value before the expression around it is evaluated.
+        const value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer(
+            "calc(clamp(10px, 20px, 30px) + 5px)",
+            null,
+          ),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(newContext(), value),
+        ).toBe(25);
+      });
+
+      it("clamps a negative result to zero", function () {
+        // font-size has a non-negative computed-value range, e.g. an element
+        // with `font-size: calc(10px - 20px)` computes to 0px.
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("max", [
+              new adapt_css.Numeric(-30, "px"),
+              new adapt_css.Numeric(-10, "px"),
+            ]),
+          ),
+        ).toBe(0);
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("calc", [new adapt_css.Numeric(-1, "px")]),
+          ),
+        ).toBe(0);
+      });
+
+      it("returns null for a value that cannot be resolved", function () {
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(
+            newContext(),
+            new adapt_css.Func("var", [new adapt_css.AnyToken("--missing")]),
+          ),
+        ).toBeNull();
+      });
+    });
+
+    describe("InheritanceVisitor", function () {
+      it("resolves font-size: larger against the accumulated parent size", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.ident.larger,
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(19.2);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-size: smaller against the accumulated parent size", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.ident.smaller,
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBeCloseTo(13.3333, 3);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves nested relative font-size keywords level by level", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var visitor = new adapt_csscasc.InheritanceVisitor(props, newContext());
+        visitor.setPropName("font-size");
+        props["font-size"] = cascadeValue(
+          adapt_css.ident.smaller.visit(visitor),
+        );
+        var resolved = adapt_css.ident.smaller.visit(visitor);
+        expect(resolved.num).toBeCloseTo(11.1111, 3);
+      });
+
+      it("uses the inherited font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(19.2, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(38.4);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-size: x-large against the default font size", function () {
+        var resolved = resolveFontValue(
+          {},
+          "font-size",
+          adapt_css.getName("x-large"),
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(24);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses an absolute size keyword as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(adapt_css.getName("small")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(26);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves font-weight: bolder against the inherited weight", function () {
+        var props = {
+          "font-weight": cascadeValue(new adapt_css.Int(700)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+
+      it("resolves font-weight: lighter against the inherited weight", function () {
+        var props = {
+          "font-weight": cascadeValue(new adapt_css.Int(400)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.lighter,
+        );
+        expect(resolved.num).toBe(100);
+      });
+
+      it("treats font-weight: bold as 700 when resolving bolder", function () {
+        var props = {
+          "font-weight": cascadeValue(adapt_css.ident.bold),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+
+      it("uses the initial weight 400 when no ancestor declared font-weight", function () {
+        var resolved = resolveFontValue(
+          {},
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(700);
+      });
+
+      it("leaves other keywords unchanged", function () {
+        var props = {};
+        expect(
+          resolveFontValue(props, "font-size", adapt_css.ident.solid),
+        ).toBe(adapt_css.ident.solid);
+        expect(resolveFontValue(props, "color", adapt_css.ident.larger)).toBe(
+          adapt_css.ident.larger,
+        );
+      });
+
+      it("uses a non-canonical size keyword as the em base", function () {
+        // `font-size: var(--x)` with `--x: SMALL` reaches the visitor without
+        // being canonicalized to lowercase by the validator, and CSS keywords
+        // are ASCII case-insensitive. (Issue #2174 follow-up)
+        var props = { "font-size": cascadeValue(adapt_css.getName("SMALL")) };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(26);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves a relative keyword coming from a custom property", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          adapt_css.getName("LARGER"),
+        );
+        expect(resolved instanceof adapt_css.Numeric).toBe(true);
+        expect(resolved.num).toBe(19.2);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses font-size: 0 (a unitless number) as the em base", function () {
+        var props = { "font-size": cascadeValue(new adapt_css.Int(0)) };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(0);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a calc() font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("calc", [new adapt_css.Numeric(32, "px")]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a clamp() font-size as the em base", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(16, "px"),
+              new adapt_css.Numeric(32, "px"),
+              new adapt_css.Numeric(48, "px"),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("evaluates a sum argument of a clamp() font-size", function () {
+        // `clamp(1rem, 1.5em + 8px, 3rem)` after the walk converted the
+        // relative units of the arguments to px.
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("clamp", [
+              new adapt_css.Numeric(16, "px"),
+              new adapt_css.SpaceList([
+                new adapt_css.Numeric(24, "px"),
+                new adapt_css.AnyToken("+"),
+                new adapt_css.Numeric(8, "px"),
+              ]),
+              new adapt_css.Numeric(48, "px"),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(64);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("uses a nested math function as the em base", function () {
+        // `min(40px, max(1em, 20px))` after the walk converted the relative
+        // units of the arguments to px.
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("min", [
+              new adapt_css.Numeric(40, "px"),
+              new adapt_css.Func("max", [
+                new adapt_css.Numeric(16, "px"),
+                new adapt_css.Numeric(20, "px"),
+              ]),
+            ]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(40); // min(40px, max(16px, 20px)) = 20px
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("keeps the default font size for a font-size that cannot be resolved", function () {
+        var props = {
+          "font-size": cascadeValue(
+            new adapt_css.Func("var", [new adapt_css.AnyToken("--missing")]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("leaves an overflowing length calculation to the browser", function () {
+        // `calc(exp(1000) * 1px)` computes to an infinity, which no length can
+        // represent: materializing it would serialize the invalid
+        // `Infinitypx`, so the value is left to the browser, which clamps the
+        // calculation to its range. (Review)
+        var value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(exp(1000) * 1px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveFontSizeValueToPx(newContext(), value, 16),
+        ).toBe(null);
+        // The evaluated value is still the calc(), not a length of an
+        // infinity that serializes as `Infinitypx`. (Review)
+        var evaluated = adapt_csscasc.evaluateCSSToCSS(
+          newContext(),
+          value,
+          "font-size",
+        );
+        expect(evaluated.toString()).toContain("calc");
+      });
+
+      it("keeps a unitless calculation a number, not a length", function () {
+        // The math functions of CSS Values 4 that return a `<number>`, e.g.
+        // `sign()`, are evaluated as unitless numbers by this language, which
+        // converts every dimension to a number: `calc(sign(20px))` is the
+        // number 1, and materializing `1px` would make a property that needs a
+        // length, e.g. `width`, accept a value that the browser rejects. A
+        // function that keeps the type of its argument stays a length.
+        // (Review)
+        function evaluate(text, propName) {
+          return adapt_csscasc
+            .evaluateCSSToCSS(
+              newContext(),
+              adapt_cssparse.parseValue(
+                new adapt_exprs.LexicalScope(null),
+                new adapt_csstok.Tokenizer(text, null),
+                "",
+              ),
+              propName,
+            )
+            .toString();
+        }
+        expect(evaluate("calc(sign(20px))", "width")).toBe("1");
+        expect(evaluate("calc(abs(-20px))", "width")).toBe("20px");
+        expect(evaluate("calc(sign(20px) * 1px)", "width")).toBe("1px");
+        // `hypot()` computes to the common type of its arguments, a length
+        // here. (Review)
+        expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5px");
+        expect(evaluate("calc(hypot(3, 4))", "width")).toBe("5");
+        // A value that is not finite is serialized as the JavaScript name and
+        // evaluated again by the checks of a declaration, e.g.
+        // `evaluatesToNaN()`: the name is a constant, not an undefined name.
+        // (Review)
+        expect(evaluate("calc(Infinity)", "width")).toBe("Infinity");
+        expect(evaluate("calc(NaN)", "width")).toBe("calc(NaN)");
+        // A calculation with a keyword that this engine cannot evaluate as a
+        // number, e.g. the `<rounding-strategy>` of `round(up, 650, 100)`, is
+        // valid CSS that the browser computes: it is left as it is instead of
+        // being parsed (the parser would report the keyword as a syntax error)
+        // and must not be treated as a calculation that computes NaN. (Review)
+        expect(evaluate("calc(round(up, 650, 100))", "font-weight")).toBe(
+          "calc(round(up,650,100))",
+        );
+        // The dimension of an argument of a number-returning function is not a
+        // dimension of the calculation: `sign(20px)` is the number 1 even
+        // through a function that keeps the type of its arguments. (Review)
+        expect(evaluate("calc(min(sign(20px), 2))", "width")).toBe("1");
+        expect(evaluate("calc(abs(sign(20px)))", "width")).toBe("1");
+        // The arguments of such a function are opaque however deeply they are
+        // nested: `calc(2 * sign(abs(20px)))` is the unitless number 2, and
+        // materializing `2px` would make a property that needs a length accept
+        // it and, for `font-weight`, reject the declaration. (Review)
+        expect(evaluate("calc(2 * sign(abs(20px)))", "width")).toBe("2");
+        expect(evaluate("calc(2 * sign(abs(20px)))", "font-weight")).toBe("2");
+        expect(evaluate("calc(abs(sign(min(1px, 2px))))", "width")).toBe("1");
+        expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
+      });
+
+      it("uses the initial font size when the accumulated font-size was removed", function () {
+        // `font-size: initial` (e.g. `all: initial`) removes the accumulated
+        // value; the initial font size is medium. (Issue #1696)
+        var resolved = resolveFontValue(
+          {},
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves the lh unit of a font-size against the inherited line height", function () {
+        // For `font-size`, the `lh` unit refers to the computed line height of
+        // the parent, which is accumulated as `line-height` of the source
+        // parent. (Issue #2174 follow-up)
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(new adapt_css.Numeric(40, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(40);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves the lh unit of a font-size against a multiplier line height", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(20, "px")),
+          "line-height": cascadeValue(new adapt_css.Num(1.5)),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(30);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves the lh unit against a computed line height", function () {
+        // `line-height: calc(2 * 20px)` stays a function while the inherited
+        // values are accumulated.
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(2 * 20px)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(40);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves the lh unit against a percentage computed line height", function () {
+        // The percentage of a computed `line-height` refers to the font size of
+        // the element itself, so `calc(150%)` of 20px is 30px.
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(20, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("calc(150%)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(30);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("reduces the other math functions of CSS Values 4", function () {
+        // The `lh` unit is replaced by px before the value is evaluated, and
+        // the math functions of CSS Values 4 are evaluated as well: a value
+        // that stayed unresolved would let a detached descendant resolve the
+        // unit in the synthetic parent. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("round(1lh, 7px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(42);
+      });
+
+      it("reduces a math function that uses the lh unit", function () {
+        // `line-height: max(1lh, 5px)` on a detached element: the `lh` unit
+        // refers to the line height that the element inherits (10px), so the
+        // value is 10px and not the 5px of the placeholder unit size. (Review)
+        var func = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("max(1lh, 5px)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 10),
+        ).toBe(10);
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), func, 16, 40),
+        ).toBe(40);
+      });
+
+      it("resolves the lh unit against a math function line height", function () {
+        // A math function such as `min(40px, 2em)` is valid, so the inherited
+        // line height is its computed 32px (the em refers to the 16px font size
+        // of the parent), not the preferred line height. (Review)
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(16, "px")),
+          "line-height": cascadeValue(
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer("min(40px, 2em)", null),
+              "",
+            ),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-size",
+          new adapt_css.Numeric(1, "lh"),
+        );
+        expect(resolved.num).toBe(32);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("clamps a negative parent font size to zero", function () {
+        var props = {
+          "font-size": cascadeValue(new adapt_css.Numeric(-10, "px")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "letter-spacing",
+          new adapt_css.Numeric(2, "em"),
+        );
+        expect(resolved.num).toBe(0);
+        expect(resolved.unit).toBe("px");
+      });
+
+      it("resolves bolder against an accumulated weight that is a function", function () {
+        // `font-weight` accepts `calc(650)`, which stays a function while the
+        // inherited values are accumulated.
+        var props = {
+          "font-weight": cascadeValue(
+            new adapt_css.Func("calc", [new adapt_css.Num(650)]),
+          ),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
+
+      it("resolves bolder against a non-canonical bold weight", function () {
+        var props = {
+          "font-weight": cascadeValue(adapt_css.getName("BOLD")),
+        };
+        var resolved = resolveFontValue(
+          props,
+          "font-weight",
+          adapt_css.ident.bolder,
+        );
+        expect(resolved.num).toBe(900);
+      });
     });
   });
 });

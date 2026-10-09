@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2174 follow-up: a root font size of unitless zero (a
+     Css.Num, not a Css.Numeric) must be resolved to a numeric root font size of
+     0px, like `font-size: 0px`, so that rem values are 0. The zero must not be
+     rejected as a missing value and fall back to the initial font size. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Root font size zero (Issue #2174 follow-up)</title>
+  <style>
+    @page {
+      size: 120mm 80mm; margin: 10mm;
+      /* 1rem = 0, so the margin box text has a font size of 0 and is not
+         rendered at the initial font size. */
+      @top-center { content: "Margin box at 1rem"; font-size: 1rem; }
+    }
+    :root { font-size: 0; }
+    /* 1rem = 0: this box must collapse. It is 16px wide when the root font size
+       falls back to the initial font size. */
+    .rem-box { width: 1rem; height: 20px; background: #f99; }
+    /* An explicit font size does not depend on the root font size */
+    .px-text { font-size: 20px; }
+  </style>
+</head>
+<body>
+  <p class="px-text">Root font size 0</p>
+  <div class="rem-box"></div>
+</body>
+</html>
