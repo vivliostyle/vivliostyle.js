@@ -2578,6 +2578,89 @@ describe("css-cascade", function () {
     });
   });
 
+  describe("applyCalcFilter validity of a math function", function () {
+    function newContext() {
+      return new adapt_exprs.Context(
+        new adapt_exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+    }
+
+    function parseValue(cssText) {
+      return adapt_cssparse.parseValue(
+        new adapt_exprs.LexicalScope(null),
+        new adapt_csstok.Tokenizer(cssText, null),
+        "",
+      );
+    }
+
+    function applyCalcFilter(style) {
+      var cascadeInstance = {
+        context: newContext(),
+        root: document.createElement("div"),
+        scope: new adapt_exprs.LexicalScope(null),
+      };
+      cascadeInstance.applyCalcFilter =
+        adapt_csscasc.CascadeInstance.prototype.applyCalcFilter;
+      cascadeInstance.applyCalcFilter(style, cascadeInstance.context);
+      return style;
+    }
+
+    it("does not make a math function that the browser rejects valid", function () {
+      // `calc(round(20px))` is invalid for a length, because the one-argument
+      // `round()` is a `<number>` (CSS Values 4 §10.3), and
+      // `calc(mod(20px, 7))` mixes a length and a number: the browser rejects
+      // such a declaration and keeps the initial value, so this engine must
+      // not turn it into the evaluated length. The evaluation is generic (it
+      // also serves the values that only this engine resolves), so the
+      // original function is checked against the property first. (Review)
+      var style = {
+        width: new adapt_csscasc.CascadeValue(
+          parseValue("calc(round(20px))"),
+          1,
+        ),
+        "margin-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(mod(20px, 7))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["width"].value.toString()).toBe("unset");
+      expect(style["margin-left"].value.toString()).toBe("unset");
+    });
+
+    it("evaluates a math function that the browser accepts", function () {
+      var style = {
+        width: new adapt_csscasc.CascadeValue(
+          parseValue("calc(round(20px, 7px))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["width"].value.toString()).toBe("21px");
+    });
+
+    it("keeps a function that only this engine resolves", function () {
+      // A value of a function that the browser does not know, e.g. the
+      // `leader()` of a `content` declaration, is not a math function: the
+      // check against the property must not reject it. The internal page
+      // viewport units are checked as the lengths they are. (Review)
+      var style = {
+        content: new adapt_csscasc.CascadeValue(
+          parseValue("leader(dotted)"),
+          1,
+        ),
+        width: new adapt_csscasc.CascadeValue(parseValue("min(2pvw, 50px)"), 1),
+      };
+      applyCalcFilter(style);
+      expect(style["content"].value.toString()).toBe("leader(dotted)");
+      expect(style["width"].value.toString()).toBe("min(2pvw,50px)");
+    });
+  });
+
   describe("VarFilterVisitor regression coverage", function () {
     function parseValue(cssText) {
       return adapt_cssparse.parseValue(

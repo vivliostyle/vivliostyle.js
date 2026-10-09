@@ -1424,6 +1424,40 @@ function isFunctionRejectedByBrowser(
 }
 
 /**
+ * Whether every function of the value is one of the math functions of CSS
+ * Values 4 that this engine evaluates: `calc()`, `min()`, `max()`, `clamp()`
+ * and the functions of `OTHER_MATH_FUNCTION_NAMES`. Only such a value is
+ * checked against the target property before it is evaluated, because the
+ * browser may reject a function that this engine resolves itself, e.g. the
+ * `leader()` of a `content` declaration or the `pv*` units that
+ * `checkableText()` covers. (Review)
+ */
+class MathFunctionVisitor extends Css.Visitor {
+  isMath = true;
+
+  override visitFunc(func: Css.Func): Css.Val | null {
+    if (
+      func.name.toLowerCase() !== "calc" &&
+      func.name.toLowerCase() !== "min" &&
+      func.name.toLowerCase() !== "max" &&
+      func.name.toLowerCase() !== "clamp" &&
+      !OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())
+    ) {
+      this.isMath = false;
+    } else if (this.isMath) {
+      this.visitValues(func.values);
+    }
+    return null;
+  }
+}
+
+function isMathFunctionValue(value: Css.Val): boolean {
+  const visitor = new MathFunctionVisitor();
+  value.visit(visitor);
+  return visitor.isMath;
+}
+
+/**
  * The value in the form that `CSS.supports()` can check: the internal page
  * viewport units of this engine are replaced by a length, as
  * `Css.withoutPageViewportUnits()` does, because a browser does not know those
@@ -6558,14 +6592,18 @@ export class CascadeInstance {
         // before the math functions are evaluated: a math function that
         // computes a negative value is valid and is clamped to zero below.
         // (Review)
-        // A function that the browser rejects, e.g. the `calc(round(20px,
-        // 7))` that a var() substitution put into a `font-size` or
-        // `line-height` declaration, makes the declaration invalid at
-        // computed-value time: the browser keeps the inherited value, so the
-        // declaration is turned into `unset` here rather than being made valid
-        // by the math functions that this engine evaluates below. (Review)
+        // A math function that the browser rejects for the property, e.g. the
+        // `calc(round(20px))` whose one-argument `round()` is a number and not
+        // a length, or the `calc(round(20px, 7))` that a var() substitution
+        // put into a `font-size` declaration, is invalid at computed-value
+        // time: the browser keeps the inherited value (or the initial one), so
+        // the declaration is turned into `unset` here rather than being made
+        // valid by the math functions that this engine evaluates below. Only a
+        // value of the math functions of CSS Values 4 is checked: a function
+        // that this engine resolves while the browser does not know it must
+        // not be rejected. (Review)
         const rejectedFunction =
-          (name === "font-size" || name === "line-height") &&
+          isMathFunctionValue(cascVal.value) &&
           isFunctionRejectedByBrowser(name, cascVal.value);
         let value =
           (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
