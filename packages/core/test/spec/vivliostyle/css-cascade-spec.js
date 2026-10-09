@@ -4893,6 +4893,13 @@ describe("css-cascade", function () {
         // through a function that keeps the type of its arguments. (Review)
         expect(evaluate("calc(min(sign(20px), 2))", "width")).toBe("1");
         expect(evaluate("calc(abs(sign(20px)))", "width")).toBe("1");
+        // The arguments of such a function are opaque however deeply they are
+        // nested: `calc(2 * sign(abs(20px)))` is the unitless number 2, and
+        // materializing `2px` would make a property that needs a length accept
+        // it and, for `font-weight`, reject the declaration. (Review)
+        expect(evaluate("calc(2 * sign(abs(20px)))", "width")).toBe("2");
+        expect(evaluate("calc(2 * sign(abs(20px)))", "font-weight")).toBe("2");
+        expect(evaluate("calc(abs(sign(min(1px, 2px))))", "width")).toBe("1");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
       });
 

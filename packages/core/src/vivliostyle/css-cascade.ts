@@ -1956,20 +1956,29 @@ function isNumberCalculation(expr: Exprs.Val): boolean {
 
 const NUMBER_MATH_FUNCTION_NAMES = ["exp", "log", "pow", "sign", "sqrt"];
 
-const NUMBER_MATH_FUNCTION_ARGUMENTS_RE = new RegExp(
-  `\\b(?:${NUMBER_MATH_FUNCTION_NAMES.join("|")})\\s*\\([^()]*\\)`,
-  "gi",
-);
+/**
+ * Replace the arguments of the math functions that return a `<number>`
+ * whatever their arguments are with nothing, e.g. the `20px` of `sign(20px)`:
+ * such a dimension belongs to a number and must not make the calculation look
+ * like a length. The value is visited structurally, so the arguments of a
+ * nested call, e.g. the `abs(20px)` of `2 * sign(abs(20px))`, are opaque as
+ * well. (Review)
+ */
+class NumberFunctionArgumentRemover extends Css.FilterVisitor {
+  override visitFunc(func: Css.Func): Css.Val {
+    const visited = super.visitFunc(func) as Css.Func;
+    return NUMBER_MATH_FUNCTION_NAMES.includes(visited.name.toLowerCase())
+      ? new Css.Func(visited.name, [])
+      : visited;
+  }
+}
 
 /**
- * The text of a calculation without the arguments of the math functions that
- * return a `<number>` whatever their arguments are, e.g. the `20px` of
- * `sign(20px)`: such a dimension belongs to a number and must not make the
- * calculation look like a length. One level at a time, so the arguments of a
- * nested function are removed as well. (Review)
+ * The text of a calculation in which the arguments of those functions are
+ * removed, which is the text that its type is inferred from. (Review)
  */
-function withoutNumberMathFunctionArguments(text: string): string {
-  return text.replace(NUMBER_MATH_FUNCTION_ARGUMENTS_RE, "()");
+function withoutNumberMathFunctionArguments(value: Css.Val): string {
+  return value.visit(new NumberFunctionArgumentRemover()).toString();
 }
 
 /**
@@ -8710,7 +8719,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
           // `sign(20px)`, are numbers and not lengths, so only the dimensions
           // outside such a function say whether the calculation is a length.
           // (Review)
-          const typeText = withoutNumberMathFunctionArguments(exprText);
+          const typeText = withoutNumberMathFunctionArguments(value);
           const isLength = !numberCalculation && this.isLengthExpr(typeText);
           if (isLength && Number.isFinite(exprResult)) {
             // length value
