@@ -20,10 +20,15 @@
      `calc(exp(1000))`, and it is kept when another argument of `hypot()` is a
      `NaN`, e.g. `hypot(exp(1000), log(-1))`, whose infinite argument takes
      precedence. A function
-     whose result is not a number, e.g. `log(100, 0)`, is invalid at
-     computed-value time: the paragraph keeps the 700 that it inherits from its
-     parent, so the `bolder` of its footnote is 900 (the pre-fix viewer resolves
-     the keyword against the fallback 400 and renders 700).
+     whose result is not a number, e.g. `log(100, 0)`, is treated as invalid by
+     this engine: the paragraph keeps the 700 that it inherits from its parent,
+     so the `bolder` of its footnote is 900 (the pre-fix viewer resolves the
+     keyword against the fallback 400 and renders 700). The browsers instead
+     accept such a declaration and censor the `NaN` to 0, which the range of
+     CSS Fonts 4 turns into the weight 1 — a relative keyword resolves to 400
+     from 1 there — so this expectation documents the model of this engine, not
+     the CSS result of the browsers; the difference is recorded with the
+     limitations of the pull request (item 10).
      The pre-fix viewers leave the functions unresolved in the reconstructed
      inheritance basis of a detached descendant, so its `bolder` resolves
      against the fallback 400 and the footnote is 700; the paragraph itself
@@ -57,9 +62,11 @@
     .dep-inf .fn-bolder { float: footnote; font-weight: bolder; } /* 1000 */
     .ref-inf { font-weight: exp(1000); } /* 1000 */
     .ref-bolder-under-inf { font-weight: bolder; } /* 1000 */
-    /* a weight that computes to NaN, e.g. `log(100, 0)`, is invalid at
-       computed-value time: the paragraph keeps the 700 that it inherits from
-       its parent, and a footnote that resolves `bolder` against it is 900 */
+    /* a weight that computes to NaN, e.g. `log(100, 0)`, is treated as invalid
+       by this engine: the paragraph keeps the 700 that it inherits from its
+       parent, and a footnote that resolves `bolder` against it is 900 (the
+       browsers censor the NaN to 0, i.e. weight 1, which `bolder` resolves to
+       400 from; see the limitations) */
     .nan-parent { font-weight: 700; }
     .nan-parent .dep-nan { font-weight: log(100, 0); }
     .nan-parent .dep-nan .fn-bolder { float: footnote; font-weight: bolder; } /* 900 */
@@ -110,10 +117,12 @@
     `abs(exp(1000))`, whose infinity survives the nested `abs()`:
     <span class="fn-bolder">B</span></p>
   <div class="nan-parent"><p class="dep-nan">The footnote "B" below must be as
-    bold as this inline <span class="ref-bolder">B</span>, i.e. the 700 that
-    this paragraph inherits from its parent, because its own
-    `font-weight: log(100, 0)` computes to NaN and the browser keeps the
-    inherited weight:
+    bold as this inline <span class="ref-bolder">B</span>, i.e. the 900 that
+    the 700 gives, which this paragraph inherits from its parent: this engine
+    treats its own `font-weight: log(100, 0)` as an invalid declaration and
+    keeps the inherited weight (the browsers censor the `NaN` to the weight 1
+    instead, so a relative keyword resolves to 400 there; the difference is
+    recorded with the limitations):
     <span class="fn-bolder">B</span></p></div>
   <p class="dep-hypot">The footnote "B" below must be as bold as this inline
     <span class="ref-hypot">B</span>, i.e. the 1000 that

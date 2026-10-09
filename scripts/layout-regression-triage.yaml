@@ -274,11 +274,15 @@
     the `NaN` one: the paragraph is 1000 in both viewers (canary serializes the
     infinity, which the browser clamps), while the `bolder` of its footnote is
     700 in canary and 1000 in the PR branch. A weight whose
-    computation is not a number, e.g. `log(100, 0)`, is invalid at
-    computed-value time as well: the paragraph keeps the 700 that it inherits
-    from its parent and canary resolves the `bolder` of its footnote against
-    the fallback 400 (700), while the PR branch renders the footnote 900 like
-    its inline reference.
+    computation is not a number, e.g. `log(100, 0)`, is treated as an invalid
+    declaration by the PR branch as well: the paragraph keeps the 700 that it
+    inherits from its parent and canary resolves the `bolder` of its footnote
+    against the fallback 400 (700), while the PR branch renders the footnote
+    900 like its inline reference. The browsers accept such a declaration and
+    censor the `NaN` to 0, which the range of CSS Fonts 4 turns into the weight
+    1 (a `bolder` resolves to 400 from 1): the 900 of this fixture documents
+    the model of the PR branch, and the difference is recorded with the
+    limitations of the pull request (item 10).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
