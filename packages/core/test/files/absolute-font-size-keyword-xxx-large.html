@@ -4,8 +4,12 @@
      times the default font size, i.e. 48px for the default 16px, so it must be
      resolved to a numeric computed value like the other absolute keywords: the
      root `rem` unit and the `em` units of detached content (footnote) depend on
-     it. The resolver's table omits the keyword, so the root font size stays
-     16px and a detached descendant falls back to 16px as well. -->
+     it. The pre-fix resolver's table omitted the keyword, so the root font
+     size stayed 16px and a detached descendant fell back to 16px as well
+     (measured in the dev viewer; stable and canary render that pre-fix
+     result). The PR branch resolves the keyword to the 48px of the browser
+     table, the new last entry of the default-size row that
+     `absolute-font-size-keywords.html` documents. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">

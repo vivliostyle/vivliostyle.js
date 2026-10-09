@@ -8,10 +8,12 @@
      32px = 80px that the inline `80px` reference "ch" of the same paragraph
      shows (the grey "ch"), not the 16px of the footnote area, and a value that
      depends on the unit must use that size as its basis. The inline `5ch`
-     reference (the plain "ch") shows the real metric of the font (≈105px),
-     which differs from the assumption; the pre-fix viewer, which converts the
-     unit eagerly, rejects the invalid `NaNpx` it materializes and falls back
-     to the 16px of the footnote area. -->
+     reference (the plain "ch") shows the real metric of the font, which is
+     close to the assumption for the default serif of Chromium (measured
+     ≈80px, i.e. the same 5 x 0.5em x 32px) but is a property of the font and
+     the platform, so it must not be asserted; the pre-fix viewer, which
+     converts the unit eagerly, rejects the invalid `NaNpx` it materializes and
+     falls back to the 16px of the footnote area. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -31,8 +33,9 @@
     "ch" of the same paragraph, i.e. with the assumed 0.5em of this 32px
     paragraph (5 x 0.5 x 32px = 80px), not with the 16px of the footnote area:
     <span class="ref-assumed">ch</span>, while the plain "ch" is the same value
-    resolved by the browser with the real metric of the font (≈105px), which
-    this engine cannot know before the document is laid out:
+    resolved by the browser with the real metric of the font (≈80px for the
+    default serif of Chromium; the metric depends on the font and the platform,
+    and this engine cannot know it before the document is laid out):
     <span class="ref-ch">ch</span></p>
   <p class="dep">The footnote of this paragraph is the one at the page bottom:
     <span class="fn-ch">ch</span></p>
