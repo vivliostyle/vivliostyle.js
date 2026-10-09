@@ -124,6 +124,15 @@ describe("exprs", function () {
       expect(call("round", 3.5, Infinity)).toBe(0);
       expect(call("round", Infinity, 7)).toBe(Infinity);
       expectResult(call("round", Infinity, Infinity), NaN);
+      // An infinite step returns `0⁻` for a negative value and for `0⁻`
+      // itself (CSS Values 4 §10.3.1), which a comparison with zero would take
+      // for positive: `1 / round(-0, infinity)` must be -Infinity, and a
+      // nested `round(-0, infinity)` of such a division stays `0⁻`. (Review)
+      expect(Object.is(call("round", -0, Infinity), -0)).toBe(true);
+      expect(Object.is(call("round", -0, -Infinity), -0)).toBe(true);
+      expect(Object.is(1 / call("round", -0, Infinity), -Infinity)).toBe(true);
+      expect(Object.is(call("round", -3.5, Infinity), -0)).toBe(true);
+      expect(Object.is(call("round", 3.5, Infinity), 0)).toBe(true);
       expect(call("rem", 7, Infinity)).toBe(7);
       expect(call("mod", 7, Infinity)).toBe(7);
       expectResult(call("mod", -7, Infinity), NaN);

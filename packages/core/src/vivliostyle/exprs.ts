@@ -400,8 +400,14 @@ export function round(...args: unknown[]): number {
   }
   if (!Number.isFinite(step)) {
     // An infinite step: a finite value rounds to zero (the `nearest`
-    // strategy of CSS Values 4 §10.3.1), while an infinite value is NaN.
-    return Number.isFinite(value) ? (value >= 0 ? 0 : -0) : NaN;
+    // strategy of CSS Values 4 §10.3.1), while an infinite value is NaN. The
+    // rule returns `0⁻` for a negative value *and* for `0⁻` itself, which a
+    // comparison with zero would take for positive: a nested calculation can
+    // observe the sign, e.g. `1 / round(-0, infinity)` is -Infinity. (Review)
+    if (!Number.isFinite(value)) {
+      return NaN;
+    }
+    return value < 0 || Object.is(value, -0) ? -0 : 0;
   }
   const interval = Math.abs(step);
   return result(Math.round(value / interval) * interval);
