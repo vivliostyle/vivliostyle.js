@@ -3265,13 +3265,52 @@ describe("css-cascade", function () {
         ).toBe(60);
       });
 
-      it("scales with the default font size", function () {
+      it("uses the browsers' table for the usual default sizes", function () {
+        // The engines look the keyword up in a table when the default font
+        // size is 9..16px: with a 12px default, `small` is 10px and not the
+        // 13/16 x 12px = 9.75px of a linear scaling. (Review)
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("small"),
+            12,
+          ),
+        ).toBe(10);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("x-large"),
+            12,
+          ),
+        ).toBe(18);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xx-large"),
+            12,
+          ),
+        ).toBe(24);
+      });
+
+      it("uses the browsers' factors outside the table range", function () {
+        // Outside 9..16px the engines apply the factors of CSS Fonts 4, with
+        // 8/9 rounded to 0.89: with a 20px default, `small` is 0.89 x 20px =
+        // 17.8px and `large` is 1.2 x 20px = 24px. (Review)
         expect(
           adapt_csscasc.resolveAbsoluteFontSizeKeyword(
             adapt_css.getName("small"),
             20,
           ),
-        ).toBeCloseTo(16.25, 3);
+        ).toBeCloseTo(17.8, 3);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("large"),
+            20,
+          ),
+        ).toBeCloseTo(24, 3);
+        expect(
+          adapt_csscasc.resolveAbsoluteFontSizeKeyword(
+            adapt_css.getName("xx-small"),
+            20,
+          ),
+        ).toBeCloseTo(12, 3);
       });
 
       it("returns null for other values", function () {

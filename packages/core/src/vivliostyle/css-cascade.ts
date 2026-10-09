@@ -1152,22 +1152,46 @@ export function resolveRelativeFontWeight(
 }
 
 /**
- * Absolute font-size keyword sizes as ratios of the default font size, using
- * the same table as browsers: xxx-small is not a keyword of CSS Fonts 4, and
- * xx-small..xxx-large = 9/10/13/16/18/24/32/48 px for the default 16px font
- * size. Browsers scale this table with the default font size, which Vivliostyle
- * models as `context.initialFontSize`. (Issue #2174 follow-up, Review)
+ * The absolute font-size keywords in the order of the tables below: the rows
+ * of the table are the default font size in px (9 to 16, the range that the
+ * engines have a table for) and the columns are xx-small..xxx-large. The
+ * engines share this table (Blink `font_size_functions.cc`, Gecko
+ * `to_length_without_context` and its `nsRuleNode::CalcFontPointSize`, WebKit
+ * `StyleFontSizeFunctions.cpp`), e.g. the 16px row is 9/10/13/16/18/24/32/48 px;
+ * `xxx-small` is not a keyword of CSS Fonts 4. The quirks mode table of the
+ * engines and the table of the fixed default size, which a monospace element
+ * uses, are not modelled. CSS Fonts 4 gives the factors of
+ * `fontSizeKeywordFactors` as a guideline for the table, and the engines use
+ * exactly those factors, with 8/9 rounded to 0.89, when the default font size
+ * is outside the table; `medium` is then the default font size. Vivliostyle
+ * models the default font size as `context.initialFontSize`. (Issue #2174
+ * follow-up, Review)
  */
-const fontSizeKeywordRatios: { [keyword: string]: number } = {
-  "xx-small": 9 / 16,
-  "x-small": 10 / 16,
-  small: 13 / 16,
-  medium: 1,
-  large: 18 / 16,
-  "x-large": 24 / 16,
-  "xx-large": 32 / 16,
-  "xxx-large": 48 / 16,
-};
+const fontSizeKeywordNames = [
+  "xx-small",
+  "x-small",
+  "small",
+  "medium",
+  "large",
+  "x-large",
+  "xx-large",
+  "xxx-large",
+];
+
+const fontSizeKeywordTable = [
+  [9, 9, 9, 9, 11, 14, 18, 27],
+  [9, 9, 9, 10, 12, 15, 20, 30],
+  [9, 9, 10, 11, 13, 17, 22, 33],
+  [9, 9, 10, 12, 14, 18, 24, 36],
+  [9, 10, 12, 13, 16, 20, 26, 39],
+  [9, 10, 12, 14, 17, 21, 28, 42],
+  [9, 10, 13, 15, 18, 23, 30, 45],
+  [9, 10, 13, 16, 18, 24, 32, 48],
+];
+
+// The scaling factors of CSS Fonts 4, in the order of the keywords, as the
+// engines apply them: 3/5, 3/4, 8/9 (rounded to 0.89), 1, 6/5, 3/2, 2/1, 3/1.
+const fontSizeKeywordFactors = [0.6, 0.75, 0.89, 1, 1.2, 1.5, 2, 3];
 
 /**
  * Resolve an absolute font-size keyword (e.g. "small") to px against the
@@ -1178,10 +1202,16 @@ export function resolveAbsoluteFontSizeKeyword(
   defaultFontSize: number,
 ): number | null {
   if (value instanceof Css.Ident) {
-    const ratio = fontSizeKeywordRatios[value.name.toLowerCase()];
-    if (ratio != null) {
-      return defaultFontSize * ratio;
+    const index = fontSizeKeywordNames.indexOf(value.name.toLowerCase());
+    if (index < 0) {
+      return null;
     }
+    // The engines look the table up with a rounded default font size and apply
+    // the factors to the exact one. (Review)
+    const rounded = Math.round(defaultFontSize);
+    return rounded >= 9 && rounded <= 16
+      ? fontSizeKeywordTable[rounded - 9][index]
+      : defaultFontSize * fontSizeKeywordFactors[index];
   }
   return null;
 }
