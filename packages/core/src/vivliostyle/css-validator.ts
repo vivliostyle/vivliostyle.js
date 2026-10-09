@@ -2781,8 +2781,13 @@ export class ValidatorSet {
           : value.visit(validator);
       if (rvalue) {
         receiver.simpleProperty(name, rvalue, important);
-      } else if (!prefix && CSS.supports(name, value.toString())) {
-        // Browser supports this property value
+      } else if (
+        !prefix &&
+        CSS.supports(name, Css.withoutPageViewportUnits(value.toString()))
+      ) {
+        // Browser supports this property value, possibly with an internal page
+        // viewport unit of this engine, which this engine resolves itself.
+        // (Review)
         receiver.simpleProperty(name, value, important);
       } else {
         receiver.invalidPropertyValue(origName, value);

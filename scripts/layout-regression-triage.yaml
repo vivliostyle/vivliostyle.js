@@ -1040,3 +1040,28 @@
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-root-unitless-function.html&zoom=1&spread=false
   diffPages:
     - 1
+- id: "0105"
+  category: "General"
+  title: "page viewport-percentage units with calc()"
+  file: page_viewport_unit.html
+  type: difference
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
+    `width: min(20pvw - 15px, 2000px)` of the last block is rejected by the
+    validator of this engine, because the browser does not know the internal
+    page viewport unit `pvw`, so the declaration is dropped and the block has
+    the full width. The PR branch checks the value with the unit replaced by a
+    length and converts the unit to px before the value reaches the browser, so
+    the block has the same width as the `calc(20pvw - 15px)` reference and the
+    browser resolves the `min()` itself. The other blocks and the page count
+    are unchanged.
+  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-issue2174
+  actualUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/page_viewport_unit.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/page_viewport_unit.html&zoom=1&spread=false
+  diffPages:
+    - 4

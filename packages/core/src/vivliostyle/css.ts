@@ -722,6 +722,22 @@ export const processingOrder = {
   color: 3,
 };
 
+const PAGE_VIEWPORT_UNIT =
+  /-?(?:\d+(?:\.\d+)?|\.\d+)(?:e[-+]?\d+)?pv(?:min|max|[whbi])\b/gi;
+
+/**
+ * The serialized value in the form that a browser can parse: the internal page
+ * viewport units of this engine (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin` and
+ * `pvmax`) are replaced by a length, because a browser does not know those
+ * units although this engine resolves them, e.g. against the size of the page
+ * box. Only the units are replaced, so the rest of the value is checked as
+ * written: a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown
+ * function, e.g. `foo(2pvw)`, stay invalid. (Review)
+ */
+export function withoutPageViewportUnits(text: string): string {
+  return text.replace(PAGE_VIEWPORT_UNIT, "1px");
+}
+
 export function isDefaultingValue(value: Val | null | undefined): boolean {
   if (value instanceof Ident) {
     // The comparison is insensitive to the casing that a var() substitution

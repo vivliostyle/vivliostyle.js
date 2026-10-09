@@ -1416,17 +1416,17 @@ function isFunctionRejectedByBrowser(
 }
 
 /**
- * The value in the form that `CSS.supports()` can check: the internal viewport
- * units of this engine (`pvw`, `pvh`, `pvi`, `pvb`, `pvmin`, `pvmax`) are
- * replaced by a length, because a browser does not know those units although
- * this engine resolves them, e.g. against the size of the page box. A
- * declaration that uses one is a valid length for a browser, so the syntax and
- * the types of the value are checked as if it were written with such a length:
- * a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown function, e.g.
- * `foo(2pvw)`, stay invalid. (Review)
+ * The value in the form that `CSS.supports()` can check: the internal page
+ * viewport units of this engine are replaced by a length, as
+ * `Css.withoutPageViewportUnits()` does, because a browser does not know those
+ * units although this engine resolves them, e.g. against the size of the page
+ * box. A declaration that uses one is a valid length for a browser, so the
+ * syntax and the types of the value are checked as if it were written with
+ * such a length: a value that mixes types, e.g. `min(2pvw, 1)`, and an unknown
+ * function, e.g. `foo(2pvw)`, stay invalid. (Review)
  */
 function checkableText(value: Css.Val): string {
-  return value.toString().replace(/-?\d*\.?\d+pv(?:min|max|[whbi])\b/gi, "1px");
+  return Css.withoutPageViewportUnits(value.toString());
 }
 
 /**

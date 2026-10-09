@@ -453,6 +453,37 @@ describe("css-validator", function () {
     });
   });
 
+  describe("page viewport units", function () {
+    it("accepts a math function with an internal page viewport unit", function (done) {
+      // A browser does not know the `pv*` units of this engine, so
+      // `CSS.supports()` rejects a value that uses one although this engine
+      // resolves it, e.g. against the size of the page box: the check is made
+      // with such a unit replaced by a length, so `width: min(2pvw, 50px)` is
+      // a valid width here. (Review)
+      parseCascade("div { width: min(2pvw, 50px); }", done, function (cascade) {
+        expect(cascade.tags.get("div").style["width"]).toBeDefined();
+        expect(cascade.tags.get("div").style["width"].value.toString()).toBe(
+          "min(2pvw,50px)",
+        );
+      });
+    });
+
+    it("rejects a math function that mixes types with the internal unit", function (done) {
+      // The internal unit is replaced by a length, so the rest of the value is
+      // checked as written: `min(2pvw, 1)` mixes a length and a number and is
+      // invalid, as it is for the browser. (Review)
+      parseCascade("div { width: min(2pvw, 1); }", done, function (cascade) {
+        expect(cascade.tags.get("div").style["width"]).toBeUndefined();
+      });
+    });
+
+    it("rejects an unknown function with the internal unit", function (done) {
+      parseCascade("div { width: foo(2pvw); }", done, function (cascade) {
+        expect(cascade.tags.get("div").style["width"]).toBeUndefined();
+      });
+    });
+  });
+
   describe("ValidatorSet", function () {
     it("should parse simple validator and simple rule", function (done) {
       var validatorSet = new adapt_cssvalid.ValidatorSet();
