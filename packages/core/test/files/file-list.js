@@ -328,6 +328,11 @@ module.exports = [
         title:
           "Root font size from a browser resolved unit (Issue #2174 follow-up)",
       },
+      {
+        file: "line-height-root-unitless-function.html",
+        title:
+          "Root line height from a math function of numbers (Issue #2174 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",
@@ -1763,16 +1768,6 @@ module.exports = [
       {
         file: "device-cmyk/test.html",
         title: "device-cmyk() function",
-      },
-    ],
-  },
-  {
-    category: "Issue #2174 follow-up (root line height)",
-    files: [
-      {
-        file: "line-height-root-unitless-function.html",
-        title:
-          "Root line height from a math function of numbers (Issue #2174 follow-up)",
       },
     ],
   },

@@ -1,14 +1,11 @@
-- id: "0157"
-  category: Cross-references
+- category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2172. canary renders the pre-fix result: page 2
-    ("OPENING 1") falls back to the default page (margins, HEADER, page
-    number) after the TOC page is re-rendered for target-counter(). The PR
-    branch renders it on the `full` named page, the same as "OPENING 2".
+    Fix for Issue #2172. canary renders the pre-fix result: page 2 ("OPENING 1") falls back to the default page
+    (margins, HEADER, page number) after the TOC page is re-rendered for target-counter(). The PR branch renders it on
+    the `full` named page, the same as "OPENING 2".
   approvedViewer: git-fix-issue2172  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2172
   actualUrl: >-
@@ -16,53 +13,35 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2172/packages/core/test/files/target-counter-named-page-after-toc.html&zoom=1&spread=false
-  diffPages:
-    - 2
-- id: "0078"
-  category: General
+- category: General
   title: "Invalid font sizes from a var() substitution (Issue #2174 follow-up)"
   file: invalid-var-font-size.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    invalid `font-size: var(--invalid)` (5) of the footnote is not inherited but
-    applied, so the footnote has no font size and its `letter-spacing: 2em` is
-    32px instead of the 64px of the reference paragraph, the invalid
-    `font-size: var(--negative)` (-10px) of a detached footnote makes it
-    `font-size: -10px`, which the browser clamps to 0, so its
-    `letter-spacing: 2em` is -20px, the substituted dimension without a unit
-    size (`--unit: 5s`) is converted to `NaNpx`, so that footnote has no font
-    size at all, and the invalid
-    `font-size: var(--negative)` (-10px) of the root element makes the width of
-    the blue 10rem box drop (it becomes the full page width) instead of the
-    160px of the green reference box. A var() substitution is not revalidated,
-    so the browser rejects such a declaration and keeps the font size that the
-    element would inherit; the PR branch renders the "Wide" footnotes like the
-    reference (31.998px, letter-spacing 64px) and the root keeps the initial
-    16px (10rem = 160px). The two math functions of CSS Values 4 whose types
-    the property does not accept (`round(20px, 7)`, which rounds a length to a
-    multiple of a number, and `sign(20px)`, which returns a number) are
-    evaluated by the pre-fix viewers as if the numbers were px, so those
-    footnotes are 21px or 1px there (0px in canary), and
-    `log(100, 0)`, whose base must make the result NaN, is the finite -0 of the
-    division by `Math.log(0) === -Infinity`, so that footnote is 0px as well
-    (letter-spacing 32px); the PR branch treats them as the invalid declarations
-    they are, so those footnotes keep the inherited 32px and their
-    letter-spacing is 64px like the reference too. The same function wrapped in
-    a `calc()` (`--rc: calc(round(20px, 7))`) is 19.992px there (letter-spacing
-    40px) because the calculation is evaluated with the number as px, while the
-    PR branch keeps the inherited 32px (64px), as it does for the declaration
-    without the `calc()`. The unknown
-    `font-size: nonsense` footnote and the
-    `font-size: calc(10px - 20px)` footnote are 0 or inherited in both viewers,
-    because an unknown keyword is rejected during parsing and a computed
-    negative value is clamped instead; they guard the walk. The same
-    `font-size: calc(10px - 20px)` in the normal flow is rendered as 0px in
-    both viewers, because Chromium clamps the negative calc(), but stable and
-    canary emit the negative length itself: a browser that rejects it (e.g.
-    WebKit, where the layout unit adjustment is zero and the emitted value is
-    the literal `-10px`) answers by inheriting the parent font size.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the invalid `font-size: var(--invalid)` (5)
+    of the footnote is not inherited but applied, so the footnote has no font size and its `letter-spacing: 2em` is 32px
+    instead of the 64px of the reference paragraph, the invalid `font-size: var(--negative)` (-10px) of a detached
+    footnote makes it `font-size: -10px`, which the browser clamps to 0, so its `letter-spacing: 2em` is -20px, the
+    substituted dimension without a unit size (`--unit: 5s`) is converted to `NaNpx`, so that footnote has no font size
+    at all, and the invalid `font-size: var(--negative)` (-10px) of the root element makes the width of the blue 10rem
+    box drop (it becomes the full page width) instead of the 160px of the green reference box. A var() substitution is
+    not revalidated, so the browser rejects such a declaration and keeps the font size that the element would inherit;
+    the PR branch renders the "Wide" footnotes like the reference (31.998px, letter-spacing 64px) and the root keeps the
+    initial 16px (10rem = 160px). The two math functions of CSS Values 4 whose types the property does not accept
+    (`round(20px, 7)`, which rounds a length to a multiple of a number, and `sign(20px)`, which returns a number) are
+    evaluated by the pre-fix viewers as if the numbers were px, so those footnotes are 21px or 1px there (0px in
+    canary), and `log(100, 0)`, whose base must make the result NaN, is the finite -0 of the division by `Math.log(0)
+    === -Infinity`, so that footnote is 0px as well (letter-spacing 32px); the PR branch treats them as the invalid
+    declarations they are, so those footnotes keep the inherited 32px and their letter-spacing is 64px like the
+    reference too. The same function wrapped in a `calc()` (`--rc: calc(round(20px, 7))`) is 19.992px there
+    (letter-spacing 40px) because the calculation is evaluated with the number as px, while the PR branch keeps the
+    inherited 32px (64px), as it does for the declaration without the `calc()`. The unknown `font-size: nonsense`
+    footnote and the `font-size: calc(10px - 20px)` footnote are 0 or inherited in both viewers, because an unknown
+    keyword is rejected during parsing and a computed negative value is clamped instead; they guard the walk. The same
+    `font-size: calc(10px - 20px)` in the normal flow is rendered as 0px in both viewers, because Chromium clamps the
+    negative calc(), but stable and canary emit the negative length itself: a browser that rejects it (e.g. WebKit,
+    where the layout unit adjustment is zero and the emitted value is the literal `-10px`) answers by inheriting the
+    parent font size.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -70,23 +49,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-size.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0079"
-  category: General
+- category: General
   title: "Root font size with a negative calc() (Issue #2174 follow-up)"
   file: font-size-root-negative-calc.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    root font size is not resolved from the math function, so the width of the
-    red 1rem box is dropped and it becomes as wide as the page (377.951px)
-    instead of the 16px of the green box. A math function that computes a
-    negative value is valid, so it is clamped to the zero of the non-negative
-    `font-size` range instead: the PR branch renders the red box with no width.
-    See invalid-var-font-size.html for the invalid literal, which does not apply
-    at all.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the root font size is not resolved from the
+    math function, so the width of the red 1rem box is dropped and it becomes as wide as the page (377.951px) instead of
+    the 16px of the green box. A math function that computes a negative value is valid, so it is clamped to the zero of
+    the non-negative `font-size` range instead: the PR branch renders the red box with no width. See
+    invalid-var-font-size.html for the invalid literal, which does not apply at all.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -94,22 +66,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-negative-calc.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0080"
-  category: General
+- category: General
   title: "Root font size from an invalid substituted unit (Issue #2174 follow-up)"
   file: font-size-invalid-unit-root.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    root font size is resolved from the invalid substituted dimension `5s` as
-    5px (the unit has no size, so the value is left as it is), so the page is
-    rendered at 5px and the blue 1rem box is 5px wide instead of the 16px of the
-    green reference box. The declaration is invalid at computed-value time, so
-    the PR branch keeps the initial 16px of the root and the two boxes are as
-    wide as each other.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the root font size is resolved from the
+    invalid substituted dimension `5s` as 5px (the unit has no size, so the value is left as it is), so the page is
+    rendered at 5px and the blue 1rem box is 5px wide instead of the 16px of the green reference box. The declaration is
+    invalid at computed-value time, so the PR branch keeps the initial 16px of the root and the two boxes are as wide as
+    each other.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -117,33 +83,23 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-invalid-unit-root.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0081"
-  category: General
+- category: General
   title: "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)"
   file: defaulting-keyword-from-var.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: a
-    CSS-wide keyword that comes from a custom property is not canonicalized, so
-    `--x: INHERIT; color: var(--x)` is not recognized as `inherit`. The
-    declaration blocks the inherited value of the source parent, so the
-    footnote "Red" is rendered in the color of the page (black) instead of the
-    red of its source parent, and the "Wide" footnotes with
-    `--y: INHERIT; font-size: var(--y)` use the initial 16px instead of the 32px
-    of the source parent (`letter-spacing: 2em` is 32px instead of 64px). The
-    PR branch compares the keyword names case insensitively, so the footnotes
-    inherit the source parent values. The two "Bold" footnotes, whose rollback
-    keyword comes from a `var()` fallback, are 700 in every viewer (the keyword
-    becomes the whole value of the declaration, which rolls back to the UA
-    weight of the `strong`), so they carry no difference; a CSS-wide keyword
-    written directly as the value of a custom property is a known limitation of
-    this engine (the browsers apply it to the custom property itself, so the
-    reference is invalid at computed-value time and the property keeps the
-    inherited value — measured 400 for a `strong` of a paragraph at 400, while
-    every viewer of this test renders the UA weight 700).
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: a CSS-wide keyword that comes from a custom
+    property is not canonicalized, so `--x: INHERIT; color: var(--x)` is not recognized as `inherit`. The declaration
+    blocks the inherited value of the source parent, so the footnote "Red" is rendered in the color of the page (black)
+    instead of the red of its source parent, and the "Wide" footnotes with `--y: INHERIT; font-size: var(--y)` use the
+    initial 16px instead of the 32px of the source parent (`letter-spacing: 2em` is 32px instead of 64px). The PR branch
+    compares the keyword names case insensitively, so the footnotes inherit the source parent values. The two "Bold"
+    footnotes, whose rollback keyword comes from a `var()` fallback, are 700 in every viewer (the keyword becomes the
+    whole value of the declaration, which rolls back to the UA weight of the `strong`), so they carry no difference; a
+    CSS-wide keyword written directly as the value of a custom property is a known limitation of this engine (the
+    browsers apply it to the custom property itself, so the reference is invalid at computed-value time and the property
+    keeps the inherited value — measured 400 for a `strong` of a paragraph at 400, while every viewer of this test
+    renders the UA weight 700).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -151,26 +107,18 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/defaulting-keyword-from-var.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0082"
-  category: General
+- category: General
   title: "Invalid font weight from a var() substitution (Issue #2174 follow-up)"
   file: invalid-var-font-weight.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: a
-    font weight that a var() substitution makes invalid is not revalidated, so
-    the invalid number replaces the inherited 700 of the source parent and the
-    relative keyword of a detached descendant is not resolved against it. The
-    footnote "B" is 700 and the footnote "Z" is 400, the weights that they
-    inherit from the footnote area of the page, while the browser rejects the
-    invalid declarations and keeps the inherited 700 of the source parent: the
-    PR branch renders "B" 900 (bolder than 700, like the inline reference) and
-    "Z" 700. The same holds for the invalid forms that the page adds, an
-    unknown keyword (`nonsense`) and a dimension (`700px`): both footnotes
-    resolve `bolder` to 700 in the canary viewer and to 900 in the PR branch.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: a font weight that a var() substitution makes
+    invalid is not revalidated, so the invalid number replaces the inherited 700 of the source parent and the relative
+    keyword of a detached descendant is not resolved against it. The footnote "B" is 700 and the footnote "Z" is 400,
+    the weights that they inherit from the footnote area of the page, while the browser rejects the invalid declarations
+    and keeps the inherited 700 of the source parent: the PR branch renders "B" 900 (bolder than 700, like the inline
+    reference) and "Z" 700. The same holds for the invalid forms that the page adds, an unknown keyword (`nonsense`) and
+    a dimension (`700px`): both footnotes resolve `bolder` to 700 in the canary viewer and to 900 in the PR branch.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -178,26 +126,18 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-weight.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0083"
-  category: General
+- category: General
   title: "xxx-large absolute font size keyword (Issue #2174 follow-up)"
   file: absolute-font-size-keyword-xxx-large.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    keyword table of the resolver omits `xxx-large` (which CSS Fonts 4 added and
-    which browsers compute as 48px), so the keyword stays an identifier and the
-    font size that Vivliostyle uses internally is the initial 16px. The blue
-    10rem box is 160px wide instead of the 480px of the green reference, the
-    margin box at 1rem is 16px instead of 48px, and the `letter-spacing: 2em`
-    of the detached footnote is 32px instead of the 96px of the inline
-    reference (the footnote's own font size is the keyword itself, which the
-    browser resolves to the 48px that the reference uses). The PR branch
-    resolves the keyword like the other absolute keywords (three times the
-    default font size).
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the keyword table of the resolver omits
+    `xxx-large` (which CSS Fonts 4 added and which browsers compute as 48px), so the keyword stays an identifier and the
+    font size that Vivliostyle uses internally is the initial 16px. The blue 10rem box is 160px wide instead of the
+    480px of the green reference, the margin box at 1rem is 16px instead of 48px, and the `letter-spacing: 2em` of the
+    detached footnote is 32px instead of the 96px of the inline reference (the footnote's own font size is the keyword
+    itself, which the browser resolves to the 48px that the reference uses). The PR branch resolves the keyword like the
+    other absolute keywords (three times the default font size).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -205,25 +145,18 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keyword-xxx-large.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0084"
-  category: General
+- category: General
   title: "line-height: lh with a region rule (Issue #2174 follow-up)"
   file: line-height-lh-region-rule.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. The footnote must have the 80px of
-    `line-height: 2lh` (2 x the inherited 40px), the declaration of the region
-    rule, and not the 40px of the `!important` declaration of the body. stable
-    and canary render 80px as well, because they do not keep the inherited line
-    height at all, but the state of the PR branch before this fix did: keeping
-    the inherited line height for resolving `lh` also kept its original cascade
-    priority, so the `!important` declaration of the body won and the footnote
-    had 40px. The PR branch keeps the inherited value only as a low-priority
-    placeholder, so the declaration of the region rule wins (verified in the
-    dev viewer: 79.998px with `line-height: calc(80px - ...)`).
+    Follow-up of Issue #2174. The footnote must have the 80px of `line-height: 2lh` (2 x the inherited 40px), the
+    declaration of the region rule, and not the 40px of the `!important` declaration of the body. stable and canary
+    render 80px as well, because they do not keep the inherited line height at all, but the state of the PR branch
+    before this fix did: keeping the inherited line height for resolving `lh` also kept its original cascade priority,
+    so the `!important` declaration of the body won and the footnote had 40px. The PR branch keeps the inherited value
+    only as a low-priority placeholder, so the declaration of the region rule wins (verified in the dev viewer: 79.998px
+    with `line-height: calc(80px - ...)`).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -231,58 +164,38 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-lh-region-rule.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0085"
-  category: General
+- category: General
   title: "Font weight from a math function (Issue #2174 follow-up)"
   file: font-weight-math-function.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. canary renders the pre-fix result: the weight of
-    the `min(900, 1000)` paragraph is preserved by the validator but never
-    evaluated, so the value is unresolved when a detached element resolves
-    `bolder` against it — the footnote "B" of that paragraph is 700, while the
-    inline reference "B" of the same paragraph is 900. The PR branch evaluates
-    number valued math functions like `calc()` and resolves the relative
-    keyword against the result, so the footnote is 900 as well, and it clamps
-    the result of a function like `max(1000, 1200)` to 1000 (canary and the PR
-    branch agree on the clamps and on the invalid `min(900px, 1em)`, whose
-    footnote keeps the inherited 700). The paragraph with
-    `font-weight: round(650, 100)` is 700 in both, but the relative keyword
-    `bolder` of its footnote resolves against the fallback 400 in canary (700)
-    and against the 700 of the paragraph in the PR branch (900), like the
-    inline reference; the engine evaluates the math functions of CSS
-    Values 4 (`round()`, `mod()`, `abs()`, …), so their results are available
-    as the basis of a relative keyword. A calculation that overflows to an
-    infinity, e.g. `exp(1000)`, is the 1000 that the range of CSS Fonts 4
-    clamps it to; canary leaves it unresolved, so the footnote "B" of that
-    paragraph resolves `bolder` against the fallback 400 and is 700, while the
-    inline references of the paragraph are 1000 and the PR branch renders the
-    footnotes 1000 as well. The infinity of that calculation survives a nested
-    call as well, e.g. the `abs(exp(1000))` of the last paragraph: both
-    renderers clamp the paragraph to 1000 (canary serializes the infinity,
-    which the browser clamps), while the footnote "B" that resolves `bolder`
-    against it is 700 in canary and 1000 in the PR branch. The same is true
-    when the calculation is wrapped in a `calc()` (`font-weight:
-    calc(exp(1000))`): canary renders the paragraph 1000 (the browser clamps
-    the infinity) but resolves the `bolder` of its footnote against the
-    fallback 400 (700), while the PR branch clamps it to 1000 like the direct
-    form and renders the footnote 1000 as well. The same holds for
-    `hypot(exp(1000), log(-1))`, whose infinite argument takes precedence over
-    the `NaN` one: the paragraph is 1000 in both viewers (canary serializes the
-    infinity, which the browser clamps), while the `bolder` of its footnote is
-    700 in canary and 1000 in the PR branch. A weight whose
-    computation is not a number, e.g. `log(100, 0)`, is treated as an invalid
-    declaration by the PR branch as well: the paragraph keeps the 700 that it
-    inherits from its parent and canary resolves the `bolder` of its footnote
-    against the fallback 400 (700), while the PR branch renders the footnote
-    900 like its inline reference. The browsers accept such a declaration and
-    censor the `NaN` to 0, which the range of CSS Fonts 4 turns into the weight
-    1 (a `bolder` resolves to 400 from 1): the 900 of this fixture documents
-    the model of the PR branch, and the difference is recorded with the
-    limitations of the pull request (item 10).
+    Follow-up of Issue #2174. canary renders the pre-fix result: the weight of the `min(900, 1000)` paragraph is
+    preserved by the validator but never evaluated, so the value is unresolved when a detached element resolves `bolder`
+    against it — the footnote "B" of that paragraph is 700, while the inline reference "B" of the same paragraph is 900.
+    The PR branch evaluates number valued math functions like `calc()` and resolves the relative keyword against the
+    result, so the footnote is 900 as well, and it clamps the result of a function like `max(1000, 1200)` to 1000
+    (canary and the PR branch agree on the clamps and on the invalid `min(900px, 1em)`, whose footnote keeps the
+    inherited 700). The paragraph with `font-weight: round(650, 100)` is 700 in both, but the relative keyword `bolder`
+    of its footnote resolves against the fallback 400 in canary (700) and against the 700 of the paragraph in the PR
+    branch (900), like the inline reference; the engine evaluates the math functions of CSS Values 4 (`round()`,
+    `mod()`, `abs()`, …), so their results are available as the basis of a relative keyword. A calculation that
+    overflows to an infinity, e.g. `exp(1000)`, is the 1000 that the range of CSS Fonts 4 clamps it to; canary leaves it
+    unresolved, so the footnote "B" of that paragraph resolves `bolder` against the fallback 400 and is 700, while the
+    inline references of the paragraph are 1000 and the PR branch renders the footnotes 1000 as well. The infinity of
+    that calculation survives a nested call as well, e.g. the `abs(exp(1000))` of the last paragraph: both renderers
+    clamp the paragraph to 1000 (canary serializes the infinity, which the browser clamps), while the footnote "B" that
+    resolves `bolder` against it is 700 in canary and 1000 in the PR branch. The same is true when the calculation is
+    wrapped in a `calc()` (`font-weight: calc(exp(1000))`): canary renders the paragraph 1000 (the browser clamps the
+    infinity) but resolves the `bolder` of its footnote against the fallback 400 (700), while the PR branch clamps it to
+    1000 like the direct form and renders the footnote 1000 as well. The same holds for `hypot(exp(1000), log(-1))`,
+    whose infinite argument takes precedence over the `NaN` one: the paragraph is 1000 in both viewers (canary
+    serializes the infinity, which the browser clamps), while the `bolder` of its footnote is 700 in canary and 1000 in
+    the PR branch. A weight whose computation is not a number, e.g. `log(100, 0)`, is treated as an invalid declaration
+    by the PR branch as well: the paragraph keeps the 700 that it inherits from its parent and canary resolves the
+    `bolder` of its footnote against the fallback 400 (700), while the PR branch renders the footnote 900 like its
+    inline reference. The browsers accept such a declaration and censor the `NaN` to 0, which the range of CSS Fonts 4
+    turns into the weight 1 (a `bolder` resolves to 400 from 1): the 900 of this fixture documents the model of the PR
+    branch, and the difference is recorded with the limitations of the pull request (item 10).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -290,27 +203,19 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-weight-math-function.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0086"
-  category: General
+- category: General
   title: "math font size keyword of a footnote (Issue #2174 follow-up)"
   file: font-size-math-keyword.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. canary leaves the `math` keyword to the browser,
-    which resolves it in the footnote area it is reparented into: the footnotes
-    are 16px there, although the source context is the 32px paragraph (the math
-    font size is 1em of the inherited font size for the depths that this engine
-    represents; `math-depth` is not supported, so a deeper context is not
-    modelled). The PR branch resolves the keyword like `1em` of the source
-    parent, so both footnotes are 32px like the inline `1em` reference. The
-    scaling of a deeper context comes from the user agent stylesheet
-    (`math-depth: add(1)`) and is applied by the browser, so the exponent of a
-    footnote is 0.71em of the resolved 32px (22.71px) in both viewers, like its
-    inline reference; only a `math` that an author declares on an element of a
-    deeper depth is not modelled, because `math-depth` is not supported.
+    Follow-up of Issue #2174. canary leaves the `math` keyword to the browser, which resolves it in the footnote area it
+    is reparented into: the footnotes are 16px there, although the source context is the 32px paragraph (the math font
+    size is 1em of the inherited font size for the depths that this engine represents; `math-depth` is not supported, so
+    a deeper context is not modelled). The PR branch resolves the keyword like `1em` of the source parent, so both
+    footnotes are 32px like the inline `1em` reference. The scaling of a deeper context comes from the user agent
+    stylesheet (`math-depth: add(1)`) and is applied by the browser, so the exponent of a footnote is 0.71em of the
+    resolved 32px (22.71px) in both viewers, like its inline reference; only a `math` that an author declares on an
+    element of a deeper depth is not modelled, because `math-depth` is not supported.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -318,25 +223,18 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-math-keyword.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0087"
-  category: General
+- category: General
   title: "Invalid line-height from a var() substitution (Issue #2174 follow-up)"
   file: invalid-var-line-height.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. canary renders the pre-fix result: the line height
-    that the var() substitution made invalid replaces the accumulated 40px, so
-    the footnote "One" resolves its `font-size: 1lh` to the preferred line
-    height (19.998px) instead of the 40px that the browser keeps when it rejects
-    the invalid declaration. The invalid value can be an unknown identifier or,
-    as the second footnote covers, a math function that is invalid at
-    computed-value time (`min(10px, 2)`). The PR branch preserves the
-    accumulated line height for such values (and lets such a declaration keep
-    the inherited value of its ancestors accumulated), so both footnotes are
-    rendered at 39.998px like the inline reference of the normal flow.
+    Follow-up of Issue #2174. canary renders the pre-fix result: the line height that the var() substitution made
+    invalid replaces the accumulated 40px, so the footnote "One" resolves its `font-size: 1lh` to the preferred line
+    height (19.998px) instead of the 40px that the browser keeps when it rejects the invalid declaration. The invalid
+    value can be an unknown identifier or, as the second footnote covers, a math function that is invalid at
+    computed-value time (`min(10px, 2)`). The PR branch preserves the accumulated line height for such values (and lets
+    such a declaration keep the inherited value of its ancestors accumulated), so both footnotes are rendered at
+    39.998px like the inline reference of the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -344,26 +242,18 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-line-height.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0088"
-  category: General
+- category: General
   title: "Negative computed line-height (Issue #2174 follow-up)"
   file: line-height-negative-calc.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. In canary the `lh` unit of the footnote is
-    resolved in the rendered context (the preferred line height of the footnote
-    area, 19.9976px), so `calc(1lh - 30px)` clamps to 0 and the footnote "Ten"
-    differs from its inline reference (10px); the -60 of `calc(1lh - 100px)` is
-    clamped by the browser to 0 in both viewers, and the -10 that canary
-    materializes for `calc(10px - 20px)` (instead of clamping it) reaches the
-    browser as an invalid declaration, which clamps it to 0 as well. The PR
-    branch resolves the `lh` unit against the 40px line height of the source
-    parent, so the footnotes are rendered like their references, and it clamps
-    the resolved values itself: "Zero" and "Plain" are 0px, and the -60 is not
-    materialized as `-60px` (which the browser would reject, inheriting the 40px
+    Follow-up of Issue #2174. In canary the `lh` unit of the footnote is resolved in the rendered context (the preferred
+    line height of the footnote area, 19.9976px), so `calc(1lh - 30px)` clamps to 0 and the footnote "Ten" differs from
+    its inline reference (10px); the -60 of `calc(1lh - 100px)` is clamped by the browser to 0 in both viewers, and the
+    -10 that canary materializes for `calc(10px - 20px)` (instead of clamping it) reaches the browser as an invalid
+    declaration, which clamps it to 0 as well. The PR branch resolves the `lh` unit against the 40px line height of the
+    source parent, so the footnotes are rendered like their references, and it clamps the resolved values itself: "Zero"
+    and "Plain" are 0px, and the -60 is not materialized as `-60px` (which the browser would reject, inheriting the 40px
     instead of applying zero).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
@@ -372,26 +262,18 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-negative-calc.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0089"
-  category: General
+- category: General
   title: "font-size with a browser resolved unit (Issue #2174 follow-up)"
   file: font-size-browser-unit.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager
-    conversion of the unit produced to the browser (`font-size: calc(NaNpx -
-    var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote
-    "ch" falls back to the inherited 16px (measured 15.9922px) of the footnote
-    area. The PR branch resolves the unit with the CSS assumption of 0.5em for
-    the "0" glyph and the font size of the source parent, so the footnote is
-    80px like the `80px` reference of the same paragraph (measured 79.998px),
-    not the 16px of the footnote area that it is reparented into: the assumed
-    size is an approximation of the real metric, which the fixture shows as
-    well (the inline `5ch` of the same 32px paragraph is 105.079px in both
-    viewers, since the browser resolves it against the font itself).
+    Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager conversion of the unit produced to the
+    browser (`font-size: calc(NaNpx - var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote "ch"
+    falls back to the inherited 16px (measured 15.9922px) of the footnote area. The PR branch resolves the unit with the
+    CSS assumption of 0.5em for the "0" glyph and the font size of the source parent, so the footnote is 80px like the
+    `80px` reference of the same paragraph (measured 79.998px), not the 16px of the footnote area that it is reparented
+    into: the assumed size is an approximation of the real metric, which the fixture shows as well (the inline `5ch` of
+    the same 32px paragraph is 105.079px in both viewers, since the browser resolves it against the font itself).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -399,28 +281,20 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0090"
-  category: General
+- category: General
   title: "Root font size from a browser resolved unit (Issue #2174 follow-up)"
   file: font-size-root-browser-unit.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. canary treats the raw number of a root font size
-    that only the browser resolves as pixels: `:root { font-size: 5ch }` sets
-    the root font size to 5px, so the box sized in `rem` is 25px wide instead of
-    the 200px of the explicit reference. The PR branch resolves `ch` with the
-    CSS assumption of 0.5em (the initial font size is the basis of the root
-    element), so the root font size is 40px and the `rem` box matches the 200px
-    reference. The root line height, `line-height: 5ch`, is resolved with the
-    assumption of CSS Values 4 as well, and the value is the one the root
-    element uses (it is materialized like a resolved calc()), so the `rlh`
-    unit, the page context and the rendered root line height come from the
-    same metric: the paragraph that resolves `1lh` is 99.992px like its 100px
-    reference in the branch, while the pre-fix viewers resolve `1lh` against
-    the real metric of the font (52.5547px for the page they keep at 16px).
+    Follow-up of Issue #2174. canary treats the raw number of a root font size that only the browser resolves as pixels:
+    `:root { font-size: 5ch }` sets the root font size to 5px, so the box sized in `rem` is 25px wide instead of the
+    200px of the explicit reference. The PR branch resolves `ch` with the CSS assumption of 0.5em (the initial font size
+    is the basis of the root element), so the root font size is 40px and the `rem` box matches the 200px reference. The
+    root line height, `line-height: 5ch`, is resolved with the assumption of CSS Values 4 as well, and the value is the
+    one the root element uses (it is materialized like a resolved calc()), so the `rlh` unit, the page context and the
+    rendered root line height come from the same metric: the paragraph that resolves `1lh` is 99.992px like its 100px
+    reference in the branch, while the pre-fix viewers resolve `1lh` against the real metric of the font (52.5547px for
+    the page they keep at 16px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -428,23 +302,17 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0116"
-  category: General
-  title: "all shorthand property"
+- category: General
+  title: all shorthand property
   file: all-shorthand.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    `all: initial` also resets the inherited properties of a detached element,
-    e.g. the footnote of this test. Removing the property from the accumulated
-    values of the inheritance walk made such an element inherit from the
-    synthetic view parent instead of using the initial value: canary renders
-    the footnote "footnote text ..." in the color of the footnote area (the
-    root of the test carries the purple of the body, 128,0,128), while the PR
-    branch keeps the `initial` declaration and renders it in the initial black
-    like the elements of the normal flow, which the browser resolves itself.
+    `all: initial` also resets the inherited properties of a detached element, e.g. the footnote of this test. Removing
+    the property from the accumulated values of the inheritance walk made such an element inherit from the synthetic
+    view parent instead of using the initial value: canary renders the footnote "footnote text ..." in the color of the
+    footnote area (the root of the test carries the purple of the body, 128,0,128), while the PR branch keeps the
+    `initial` declaration and renders it in the initial black like the elements of the normal flow, which the browser
+    resolves itself.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -452,19 +320,14 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/all-shorthand.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0127"
-  category: Ruby and text emphasis
+- category: Ruby and text emphasis
   title: "text-emphasis-position at root with lang attribute (Issue #2167)"
   file: ruby-text-emphasis/text-emphasis-position-root-lang.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2167. stable renders the pre-fix result: the dir="rtl" UA
-    rule wins over the author :root { direction: ltr } and the text is
-    right-aligned. The PR branch renders the corrected result (left-aligned
-    text, underline on the left side in the vertical block).
+    Fix for Issue #2167. stable renders the pre-fix result: the dir="rtl" UA rule wins over the author :root {
+    direction: ltr } and the text is right-aligned. The PR branch renders the corrected result (left-aligned text,
+    underline on the left side in the vertical block).
   approvedViewer: git-fix-issue2167  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2167
   actualUrl: >-
@@ -472,8 +335,6 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2167/packages/core/test/files/ruby-text-emphasis/text-emphasis-position-root-lang.html&zoom=1&spread=false
-  diffPages:
-    - 1
 - category: Ruby and text emphasis
   title: "Absolutely positioned rt at a page break (horizontal, Issue #2162)"
   file: ruby-text-emphasis/absolute-rt-page-break-horizontal.html
@@ -702,18 +563,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
-- id: "0068"
-  category: General
+- category: General
   title: "Relative font keywords on the root element (Issue #2174)"
   file: relative-font-keywords-root.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2174. stable renders the pre-fix result: the relative font
-    keyword on the root element is resolved once by Vivliostyle and once more by
-    the browser (23.04px instead of 19.2px), so all pages and the number of lines
-    differ. The PR branch resolves the keyword to the numeric computed value
-    (19.2px, 13 lines per page) that the expected values in the test page show.
+    Fix for Issue #2174. stable renders the pre-fix result: the relative font keyword on the root element is resolved
+    once by Vivliostyle and once more by the browser (23.04px instead of 19.2px), so all pages and the number of lines
+    differ. The PR branch resolves the keyword to the numeric computed value (19.2px, 13 lines per page) that the
+    expected values in the test page show.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -721,25 +579,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-root.html&zoom=1&spread=false
-  diffPages:
-    - 1
-    - 2
-    - 3
-    - 4
-- id: "0069"
-  category: General
+- category: General
   title: "Relative font keywords in a footnote (Issue #2174)"
   file: relative-font-keywords-footnote.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2174. stable renders the pre-fix result for the footnote:
-    the inherited font-size (`smaller`) and font-weight (`bolder`) are resolved
-    against the footnote area instead of the source parent, so the letter-spacing
-    of "Wide letters" is 32px instead of 26.667px and the footnote of "Weight
-    test" / "Weight test 2" / "Weight test 3" is 700 instead of 900. The PR
-    branch matches the reference paragraphs. "Weight test 4" inherits 950 from
-    its source parent, so `bolder` keeps 950 (stable: 900).
+    Fix for Issue #2174. stable renders the pre-fix result for the footnote: the inherited font-size (`smaller`) and
+    font-weight (`bolder`) are resolved against the footnote area instead of the source parent, so the letter-spacing of
+    "Wide letters" is 32px instead of 26.667px and the footnote of "Weight test" / "Weight test 2" / "Weight test 3" is
+    700 instead of 900. The PR branch matches the reference paragraphs. "Weight test 4" inherits 950 from its source
+    parent, so `bolder` keeps 950 (stable: 900).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -747,20 +596,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-footnote.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0070"
-  category: General
+- category: General
   title: "Absolute font size keywords with rem/rlh/em (Issue #2174 follow-up)"
   file: absolute-font-size-keywords.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: with
-    `:root { font-size: large }` the `rem`/`rlh` units and the page margin box
-    stay at 16px instead of 18px, and the em values of the footnote are resolved
-    against 16px instead of 13px. The PR branch matches the numeric expected
-    values in the test page (180px, 27px, 26px, 1rem = 18px).
+    Follow-up of Issue #2174. stable renders the pre-fix result: with `:root { font-size: large }` the `rem`/`rlh` units
+    and the page margin box stay at 16px instead of 18px, and the em values of the footnote are resolved against 16px
+    instead of 13px. The PR branch matches the numeric expected values in the test page (180px, 27px, 26px, 1rem =
+    18px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -768,32 +612,23 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keywords.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0071"
-  category: General
+- category: General
   title: "calc()/clamp()/unitless font size in a footnote (Issue #2174 follow-up)"
   file: font-size-calc-values.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: a font-size that
-    is not a size keyword (`calc()`, `clamp()`, a unitless zero, a negative
-    `calc()` that the non-negative range of `font-size` clamps to zero, a
-    `calc()` with a signed term, a math function embedded in an arithmetic
-    expression, or a keyword substituted from a custom property) is not resolved to a length, so the em values of the footnote fall
-    back to 16px (letter-spacing 32px) and differ from the inline reference of
-    each paragraph. A source parent whose font size is a math function that the
-    engine does not evaluate, e.g. `round(20px, 7px)` (21px), is not resolved
-    either, so the relative `font-size: 2em` of the footnote is resolved in the
-    footnote area: it is 32px in canary instead of the 42px of the inline
-    reference. The step of a `round()` can be negative: the pre-fix viewers
-    leave the value to the browser, which computes the 7px of the upper
-    multiple of the interval but resolves the `letter-spacing: 2em` of the
-    footnote against the 16px of the footnote area (32px instead of the
-    reference's 14px), while the PR branch evaluates the function itself (the
-    division by the negative step gave the -0 that was materialized as a zero
-    size before this round) and matches the reference.
+    Follow-up of Issue #2174. stable renders the pre-fix result: a font-size that is not a size keyword (`calc()`,
+    `clamp()`, a unitless zero, a negative `calc()` that the non-negative range of `font-size` clamps to zero, a
+    `calc()` with a signed term, a math function embedded in an arithmetic expression, or a keyword substituted from a
+    custom property) is not resolved to a length, so the em values of the footnote fall back to 16px (letter-spacing
+    32px) and differ from the inline reference of each paragraph. A source parent whose font size is a math function
+    that the engine does not evaluate, e.g. `round(20px, 7px)` (21px), is not resolved either, so the relative
+    `font-size: 2em` of the footnote is resolved in the footnote area: it is 32px in canary instead of the 42px of the
+    inline reference. The step of a `round()` can be negative: the pre-fix viewers leave the value to the browser, which
+    computes the 7px of the upper multiple of the interval but resolves the `letter-spacing: 2em` of the footnote
+    against the 16px of the footnote area (32px instead of the reference's 14px), while the PR branch evaluates the
+    function itself (the division by the negative step gave the -0 that was materialized as a zero size before this
+    round) and matches the reference.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -801,22 +636,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-values.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0072"
-  category: General
+- category: General
   title: "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)"
   file: font-size-in-footnote.html
-  type: error
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable aborts the layout of this test page with
-    `TypeError: Cannot read properties of undefined (reading 'value')` (the
-    `font-size: initial` footnote removes the accumulated font-size), so it
-    cannot render it. The PR branch renders the page and resolves the font-size
-    declared in the footnote against the source parent (48px/38.4px instead of
-    the root font size); the footnote with `font-size: initial` uses the initial
-    (medium) font size, not the inherited 20px.
+    Follow-up of Issue #2174. stable aborts the layout of this test page with `TypeError: Cannot read properties of
+    undefined (reading 'value')` (the `font-size: initial` footnote removes the accumulated font-size), so it cannot
+    render it. The PR branch renders the page and resolves the font-size declared in the footnote against the source
+    parent (48px/38.4px instead of the root font size); the footnote with `font-size: initial` uses the initial (medium)
+    font size, not the inherited 20px.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -824,23 +653,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-in-footnote.html&zoom=1&spread=false
-  errorSide: stable
-  errorName: Error
-  errorMessage: "Viewer error: TypeError: Cannot read properties of undefined (reading 'value')"
-- id: "0073"
-  category: General
+- category: General
   title: "Root font size with a math function (Issue #2174 follow-up)"
   file: font-size-calc-root.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: a root
-    font-size that is a math function (`clamp(10px, calc(1em + 4px), 30px)`,
-    whose `em` argument is relative to the initial font size for the root
-    element) is not resolved by the root sizing, so `rem` values and the page
-    margin box use the initial 16px (10rem = 160px, the margin box text at
-    16px). The PR branch resolves the root font size to 20px (10rem = 200px,
-    the same as the 200px reference box, the margin box text at 20px).
+    Follow-up of Issue #2174. stable renders the pre-fix result: a root font-size that is a math function (`clamp(10px,
+    calc(1em + 4px), 30px)`, whose `em` argument is relative to the initial font size for the root element) is not
+    resolved by the root sizing, so `rem` values and the page margin box use the initial 16px (10rem = 160px, the margin
+    box text at 16px). The PR branch resolves the root font size to 20px (10rem = 200px, the same as the 200px reference
+    box, the margin box text at 20px).
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -848,22 +670,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-root.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0074"
-  category: General
+- category: General
   title: "Root font size zero (Issue #2174 follow-up)"
   file: font-size-root-zero.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: a root
-    font-size of unitless zero (`:root { font-size: 0 }`) is not resolved by the
-    root sizing and is then rejected by the truthiness checks, so `rem` values
-    and the page margin box use the initial 16px (the box is 16px wide and the
-    margin box text is visible at 16px). The PR branch resolves the root font
-    size to 0px like `font-size: 0px`, so the `1rem` box collapses and the
-    margin box text has a font size of 0.
+    Follow-up of Issue #2174. stable renders the pre-fix result: a root font-size of unitless zero (`:root { font-size:
+    0 }`) is not resolved by the root sizing and is then rejected by the truthiness checks, so `rem` values and the page
+    margin box use the initial 16px (the box is 16px wide and the margin box text is visible at 16px). The PR branch
+    resolves the root font size to 0px like `font-size: 0px`, so the `1rem` box collapses and the margin box text has a
+    font size of 0.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -871,25 +687,18 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-zero.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0075"
-  category: General
+- category: General
   title: "Relative font weight in a region rule (Issue #2174 follow-up)"
   file: relative-font-weight-region-rule.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. The CI comparison of the PR preview with the
-    released viewer reports no difference for this file, and the three viewers
-    render the footnote at the 400 that `lighter` resolves to (verified in the
-    browser: dev, canary and the release). The record keeps that expectation
-    explicit: the region declaration
-    `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }` must
-    win over the accumulated inherited weight of the source parent, which is
-    declared with `!important` here, while the keyword is still resolved against
-    that inherited weight. An earlier state of this PR resolved the keyword but
-    let the inherited weight win, which rendered the footnote at 700.
+    Follow-up of Issue #2174. The CI comparison of the PR preview with the released viewer reports no difference for
+    this file, and the three viewers render the footnote at the 400 that `lighter` resolves to (verified in the browser:
+    dev, canary and the release). The record keeps that expectation explicit: the region declaration
+    `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }` must win over the accumulated inherited
+    weight of the source parent, which is declared with `!important` here, while the keyword is still resolved against
+    that inherited weight. An earlier state of this PR resolved the keyword but let the inherited weight win, which
+    rendered the footnote at 700.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -897,90 +706,58 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-weight-region-rule.html&zoom=1&spread=false
-- id: "0076"
-  category: General
+- category: General
   title: "lh unit of a detached font-size (Issue #2174 follow-up)"
   file: font-size-lh-unit-in-footnote.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: the `lh` unit
-    of a `font-size` declared in a footnote is resolved against the root line
-    height (20px) instead of the 40px line height of the source parent, so the
-    letter-spacing of the footnote is 40px instead of the 80px of the inline
-    reference (also when the line height is computed, e.g.
-    `calc(2 * 20px)` or `calc(150%)`). The line height of an ancestor can be an
-    `lh` unit itself, e.g. `line-height: 1lh` on the source parent of a
-    footnote: it resolved to the 30px line height of its own parent, and the
-    footnote that resolves `1lh` against it fell back to the 20px of the root
-    instead of the 60px letter-spacing of the inline reference. A line height
-    that is a math function, e.g. `min(40px, 2em)`, was not reduced either: the
-    footnote that resolves `1lh` against it used the 20px of the root line
-    height (letter-spacing 40px) instead of the 32px of the math function
-    (letter-spacing 64px). An own line height of a detached element that is a
-    math function with `lh`, e.g. `line-height: max(1lh, 5px)` on the footnote,
-    was not resolved either: the footnote had the 20px of the preferred line
-    height instead of the 40px of its source parent. A bare `line-height: 2lh`
-    on the footnote itself was resolved against the 20px of the footnote area
-    (40px) instead of the 40px that it inherits (80px), and an ancestor whose
-    font size only the browser resolves (`font-size: math`) made the absolute
-    line height of that ancestor unknown, so the footnote with `font-size: 1lh`
-    was 20px instead of the 40px of the paragraph. A line height that is one of
-    the other math functions of CSS Values 4, e.g. `round(40px, 7px)` of the
-    source parent, was not reduced either: the footnote that resolves `1lh`
-    against it used the 20px of the root line height (letter-spacing 40px)
-    instead of the 42px that the function computes (letter-spacing 84px), and
-    an own `line-height: round(1lh, 7px)` of the footnote was left to the
-    browser, which resolved its `lh` against the 21px line height of the
-    footnote area instead of the 42px computed from the 40px of the source
-    parent. The root line height of this fixture is such a function as well
-    (`:root { line-height: round(40px, 7px) }`): the pre-fix viewers keep the
-    preferred line height of the root font size there, so the footnote with
-    `font-size: 1rlh` is 19.992px (letter-spacing 40px) instead of the 41.992px
-    of its `42px` reference (84px), while the PR branch resolves the root line
-    height with the same resolver as the inherited ones and matches it. A line
-    height whose computation is not a number, e.g. `log(100, 0)`, is
-    materialized as the zero length `calc(0)` by both viewers, while the
-    footnote that resolves `1lh` against it was 19.992px (letter-spacing 40px)
-    in the pre-fix ones instead of the 42px that the PR branch keeps as the
-    basis (84px, like its reference): this engine treats such a declaration as
-    invalid, so the inherited line height stays the basis of the `lh` unit. The
-    browsers instead censor a NaN result to 0px at the top level of a
-    calculation (CSS Values 4 §10.9.2, measured in Chromium and WebKit), which
-    would make an `lh` based font size collapse; the difference is a known
-    approximation of this branch. A
-    line height that computes below zero, e.g. `min(-10px, -20px)`, was
-    recorded as the -20px of the calculation, so the footnote with
-    `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of the 10px of
-    the clamped zero (20px), and a line height that is a function of unitless
-    numbers, e.g. `min(1, 2)`, was not resolved at all, so that footnote was
-    19.992px (40px) instead of the 16px of the number (32px). A line height in
-    an internal viewport unit (`line-height: 2pvw`) is 2% of the width of the
-    `160mm` page box (12.0925px), which the pre-fix viewers render but do not
-    use as the basis of the `lh` unit: that footnote was 19.992px (40px)
-    instead of the 12.0925px of the paragraph (24.19px), like its reference.
-    A line height whose computed value is a length is the length of the element
-    that declares it, so the `150%` and the `calc(150%)` declared by a level
-    whose font size is 16px are the 24px that a footnote inherits, and the
-    `5ch` of such a level is the assumed 40px, also when an intervening level
-    has the larger font size of 32px: the earlier rounds of the PR branch kept
-    the relative value in the accumulated one and resolved it level by level,
-    so those footnotes with `font-size: 1lh` were 47.992px (letter-spacing
-    96px) and 79.998px (160px) instead of the 24px and 40px of their
-    references (48px and 80px).
-    A line height that uses the numeric constants of CSS Values 4 §10.7.1
-    (`line-height: calc(pi * 10px)` and `calc(e * 10px)`) was left unresolved as
-    well: the footnote that resolves `1lh` against it used the preferred line
-    height (19.992px, letter-spacing 40px) instead of the 31.4159px and
-    27.1828px of the constants (63px and 54px), while the PR branch resolves the
-    names with `Exprs.Context.evalName()` and lets them through the calculation
-    keyword guard.
-    The PR branch
-    resolves those ancestor values level by level against
-    the font size of the level that the value belongs to, reduces the math
-    functions of a line height to px, replaces the `lh` unit of such a value
-    with the line height that the element inherits, and resolves the lh unit
-    against the source parent, like content in the normal flow.
+    Follow-up of Issue #2174. stable renders the pre-fix result: the `lh` unit of a `font-size` declared in a footnote
+    is resolved against the root line height (20px) instead of the 40px line height of the source parent, so the
+    letter-spacing of the footnote is 40px instead of the 80px of the inline reference (also when the line height is
+    computed, e.g. `calc(2 * 20px)` or `calc(150%)`). The line height of an ancestor can be an `lh` unit itself, e.g.
+    `line-height: 1lh` on the source parent of a footnote: it resolved to the 30px line height of its own parent, and
+    the footnote that resolves `1lh` against it fell back to the 20px of the root instead of the 60px letter-spacing of
+    the inline reference. A line height that is a math function, e.g. `min(40px, 2em)`, was not reduced either: the
+    footnote that resolves `1lh` against it used the 20px of the root line height (letter-spacing 40px) instead of the
+    32px of the math function (letter-spacing 64px). An own line height of a detached element that is a math function
+    with `lh`, e.g. `line-height: max(1lh, 5px)` on the footnote, was not resolved either: the footnote had the 20px of
+    the preferred line height instead of the 40px of its source parent. A bare `line-height: 2lh` on the footnote itself
+    was resolved against the 20px of the footnote area (40px) instead of the 40px that it inherits (80px), and an
+    ancestor whose font size only the browser resolves (`font-size: math`) made the absolute line height of that
+    ancestor unknown, so the footnote with `font-size: 1lh` was 20px instead of the 40px of the paragraph. A line height
+    that is one of the other math functions of CSS Values 4, e.g. `round(40px, 7px)` of the source parent, was not
+    reduced either: the footnote that resolves `1lh` against it used the 20px of the root line height (letter-spacing
+    40px) instead of the 42px that the function computes (letter-spacing 84px), and an own `line-height: round(1lh,
+    7px)` of the footnote was left to the browser, which resolved its `lh` against the 21px line height of the footnote
+    area instead of the 42px computed from the 40px of the source parent. The root line height of this fixture is such a
+    function as well (`:root { line-height: round(40px, 7px) }`): the pre-fix viewers keep the preferred line height of
+    the root font size there, so the footnote with `font-size: 1rlh` is 19.992px (letter-spacing 40px) instead of the
+    41.992px of its `42px` reference (84px), while the PR branch resolves the root line height with the same resolver as
+    the inherited ones and matches it. A line height whose computation is not a number, e.g. `log(100, 0)`, is
+    materialized as the zero length `calc(0)` by both viewers, while the footnote that resolves `1lh` against it was
+    19.992px (letter-spacing 40px) in the pre-fix ones instead of the 42px that the PR branch keeps as the basis (84px,
+    like its reference): this engine treats such a declaration as invalid, so the inherited line height stays the basis
+    of the `lh` unit. The browsers instead censor a NaN result to 0px at the top level of a calculation (CSS Values 4
+    §10.9.2, measured in Chromium and WebKit), which would make an `lh` based font size collapse; the difference is a
+    known approximation of this branch. A line height that computes below zero, e.g. `min(-10px, -20px)`, was recorded
+    as the -20px of the calculation, so the footnote with `font-size: calc(1lh + 10px)` was 29.992px (60px) instead of
+    the 10px of the clamped zero (20px), and a line height that is a function of unitless numbers, e.g. `min(1, 2)`, was
+    not resolved at all, so that footnote was 19.992px (40px) instead of the 16px of the number (32px). A line height in
+    an internal viewport unit (`line-height: 2pvw`) is 2% of the width of the `160mm` page box (12.0925px), which the
+    pre-fix viewers render but do not use as the basis of the `lh` unit: that footnote was 19.992px (40px) instead of
+    the 12.0925px of the paragraph (24.19px), like its reference. A line height whose computed value is a length is the
+    length of the element that declares it, so the `150%` and the `calc(150%)` declared by a level whose font size is
+    16px are the 24px that a footnote inherits, and the `5ch` of such a level is the assumed 40px, also when an
+    intervening level has the larger font size of 32px: the earlier rounds of the PR branch kept the relative value in
+    the accumulated one and resolved it level by level, so those footnotes with `font-size: 1lh` were 47.992px
+    (letter-spacing 96px) and 79.998px (160px) instead of the 24px and 40px of their references (48px and 80px). A line
+    height that uses the numeric constants of CSS Values 4 §10.7.1 (`line-height: calc(pi * 10px)` and `calc(e * 10px)`)
+    was left unresolved as well: the footnote that resolves `1lh` against it used the preferred line height (19.992px,
+    letter-spacing 40px) instead of the 31.4159px and 27.1828px of the constants (63px and 54px), while the PR branch
+    resolves the names with `Exprs.Context.evalName()` and lets them through the calculation keyword guard. The PR
+    branch resolves those ancestor values level by level against the font size of the level that the value belongs to,
+    reduces the math functions of a line height to px, replaces the `lh` unit of such a value with the line height that
+    the element inherits, and resolves the lh unit against the source parent, like content in the normal flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -988,23 +765,16 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-lh-unit-in-footnote.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0077"
-  category: General
+- category: General
   title: "font-size: inherit with a region rule (Issue #2174 follow-up)"
   file: font-size-inherit-region-rule.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable renders the pre-fix result: the inline
-    `font-size: inherit` of the footnote is compared with the region rule
-    `:footnote-content { font-size: 0.9em }` as if the declaration of the
-    source parent were a declaration of the element, so the region rule wins
-    and the footnote is 18px instead of the inherited 20px. The PR branch
-    materializes `inherit` — and `unset`, which behaves the same for an
-    inherited property — with the priority of its own declaration, so the
-    inline declaration wins and the footnotes are rendered like the browser
+    Follow-up of Issue #2174. stable renders the pre-fix result: the inline `font-size: inherit` of the footnote is
+    compared with the region rule `:footnote-content { font-size: 0.9em }` as if the declaration of the source parent
+    were a declaration of the element, so the region rule wins and the footnote is 18px instead of the inherited 20px.
+    The PR branch materializes `inherit` — and `unset`, which behaves the same for an inherited property — with the
+    priority of its own declaration, so the inline declaration wins and the footnotes are rendered like the browser
     renders them in the flow.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
@@ -1013,48 +783,17 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-inherit-region-rule.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0175"
-  category: Leader
-  title: Table of Contents with leader()
-  file: leader/toc-leader.html
-  type: difference
-  decision: skip  # regression / expected / skip
-  notes: >-
-    Noise, not a change of this PR: one run of the comparison reported 370
-    differing pixels (diffRatio 0.00044) on the leader dots of the "Named
-    pages" TOC line, where the dots differ by about one pixel of phase while
-    the text and the page numbers are identical. The same comparison re-run
-    with the same viewers found no difference at all, so the entry records a
-    sub-pixel rendering difference of the leader dots, which the workflow
-    classifies as `skip` (noise or irrelevant); if it reappears, the dot phase
-    is reviewed again instead of masking a change of this test.
-  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue2174
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/leader/toc-leader.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0429"
-  category: "Issue #2174 follow-up (root line height)"
+- category: General
   title: "Root line height from a math function of numbers (Issue #2174 follow-up)"
   file: line-height-root-unitless-function.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    paragraph with `line-height: 1rlh` has the preferred 1.25 x 16px = 20px
-    root line height instead of the 16px that the `min(1, 2)` root declaration
-    computes (the number is the multiplier of the 16px font size of the root
-    element). The PR branch records the 16px for the `rlh` unit and the page
-    context, while the root element keeps the declaration, so the paragraphs
-    that inherit the number, e.g. the one with a 32px font size, keep the
-    multiplier of their own font size like the browsers do instead of the
-    materialized 16px that replacing the root declaration would give them.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the paragraph with `line-height: 1rlh` has
+    the preferred 1.25 x 16px = 20px root line height instead of the 16px that the `min(1, 2)` root declaration computes
+    (the number is the multiplier of the 16px font size of the root element). The PR branch records the 16px for the
+    `rlh` unit and the page context, while the root element keeps the declaration, so the paragraphs that inherit the
+    number, e.g. the one with a 32px font size, keep the multiplier of their own font size like the browsers do instead
+    of the materialized 16px that replacing the root declaration would give them.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -1062,24 +801,17 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-root-unitless-function.html&zoom=1&spread=false
-  diffPages:
-    - 1
-- id: "0105"
-  category: "General"
-  title: "page viewport-percentage units with calc()"
+- category: General
+  title: page viewport-percentage units with calc()
   file: page_viewport_unit.html
-  type: difference
   decision: expected  # regression / expected / skip
   notes: >-
-    Follow-up of Issue #2174. stable and canary render the pre-fix result: the
-    `width: min(20pvw - 15px, 2000px)` of the last block is rejected by the
-    validator of this engine, because the browser does not know the internal
-    page viewport unit `pvw`, so the declaration is dropped and the block has
-    the full width. The PR branch checks the value with the unit replaced by a
-    length and converts the unit to px before the value reaches the browser, so
-    the block has the same width as the `calc(20pvw - 15px)` reference and the
-    browser resolves the `min()` itself. The other blocks and the page count
-    are unchanged.
+    Follow-up of Issue #2174. stable and canary render the pre-fix result: the `width: min(20pvw - 15px, 2000px)` of the
+    last block is rejected by the validator of this engine, because the browser does not know the internal page viewport
+    unit `pvw`, so the declaration is dropped and the block has the full width. The PR branch checks the value with the
+    unit replaced by a length and converts the unit to px before the value reaches the browser, so the block has the
+    same width as the `calc(20pvw - 15px)` reference and the browser resolves the `min()` itself. The other blocks and
+    the page count are unchanged.
   approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
@@ -1087,5 +819,3 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/page_viewport_unit.html&zoom=1&spread=false
-  diffPages:
-    - 4
