@@ -1,4 +1,22 @@
 - category: General
+  title: "Page size from standalone math functions (PR #2176 follow-up)"
+  file: page-size-math-functions.html
+  decision: expected
+  notes: >-
+    The page size calc(400px + 100px * sign(-1)) max(pi * 1px, 500px)
+    must resolve to 300px by 500px and finish on one page. Previously the
+    standalone max() remained unevaluated and its use as a numeric second
+    dimension produced NaN page height, preventing pagination from finishing.
+    The fix evaluates both dimensions and prevents unresolved functions from
+    being used as numeric page dimensions.
+  approvedViewer: git-fix-pr2176followup
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/page-size-math-functions.html&zoom=1&spread=false
+  baselineLabel: git-fix-pr2176followup
+  baselineUrl: >-
+    https://vivliostyle-git-fix-pr2176followup-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/page-size-math-functions.html&zoom=1&spread=false
+- category: General
   title: "calc() in headings and page properties (PR #2176 follow-up)"
   file: calc-page-layout.html
   decision: expected
