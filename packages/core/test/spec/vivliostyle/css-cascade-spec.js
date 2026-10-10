@@ -2775,6 +2775,24 @@ describe("css-cascade", function () {
       );
     });
 
+    it("preserves unrestricted utilization number calculations", function () {
+      [
+        ["calc(min(-0.5, 1))", "-0.5"],
+        ["calc(max(0.25, 0.5))", "0.5"],
+        ["calc(mod(-20, 7))", "1"],
+        ["calc(min(20px, 7px))", "unset"],
+        ["calc(min(20%, 7%))", "unset"],
+      ].forEach(([input, expected]) => {
+        var style = {
+          utilization: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+        };
+        applyCalcFilter(style);
+        expect(style.utilization.value.toString())
+          .withContext(input)
+          .toBe(expected);
+      });
+    });
+
     it("checks min, max, and clamp types inside calc", function () {
       [
         ["calc(min(20px, 7))", "unset"],

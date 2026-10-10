@@ -1444,7 +1444,9 @@ function isFunctionRejectedByBrowser(
       propName = "z-index";
       break;
     case "utilization":
-      propName = "flex-grow";
+      // z-index accepts signed number calculations, including fractions. Its
+      // integer rounding is irrelevant: only syntax/types are checked here.
+      propName = "z-index";
       break;
   }
   return (
