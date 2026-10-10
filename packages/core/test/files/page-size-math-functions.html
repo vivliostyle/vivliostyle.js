@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- Regression for PR #2176 follow-up: standalone page size math must
+     resolve to numeric dimensions before pagination. -->
+<html lang="en">
+<meta charset="utf-8">
+<title>Page size from standalone math functions</title>
+<style>
+@page { size: calc(400px + 100px * sign(-1)) max(pi * 1px, 500px); margin: 20px; }
+body { margin: 0; }
+</style>
+<h1>Hello</h1><p>world</p>
+<p>This document must finish on one 300px × 500px page.</p>
+</html>

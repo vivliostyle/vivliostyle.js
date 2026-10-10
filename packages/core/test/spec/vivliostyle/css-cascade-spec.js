@@ -2844,6 +2844,17 @@ describe("css-cascade", function () {
       );
     });
 
+    it("evaluates standalone math in page size dimensions", function () {
+      var style = {
+        size: new adapt_csscasc.CascadeValue(
+          parseValue("calc(400px + 100px * sign(-1)) max(pi * 1px, 500px)"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style.size.value.toString()).toBe("300px 500px");
+    });
+
     it("evaluates calculations in Vivliostyle page properties", function () {
       var style = {};
       ["margin-inside", "margin-outside", "bleed", "crop-offset"].forEach(

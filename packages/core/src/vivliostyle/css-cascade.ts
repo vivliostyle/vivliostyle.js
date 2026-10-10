@@ -6689,6 +6689,20 @@ export class CascadeInstance {
           rejectedFunction
             ? Css.ident.unset
             : cascVal.value.visit(visitor);
+        if (name === "size" && !rejectedFunction) {
+          // Page dimensions must be numeric: unlike element properties they
+          // cannot leave standalone math functions for the browser to resolve.
+          const evaluateDimension = (dimension: Css.Val): Css.Val =>
+            dimension instanceof Css.Func &&
+            dimension.name.toLowerCase() !== "calc" &&
+            needsMathFunctionTypeCheck(dimension)
+              ? new Css.Func("calc", [dimension]).visit(visitor)
+              : dimension;
+          value =
+            value instanceof Css.SpaceList
+              ? new Css.SpaceList(value.values.map(evaluateDimension))
+              : evaluateDimension(value);
+        }
         if (name === "font-weight") {
           if (value instanceof Css.Func || value instanceof Css.Expr) {
             // The validator passes browser-supported math functions through,

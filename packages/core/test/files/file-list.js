@@ -334,6 +334,10 @@ module.exports = [
           "Root line height from a math function of numbers (Issue #2174 follow-up)",
       },
       {
+        file: "page-size-math-functions.html",
+        title: "Page size from standalone math functions (PR #2176 follow-up)",
+      },
+      {
         file: "calc-page-layout.html",
         title: "calc() in headings and page properties (PR #2176 follow-up)",
       },
