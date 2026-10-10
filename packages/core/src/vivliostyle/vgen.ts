@@ -1041,6 +1041,12 @@ export class ViewFactory
         this.regionIds,
         this.isFootnote,
       );
+      const currentFontSize = flattenedCurrentStyle["font-size"]?.evaluate(
+        this.context,
+        "font-size",
+      );
+      const fontSizeUsesLineHeight =
+        !!currentFontSize && CssCascade.usesLineHeightUnit(currentFontSize);
       for (const name in flattenedCurrentStyle) {
         if (!CssCascade.isInherited(name)) {
           continue;
@@ -1070,7 +1076,11 @@ export class ViewFactory
             // the priority of the accumulated value is lowered below when the
             // declaration is not in the element's own cascaded style. (Review)
             name === "line-height" &&
-            (CssCascade.usesLineHeightUnit(value) ||
+            // An own line-height must not block the source parent's value
+            // while resolving `font-size: 1lh`. Font size is processed first,
+            // then this element's line-height replaces the inherited value.
+            (fontSizeUsesLineHeight ||
+              CssCascade.usesLineHeightUnit(value) ||
               // A line height that the browser rejects is inherited as well,
               // so the inherited line height must still be accumulated for a
               // descendant that resolves the `lh` unit. (Review)

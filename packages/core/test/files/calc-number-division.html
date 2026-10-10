@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!-- Regression test for PR #2176: dimensionally cancelled lengths and
+     percentages produce a unitless number, including inherited line-height
+     and the source parent of detached footnotes. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Number calculations with dimensional cancellation (PR #2176 follow-up)</title>
+  <style>
+    @page { size: 160mm 220mm; margin: 10mm; }
+    :root { font-size: 16px; line-height: calc(150% / 100%); }
+    body { margin: 0; }
+    p { margin: 0 0 10px; }
+    .sample { font-size: 20px; line-height: calc(30px / 20px); background: #ddd; }
+    .reference { line-height: 1.5; background: #eee; }
+    .percent { line-height: calc(150% / 100%); }
+    .child { font-size: 24px; }
+    .inherited { font-size: 24px; background: #ddd; }
+    .rlh { height: 1rlh; background: #def; }
+    .rlh.reference { height: 24px; }
+    .parent { font-size: 20px; line-height: calc(150% / 100%); }
+    .note { float: footnote; font-size: 1lh; line-height: 1; }
+    .note.reference { font-size: 30px; }
+  </style>
+</head>
+<body>
+  <p>Each pair must have matching heights and font sizes.</p>
+  <p class="sample">Inherited number<br>Second line</p>
+  <p class="sample reference">Inherited number<br>Second line</p>
+  <div class="percent"><p class="child">Percentage ratio<br>Second line</p></div>
+  <div class="reference"><p class="child">Percentage ratio<br>Second line</p></div>
+  <p class="inherited">Root percentage ratio<br>Second line</p>
+  <p class="inherited reference">Root percentage ratio<br>Second line</p>
+  <div class="rlh">Root line height</div>
+  <div class="rlh reference">Root line height</div>
+  <p class="parent">Footnotes:
+    <span class="note">Source parent ratio</span>
+    <span class="note reference">Source parent ratio</span>
+  </p>
+</body>
+</html>

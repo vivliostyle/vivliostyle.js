@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Regression test for PR #2176: preserve legacy calc(0 - length) and
+     calculations in Vivliostyle page properties. Each page's heading must
+     have the same geometry as its explicit reference. The page area is
+     100mm wide, with 30mm inside and 20mm outside margins and 3mm bleed. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculations in headings and page properties (PR #2176 follow-up)</title>
+  <style>
+    :root { font-size: 16px; line-height: 20px; }
+    @page {
+      size: 150mm 100mm;
+      margin-top: 10mm;
+      margin-bottom: 10mm;
+      margin-inside: calc(150mm - 20mm - 100mm);
+      margin-outside: calc(10mm * 2);
+      bleed: calc(1mm * 3);
+      crop-offset: calc(2mm * 3);
+      marks: crop cross;
+    }
+    body { margin: 0; }
+    section { break-before: page; }
+    .heading {
+      --overhang: 5mm;
+      --left: calc(0 - var(--overhang));
+      margin-left: var(--left);
+      padding-left: calc(15mm - var(--left));
+      width: calc(100mm - calc(15mm - var(--left)));
+      height: 15mm;
+      background: #ddd;
+      font-weight: bold;
+    }
+    .reference { margin-left: -5mm; padding-left: 20mm; width: 80mm; }
+    .area { width: 100%; height: 10mm; background: #def; }
+  </style>
+</head>
+<body>
+  <section>
+    <p>The following two headings must align.</p>
+    <div class="heading">Heading</div>
+    <div class="heading reference">Heading</div>
+    <div class="area">100mm page area</div>
+  </section>
+  <section>
+    <p>The inside and outside margins switch on this page.</p>
+    <div class="heading">Heading</div>
+    <div class="heading reference">Heading</div>
+    <div class="area">100mm page area</div>
+  </section>
+</body>
+</html>

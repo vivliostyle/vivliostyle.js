@@ -42,6 +42,19 @@ describe("css-page", function () {
       expect(resolved).toEqual(expected);
     });
 
+    it("uses default dimensions when a second size component remains unevaluated", function () {
+      var resolved = module.resolvePageSizeAndBleed({
+        size: new adapt_csscasc.CascadeValue(
+          new adapt_css.SpaceList([
+            new adapt_css.Numeric(300, "px"),
+            new adapt_css.Func("max", [new adapt_css.Numeric(500, "px")]),
+          ]),
+          0,
+        ),
+      });
+      expect(resolved).toEqual(expected);
+    });
+
     it("has fullWidth and fullHeight when size=auto", function () {
       var resolved = module.resolvePageSizeAndBleed({
         size: new adapt_csscasc.CascadeValue(adapt_css.ident.auto, 0),

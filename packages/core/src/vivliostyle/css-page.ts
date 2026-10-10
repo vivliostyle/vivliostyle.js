@@ -222,7 +222,7 @@ export function resolvePageSizeAndBleed(style: {
       val1 = value;
       val2 = null;
     }
-    if (val1.isNumeric()) {
+    if (val1.isNumeric() && (!val2 || val2.isNumeric())) {
       // <length>{1,2}
       pageSizeAndBleed.width = val1 as Css.Numeric;
       pageSizeAndBleed.height = (val2 || val1) as Css.Numeric;

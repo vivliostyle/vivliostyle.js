@@ -2659,6 +2659,217 @@ describe("css-cascade", function () {
       expect(style["content"].value.toString()).toBe("leader(dotted)");
       expect(style["width"].value.toString()).toBe("min(2pvw,50px)");
     });
+
+    it("preserves legacy calc arithmetic with a unitless zero", function () {
+      var style = {
+        "margin-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(0 - 10px)"),
+          1,
+        ),
+        "padding-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(20px - calc(0 - 10px))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["margin-left"].value.toString()).toBe("-10px");
+      expect(style["padding-left"].value.toString()).toBe("30px");
+    });
+
+    it("validates math types in Vivliostyle page properties", function () {
+      [
+        "margin-inside",
+        "margin-outside",
+        "padding-inside",
+        "padding-outside",
+        "border-inside-width",
+        "border-outside-width",
+        "inside",
+        "outside",
+        "block-start",
+        "block-end",
+        "inline-start",
+        "inline-end",
+        "min-page-width",
+        "min-page-height",
+        "snap-width",
+        "snap-height",
+        "float-min-wrap-block",
+        "bleed",
+        "crop-offset",
+      ].forEach((name) => {
+        [
+          ["calc(mod(20px, 7))", "unset"],
+          ["calc(mod(20px, 7px))", "6px"],
+        ].forEach(([input, expected]) => {
+          var style = {};
+          style[name] = new adapt_csscasc.CascadeValue(parseValue(input), 1);
+          applyCalcFilter(style);
+          expect(style[name].value.toString())
+            .withContext(name + ": " + input)
+            .toBe(expected);
+        });
+      });
+    });
+
+    it("rejects percentage math in length-only page properties", function () {
+      var style = {};
+      ["margin-inside", "padding-outside", "bleed", "crop-offset"].forEach(
+        (name) => {
+          style[name] = new adapt_csscasc.CascadeValue(
+            parseValue("calc(mod(20%, 7%))"),
+            1,
+          );
+        },
+      );
+      applyCalcFilter(style);
+      expect(style["margin-inside"].value.toString()).toBe("calc(mod(20%,7%))");
+      expect(style["padding-outside"].value.toString()).toBe(
+        "calc(mod(20%,7%))",
+      );
+      expect(style["bleed"].value.toString()).toBe("unset");
+      expect(style["crop-offset"].value.toString()).toBe("unset");
+    });
+
+    it("validates math after expanding inset page aliases", function () {
+      ["inset-inside", "inset-outside"].forEach((name) => {
+        var style = {};
+        var scope = new adapt_exprs.LexicalScope(null);
+        adapt_cssvalid
+          .baseValidatorSet()
+          .validatePropertyAndHandleShorthand(
+            name,
+            parseValue("calc(mod(20px, 7))"),
+            false,
+            scope,
+            {
+              simpleProperty: function (propName, value) {
+                style[propName] = new adapt_csscasc.CascadeValue(value, 1);
+              },
+            },
+          );
+        var expandedName = name.replace("inset-", "");
+        expect(style[expandedName]).withContext(name).toBeDefined();
+        applyCalcFilter(style);
+        expect(style[expandedName].value.toString())
+          .withContext(name)
+          .toBe("unset");
+      });
+    });
+
+    it("validates number-only math in Vivliostyle properties", function () {
+      ["flow-linger", "flow-priority", "page", "utilization"].forEach(
+        (name) => {
+          [
+            ["calc(mod(20px, 7px))", "unset"],
+            ["calc(mod(20, 7))", "6"],
+          ].forEach(([input, expected]) => {
+            var style = {};
+            style[name] = new adapt_csscasc.CascadeValue(parseValue(input), 1);
+            applyCalcFilter(style);
+            expect(style[name].value.toString())
+              .withContext(name + ": " + input)
+              .toBe(expected);
+          });
+        },
+      );
+    });
+
+    it("preserves unrestricted utilization number calculations", function () {
+      [
+        ["calc(min(-0.5, 1))", "-0.5"],
+        ["calc(max(0.25, 0.5))", "0.5"],
+        ["calc(mod(-20, 7))", "1"],
+        ["calc(min(20px, 7px))", "unset"],
+        ["calc(min(20%, 7%))", "unset"],
+      ].forEach(([input, expected]) => {
+        var style = {
+          utilization: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+        };
+        applyCalcFilter(style);
+        expect(style.utilization.value.toString())
+          .withContext(input)
+          .toBe(expected);
+      });
+    });
+
+    it("checks min, max, and clamp types inside calc", function () {
+      [
+        ["calc(min(20px, 7))", "unset"],
+        ["calc(max(20px, 7))", "unset"],
+        ["calc(clamp(7, 20px, 30px))", "unset"],
+        ["calc(min(20px, 7px))", "7px"],
+        ["calc(max(20px, 7px))", "20px"],
+        ["calc(clamp(7px, 20px, 30px))", "calc(clamp(7px,20px,30px))"],
+        ["calc(min(2pvw, 7))", "unset"],
+      ].forEach(([input, expected]) => {
+        var style = {
+          width: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+        };
+        applyCalcFilter(style);
+        expect(style.width.value.toString()).withContext(input).toBe(expected);
+      });
+    });
+
+    it("validates each page size dimension independently of native size support", function () {
+      var nativeSupports = CSS.supports.bind(CSS);
+      var supports = spyOn(CSS, "supports");
+      [true, false].forEach((sizeSupported) => {
+        supports.and.callFake((name, value) =>
+          name === "size" ? sizeSupported : nativeSupports(name, value),
+        );
+        [
+          ["calc(min(20px, 7))", "unset"],
+          ["calc(min(20px, 7)) 30px", "unset"],
+          ["30px calc(min(20px, 7))", "unset"],
+          ["calc(min(20%, 7%)) 30px", "unset"],
+          ["calc(min(20, 7))", "unset"],
+          ["calc(min(20px, 7px))", "7px"],
+          ["calc(min(20px, 7px)) calc(max(20px, 30px))", "7px 30px"],
+          ["calc(20px - calc(0 - 10px)) calc(min(20px, 7px))", "30px 7px"],
+          ["a4 landscape", "a4 landscape"],
+          ["auto", "auto"],
+        ].forEach(([input, expected]) => {
+          var style = {
+            size: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+          };
+          applyCalcFilter(style);
+          expect(style.size.value.toString())
+            .withContext(input + ", native size: " + sizeSupported)
+            .toBe(expected);
+        });
+      });
+      expect(supports.calls.allArgs().some(([name]) => name === "size")).toBe(
+        false,
+      );
+    });
+
+    it("evaluates standalone math in page size dimensions", function () {
+      var style = {
+        size: new adapt_csscasc.CascadeValue(
+          parseValue("calc(400px + 100px * sign(-1)) max(pi * 1px, 500px)"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style.size.value.toString()).toBe("300px 500px");
+    });
+
+    it("evaluates calculations in Vivliostyle page properties", function () {
+      var style = {};
+      ["margin-inside", "margin-outside", "bleed", "crop-offset"].forEach(
+        (name) => {
+          style[name] = new adapt_csscasc.CascadeValue(
+            parseValue("calc(20px + 5px)"),
+            1,
+          );
+        },
+      );
+      applyCalcFilter(style);
+      Object.keys(style).forEach((name) => {
+        expect(style[name].value.toString()).withContext(name).toBe("25px");
+      });
+    });
   });
 
   describe("VarFilterVisitor regression coverage", function () {
@@ -5029,6 +5240,39 @@ describe("css-cascade", function () {
         expect(evaluate("calc(2 * sign(abs(20px)))", "font-weight")).toBe("2");
         expect(evaluate("calc(abs(sign(min(1px, 2px))))", "width")).toBe("1");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
+      });
+
+      it("keeps dimensionally cancelled lengths as numbers", function () {
+        if (!CSS.supports("z-index", "calc(30px / 20px)")) {
+          // Firefox enables CSS typed arithmetic by default starting in 158.
+          // Run automatically when the host supports dimensional division.
+          pending("Requires native CSS typed division (Firefox 158 or later)");
+          return;
+        }
+        function evaluate(text) {
+          return adapt_csscasc.evaluateCSSToCSS(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            ),
+            "line-height",
+          );
+        }
+        expect(evaluate("calc(30px / 20px)").toString()).toBe("1.5");
+        expect(evaluate("calc(2 * (30px / 20px))").toString()).toBe("3");
+        expect(evaluate("calc(30px / 20px * 10px)").toString()).toBe("15px");
+        expect(evaluate("calc(min(30px / 20px, 2))").toString()).toBe("1.5");
+        var value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(150% / 100%)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), value, 32, 40),
+        ).toBe(48);
+        expect(adapt_csscasc.isUnitlessNumberValue(value)).toBe(true);
       });
 
       it("uses the initial font size when the accumulated font-size was removed", function () {
