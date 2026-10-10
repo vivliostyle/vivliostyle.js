@@ -2682,6 +2682,19 @@ describe("css-cascade", function () {
         "margin-outside",
         "padding-inside",
         "padding-outside",
+        "border-inside-width",
+        "border-outside-width",
+        "inside",
+        "outside",
+        "block-start",
+        "block-end",
+        "inline-start",
+        "inline-end",
+        "min-page-width",
+        "min-page-height",
+        "snap-width",
+        "snap-height",
+        "float-min-wrap-block",
         "bleed",
         "crop-offset",
       ].forEach((name) => {
@@ -2716,6 +2729,68 @@ describe("css-cascade", function () {
       );
       expect(style["bleed"].value.toString()).toBe("unset");
       expect(style["crop-offset"].value.toString()).toBe("unset");
+    });
+
+    it("validates math after expanding inset page aliases", function () {
+      ["inset-inside", "inset-outside"].forEach((name) => {
+        var style = {};
+        var scope = new adapt_exprs.LexicalScope(null);
+        adapt_cssvalid
+          .baseValidatorSet()
+          .validatePropertyAndHandleShorthand(
+            name,
+            parseValue("calc(mod(20px, 7))"),
+            false,
+            scope,
+            {
+              simpleProperty: function (propName, value) {
+                style[propName] = new adapt_csscasc.CascadeValue(value, 1);
+              },
+            },
+          );
+        var expandedName = name.replace("inset-", "");
+        expect(style[expandedName]).withContext(name).toBeDefined();
+        applyCalcFilter(style);
+        expect(style[expandedName].value.toString())
+          .withContext(name)
+          .toBe("unset");
+      });
+    });
+
+    it("validates number-only math in Vivliostyle properties", function () {
+      ["flow-linger", "flow-priority", "page", "utilization"].forEach(
+        (name) => {
+          [
+            ["calc(mod(20px, 7px))", "unset"],
+            ["calc(mod(20, 7))", "6"],
+          ].forEach(([input, expected]) => {
+            var style = {};
+            style[name] = new adapt_csscasc.CascadeValue(parseValue(input), 1);
+            applyCalcFilter(style);
+            expect(style[name].value.toString())
+              .withContext(name + ": " + input)
+              .toBe(expected);
+          });
+        },
+      );
+    });
+
+    it("checks min, max, and clamp types inside calc", function () {
+      [
+        ["calc(min(20px, 7))", "unset"],
+        ["calc(max(20px, 7))", "unset"],
+        ["calc(clamp(7, 20px, 30px))", "unset"],
+        ["calc(min(20px, 7px))", "7px"],
+        ["calc(max(20px, 7px))", "20px"],
+        ["calc(clamp(7px, 20px, 30px))", "calc(clamp(7px,20px,30px))"],
+        ["calc(min(2pvw, 7))", "unset"],
+      ].forEach(([input, expected]) => {
+        var style = {
+          width: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+        };
+        applyCalcFilter(style);
+        expect(style.width.value.toString()).withContext(input).toBe(expected);
+      });
     });
 
     it("evaluates calculations in Vivliostyle page properties", function () {

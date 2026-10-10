@@ -1419,20 +1419,32 @@ function isFunctionRejectedByBrowser(
   propName: string,
   value: Css.Val,
 ): boolean {
-  // Only function values are checked, so bleed/crop-offset's `auto` keyword
-  // does not need to be accepted by outline-offset's <length> grammar.
+  // Reuse the layout coupling maps for browser-unknown logical/page sides.
+  // Shorthand aliases such as inset-inside have already become inside here.
+  if (!CSS.supports(propName, "initial")) {
+    propName =
+      couplingMapHor[propName] ?? couplingMapLeftPage[propName] ?? propName;
+  }
+  // Only functions are checked, so keyword differences do not matter here.
   switch (propName) {
-    case "margin-inside":
-    case "margin-outside":
-      propName = "margin-left";
-      break;
-    case "padding-inside":
-    case "padding-outside":
-      propName = "padding-left";
-      break;
     case "bleed":
     case "crop-offset":
+    case "min-page-width":
+    case "min-page-height":
+    case "snap-width":
+    case "snap-height":
       propName = "outline-offset";
+      break;
+    case "float-min-wrap-block":
+      propName = "padding-left";
+      break;
+    case "flow-linger":
+    case "flow-priority":
+    case "page":
+      propName = "z-index";
+      break;
+    case "utilization":
+      propName = "flex-grow";
       break;
   }
   return (
@@ -1443,14 +1455,14 @@ function isFunctionRejectedByBrowser(
 }
 
 /**
- * Check only values containing the newly evaluated math functions, with no
+ * Check values containing math functions other than calc(), with no
  * functions outside CSS math. Browser validation must not reject functions
  * that Vivliostyle resolves itself, such as `leader()`, or change the legacy
  * calc() arithmetic used by existing publications.
  */
 class MathFunctionVisitor extends Css.Visitor {
   isMath = true;
-  hasOtherMath = false;
+  hasNonCalcMath = false;
 
   override visitFunc(func: Css.Func): Css.Val | null {
     if (
@@ -1462,8 +1474,8 @@ class MathFunctionVisitor extends Css.Visitor {
     ) {
       this.isMath = false;
     } else if (this.isMath) {
-      if (OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())) {
-        this.hasOtherMath = true;
+      if (func.name.toLowerCase() !== "calc") {
+        this.hasNonCalcMath = true;
       }
       this.visitValues(func.values);
     }
@@ -1476,8 +1488,8 @@ function needsMathFunctionTypeCheck(value: Css.Val): boolean {
   value.visit(visitor);
   // Keep the legacy calc() evaluator's permissive arithmetic, including
   // `calc(0 - 10px)`, which existing publications use. Only the newly
-  // evaluated math functions need this extra browser type check.
-  return visitor.isMath && visitor.hasOtherMath;
+  // evaluated math functions and min()/max()/clamp() need this type check.
+  return visitor.isMath && visitor.hasNonCalcMath;
 }
 
 /**
@@ -6647,9 +6659,8 @@ export class CascadeInstance {
         // time: the browser keeps the inherited value (or the initial one), so
         // the declaration is turned into `unset` here rather than being made
         // valid by the math functions that this engine evaluates below. Only a
-        // value containing the newly evaluated math functions is checked;
-        // legacy calc() arithmetic and Vivliostyle's own properties must
-        // retain their existing behavior.
+        // value containing non-calc() math functions is checked; pure legacy
+        // calc() arithmetic retains its existing behavior.
         const rejectedFunction =
           needsMathFunctionTypeCheck(cascVal.value) &&
           isFunctionRejectedByBrowser(name, cascVal.value);
