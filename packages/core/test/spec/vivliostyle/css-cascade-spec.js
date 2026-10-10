@@ -2811,6 +2811,39 @@ describe("css-cascade", function () {
       });
     });
 
+    it("validates each page size dimension independently of native size support", function () {
+      var nativeSupports = CSS.supports.bind(CSS);
+      var supports = spyOn(CSS, "supports");
+      [true, false].forEach((sizeSupported) => {
+        supports.and.callFake((name, value) =>
+          name === "size" ? sizeSupported : nativeSupports(name, value),
+        );
+        [
+          ["calc(min(20px, 7))", "unset"],
+          ["calc(min(20px, 7)) 30px", "unset"],
+          ["30px calc(min(20px, 7))", "unset"],
+          ["calc(min(20%, 7%)) 30px", "unset"],
+          ["calc(min(20, 7))", "unset"],
+          ["calc(min(20px, 7px))", "7px"],
+          ["calc(min(20px, 7px)) calc(max(20px, 30px))", "7px 30px"],
+          ["calc(20px - calc(0 - 10px)) calc(min(20px, 7px))", "30px 7px"],
+          ["a4 landscape", "a4 landscape"],
+          ["auto", "auto"],
+        ].forEach(([input, expected]) => {
+          var style = {
+            size: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+          };
+          applyCalcFilter(style);
+          expect(style.size.value.toString())
+            .withContext(input + ", native size: " + sizeSupported)
+            .toBe(expected);
+        });
+      });
+      expect(supports.calls.allArgs().some(([name]) => name === "size")).toBe(
+        false,
+      );
+    });
+
     it("evaluates calculations in Vivliostyle page properties", function () {
       var style = {};
       ["margin-inside", "margin-outside", "bleed", "crop-offset"].forEach(

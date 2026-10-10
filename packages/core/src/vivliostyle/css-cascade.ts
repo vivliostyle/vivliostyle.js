@@ -1419,6 +1419,17 @@ function isFunctionRejectedByBrowser(
   propName: string,
   value: Css.Val,
 ): boolean {
+  if (propName === "size") {
+    // @page size is a descriptor: do not depend on whether the browser also
+    // exposes a property named size. Check each dimension as a length only.
+    const dimensions = value instanceof Css.SpaceList ? value.values : [value];
+    return dimensions.some(
+      (dimension) =>
+        needsMathFunctionTypeCheck(dimension) &&
+        dimension instanceof Css.Func &&
+        !CSS.supports("border-top-width", checkableText(dimension)),
+    );
+  }
   // Reuse the layout coupling maps for browser-unknown logical/page sides.
   // Shorthand aliases such as inset-inside have already become inside here.
   if (!CSS.supports(propName, "initial")) {
@@ -6664,7 +6675,7 @@ export class CascadeInstance {
         // value containing non-calc() math functions is checked; pure legacy
         // calc() arithmetic retains its existing behavior.
         const rejectedFunction =
-          needsMathFunctionTypeCheck(cascVal.value) &&
+          (name === "size" || needsMathFunctionTypeCheck(cascVal.value)) &&
           isFunctionRejectedByBrowser(name, cascVal.value);
         let value =
           (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
