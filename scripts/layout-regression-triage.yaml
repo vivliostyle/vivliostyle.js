@@ -9,7 +9,7 @@
     and a 100mm page area with 30mm inside and 20mm outside margins, 3mm bleed,
     and 6mm crop offset. Both pages match the stable viewer. Browser validation
     remains in place for the newly evaluated math functions on known properties.
-  approvedViewer: ""
+  approvedViewer: git-fix-pr2176followup
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
@@ -29,7 +29,7 @@
     with font-size: 1lh and its own line-height must still resolve font size
     against the source parent's line height (30px), before applying its own
     line-height. Both footnotes are 29.998px after layout unit adjustment.
-  approvedViewer: ""
+  approvedViewer: git-fix-pr2176followup
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-number-division.html&zoom=1&spread=false

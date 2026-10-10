@@ -1399,6 +1399,12 @@ export function isInvalidFontWeight(
 function isSupportedFunctionValue(propName: string, value: Css.Val): boolean {
   return (
     !(value instanceof Css.Func || value instanceof Css.Expr) ||
+    // The engine can resolve a number-valued line-height calculation even
+    // when the browser does not yet parse dimensional division. Keep native
+    // validation for the newly evaluated math functions and other properties.
+    (propName === "line-height" &&
+      !needsMathFunctionTypeCheck(value) &&
+      isNumberCalculationValue(value)) ||
     CSS.supports(propName, value.toString())
   );
 }
@@ -1681,13 +1687,102 @@ class LengthPercentageTypeVisitor extends Css.FilterVisitor {
   }
 }
 
-function isNumberCalculationValue(value: Css.Val): boolean {
-  return (
-    value instanceof Css.Func &&
-    CSS.supports(
-      "z-index",
-      checkableText(value.visit(new LengthPercentageTypeVisitor())),
+/**
+ * Infer the length exponent from the parsed operands, before evaluation erases
+ * their units. Zero denotes a number; null denotes an unknown or incompatible
+ * type. This must work even when the host browser lacks CSS typed division.
+ */
+function calculationLengthExponent(expr: Exprs.Val): number | null {
+  if (expr instanceof Exprs.Numeric) {
+    return Exprs.isAbsoluteLengthUnit(expr.unit) ||
+      Exprs.isFontRelativeLengthUnit(expr.unit) ||
+      browserFontRelativeUnitRatio(expr.unit) != null ||
+      Exprs.isRootFontRelativeLengthUnit(expr.unit) ||
+      Exprs.isViewportRelativeLengthUnit(expr.unit)
+      ? 1
+      : null;
+  }
+  if (expr instanceof Exprs.Const) {
+    return typeof expr.val === "number" ? 0 : null;
+  }
+  if (expr instanceof Exprs.Named) {
+    return ["pi", "e", "infinity", "nan"].includes(
+      expr.qualifiedName.toLowerCase(),
     )
+      ? 0
+      : null;
+  }
+  if (expr instanceof Exprs.Negate) {
+    return calculationLengthExponent(expr.val);
+  }
+  if (
+    expr instanceof Exprs.Add ||
+    expr instanceof Exprs.Subtract ||
+    expr instanceof Exprs.Multiply ||
+    expr instanceof Exprs.Divide
+  ) {
+    const lhs = calculationLengthExponent(expr.lhs);
+    const rhs = calculationLengthExponent(expr.rhs);
+    if (lhs == null || rhs == null) {
+      return null;
+    }
+    if (expr instanceof Exprs.Multiply) {
+      return lhs + rhs;
+    }
+    if (expr instanceof Exprs.Divide) {
+      return lhs - rhs;
+    }
+    return lhs === rhs ? lhs : null;
+  }
+  if (expr instanceof Exprs.Call) {
+    const name = expr.qualifiedName.toLowerCase();
+    if (NUMBER_MATH_FUNCTION_NAMES.includes(name)) {
+      return 0;
+    }
+    if (
+      !["min", "max", "clamp", "abs", "hypot", "mod", "rem", "round"].includes(
+        name,
+      )
+    ) {
+      return null;
+    }
+    // A rounding strategy is an identifier, not an operand dimension.
+    const params =
+      name === "round" && expr.params[0] instanceof Exprs.Named
+        ? expr.params.slice(1)
+        : expr.params;
+    const dimensions = params.map(calculationLengthExponent);
+    const first = dimensions[0];
+    // round() without a step accepts only a number, with an implicit step of 1.
+    if (name === "round" && dimensions.length === 1 && first !== 0) {
+      return null;
+    }
+    return first != null && dimensions.every((dimension) => dimension === first)
+      ? first
+      : null;
+  }
+  return null;
+}
+
+function isNumberCalculationValue(value: Css.Val): boolean {
+  if (!(value instanceof Css.Func)) {
+    return false;
+  }
+  // Font-size and line-height percentages have a length basis, including
+  // root values inspected before relative units are converted to px.
+  const typedValue = value.visit(new LengthPercentageTypeVisitor());
+  const exprText =
+    value.name.toLowerCase() === "calc"
+      ? typedValue.toString().replace(/^calc\b/i, "-epubx-expr")
+      : new Css.Func("-epubx-expr", [typedValue]).toString();
+  const exprValue = CssParser.parseValue(
+    new Exprs.LexicalScope(null),
+    new CssTokenizer.Tokenizer(exprText, null),
+    "",
+  );
+  return (
+    exprValue instanceof Css.Expr &&
+    calculationLengthExponent(exprValue.expr) === 0
   );
 }
 
@@ -8819,10 +8914,8 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
         if (typeof exprResult === "number" && isNaN(exprResult)) {
           this.evaluatedToNaN = true;
         } else if (typeof exprResult === "number") {
-          // A calculation can be a number even when it contains lengths:
-          // `calc(30px / 20px)` cancels their dimensions. Probe a property
-          // that accepts only numbers (including calculations of fractional
-          // numbers), so percentages and lengths cannot be mistaken for one.
+          // The parsed operands retain their dimensions: division can cancel
+          // lengths into a number even when the browser lacks typed division.
           const numberCalculation =
             isNumberCalculationValue(value) ||
             isNumberCalculation(exprVal.expr);
