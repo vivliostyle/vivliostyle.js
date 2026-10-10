@@ -1,3 +1,41 @@
+- category: General
+  title: "calc() in headings and page properties (PR #2176 follow-up)"
+  file: calc-page-layout.html
+  decision: expected
+  notes: >-
+    PR #2176 rejected legacy calc(0 - length) arithmetic and calculations in
+    Vivliostyle-only page properties through CSS.supports(). The fix restores
+    matching heading geometry (margin-left -5mm, padding-left 20mm, width 80mm)
+    and a 100mm page area with 30mm inside and 20mm outside margins, 3mm bleed,
+    and 6mm crop offset. Both pages match the stable viewer. Browser validation
+    remains in place for the newly evaluated math functions on known properties.
+  approvedViewer: ""
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
+- category: General
+  title: "calc() with dimensional cancellation (PR #2176 follow-up)"
+  file: calc-number-division.html
+  decision: expected
+  notes: >-
+    A ratio of lengths is a number, so calc(30px / 20px) keeps the inherited
+    1.5 line-height multiplier rather than becoming 1.5px. The sample and
+    reference have matching 30px line heights at 20px font size; the percentage
+    ratio keeps the 36px line height of a 24px child, including inheritance from
+    the root's percentage ratio, and 1rlh is 24px. A footnote
+    with font-size: 1lh and its own line-height must still resolve font size
+    against the source parent's line height (30px), before applying its own
+    line-height. Both footnotes are 29.998px after layout unit adjustment.
+  approvedViewer: ""
+  actualLabel: dev
+  actualUrl: >-
+    http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-number-division.html&zoom=1&spread=false
+  baselineLabel: canary
+  baselineUrl: >-
+    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/calc-number-division.html&zoom=1&spread=false
 - category: Cross-references
   title: "target-counter() named page after TOC page (Issue #2172)"
   file: target-counter-named-page-after-toc.html

@@ -333,6 +333,14 @@ module.exports = [
         title:
           "Root line height from a math function of numbers (Issue #2174 follow-up)",
       },
+      {
+        file: "calc-page-layout.html",
+        title: "calc() in headings and page properties (PR #2176 follow-up)",
+      },
+      {
+        file: "calc-number-division.html",
+        title: "calc() with dimensional cancellation (PR #2176 follow-up)",
+      },
       { file: "justification.html", title: "Justification" },
       {
         file: "justification_vertical.html",

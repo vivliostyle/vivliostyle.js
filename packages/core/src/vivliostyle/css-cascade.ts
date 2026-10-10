@@ -1412,28 +1412,29 @@ function isSupportedFunctionValue(propName: string, value: Css.Val): boolean {
  * inherited value, and this engine must not make it valid by evaluating the
  * function. A function with an internal viewport unit (`pv*`) is not such a
  * value: the browser does not know those units, while this engine resolves
- * them. (Review)
+ * them. Properties that the browser does not recognize, such as `bleed`
+ * and `margin-inside`, are validated by Vivliostyle instead.
  */
 function isFunctionRejectedByBrowser(
   propName: string,
   value: Css.Val,
 ): boolean {
   return (
-    value instanceof Css.Func && !CSS.supports(propName, checkableText(value))
+    value instanceof Css.Func &&
+    CSS.supports(propName, "initial") &&
+    !CSS.supports(propName, checkableText(value))
   );
 }
 
 /**
- * Whether every function of the value is one of the math functions of CSS
- * Values 4 that this engine evaluates: `calc()`, `min()`, `max()`, `clamp()`
- * and the functions of `OTHER_MATH_FUNCTION_NAMES`. Only such a value is
- * checked against the target property before it is evaluated, because the
- * browser may reject a function that this engine resolves itself, e.g. the
- * `leader()` of a `content` declaration or the `pv*` units that
- * `checkableText()` covers. (Review)
+ * Check only values containing the newly evaluated math functions, with no
+ * functions outside CSS math. Browser validation must not reject functions
+ * that Vivliostyle resolves itself, such as `leader()`, or change the legacy
+ * calc() arithmetic used by existing publications.
  */
 class MathFunctionVisitor extends Css.Visitor {
   isMath = true;
+  hasOtherMath = false;
 
   override visitFunc(func: Css.Func): Css.Val | null {
     if (
@@ -1445,16 +1446,22 @@ class MathFunctionVisitor extends Css.Visitor {
     ) {
       this.isMath = false;
     } else if (this.isMath) {
+      if (OTHER_MATH_FUNCTION_NAMES.includes(func.name.toLowerCase())) {
+        this.hasOtherMath = true;
+      }
       this.visitValues(func.values);
     }
     return null;
   }
 }
 
-function isMathFunctionValue(value: Css.Val): boolean {
+function needsMathFunctionTypeCheck(value: Css.Val): boolean {
   const visitor = new MathFunctionVisitor();
   value.visit(visitor);
-  return visitor.isMath;
+  // Keep the legacy calc() evaluator's permissive arithmetic, including
+  // `calc(0 - 10px)`, which existing publications use. Only the newly
+  // evaluated math functions need this extra browser type check.
+  return visitor.isMath && visitor.hasOtherMath;
 }
 
 /**
@@ -1666,7 +1673,30 @@ class DimensionVisitor extends Css.FilterVisitor {
   }
 }
 
+class LengthPercentageTypeVisitor extends Css.FilterVisitor {
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    // Font-size and line-height percentages have a length basis. A type
+    // probe needs that context even before their actual px values are known.
+    return numeric.unit === "%" ? new Css.Numeric(numeric.num, "px") : numeric;
+  }
+}
+
+function isNumberCalculationValue(value: Css.Val): boolean {
+  return (
+    value instanceof Css.Func &&
+    CSS.supports(
+      "z-index",
+      checkableText(value.visit(new LengthPercentageTypeVisitor())),
+    )
+  );
+}
+
 export function isUnitlessNumberValue(value: Css.Val): boolean {
+  // Lengths and percentages can cancel through division, including in a
+  // root declaration whose percentages have not yet been converted to px.
+  if (isNumberCalculationValue(value)) {
+    return true;
+  }
   const visitor = new DimensionVisitor();
   value.visit(visitor);
   return !visitor.found;
@@ -6599,11 +6629,11 @@ export class CascadeInstance {
         // time: the browser keeps the inherited value (or the initial one), so
         // the declaration is turned into `unset` here rather than being made
         // valid by the math functions that this engine evaluates below. Only a
-        // value of the math functions of CSS Values 4 is checked: a function
-        // that this engine resolves while the browser does not know it must
-        // not be rejected. (Review)
+        // value containing the newly evaluated math functions is checked;
+        // legacy calc() arithmetic and Vivliostyle's own properties must
+        // retain their existing behavior.
         const rejectedFunction =
-          isMathFunctionValue(cascVal.value) &&
+          needsMathFunctionTypeCheck(cascVal.value) &&
           isFunctionRejectedByBrowser(name, cascVal.value);
         let value =
           (name === "font-size" && isNegativeLiteralFontSize(cascVal.value)) ||
@@ -8789,7 +8819,13 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
         if (typeof exprResult === "number" && isNaN(exprResult)) {
           this.evaluatedToNaN = true;
         } else if (typeof exprResult === "number") {
-          const numberCalculation = isNumberCalculation(exprVal.expr);
+          // A calculation can be a number even when it contains lengths:
+          // `calc(30px / 20px)` cancels their dimensions. Probe a property
+          // that accepts only numbers (including calculations of fractional
+          // numbers), so percentages and lengths cannot be mistaken for one.
+          const numberCalculation =
+            isNumberCalculationValue(value) ||
+            isNumberCalculation(exprVal.expr);
           // The dimensions of the arguments of a function that returns a
           // `<number>` whatever its arguments are, e.g. the `20px` of
           // `sign(20px)`, are numbers and not lengths, so only the dimensions

@@ -2659,6 +2659,38 @@ describe("css-cascade", function () {
       expect(style["content"].value.toString()).toBe("leader(dotted)");
       expect(style["width"].value.toString()).toBe("min(2pvw,50px)");
     });
+
+    it("preserves legacy calc arithmetic with a unitless zero", function () {
+      var style = {
+        "margin-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(0 - 10px)"),
+          1,
+        ),
+        "padding-left": new adapt_csscasc.CascadeValue(
+          parseValue("calc(20px - calc(0 - 10px))"),
+          1,
+        ),
+      };
+      applyCalcFilter(style);
+      expect(style["margin-left"].value.toString()).toBe("-10px");
+      expect(style["padding-left"].value.toString()).toBe("30px");
+    });
+
+    it("evaluates calculations in Vivliostyle page properties", function () {
+      var style = {};
+      ["margin-inside", "margin-outside", "bleed", "crop-offset"].forEach(
+        (name) => {
+          style[name] = new adapt_csscasc.CascadeValue(
+            parseValue("calc(20px + 5px)"),
+            1,
+          );
+        },
+      );
+      applyCalcFilter(style);
+      Object.keys(style).forEach((name) => {
+        expect(style[name].value.toString()).withContext(name).toBe("25px");
+      });
+    });
   });
 
   describe("VarFilterVisitor regression coverage", function () {
@@ -5029,6 +5061,33 @@ describe("css-cascade", function () {
         expect(evaluate("calc(2 * sign(abs(20px)))", "font-weight")).toBe("2");
         expect(evaluate("calc(abs(sign(min(1px, 2px))))", "width")).toBe("1");
         expect(evaluate("calc(round(20px, 7px))", "width")).toBe("21px");
+      });
+
+      it("keeps dimensionally cancelled lengths as numbers", function () {
+        function evaluate(text) {
+          return adapt_csscasc.evaluateCSSToCSS(
+            newContext(),
+            adapt_cssparse.parseValue(
+              new adapt_exprs.LexicalScope(null),
+              new adapt_csstok.Tokenizer(text, null),
+              "",
+            ),
+            "line-height",
+          );
+        }
+        expect(evaluate("calc(30px / 20px)").toString()).toBe("1.5");
+        expect(evaluate("calc(2 * (30px / 20px))").toString()).toBe("3");
+        expect(evaluate("calc(30px / 20px * 10px)").toString()).toBe("15px");
+        expect(evaluate("calc(min(30px / 20px, 2))").toString()).toBe("1.5");
+        var value = adapt_cssparse.parseValue(
+          new adapt_exprs.LexicalScope(null),
+          new adapt_csstok.Tokenizer("calc(150% / 100%)", null),
+          "",
+        );
+        expect(
+          adapt_csscasc.resolveLineHeightValueToPx(newContext(), value, 32, 40),
+        ).toBe(48);
+        expect(adapt_csscasc.isUnitlessNumberValue(value)).toBe(true);
       });
 
       it("uses the initial font size when the accumulated font-size was removed", function () {
