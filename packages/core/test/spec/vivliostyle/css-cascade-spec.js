@@ -2676,6 +2676,48 @@ describe("css-cascade", function () {
       expect(style["padding-left"].value.toString()).toBe("30px");
     });
 
+    it("validates math types in Vivliostyle page properties", function () {
+      [
+        "margin-inside",
+        "margin-outside",
+        "padding-inside",
+        "padding-outside",
+        "bleed",
+        "crop-offset",
+      ].forEach((name) => {
+        [
+          ["calc(mod(20px, 7))", "unset"],
+          ["calc(mod(20px, 7px))", "6px"],
+        ].forEach(([input, expected]) => {
+          var style = {};
+          style[name] = new adapt_csscasc.CascadeValue(parseValue(input), 1);
+          applyCalcFilter(style);
+          expect(style[name].value.toString())
+            .withContext(name + ": " + input)
+            .toBe(expected);
+        });
+      });
+    });
+
+    it("rejects percentage math in length-only page properties", function () {
+      var style = {};
+      ["margin-inside", "padding-outside", "bleed", "crop-offset"].forEach(
+        (name) => {
+          style[name] = new adapt_csscasc.CascadeValue(
+            parseValue("calc(mod(20%, 7%))"),
+            1,
+          );
+        },
+      );
+      applyCalcFilter(style);
+      expect(style["margin-inside"].value.toString()).toBe("calc(mod(20%,7%))");
+      expect(style["padding-outside"].value.toString()).toBe(
+        "calc(mod(20%,7%))",
+      );
+      expect(style["bleed"].value.toString()).toBe("unset");
+      expect(style["crop-offset"].value.toString()).toBe("unset");
+    });
+
     it("evaluates calculations in Vivliostyle page properties", function () {
       var style = {};
       ["margin-inside", "margin-outside", "bleed", "crop-offset"].forEach(

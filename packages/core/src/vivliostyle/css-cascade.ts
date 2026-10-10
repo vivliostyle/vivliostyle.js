@@ -1412,13 +1412,29 @@ function isSupportedFunctionValue(propName: string, value: Css.Val): boolean {
  * inherited value, and this engine must not make it valid by evaluating the
  * function. A function with an internal viewport unit (`pv*`) is not such a
  * value: the browser does not know those units, while this engine resolves
- * them. Properties that the browser does not recognize, such as `bleed`
- * and `margin-inside`, are validated by Vivliostyle instead.
+ * them. Vivliostyle page properties are checked using standard properties
+ * with the same math-value grammar.
  */
 function isFunctionRejectedByBrowser(
   propName: string,
   value: Css.Val,
 ): boolean {
+  // Only function values are checked, so bleed/crop-offset's `auto` keyword
+  // does not need to be accepted by outline-offset's <length> grammar.
+  switch (propName) {
+    case "margin-inside":
+    case "margin-outside":
+      propName = "margin-left";
+      break;
+    case "padding-inside":
+    case "padding-outside":
+      propName = "padding-left";
+      break;
+    case "bleed":
+    case "crop-offset":
+      propName = "outline-offset";
+      break;
+  }
   return (
     value instanceof Css.Func &&
     CSS.supports(propName, "initial") &&
