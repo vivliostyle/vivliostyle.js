@@ -2609,6 +2609,89 @@ describe("css-cascade", function () {
       return style;
     }
 
+    function renderCalculatedValue(property, input) {
+      var style = {
+        [property]: new adapt_csscasc.CascadeValue(parseValue(input), 1),
+      };
+      applyCalcFilter(style);
+      return adapt_csscasc
+        .evaluateCSSToCSS(newContext(), style[property].value, property)
+        .toString();
+    }
+
+    it("keeps overflowing flex shorthand calculations usable by the browser", function () {
+      ["calc(infinity)", "calc(exp(1000))", "calc(1 / 0)"].forEach(
+        (calculation) => {
+          var value = renderCalculatedValue("flex", calculation + " 0 0px");
+          var container = document.createElement("div");
+          container.style.cssText = "display:flex;width:100px";
+          var growing = document.createElement("div");
+          growing.style.flex = value;
+          var sibling = document.createElement("div");
+          sibling.style.flex = "1 0 0px";
+          container.append(growing, sibling);
+          document.body.append(container);
+          try {
+            expect(growing.getBoundingClientRect().width)
+              .withContext(calculation)
+              .toBe(100);
+            expect(sibling.getBoundingClientRect().width).toBe(0);
+          } finally {
+            container.remove();
+          }
+        },
+      );
+    });
+
+    it("preserves non-finite calculations through the final longhand evaluation", function () {
+      [
+        ["flex-grow", "calc(infinity)"],
+        ["opacity", "calc(infinity)"],
+        ["opacity", "calc(-1 / 0)"],
+        ["opacity", "calc(NaN)"],
+      ].forEach(([property, input]) => {
+        var value = renderCalculatedValue(property, input);
+        var native = document.createElement("div");
+        var evaluated = document.createElement("div");
+        native.style.setProperty(property, input);
+        evaluated.style.setProperty(property, value);
+        document.body.append(native, evaluated);
+        try {
+          expect(evaluated.style.getPropertyValue(property))
+            .withContext(property + ": " + input)
+            .not.toBe("");
+          expect(getComputedStyle(evaluated).getPropertyValue(property))
+            .withContext(property + ": " + input)
+            .toBe(getComputedStyle(native).getPropertyValue(property));
+        } finally {
+          native.remove();
+          evaluated.remove();
+        }
+      });
+    });
+
+    it("preserves calculations in comma lists and color functions", function () {
+      [
+        [
+          "font-variation-settings",
+          '"wght" calc(infinity), "wdth" calc(-1 / 0)',
+        ],
+        ["color", "rgb(calc(infinity), calc(-1 / 0), calc(NaN))"],
+      ].forEach(([property, input]) => {
+        var value = renderCalculatedValue(property, input);
+        expect(CSS.supports(property, value))
+          .withContext(property + ": " + value)
+          .toBe(true);
+      });
+    });
+
+    it("still clamps overflowing font weight calculations to their range", function () {
+      expect(renderCalculatedValue("font-weight", "calc(infinity)")).toBe(
+        "1000",
+      );
+      expect(renderCalculatedValue("font-weight", "calc(-1 / 0)")).toBe("1");
+    });
+
     it("does not make a math function that the browser rejects valid", function () {
       // `calc(round(20px))` is invalid for a length, because the one-argument
       // `round()` is a `<number>` (CSS Values 4 §10.3), and
@@ -5213,11 +5296,9 @@ describe("css-cascade", function () {
         // here. (Review)
         expect(evaluate("calc(hypot(3px, 4px))", "width")).toBe("5px");
         expect(evaluate("calc(hypot(3, 4))", "width")).toBe("5");
-        // A value that is not finite is serialized as the JavaScript name and
-        // evaluated again by the checks of a declaration, e.g.
-        // `evaluatesToNaN()`: the name is a constant, not an undefined name.
-        // (Review)
-        expect(evaluate("calc(Infinity)", "width")).toBe("Infinity");
+        // Non-finite numbers must remain valid CSS calculations even after
+        // evaluation; bare JavaScript Infinity is not a CSS number.
+        expect(evaluate("calc(Infinity)", "width")).toBe("calc(infinity)");
         expect(evaluate("calc(NaN)", "width")).toBe("calc(NaN)");
         // A calculation with a keyword that this engine cannot evaluate as a
         // number, e.g. the `<rounding-strategy>` of `round(up, 650, 100)`, is

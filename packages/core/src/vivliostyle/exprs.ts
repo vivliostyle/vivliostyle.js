@@ -680,14 +680,9 @@ export class Context {
       }
       s = s.parent;
     }
-    // This engine represents a value that is not finite with the JavaScript
-    // name: `Css.Num(Infinity)` serializes as `Infinity`, e.g. the value that
-    // `evaluateFontWeightMathFunction()` materializes for
-    // `font-weight: calc(exp(1000))` before the range of CSS Fonts 4 clamps
-    // it. Such a value is evaluated again when the declaration is validated
-    // afterwards, e.g. by `evaluatesToNaN()`, and the `nan` of CSS Values 4 is
-    // represented as `NaN` in the same way: recognize both, or the evaluation
-    // fails with an undefined name. The other numeric constants of CSS Values
+    // Non-finite CSS numbers serialize as calculations containing these
+    // keywords and can be evaluated again when a declaration is validated.
+    // The other numeric constants of CSS Values
     // 4 §10.7.1 are recognized here as well, so that a declaration that uses
     // `pi` or `e`, e.g. `line-height: calc(pi * 10px)`, resolves in the
     // inheritance walk as well (the calculation keyword guard lets those two
