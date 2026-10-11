@@ -51,6 +51,16 @@ module.exports = [
           "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)",
       },
       {
+        file: "absolute-inline-line-numbers-horizontal.html",
+        title:
+          "Code pagination with absolutely positioned line numbers and annotations (horizontal, PR #2165)",
+      },
+      {
+        file: "absolute-inline-line-numbers-vertical.html",
+        title:
+          "Code pagination with absolutely positioned line numbers and annotations (vertical, PR #2165)",
+      },
+      {
         file: "css-parse-error/gradient-background-image.html",
         title: "Gradient background-image",
       },

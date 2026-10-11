@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Regression test for PR #2165: out-of-flow line numbers must not affect code pagination. -->
+<html lang="en"><head><meta charset="utf-8">
+<title>Absolutely positioned line numbers at page breaks (horizontal)</title>
+<style>
+@page { size: 220px 120px; margin: 10px; }
+:root { font: 16px/20px monospace;  orphans: 1; widows: 1; }
+body { margin: 0; }
+pre { margin: 0; padding-inline-start: 30px; white-space: pre-wrap; background: #eee; }
+.number { position: absolute; inset-inline-start: 0; color: #888; }
+.annotation { position: relative; font-size: 10px; line-height: 12px; top: -1px; background: #333; color: white; }
+.annotation::before { content: "\a0"; display: block; position: absolute; inline-size: 20px; inset-block-start: -6px; inset-inline-start: -20px; border-block-end: 1px dashed #333; }
+</style></head><body><pre><code><span class="number">01</span><span>line 01 text</span> <span class="annotation">note</span>
+<span class="number">02</span><span>line 02 text</span> <span class="annotation">note</span>
+<span class="number">03</span><span>line 03 text</span> <span class="annotation">note</span>
+<span class="number">04</span><span>line 04 text</span> <span class="annotation">note</span>
+<span class="number">05</span><span>line 05 text</span> <span class="annotation">note</span>
+<span class="number">06</span><span>line 06 text</span> <span class="annotation">note</span>
+<span class="number">07</span><span>line 07 text</span> <span class="annotation">note</span>
+<span class="number">08</span><span>line 08 text</span> <span class="annotation">note</span>
+<span class="number">09</span><span>line 09 text</span> <span class="annotation">note</span>
+<span class="number">10</span><span>line 10 text</span> <span class="annotation">note</span>
+<span class="number">11</span><span>line 11 text</span> <span class="annotation">note</span>
+<span class="number">12</span><span>line 12 text</span> <span class="annotation">note</span>
+<span class="number">13</span><span>line 13 text</span> <span class="annotation">note</span>
+<span class="number">14</span><span>line 14 text</span> <span class="annotation">note</span>
+<span class="number">15</span><span>line 15 text</span></code></pre></body></html>

@@ -616,6 +616,39 @@ export function fixAutoFillMultiColumnBoxes(column: Layout.Column): void {
 }
 
 /**
+ * Measure the line containing a BR or an out-of-flow element's static anchor,
+ * using the containing inline's font rather than the positioned box's size.
+ */
+function calculateInlineAnchorEdge(
+  element: Element,
+  clientLayout: Vtree.ClientLayout,
+  vertical: boolean,
+): number {
+  const marker = element.ownerDocument.createElement("span");
+  element.before(marker);
+  const markerRect = clientLayout.getElementClientRect(marker);
+  marker.remove();
+  if (
+    markerRect &&
+    (markerRect.right > markerRect.left || markerRect.bottom > markerRect.top)
+  ) {
+    const rects = [markerRect];
+    adjustRectsForColumnBreaking(rects, vertical);
+    adjustTextRectsForLineHeight(
+      rects,
+      element.parentElement,
+      clientLayout,
+      vertical,
+    );
+    const edge = vertical ? rects[0].left : rects[0].bottom;
+    if (Number.isFinite(edge)) {
+      return edge;
+    }
+  }
+  return NaN;
+}
+
+/**
  * Calculate the position of the "after" edge in the block-progression.
  * Returns the edge position in pixels if it was determined successfully,
  * and returns NaN if the position could not be determined and the node
@@ -629,6 +662,37 @@ export function calculateEdge(
 ): number {
   const node = nodeContext.viewNode;
   if (!node) {
+    return NaN;
+  }
+
+  // Inline traversal also visits absolutely positioned annotations (#2162).
+  // Measure only their in-flow anchor when the block position is static. This
+  // keeps leading annotations, such as line numbers, with the following line.
+  // Explicitly positioned boxes must not contribute their shifted edges.
+  let outOfFlowContext: Vtree.NodeContext | null = null;
+  for (
+    let context: Vtree.NodeContext | null = nodeContext;
+    context;
+    context = context.parent
+  ) {
+    if (isCssOutOfFlow(context.viewNode)) {
+      outOfFlowContext = context;
+    }
+  }
+  if (outOfFlowContext) {
+    const element = outOfFlowContext.viewNode as HTMLElement;
+    const style = element.style;
+    const blockStart =
+      (vertical ? style.right : style.top) || style.insetBlockStart;
+    const blockEnd =
+      (vertical ? style.left : style.bottom) || style.insetBlockEnd;
+    if (
+      style.position === "absolute" &&
+      (!blockStart || blockStart === "auto") &&
+      (!blockEnd || blockEnd === "auto")
+    ) {
+      return calculateInlineAnchorEdge(element, clientLayout, vertical);
+    }
     return NaN;
   }
 
@@ -659,30 +723,9 @@ export function calculateEdge(
     // the first BR's line fits while the second BR's blank line overflows.
     // (issue #1685)
     if (element.localName === "br") {
-      const doc = element.ownerDocument;
-      const marker = doc.createElement("span");
-      element.before(marker);
-      const markerRect = clientLayout.getElementClientRect(marker);
-      marker.remove();
-      if (markerRect) {
-        const rects = [markerRect];
-        adjustRectsForColumnBreaking(rects, vertical);
-        // The marker has the font's extent, just like a text range. Use the
-        // same line-height adjustment so a fitting line does not leave its
-        // BR on the next page as an extra blank line. (Issue #2163)
-        adjustTextRectsForLineHeight(
-          rects,
-          element.parentElement,
-          clientLayout,
-          vertical,
-        );
-        const adjustedRect = rects[0];
-        const edge = vertical ? adjustedRect.left : adjustedRect.bottom;
-        if (!isNaN(edge) && edge !== 0) {
-          return edge;
-        }
-      }
-      return NaN;
+      // Use the line-height-adjusted marker so a fitting line does not leave
+      // its BR on the next page as an extra blank line. (Issue #2163)
+      return calculateInlineAnchorEdge(element, clientLayout, vertical);
     }
     if (nodeContext.after || !nodeContext.inline) {
       if (

@@ -2960,8 +2960,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       } else if (wentUp) {
         wentUp = false;
-      } else if (LayoutHelper.isSpecial(element)) {
-        // Skip special
+      } else if (
+        LayoutHelper.isSpecial(element) ||
+        LayoutHelper.isCssOutOfFlow(element)
+      ) {
+        // Out-of-flow annotations stay in inline traversal (#2162), but their
+        // boxes must not participate in line grouping or page-break fitting.
+        if (node.contains(end)) {
+          endNotReached = false;
+        }
       } else if (
         !element.firstChild ||
         Base.mediaTags[element.localName] ||
