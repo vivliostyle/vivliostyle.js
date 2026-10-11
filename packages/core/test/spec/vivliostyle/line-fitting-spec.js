@@ -46,8 +46,21 @@ describe("line fitting with inline elements", function () {
         return column.findLinePositions([{ viewNode: block }]);
       }
       function edge(node, after = true) {
+        let parent = null;
+        const ancestors = [];
+        for (
+          let element = node.parentElement;
+          element;
+          element = element.parentElement
+        ) {
+          ancestors.push(element);
+          if (element === block) break;
+        }
+        for (const element of ancestors.reverse()) {
+          parent = { viewNode: element, parent };
+        }
         return LayoutHelper.calculateEdge(
-          { viewNode: node, inline: true, after },
+          { viewNode: node, inline: true, after, parent },
           clientLayout,
           0,
           vertical,
@@ -82,6 +95,31 @@ describe("line fitting with inline elements", function () {
         for (const br of block.querySelectorAll("br")) {
           expect(edge(br)).toBeCloseTo(edge(br.previousSibling), 2);
         }
+      });
+
+      it("ignores absolutely positioned annotations when fitting lines", function () {
+        block.textContent = "a".repeat(80);
+        const expected = positions();
+        block.innerHTML =
+          "a".repeat(10) +
+          '<span style="position: absolute; inset-block-start: -40px; font-size: 40px"><span>annotation</span></span>' +
+          "a".repeat(70);
+        expectSamePositions(positions(), expected);
+        const annotation = block.querySelector("span");
+        expect(edge(annotation)).toBeNaN();
+        expect(edge(annotation.firstChild)).toBeNaN();
+        expect(edge(annotation.firstChild.firstChild)).toBeNaN();
+      });
+
+      it("measures a static-positioned annotation on its source line", function () {
+        block.innerHTML =
+          'first<br><span style="position: absolute; inset-inline-start: -40px; font-size: 40px"><span>02</span></span>second';
+        const annotation = block.querySelector("span");
+        const expected = edge(block.lastChild);
+        expect(edge(annotation)).toBeCloseTo(expected, 2);
+        expect(edge(annotation.firstChild)).toBeCloseTo(expected, 2);
+        expect(edge(annotation.firstChild.firstChild)).toBeCloseTo(expected, 2);
+        expect(Math.abs(expected - edge(block.firstChild))).toBeCloseTo(16, 2);
       });
 
       it("keeps consecutive BRs on separate lines", function () {
