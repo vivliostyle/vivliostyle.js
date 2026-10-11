@@ -309,12 +309,7 @@ describe("exprs", function () {
   });
 
   describe("non-finite numbers", function () {
-    it("resolves the names that such a value is serialized as", function () {
-      // This engine represents a value that is not finite with the JavaScript
-      // name: `Css.Num(Infinity)` is serialized as `Infinity`, and such a
-      // value is evaluated again when a declaration is validated afterwards,
-      // e.g. by `evaluatesToNaN()`. The `nan` of CSS Values 4 is represented
-      // as `NaN` in the same way. (Review)
+    it("resolves calculation keywords case-insensitively", function () {
       expectResult(
         context.evalName(scope, "Infinity").evaluate(context),
         Infinity,

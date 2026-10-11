@@ -420,7 +420,18 @@ export class Num extends Val {
   }
 
   override appendTo(buf: Base.StringBuffer, toString: boolean): void {
-    buf.append(this.num.toString());
+    if (Number.isFinite(this.num)) {
+      buf.append(this.num.toString());
+    } else {
+      // Non-finite numbers are calculation keywords, not bare CSS numbers.
+      // Keep them usable in lists and in values evaluated again for output.
+      const keyword = Number.isNaN(this.num)
+        ? "NaN"
+        : this.num < 0
+          ? "-infinity"
+          : "infinity";
+      buf.append(`calc(${keyword})`);
+    }
   }
 
   override visit(visitor: Visitor): Val | null {
