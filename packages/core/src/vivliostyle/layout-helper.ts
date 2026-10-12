@@ -668,14 +668,16 @@ export function calculateEdge(
   // Inline traversal also visits absolutely positioned annotations (#2162).
   // Measure only their in-flow anchor when the block position is static. This
   // keeps leading annotations, such as line numbers, with the following line.
-  // Explicitly positioned boxes must not contribute their shifted edges.
+  // Explicitly positioned inline annotations must not contribute their shifted
+  // edges. Block-level positioned boxes and floats still need their own edges
+  // for page-break selection.
   let outOfFlowContext: Vtree.NodeContext | null = null;
   for (
     let context: Vtree.NodeContext | null = nodeContext;
     context;
     context = context.parent
   ) {
-    if (isCssOutOfFlow(context.viewNode)) {
+    if (context.inline && isCssOutOfFlow(context.viewNode)) {
       outOfFlowContext = context;
     }
   }

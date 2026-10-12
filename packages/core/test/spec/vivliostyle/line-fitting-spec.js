@@ -45,7 +45,7 @@ describe("line fitting with inline elements", function () {
       function positions() {
         return column.findLinePositions([{ viewNode: block }]);
       }
-      function edge(node, after = true) {
+      function edge(node, after = true, inline = true) {
         let parent = null;
         const ancestors = [];
         for (
@@ -57,10 +57,16 @@ describe("line fitting with inline elements", function () {
           if (element === block) break;
         }
         for (const element of ancestors.reverse()) {
-          parent = { viewNode: element, parent };
+          // These source spans remain inline in NodeContext even when an
+          // absolutely positioned annotation is blockified by the browser.
+          parent = {
+            viewNode: element,
+            inline: element.localName === "span",
+            parent,
+          };
         }
         return LayoutHelper.calculateEdge(
-          { viewNode: node, inline: true, after, parent },
+          { viewNode: node, inline, after, parent },
           clientLayout,
           0,
           vertical,
@@ -120,6 +126,29 @@ describe("line fitting with inline elements", function () {
         expect(edge(annotation.firstChild)).toBeCloseTo(expected, 2);
         expect(edge(annotation.firstChild.firstChild)).toBeCloseTo(expected, 2);
         expect(Math.abs(expected - edge(block.firstChild))).toBeCloseTo(16, 2);
+      });
+
+      it("measures block-level positioned boxes instead of their inline anchors", function () {
+        block.style.position = "relative";
+        block.innerHTML =
+          '<div style="position:absolute; inset-block-start:20px; width:40px; height:40px">box</div>';
+        const positioned = block.firstChild;
+        const rect = clientLayout.getElementClientRect(positioned);
+        expect(edge(positioned, true, false)).toBe(
+          vertical ? rect.left : rect.bottom,
+        );
+        expect(Number.isFinite(edge(positioned.firstChild))).toBe(true);
+      });
+
+      it("measures block-level floats for page-break selection", function () {
+        block.innerHTML =
+          '<div style="float:left; width:40px; height:40px">float</div>';
+        const floated = block.firstChild;
+        const rect = clientLayout.getElementClientRect(floated);
+        expect(edge(floated, true, false)).toBe(
+          vertical ? rect.left : rect.bottom,
+        );
+        expect(Number.isFinite(edge(floated.firstChild))).toBe(true);
       });
 
       it("keeps consecutive BRs on separate lines", function () {
