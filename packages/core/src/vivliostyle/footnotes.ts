@@ -270,14 +270,31 @@ export class LineFootnotePolicyLayoutConstraint
     public readonly footnote: Footnote,
     anchorViewNode: Element | Text | null,
     private readonly vertical: boolean,
+    private readonly pageFloatLayoutContext?: PageFloats.AttachedPageFloatLayoutContext,
   ) {
     // Capture the rendered anchor line when the footnote becomes constrained.
     // Using live DOM geometry keeps footnote-policy: line tied to the line that
     // owns the call instead of falling back to whole-paragraph ancestry.
-    this.anchorEdge = getBlockEndEdgeFromViewNode(anchorViewNode, vertical);
+    // Detached calls no longer identify a rendered anchor line.
+    this.anchorEdge =
+      anchorViewNode && !anchorViewNode.isConnected
+        ? NaN
+        : getBlockEndEdgeFromViewNode(anchorViewNode, vertical);
   }
 
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
+    if (
+      nodeContext.floatSide === "footnote" &&
+      this.pageFloatLayoutContext?.findPageFloatByNodePosition({
+        ...nodeContext.toNodePosition(),
+        after: false,
+      }) === this.footnote
+    ) {
+      // Cell pseudo-columns may shorten the source position, and re-layout
+      // may move the call before its previous line. Both edges of the call
+      // remain constrained by the float's registered before position.
+      return false;
+    }
     if (!isNaN(this.anchorEdge)) {
       const edge = getNodeContextEdge(nodeContext, this.vertical);
       if (!isNaN(edge)) {
@@ -506,6 +523,7 @@ export class FootnoteLayoutStrategy
           pageFloatLayoutContext.getPageFloatLayoutContext(
             footnote.floatReference,
           ).container.vertical,
+          pageFloatLayoutContext,
         );
         pageFloatLayoutContext.addLayoutConstraint(
           constraint,

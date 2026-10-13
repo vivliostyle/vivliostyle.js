@@ -804,6 +804,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   inRow: boolean = false;
   checkPoints: Vtree.RenderedNodeContext[] = [];
   inHeaderOrFooter: boolean = false;
+  violatesLayoutConstraint: boolean = false;
 
   constructor(
     public readonly formattingContext: TableFormattingContext,
@@ -821,11 +822,12 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
       return r;
     }
     this.postLayoutBlockContents(state);
+    const nodeContext = state.nodeContext;
+    this.checkLayoutConstraint(nodeContext);
     const floatResult = layoutFloatOrFootnoteIfNeeded(this.column, state);
     if (floatResult) {
       return floatResult;
     }
-    const nodeContext = state.nodeContext;
     const display = nodeContext.display;
     const repetitiveElements = formattingContext.getRepetitiveElements();
     switch (display) {
@@ -884,6 +886,7 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
     const display = nodeContext.display;
     const clientLayout = this.column.clientLayout;
     this.postLayoutBlockContents(state);
+    this.checkLayoutConstraint(nodeContext);
     if (nodeContext.sourceNode === formattingContext.tableSourceNode) {
       const computedStyle = clientLayout.getElementComputedStyle(
         formattingContext.getRootViewNode(nodeContext) as Element,
@@ -986,8 +989,19 @@ export class EntireTableLayoutStrategy extends LayoutUtil.EdgeSkipper {
   postLayoutBlockContents(state: LayoutUtil.RenderedActiveLayoutIteratorState) {
     if (this.checkPoints.length > 0) {
       this.column.postLayoutBlock(state.nodeContext, this.checkPoints);
+      this.checkPoints.forEach((checkPoint) => {
+        this.checkLayoutConstraint(checkPoint);
+      });
     }
     this.checkPoints = [];
+  }
+
+  private checkLayoutConstraint(nodeContext: Vtree.NodeContext): void {
+    if (!this.column.layoutConstraint.allowLayout(nodeContext)) {
+      // Finish collecting the table structure, then use fragmented layout to
+      // enforce constraints such as a forbidden line-policy footnote anchor.
+      this.violatesLayoutConstraint = true;
+    }
   }
 }
 
@@ -1523,6 +1537,24 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
             nodeContext,
             null,
           );
+          // Pseudo-columns render beyond denied checkpoints to collect cell
+          // breaks. Propagate those constraints even when the row fits.
+          const overflownInsideCell = this.formattingContext
+            .getCellsFallingOnRow(this.currentRowIndex)
+            .some((cell) => {
+              const fragment =
+                this.formattingContext.getCellFragmentOfCell(cell);
+              const pseudoColumn = fragment?.pseudoColumn.getColumn();
+              return pseudoColumn?.breakPositions.some(
+                (position) =>
+                  position instanceof Layout.BoxBreakPosition &&
+                  position.checkPoints.some(
+                    (point) =>
+                      point.overflow &&
+                      !pseudoColumn.layoutConstraint.allowLayout(point),
+                  ),
+              );
+            });
           const repetitiveElements =
             this.formattingContext.getRepetitiveElements();
           const overflownDueToRepetitiveElements =
@@ -1534,17 +1566,23 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           // overflow for this table fragment.
           const canResolveByDroppingFooter =
             !overflown &&
+            !overflownInsideCell &&
             overflownDueToRepetitiveElements &&
             !!repetitiveElements?.isFooterRegistered();
-          if (overflown || overflownDueToRepetitiveElements) {
+          if (
+            overflown ||
+            overflownInsideCell ||
+            overflownDueToRepetitiveElements
+          ) {
             // Catch row overflow as soon as the row finishes; otherwise the
             // next row start detects it one row too late and content can drift
             // into the page margin before the break is taken. (Issue #1902)
             if (
               !canResolveByDroppingFooter &&
-              this.formattingContext.getRowSpanningCellsOverflowingTheRow(
-                this.currentRowIndex,
-              ).length === 0
+              (overflownInsideCell ||
+                this.formattingContext.getRowSpanningCellsOverflowingTheRow(
+                  this.currentRowIndex,
+                ).length === 0)
             ) {
               this.resetColumn();
               nodeContext.overflow = true;
@@ -1592,7 +1630,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   private layoutEntireTable(
     nodeContext: Vtree.NodeContext,
     column: Layout.Column,
-  ): Task.Result<Vtree.NodeContext | null> {
+  ): Task.Result<{
+    nodeContext: Vtree.NodeContext | null;
+    violatesLayoutConstraint: boolean;
+  }> {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
@@ -1601,7 +1642,12 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       strategy,
       column.layoutContext,
     );
-    return iterator.iterate(nodeContext);
+    return iterator.iterate(nodeContext).thenAsync((nodeContextAfter) =>
+      Task.newResult({
+        nodeContext: nodeContextAfter,
+        violatesLayoutConstraint: strategy.violatesLayoutConstraint,
+      }),
+    );
   }
 
   private getColumnWidths(
@@ -1763,7 +1809,8 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       "TableLayoutProcessor.doInitialLayout",
     );
     const initialNodeContext = nodeContext.copy();
-    this.layoutEntireTable(nodeContext, column).then((nodeContextAfter) => {
+    this.layoutEntireTable(nodeContext, column).then((result) => {
+      const nodeContextAfter = result.nodeContext;
       const tableElement = nodeContextAfter.viewNode as Element;
 
       // CSS 2.1 §13.3.3: The first row's break-before propagates to the
@@ -1796,6 +1843,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
         ).current;
       if (
         !column.isOverflown(edge) &&
+        !result.violatesLayoutConstraint &&
         (!tableLayoutOption ||
           !tableLayoutOption.calculateBreakPositionsInside) &&
         !this.hasForcedBreakInRows(formattingContext)

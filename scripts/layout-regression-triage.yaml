@@ -875,3 +875,91 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/page_viewport_unit.html&zoom=1&spread=false
+- id: "0385"
+  category: Footnotes
+  title: "Shared line-policy footnotes in avoided table rows (Issue #2186)"
+  file: footnotes/footnotes-in-table-avoided-rows.html
+  type: difference
+  decision: expected
+  notes: >-
+    Fix for Issue #2186. Stable places all three body rows and both line-policy footnotes on one page,
+    overlapping the final row and the paragraph after the table. The PR preview reserves the shared footnote
+    area: the first call and its complete three-line note stay on page 1, and the avoided final row moves
+    intact to page 2 with its complete six-line note. The two-page result is the expected improvement.
+  approvedViewer: git-codex-fix2186-table-footnotes
+  actualLabel: git-codex-fix2186-table-footnotes
+  actualUrl: >-
+    https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-rows.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-rows.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
+- id: "0386"
+  category: Footnotes
+  title: "Line-policy footnote constraints in a table that fits (Issue #2186)"
+  file: footnotes/footnotes-in-table-avoided-short-row.html
+  type: difference
+  decision: expected
+  notes: >-
+    Fix for Issue #2186. The short final row fits geometrically, but its line-policy footnote constraint must
+    still be respected. Stable keeps it on page 1 and overlaps the following paragraph with the second note.
+    The PR preview keeps the first call and note on page 1 and moves the final row, its complete six-line
+    note, and the following paragraph to page 2 without overlap.
+  approvedViewer: git-codex-fix2186-table-footnotes
+  actualLabel: git-codex-fix2186-table-footnotes
+  actualUrl: >-
+    https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-short-row.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-short-row.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
+- id: "0387"
+  category: Footnotes
+  title: "Single line-policy footnote in an avoided final table row (Issue #2186)"
+  file: footnotes/footnotes-in-table-avoided-single-last-row.html
+  type: difference
+  decision: expected
+  notes: >-
+    Fix for Issue #2186. Stable overlaps the only footnote with the avoided final row and the following
+    paragraph on page 1. The PR preview moves the complete row and its six-line footnote to page 2, retaining
+    the repeated table header and the paragraph after the table. Page 1 contains only the first two body rows,
+    with no stale footnote area.
+  approvedViewer: git-codex-fix2186-table-footnotes
+  actualLabel: git-codex-fix2186-table-footnotes
+  actualUrl: >-
+    https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-single-last-row.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-single-last-row.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1
+- id: "0388"
+  category: Footnotes
+  title: "All line-policy footnotes in one avoided table row (Issue #2186)"
+  file: footnotes/footnotes-in-table-avoided-both-last-row.html
+  type: difference
+  decision: expected
+  notes: >-
+    Fix for Issue #2186. Both line-policy calls belong to the avoided final row. Stable overlaps their shared
+    footnote area with body text on a single page. The PR preview moves the complete row and both complete
+    notes together to page 2, preserving call order, numbering, the repeated table header, and the following
+    paragraph; no orphaned footnotes remain on page 1.
+  approvedViewer: git-codex-fix2186-table-footnotes
+  actualLabel: git-codex-fix2186-table-footnotes
+  actualUrl: >-
+    https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-both-last-row.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-both-last-row.html&zoom=1&spread=false
+  pageCountActual: 2
+  pageCountBaseline: 1
+  diffPages:
+    - 1

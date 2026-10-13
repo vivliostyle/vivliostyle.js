@@ -1569,6 +1569,26 @@ module.exports = [
         title: "Footnotes in table with rowspan/colspan (Issue #1667)",
       },
       {
+        file: "footnotes/footnotes-in-table-avoided-rows.html",
+        title:
+          "Shared line-policy footnotes in avoided table rows (Issue #2186)",
+      },
+      {
+        file: "footnotes/footnotes-in-table-avoided-short-row.html",
+        title:
+          "Line-policy footnote constraints in a table that fits (Issue #2186)",
+      },
+      {
+        file: "footnotes/footnotes-in-table-avoided-single-last-row.html",
+        title:
+          "Single line-policy footnote in an avoided final table row (Issue #2186)",
+      },
+      {
+        file: "footnotes/footnotes-in-table-avoided-both-last-row.html",
+        title:
+          "All line-policy footnotes in one avoided table row (Issue #2186)",
+      },
+      {
         file: "footnotes/footnotes-in-multicol.html",
         title: "Footnotes in multi-column (Issue #1460)",
       },

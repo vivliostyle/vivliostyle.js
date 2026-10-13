@@ -27,7 +27,7 @@ import * as CssLogicalUtil from "./css-logical-util";
 import * as Sizing from "./sizing";
 import * as Task from "./task";
 import * as VtreeImpl from "./vtree";
-import { Layout as LayoutType, PageFloats, Vtree } from "./types";
+import { Layout as LayoutType, PageFloats, Table, Vtree } from "./types";
 
 export const FloatReference = PageFloats.FloatReference;
 export type FloatReference = PageFloats.FloatReference; // eslint-disable-line no-redeclare
@@ -41,6 +41,23 @@ type PageFloatID = PageFloats.PageFloatID;
  * that the fragment is still visually meaningful. (Issue #1879)
  */
 const MIN_FOOTNOTE_BLOCK_SIZE = 20;
+
+function isFloatInTable(float: PageFloat): boolean {
+  return (
+    float.nodePosition.steps?.some((step) => {
+      for (
+        let context = step.formattingContext;
+        context;
+        context = context.getParent()
+      ) {
+        if (Table.isInstanceOfTableFormattingContext(context)) {
+          return true;
+        }
+      }
+      return false;
+    }) ?? false
+  );
+}
 
 export function floatReferenceOf(str: string): FloatReference {
   switch (str) {
@@ -1522,10 +1539,10 @@ export class AttachedPageFloatLayoutContext
   finish() {
     for (let i = this.floatFragments.length - 1; i >= 0; i--) {
       const fragment = this.floatFragments[i];
-      // A line-policy footnote fragment whose anchor moved off this page is
-      // stale unless it is continuing from the previous page. Remove it before
-      // finishing so retries do not keep an orphaned footnote area.
-      const staleLineFootnote = fragment.continuations.some((continuation) => {
+      // Remove a shared footnote area only when all its continuations are
+      // stale. If some anchors remain on the page, let the normal placement
+      // check below retry sizing or forbid the footnote whose anchor moved.
+      const staleLineFootnote = fragment.continuations.every((continuation) => {
         const float = continuation.float;
         return (
           "footnotePolicy" in float &&
@@ -1540,6 +1557,14 @@ export class AttachedPageFloatLayoutContext
         if (this.state.locked) {
           this.invalidate();
           return;
+        }
+        // An avoided row can move every call off the page. Constrain those
+        // calls before discarding the area: the placement guards otherwise
+        // permit a replacement area without reflowing the row.
+        for (const { float } of fragment.continuations) {
+          if (!float.insidePageFloatArea && isFloatInTable(float)) {
+            this.forbid(float);
+          }
         }
         this.removePageFloatFragment(fragment);
         return;
@@ -2207,6 +2232,16 @@ export class AttachedPageFloatLayoutContext
         area.computedBlockSize + Math.min(0, marginAfter),
       );
       outerBlockSize = blockSize + area.getInsetBefore() + area.getInsetAfter();
+      if (
+        area.isFootnote &&
+        this.footnoteMaxBlockSize != null &&
+        outerBlockSize > this.footnoteMaxBlockSize
+      ) {
+        // A completed shared area must obey the same retry budget as its
+        // initial layout. Otherwise merging a later footnote grows it past
+        // the limit again and the next retry needlessly truncates earlier notes.
+        return null;
+      }
       const availableBlockSize = (blockEnd - blockStart) * area.getBoxDir();
       if (logicalFloatSides[0] === "snap-block") {
         if (anchorEdge === null) {
