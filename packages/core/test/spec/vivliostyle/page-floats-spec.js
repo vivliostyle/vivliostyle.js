@@ -1193,6 +1193,104 @@ describe("page-floats", function () {
       });
     });
 
+    describe("#setFloatAreaDimensions", function () {
+      var pageContext, area;
+
+      beforeEach(function () {
+        pageContext = PageFloatLayoutContext.createWithContainer(
+          mockContainer(),
+          rootContext,
+          FloatReference.PAGE,
+          "body",
+          null,
+          null,
+          null,
+        );
+        pageContext.footnoteMaxBlockSize = 55;
+        spyOn(pageContext, "getLimitValue").and.callFake(function (side) {
+          return side === "block-end" ? 500 : side === "inline-end" ? 100 : 0;
+        });
+        area = {
+          isFootnote: true,
+          computedBlockSize: 100,
+          vertical: false,
+          originX: 0,
+          originY: 0,
+          top: 0,
+          width: 100,
+          height: 500,
+          getContentBlockMarginAfter: function () {
+            return 0;
+          },
+          getInsetBefore: function () {
+            return 5;
+          },
+          getInsetAfter: function () {
+            return 5;
+          },
+          getInsetTop: function () {
+            return 5;
+          },
+          getInsetBottom: function () {
+            return 5;
+          },
+          getInsetStart: function () {
+            return 0;
+          },
+          getInsetEnd: function () {
+            return 0;
+          },
+          getBoxDir: function () {
+            return 1;
+          },
+          getInlineDir: function () {
+            return 1;
+          },
+          setInlinePosition: jasmine.createSpy("setInlinePosition"),
+          setBlockPosition: jasmine.createSpy("setBlockPosition"),
+        };
+      });
+
+      function positionCompletedArea() {
+        return pageContext.setFloatAreaDimensions(
+          area,
+          FloatReference.PAGE,
+          "block-end",
+          null,
+          false,
+          true,
+          { "block-end": true },
+        );
+      }
+
+      it("rejects a completed footnote area that exceeds the retry budget even when forced", function () {
+        expect(positionCompletedArea()).toBe(null);
+        expect(area.setInlinePosition).not.toHaveBeenCalled();
+        expect(area.setBlockPosition).not.toHaveBeenCalled();
+      });
+
+      it("positions a completed footnote area including insets within the retry budget", function () {
+        area.computedBlockSize = 45;
+
+        expect(positionCompletedArea()).toBe("block-end");
+        expect(area.setBlockPosition).toHaveBeenCalledWith(445, 45);
+      });
+
+      it("allows a completed footnote area when there is no retry budget", function () {
+        pageContext.footnoteMaxBlockSize = null;
+
+        expect(positionCompletedArea()).toBe("block-end");
+        expect(area.setBlockPosition).toHaveBeenCalledWith(390, 100);
+      });
+
+      it("does not apply the footnote retry budget to other page floats", function () {
+        area.isFootnote = false;
+
+        expect(positionCompletedArea()).toBe("block-end");
+        expect(area.setBlockPosition).toHaveBeenCalledWith(390, 100);
+      });
+    });
+
     describe("#addPageFloatLayoutContextAsPreviousSibling", function () {
       it("seeds isolated roots with continuations from the previous page", function () {
         var previousPageContext = PageFloatLayoutContext.createWithContainer(
@@ -1693,6 +1791,252 @@ describe("page-floats", function () {
         expect(pageContext.footnoteMaxBlockSize).toBe(55);
         expect(pageContext.isForbidden(float)).toBe(false);
         expect(pageContext.findPageFloatFragment(float)).toBe(null);
+      });
+
+      describe("shared line-policy footnote areas", function () {
+        var pageContext, firstFloat, secondFloat, secondContinuation, fragment;
+
+        function markTableContext(float, inherited = false) {
+          var tableContext = {
+            formattingContextType: "Table",
+            getParent: function () {
+              return null;
+            },
+          };
+          float.nodePosition.steps = [
+            {
+              formattingContext: inherited
+                ? {
+                    formattingContextType: "Block",
+                    getParent: function () {
+                      return tableContext;
+                    },
+                  }
+                : tableContext,
+            },
+          ];
+        }
+
+        beforeEach(function () {
+          var container = mockContainer();
+          pageContext = PageFloatLayoutContext.createWithContainer(
+            container,
+            rootContext,
+            FloatReference.PAGE,
+            "body",
+            null,
+            null,
+            null,
+          );
+          firstFloat = new PageFloat(
+            dummyNodePosition(),
+            FloatReference.PAGE,
+            "block-end",
+            null,
+            "body",
+          );
+          secondFloat = new PageFloat(
+            dummyNodePosition(),
+            FloatReference.PAGE,
+            "block-end",
+            null,
+            "body",
+          );
+          firstFloat.footnotePolicy = adapt_css.ident.line;
+          secondFloat.footnotePolicy = adapt_css.ident.line;
+          pageContext.addPageFloat(firstFloat);
+          pageContext.addPageFloat(secondFloat);
+
+          var firstAnchor = {};
+          var secondAnchor = {};
+          container.element.contains.and.callFake(function (node) {
+            return node === firstAnchor;
+          });
+          pageContext.registerPageFloatAnchor(firstFloat, firstAnchor);
+          pageContext.registerPageFloatAnchor(secondFloat, secondAnchor);
+          pageContext.markInvalidatedForLineFootnote(firstFloat);
+          pageContext.markInvalidatedForLineFootnote(secondFloat);
+
+          secondContinuation = new PageFloatContinuation(secondFloat, {});
+          var area = {
+            isFootnote: true,
+            computedBlockSize: 100,
+            getInsetBefore: function () {
+              return 5;
+            },
+            getInsetAfter: function () {
+              return 5;
+            },
+            element: {
+              parentNode: {
+                removeChild: jasmine.createSpy("removeChild"),
+              },
+            },
+          };
+          fragment = new PageFloatFragment(
+            FloatReference.PAGE,
+            "block-end",
+            null,
+            [new PageFloatContinuation(firstFloat, {}), secondContinuation],
+            area,
+            false,
+          );
+          pageContext.addPageFloatFragment(fragment, true);
+          spyOn(pageContext, "invalidate").and.callThrough();
+        });
+
+        it("retries sizing when only a later anchor moved off the page", function () {
+          pageContext.finish();
+
+          expect(pageContext.footnoteMaxBlockSize).toBe(55);
+          expect(pageContext.findPageFloatFragment(firstFloat)).toBe(null);
+          expect(pageContext.isForbidden(firstFloat)).toBe(false);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+          expect(pageContext.hasInvalidatedForLineFootnote(firstFloat)).toBe(
+            false,
+          );
+          expect(pageContext.hasInvalidatedForLineFootnote(secondFloat)).toBe(
+            false,
+          );
+        });
+
+        it("removes an area when all its anchors moved off the page", function () {
+          pageContext.container.element.contains.and.returnValue(false);
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(firstFloat)).toBe(null);
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+          expect(pageContext.footnoteMaxBlockSize).toBe(null);
+          expect(pageContext.isForbidden(firstFloat)).toBe(false);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+        });
+
+        it("removes a single stale footnote without retrying its size", function () {
+          fragment.continuations.splice(0, 1);
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+          expect(pageContext.footnoteMaxBlockSize).toBe(null);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+        });
+
+        it("keeps a continuation from the previous page without a current anchor", function () {
+          pageContext.state.floatsDeferredFromPrevious.push(secondContinuation);
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(firstFloat)).toBe(fragment);
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(fragment);
+          expect(pageContext.footnoteMaxBlockSize).toBe(null);
+          expect(pageContext.isForbidden(firstFloat)).toBe(false);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).not.toHaveBeenCalled();
+        });
+
+        it("constrains a stale table call before discarding its only footnote area", function () {
+          fragment.continuations.splice(0, 1);
+          markTableContext(secondFloat, true);
+          var remove = pageContext.removePageFloatFragment;
+          spyOn(pageContext, "removePageFloatFragment").and.callFake(
+            function (area) {
+              expect(pageContext.isForbidden(secondFloat)).toBe(true);
+              return remove.call(pageContext, area);
+            },
+          );
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+          expect(pageContext.footnoteMaxBlockSize).toBe(null);
+          expect(pageContext.isForbidden(secondFloat)).toBe(true);
+          expect(pageContext.hasInvalidatedForLineFootnote(secondFloat)).toBe(
+            true,
+          );
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+        });
+
+        it("constrains all stale table calls while retaining their placement guards", function () {
+          pageContext.container.element.contains.and.returnValue(false);
+          markTableContext(firstFloat);
+          markTableContext(secondFloat, true);
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(firstFloat)).toBe(null);
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+          expect(pageContext.isForbidden(firstFloat)).toBe(true);
+          expect(pageContext.isForbidden(secondFloat)).toBe(true);
+          expect(pageContext.hasInvalidatedForLineFootnote(firstFloat)).toBe(
+            true,
+          );
+          expect(pageContext.hasInvalidatedForLineFootnote(secondFloat)).toBe(
+            true,
+          );
+          expect(pageContext.footnoteMaxBlockSize).toBe(null);
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+        });
+
+        it("keeps stale paragraph calls unconstrained when a shared area also contains a table call", function () {
+          pageContext.container.element.contains.and.returnValue(false);
+          markTableContext(firstFloat);
+          secondFloat.nodePosition.steps = [
+            {
+              formattingContext: {
+                formattingContextType: "Block",
+                getParent: function () {
+                  return null;
+                },
+              },
+            },
+          ];
+
+          pageContext.finish();
+
+          expect(pageContext.isForbidden(firstFloat)).toBe(true);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+        });
+
+        it("retains a table footnote continued from the previous page without forbidding its call", function () {
+          fragment.continuations.splice(0, 1);
+          markTableContext(secondFloat);
+          pageContext.state.floatsDeferredFromPrevious.push(secondContinuation);
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(fragment);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).not.toHaveBeenCalled();
+        });
+
+        it("preserves stale cleanup for a table footnote inside a page float", function () {
+          fragment.continuations.splice(0, 1);
+          markTableContext(secondFloat);
+          secondFloat.insidePageFloatArea = true;
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(null);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.invalidate).toHaveBeenCalledTimes(1);
+        });
+
+        it("leaves stale table calls unconstrained during a locked layout trial", function () {
+          fragment.continuations.splice(0, 1);
+          markTableContext(secondFloat);
+          pageContext.lock();
+
+          pageContext.finish();
+
+          expect(pageContext.findPageFloatFragment(secondFloat)).toBe(fragment);
+          expect(pageContext.isForbidden(secondFloat)).toBe(false);
+          expect(pageContext.isInvalidated()).toBe(true);
+        });
       });
 
       it("forbids deferred line-policy footnotes on page contexts while the anchor is present", function () {

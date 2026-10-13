@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- Test case for Issue #2186: line-policy footnotes in avoided table rows -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Line-policy footnotes in fragmented table cells</title>
+    <style>
+      @page {
+        size: 500px 650px;
+        margin: 40px;
+        @footnote {
+          border-top: 1px solid black;
+          margin-top: 16px;
+          padding-top: 8px;
+        }
+      }
+      :root {
+        font:
+          14px/18px Arial,
+          sans-serif;
+      }
+      body {
+        margin: 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        width: 50%;
+        padding: 8px;
+        vertical-align: top;
+      }
+      th {
+        background: #eee;
+      }
+      tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .nota-rodape {
+        float: footnote;
+        footnote-policy: line;
+        font:
+          12px/16px Arial,
+          sans-serif;
+      }
+      .nota-rodape::footnote-call {
+        content: counter(footnote);
+        font-size: 70%;
+        line-height: 0;
+        vertical-align: super;
+      }
+      .nota-rodape::footnote-marker {
+        content: counter(footnote) " ";
+      }
+    </style>
+  </head>
+  <body>
+    <main id="quarto-document-content">
+      <table>
+        <thead>
+          <tr>
+            <th>Left cell</th>
+            <th>Right cell</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>First row.</td>
+            <td>
+              First row right line 1.<br />First row right line 2.<br />First
+              row right line 3.<br />First row right line 4.<br />First row
+              right line 5.<br />First row right line 6.<br />First row right
+              line 7.
+            </td>
+          </tr>
+          <tr>
+            <td>Second row.</td>
+            <td>
+              Second row right line 1.<br />Second row right line 2.<br />Second
+              row right line 3.<br />Second row right line 4.<br />Second row
+              right line 5.<br />Second row right line 6.<br />Second row right
+              line 7.<br />Second row end.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Third row. Second call<span class="nota-rodape" id="note-b"
+                >Second footnote line 1.<br />Second footnote line 2.<br />Second
+                footnote line 3.<br />Second footnote line 4.<br />Second
+                footnote line 5.<br />Second footnote line 6.</span
+              >.
+            </td>
+            <td>
+              Third row right line 1.<br />Third row right line 2.<br />Third
+              row right line 3.<br />Third row right line 4.<br />Third row
+              right line 5.<br />Third row right line 6.<br />Third row right
+              line 7.<br />Third row right line 8.<br />Third row right line
+              9.<br />Third row right line 10.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p id="end">End of table.</p>
+    </main>
+  </body>
+</html>
