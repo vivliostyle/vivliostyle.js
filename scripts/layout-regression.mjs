@@ -1735,7 +1735,7 @@ class ContextPool {
           width: this._viewportWidth,
           height: this._viewportHeight,
         },
-        deviceScaleFactor: 2,
+        deviceScaleFactor: 1,
       });
       this._all.push(ctx);
       return ctx;
@@ -1834,8 +1834,8 @@ async function captureOneSide({
   try {
     context = await browser.newContext({
       viewport: { width: viewportWidth, height: viewportHeight },
-      // Use device scale factor 2 to get more accurate pixel diffs.
-      deviceScaleFactor: 2,
+      // Keep the context scale consistent with the browser launch scale.
+      deviceScaleFactor: 1,
     });
     const page = await context.newPage();
     const captured = await capturePages({
@@ -3934,7 +3934,9 @@ async function main() {
   const browserEngines = { chromium, firefox, webkit };
   const browserEngine = browserEngines[opts.browser] ?? chromium;
   const launchArgs =
-    opts.browser === "chromium" ? { args: ["--disable-web-security"] } : {};
+    opts.browser === "chromium"
+      ? { args: ["--disable-web-security", "--force-device-scale-factor=1"] }
+      : {};
   const browser = await browserEngine.launch({
     headless: true,
     ...launchArgs,
