@@ -117,11 +117,12 @@ than the viewer's high-resolution fallback. This only applies to WPT manifest
 tests; manual `--test-url` / `--ref-url` pairs keep the normal viewer defaults.
 
 Manifest-driven WPT runs use browser contexts with device pixel ratio (DPR) 2.
-Chromium also starts with scale factor 2 so startup and context scales agree.
-Ordinary version comparisons and manual URL pairs use DPR 1. Screenshots still
-use `scale: "css"` (one output pixel per CSS pixel); DPR changes native layout
-and rasterization rather than the output image resolution. The selected DPR is
-recorded as `options.deviceScaleFactor` in the JSON report.
+Chromium's startup scale factor is fixed at 1, preserving the WPT rendering
+conditions used before PR #2187. Ordinary version comparisons and manual URL
+pairs use DPR 1, with Chromium's startup scale also fixed at 1.
+Screenshots still use `scale: "css"` (one output pixel per CSS pixel); DPR changes
+native layout and rasterization rather than the output image resolution. The
+selected DPR is recorded as `options.deviceScaleFactor` in the JSON report.
 
 Defaults in this mode:
 

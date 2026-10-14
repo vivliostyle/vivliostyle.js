@@ -1839,7 +1839,7 @@ async function captureOneSide({
   try {
     context = await browser.newContext({
       viewport: { width: viewportWidth, height: viewportHeight },
-      // Keep the context scale consistent with the browser launch scale.
+      // Use the same context DPR as the pooled capture path.
       deviceScaleFactor,
     });
     const page = await context.newPage();
@@ -3937,10 +3937,9 @@ async function main() {
   }
 
   const browserEngines = { chromium, firefox, webkit };
-  // WPT uses native rendering (pixelRatio=0). Keep DPR2 for its text
-  // comparisons, while ordinary viewer comparisons use the faster DPR1.
-  // Match Chromium's startup scale and context DPR to avoid border rounding
-  // differences. Manual URL pairs keep the ordinary comparison settings.
+  // Use startup scale 1 with context DPR2 for the original WPT rendering
+  // conditions. Ordinary comparisons and manual URL pairs use matched DPR1
+  // to avoid scale-dependent border rounding and pagination.
   opts.deviceScaleFactor = targets.every((target) =>
     ["reftest", "print-reftest", "manual"].includes(target.sourceType),
   )
@@ -3950,10 +3949,7 @@ async function main() {
   const launchArgs =
     opts.browser === "chromium"
       ? {
-          args: [
-            "--disable-web-security",
-            `--force-device-scale-factor=${opts.deviceScaleFactor}`,
-          ],
+          args: ["--disable-web-security", "--force-device-scale-factor=1"],
         }
       : {};
   const browser = await browserEngine.launch({
