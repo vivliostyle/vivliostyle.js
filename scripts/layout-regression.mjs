@@ -1710,11 +1710,15 @@ function toComparableError(err) {
  * via release() after use.
  */
 class ContextPool {
-  constructor(browser, { viewportWidth, viewportHeight, poolSize }) {
+  constructor(
+    browser,
+    { viewportWidth, viewportHeight, poolSize, deviceScaleFactor },
+  ) {
     this._browser = browser;
     this._viewportWidth = viewportWidth;
     this._viewportHeight = viewportHeight;
     this._poolSize = poolSize;
+    this._deviceScaleFactor = deviceScaleFactor;
     /** @type {Array<import('playwright').BrowserContext>} */
     this._all = [];
     /** @type {Array<import('playwright').BrowserContext>} */
@@ -1735,7 +1739,7 @@ class ContextPool {
           width: this._viewportWidth,
           height: this._viewportHeight,
         },
-        deviceScaleFactor: 1,
+        deviceScaleFactor: this._deviceScaleFactor,
       });
       this._all.push(ctx);
       return ctx;
@@ -1776,6 +1780,7 @@ async function captureOneSide({
   exportHtml,
   viewportWidth,
   viewportHeight,
+  deviceScaleFactor,
 }) {
   // When a context pool is available, check out a context exclusively and
   // use a dedicated page (closed after capture).  The context is returned
@@ -1835,7 +1840,7 @@ async function captureOneSide({
     context = await browser.newContext({
       viewport: { width: viewportWidth, height: viewportHeight },
       // Keep the context scale consistent with the browser launch scale.
-      deviceScaleFactor: 1,
+      deviceScaleFactor,
     });
     const page = await context.newPage();
     const captured = await capturePages({
@@ -3932,10 +3937,24 @@ async function main() {
   }
 
   const browserEngines = { chromium, firefox, webkit };
+  // WPT uses native rendering (pixelRatio=0). Keep DPR2 for its text
+  // comparisons, while ordinary viewer comparisons use the faster DPR1.
+  // Match Chromium's startup scale and context DPR to avoid border rounding
+  // differences. Manual URL pairs keep the ordinary comparison settings.
+  opts.deviceScaleFactor = targets.every((target) =>
+    ["reftest", "print-reftest", "manual"].includes(target.sourceType),
+  )
+    ? 2
+    : 1;
   const browserEngine = browserEngines[opts.browser] ?? chromium;
   const launchArgs =
     opts.browser === "chromium"
-      ? { args: ["--disable-web-security", "--force-device-scale-factor=1"] }
+      ? {
+          args: [
+            "--disable-web-security",
+            `--force-device-scale-factor=${opts.deviceScaleFactor}`,
+          ],
+        }
       : {};
   const browser = await browserEngine.launch({
     headless: true,
@@ -3951,6 +3970,7 @@ async function main() {
     viewportWidth: opts.viewportWidth,
     viewportHeight: opts.viewportHeight,
     poolSize: opts.concurrency,
+    deviceScaleFactor: opts.deviceScaleFactor,
   });
 
   const differences = [];
@@ -3982,6 +4002,7 @@ async function main() {
       exportHtml: opts.exportHtml,
       viewportWidth: opts.viewportWidth,
       viewportHeight: opts.viewportHeight,
+      deviceScaleFactor: opts.deviceScaleFactor,
     };
 
     if (opts.mode === "reftest-diff") {

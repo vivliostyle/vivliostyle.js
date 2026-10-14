@@ -114,6 +114,13 @@ fallback ではなく、ブラウザのネイティブな device pixel ratio で
 この設定は WPT manifest テストのみに適用され、手動の `--test-url` /
 `--ref-url` ペアでは通常の viewer デフォルトが使われます。
 
+WPT manifest ベースの実行では browser context の device pixel ratio (DPR) を
+2 にします。Chromium の起動時 scale factor も 2 に揃えます。通常の版間比較と
+手動 URL ペアでは DPR 1 を使用します。スクリーンショットは引き続き
+`scale: "css"`（1 CSS px あたり出力画像の1画素）で取得するため、DPR は出力画像の
+解像度ではなく、ネイティブのレイアウト・描画条件に影響します。使用 DPR は JSON の
+`options.deviceScaleFactor` に記録します。
+
 このモードのデフォルト:
 
 - 出力ディレクトリ: `artifacts/wpt-reftest`
