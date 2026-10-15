@@ -19,6 +19,7 @@ import * as Css from "../../../src/vivliostyle/css";
 import * as CssCascade from "../../../src/vivliostyle/css-cascade";
 import * as CssParser from "../../../src/vivliostyle/css-parser";
 import * as CssTokenizer from "../../../src/vivliostyle/css-tokenizer";
+import * as CssValidator from "../../../src/vivliostyle/css-validator";
 import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
@@ -30,6 +31,63 @@ function expectFontMetricLength(actual, expected) {
 }
 
 describe("vgen", function () {
+  it("preserves em and lh for a browser-resolved font shorthand", function () {
+    const scope = new Exprs.LexicalScope(null);
+    const context = new Exprs.Context(scope, 800, 600, 16, 20);
+    const parent = document.createElement("div");
+    const actual = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    parent.style.cssText = "font:16px/20px serif";
+    reference.style.cssText = "font:10svw/1.5 serif;width:1em;height:1lh";
+    document.body.append(parent);
+    const computedStyle = {
+      width: new Css.Numeric(1, "em"),
+      height: new Css.Numeric(1, "lh"),
+    };
+    CssValidator.baseValidatorSet().validatePropertyAndHandleShorthand(
+      "font",
+      CssParser.parseValue(
+        scope,
+        new CssTokenizer.Tokenizer("10svw/1.5 serif", null),
+        "",
+      ),
+      false,
+      scope,
+      {
+        simpleProperty(name, value) {
+          computedStyle[name] = value;
+        },
+        invalidPropertyValue() {
+          fail("font shorthand rejected");
+        },
+        unknownProperty() {
+          fail("font shorthand unrecognized");
+        },
+      },
+    );
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj: 0 },
+      xmldoc: { url: document.URL },
+      sourceNode: actual,
+      nodeContext: { parent: { viewNode: parent } },
+    });
+    try {
+      factory.applyComputedStyles(actual, computedStyle);
+      expect(actual.style.width).toBe("1em");
+      expect(actual.style.height).toBe("1lh");
+      for (const name of ["fontSize", "lineHeight", "width", "height"]) {
+        expectFontMetricLength(
+          parseFloat(getComputedStyle(actual)[name]),
+          parseFloat(getComputedStyle(reference)[name]),
+        );
+      }
+    } finally {
+      parent.remove();
+    }
+  });
+
   it("resolves dependent em using a font size measured in the parent font", function () {
     const parent = document.createElement("div");
     parent.style.cssText = 'font:32px "Courier New"';
@@ -116,7 +174,7 @@ describe("vgen", function () {
         ];
       const parentStyle = {
         "font-size": value("20px"),
-        "line-height": value("1.5"),
+        "line-height": value(options.parentLineHeight || "1.5"),
       };
       if (parentFamily)
         parentStyle["font-family"] = value(
@@ -333,6 +391,47 @@ describe("vgen", function () {
         expect(flattened["font-weight"].value.toString())
           .withContext(`${rule}: font-weight`)
           .toBe("lighter");
+      }
+    });
+
+    it("resolves source-parent lh before deferring current-font terms", function () {
+      const sourceParent = document.createElement("div");
+      const renderingParent = document.createElement("div");
+      sourceParent.style.cssText = "font:20px/60px Arial";
+      renderingParent.style.cssText = "font:16px/12px Arial";
+      const reference = sourceParent.appendChild(
+        document.createElement("span"),
+      );
+      const actual = renderingParent.appendChild(
+        document.createElement("span"),
+      );
+      document.body.append(sourceParent, renderingParent);
+      try {
+        for (const rule of ["region", "conditional"]) {
+          for (const override of [
+            { "font-size": "40px" },
+            { "font-weight": "lighter" },
+          ]) {
+            const size = override["font-size"] || "20px";
+            reference.style.cssText = `font-size:${size};font-weight:100;line-height:calc(1lh + 1cap)`;
+            const style = inherit("20px", "calc(1lh + 1cap)", "Arial", null, {
+              parentLineHeight: "60px",
+              [rule]: override,
+            });
+            const lineHeight = style["line-height"].value.toString();
+            expect(lineHeight).toContain("60px");
+            expect(lineHeight).toContain("1cap");
+            expect(lineHeight).not.toMatch(/\blh\b/);
+            actual.style.cssText = `font-size:${size};font-weight:100;line-height:${lineHeight}`;
+            expectFontMetricLength(
+              parseFloat(getComputedStyle(actual).lineHeight),
+              parseFloat(getComputedStyle(reference).lineHeight),
+            );
+          }
+        }
+      } finally {
+        sourceParent.remove();
+        renderingParent.remove();
       }
     });
 

@@ -442,6 +442,10 @@ module.exports = [
         title: "Font metrics and footnote region priority (PR #2198)",
       },
       {
+        file: "deferred-font-relative-lengths.html",
+        title: "Deferred font-relative lengths (PR #2198)",
+      },
+      {
         file: "browser-viewport-page-descriptors.html",
         title: "Browser viewport units in page descriptors (PR #2198)",
         // Older viewers cannot render NaN page geometry; use the local reftest.

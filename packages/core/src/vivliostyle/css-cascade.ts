@@ -1658,7 +1658,7 @@ export function usesLineHeightUnit(value: Css.Val): boolean {
  * Replace the `lh` units of a value with px, using the line height that the
  * element inherits. (Review)
  */
-class LineHeightUnitReplacer extends Css.FilterVisitor {
+export class LineHeightUnitReplacer extends Css.FilterVisitor {
   constructor(private readonly inheritedLineHeight: number) {
     super();
   }

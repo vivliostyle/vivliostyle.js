@@ -1246,6 +1246,20 @@ export class ViewFactory
             // intact so they resolve against those final font metrics,
             // including relative region sizes against the rendering parent.
             prop1 = prop;
+            if (
+              name === "line-height" &&
+              CssCascade.usesLineHeightUnit(prop.value)
+            ) {
+              const inheritedLineHeight =
+                inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+              if (inheritedLineHeight != null) {
+                // Only current-font terms are deferred. lh in line-height
+                // still refers to the source parent's line height.
+                prop1 = prop.filterValue(
+                  new CssCascade.LineHeightUnitReplacer(inheritedLineHeight),
+                );
+              }
+            }
           } else if (
             name === "font-size" &&
             i === styles.length - 1 &&
@@ -4110,12 +4124,11 @@ export class ViewFactory
           this.context,
           undefined,
           this.getParentFontProperties(parentStyle),
-        ).num;
-        // parentFontSize may be null and the fontSizePx may be NaN
-        if (typeof fontSizePx !== "number" || isNaN(fontSizePx)) {
+        );
+        if (fontSizePx.unit !== "px" || !Number.isFinite(fontSizePx.num)) {
           return null; // cannot determine
         }
-        return lineHeightNum * fontSizePx;
+        return lineHeightNum * fontSizePx.num;
       } else {
         if (parentFontSize == null) {
           return null;
@@ -4151,9 +4164,9 @@ export class ViewFactory
         this.context,
         undefined,
         this.getParentFontProperties(parentStyle),
-      ).num;
-      if (typeof fontSizePx === "number" && !isNaN(fontSizePx)) {
-        return fontSizePx;
+      );
+      if (fontSizePx.unit === "px" && Number.isFinite(fontSizePx.num)) {
+        return fontSizePx.num;
       }
     }
     return null; // cannot determine
