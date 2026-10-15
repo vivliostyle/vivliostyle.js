@@ -1030,14 +1030,15 @@ export class ViewFactory
     const lineHeightFromOwnStyle = !!(
       styles.length > 0 && CssCascade.getProp(styles[0], "line-height")
     );
+    const flattenedCurrentStyle = styles.length
+      ? CssCascade.flattenCascadedStyle(
+          styles[0],
+          this.context,
+          this.regionIds,
+          this.isFootnote,
+        )
+      : {};
     if (styles.length > 0) {
-      const currentStyle = styles[0];
-      const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
-        currentStyle,
-        this.context,
-        this.regionIds,
-        this.isFootnote,
-      );
       const currentFontSize = flattenedCurrentStyle["font-size"]?.evaluate(
         this.context,
         "font-size",
@@ -1113,7 +1114,17 @@ export class ViewFactory
     );
     let inheritedLanguage = this.context.fontLanguage;
     for (let i = styles.length - 1; i >= 0; --i) {
-      const style = styles[i];
+      const style = i === 0 ? { ...styles[i] } : styles[i];
+      if (i === 0) {
+        // Font-size still sees source-parent traits. The traits processed
+        // after it must include winning region/view rules before dependent
+        // lengths such as line-height and letter-spacing are converted.
+        for (const name of fontMetricProperties) {
+          if (flattenedCurrentStyle[name]) {
+            style[name] = flattenedCurrentStyle[name];
+          }
+        }
+      }
       const currentLanguage = styleLanguages[i] ?? inheritedLanguage;
       inheritanceVisitor.fontLanguage = inheritedLanguage;
       const propList: string[] = [];

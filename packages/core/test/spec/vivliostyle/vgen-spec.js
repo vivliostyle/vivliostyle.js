@@ -88,6 +88,9 @@ describe("vgen", function () {
         "font-size": value(fontSize),
         "line-height": value(lineHeight),
       };
+      for (const [name, text] of Object.entries(options.properties || {})) {
+        currentStyle[name] = value(text);
+      }
       if (currentFamily)
         currentStyle["font-family"] = value(currentFamily, options.ownPriority);
       if (options.region)
@@ -239,6 +242,47 @@ describe("vgen", function () {
           "font-family"
         ].value.toString(),
       ).toBe("Arial");
+    });
+
+    it("uses winning region and view fonts for dependent lengths after resolving font-size", function () {
+      const parent = document.createElement("div");
+      parent.style.cssText = 'font:20px "Courier New"';
+      const child = parent.appendChild(document.createElement("span"));
+      document.body.append(parent);
+      try {
+        for (const rule of ["region", "conditional"]) {
+          for (const size of ["20px", "calc(2cap + 1px)"]) {
+            child.style.cssText = `font-family:Arial;font-size:${size};line-height:2cap;letter-spacing:1cap`;
+            const native = getComputedStyle(child);
+            const style = inherit(size, "2cap", '"Courier New"', null, {
+              parentPriority: 10000,
+              [rule]: { "font-family": "Arial" },
+              properties: { "letter-spacing": "1cap" },
+            });
+            const context = new Exprs.Context(
+              new Exprs.LexicalScope(null),
+              800,
+              600,
+              16,
+              20,
+            );
+            for (const [name, nativeValue] of [
+              ["font-size", native.fontSize],
+              ["line-height", native.lineHeight],
+              ["letter-spacing", native.letterSpacing],
+            ]) {
+              const actual = CssCascade.evaluateCSSToCSS(
+                context,
+                style[name].value,
+                name,
+              );
+              expectFontMetricLength(actual.num, parseFloat(nativeValue));
+            }
+          }
+        }
+      } finally {
+        parent.remove();
+      }
     });
 
     it("resolves an lh font size before applying its own line height", function () {

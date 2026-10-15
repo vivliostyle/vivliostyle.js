@@ -3,12 +3,12 @@
 <html lang="en"><meta charset="utf-8"><title>Font metrics and footnote region priority</title><style>
 @page { size: 600px 500px; margin: 30px; }
 body { font-family: "Courier New" !important; font-size: 20px; }
-.reference, aside { font-size: calc(2cap + 1px); }
+.reference, aside { font-size: calc(2cap + 1px); line-height: 2cap; letter-spacing: 1cap; }
 .reference, aside:footnote-content { font-family: Arial; }
 aside { float: footnote; }
 ::footnote-call, ::footnote-marker { content: ""; }
 </style><body>
-<p>The reference and footnote must both use Arial at the same size.</p>
+<p>The reference and footnote must use Arial with the same size, line height and spacing.</p>
 <p class="reference">Same font and size</p>
 <aside>Same font and size</aside>
 </body></html>
