@@ -91,6 +91,41 @@ describe("font metrics", function () {
     }
   });
 
+  it("resolves a relative root font weight against the initial weight", function () {
+    const previousWeight = document.body.style.fontWeight;
+    document.body.style.fontWeight = "900";
+    try {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      context.fontMetrics = new FontMetrics(document);
+      const styler = Object.create(CssStyler.Styler.prototype);
+      styler.context = context;
+      styler.determineRootSizes({
+        "font-weight": new Cascade.CascadeValue(Css.ident.lighter, 0),
+        "font-family": new Cascade.CascadeValue(new Css.Str("Arial"), 0),
+      });
+
+      expect(context.rootFontProperties["font-weight"]).toBe("100");
+      const actual = context.measureFontUnit(
+        "cap",
+        16,
+        context.rootFontProperties,
+      );
+      const expected = nativeLength("cap", 16, {
+        fontFamily: "Arial",
+        fontWeight: "100",
+      });
+      expect(actual).toBeCloseTo(expected, 4);
+    } finally {
+      document.body.style.fontWeight = previousWeight;
+    }
+  });
+
   it("converts root metric calculations after default root sizing", function () {
     for (const defaultValue of [
       Css.ident.initial,

@@ -448,6 +448,12 @@ module.exports = [
         skipLayoutRegression: true,
       },
       {
+        file: "adaptive-viewport-page-boxes.html",
+        title: "Browser viewport units in adaptive page boxes (PR #2198)",
+        // Older viewers cannot render NaN page geometry; use the local reftest.
+        skipLayoutRegression: true,
+      },
+      {
         file: "font-relative-metrics-root.html",
         title: "Actual font metrics in root sizing",
       },

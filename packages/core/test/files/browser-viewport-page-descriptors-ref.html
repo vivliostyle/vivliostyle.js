@@ -6,9 +6,18 @@
   @top-left {
     content: "Page header";
     padding: 20px;
+    min-width: 20px;
+    max-width: 60px;
+    min-height: 15px;
+    max-height: 30px;
+    min-block-size: 18px;
+    max-inline-size: 70px;
     border-top: 5px solid black;
     border-block-width: 6px;
     border-inline-width: 7px;
+  }
+  @bottom-left {
+    content: "Substituted dimension constraints use defaults.";
   }
 }
 @page:first {margin:30px;padding:0;bleed:0;crop-offset:0;}

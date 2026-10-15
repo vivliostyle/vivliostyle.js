@@ -795,6 +795,22 @@ export class Styler implements AbstractStyler {
       elemStyle,
       this.context,
     );
+    const rootFontWeight = elemStyle["font-weight"] as
+      CssCascade.CascadeValue | undefined;
+    const rootWeight = rootFontWeight?.evaluate(this.context, "font-weight");
+    if (
+      rootWeight instanceof Css.Ident &&
+      (CssCascade.hasKeywordName(rootWeight, "bolder") ||
+        CssCascade.hasKeywordName(rootWeight, "lighter"))
+    ) {
+      // The root has no parent element, so relative weights use the initial
+      // font weight. Resolve the keyword before measuring: the hidden probe is
+      // appended to the viewer body, whose weight may differ from the source
+      // document's initial weight.
+      this.context.rootFontProperties["font-weight"] = String(
+        CssCascade.resolveRelativeFontWeight(rootWeight, 400),
+      );
+    }
     // A default root font-size can stay implicit while root-metric terms in
     // calc() already need to use the source root's font settings.
     this.context.rootFontMetricsReady =

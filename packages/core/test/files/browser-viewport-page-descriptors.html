@@ -10,12 +10,44 @@
     content: "Page header";
     padding: 20px;
     padding: 1svw;
+    min-width: 20px;
+    min-width: 1svw;
+    max-width: 60px;
+    max-width: 1svw;
+    min-height: 15px;
+    min-height: 1svh;
+    max-height: 30px;
+    max-height: 1svh;
+    min-block-size: 18px;
+    min-block-size: 1svh;
+    max-inline-size: 70px;
+    max-inline-size: 1svw;
     border-top: 5px solid black;
     border-top: 1svw solid black;
     border-block-width: 6px;
     border-block-width: 1svh;
     border-inline-width: 7px;
     border-inline-width: 1svh;
+  }
+  @bottom-left {
+    content: "Substituted dimension constraints use defaults.";
+    --unsupported-dimension: 1svw;
+    min-width: 200px;
+    min-width: var(--unsupported-dimension);
+    max-width: 10px;
+    max-width: var(--unsupported-dimension);
+    min-height: 50px;
+    min-height: var(--unsupported-dimension);
+    max-height: 1px;
+    max-height: var(--unsupported-dimension);
+    min-block-size: 50px;
+    min-block-size: var(--unsupported-dimension);
+    max-block-size: 1px;
+    max-block-size: var(--unsupported-dimension);
+    min-inline-size: 200px;
+    min-inline-size: var(--unsupported-dimension);
+    max-inline-size: 10px;
+    max-inline-size: var(--unsupported-dimension);
   }
 }
 @page:first {margin:30px;padding:0;bleed:0;crop-offset:0;}

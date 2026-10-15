@@ -2862,8 +2862,20 @@ export function containsBrowserViewportUnit(value: Css.Val): boolean {
 
 /** Page-box properties whose lengths are evaluated numerically by the engine. */
 export function isPageBoxGeometryProperty(name: string): boolean {
+  name = name.toLowerCase();
   return (
-    ["size", "width", "height", "block-size", "inline-size"].includes(name) ||
+    [
+      "size",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "columns",
+      "column-width",
+      "column-gap",
+    ].includes(name) ||
+    /^(?:min-|max-)?(?:width|height|block-size|inline-size)$/.test(name) ||
+    /^inset(-|$)/.test(name) ||
     /^(margin|padding)(-|$)/.test(name) ||
     /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-width)?$/.test(
       name,

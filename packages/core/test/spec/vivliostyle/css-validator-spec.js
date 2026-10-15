@@ -194,7 +194,7 @@ describe("css-validator", function () {
       );
     });
 
-    it("rejects side and logical border shorthands before replacing valid page values", function () {
+    it("rejects unsupported page geometry before replacing valid declarations", function () {
       const scope = new adapt_exprs.LexicalScope(null);
       const validatorSet = adapt_cssvalid.baseValidatorSet();
       const style = {};
@@ -223,6 +223,18 @@ describe("css-validator", function () {
         ["border-top", "5px solid", "1svw solid"],
         ["border-block-width", "6px", "1svw"],
         ["border-inline-width", "7px", "1svw"],
+        ["min-width", "8px", "1svw"],
+        ["max-width", "9px", "1svw"],
+        ["min-height", "10px", "1svh"],
+        ["max-height", "11px", "1svh"],
+        ["min-block-size", "12px", "1svh"],
+        ["max-block-size", "13px", "1svh"],
+        ["min-inline-size", "14px", "1svw"],
+        ["max-inline-size", "15px", "1svw"],
+        ["top", "16px", "1svh"],
+        ["inset-inline-start", "17px", "1svw"],
+        ["columns", "18px 2", "1svw 2"],
+        ["column-gap", "19px", "1svw"],
       ]) {
         validate(name, valid);
         validate(name, unsupported);
@@ -234,9 +246,25 @@ describe("css-validator", function () {
           adapt_cssvalid.containsBrowserViewportUnit(value),
         ),
       ).toBe(false);
-      for (const width of ["5px", "6px", "7px"]) {
-        expect(values.some((value) => value.toString().includes(width)))
-          .withContext(width)
+      for (const valid of [
+        "5px",
+        "6px",
+        "7px",
+        "8px",
+        "9px",
+        "10px",
+        "11px",
+        "12px",
+        "13px",
+        "14px",
+        "15px",
+        "16px",
+        "17px",
+        "18px",
+        "19px",
+      ]) {
+        expect(values.some((value) => value.toString().includes(valid)))
+          .withContext(valid)
           .toBe(true);
       }
     });
