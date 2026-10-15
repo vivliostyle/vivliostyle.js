@@ -40,6 +40,7 @@ import * as CssValidator from "./css-validator";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import { FontMetrics } from "./font-metrics";
 import * as GeometryUtil from "./geometry-util";
 import * as Layout from "./layout";
 import * as LayoutProcessor from "./layout-processor";
@@ -384,6 +385,7 @@ export class StyleInstance
       viewport.fontSize * pref.lineHeight,
     );
     this.lang = xmldoc.lang || defaultLang;
+    this.fontLanguage = this.lang;
     this.faces = new Font.DocumentFaces(this.style.fontDeobfuscator);
     this.rootPageFloatLayoutContext =
       PageFloats.RootPageFloatLayoutContext.createRoot();
@@ -409,6 +411,20 @@ export class StyleInstance
     this.pubTitle = pubTitle;
     this.docTitle = docTitle;
 
+    this.fontMetrics = new FontMetrics(viewport.document, (family) =>
+      this.faces
+        .filterFontFamily(
+          CssParser.parseValue(
+            style.rootScope,
+            new CssTokenizer.Tokenizer(family, null),
+            "",
+          ),
+        )
+        .toString(),
+    );
+  }
+
+  private initializeLayout(): void {
     const counterListener = this.counterStore.createCounterListener(
       this.xmldoc.url,
     );
@@ -554,16 +570,21 @@ export class StyleInstance
     const frame: Task.Frame<StyleInstance> = Task.newFrame(
       "StyleInstance.create",
     );
-    instance.loadFontsAndScripts().then(() => {
-      frame.finish(instance);
+    // Root font metrics determine rem/rex/rcap/rch/ric and page geometry.
+    // Embedded faces must be usable before the styler computes those values.
+    instance.loadFonts().then(() => {
+      instance.initializeLayout();
+      Scripts.loadScriptsInHead(
+        instance.xmldoc.document,
+        instance.viewport.window,
+        instance.styler,
+      ).then(() => frame.finish(instance));
     });
     return frame.result();
   }
 
-  private loadFontsAndScripts(): Task.Result<boolean> {
-    const frame: Task.Frame<boolean> = Task.newFrame(
-      "StyleInstance.loadFontsAndScripts",
-    );
+  private loadFonts(): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame("StyleInstance.loadFonts");
     const srcFaces = [] as Font.Face[];
     for (const fontFace of this.style.fontFaces) {
       if (fontFace.condition && !fontFace.condition.evaluate(this)) {
@@ -573,14 +594,7 @@ export class StyleInstance
       const srcFace = new Font.Face(properties);
       srcFaces.push(srcFace);
     }
-    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).then(() => {
-      // JavaScript in HTML documents support
-      Scripts.loadScriptsInHead(
-        this.xmldoc.document,
-        this.viewport.window,
-        this.styler,
-      ).thenFinish(frame);
-    });
+    this.fontMapper.findOrLoadFonts(srcFaces, this.faces).thenFinish(frame);
     return frame.result();
   }
 

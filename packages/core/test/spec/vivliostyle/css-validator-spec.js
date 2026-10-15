@@ -58,6 +58,72 @@ describe("css-validator", function () {
     });
   }
 
+  describe("ic length unit (Issue #2197)", function () {
+    it("expands an ic margin into all four longhands", function (done) {
+      parseCascade("span { margin: 0.125ic; }", done, function (cascade) {
+        const style = cascade.tags.get("span").style;
+        for (const side of ["top", "right", "bottom", "left"]) {
+          expect(style[`margin-${side}`]?.value.toString()).toBe("0.125ic");
+        }
+      });
+    });
+
+    it("preserves signed ic margins when expanding mixed units", function (done) {
+      parseCascade(
+        "span { margin: -0.125ic 2px 1ic 0; }",
+        done,
+        function (cascade) {
+          const style = cascade.tags.get("span").style;
+          expect(style["margin-top"]?.value.toString()).toBe("-0.125ic");
+          expect(style["margin-right"]?.value.toString()).toBe("2px");
+          expect(style["margin-bottom"]?.value.toString()).toBe("1ic");
+          expect(style["margin-left"]?.value.toString()).toBe("0");
+        },
+      );
+    });
+
+    it("accepts ic in other length shorthands", function (done) {
+      parseCascade("span { padding: 1ic 2ic; }", done, function (cascade) {
+        const style = cascade.tags.get("span").style;
+        expect(style["padding-top"]?.value.toString()).toBe("1ic");
+        expect(style["padding-right"]?.value.toString()).toBe("2ic");
+        expect(style["padding-bottom"]?.value.toString()).toBe("1ic");
+        expect(style["padding-left"]?.value.toString()).toBe("2ic");
+      });
+    });
+  });
+
+  describe("browser viewport length units", function () {
+    it("expands margin and padding while preserving all small, large and dynamic units", function (done) {
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .map(
+            (unit) =>
+              `.${unit} { margin: -1${unit} 2${unit}; padding: 1${unit}; }`,
+          )
+          .join("\n"),
+        done,
+        function (cascade) {
+          for (const unit of units) {
+            const style = cascade.classes.get(unit).style;
+            for (const side of ["top", "right", "bottom", "left"]) {
+              const margin = side === "top" || side === "bottom" ? -1 : 2;
+              expect(style[`margin-${side}`]?.value.toString())
+                .withContext(`${unit}: margin-${side}`)
+                .toBe(`${margin}${unit}`);
+              expect(style[`padding-${side}`]?.value.toString())
+                .withContext(`${unit}: padding-${side}`)
+                .toBe(`1${unit}`);
+            }
+          }
+        },
+      );
+    });
+  });
+
   describe("background shorthand regression", function () {
     it("keeps color in cascade for a semicolonless declaration", function (done) {
       parseCascade("h1 { color: blue }", done, function (cascade) {

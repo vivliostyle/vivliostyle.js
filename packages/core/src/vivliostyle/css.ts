@@ -20,6 +20,7 @@
  */
 import * as Base from "./base";
 import * as Exprs from "./exprs";
+import { fontMetricProperties } from "./font-metrics";
 
 export class Visitor {
   visitValues(values: Val[]): Val[] | null {
@@ -729,8 +730,11 @@ export const numericZero: Numeric = new Numeric(0, "px");
 
 export const processingOrder = {
   "font-size": 1,
-  "line-height": 2,
-  color: 3,
+  // Font size uses the parent's metrics; dependent lengths use the current
+  // font settings, which must therefore be accumulated before line height.
+  ...Object.fromEntries(fontMetricProperties.map((name) => [name, 2])),
+  "line-height": 3,
+  color: 4,
 };
 
 const PAGE_VIEWPORT_UNIT =

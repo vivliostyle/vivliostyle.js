@@ -667,6 +667,7 @@ export class Styler implements AbstractStyler {
   }
 
   private determineRootSizes(elemStyle: CssCascade.ElementStyle): void {
+    this.context.resolvingRootFontSize = true;
     const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
     let isRelativeFontSize = true;
     if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
@@ -709,20 +710,15 @@ export class Styler implements AbstractStyler {
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
-            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
+            const metric = this.context.measureFontUnit(
+              val.unit,
+              this.context.initialFontSize,
+            );
             if (unitSize) {
               px *= unitSize;
               isRelativeFontSize = fromRelativeCalc;
-            } else if (ratio != null) {
-              // A unit that only the browser resolves, e.g. `ch`: its metric is
-              // not obtainable here, so the assumption of CSS Values 4 for such
-              // a unit is used against the initial font size, which is the font
-              // size of the root element (it has no parent), and the raw number
-              // of the value must not be treated as pixels. The root element
-              // must use this assumed size as well, or it would render the real
-              // metric of the font while `rem` and the page context use the
-              // assumption. (Review)
-              px *= ratio * this.context.initialFontSize;
+            } else if (metric != null) {
+              px *= metric;
               isRelativeFontSize = true;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               // The unit size of a viewport relative unit, e.g. `2vw`, must not
@@ -793,6 +789,11 @@ export class Styler implements AbstractStyler {
         this.context.isRelativeRootFontSize = isRelativeFontSize;
       }
     }
+    this.context.resolvingRootFontSize = false;
+    this.context.rootFontProperties = CssCascade.getFontMetricProperties(
+      elemStyle,
+      this.context,
+    );
     const rootFontSize =
       this.context.rootFontSize ?? this.context.initialFontSize;
     const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
@@ -826,22 +827,15 @@ export class Styler implements AbstractStyler {
             break;
           default: {
             const unitSize = Exprs.defaultUnitSizes[val.unit];
-            const ratio = CssCascade.browserFontRelativeUnitRatio(val.unit);
+            const metric = this.context.measureFontUnit(
+              val.unit,
+              rootFontSize,
+              this.context.rootFontProperties,
+            );
             if (unitSize) {
               px = val.num * unitSize;
-            } else if (ratio != null) {
-              // As above: a unit that only the browser resolves is relative to
-              // the font size of the root element, not to the raw number.
-              // (Review)
-              px =
-                val.num *
-                ratio *
-                (rootFontSize ?? this.context.initialFontSize);
-              // The assumed size is the one the root element uses: the browser
-              // would resolve the unit with the real metrics of its font and
-              // the root line height of this context (which the `rlh` unit and
-              // the page context use) would differ from the rendered one.
-              // (Review)
+            } else if (metric != null) {
+              px = val.num * metric;
               fromRelativeCalc = true;
             } else if (Exprs.isViewportRelativeLengthUnit(val.unit)) {
               px = val.num * this.context.queryUnitSize(val.unit, true);
@@ -875,6 +869,7 @@ export class Styler implements AbstractStyler {
           val,
           rootFontSize,
           this.context.rootLineHeight,
+          this.context.rootFontProperties,
         );
         if (resolved != null) {
           rootLineHeight = resolved;

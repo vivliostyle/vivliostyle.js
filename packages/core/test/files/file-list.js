@@ -391,6 +391,10 @@ module.exports = [
         title: "viewport-percentage units (vertical writing-mode)",
       },
       {
+        file: "browser-viewport-units.html",
+        title: "Browser viewport units in shorthands and longhands",
+      },
+      {
         file: "page_viewport_unit.html",
         title: "page viewport-percentage units with calc()",
       },
@@ -420,6 +424,18 @@ module.exports = [
       {
         file: "lh-rlh-units.html",
         title: "lh and rlh units",
+      },
+      {
+        file: "ic-unit-margin.html",
+        title: "Margins using the ic unit (Issue #2197)",
+      },
+      {
+        file: "font-relative-metrics.html",
+        title: "Font-relative lengths with actual metrics",
+      },
+      {
+        file: "font-relative-metrics-root.html",
+        title: "Actual font metrics in root sizing",
       },
       {
         file: "margin-break.html",

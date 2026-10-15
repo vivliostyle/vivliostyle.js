@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!-- Font-relative lengths use real source font metrics, including detached content. -->
+<html lang="en"><head><meta charset="utf-8"><title>Font-relative lengths with actual metrics</title><style>
+@font-face { font-family: MetricWeb; src: url(fonts/ArchivoBlack/archivo-black-subset.woff2); }
+@page { size: 800px 900px; margin: 30px; }
+html { font: 40px "Courier New"; }
+body { font: 20px "Times New Roman"; text-autospace: no-autospace; }
+p { margin: 8px 0; }
+.fn { float: footnote; font-size: 1em; }
+::footnote-call { content: ""; } ::footnote-marker { content: ""; }
+.web { font-family: MetricWeb; }
+</style></head><body>
+<p>Root font: 40px Courier New. Body font: 20px Times New Roman.</p>
+<p>rex: <span class="metric" data-unit="rex" style="display:inline-block;width:1rex;height:8px;background:#297"></span></p>
+<p>rcap: <span class="metric" data-unit="rcap" style="display:inline-block;width:1rcap;height:8px;background:#297"></span></p>
+<p>rch: <span class="metric" data-unit="rch" style="display:inline-block;width:1rch;height:8px;background:#297"></span></p>
+<p>ric: <span class="metric" data-unit="ric" style="display:inline-block;width:1ric;height:8px;background:#297"></span></p>
+<p style="font-size:calc(2cap + 1px)">cap <span class="reference" data-unit="cap">same size</span><span class="fn" data-unit="cap">same size</span></p>
+<p style="font-size:calc(2ric + 1px)">ric <span class="reference" data-unit="ric">same size</span><span class="fn" data-unit="ric">same size</span></p>
+<p class="web" style="font-size:calc(2cap + 1px)">Web font <span class="reference" data-unit="web-cap">same size</span><span class="fn" data-unit="web-cap">same size</span></p>
+<p class="web" style="font-size:20px;line-height:2cap">line-height <span class="reference" data-unit="web-line">same line height</span><span class="fn" data-unit="web-line" style="font-size:10px">same line height</span></p>
+<div class="web"><p style="font-family:Arial;font-size:calc(2cap + 1px)">Changed family <span class="reference" data-unit="changed-family">same size</span><span class="fn" data-unit="changed-family">same size</span></p></div>
+<div class="web" style="font-size:20px"><p>Dependent em (size and offset equal the font size)</p><div data-unit="dependent-em" style="font-size:2cap;width:1em;margin-left:1em;height:8px;background:#297"></div></div>
+</body></html>

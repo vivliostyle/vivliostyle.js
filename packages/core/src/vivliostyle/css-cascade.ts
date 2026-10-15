@@ -19,6 +19,7 @@
  * @fileoverview CssCascade - CSS Cascade.
  */
 import * as Asserts from "./asserts";
+import { fontMetricProperties, type FontProperties } from "./font-metrics";
 import * as Base from "./base";
 import * as CmykStore from "./cmyk-store";
 import * as CounterStyle from "./counter-style";
@@ -48,6 +49,7 @@ export type ElementStyle = {
 };
 
 export const inheritedProps = {
+  ...Object.fromEntries(fontMetricProperties.map((name) => [name, true])),
   "border-collapse": true,
   "border-spacing": true,
   "caption-side": true,
@@ -1544,39 +1546,18 @@ export function isNegativeLiteralLineHeight(value: Css.Val): boolean {
   );
 }
 
-/**
- * The size of a font relative unit that only the browser resolves, as a
- * multiple of the font size. These units come from the glyph metrics of the
- * actual font, which this engine cannot obtain before the source document is
- * laid out, and which differ with the font, the platform and the user settings,
- * so the assumptions of CSS Values 4 §6.1 are used: it defines them for the
- * cases where it is "impossible or impractical to determine" the metric (the
- * `0` glyph of `ch` and the x-height of `ex` are assumed to be 0.5em, and the
- * ideographic advance of `ic` is 1em). Only the cap height of `cap` has no
- * numeric assumption there ("the font's ascent must be used", which is not
- * obtainable here either), so the typical cap height of the Latin fonts is
- * used, about 0.7em (0.57em for Courier, 0.73em for Verdana). Returns null for
- * every other unit, including the ones `Exprs.defaultUnitSizes` covers.
- * (Review)
- */
-export function browserFontRelativeUnitRatio(unit: string): number | null {
-  switch (unit) {
-    case "ch":
-    case "ex":
-      // "In the cases where it is impossible or impractical to determine the
-      // measure of the “0” glyph, it must be assumed to be 0.5em wide" and
-      // "In the cases where it is impossible or impractical to determine the
-      // x-height, a value of 0.5em must be assumed."
-      return 0.5;
-    case "cap":
-      return 0.7;
-    case "ic":
-      // "In the cases where it is impossible or impractical to determine the
-      // ideographic advance measure, it must be assumed to be 1em."
-      return 1;
-    default:
-      return null;
+/** Font settings accumulated by the source inheritance walk. */
+export function getFontMetricProperties(
+  props: ElementStyle,
+  context: Exprs.Context,
+): FontProperties {
+  const properties: FontProperties = { lang: context.fontLanguage || "" };
+  for (const name of fontMetricProperties) {
+    const value = getProp(props, name)?.evaluate(context, name);
+    if (value && !Css.isDefaultingValue(value))
+      properties[name] = value.toString();
   }
+  return properties;
 }
 
 /**
@@ -1634,6 +1615,7 @@ function convertParentRelativeFontSizeUnits(
   func: Css.Func,
   parentFontSize: number,
   parentLineHeight?: number,
+  fontProperties?: FontProperties,
 ): Css.Val {
   const parentProps = {
     "font-size": new CascadeValue(new Css.Numeric(parentFontSize, "px"), 0),
@@ -1646,7 +1628,7 @@ function convertParentRelativeFontSizeUnits(
       0,
     );
   }
-  const visitor = new InheritanceVisitor(parentProps, context);
+  const visitor = new InheritanceVisitor(parentProps, context, fontProperties);
   visitor.setPropName("font-size");
   return func.visit(visitor);
 }
@@ -1780,6 +1762,7 @@ export function resolveLineHeightValueToPx(
   func: Css.Func,
   parentFontSize: number,
   inheritedLineHeight: number,
+  fontProperties?: FontProperties,
 ): number | null {
   if (!isSupportedFunctionValue("line-height", func)) {
     return null;
@@ -1796,6 +1779,7 @@ export function resolveLineHeightValueToPx(
     func,
     parentFontSize,
     inheritedLineHeight,
+    fontProperties,
   );
   // `evaluateValueToPx()` reduces the math functions of the value (including
   // the other functions of CSS Values 4, e.g. the `round(1lh, 7px)` that has
@@ -2149,12 +2133,23 @@ function isAbsoluteLengthValue(value: Css.Val): boolean {
 
 export class InheritanceVisitor extends Css.FilterVisitor {
   propName: string = "";
+  fontLanguage: string | null = null;
 
   constructor(
     public readonly props: ElementStyle,
     public readonly context: Exprs.Context,
+    private readonly fontProperties?: FontProperties,
   ) {
     super();
+  }
+
+  private metricProperties(): FontProperties {
+    return (
+      this.fontProperties ?? {
+        ...getFontMetricProperties(this.props, this.context),
+        lang: this.fontLanguage ?? this.context.fontLanguage ?? "",
+      }
+    );
   }
 
   setPropName(name: string): void {
@@ -2285,6 +2280,8 @@ export class InheritanceVisitor extends Css.FilterVisitor {
           this.context,
           value,
           parentFontSize,
+          undefined,
+          this.metricProperties(),
         );
         // A function of unitless numbers, e.g. `min(1, 2)`, is a number rather
         // than a length: it is not reduced by the visitors below, so it is
@@ -2342,16 +2339,12 @@ export class InheritanceVisitor extends Css.FilterVisitor {
           if (unitSize) {
             return clampComputed(value.num * unitSize);
           }
-          const ratio = browserFontRelativeUnitRatio(value.unit);
-          // A unit that only the browser resolves, e.g. the `ch` of
-          // `line-height: 5ch`, has no unit size here: the assumption of CSS
-          // Values 4 is used against the font size of the element, as the root
-          // sizing does, so that a detached descendant that resolves an `lh`
-          // unit against such a line height does not fall back to the root
-          // line height. (Review)
-          return ratio != null
-            ? clampComputed(value.num * ratio * parentFontSize)
-            : null;
+          const size = this.context.measureFontUnit(
+            value.unit,
+            parentFontSize,
+            this.metricProperties(),
+          );
+          return size != null ? clampComputed(value.num * size) : null;
         }
       }
     }
@@ -2401,15 +2394,20 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         parentFontSize,
         this.context,
         this.getInheritedLineHeightUnitSize(),
+        this.metricProperties(),
       );
     } else if (
       numeric.unit === "em" ||
       numeric.unit === "rem" ||
       numeric.unit === "lh" ||
-      numeric.unit === "rlh"
+      numeric.unit === "rlh" ||
+      /^r?(ex|cap|ch|ic)$/.test(numeric.unit)
     ) {
       const parentFontSize = this.getFontSize();
-      if (parentFontSize == null && numeric.unit === "em") {
+      if (
+        parentFontSize == null &&
+        (numeric.unit === "em" || /^(ex|cap|ch|ic)$/.test(numeric.unit))
+      ) {
         // As above: the `em` unit of a dependent property must not be
         // resolved against the inherited fallback when the element's own font
         // size is a value that only the browser resolves. (Review)
@@ -2419,26 +2417,14 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         numeric,
         parentFontSize ?? 0,
         this.context,
+        this.metricProperties(),
       );
     } else if (this.propName === "line-height") {
-      // A percentage of a line height refers to the font size of the element
-      // that declares it, and the computed value of a percentage or of a unit
-      // whose metric only the browser resolves (`ch`, `ex`, `cap`, `ic`) is
-      // that length, which a descendant inherits: the accumulated value must
-      // not keep the relative unit, or a detached descendant would resolve it
-      // against its own font size — e.g. the `calc(150%)` of an ancestor at
-      // 16px is 24px, not the 48px of an intervening level at 32px, and the
-      // `5ch` of that ancestor is the 40px of the assumed metric (CSS Values 4
-      // §6.1, as for a font size), not the 80px of the level below. A function
-      // keeps only those values converted, so a function of unitless numbers
-      // stays the multiplier that it is. (Review)
-      const ratio =
-        numeric.unit === "%"
-          ? 0.01
-          : browserFontRelativeUnitRatio(numeric.unit);
+      // A percentage line height is inherited as the length computed at its
+      // declaring element. Unitless numbers remain multipliers instead.
       const fontSize = this.getFontSize();
-      if (ratio != null && fontSize != null) {
-        return new Css.Numeric(numeric.num * ratio * fontSize, "px");
+      if (numeric.unit === "%" && fontSize != null) {
+        return new Css.Numeric(numeric.num * 0.01 * fontSize, "px");
       }
     }
     return numeric;
@@ -2519,6 +2505,7 @@ export function convertFontRelativeLengthToPx(
   numeric: Css.Numeric,
   baseFontSize: number,
   context: Exprs.Context,
+  fontProperties?: FontProperties,
 ): Css.Numeric {
   const unit = numeric.unit;
   const num = numeric.num;
@@ -2529,7 +2516,8 @@ export function convertFontRelativeLengthToPx(
   } else if (unit === "rlh") {
     return new Css.Numeric(num * context.rootLineHeight, "px");
   } else {
-    return numeric;
+    const size = context.measureFontUnit(unit, baseFontSize, fontProperties);
+    return size != null ? new Css.Numeric(num * size, "px") : numeric;
   }
 }
 
@@ -2538,6 +2526,7 @@ export function convertFontSizeToPx(
   parentFontSize: number | null,
   context: Exprs.Context,
   inheritedLineHeight?: number | null,
+  fontProperties?: FontProperties,
 ): Css.Numeric {
   // FIXME: This fallback to 0 is obviously an invalid value. A null arrives
   // from reading back the computed style of an element whose view is detached
@@ -2550,6 +2539,9 @@ export function convertFontSizeToPx(
   // AttachedPageFloatLayoutContext.invalidate(). That trial is discarded. The
   // real DOM is built again while attached to the document, and the invalid
   // value does not reach the rendered result.
+  if (parentFontSize == null && /^(ex|cap|ch|ic)$/.test(numeric.unit)) {
+    return numeric;
+  }
   if (numeric.unit === "lh" && inheritedLineHeight != null) {
     // For `font-size`, the `lh` unit refers to the computed line height of the
     // parent. (Issue #2174 follow-up)
@@ -2559,6 +2551,7 @@ export function convertFontSizeToPx(
     numeric,
     parentFontSize ?? 0,
     context,
+    fontProperties,
   );
   const unit = numeric.unit;
   const num = numeric.num;
@@ -2570,16 +2563,6 @@ export function convertFontSizeToPx(
     const unitSize = context.queryUnitSize(unit, false);
     if (Number.isFinite(unitSize)) {
       return new Css.Numeric(num * unitSize, "px");
-    }
-    // A unit that only the browser resolves, e.g. `ch`: it would be resolved
-    // against the font metrics of the element, which for detached content are
-    // the ones of the source parent, so the value must not be left to the
-    // browser, which would resolve it against the synthetic parent it is
-    // rendered in. The metric is not obtainable here, so the assumption of CSS
-    // Values 4 for such a unit is used with the parent font size. (Review)
-    const ratio = browserFontRelativeUnitRatio(unit);
-    if (ratio != null && parentFontSize != null) {
-      return new Css.Numeric(num * ratio * parentFontSize, "px");
     }
     return numeric;
   }
@@ -8914,7 +8897,8 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
   }
 
   protected hasUnresolvableUnit(exprText: string): boolean {
-    return /\d(%|em|ex|cap|ch|ic|lh|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
+    // The browser resolves sv*/lv*/dv* units, including inside calculations.
+    return /\d(%|em|r?(?:ex|cap|ch|ic)|lh|[psld]?v(?:[whbi]|min|max))\W|\Wvar\(\s*--/i.test(
       exprText,
     );
   }
@@ -8930,11 +8914,14 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       (this.context.rootFontSize != null &&
         Exprs.isRootFontRelativeLengthUnit(numeric.unit))
     ) {
-      return new Css.Numeric(
-        numeric.num *
-          this.context.queryUnitSize(numeric.unit, false, this.vertical),
-        "px",
+      const size = this.context.queryUnitSize(
+        numeric.unit,
+        false,
+        this.vertical,
       );
+      return Number.isFinite(size)
+        ? new Css.Numeric(numeric.num * size, "px")
+        : numeric;
     }
     if (typeof this.percentRef === "number" && numeric.unit === "%") {
       return new Css.Numeric((numeric.num * this.percentRef) / 100, "px");
@@ -8945,7 +8932,7 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
 
 export class RootSizingCalcFilterVisitor extends CalcFilterVisitor {
   protected override hasUnresolvableUnit(exprText: string): boolean {
-    return /\d(%|em|ex|cap|ch|ic|p?v[whbi]|p?vmin|p?vmax)\W|\Wvar\(\s*--/i.test(
+    return /\d(%|em|r?(?:ex|cap|ch|ic)|[psld]?v(?:[whbi]|min|max))\W|\Wvar\(\s*--/i.test(
       exprText,
     );
   }

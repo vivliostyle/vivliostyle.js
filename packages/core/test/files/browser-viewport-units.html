@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- Small, large and dynamic viewport units are passed through to the browser. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Browser viewport units in shorthands and longhands</title>
+  <style>
+    @page { size: 800px 1000px; margin: 24px; }
+    body { font: 14px sans-serif; }
+    .row { line-height: 32px; white-space: nowrap; }
+    .label { display: inline-block; width: 70px; }
+    .box { display: inline-block; width: 12px; height: 12px; background: #297; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <p>Each pair of green squares should have matching size and spacing.<br>
+    Left: margin/padding shorthands. Right: equivalent longhands.<br>
+    These units use the browser viewport, so sizes can change with the window.</p>
+  <div class="row"><span class="label">svw</span><span class="box shorthand" style="margin: 0.5svw; padding: 0.25svw"></span><span class="box longhand" style="margin-top: 0.5svw; margin-right: 0.5svw; margin-bottom: 0.5svw; margin-left: 0.5svw; padding-top: 0.25svw; padding-right: 0.25svw; padding-bottom: 0.25svw; padding-left: 0.25svw"></span></div>
+  <div class="row"><span class="label">svh</span><span class="box shorthand" style="margin: 0.5svh; padding: 0.25svh"></span><span class="box longhand" style="margin-top: 0.5svh; margin-right: 0.5svh; margin-bottom: 0.5svh; margin-left: 0.5svh; padding-top: 0.25svh; padding-right: 0.25svh; padding-bottom: 0.25svh; padding-left: 0.25svh"></span></div>
+  <div class="row"><span class="label">svi</span><span class="box shorthand" style="margin: 0.5svi; padding: 0.25svi"></span><span class="box longhand" style="margin-top: 0.5svi; margin-right: 0.5svi; margin-bottom: 0.5svi; margin-left: 0.5svi; padding-top: 0.25svi; padding-right: 0.25svi; padding-bottom: 0.25svi; padding-left: 0.25svi"></span></div>
+  <div class="row"><span class="label">svb</span><span class="box shorthand" style="margin: 0.5svb; padding: 0.25svb"></span><span class="box longhand" style="margin-top: 0.5svb; margin-right: 0.5svb; margin-bottom: 0.5svb; margin-left: 0.5svb; padding-top: 0.25svb; padding-right: 0.25svb; padding-bottom: 0.25svb; padding-left: 0.25svb"></span></div>
+  <div class="row"><span class="label">svmin</span><span class="box shorthand" style="margin: 0.5svmin; padding: 0.25svmin"></span><span class="box longhand" style="margin-top: 0.5svmin; margin-right: 0.5svmin; margin-bottom: 0.5svmin; margin-left: 0.5svmin; padding-top: 0.25svmin; padding-right: 0.25svmin; padding-bottom: 0.25svmin; padding-left: 0.25svmin"></span></div>
+  <div class="row"><span class="label">svmax</span><span class="box shorthand" style="margin: 0.5svmax; padding: 0.25svmax"></span><span class="box longhand" style="margin-top: 0.5svmax; margin-right: 0.5svmax; margin-bottom: 0.5svmax; margin-left: 0.5svmax; padding-top: 0.25svmax; padding-right: 0.25svmax; padding-bottom: 0.25svmax; padding-left: 0.25svmax"></span></div>
+  <div class="row"><span class="label">lvw</span><span class="box shorthand" style="margin: 0.5lvw; padding: 0.25lvw"></span><span class="box longhand" style="margin-top: 0.5lvw; margin-right: 0.5lvw; margin-bottom: 0.5lvw; margin-left: 0.5lvw; padding-top: 0.25lvw; padding-right: 0.25lvw; padding-bottom: 0.25lvw; padding-left: 0.25lvw"></span></div>
+  <div class="row"><span class="label">lvh</span><span class="box shorthand" style="margin: 0.5lvh; padding: 0.25lvh"></span><span class="box longhand" style="margin-top: 0.5lvh; margin-right: 0.5lvh; margin-bottom: 0.5lvh; margin-left: 0.5lvh; padding-top: 0.25lvh; padding-right: 0.25lvh; padding-bottom: 0.25lvh; padding-left: 0.25lvh"></span></div>
+  <div class="row"><span class="label">lvi</span><span class="box shorthand" style="margin: 0.5lvi; padding: 0.25lvi"></span><span class="box longhand" style="margin-top: 0.5lvi; margin-right: 0.5lvi; margin-bottom: 0.5lvi; margin-left: 0.5lvi; padding-top: 0.25lvi; padding-right: 0.25lvi; padding-bottom: 0.25lvi; padding-left: 0.25lvi"></span></div>
+  <div class="row"><span class="label">lvb</span><span class="box shorthand" style="margin: 0.5lvb; padding: 0.25lvb"></span><span class="box longhand" style="margin-top: 0.5lvb; margin-right: 0.5lvb; margin-bottom: 0.5lvb; margin-left: 0.5lvb; padding-top: 0.25lvb; padding-right: 0.25lvb; padding-bottom: 0.25lvb; padding-left: 0.25lvb"></span></div>
+  <div class="row"><span class="label">lvmin</span><span class="box shorthand" style="margin: 0.5lvmin; padding: 0.25lvmin"></span><span class="box longhand" style="margin-top: 0.5lvmin; margin-right: 0.5lvmin; margin-bottom: 0.5lvmin; margin-left: 0.5lvmin; padding-top: 0.25lvmin; padding-right: 0.25lvmin; padding-bottom: 0.25lvmin; padding-left: 0.25lvmin"></span></div>
+  <div class="row"><span class="label">lvmax</span><span class="box shorthand" style="margin: 0.5lvmax; padding: 0.25lvmax"></span><span class="box longhand" style="margin-top: 0.5lvmax; margin-right: 0.5lvmax; margin-bottom: 0.5lvmax; margin-left: 0.5lvmax; padding-top: 0.25lvmax; padding-right: 0.25lvmax; padding-bottom: 0.25lvmax; padding-left: 0.25lvmax"></span></div>
+  <div class="row"><span class="label">dvw</span><span class="box shorthand" style="margin: 0.5dvw; padding: 0.25dvw"></span><span class="box longhand" style="margin-top: 0.5dvw; margin-right: 0.5dvw; margin-bottom: 0.5dvw; margin-left: 0.5dvw; padding-top: 0.25dvw; padding-right: 0.25dvw; padding-bottom: 0.25dvw; padding-left: 0.25dvw"></span></div>
+  <div class="row"><span class="label">dvh</span><span class="box shorthand" style="margin: 0.5dvh; padding: 0.25dvh"></span><span class="box longhand" style="margin-top: 0.5dvh; margin-right: 0.5dvh; margin-bottom: 0.5dvh; margin-left: 0.5dvh; padding-top: 0.25dvh; padding-right: 0.25dvh; padding-bottom: 0.25dvh; padding-left: 0.25dvh"></span></div>
+  <div class="row"><span class="label">dvi</span><span class="box shorthand" style="margin: 0.5dvi; padding: 0.25dvi"></span><span class="box longhand" style="margin-top: 0.5dvi; margin-right: 0.5dvi; margin-bottom: 0.5dvi; margin-left: 0.5dvi; padding-top: 0.25dvi; padding-right: 0.25dvi; padding-bottom: 0.25dvi; padding-left: 0.25dvi"></span></div>
+  <div class="row"><span class="label">dvb</span><span class="box shorthand" style="margin: 0.5dvb; padding: 0.25dvb"></span><span class="box longhand" style="margin-top: 0.5dvb; margin-right: 0.5dvb; margin-bottom: 0.5dvb; margin-left: 0.5dvb; padding-top: 0.25dvb; padding-right: 0.25dvb; padding-bottom: 0.25dvb; padding-left: 0.25dvb"></span></div>
+  <div class="row"><span class="label">dvmin</span><span class="box shorthand" style="margin: 0.5dvmin; padding: 0.25dvmin"></span><span class="box longhand" style="margin-top: 0.5dvmin; margin-right: 0.5dvmin; margin-bottom: 0.5dvmin; margin-left: 0.5dvmin; padding-top: 0.25dvmin; padding-right: 0.25dvmin; padding-bottom: 0.25dvmin; padding-left: 0.25dvmin"></span></div>
+  <div class="row"><span class="label">dvmax</span><span class="box shorthand" style="margin: 0.5dvmax; padding: 0.25dvmax"></span><span class="box longhand" style="margin-top: 0.5dvmax; margin-right: 0.5dvmax; margin-bottom: 0.5dvmax; margin-left: 0.5dvmax; padding-top: 0.25dvmax; padding-right: 0.25dvmax; padding-bottom: 0.25dvmax; padding-left: 0.25dvmax"></span></div>
+</body>
+</html>

@@ -32,6 +32,7 @@ import * as Diff from "./diff";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import { fontMetricProperties, type FontProperties } from "./font-metrics";
 import * as LayoutHelper from "./layout-helper";
 import * as RubyEmphasis from "./ruby-emphasis";
 import * as Logging from "./logging";
@@ -930,6 +931,7 @@ export class ViewFactory
   } {
     let node: Node | null = nodeContext.sourceNode;
     const styles: CssCascade.ElementStyle[] = [];
+    const styleLanguages: (string | null)[] = [];
     let lang: string | null = null;
     const isFootnoteContentInclude =
       node instanceof Element &&
@@ -996,7 +998,9 @@ export class ViewFactory
           : this.styler;
         const nodeStyle = styler.getStyle(node as Element, false);
         styles.push(nodeStyle);
-        lang = lang || Base.getLangAttribute(node as Element);
+        const nodeLanguage = Base.getLangAttribute(node as Element);
+        styleLanguages.push(nodeLanguage);
+        lang = lang || nodeLanguage;
       }
       if (shadowRoot && !semanticFootnoteRootInRootedShadow) {
         node = shadow.owner;
@@ -1098,7 +1102,9 @@ export class ViewFactory
               CssCascade.hasKeywordName(value, "lighter"))
           ) {
             currentHasRelativeFontWeight = true;
-          } else {
+          } else if (!fontMetricProperties.includes(name)) {
+            // Font traits of the source parent are needed to resolve this
+            // element's font-relative font-size before its own traits apply.
             blockedInheritedByCurrent.add(name);
           }
         }
@@ -1123,8 +1129,11 @@ export class ViewFactory
       props,
       this.context,
     );
+    let inheritedLanguage = this.context.fontLanguage;
     for (let i = styles.length - 1; i >= 0; --i) {
       const style = styles[i];
+      const currentLanguage = styleLanguages[i] ?? inheritedLanguage;
+      inheritanceVisitor.fontLanguage = inheritedLanguage;
       const propList: string[] = [];
       for (const propName in style) {
         if (CssCascade.isInherited(propName)) {
@@ -1151,6 +1160,8 @@ export class ViewFactory
         if (i > 0 && blockedInheritedByCurrent.has(name)) {
           continue;
         }
+        inheritanceVisitor.fontLanguage =
+          name === "font-size" ? inheritedLanguage : currentLanguage;
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
@@ -1266,6 +1277,10 @@ export class ViewFactory
                 prop.value,
                 inheritedFontSize,
                 inheritedLineHeight,
+                {
+                  ...CssCascade.getFontMetricProperties(props, this.context),
+                  lang: currentLanguage || "",
+                },
               );
               if (px != null) {
                 prop1 = prop.withValue(new Css.Numeric(px, "px"));
@@ -1344,6 +1359,7 @@ export class ViewFactory
           props[name] = prop1;
         }
       }
+      inheritedLanguage = currentLanguage;
     }
     if (currentDeclaresFontSize && !fontSizeFromOwnStyle) {
       const inheritedFontSize = props["font-size"] as
@@ -3965,6 +3981,25 @@ export class ViewFactory
     };
   }
 
+  private getParentFontProperties(
+    style: CSSStyleDeclaration | null,
+  ): FontProperties {
+    if (!style) return this.context.rootFontProperties;
+    const properties: FontProperties = {};
+    for (const name of fontMetricProperties)
+      properties[name] = style.getPropertyValue(name);
+    let element = this.getParentViewNode();
+    while (element) {
+      const lang = Base.getLangAttribute(element);
+      if (lang != null) {
+        properties.lang = lang;
+        break;
+      }
+      element = element.parentElement;
+    }
+    return properties;
+  }
+
   /**
    * Get "lh" unit size in px
    * @return line-height in px, or null if cannot be determined
@@ -3999,6 +4034,14 @@ export class ViewFactory
             ? lineHeight.num / 100
             : lineHeight.num;
       } else {
+        if (
+          lineHeight instanceof Css.Numeric &&
+          /^(ex|cap|ch|ic)$/.test(lineHeight.unit)
+        ) {
+          // These units use this element's font, not the root font of the
+          // page context. Let the browser resolve lh from its computed style.
+          return null;
+        }
         if (lineHeight instanceof Css.Numeric && lineHeight.unit !== "lh") {
           const unitSize = this.context.queryUnitSize(lineHeight.unit, false);
           if (unitSize != null) {
@@ -4041,6 +4084,8 @@ export class ViewFactory
           fontSize,
           parentFontSize,
           this.context,
+          undefined,
+          this.getParentFontProperties(parentStyle),
         ).num;
         // parentFontSize may be null and the fontSizePx may be NaN
         if (typeof fontSizePx !== "number" || isNaN(fontSizePx)) {
@@ -4080,6 +4125,8 @@ export class ViewFactory
         fontSize,
         parentFontSize,
         this.context,
+        undefined,
+        this.getParentFontProperties(parentStyle),
       ).num;
       if (typeof fontSizePx === "number" && !isNaN(fontSizePx)) {
         return fontSizePx;
@@ -4566,19 +4613,21 @@ export class ViewFactory
   ): number | Css.Numeric {
     const num = numeric.num;
     const unit = numeric.unit;
-    if (Exprs.isFontRelativeLengthUnit(unit)) {
+    if (Exprs.isFontRelativeLengthUnit(unit) || /^(ex|cap|ch|ic)$/.test(unit)) {
       let elem: Node | null = viewNode;
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;
       }
       Asserts.assert(elem);
-      const fontSize = parseFloat(
-        clientLayout.getElementComputedStyle(elem as Element)["font-size"],
-      );
+      const style = clientLayout.getElementComputedStyle(elem as Element);
+      const fontSize = parseFloat(style["font-size"]);
+      const properties: FontProperties = {};
+      for (const name of fontMetricProperties) properties[name] = style[name];
       return CssCascade.convertFontRelativeLengthToPx(
         numeric,
         fontSize,
         this.context,
+        properties,
       ).num;
     } else {
       const unitSize = this.context.queryUnitSize(unit, false);

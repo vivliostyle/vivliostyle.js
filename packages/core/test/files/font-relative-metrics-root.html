@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<!-- Root font metrics must be measured after the embedded font is loaded. -->
+<html lang="en"><head><meta charset="utf-8"><title>Root font-relative metrics with an embedded font</title><style>
+@font-face { font-family: MetricWeb; src: url(fonts/ArchivoBlack/archivo-black-subset.woff2); }
+@page { size: 600px 500px; margin: 30px; @bottom-center { content: "root cap height"; font-size: 1rcap; } }
+html { font-family: MetricWeb; font-size: calc(2rcap + 1px); }
+body { font: 16px Arial; }
+.root-size { font-size: 1rem; }
+.bar { height: 12px; background: #297; margin: 8px 0; }
+</style></head><body>
+<p class="root-size">Embedded root font, sized using initial cap height</p>
+<p>10rem</p><div class="bar" data-unit="rem" style="width:10rem"></div>
+<p>10rcap</p><div class="bar" data-unit="rcap" style="width:10rcap"></div>
+<p>10rch</p><div class="bar" data-unit="rch" style="width:10rch"></div>
+</body></html>
