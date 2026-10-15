@@ -8912,7 +8912,9 @@ export class CalcFilterVisitor extends Css.FilterVisitor {
       (this.resolveViewportUnit &&
         Exprs.isViewportRelativeLengthUnit(numeric.unit)) ||
       (this.context.rootFontSize != null &&
-        Exprs.isRootFontRelativeLengthUnit(numeric.unit))
+        Exprs.isRootFontRelativeLengthUnit(numeric.unit)) ||
+      (this.context.rootFontMetricsReady &&
+        /^r(ex|cap|ch|ic)$/.test(numeric.unit))
     ) {
       const size = this.context.queryUnitSize(
         numeric.unit,

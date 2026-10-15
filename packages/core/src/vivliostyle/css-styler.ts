@@ -667,6 +667,7 @@ export class Styler implements AbstractStyler {
   }
 
   private determineRootSizes(elemStyle: CssCascade.ElementStyle): void {
+    this.context.rootFontMetricsReady = false;
     this.context.resolvingRootFontSize = true;
     const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
     let isRelativeFontSize = true;
@@ -794,6 +795,12 @@ export class Styler implements AbstractStyler {
       elemStyle,
       this.context,
     );
+    // A default root font-size can stay implicit while root-metric terms in
+    // calc() already need to use the source root's font settings.
+    this.context.rootFontMetricsReady =
+      this.context.rootFontSize != null ||
+      !fontSize ||
+      Css.isDefaultingValue(fontSize.value);
     const rootFontSize =
       this.context.rootFontSize ?? this.context.initialFontSize;
     const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;

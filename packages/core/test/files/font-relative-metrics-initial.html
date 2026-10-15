@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<!-- PR #2198: default root sizing must precede root-unit calc resolution. -->
+<html lang="en"><meta charset="utf-8"><title>Root metric units with initial font size</title><style>
+@page { size: 600px 500px; margin: 30px; }
+html { font-size: initial; font-family: "Courier New"; }
+body { font: 16px Arial; }
+.bar { height: 12px; background: #297; margin: 8px 0; }
+</style><body>
+<p>The second bar must be exactly 1px longer than the first.</p>
+<p>10rch, source root: initial Courier New</p><div class="bar" data-unit="plain" style="width:10rch"></div>
+<p>calc(10rch + 1px)</p><div class="bar" data-unit="calc" style="width:calc(10rch + 1px)"></div>
+</body></html>

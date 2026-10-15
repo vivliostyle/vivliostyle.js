@@ -23,6 +23,12 @@ import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
 
+// Firefox quantizes computed font sizes and used lengths differently. Allow
+// one 1/60px layout unit, plus CSSOM decimal serialization, when comparing them.
+function expectFontMetricLength(actual, expected) {
+  expect(Math.abs(actual - expected)).toBeLessThan(1 / 60 + 0.0001);
+}
+
 describe("vgen", function () {
   it("resolves dependent em using a font size measured in the parent font", function () {
     const parent = document.createElement("div");
@@ -46,27 +52,34 @@ describe("vgen", function () {
       getParentComputedMetrics: () => ({ fontSize: 32, lineHeight: 40 }),
     });
     try {
-      expect(
+      expectFontMetricLength(
         factory.getEmUnitSize("margin-left", new Css.Numeric(2, "cap")),
-      ).toBeCloseTo(parseFloat(getComputedStyle(child).fontSize), 3);
+        parseFloat(getComputedStyle(child).fontSize),
+      );
     } finally {
       parent.remove();
     }
   });
 
   describe("inheritFromSourceParent", function () {
-    function inherit(fontSize, lineHeight, parentFamily, currentFamily) {
+    function inherit(
+      fontSize,
+      lineHeight,
+      parentFamily,
+      currentFamily,
+      options = {},
+    ) {
       const scope = new Exprs.LexicalScope(null);
       const context = new Exprs.Context(scope, 800, 600, 16, 20);
       context.fontMetrics = new FontMetrics(document);
-      const value = (text) =>
+      const value = (text, priority = 1) =>
         new CssCascade.CascadeValue(
           CssParser.parseValue(
             scope,
             new CssTokenizer.Tokenizer(text, null),
             "",
           ),
-          1,
+          priority,
         );
       const root = document.createElement("div");
       const parent = root.appendChild(document.createElement("p"));
@@ -75,12 +88,38 @@ describe("vgen", function () {
         "font-size": value(fontSize),
         "line-height": value(lineHeight),
       };
-      if (currentFamily) currentStyle["font-family"] = value(currentFamily);
+      if (currentFamily)
+        currentStyle["font-family"] = value(currentFamily, options.ownPriority);
+      if (options.region)
+        currentStyle._regions = {
+          footnote: Object.fromEntries(
+            Object.entries(options.region).map(([name, text]) => [
+              name,
+              value(text),
+            ]),
+          ),
+        };
+      if (options.conditional)
+        currentStyle._viewConditionalStyles = [
+          {
+            matcher: { matches: () => true },
+            styles: Object.fromEntries(
+              Object.entries(options.conditional).map(([name, text]) => [
+                name,
+                value(text),
+              ]),
+            ),
+          },
+        ];
       const parentStyle = {
         "font-size": value("20px"),
         "line-height": value("1.5"),
       };
-      if (parentFamily) parentStyle["font-family"] = value(parentFamily);
+      if (parentFamily)
+        parentStyle["font-family"] = value(
+          parentFamily,
+          options.parentPriority,
+        );
       const styles = new Map([
         [root, { "font-size": value("16px"), "line-height": value("40px") }],
         [parent, parentStyle],
@@ -131,12 +170,75 @@ describe("vgen", function () {
           style["line-height"].value,
           "line-height",
         );
-        expect(size.num).toBeCloseTo(parseFloat(native.fontSize), 2);
-        expect(height.num).toBeCloseTo(parseFloat(native.lineHeight), 2);
+        expectFontMetricLength(size.num, parseFloat(native.fontSize));
+        expectFontMetricLength(height.num, parseFloat(native.lineHeight));
         expect(style["font-family"].value.toString()).toBe("Arial");
       } finally {
         parent.remove();
       }
+    });
+
+    it("does not let inherited font priority override a footnote region declaration", function () {
+      const style = inherit(
+        "calc(2cap + 1px)",
+        "normal",
+        '"Courier New"',
+        null,
+        { parentPriority: 10000, region: { "font-family": "Arial" } },
+      );
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      const merged = CssCascade.flattenCascadedStyle(style, context, [], true);
+      expect(merged["font-family"].value.toString()).toBe("Arial");
+      const probe = document.createElement("span");
+      probe.style.cssText = 'font:20px "Courier New";margin-left:2cap';
+      document.body.append(probe);
+      try {
+        expectFontMetricLength(
+          CssCascade.evaluateCSSToCSS(
+            context,
+            style["font-size"].value,
+            "font-size",
+          ).num,
+          parseFloat(getComputedStyle(probe).marginLeft) + 1,
+        );
+      } finally {
+        probe.remove();
+      }
+    });
+
+    it("keeps own font declarations authoritative and lets view conditions replace inheritance", function () {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      const own = inherit("16px", "normal", '"Courier New"', "Verdana", {
+        ownPriority: 10000,
+        parentPriority: 20000,
+        region: { "font-family": "Arial" },
+      });
+      expect(
+        CssCascade.flattenCascadedStyle(own, context, [], true)[
+          "font-family"
+        ].value.toString(),
+      ).toBe("Verdana");
+      const conditional = inherit("16px", "normal", '"Courier New"', null, {
+        parentPriority: 10000,
+        conditional: { "font-family": "Arial" },
+      });
+      expect(
+        CssCascade.flattenCascadedStyle(conditional, context, [], true)[
+          "font-family"
+        ].value.toString(),
+      ).toBe("Arial");
     });
 
     it("resolves an lh font size before applying its own line height", function () {

@@ -15,6 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as CssStyler from "../../../src/vivliostyle/css-styler";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Exprs from "../../../src/vivliostyle/exprs";
 import * as Css from "../../../src/vivliostyle/css";
@@ -87,6 +88,74 @@ describe("font metrics", function () {
         4,
       );
       context.resolvingRootFontSize = false;
+    }
+  });
+
+  it("converts root metric calculations after default root sizing", function () {
+    for (const defaultValue of [
+      Css.ident.initial,
+      Css.ident.inherit,
+      Css.ident.unset,
+      null,
+    ]) {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      context.fontMetrics = new FontMetrics(document);
+      const style = {
+        "font-family": new Cascade.CascadeValue(new Css.Str("Courier New"), 0),
+      };
+      if (defaultValue)
+        style["font-size"] = new Cascade.CascadeValue(defaultValue, 0);
+      const styler = Object.create(CssStyler.Styler.prototype);
+      styler.context = context;
+      styler.determineRootSizes(style);
+      expect(context.rootFontSize).toBeNull();
+      for (const unit of ["ex", "cap", "ch", "ic"]) {
+        const value = Parser.parseValue(
+          context.rootScope,
+          new Tokenizer.Tokenizer(`calc(10r${unit} + 1px)`, null),
+          "",
+        );
+        const result = value.visit(new Cascade.CalcFilterVisitor(context));
+        expect(result.unit).withContext(`${defaultValue}/${unit}`).toBe("px");
+        expect(result.num)
+          .withContext(`${defaultValue}/${unit}`)
+          .toBeCloseTo(
+            10 * nativeLength(unit, 16, { fontFamily: "Courier New" }) + 1,
+            3,
+          );
+      }
+    }
+  });
+
+  it("preserves root metric calculations while the root font size is unresolved", function () {
+    for (const fontSize of [Css.getName("math"), new Css.Numeric(1, "svw")]) {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      context.fontMetrics = new FontMetrics(document);
+      const styler = Object.create(CssStyler.Styler.prototype);
+      styler.context = context;
+      styler.determineRootSizes({
+        "font-size": new Cascade.CascadeValue(fontSize, 0),
+      });
+      const value = Parser.parseValue(
+        context.rootScope,
+        new Tokenizer.Tokenizer("calc(10rch + 1px)", null),
+        "",
+      );
+      expect(
+        value.visit(new Cascade.CalcFilterVisitor(context)).toString(),
+      ).toBe(value.toString());
     }
   });
 

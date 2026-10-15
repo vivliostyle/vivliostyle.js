@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<!-- PR #2198: browser-only viewport units cannot be evaluated as page geometry. -->
+<html lang="en"><meta charset="utf-8"><title>Browser viewport units in page descriptors</title><style>
+@page {size:500px 400px;margin:30px;bleed:0;crop-offset:0;}
+
+body {font:16px Arial;margin:0;}
+</style><body><p>Page size: 500px by 400px.</p><p>Unsupported variable values use zero crop offset and bleed.</p></body></html>

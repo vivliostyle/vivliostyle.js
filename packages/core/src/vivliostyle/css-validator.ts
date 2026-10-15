@@ -2755,6 +2755,16 @@ export class ValidatorSet {
       receiver.simpleProperty(shorthandName, value, important);
       return;
     }
+    if (
+      ["size", "bleed", "crop-offset"].includes(name) &&
+      containsBrowserViewportUnit(value)
+    ) {
+      // These descriptors are evaluated numerically by the engine and never
+      // reach the browser. Keep browser-only viewport units out of page
+      // geometry while allowing them in ordinary properties/shorthands.
+      receiver.invalidPropertyValue(origName, value);
+      return;
+    }
     const px = this.prefixes.get(name);
     // The rollback keywords (`revert`, `revert-layer` and `revert-rule`) are
     // resolved by Vivliostyle's own cascade rather than handed to the browser,
@@ -2840,6 +2850,22 @@ export function baseValidatorSet(): ValidatorSet {
   validatorSet.initBuiltInValidators();
   validatorSet.parse(ValidationTxt);
   return validatorSet;
+}
+
+/** Browser-only viewport lengths cannot be evaluated as page geometry. */
+export function containsBrowserViewportUnit(value: Css.Val): boolean {
+  const visitor = new BrowserViewportUnitVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+class BrowserViewportUnitVisitor extends Css.Visitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+    this.found ||= /^[sld]v(?:[whbi]|min|max)$/i.test(numeric.unit);
+    return null;
+  }
 }
 
 class VarCheckVisitor extends Css.Visitor {

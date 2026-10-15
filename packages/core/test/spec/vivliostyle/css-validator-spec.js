@@ -16,6 +16,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as CssPage from "../../../src/vivliostyle/css-page";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
@@ -94,6 +95,51 @@ describe("css-validator", function () {
   });
 
   describe("browser viewport length units", function () {
+    it("rejects browser-only viewport units in engine-evaluated page descriptors", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .flatMap((unit) =>
+            [`1${unit}`, `calc(1${unit} + 1px)`].map(
+              (value, index) =>
+                `.${unit}-${index} {size:300px 400px;size:${value} 400px;bleed:3px;bleed:${value};crop-offset:10px;crop-offset:${value};}`,
+            ),
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of units)
+            for (const index of [0, 1]) {
+              const style = cascade.classes.get(`${unit}-${index}`).style;
+              expect(style.size.value.toString())
+                .withContext(`${unit}/${index}`)
+                .toBe("300px 400px");
+              const context = new adapt_exprs.Context(
+                new adapt_exprs.LexicalScope(null),
+                800,
+                600,
+                16,
+                20,
+              );
+              const evaluated = CssPage.evaluatePageSizeAndBleed(
+                CssPage.resolvePageSizeAndBleed(style),
+                context,
+              );
+              expect(evaluated).withContext(`${unit}/${index}`).toEqual({
+                pageWidth: 300,
+                pageHeight: 400,
+                bleed: 3,
+                bleedOffset: 7,
+                cropOffset: 10,
+              });
+            }
+        },
+      );
+    });
+
     it("expands margin and padding while preserving all small, large and dynamic units", function (done) {
       const units = ["s", "l", "d"].flatMap((prefix) =>
         ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),

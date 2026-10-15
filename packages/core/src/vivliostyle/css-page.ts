@@ -198,6 +198,15 @@ export type PageSizeAndBleed = {
 export function resolvePageSizeAndBleed(style: {
   [key: string]: CssCascade.CascadeValue;
 }): PageSizeAndBleed {
+  // Variable substitution can introduce units after parse-time validation.
+  // Such descriptors are invalid at computed-value time and use defaults.
+  const descriptor = (name: string): CssCascade.CascadeValue | undefined => {
+    const declaration = style[name];
+    return declaration &&
+      !CssValidator.containsBrowserViewportUnit(declaration.value)
+      ? declaration
+      : undefined;
+  };
   // default value (fit to viewport, no bleed)
   const pageSizeAndBleed: PageSizeAndBleed = {
     width: Css.fullWidth,
@@ -206,7 +215,7 @@ export function resolvePageSizeAndBleed(style: {
     bleedOffset: Css.numericZero,
     cropOffset: Css.numericZero,
   };
-  const size: CssCascade.CascadeValue = style["size"];
+  const size = descriptor("size");
 
   if (!size || size.value === Css.ident.auto) {
     // if size is auto, fit to the viewport (use default value)
@@ -245,7 +254,7 @@ export function resolvePageSizeAndBleed(style: {
     }
   }
   const marksCV = style["marks"];
-  const bleedCV = style["bleed"];
+  const bleedCV = descriptor("bleed");
   const marks =
     marksCV && !Css.isDefaultingValue(marksCV.value)
       ? marksCV.value
@@ -275,7 +284,7 @@ export function resolvePageSizeAndBleed(style: {
   }
 
   // crop-offset (Issue #913)
-  const cropOffsetCV = style["crop-offset"];
+  const cropOffsetCV = descriptor("crop-offset");
   const cropOffset =
     cropOffsetCV && !Css.isDefaultingValue(cropOffsetCV.value)
       ? cropOffsetCV.value

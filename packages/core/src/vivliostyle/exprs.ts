@@ -570,6 +570,7 @@ export class Context {
   initialFontSize: number;
   fontMetrics: FontMetrics | null = null;
   rootFontProperties: FontProperties = {};
+  rootFontMetricsReady = false;
   fontLanguage: string | null = null;
   resolvingRootFontSize = false;
   rootFontSize: number | null = null;

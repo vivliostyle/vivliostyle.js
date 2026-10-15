@@ -1030,13 +1030,6 @@ export class ViewFactory
     const lineHeightFromOwnStyle = !!(
       styles.length > 0 && CssCascade.getProp(styles[0], "line-height")
     );
-    // Whether the current element's relative font weight (including region
-    // rules) is resolved against the inherited weight.
-    let currentHasRelativeFontWeight = false;
-    // Whether the current element's own cascaded style declares font-weight.
-    const fontWeightFromOwnStyle = !!(
-      styles.length > 0 && CssCascade.getProp(styles[0], "font-weight")
-    );
     if (styles.length > 0) {
       const currentStyle = styles[0];
       const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
@@ -1091,17 +1084,6 @@ export class ViewFactory
               CssCascade.isInvalidLineHeight(this.context, value))
           ) {
             currentDeclaresLineHeight = true;
-          } else if (
-            // The relative font-weight keywords are resolved against the
-            // inherited weight, so keep accumulating it. A keyword coming from
-            // a custom property is not canonicalized, so compare names. (Only
-            // `font-weight` has these keywords; the same identifier of another
-            // property, e.g. `font-family: bolder`, is an ordinary value.)
-            name === "font-weight" &&
-            (CssCascade.hasKeywordName(value, "bolder") ||
-              CssCascade.hasKeywordName(value, "lighter"))
-          ) {
-            currentHasRelativeFontWeight = true;
           } else if (!fontMetricProperties.includes(name)) {
             // Font traits of the source parent are needed to resolve this
             // element's font-relative font-size before its own traits apply.
@@ -1401,22 +1383,13 @@ export class ViewFactory
         );
       }
     }
-    if (currentHasRelativeFontWeight && !fontWeightFromOwnStyle) {
-      const inheritedFontWeight = props["font-weight"] as
-        CssCascade.CascadeValue | undefined;
-      // Likewise for a relative font weight (`bolder`/`lighter`) that comes
-      // from a declaration outside the element's own cascaded style, e.g.
-      // `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }`.
-      // The accumulated inherited weight is kept only as a low-priority
-      // placeholder, so that it cannot beat the declaration during the
-      // cascade. As for the font size above, only the priority is affected:
-      // the declaration of the region rule resolves in the context that it is
-      // rendered in. (Issue #2174)
-      if (inheritedFontWeight) {
-        props["font-weight"] = new CssCascade.CascadeValue(
-          inheritedFontWeight.value,
-          0,
-        );
+    // Ancestor traits were needed for source-parent font-size calculations.
+    // Their priorities must not compete with declarations on this element,
+    // including region and view-conditional rules merged after this walk.
+    for (const name of fontMetricProperties) {
+      const inherited = CssCascade.getProp(props, name);
+      if (inherited && !CssCascade.getProp(styles[0], name)) {
+        props[name] = new CssCascade.CascadeValue(inherited.value, 0);
       }
     }
     for (const sname in elementStyle) {

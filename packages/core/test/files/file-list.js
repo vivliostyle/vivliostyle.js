@@ -434,6 +434,20 @@ module.exports = [
         title: "Font-relative lengths with actual metrics",
       },
       {
+        file: "font-relative-metrics-initial.html",
+        title: "Root metric calculations with initial font size (PR #2198)",
+      },
+      {
+        file: "font-relative-metrics-region.html",
+        title: "Font metrics and footnote region priority (PR #2198)",
+      },
+      {
+        file: "browser-viewport-page-descriptors.html",
+        title: "Browser viewport units in page descriptors (PR #2198)",
+        // Older viewers cannot render NaN page geometry; use the local reftest.
+        skipLayoutRegression: true,
+      },
+      {
         file: "font-relative-metrics-root.html",
         title: "Actual font metrics in root sizing",
       },
