@@ -2756,12 +2756,12 @@ export class ValidatorSet {
       return;
     }
     if (
-      ["size", "bleed", "crop-offset"].includes(name) &&
+      ["size", "bleed", "crop-offset", "float-min-wrap-block"].includes(name) &&
       containsBrowserViewportUnit(value)
     ) {
-      // These descriptors are evaluated numerically by the engine and never
+      // These values are evaluated numerically by the engine and never
       // reach the browser. Keep browser-only viewport units out of page
-      // geometry while allowing them in ordinary properties/shorthands.
+      // geometry or float limits, but allow them in browser CSS/shorthands.
       receiver.invalidPropertyValue(origName, value);
       return;
     }
@@ -2852,7 +2852,7 @@ export function baseValidatorSet(): ValidatorSet {
   return validatorSet;
 }
 
-/** Browser-only viewport lengths cannot be evaluated as page geometry. */
+/** Browser-only viewport lengths cannot be evaluated numerically by the engine. */
 export function containsBrowserViewportUnit(value: Css.Val): boolean {
   const visitor = new BrowserViewportUnitVisitor();
   value.visit(visitor);

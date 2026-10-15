@@ -6537,6 +6537,12 @@ export class CascadeInstance {
       }
       if (value !== cascVal.value) {
         // all variables substituted
+        if (
+          name === "float-min-wrap-block" &&
+          CssValidator.containsBrowserViewportUnit(value)
+        ) {
+          value = Css.ident.unset;
+        }
         const shorthand = this.validatorSet
           .getShorthand(name, value)
           ?.clone(this.scope);

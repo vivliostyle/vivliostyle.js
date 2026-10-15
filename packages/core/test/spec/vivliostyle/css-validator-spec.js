@@ -95,6 +95,31 @@ describe("css-validator", function () {
   });
 
   describe("browser viewport length units", function () {
+    it("rejects browser-only viewport units in float-min-wrap-block and retains the valid cutoff", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .map(
+            (unit) =>
+              `.${unit} { float-min-wrap-block: 42px; float-min-wrap-block: 10${unit}; float-min-wrap-block: calc(10${unit} + 1px); }`,
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of units) {
+            const cutoff =
+              cascade.classes.get(unit).style["float-min-wrap-block"].value;
+            expect(cutoff.unit).withContext(unit).toBe("px");
+            expect(cutoff.num).withContext(unit).toBe(42);
+            expect(Number.isFinite(cutoff.num)).withContext(unit).toBe(true);
+          }
+        },
+      );
+    });
+
     it("rejects browser-only viewport units in engine-evaluated page descriptors", function (done) {
       spyOn(vivliostyle_logging.logger, "warn");
       const units = ["s", "l", "d"].flatMap((prefix) =>

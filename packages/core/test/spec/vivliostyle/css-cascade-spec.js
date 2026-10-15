@@ -3024,6 +3024,33 @@ describe("css-cascade", function () {
       cascadeInstance.applyVarFilter([style], element);
     }
 
+    it("rejects browser viewport float cutoffs introduced by variables without rejecting browser CSS", function () {
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      for (const unit of units) {
+        for (const value of [`10${unit}`, `calc(10${unit} + 1px)`]) {
+          const style = {
+            "--length": createCascadeValue(value),
+            "float-min-wrap-block": createCascadeValue("var(--length)"),
+            "margin-top": createCascadeValue("var(--length)"),
+          };
+          applyVarFilter(style, document.createElement("div"));
+          expect(style["float-min-wrap-block"].value)
+            .withContext(value)
+            .toBe(adapt_css.ident.unset);
+          expect(style["margin-top"].value.toString())
+            .withContext(value)
+            .toBe(style["--length"].value.toString());
+        }
+      }
+      const style = {
+        "float-min-wrap-block": createCascadeValue("var(--missing, 42px)"),
+      };
+      applyVarFilter(style, document.createElement("div"));
+      expect(style["float-min-wrap-block"].value.toString()).toBe("42px");
+    });
+
     it("keeps self-referential custom properties guaranteed-invalid instead of using their fallback", function () {
       var element = document.createElement("div");
       var style = {
