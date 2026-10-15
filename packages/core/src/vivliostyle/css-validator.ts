@@ -2756,8 +2756,7 @@ export class ValidatorSet {
       return;
     }
     if (
-      (isEngineEvaluatedLengthProperty(name) ||
-        (ruleType === "page" && isPageBoxGeometryProperty(name))) &&
+      isEngineEvaluatedLengthProperty(name, ruleType === "page") &&
       containsBrowserViewportUnit(value)
     ) {
       // These values are evaluated numerically by the engine and never
@@ -2860,44 +2859,44 @@ export function containsBrowserViewportUnit(value: Css.Val): boolean {
   return visitor.found;
 }
 
-/** Page-box properties whose lengths are evaluated numerically by the engine. */
-export function isPageBoxGeometryProperty(name: string): boolean {
-  name = name.toLowerCase();
+/** Whether a length needs engine evaluation, optionally in a page-box context. */
+export function isEngineEvaluatedLengthProperty(
+  name: string,
+  pageBox = false,
+): boolean {
+  name = name.toLowerCase().replace(/^-epubx-/, "");
   return (
     [
+      "bleed",
+      "crop-offset",
+      "float-min-wrap-block",
+      "min-page-height",
+      "min-page-width",
       "size",
-      "top",
-      "right",
-      "bottom",
-      "left",
-      "columns",
-      "column-width",
-      "column-gap",
-      "column-rule",
-      "column-rule-width",
+      "snap-height",
+      "snap-width",
     ].includes(name) ||
-    /^(?:min-|max-)?(?:width|height|block-size|inline-size)$/.test(name) ||
-    /^inset(-|$)/.test(name) ||
-    /^(margin|padding)(-|$)/.test(name) ||
-    /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-width)?$/.test(
-      name,
-    )
+    (pageBox &&
+      ([
+        "top",
+        "right",
+        "bottom",
+        "left",
+        "columns",
+        "column-width",
+        "column-gap",
+        "column-rule",
+        "column-rule-width",
+        "shape-inside",
+        "shape-outside",
+      ].includes(name) ||
+        /^(?:min-|max-)?(?:width|height|block-size|inline-size)$/.test(name) ||
+        /^inset(-|$)/.test(name) ||
+        /^(margin|padding)(-|$)/.test(name) ||
+        /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-width)?$/.test(
+          name,
+        )))
   );
-}
-
-/** Length properties evaluated numerically by Vivliostyle rather than CSS. */
-export function isEngineEvaluatedLengthProperty(name: string): boolean {
-  name = name.toLowerCase().replace(/^-epubx-/, "");
-  return [
-    "bleed",
-    "crop-offset",
-    "float-min-wrap-block",
-    "min-page-height",
-    "min-page-width",
-    "size",
-    "snap-height",
-    "snap-width",
-  ].includes(name);
 }
 
 class BrowserViewportUnitVisitor extends Css.Visitor {

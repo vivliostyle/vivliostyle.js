@@ -995,8 +995,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     // to both @page boxes and adaptive page-template partitions.
     for (const name in cascMap) {
       if (
-        (CssValidator.isPageBoxGeometryProperty(name) ||
-          CssValidator.isEngineEvaluatedLengthProperty(name)) &&
+        CssValidator.isEngineEvaluatedLengthProperty(name, true) &&
         CssValidator.containsBrowserViewportUnit(cascMap[name].value)
       ) {
         cascMap[name] = cascMap[name].withValue(Css.ident.unset);

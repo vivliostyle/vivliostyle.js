@@ -197,7 +197,7 @@ describe("css-validator", function () {
     it("rejects unsupported page geometry before replacing valid declarations", function () {
       const scope = new adapt_exprs.LexicalScope(null);
       const validatorSet = adapt_cssvalid.baseValidatorSet();
-      const style = {};
+      let style = {};
       const receiver = {
         ruleType: "page",
         simpleProperty(name, value) {
@@ -237,39 +237,27 @@ describe("css-validator", function () {
         ["column-gap", "19px", "1svw"],
         ["column-rule", "20px solid", "1svw solid"],
         ["column-rule-width", "21px", "1svw"],
+        [
+          "shape-inside",
+          "rectangle(0px, 0px, 100px, 100px)",
+          "rectangle(0px, 0px, 10svw, 100px)",
+        ],
+        [
+          "shape-outside",
+          "rectangle(0px, 0px, 100px, 100px)",
+          "rectangle(0px, 0px, 10svw, 100px)",
+        ],
       ]) {
+        style = {};
         validate(name, valid);
+        expect(Object.keys(style).length).withContext(name).toBeGreaterThan(0);
+        const expected = { ...style };
         validate(name, unsupported);
+        expect(style).withContext(name).toEqual(expected);
       }
-
-      const values = Object.values(style);
-      expect(
-        values.some((value) =>
-          adapt_cssvalid.containsBrowserViewportUnit(value),
-        ),
-      ).toBe(false);
-      for (const valid of [
-        "5px",
-        "6px",
-        "7px",
-        "8px",
-        "9px",
-        "10px",
-        "11px",
-        "12px",
-        "13px",
-        "14px",
-        "15px",
-        "16px",
-        "17px",
-        "18px",
-        "19px",
-        "21px",
-      ]) {
-        expect(values.some((value) => value.toString().includes(valid)))
-          .withContext(valid)
-          .toBe(true);
-      }
+      receiver.ruleType = undefined;
+      validate("shape-outside", "inset(1svw)");
+      expect(style["shape-outside"].toString()).toBe("inset(1svw)");
     });
 
     it("expands margin and padding while preserving all small, large and dynamic units", function (done) {

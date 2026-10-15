@@ -29,6 +29,10 @@
             column-gap: 20px;
             column-rule: 5px solid #102a43;
             column-rule: 1svw solid #102a43;
+            shape-inside: rectangle(0px, 0px, 200px, 100px);
+            shape-inside: rectangle(0px, 0px, 10svw, 100px);
+            shape-outside: rectangle(0px, 0px, 200px, 100px);
+            shape-outside: rectangle(0px, 0px, 10svw, 100px);
           }
           @-epubx-partition {
             content: "Substituted column-rule widths use defaults.";
@@ -41,6 +45,8 @@
             column-rule: 5px solid #102a43;
             --unsupported-rule-width: 1svw;
             column-rule-width: var(--unsupported-rule-width);
+            shape-inside: rectangle(0px, 0px, var(--unsupported-rule-width), 100px);
+            shape-outside: rectangle(0px, 0px, var(--unsupported-rule-width), 100px);
             background: #dceeff;
           }
         }
