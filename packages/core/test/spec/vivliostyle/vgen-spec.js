@@ -285,6 +285,30 @@ describe("vgen", function () {
       }
     });
 
+    it("leaves metric lengths for the winning region or view font-size to resolve", function () {
+      for (const rule of ["region", "conditional"]) {
+        for (const fontSize of ["40px", "2em"]) {
+          const style = inherit("20px", "normal", '"Courier New"', null, {
+            parentPriority: 10000,
+            [rule]: { "font-size": fontSize },
+            properties: { "letter-spacing": "1cap" },
+          });
+          expect(style["letter-spacing"].value.toString())
+            .withContext(`${rule}: ${fontSize}`)
+            .toBe("1cap");
+          const flattened = CssCascade.flattenCascadedStyle(
+            style,
+            new Exprs.Context(new Exprs.LexicalScope(null), 800, 600, 16, 20),
+            [],
+            rule === "region",
+          );
+          expect(flattened["font-size"].value.toString())
+            .withContext(`${rule}: ${fontSize}`)
+            .toBe(fontSize);
+        }
+      }
+    });
+
     it("resolves an lh font size before applying its own line height", function () {
       const style = inherit("1lh", "1");
       expect(style["font-size"].value.toString()).toBe("30px");

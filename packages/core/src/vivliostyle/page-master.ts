@@ -21,7 +21,11 @@
 import * as Base from "./base";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
-import { PageRuleMaster, PageRuleMasterInstance } from "./css-page";
+import {
+  PageRuleMaster,
+  PageRuleMasterInstance,
+  pageRuleMasterPseudoName,
+} from "./css-page";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
@@ -981,6 +985,22 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       regionIds,
       false,
     );
+    if (
+      this.pageBox.pseudoName === pageRuleMasterPseudoName ||
+      this.pageBox.parent?.pseudoName === pageRuleMasterPseudoName
+    ) {
+      // Variable substitution can introduce browser-only units after @page
+      // parsing. Treat them as invalid at computed-value time before page
+      // dimensions and margins are converted to expression values.
+      for (const name in cascMap) {
+        if (
+          CssValidator.isPageBoxGeometryProperty(name) &&
+          CssValidator.containsBrowserViewportUnit(cascMap[name].value)
+        ) {
+          cascMap[name] = cascMap[name].withValue(Css.ident.unset);
+        }
+      }
+    }
     this.vertical = CssCascade.isVertical(
       cascMap,
       context,

@@ -2,7 +2,8 @@
 <!-- PR #2198: browser-only viewport units cannot be evaluated as page geometry. -->
 <html lang="en"><meta charset="utf-8"><title>Browser viewport units in page descriptors</title><style>
 @page {size:500px 400px;margin:30px;bleed:3px;crop-offset:10px;}
-@page {size:100svw 100svh;bleed:1lvh;crop-offset:calc(1dvw + 1px);}
-@page {bleed:var(--unsupported-viewport, 1lvh);crop-offset:var(--unsupported-viewport, 1dvw);}
+@page {size:100svw 100svh;bleed:1lvh;crop-offset:calc(1dvw + 1px);margin:10svw;padding:calc(1dvh + 1px);}
+@page {--unsupported-viewport:10svw;margin:var(--unsupported-viewport);bleed:var(--unsupported-viewport, 1lvh);crop-offset:var(--unsupported-viewport, 1dvw);}
+@page:first {margin:0;padding:0;bleed:0;crop-offset:0;}
 body {font:16px Arial;margin:0;}
 </style><body><p>Page size: 500px by 400px.</p><p>Unsupported variable values use zero crop offset and bleed.</p></body></html>

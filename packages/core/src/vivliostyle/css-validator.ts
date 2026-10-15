@@ -2756,7 +2756,10 @@ export class ValidatorSet {
       return;
     }
     if (
-      ["size", "bleed", "crop-offset", "float-min-wrap-block"].includes(name) &&
+      (["size", "bleed", "crop-offset", "float-min-wrap-block"].includes(
+        name,
+      ) ||
+        (ruleType === "page" && isPageBoxGeometryProperty(name))) &&
       containsBrowserViewportUnit(value)
     ) {
       // These values are evaluated numerically by the engine and never
@@ -2857,6 +2860,19 @@ export function containsBrowserViewportUnit(value: Css.Val): boolean {
   const visitor = new BrowserViewportUnitVisitor();
   value.visit(visitor);
   return visitor.found;
+}
+
+/** Page-box properties whose lengths are evaluated numerically by the engine. */
+export function isPageBoxGeometryProperty(name: string): boolean {
+  return (
+    ["size", "width", "height", "block-size", "inline-size"].includes(name) ||
+    /^(margin|padding)(-|$)/.test(name) ||
+    name === "border" ||
+    name === "border-width" ||
+    /^border-(top|right|bottom|left|block-start|block-end|inline-start|inline-end)-width$/.test(
+      name,
+    )
+  );
 }
 
 class BrowserViewportUnitVisitor extends Css.Visitor {

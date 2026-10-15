@@ -64,6 +64,20 @@ const xhtmlElementsRenderedAsDiv = new Set([
   "title",
 ]);
 
+function hasCurrentFontRelativeLength(value: Css.Val): boolean {
+  class Visitor extends Css.Visitor {
+    found = false;
+
+    override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+      this.found ||= /^(em|ex|cap|ch|ic)$/i.test(numeric.unit);
+      return null;
+    }
+  }
+  const visitor = new Visitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
 function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
   if (markerContent instanceof Css.Str) {
     return markerContent;
@@ -1038,6 +1052,12 @@ export class ViewFactory
           this.isFootnote,
         )
       : {};
+    const sourceFontSize = styles.length
+      ? CssCascade.getProp(styles[0], "font-size")
+      : null;
+    const winningFontSize = flattenedCurrentStyle["font-size"];
+    const hasWinningFontSizeOverride =
+      !!winningFontSize && winningFontSize !== sourceFontSize;
     if (styles.length > 0) {
       const currentFontSize = flattenedCurrentStyle["font-size"]?.evaluate(
         this.context,
@@ -1207,6 +1227,17 @@ export class ViewFactory
           }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
+            i === 0 &&
+            name !== "font-size" &&
+            hasWinningFontSizeOverride &&
+            hasCurrentFontRelativeLength(prop.value)
+          ) {
+            // The browser applies the winning region/view font-size after this
+            // walk. Leave dependent units intact so it resolves them against
+            // that final size, including relative region sizes against the
+            // rendering parent.
+            prop1 = prop;
+          } else if (
             name === "font-size" &&
             i === styles.length - 1 &&
             this.context.isRelativeRootFontSize &&

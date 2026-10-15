@@ -3189,6 +3189,8 @@ export class PageParserHandler
   extends CssCascade.CascadeParserHandler
   implements CssValidator.PropertyReceiver
 {
+  readonly ruleType = "page";
+
   private currentPageSelectors: {
     selectors: string[] | null;
     specificity: number;
