@@ -235,6 +235,8 @@ describe("css-validator", function () {
         ["inset-inline-start", "17px", "1svw"],
         ["columns", "18px 2", "1svw 2"],
         ["column-gap", "19px", "1svw"],
+        ["column-rule", "20px solid", "1svw solid"],
+        ["column-rule-width", "21px", "1svw"],
       ]) {
         validate(name, valid);
         validate(name, unsupported);
@@ -262,6 +264,7 @@ describe("css-validator", function () {
         "17px",
         "18px",
         "19px",
+        "21px",
       ]) {
         expect(values.some((value) => value.toString().includes(valid)))
           .withContext(valid)

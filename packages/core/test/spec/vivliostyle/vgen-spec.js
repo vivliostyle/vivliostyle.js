@@ -183,6 +183,29 @@ describe("vgen", function () {
         );
       if (options.parentFontWeight)
         parentStyle["font-weight"] = value(options.parentFontWeight);
+      if (options.parentConditional)
+        parentStyle._viewConditionalStyles = [
+          {
+            matcher: {
+              matches: () => options.parentConditionalMatches !== false,
+            },
+            styles: Object.fromEntries(
+              Object.entries(options.parentConditional).map(([name, text]) => [
+                name,
+                value(text),
+              ]),
+            ),
+          },
+        ];
+      if (options.parentRegion)
+        parentStyle._regions = {
+          footnote: Object.fromEntries(
+            Object.entries(options.parentRegion).map(([name, text]) => [
+              name,
+              value(text, 10000),
+            ]),
+          ),
+        };
       const styles = new Map([
         [root, { "font-size": value("16px"), "line-height": value("40px") }],
         [parent, parentStyle],
@@ -200,6 +223,48 @@ describe("vgen", function () {
         currentStyle,
       ).elementStyle;
     }
+
+    it("uses ancestor view-conditional metrics without the child's region rules", function () {
+      const parent = document.createElement("div");
+      const child = parent.appendChild(document.createElement("span"));
+      document.body.append(parent);
+      try {
+        for (const matches of [true, false]) {
+          parent.style.cssText = matches
+            ? "font:700 28px/60px Arial"
+            : 'font:20px/30px "Courier New"';
+          for (const fontSize of ["2cap", "1lh"]) {
+            child.style.cssText = `font-family:Courier New;font-size:${fontSize}`;
+            const style = inherit(
+              fontSize,
+              "normal",
+              '"Courier New"',
+              '"Courier New"',
+              {
+                parentConditionalMatches: matches,
+                parentConditional: {
+                  "font-family": "Arial",
+                  "font-size": "28px",
+                  "font-weight": "700",
+                  "line-height": "60px",
+                },
+                parentRegion: {
+                  "font-family": "Verdana",
+                  "font-size": "80px",
+                  "line-height": "90px",
+                },
+              },
+            );
+            expectFontMetricLength(
+              style["font-size"].value.num,
+              parseFloat(getComputedStyle(child).fontSize),
+            );
+          }
+        }
+      } finally {
+        parent.remove();
+      }
+    });
 
     it("uses parent font metrics for font-size and current metrics for line-height", function () {
       const parent = document.createElement("div");

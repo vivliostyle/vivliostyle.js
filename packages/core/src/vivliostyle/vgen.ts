@@ -1143,15 +1143,22 @@ export class ViewFactory
     );
     let inheritedLanguage = this.context.fontLanguage;
     for (let i = styles.length - 1; i >= 0; --i) {
-      const style = i === 0 ? { ...styles[i] } : styles[i];
-      if (i === 0) {
-        // Font-size still sees source-parent traits. The traits processed
-        // after it must include winning region/view rules before dependent
-        // lengths such as line-height and letter-spacing are converted.
-        for (const name of fontMetricProperties) {
-          if (flattenedCurrentStyle[name]) {
-            style[name] = flattenedCurrentStyle[name];
-          }
+      const style = { ...styles[i] };
+      // Ancestors use their own view conditions, without the detached child's
+      // region rules. Their computed font settings form the child's metrics.
+      const fontStyle =
+        i === 0
+          ? flattenedCurrentStyle
+          : CssCascade.flattenCascadedStyle(style, this.context, null, false);
+      // The current element's font-size still uses the source-parent basis;
+      // its winning region/view traits apply after font-size is resolved.
+      const fontProperties =
+        i === 0
+          ? fontMetricProperties
+          : ["font-size", "line-height", ...fontMetricProperties];
+      for (const name of fontProperties) {
+        if (fontStyle[name]) {
+          style[name] = fontStyle[name];
         }
       }
       const currentLanguage = styleLanguages[i] ?? inheritedLanguage;

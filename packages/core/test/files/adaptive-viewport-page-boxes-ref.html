@@ -16,12 +16,27 @@
             -epubx-flow-from: body;
             top: 10mm;
             right: 10mm;
-            bottom: 10mm;
+            height: 50mm;
             left: 10mm;
             padding: 3px;
             padding-left: 0;
             background: #dceeff;
             color: #102a43;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+          }
+          @-epubx-partition {
+            content: "Substituted column-rule widths use defaults.";
+            top: 80mm;
+            right: 10mm;
+            left: 10mm;
+            height: 40mm;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+            column-rule-width: initial;
+            background: #dceeff;
           }
         }
       }

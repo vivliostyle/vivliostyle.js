@@ -17,7 +17,7 @@
             top: 10mm;
             top: 1svh;
             right: 10mm;
-            bottom: 10mm;
+            height: 50mm;
             left: 10mm;
             padding: 3px;
             padding: 1svw;
@@ -25,6 +25,23 @@
             padding-left: var(--unsupported-padding);
             background: #dceeff;
             color: #102a43;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+            column-rule: 1svw solid #102a43;
+          }
+          @-epubx-partition {
+            content: "Substituted column-rule widths use defaults.";
+            top: 80mm;
+            right: 10mm;
+            left: 10mm;
+            height: 40mm;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+            --unsupported-rule-width: 1svw;
+            column-rule-width: var(--unsupported-rule-width);
+            background: #dceeff;
           }
         }
       }

@@ -2873,6 +2873,8 @@ export function isPageBoxGeometryProperty(name: string): boolean {
       "columns",
       "column-width",
       "column-gap",
+      "column-rule",
+      "column-rule-width",
     ].includes(name) ||
     /^(?:min-|max-)?(?:width|height|block-size|inline-size)$/.test(name) ||
     /^inset(-|$)/.test(name) ||
