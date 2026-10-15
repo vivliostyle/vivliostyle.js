@@ -2756,9 +2756,7 @@ export class ValidatorSet {
       return;
     }
     if (
-      (["size", "bleed", "crop-offset", "float-min-wrap-block"].includes(
-        name,
-      ) ||
+      (isEngineEvaluatedLengthProperty(name) ||
         (ruleType === "page" && isPageBoxGeometryProperty(name))) &&
       containsBrowserViewportUnit(value)
     ) {
@@ -2867,12 +2865,25 @@ export function isPageBoxGeometryProperty(name: string): boolean {
   return (
     ["size", "width", "height", "block-size", "inline-size"].includes(name) ||
     /^(margin|padding)(-|$)/.test(name) ||
-    name === "border" ||
-    name === "border-width" ||
-    /^border-(top|right|bottom|left|block-start|block-end|inline-start|inline-end)-width$/.test(
+    /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-width)?$/.test(
       name,
     )
   );
+}
+
+/** Length properties evaluated numerically by Vivliostyle rather than CSS. */
+export function isEngineEvaluatedLengthProperty(name: string): boolean {
+  name = name.toLowerCase().replace(/^-epubx-/, "");
+  return [
+    "bleed",
+    "crop-offset",
+    "float-min-wrap-block",
+    "min-page-height",
+    "min-page-width",
+    "size",
+    "snap-height",
+    "snap-width",
+  ].includes(name);
 }
 
 class BrowserViewportUnitVisitor extends Css.Visitor {

@@ -3480,6 +3480,8 @@ export class PageMarginBoxParserHandler
     super(scope, owner, delegation);
   }
 
+  readonly ruleType = "page";
+
   readonly ruleId: number = CssCascade.nextRuleId();
 
   override property(name: string, value: Css.Val, important: boolean): void {

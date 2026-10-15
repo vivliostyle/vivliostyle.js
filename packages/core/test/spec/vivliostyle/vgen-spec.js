@@ -123,6 +123,8 @@ describe("vgen", function () {
           parentFamily,
           options.parentPriority,
         );
+      if (options.parentFontWeight)
+        parentStyle["font-weight"] = value(options.parentFontWeight);
       const styles = new Map([
         [root, { "font-size": value("16px"), "line-height": value("40px") }],
         [parent, parentStyle],
@@ -306,6 +308,31 @@ describe("vgen", function () {
             .withContext(`${rule}: ${fontSize}`)
             .toBe(fontSize);
         }
+      }
+    });
+
+    it("leaves metric lengths for a relative winning region or view font-weight to resolve", function () {
+      for (const rule of ["region", "conditional"]) {
+        const style = inherit("20px", "2cap", '"Courier New"', null, {
+          parentFontWeight: "900",
+          [rule]: { "font-weight": "lighter" },
+          properties: { "letter-spacing": "1cap" },
+        });
+        expect(style["line-height"].value.toString())
+          .withContext(`${rule}: line-height`)
+          .toBe("2cap");
+        expect(style["letter-spacing"].value.toString())
+          .withContext(`${rule}: letter-spacing`)
+          .toBe("1cap");
+        const flattened = CssCascade.flattenCascadedStyle(
+          style,
+          new Exprs.Context(new Exprs.LexicalScope(null), 800, 600, 16, 20),
+          [],
+          rule === "region",
+        );
+        expect(flattened["font-weight"].value.toString())
+          .withContext(`${rule}: font-weight`)
+          .toBe("lighter");
       }
     });
 

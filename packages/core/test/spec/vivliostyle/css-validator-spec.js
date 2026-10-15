@@ -21,6 +21,7 @@ import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
+import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
@@ -163,6 +164,81 @@ describe("css-validator", function () {
             }
         },
       );
+    });
+
+    it("rejects viewport units in engine-only page length properties", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      parseCascade(
+        ["svw", "svh", "dvw", "lvh"]
+          .map(
+            (unit) =>
+              `.case-${unit} { -epubx-min-page-width:42px; -epubx-min-page-width:10${unit}; min-page-height:43px; min-page-height:10${unit}; snap-width:44px; snap-width:10${unit}; snap-height:45px; snap-height:10${unit}; }`,
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of ["svw", "svh", "dvw", "lvh"]) {
+            const style = cascade.classes.get(`case-${unit}`).style;
+            for (const [name, value] of [
+              ["min-page-width", "42px"],
+              ["min-page-height", "43px"],
+              ["snap-width", "44px"],
+              ["snap-height", "45px"],
+            ]) {
+              expect(style[name]?.value.toString())
+                .withContext(`${unit}: ${name}`)
+                .toBe(value);
+            }
+          }
+        },
+      );
+    });
+
+    it("rejects side and logical border shorthands before replacing valid page values", function () {
+      const scope = new adapt_exprs.LexicalScope(null);
+      const validatorSet = adapt_cssvalid.baseValidatorSet();
+      const style = {};
+      const receiver = {
+        ruleType: "page",
+        simpleProperty(name, value) {
+          style[name] = value;
+        },
+        invalidPropertyValue() {},
+        unknownProperty() {},
+      };
+      const validate = (name, text) =>
+        validatorSet.validatePropertyAndHandleShorthand(
+          name,
+          adapt_cssparse.parseValue(
+            scope,
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          ),
+          false,
+          scope,
+          receiver,
+        );
+
+      for (const [name, valid, unsupported] of [
+        ["border-top", "5px solid", "1svw solid"],
+        ["border-block-width", "6px", "1svw"],
+        ["border-inline-width", "7px", "1svw"],
+      ]) {
+        validate(name, valid);
+        validate(name, unsupported);
+      }
+
+      const values = Object.values(style);
+      expect(
+        values.some((value) =>
+          adapt_cssvalid.containsBrowserViewportUnit(value),
+        ),
+      ).toBe(false);
+      for (const width of ["5px", "6px", "7px"]) {
+        expect(values.some((value) => value.toString().includes(width)))
+          .withContext(width)
+          .toBe(true);
+      }
     });
 
     it("expands margin and padding while preserving all small, large and dynamic units", function (done) {

@@ -994,7 +994,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       // dimensions and margins are converted to expression values.
       for (const name in cascMap) {
         if (
-          CssValidator.isPageBoxGeometryProperty(name) &&
+          (CssValidator.isPageBoxGeometryProperty(name) ||
+            CssValidator.isEngineEvaluatedLengthProperty(name)) &&
           CssValidator.containsBrowserViewportUnit(cascMap[name].value)
         ) {
           cascMap[name] = cascMap[name].withValue(Css.ident.unset);

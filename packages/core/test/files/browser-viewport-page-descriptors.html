@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <!-- PR #2198: browser-only viewport units cannot be evaluated as page geometry. -->
 <html lang="en"><meta charset="utf-8"><title>Browser viewport units in page descriptors</title><style>
-@page {size:500px 400px;margin:30px;bleed:3px;crop-offset:10px;}
+@page {size:500px 400px;margin:30px;bleed:3px;crop-offset:10px;min-page-width:0px;min-page-height:0px;snap-width:0px;snap-height:0px;}
 @page {size:100svw 100svh;bleed:1lvh;crop-offset:calc(1dvw + 1px);margin:10svw;padding:calc(1dvh + 1px);}
-@page {--unsupported-viewport:10svw;margin:var(--unsupported-viewport);bleed:var(--unsupported-viewport, 1lvh);crop-offset:var(--unsupported-viewport, 1dvw);}
-@page:first {margin:0;padding:0;bleed:0;crop-offset:0;}
+@page {min-page-width:10svw;min-page-height:10svh;snap-width:10dvw;snap-height:10lvh;}
+@page {--unsupported-viewport:10svw;margin:var(--unsupported-viewport);bleed:var(--unsupported-viewport, 1lvh);crop-offset:var(--unsupported-viewport, 1dvw);min-page-width:var(--unsupported-viewport);min-page-height:var(--unsupported-viewport);snap-width:var(--unsupported-viewport);snap-height:var(--unsupported-viewport);}
+@page {
+  @top-left {
+    content: "Page header";
+    padding: 20px;
+    padding: 1svw;
+    border-top: 5px solid black;
+    border-top: 1svw solid black;
+    border-block-width: 6px;
+    border-block-width: 1svh;
+    border-inline-width: 7px;
+    border-inline-width: 1svh;
+  }
+}
+@page:first {margin:30px;padding:0;bleed:0;crop-offset:0;}
 body {font:16px Arial;margin:0;}
 </style><body><p>Page size: 500px by 400px.</p><p>Unsupported variable values use zero crop offset and bleed.</p></body></html>

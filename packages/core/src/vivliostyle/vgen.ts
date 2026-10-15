@@ -1058,6 +1058,15 @@ export class ViewFactory
     const winningFontSize = flattenedCurrentStyle["font-size"];
     const hasWinningFontSizeOverride =
       !!winningFontSize && winningFontSize !== sourceFontSize;
+    const sourceFontWeight = styles.length
+      ? CssCascade.getProp(styles[0], "font-weight")
+      : null;
+    const winningFontWeight = flattenedCurrentStyle["font-weight"];
+    const winningRelativeFontWeight =
+      winningFontWeight &&
+      winningFontWeight !== sourceFontWeight &&
+      (CssCascade.hasKeywordName(winningFontWeight.value, "bolder") ||
+        CssCascade.hasKeywordName(winningFontWeight.value, "lighter"));
     if (styles.length > 0) {
       const currentFontSize = flattenedCurrentStyle["font-size"]?.evaluate(
         this.context,
@@ -1229,13 +1238,13 @@ export class ViewFactory
           if (
             i === 0 &&
             name !== "font-size" &&
-            hasWinningFontSizeOverride &&
+            (hasWinningFontSizeOverride || winningRelativeFontWeight) &&
             hasCurrentFontRelativeLength(prop.value)
           ) {
-            // The browser applies the winning region/view font-size after this
-            // walk. Leave dependent units intact so it resolves them against
-            // that final size, including relative region sizes against the
-            // rendering parent.
+            // The browser applies the winning region/view font-size or
+            // relative font-weight after this walk. Leave dependent units
+            // intact so they resolve against those final font metrics,
+            // including relative region sizes against the rendering parent.
             prop1 = prop;
           } else if (
             name === "font-size" &&

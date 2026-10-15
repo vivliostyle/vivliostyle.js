@@ -3024,7 +3024,7 @@ describe("css-cascade", function () {
       cascadeInstance.applyVarFilter([style], element);
     }
 
-    it("rejects browser viewport float cutoffs introduced by variables without rejecting browser CSS", function () {
+    it("rejects engine-only lengths introduced by viewport-unit variables without rejecting browser CSS", function () {
       const units = ["s", "l", "d"].flatMap((prefix) =>
         ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
       );
@@ -3033,12 +3033,26 @@ describe("css-cascade", function () {
           const style = {
             "--length": createCascadeValue(value),
             "float-min-wrap-block": createCascadeValue("var(--length)"),
+            "min-page-width": createCascadeValue("var(--length)"),
+            "-epubx-min-page-width": createCascadeValue("var(--length)"),
+            "min-page-height": createCascadeValue("var(--length)"),
+            "snap-width": createCascadeValue("var(--length)"),
+            "snap-height": createCascadeValue("var(--length)"),
             "margin-top": createCascadeValue("var(--length)"),
           };
           applyVarFilter(style, document.createElement("div"));
-          expect(style["float-min-wrap-block"].value)
-            .withContext(value)
-            .toBe(adapt_css.ident.unset);
+          for (const name of [
+            "float-min-wrap-block",
+            "min-page-width",
+            "-epubx-min-page-width",
+            "min-page-height",
+            "snap-width",
+            "snap-height",
+          ]) {
+            expect(style[name].value)
+              .withContext(`${name}: ${value}`)
+              .toBe(adapt_css.ident.unset);
+          }
           expect(style["margin-top"].value.toString())
             .withContext(value)
             .toBe(style["--length"].value.toString());
@@ -3046,9 +3060,16 @@ describe("css-cascade", function () {
       }
       const style = {
         "float-min-wrap-block": createCascadeValue("var(--missing, 42px)"),
+        "min-page-width": createCascadeValue("var(--missing, 42px)"),
+        "-epubx-min-page-width": createCascadeValue("var(--missing, 42px)"),
+        "min-page-height": createCascadeValue("var(--missing, 42px)"),
+        "snap-width": createCascadeValue("var(--missing, 42px)"),
+        "snap-height": createCascadeValue("var(--missing, 42px)"),
       };
       applyVarFilter(style, document.createElement("div"));
-      expect(style["float-min-wrap-block"].value.toString()).toBe("42px");
+      for (const name of Object.keys(style)) {
+        expect(style[name].value.toString()).withContext(name).toBe("42px");
+      }
     });
 
     it("keeps self-referential custom properties guaranteed-invalid instead of using their fallback", function () {

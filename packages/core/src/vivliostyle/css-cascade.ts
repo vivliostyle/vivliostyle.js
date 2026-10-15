@@ -6538,7 +6538,7 @@ export class CascadeInstance {
       if (value !== cascVal.value) {
         // all variables substituted
         if (
-          name === "float-min-wrap-block" &&
+          CssValidator.isEngineEvaluatedLengthProperty(name) &&
           CssValidator.containsBrowserViewportUnit(value)
         ) {
           value = Css.ident.unset;
