@@ -24,10 +24,10 @@ import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
 
-// Firefox quantizes computed font sizes and used lengths differently. Allow
-// one 1/60px layout unit, plus CSSOM decimal serialization, when comparing them.
+// Firefox can quantize both independently measured values by one layout unit.
+// Allow two 1/60px units, plus CSSOM decimal serialization, when comparing them.
 function expectFontMetricLength(actual, expected) {
-  expect(Math.abs(actual - expected)).toBeLessThan(1 / 60 + 0.0001);
+  expect(Math.abs(actual - expected)).toBeLessThan(2 / 60 + 0.0001);
 }
 
 describe("vgen", function () {
