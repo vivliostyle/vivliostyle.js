@@ -32,6 +32,7 @@ import * as Diff from "./diff";
 import * as Display from "./display";
 import * as Exprs from "./exprs";
 import * as Font from "./font";
+import { fontMetricProperties, type FontProperties } from "./font-metrics";
 import * as LayoutHelper from "./layout-helper";
 import * as RubyEmphasis from "./ruby-emphasis";
 import * as Logging from "./logging";
@@ -62,6 +63,20 @@ const xhtmlElementsRenderedAsDiv = new Set([
   "style",
   "title",
 ]);
+
+function hasCurrentFontRelativeLength(value: Css.Val): boolean {
+  class Visitor extends Css.Visitor {
+    found = false;
+
+    override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+      this.found ||= /^(em|ex|cap|ch|ic)$/i.test(numeric.unit);
+      return null;
+    }
+  }
+  const visitor = new Visitor();
+  value.visit(visitor);
+  return visitor.found;
+}
 
 function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
   if (markerContent instanceof Css.Str) {
@@ -930,6 +945,7 @@ export class ViewFactory
   } {
     let node: Node | null = nodeContext.sourceNode;
     const styles: CssCascade.ElementStyle[] = [];
+    const styleLanguages: (string | null)[] = [];
     let lang: string | null = null;
     const isFootnoteContentInclude =
       node instanceof Element &&
@@ -996,7 +1012,9 @@ export class ViewFactory
           : this.styler;
         const nodeStyle = styler.getStyle(node as Element, false);
         styles.push(nodeStyle);
-        lang = lang || Base.getLangAttribute(node as Element);
+        const nodeLanguage = Base.getLangAttribute(node as Element);
+        styleLanguages.push(nodeLanguage);
+        lang = lang || nodeLanguage;
       }
       if (shadowRoot && !semanticFootnoteRootInRootedShadow) {
         node = shadow.owner;
@@ -1026,21 +1044,30 @@ export class ViewFactory
     const lineHeightFromOwnStyle = !!(
       styles.length > 0 && CssCascade.getProp(styles[0], "line-height")
     );
-    // Whether the current element's relative font weight (including region
-    // rules) is resolved against the inherited weight.
-    let currentHasRelativeFontWeight = false;
-    // Whether the current element's own cascaded style declares font-weight.
-    const fontWeightFromOwnStyle = !!(
-      styles.length > 0 && CssCascade.getProp(styles[0], "font-weight")
-    );
+    const flattenedCurrentStyle = styles.length
+      ? CssCascade.flattenCascadedStyle(
+          styles[0],
+          this.context,
+          this.regionIds,
+          this.isFootnote,
+        )
+      : {};
+    const sourceFontSize = styles.length
+      ? CssCascade.getProp(styles[0], "font-size")
+      : null;
+    const winningFontSize = flattenedCurrentStyle["font-size"];
+    const hasWinningFontSizeOverride =
+      !!winningFontSize && winningFontSize !== sourceFontSize;
+    const sourceFontWeight = styles.length
+      ? CssCascade.getProp(styles[0], "font-weight")
+      : null;
+    const winningFontWeight = flattenedCurrentStyle["font-weight"];
+    const winningRelativeFontWeight =
+      winningFontWeight &&
+      winningFontWeight !== sourceFontWeight &&
+      (CssCascade.hasKeywordName(winningFontWeight.value, "bolder") ||
+        CssCascade.hasKeywordName(winningFontWeight.value, "lighter"));
     if (styles.length > 0) {
-      const currentStyle = styles[0];
-      const flattenedCurrentStyle = CssCascade.flattenCascadedStyle(
-        currentStyle,
-        this.context,
-        this.regionIds,
-        this.isFootnote,
-      );
       const currentFontSize = flattenedCurrentStyle["font-size"]?.evaluate(
         this.context,
         "font-size",
@@ -1087,18 +1114,9 @@ export class ViewFactory
               CssCascade.isInvalidLineHeight(this.context, value))
           ) {
             currentDeclaresLineHeight = true;
-          } else if (
-            // The relative font-weight keywords are resolved against the
-            // inherited weight, so keep accumulating it. A keyword coming from
-            // a custom property is not canonicalized, so compare names. (Only
-            // `font-weight` has these keywords; the same identifier of another
-            // property, e.g. `font-family: bolder`, is an ordinary value.)
-            name === "font-weight" &&
-            (CssCascade.hasKeywordName(value, "bolder") ||
-              CssCascade.hasKeywordName(value, "lighter"))
-          ) {
-            currentHasRelativeFontWeight = true;
-          } else {
+          } else if (!fontMetricProperties.includes(name)) {
+            // Font traits of the source parent are needed to resolve this
+            // element's font-relative font-size before its own traits apply.
             blockedInheritedByCurrent.add(name);
           }
         }
@@ -1123,8 +1141,28 @@ export class ViewFactory
       props,
       this.context,
     );
+    let inheritedLanguage = this.context.fontLanguage;
     for (let i = styles.length - 1; i >= 0; --i) {
-      const style = styles[i];
+      const style = { ...styles[i] };
+      // Ancestors use their own view conditions, without the detached child's
+      // region rules. Their computed font settings form the child's metrics.
+      const fontStyle =
+        i === 0
+          ? flattenedCurrentStyle
+          : CssCascade.flattenCascadedStyle(style, this.context, null, false);
+      // The current element's font-size still uses the source-parent basis;
+      // its winning region/view traits apply after font-size is resolved.
+      const fontProperties =
+        i === 0
+          ? fontMetricProperties
+          : ["font-size", "line-height", ...fontMetricProperties];
+      for (const name of fontProperties) {
+        if (fontStyle[name]) {
+          style[name] = fontStyle[name];
+        }
+      }
+      const currentLanguage = styleLanguages[i] ?? inheritedLanguage;
+      inheritanceVisitor.fontLanguage = inheritedLanguage;
       const propList: string[] = [];
       for (const propName in style) {
         if (CssCascade.isInherited(propName)) {
@@ -1151,6 +1189,8 @@ export class ViewFactory
         if (i > 0 && blockedInheritedByCurrent.has(name)) {
           continue;
         }
+        inheritanceVisitor.fontLanguage =
+          name === "font-size" ? inheritedLanguage : currentLanguage;
         inheritanceVisitor.setPropName(name);
         const prop = CssCascade.getProp(style, name);
         let prop1 = prop;
@@ -1203,6 +1243,31 @@ export class ViewFactory
           }
         } else if (!Css.isDefaultingValue(prop.value)) {
           if (
+            i === 0 &&
+            name !== "font-size" &&
+            (hasWinningFontSizeOverride || winningRelativeFontWeight) &&
+            hasCurrentFontRelativeLength(prop.value)
+          ) {
+            // The browser applies the winning region/view font-size or
+            // relative font-weight after this walk. Leave dependent units
+            // intact so they resolve against those final font metrics,
+            // including relative region sizes against the rendering parent.
+            prop1 = prop;
+            if (
+              name === "line-height" &&
+              CssCascade.usesLineHeightUnit(prop.value)
+            ) {
+              const inheritedLineHeight =
+                inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+              if (inheritedLineHeight != null) {
+                // Only current-font terms are deferred. lh in line-height
+                // still refers to the source parent's line height.
+                prop1 = prop.filterValue(
+                  new CssCascade.LineHeightUnitReplacer(inheritedLineHeight),
+                );
+              }
+            }
+          } else if (
             name === "font-size" &&
             i === styles.length - 1 &&
             this.context.isRelativeRootFontSize &&
@@ -1266,6 +1331,10 @@ export class ViewFactory
                 prop.value,
                 inheritedFontSize,
                 inheritedLineHeight,
+                {
+                  ...CssCascade.getFontMetricProperties(props, this.context),
+                  lang: currentLanguage || "",
+                },
               );
               if (px != null) {
                 prop1 = prop.withValue(new Css.Numeric(px, "px"));
@@ -1344,6 +1413,7 @@ export class ViewFactory
           props[name] = prop1;
         }
       }
+      inheritedLanguage = currentLanguage;
     }
     if (currentDeclaresFontSize && !fontSizeFromOwnStyle) {
       const inheritedFontSize = props["font-size"] as
@@ -1385,22 +1455,13 @@ export class ViewFactory
         );
       }
     }
-    if (currentHasRelativeFontWeight && !fontWeightFromOwnStyle) {
-      const inheritedFontWeight = props["font-weight"] as
-        CssCascade.CascadeValue | undefined;
-      // Likewise for a relative font weight (`bolder`/`lighter`) that comes
-      // from a declaration outside the element's own cascaded style, e.g.
-      // `aside[role="doc-footnote"]:footnote-content { font-weight: lighter }`.
-      // The accumulated inherited weight is kept only as a low-priority
-      // placeholder, so that it cannot beat the declaration during the
-      // cascade. As for the font size above, only the priority is affected:
-      // the declaration of the region rule resolves in the context that it is
-      // rendered in. (Issue #2174)
-      if (inheritedFontWeight) {
-        props["font-weight"] = new CssCascade.CascadeValue(
-          inheritedFontWeight.value,
-          0,
-        );
+    // Ancestor traits were needed for source-parent font-size calculations.
+    // Their priorities must not compete with declarations on this element,
+    // including region and view-conditional rules merged after this walk.
+    for (const name of fontMetricProperties) {
+      const inherited = CssCascade.getProp(props, name);
+      if (inherited && !CssCascade.getProp(styles[0], name)) {
+        props[name] = new CssCascade.CascadeValue(inherited.value, 0);
       }
     }
     for (const sname in elementStyle) {
@@ -3965,6 +4026,25 @@ export class ViewFactory
     };
   }
 
+  private getParentFontProperties(
+    style: CSSStyleDeclaration | null,
+  ): FontProperties {
+    if (!style) return this.context.rootFontProperties;
+    const properties: FontProperties = {};
+    for (const name of fontMetricProperties)
+      properties[name] = style.getPropertyValue(name);
+    let element = this.getParentViewNode();
+    while (element) {
+      const lang = Base.getLangAttribute(element);
+      if (lang != null) {
+        properties.lang = lang;
+        break;
+      }
+      element = element.parentElement;
+    }
+    return properties;
+  }
+
   /**
    * Get "lh" unit size in px
    * @return line-height in px, or null if cannot be determined
@@ -3999,6 +4079,14 @@ export class ViewFactory
             ? lineHeight.num / 100
             : lineHeight.num;
       } else {
+        if (
+          lineHeight instanceof Css.Numeric &&
+          /^(ex|cap|ch|ic)$/.test(lineHeight.unit)
+        ) {
+          // These units use this element's font, not the root font of the
+          // page context. Let the browser resolve lh from its computed style.
+          return null;
+        }
         if (lineHeight instanceof Css.Numeric && lineHeight.unit !== "lh") {
           const unitSize = this.context.queryUnitSize(lineHeight.unit, false);
           if (unitSize != null) {
@@ -4041,12 +4129,13 @@ export class ViewFactory
           fontSize,
           parentFontSize,
           this.context,
-        ).num;
-        // parentFontSize may be null and the fontSizePx may be NaN
-        if (typeof fontSizePx !== "number" || isNaN(fontSizePx)) {
+          undefined,
+          this.getParentFontProperties(parentStyle),
+        );
+        if (fontSizePx.unit !== "px" || !Number.isFinite(fontSizePx.num)) {
           return null; // cannot determine
         }
-        return lineHeightNum * fontSizePx;
+        return lineHeightNum * fontSizePx.num;
       } else {
         if (parentFontSize == null) {
           return null;
@@ -4080,9 +4169,11 @@ export class ViewFactory
         fontSize,
         parentFontSize,
         this.context,
-      ).num;
-      if (typeof fontSizePx === "number" && !isNaN(fontSizePx)) {
-        return fontSizePx;
+        undefined,
+        this.getParentFontProperties(parentStyle),
+      );
+      if (fontSizePx.unit === "px" && Number.isFinite(fontSizePx.num)) {
+        return fontSizePx.num;
       }
     }
     return null; // cannot determine
@@ -4566,19 +4657,21 @@ export class ViewFactory
   ): number | Css.Numeric {
     const num = numeric.num;
     const unit = numeric.unit;
-    if (Exprs.isFontRelativeLengthUnit(unit)) {
+    if (Exprs.isFontRelativeLengthUnit(unit) || /^(ex|cap|ch|ic)$/.test(unit)) {
       let elem: Node | null = viewNode;
       while (elem && elem.nodeType !== 1) {
         elem = elem.parentNode;
       }
       Asserts.assert(elem);
-      const fontSize = parseFloat(
-        clientLayout.getElementComputedStyle(elem as Element)["font-size"],
-      );
+      const style = clientLayout.getElementComputedStyle(elem as Element);
+      const fontSize = parseFloat(style["font-size"]);
+      const properties: FontProperties = {};
+      for (const name of fontMetricProperties) properties[name] = style[name];
       return CssCascade.convertFontRelativeLengthToPx(
         numeric,
         fontSize,
         this.context,
+        properties,
       ).num;
     } else {
       const unitSize = this.context.queryUnitSize(unit, false);

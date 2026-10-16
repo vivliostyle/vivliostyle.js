@@ -195,7 +195,7 @@ export function toShape(
   height: number,
   context: Exprs.Context | null,
 ): GeometryUtil.Shape | null {
-  if (val) {
+  if (val && !Css.isDefaultingValue(val)) {
     const visitor = new ShapeVisitor();
     try {
       val.visit(visitor);

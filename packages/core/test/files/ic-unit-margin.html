@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2197: margins using the ic unit must survive validation. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Margins using the ic unit (Issue #2197)</title>
+  <style>
+    @page { size: 180mm 150mm; margin: 10mm; }
+    body { font-family: sans-serif; font-size: 16px; }
+    .sample { font-size: 32px; line-height: 1.5; text-autospace: no-autospace; }
+    .sample span { background: #ddd; }
+    .shorthand span { margin: 0.125ic; }
+    .longhand span { margin-left: 0.125ic; margin-right: 0.125ic; }
+    .calc span { margin: calc(0.125ic); }
+    .variable { --gap: 0.125ic; }
+    .variable span { margin: var(--gap); }
+    .reference span { margin: 0.125em; }
+    .wide span { margin: 1ic; }
+  </style>
+</head>
+<body>
+  <p>The first five rows should have matching gaps around the grey text.
+    The last row should have a one-ideograph gap on both sides.</p>
+  <div>margin shorthand</div>
+  <div class="sample shorthand">永<span>abc</span>永</div>
+  <div>margin longhands</div>
+  <div class="sample longhand">永<span>abc</span>永</div>
+  <div>calc()</div>
+  <div class="sample calc">永<span>abc</span>永</div>
+  <div>var()</div>
+  <div class="sample variable">永<span>abc</span>永</div>
+  <div>em reference (the ideographic advance is 1em in this font)</div>
+  <div class="sample reference">永<span>abc</span>永</div>
+  <div>1ic margin</div>
+  <div class="sample wide">永<span>abc</span>永</div>
+</body>
+</html>

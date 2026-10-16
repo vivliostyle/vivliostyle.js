@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- PR #2198: reject browser-only viewport units in adaptive page-box geometry. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Browser-only viewport units in adaptive page boxes</title>
+    <style>
+      @page {
+        size: 200mm 140mm;
+        margin: 0;
+      }
+
+      @-epubx-page-template {
+        @-epubx-page-master {
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            top: 10mm;
+            right: 10mm;
+            height: 50mm;
+            left: 10mm;
+            padding: 3px;
+            padding-left: 0;
+            background: #dceeff;
+            color: #102a43;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+            shape-inside: rectangle(0px, 0px, 200px, 100px);
+            shape-outside: rectangle(0px, 0px, 200px, 100px);
+          }
+          @-epubx-partition {
+            content: "Substituted column-rule widths use defaults.";
+            top: 80mm;
+            right: 10mm;
+            left: 10mm;
+            height: 40mm;
+            column-count: 2;
+            column-gap: 20px;
+            column-rule: 5px solid #102a43;
+            column-rule-width: initial;
+            background: #dceeff;
+          }
+        }
+      }
+
+      body {
+        font: 12px Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Adaptive page-box geometry remains finite.</p>
+  </body>
+</html>

@@ -16,10 +16,12 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as CssPage from "../../../src/vivliostyle/css-page";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
+import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_task from "../../../src/vivliostyle/task";
 import * as vivliostyle_logging from "../../../src/vivliostyle/logging";
@@ -57,6 +59,236 @@ describe("css-validator", function () {
       return adapt_task.newResult(true);
     });
   }
+
+  describe("ic length unit (Issue #2197)", function () {
+    it("expands an ic margin into all four longhands", function (done) {
+      parseCascade("span { margin: 0.125ic; }", done, function (cascade) {
+        const style = cascade.tags.get("span").style;
+        for (const side of ["top", "right", "bottom", "left"]) {
+          expect(style[`margin-${side}`]?.value.toString()).toBe("0.125ic");
+        }
+      });
+    });
+
+    it("preserves signed ic margins when expanding mixed units", function (done) {
+      parseCascade(
+        "span { margin: -0.125ic 2px 1ic 0; }",
+        done,
+        function (cascade) {
+          const style = cascade.tags.get("span").style;
+          expect(style["margin-top"]?.value.toString()).toBe("-0.125ic");
+          expect(style["margin-right"]?.value.toString()).toBe("2px");
+          expect(style["margin-bottom"]?.value.toString()).toBe("1ic");
+          expect(style["margin-left"]?.value.toString()).toBe("0");
+        },
+      );
+    });
+
+    it("accepts ic in other length shorthands", function (done) {
+      parseCascade("span { padding: 1ic 2ic; }", done, function (cascade) {
+        const style = cascade.tags.get("span").style;
+        expect(style["padding-top"]?.value.toString()).toBe("1ic");
+        expect(style["padding-right"]?.value.toString()).toBe("2ic");
+        expect(style["padding-bottom"]?.value.toString()).toBe("1ic");
+        expect(style["padding-left"]?.value.toString()).toBe("2ic");
+      });
+    });
+  });
+
+  describe("browser viewport length units", function () {
+    it("rejects browser-only viewport units in float-min-wrap-block and retains the valid cutoff", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .map(
+            (unit) =>
+              `.${unit} { float-min-wrap-block: 42px; float-min-wrap-block: 10${unit}; float-min-wrap-block: calc(10${unit} + 1px); }`,
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of units) {
+            const cutoff =
+              cascade.classes.get(unit).style["float-min-wrap-block"].value;
+            expect(cutoff.unit).withContext(unit).toBe("px");
+            expect(cutoff.num).withContext(unit).toBe(42);
+            expect(Number.isFinite(cutoff.num)).withContext(unit).toBe(true);
+          }
+        },
+      );
+    });
+
+    it("rejects browser-only viewport units in engine-evaluated page descriptors", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .flatMap((unit) =>
+            [`1${unit}`, `calc(1${unit} + 1px)`].map(
+              (value, index) =>
+                `.${unit}-${index} {size:300px 400px;size:${value} 400px;bleed:3px;bleed:${value};crop-offset:10px;crop-offset:${value};}`,
+            ),
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of units)
+            for (const index of [0, 1]) {
+              const style = cascade.classes.get(`${unit}-${index}`).style;
+              expect(style.size.value.toString())
+                .withContext(`${unit}/${index}`)
+                .toBe("300px 400px");
+              const context = new adapt_exprs.Context(
+                new adapt_exprs.LexicalScope(null),
+                800,
+                600,
+                16,
+                20,
+              );
+              const evaluated = CssPage.evaluatePageSizeAndBleed(
+                CssPage.resolvePageSizeAndBleed(style),
+                context,
+              );
+              expect(evaluated).withContext(`${unit}/${index}`).toEqual({
+                pageWidth: 300,
+                pageHeight: 400,
+                bleed: 3,
+                bleedOffset: 7,
+                cropOffset: 10,
+              });
+            }
+        },
+      );
+    });
+
+    it("rejects viewport units in engine-only page length properties", function (done) {
+      spyOn(vivliostyle_logging.logger, "warn");
+      parseCascade(
+        ["svw", "svh", "dvw", "lvh"]
+          .map(
+            (unit) =>
+              `.case-${unit} { -epubx-min-page-width:42px; -epubx-min-page-width:10${unit}; min-page-height:43px; min-page-height:10${unit}; snap-width:44px; snap-width:10${unit}; snap-height:45px; snap-height:10${unit}; }`,
+          )
+          .join("\n"),
+        done,
+        (cascade) => {
+          for (const unit of ["svw", "svh", "dvw", "lvh"]) {
+            const style = cascade.classes.get(`case-${unit}`).style;
+            for (const [name, value] of [
+              ["min-page-width", "42px"],
+              ["min-page-height", "43px"],
+              ["snap-width", "44px"],
+              ["snap-height", "45px"],
+            ]) {
+              expect(style[name]?.value.toString())
+                .withContext(`${unit}: ${name}`)
+                .toBe(value);
+            }
+          }
+        },
+      );
+    });
+
+    it("rejects unsupported page geometry before replacing valid declarations", function () {
+      const scope = new adapt_exprs.LexicalScope(null);
+      const validatorSet = adapt_cssvalid.baseValidatorSet();
+      let style = {};
+      const receiver = {
+        ruleType: "page",
+        simpleProperty(name, value) {
+          style[name] = value;
+        },
+        invalidPropertyValue() {},
+        unknownProperty() {},
+      };
+      const validate = (name, text) =>
+        validatorSet.validatePropertyAndHandleShorthand(
+          name,
+          adapt_cssparse.parseValue(
+            scope,
+            new adapt_csstok.Tokenizer(text, null),
+            "",
+          ),
+          false,
+          scope,
+          receiver,
+        );
+
+      for (const [name, valid, unsupported] of [
+        ["border-top", "5px solid", "1svw solid"],
+        ["border-block-width", "6px", "1svw"],
+        ["border-inline-width", "7px", "1svw"],
+        ["min-width", "8px", "1svw"],
+        ["max-width", "9px", "1svw"],
+        ["min-height", "10px", "1svh"],
+        ["max-height", "11px", "1svh"],
+        ["min-block-size", "12px", "1svh"],
+        ["max-block-size", "13px", "1svh"],
+        ["min-inline-size", "14px", "1svw"],
+        ["max-inline-size", "15px", "1svw"],
+        ["top", "16px", "1svh"],
+        ["inset-inline-start", "17px", "1svw"],
+        ["columns", "18px 2", "1svw 2"],
+        ["column-gap", "19px", "1svw"],
+        ["column-rule", "20px solid", "1svw solid"],
+        ["column-rule-width", "21px", "1svw"],
+        [
+          "shape-inside",
+          "rectangle(0px, 0px, 100px, 100px)",
+          "rectangle(0px, 0px, 10svw, 100px)",
+        ],
+        [
+          "shape-outside",
+          "rectangle(0px, 0px, 100px, 100px)",
+          "rectangle(0px, 0px, 10svw, 100px)",
+        ],
+      ]) {
+        style = {};
+        validate(name, valid);
+        expect(Object.keys(style).length).withContext(name).toBeGreaterThan(0);
+        const expected = { ...style };
+        validate(name, unsupported);
+        expect(style).withContext(name).toEqual(expected);
+      }
+      receiver.ruleType = undefined;
+      validate("shape-outside", "inset(1svw)");
+      expect(style["shape-outside"].toString()).toBe("inset(1svw)");
+    });
+
+    it("expands margin and padding while preserving all small, large and dynamic units", function (done) {
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      parseCascade(
+        units
+          .map(
+            (unit) =>
+              `.${unit} { margin: -1${unit} 2${unit}; padding: 1${unit}; }`,
+          )
+          .join("\n"),
+        done,
+        function (cascade) {
+          for (const unit of units) {
+            const style = cascade.classes.get(unit).style;
+            for (const side of ["top", "right", "bottom", "left"]) {
+              const margin = side === "top" || side === "bottom" ? -1 : 2;
+              expect(style[`margin-${side}`]?.value.toString())
+                .withContext(`${unit}: margin-${side}`)
+                .toBe(`${margin}${unit}`);
+              expect(style[`padding-${side}`]?.value.toString())
+                .withContext(`${unit}: padding-${side}`)
+                .toBe(`1${unit}`);
+            }
+          }
+        },
+      );
+    });
+  });
 
   describe("background shorthand regression", function () {
     it("keeps color in cascade for a semicolonless declaration", function (done) {

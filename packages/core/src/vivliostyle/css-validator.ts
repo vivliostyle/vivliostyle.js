@@ -606,6 +606,12 @@ const LENGTH_UNITS = makeUnitMap([
   "em",
   "ex",
   "ch",
+  "ic",
+  "cap",
+  "rex",
+  "rcap",
+  "rch",
+  "ric",
   "rem",
   "lh",
   "rlh",
@@ -615,6 +621,25 @@ const LENGTH_UNITS = makeUnitMap([
   "vb",
   "vmin",
   "vmax",
+  // Small, large and dynamic viewport units are resolved by the browser.
+  "svw",
+  "svh",
+  "svi",
+  "svb",
+  "svmin",
+  "svmax",
+  "lvw",
+  "lvh",
+  "lvi",
+  "lvb",
+  "lvmin",
+  "lvmax",
+  "dvw",
+  "dvh",
+  "dvi",
+  "dvb",
+  "dvmin",
+  "dvmax",
   "pvw",
   "pvh",
   "pvi",
@@ -2730,6 +2755,16 @@ export class ValidatorSet {
       receiver.simpleProperty(shorthandName, value, important);
       return;
     }
+    if (
+      isEngineEvaluatedLengthProperty(name, ruleType === "page") &&
+      containsBrowserViewportUnit(value)
+    ) {
+      // These values are evaluated numerically by the engine and never
+      // reach the browser. Keep browser-only viewport units out of page
+      // geometry or float limits, but allow them in browser CSS/shorthands.
+      receiver.invalidPropertyValue(origName, value);
+      return;
+    }
     const px = this.prefixes.get(name);
     // The rollback keywords (`revert`, `revert-layer` and `revert-rule`) are
     // resolved by Vivliostyle's own cascade rather than handed to the browser,
@@ -2815,6 +2850,62 @@ export function baseValidatorSet(): ValidatorSet {
   validatorSet.initBuiltInValidators();
   validatorSet.parse(ValidationTxt);
   return validatorSet;
+}
+
+/** Browser-only viewport lengths cannot be evaluated numerically by the engine. */
+export function containsBrowserViewportUnit(value: Css.Val): boolean {
+  const visitor = new BrowserViewportUnitVisitor();
+  value.visit(visitor);
+  return visitor.found;
+}
+
+/** Whether a length needs engine evaluation, optionally in a page-box context. */
+export function isEngineEvaluatedLengthProperty(
+  name: string,
+  pageBox = false,
+): boolean {
+  name = name.toLowerCase().replace(/^-epubx-/, "");
+  return (
+    [
+      "bleed",
+      "crop-offset",
+      "float-min-wrap-block",
+      "min-page-height",
+      "min-page-width",
+      "size",
+      "snap-height",
+      "snap-width",
+    ].includes(name) ||
+    (pageBox &&
+      ([
+        "top",
+        "right",
+        "bottom",
+        "left",
+        "columns",
+        "column-width",
+        "column-gap",
+        "column-rule",
+        "column-rule-width",
+        "shape-inside",
+        "shape-outside",
+      ].includes(name) ||
+        /^(?:min-|max-)?(?:width|height|block-size|inline-size)$/.test(name) ||
+        /^inset(-|$)/.test(name) ||
+        /^(margin|padding)(-|$)/.test(name) ||
+        /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-width)?$/.test(
+          name,
+        )))
+  );
+}
+
+class BrowserViewportUnitVisitor extends Css.Visitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+    this.found ||= /^[sld]v(?:[whbi]|min|max)$/i.test(numeric.unit);
+    return null;
+  }
 }
 
 class VarCheckVisitor extends Css.Visitor {

@@ -19,6 +19,7 @@
  * @fileoverview Exprs - `-epubx-expr` Adaptive Layout expressions.
  */
 import * as Base from "./base";
+import type { FontMetrics, FontProperties } from "./font-metrics";
 
 export type Preferences = {
   fontFamily: string;
@@ -274,6 +275,10 @@ export function isFontRelativeLengthUnit(unit: string): boolean {
     case "rem":
     case "lh":
     case "rlh":
+    case "rex":
+    case "rcap":
+    case "rch":
+    case "ric":
       return true;
     default:
       return false;
@@ -284,6 +289,10 @@ export function isRootFontRelativeLengthUnit(unit: string): boolean {
   switch (unit?.toLowerCase()) {
     case "rem":
     case "rlh":
+    case "rex":
+    case "rcap":
+    case "rch":
+    case "ric":
       return true;
     default:
       return false;
@@ -319,6 +328,10 @@ export function needUnitConversion(unit: string): boolean {
       return !CSS.supports("line-height", "1lh");
     case "rem":
     case "rlh":
+    case "rex":
+    case "rcap":
+    case "rch":
+    case "ric":
       return true;
     default:
       return false;
@@ -555,6 +568,11 @@ export class Context {
   protected actualPageHeight: number | null = null;
   pageHeight: () => number;
   initialFontSize: number;
+  fontMetrics: FontMetrics | null = null;
+  rootFontProperties: FontProperties = {};
+  rootFontMetricsReady = false;
+  fontLanguage: string | null = null;
+  resolvingRootFontSize = false;
   rootFontSize: number | null = null;
   isRelativeRootFontSize: boolean | null = null;
   fontSize: () => number;
@@ -619,6 +637,30 @@ export class Context {
     }
   }
 
+  measureFontUnit(
+    unit: string,
+    fontSize: number,
+    properties: FontProperties = {},
+  ): number | null {
+    if (["rex", "rcap", "rch", "ric"].includes(unit)) {
+      return (
+        this.fontMetrics?.measure(
+          unit.slice(1),
+          this.resolvingRootFontSize ? this.initialFontSize : this.fontSize(),
+          this.resolvingRootFontSize
+            ? { lang: this.fontLanguage || "" }
+            : this.rootFontProperties,
+        ) ?? null
+      );
+    }
+    return (
+      this.fontMetrics?.measure(unit, fontSize, {
+        lang: this.fontLanguage || "",
+        ...properties,
+      }) ?? null
+    );
+  }
+
   queryUnitSize(unit: string, isRoot: boolean, vertical?: boolean): number {
     if (isViewportRelativeLengthUnit(unit)) {
       const pvw = this.pageWidth() / 100;
@@ -662,6 +704,21 @@ export class Context {
       return this.rootLineHeight;
     }
 
+    if (/^r?(ex|cap|ch|ic)$/.test(unit)) {
+      if (isRoot) {
+        return (
+          this.fontMetrics?.measure(
+            unit.replace(/^r/, ""),
+            this.initialFontSize,
+            { lang: this.fontLanguage || "" },
+          ) ?? NaN
+        );
+      }
+      return (
+        this.measureFontUnit(unit, this.fontSize(), this.rootFontProperties) ??
+        NaN
+      );
+    }
     return defaultUnitSizes[unit];
   }
 

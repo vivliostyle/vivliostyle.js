@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- A head script loads the root font after the initial style setup. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Root metrics after a script-loaded font</title>
+    <script>
+      const font = new FontFace(
+        "ScriptMetric",
+        'url("' +
+          new URL(
+            "../../core/test/files/fonts/ArchivoBlack/archivo-black-subset.woff2",
+            location.href,
+          ) +
+          '")',
+      );
+      document.fonts.add(font);
+      font.load();
+    </script>
+    <style>
+      @page {
+        size: calc(10rch + 500px) calc(10rcap + 500px);
+        margin: 30px;
+      }
+      html {
+        font-family: ScriptMetric;
+        font-size: calc(2rcap + 1px);
+        line-height: 1rcap;
+      }
+      body {
+        font: 16px Arial;
+      }
+      .bar {
+        height: 12px;
+        margin: 8px 0;
+        background: #297;
+      }
+      .plain {
+        width: 20rch;
+      }
+      .calculated {
+        width: calc(20rch + 1px);
+      }
+    </style>
+  </head>
+  <body>
+    <p>The page and bars use metrics from the script-loaded root font.</p>
+    <div class="bar plain"></div>
+    <div class="bar calculated"></div>
+  </body>
+</html>

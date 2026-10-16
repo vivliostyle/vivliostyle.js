@@ -391,6 +391,10 @@ module.exports = [
         title: "viewport-percentage units (vertical writing-mode)",
       },
       {
+        file: "browser-viewport-units.html",
+        title: "Browser viewport units in shorthands and longhands",
+      },
+      {
         file: "page_viewport_unit.html",
         title: "page viewport-percentage units with calc()",
       },
@@ -420,6 +424,47 @@ module.exports = [
       {
         file: "lh-rlh-units.html",
         title: "lh and rlh units",
+      },
+      {
+        file: "ic-unit-margin.html",
+        title: "Margins using the ic unit (Issue #2197)",
+      },
+      {
+        file: "font-relative-metrics.html",
+        title: "Font-relative lengths with actual metrics",
+      },
+      {
+        file: "font-relative-metrics-initial.html",
+        title: "Root metric calculations with initial font size (PR #2198)",
+      },
+      {
+        file: "font-relative-metrics-region.html",
+        title: "Font metrics and footnote region priority (PR #2198)",
+      },
+      {
+        file: "deferred-font-relative-lengths.html",
+        title: "Deferred font-relative lengths (PR #2198)",
+      },
+      {
+        file: "browser-viewport-page-descriptors.html",
+        title: "Browser viewport units in page descriptors (PR #2198)",
+        // Older viewers cannot render NaN page geometry; use the local reftest.
+        skipLayoutRegression: true,
+      },
+      {
+        file: "adaptive-viewport-page-boxes.html",
+        title: "Browser viewport units in adaptive page boxes (PR #2198)",
+        // Older viewers cannot render NaN page geometry; use the local reftest.
+        skipLayoutRegression: true,
+      },
+      {
+        file: "font-relative-metrics-root.html",
+        title: "Actual font metrics in root sizing",
+      },
+      {
+        file: "script-loaded-font-metrics.html",
+        title: "Root metrics after a script-loaded font (PR #2198)",
+        skipLayoutRegression: true,
       },
       {
         file: "margin-break.html",

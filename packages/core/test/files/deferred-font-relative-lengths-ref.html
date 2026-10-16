@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!-- PR #2198: defer current-font units while retaining source-parent lh. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deferred font-relative lengths</title>
+<style>
+@page { size: 600px 700px; margin: 30px; }
+body { font: 16px/20px Arial; }
+.viewport { font: 2svw/1.5 serif; width: calc(1em + 0px); height: calc(1lh + 0px); background: #297; }
+.source { line-height: 60px; }
+.reference { font: 40px Arial; line-height: calc(60px + 1cap); }
+aside { float: footnote; font: 20px Arial; line-height: calc(60px + 1cap); }
+aside:footnote-content { font-size: 40px !important; }
+::footnote-call, ::footnote-marker { content: ""; }
+</style>
+</head>
+<body>
+<p>The green box uses the viewport font size for 1em width and 1lh height.</p>
+<div class="viewport"></div>
+<p>The reference and footnote must have matching line spacing.</p>
+<div class="reference">First line<br>Second line</div>
+<div class="source"><aside>First line<br>Second line</aside></div>
+</body>
+</html>

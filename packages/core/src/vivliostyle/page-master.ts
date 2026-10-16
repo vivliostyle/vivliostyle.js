@@ -981,6 +981,26 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       regionIds,
       false,
     );
+    if (context instanceof StyleInstance) {
+      // Adaptive page-box declarations are not part of the document element
+      // cascade, so their var() references have not gone through the usual
+      // cascade substitution pass. Resolve them here before checking geometry;
+      // a substituted browser-only viewport unit cannot be evaluated by the
+      // page-box layout code.
+      context.styler.cascade.applyVarFilter([cascMap], null);
+    }
+    // Variable substitution can introduce browser-only units after page-box
+    // parsing. Treat them as invalid at computed-value time before page
+    // dimensions and margins are converted to expression values. This applies
+    // to both @page boxes and adaptive page-template partitions.
+    for (const name in cascMap) {
+      if (
+        CssValidator.isEngineEvaluatedLengthProperty(name, true) &&
+        CssValidator.containsBrowserViewportUnit(cascMap[name].value)
+      ) {
+        cascMap[name] = cascMap[name].withValue(Css.ident.unset);
+      }
+    }
     this.vertical = CssCascade.isVertical(
       cascMap,
       context,
@@ -2100,6 +2120,8 @@ export class PageBoxParserHandler
   extends CssParser.SlaveParserHandler
   implements CssValidator.PropertyReceiver
 {
+  readonly ruleType = "page";
+
   constructor(
     scope: Exprs.LexicalScope,
     owner: CssParser.DispatchParserHandler,

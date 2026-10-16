@@ -20,6 +20,7 @@ import * as adapt_css from "../../../src/vivliostyle/css";
 import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssvalid from "../../../src/vivliostyle/css-validator";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
+import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as adapt_task from "../../../src/vivliostyle/task";
@@ -2597,6 +2598,31 @@ describe("css-cascade", function () {
       );
     }
 
+    it("leaves small, large and dynamic viewport calculations to the browser", function () {
+      for (const prefix of ["s", "l", "d"]) {
+        for (const unit of ["vw", "vh", "vi", "vb", "vmin", "vmax"]) {
+          const text = `calc(1${prefix}${unit} + 1px)`;
+          const value = parseValue(text);
+          const context = newContext();
+          context.rootFontSize = 40;
+          context.pageAreaWidth = 400;
+          context.pageAreaHeight = 600;
+          for (const visitor of [
+            new adapt_csscasc.CalcFilterVisitor(context, true),
+            new adapt_csscasc.RootSizingCalcFilterVisitor(context),
+          ]) {
+            expect(value.visit(visitor).toString())
+              .withContext(text)
+              .toBe(text);
+            expect(visitor.evaluatedToNaN).withContext(text).toBe(false);
+          }
+          expect(adapt_csscasc.isValidUnresolvedFontSize(context, value))
+            .withContext(text)
+            .toBe(true);
+        }
+      }
+    });
+
     function applyCalcFilter(style) {
       var cascadeInstance = {
         context: newContext(),
@@ -2997,6 +3023,54 @@ describe("css-cascade", function () {
         adapt_csscasc.CascadeInstance.prototype.applyVarFilter;
       cascadeInstance.applyVarFilter([style], element);
     }
+
+    it("rejects engine-only lengths introduced by viewport-unit variables without rejecting browser CSS", function () {
+      const units = ["s", "l", "d"].flatMap((prefix) =>
+        ["vw", "vh", "vi", "vb", "vmin", "vmax"].map((unit) => prefix + unit),
+      );
+      for (const unit of units) {
+        for (const value of [`10${unit}`, `calc(10${unit} + 1px)`]) {
+          const style = {
+            "--length": createCascadeValue(value),
+            "float-min-wrap-block": createCascadeValue("var(--length)"),
+            "min-page-width": createCascadeValue("var(--length)"),
+            "-epubx-min-page-width": createCascadeValue("var(--length)"),
+            "min-page-height": createCascadeValue("var(--length)"),
+            "snap-width": createCascadeValue("var(--length)"),
+            "snap-height": createCascadeValue("var(--length)"),
+            "margin-top": createCascadeValue("var(--length)"),
+          };
+          applyVarFilter(style, document.createElement("div"));
+          for (const name of [
+            "float-min-wrap-block",
+            "min-page-width",
+            "-epubx-min-page-width",
+            "min-page-height",
+            "snap-width",
+            "snap-height",
+          ]) {
+            expect(style[name].value)
+              .withContext(`${name}: ${value}`)
+              .toBe(adapt_css.ident.unset);
+          }
+          expect(style["margin-top"].value.toString())
+            .withContext(value)
+            .toBe(style["--length"].value.toString());
+        }
+      }
+      const style = {
+        "float-min-wrap-block": createCascadeValue("var(--missing, 42px)"),
+        "min-page-width": createCascadeValue("var(--missing, 42px)"),
+        "-epubx-min-page-width": createCascadeValue("var(--missing, 42px)"),
+        "min-page-height": createCascadeValue("var(--missing, 42px)"),
+        "snap-width": createCascadeValue("var(--missing, 42px)"),
+        "snap-height": createCascadeValue("var(--missing, 42px)"),
+      };
+      applyVarFilter(style, document.createElement("div"));
+      for (const name of Object.keys(style)) {
+        expect(style[name].value.toString()).withContext(name).toBe("42px");
+      }
+    });
 
     it("keeps self-referential custom properties guaranteed-invalid instead of using their fallback", function () {
       var element = document.createElement("div");
@@ -3567,13 +3641,15 @@ describe("css-cascade", function () {
     }
 
     function newContext() {
-      return new adapt_exprs.Context(
+      const context = new adapt_exprs.Context(
         new adapt_exprs.LexicalScope(null),
         800,
         600,
         16,
         20,
       );
+      context.fontMetrics = new FontMetrics(document);
+      return context;
     }
 
     function resolveFontValue(props, propName, value) {
@@ -4126,21 +4202,14 @@ describe("css-cascade", function () {
       });
     });
 
-    describe("browserFontRelativeUnitRatio", function () {
-      it("reports the ratio of the units that only the browser resolves", function () {
-        // The metrics of these units are not obtainable before the source
-        // document is laid out, so CSS Values 4 §6.1 is followed: `ch` and `ex`
-        // must be assumed to be 0.5em and `ic` 1em when their metric cannot be
-        // determined. `cap` has no numeric assumption there, so the typical cap
-        // height of the Latin fonts is used. (Review)
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("ch")).toBe(0.5);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("ex")).toBe(0.5);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("cap")).toBe(0.7);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("ic")).toBe(1);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("em")).toBe(null);
-        expect(adapt_csscasc.browserFontRelativeUnitRatio("px")).toBe(null);
-      });
-    });
+    function nativeLength(text, fontSize) {
+      const probe = document.createElement("span");
+      probe.style.cssText = `all:initial;position:absolute;font-size:${fontSize}px;margin-left:${text}`;
+      document.body.append(probe);
+      const result = parseFloat(getComputedStyle(probe).marginLeft);
+      probe.remove();
+      return result;
+    }
 
     describe("getInheritedLineHeight", function () {
       function inheritedLineHeight(fontSize, lineHeight) {
@@ -4182,12 +4251,8 @@ describe("css-cascade", function () {
       });
 
       it("resolves a line height in a unit that only the browser resolves", function () {
-        // The `ch`/`ex`/`cap`/`ic` units come from the metrics of the font,
-        // which this engine cannot obtain: the assumptions of CSS Values 4 are
-        // used against the font size of the element, as the root sizing does,
-        // so that a footnote that resolves `1lh` against such a line height
-        // does not fall back to the root line height. `5ch` of a 16px font is
-        // 5 x 0.5em x 16px = 40px, and `5rem`/`5rlh` are not affected. (Review)
+        // Font metric units use the declaring font, so a detached descendant
+        // resolving `1lh` inherits that length instead of the root line height.
         function inherited(text) {
           var props = {
             "font-size": new adapt_csscasc.CascadeValue(
@@ -4208,9 +4273,9 @@ describe("css-cascade", function () {
             newContext(),
           ).getInheritedLineHeight();
         }
-        expect(inherited("5ch")).toBe(40);
+        expect(inherited("5ch")).toBeCloseTo(nativeLength("5ch", 16), 3);
         expect(inherited("5ic")).toBe(80);
-        expect(inherited("2.5ex")).toBe(20);
+        expect(inherited("2.5ex")).toBeCloseTo(nativeLength("2.5ex", 16), 3);
       });
 
       it("resolves a line height in an internal viewport unit", function () {
@@ -4321,8 +4386,7 @@ describe("css-cascade", function () {
         // element that declares it, so the accumulated value must be that
         // length: the `150%` declared at 16px is the 24px that a descendant
         // inherits, not the percentage of the 32px of an intervening level,
-        // and a unit whose metric only the browser resolves is the assumed
-        // size of the declaring level (`5ch` = 5 x 0.5em x 16px = 40px).
+        // and a font metric unit uses the actual font of the declaring level.
         // A function keeps only those values converted, so a function of
         // unitless numbers stays the multiplier that it is, and the
         // percentages of another property are unchanged. (Review)
@@ -4349,7 +4413,10 @@ describe("css-cascade", function () {
         expect(accumulated("line-height", "min(200%, 40px)")).toBe(
           "min(32px,40px)",
         );
-        expect(accumulated("line-height", "5ch")).toBe("40px");
+        expect(parseFloat(accumulated("line-height", "5ch"))).toBeCloseTo(
+          nativeLength("5ch", 16),
+          3,
+        );
         expect(accumulated("line-height", "2ic")).toBe("32px");
         expect(accumulated("line-height", "calc(1.5)")).toBe("calc(1.5)");
         expect(accumulated("line-height", "1.5")).toBe("1.5");
@@ -4400,7 +4467,7 @@ describe("css-cascade", function () {
           32,
           newContext(),
         );
-        expect(fromParent.num).toBe(80);
+        expect(fromParent.num).toBeCloseTo(nativeLength("5ch", 32), 3);
         expect(fromParent.unit).toBe("px");
         var kept = adapt_csscasc.convertFontSizeToPx(
           new adapt_css.Numeric(5, "ch"),

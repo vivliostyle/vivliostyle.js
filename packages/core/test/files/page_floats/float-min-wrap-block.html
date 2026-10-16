@@ -33,10 +33,13 @@
       .block-start {
         float: block-start;
         float-min-wrap-block: 2.6em;
+        /* Unsupported browser-only units must leave the valid cutoff intact. */
+        float-min-wrap-block: 10svh;
       }
       .block-end {
         float: block-end;
         float-min-wrap-block: 21%;
+        float-min-wrap-block: calc(10dvh + 1px);
       }
     </style>
   </head>
