@@ -671,9 +671,11 @@ export class Styler implements AbstractStyler {
     this.context.resolvingRootFontSize = true;
     const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
     let isRelativeFontSize = true;
+    let isInvalidFontSize = false;
     if (fontSize && !Css.isDefaultingValue(fontSize.value)) {
       const evaluated = fontSize.evaluate(this.context);
       const val = this.resolveRootSizingCalc(evaluated);
+      isInvalidFontSize = !CSS.supports("font-size", val.toString());
       const fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
       // The absolute size keywords (e.g. "small") and the relative keywords
@@ -815,6 +817,7 @@ export class Styler implements AbstractStyler {
     // calc() already need to use the source root's font settings.
     this.context.rootFontMetricsReady =
       this.context.rootFontSize != null ||
+      isInvalidFontSize ||
       !fontSize ||
       Css.isDefaultingValue(fontSize.value);
     const rootFontSize =

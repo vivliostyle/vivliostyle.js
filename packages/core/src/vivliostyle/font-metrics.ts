@@ -55,6 +55,10 @@ export class FontMetrics {
       family,
   ) {}
 
+  clearCache(): void {
+    this.cache.clear();
+  }
+
   measure(
     unit: string,
     fontSize: number,

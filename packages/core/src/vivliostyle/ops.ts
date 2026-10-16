@@ -578,7 +578,21 @@ export class StyleInstance
         instance.xmldoc.document,
         instance.viewport.window,
         instance.styler,
-      ).then(() => frame.finish(instance));
+      ).then((scriptsLoaded) => {
+        if (scriptsLoaded) {
+          // Head scripts may load a font used by root metrics and page
+          // geometry. Refresh only scripted documents after their loaders end.
+          instance.fontMetrics.clearCache();
+          instance.rootFontSize = null;
+          instance.isRelativeRootFontSize = null;
+          instance.rootLineHeight =
+            instance.initialFontSize * instance.pref.lineHeight;
+          instance.isRootLineHeightFromRelativeCalc = false;
+          instance.pageSheetSize = {};
+          instance.initializeLayout();
+        }
+        frame.finish(instance);
+      });
     });
     return frame.result();
   }

@@ -462,6 +462,11 @@ module.exports = [
         title: "Actual font metrics in root sizing",
       },
       {
+        file: "script-loaded-font-metrics.html",
+        title: "Root metrics after a script-loaded font (PR #2198)",
+        skipLayoutRegression: true,
+      },
+      {
         file: "margin-break.html",
         title: "margin-break property",
       },

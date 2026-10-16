@@ -68,6 +68,26 @@ describe("font metrics", function () {
     }
   });
 
+  it("can remeasure a font after the browser loads it", function () {
+    let loaded = false;
+    const metrics = new FontMetrics(document, () =>
+      loaded ? "Courier New" : "Arial",
+    );
+    const properties = { "font-family": "ScriptLoadedFont" };
+    const before = metrics.measure("ch", 32, properties);
+    loaded = true;
+    metrics.clearCache();
+    const after = metrics.measure("ch", 32, properties);
+    expect(before).toBeCloseTo(
+      nativeLength("ch", 32, { fontFamily: "Arial" }),
+      4,
+    );
+    expect(after).toBeCloseTo(
+      nativeLength("ch", 32, { fontFamily: "Courier New" }),
+      4,
+    );
+  });
+
   it("resolves root units against the document root and initial units during root sizing", function () {
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
@@ -166,6 +186,38 @@ describe("font metrics", function () {
           );
       }
     }
+  });
+
+  it("uses initial root metrics when a substituted root font size is invalid", function () {
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const styler = Object.create(CssStyler.Styler.prototype);
+    styler.context = context;
+    styler.determineRootSizes({
+      "font-family": new Cascade.CascadeValue(new Css.Str("Courier New"), 0),
+      // This represents a var() value after substitution and validation.
+      "font-size": new Cascade.CascadeValue(new Css.Numeric(5, "s"), 0),
+    });
+
+    expect(context.rootFontMetricsReady).toBe(true);
+    expect(context.rootFontSize).toBeNull();
+    const value = Parser.parseValue(
+      context.rootScope,
+      new Tokenizer.Tokenizer("calc(10rch + 1px)", null),
+      "",
+    );
+    const result = value.visit(new Cascade.CalcFilterVisitor(context));
+    expect(result.unit).toBe("px");
+    expect(result.num).toBeCloseTo(
+      10 * nativeLength("ch", 16, { fontFamily: "Courier New" }) + 1,
+      3,
+    );
   });
 
   it("preserves root metric calculations while the root font size is unresolved", function () {
