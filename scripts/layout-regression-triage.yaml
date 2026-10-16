@@ -1,15 +1,138 @@
 - category: General
+  title: "font-size with a browser resolved unit (Issue #2174 follow-up)"
+  file: font-size-browser-unit.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager conversion of the unit produced to the
+    browser (`font-size: calc(NaNpx - var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote "ch"
+    falls back to the inherited 16px (measured 15.9922px) of the footnote area. The PR branch resolves the unit with the
+    CSS assumption of 0.5em for the "0" glyph and the font size of the source parent, so the footnote is 80px like the
+    `80px` reference of the same paragraph (measured 79.998px), not the 16px of the footnote area that it is reparented
+    into: the assumed size is an approximation of the real metric, which the fixture shows as well (the inline `5ch` of
+    the same 32px paragraph is 105.079px in both viewers, since the browser resolves it against the font itself).
+    Update: Re-fixed in PR #2198
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
+- category: General
+  title: "Root font size from a browser resolved unit (Issue #2174 follow-up)"
+  file: font-size-root-browser-unit.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    Follow-up of Issue #2174. canary treats the raw number of a root font size that only the browser resolves as pixels:
+    `:root { font-size: 5ch }` sets the root font size to 5px, so the box sized in `rem` is 25px wide instead of the
+    200px of the explicit reference. The PR branch resolves `ch` with the CSS assumption of 0.5em (the initial font size
+    is the basis of the root element), so the root font size is 40px and the `rem` box matches the 200px reference. The
+    root line height, `line-height: 5ch`, is resolved with the assumption of CSS Values 4 as well, and the value is the
+    one the root element uses (it is materialized like a resolved calc()), so the `rlh` unit, the page context and the
+    rendered root line height come from the same metric: the paragraph that resolves `1lh` is 99.992px like its 100px
+    reference in the branch, while the pre-fix viewers resolve `1lh` against the real metric of the font (52.5547px for
+    the page they keep at 16px). Update: Re-fixed in PR #2198
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
+- category: General
+  title: Browser viewport units in shorthands and longhands
+  file: browser-viewport-units.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/browser-viewport-units.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/browser-viewport-units.html&zoom=1&spread=false
+- category: General
+  title: "Margins using the ic unit (Issue #2197)"
+  file: ic-unit-margin.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ic-unit-margin.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ic-unit-margin.html&zoom=1&spread=false
+- category: General
+  title: Font-relative lengths with actual metrics
+  file: font-relative-metrics.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics.html&zoom=1&spread=false
+- category: General
+  title: "Root metric calculations with initial font size (PR #2198)"
+  file: font-relative-metrics-initial.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-initial.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-initial.html&zoom=1&spread=false
+- category: General
+  title: "Deferred font-relative lengths (PR #2198)"
+  file: deferred-font-relative-lengths.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/deferred-font-relative-lengths.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/deferred-font-relative-lengths.html&zoom=1&spread=false
+- category: General
+  title: Actual font metrics in root sizing
+  file: font-relative-metrics-root.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-root.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-root.html&zoom=1&spread=false
+- category: Page floats
+  title: float-min-wrap-block
+  file: page_floats/float-min-wrap-block.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2198"
+  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/float-min-wrap-block.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/float-min-wrap-block.html&zoom=1&spread=false
+- category: General
   title: "Page size from standalone math functions (PR #2176 follow-up)"
   file: page-size-math-functions.html
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    The page size calc(400px + 100px * sign(-1)) max(pi * 1px, 500px)
-    must resolve to 300px by 500px and finish on one page. Previously the
-    standalone max() remained unevaluated and its use as a numeric second
-    dimension produced NaN page height, preventing pagination from finishing.
-    The fix evaluates both dimensions and prevents unresolved functions from
-    being used as numeric page dimensions.
-  approvedViewer: git-fix-pr2176followup
+    The page size calc(400px + 100px * sign(-1)) max(pi * 1px, 500px) must resolve to 300px by 500px and finish on one
+    page. Previously the standalone max() remained unevaluated and its use as a numeric second dimension produced NaN
+    page height, preventing pagination from finishing. The fix evaluates both dimensions and prevents unresolved
+    functions from being used as numeric page dimensions.
+  approvedViewer: git-fix-pr2176followup  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/page-size-math-functions.html&zoom=1&spread=false
@@ -19,35 +142,30 @@
 - category: General
   title: "calc() in headings and page properties (PR #2176 follow-up)"
   file: calc-page-layout.html
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    PR #2176 rejected legacy calc(0 - length) arithmetic and calculations in
-    Vivliostyle-only page properties through CSS.supports(). The fix restores
-    matching heading geometry (margin-left -5mm, padding-left 20mm, width 80mm)
-    and a 100mm page area with 30mm inside and 20mm outside margins, 3mm bleed,
-    and 6mm crop offset. Both pages match the stable viewer. Browser validation
-    remains in place for the newly evaluated math functions on known properties.
-  approvedViewer: git-fix-pr2176followup
+    PR #2176 rejected legacy calc(0 - length) arithmetic and calculations in Vivliostyle-only page properties through
+    CSS.supports(). The fix restores matching heading geometry (margin-left -5mm, padding-left 20mm, width 80mm) and a
+    100mm page area with 30mm inside and 20mm outside margins, 3mm bleed, and 6mm crop offset. Both pages match the
+    stable viewer. Browser validation remains in place for the newly evaluated math functions on known properties.
+  approvedViewer: git-fix-pr2176followup  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
   baselineLabel: canary
-  baselineUrl: >-
-    https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
+  baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
 - category: General
   title: "calc() with dimensional cancellation (PR #2176 follow-up)"
   file: calc-number-division.html
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    A ratio of lengths is a number, so calc(30px / 20px) keeps the inherited
-    1.5 line-height multiplier rather than becoming 1.5px. The sample and
-    reference have matching 30px line heights at 20px font size; the percentage
-    ratio keeps the 36px line height of a 24px child, including inheritance from
-    the root's percentage ratio, and 1rlh is 24px. A footnote
-    with font-size: 1lh and its own line-height must still resolve font size
-    against the source parent's line height (30px), before applying its own
-    line-height. Both footnotes are 29.998px after layout unit adjustment.
-  approvedViewer: git-fix-pr2176followup
+    A ratio of lengths is a number, so calc(30px / 20px) keeps the inherited 1.5 line-height multiplier rather than
+    becoming 1.5px. The sample and reference have matching 30px line heights at 20px font size; the percentage ratio
+    keeps the 36px line height of a 24px child, including inheritance from the root's percentage ratio, and 1rlh is
+    24px. A footnote with font-size: 1lh and its own line-height must still resolve font size against the source
+    parent's line height (30px), before applying its own line-height. Both footnotes are 29.998px after layout unit
+    adjustment.
+  approvedViewer: git-fix-pr2176followup  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: dev
   actualUrl: >-
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-number-division.html&zoom=1&spread=false
@@ -318,46 +436,6 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-negative-calc.html&zoom=1&spread=false
-- category: General
-  title: "font-size with a browser resolved unit (Issue #2174 follow-up)"
-  file: font-size-browser-unit.html
-  decision: expected  # regression / expected / skip
-  notes: >-
-    Follow-up of Issue #2174. canary passes the invalid `NaNpx` that the eager conversion of the unit produced to the
-    browser (`font-size: calc(NaNpx - var(--viv-layoutUnitAdj))`), which rejects the declaration, so the footnote "ch"
-    falls back to the inherited 16px (measured 15.9922px) of the footnote area. The PR branch resolves the unit with the
-    CSS assumption of 0.5em for the "0" glyph and the font size of the source parent, so the footnote is 80px like the
-    `80px` reference of the same paragraph (measured 79.998px), not the 16px of the footnote area that it is reparented
-    into: the assumed size is an approximation of the real metric, which the fixture shows as well (the inline `5ch` of
-    the same 32px paragraph is 105.079px in both viewers, since the browser resolves it against the font itself).
-  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue2174
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
-  baselineLabel: canary
-  baselineUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
-- category: General
-  title: "Root font size from a browser resolved unit (Issue #2174 follow-up)"
-  file: font-size-root-browser-unit.html
-  decision: expected  # regression / expected / skip
-  notes: >-
-    Follow-up of Issue #2174. canary treats the raw number of a root font size that only the browser resolves as pixels:
-    `:root { font-size: 5ch }` sets the root font size to 5px, so the box sized in `rem` is 25px wide instead of the
-    200px of the explicit reference. The PR branch resolves `ch` with the CSS assumption of 0.5em (the initial font size
-    is the basis of the root element), so the root font size is 40px and the `rem` box matches the 200px reference. The
-    root line height, `line-height: 5ch`, is resolved with the assumption of CSS Values 4 as well, and the value is the
-    one the root element uses (it is materialized like a resolved calc()), so the `rlh` unit, the page context and the
-    rendered root line height come from the same metric: the paragraph that resolves `1lh` is 99.992px like its 100px
-    reference in the branch, while the pre-fix viewers resolve `1lh` against the real metric of the font (52.5547px for
-    the page they keep at 16px).
-  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue2174
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
-  baselineLabel: canary
-  baselineUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
 - category: General
   title: all shorthand property
   file: all-shorthand.html
@@ -875,91 +953,66 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/page_viewport_unit.html&zoom=1&spread=false
-- id: "0385"
-  category: Footnotes
+- category: Footnotes
   title: "Shared line-policy footnotes in avoided table rows (Issue #2186)"
   file: footnotes/footnotes-in-table-avoided-rows.html
-  type: difference
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2186. Stable places all three body rows and both line-policy footnotes on one page,
-    overlapping the final row and the paragraph after the table. The PR preview reserves the shared footnote
-    area: the first call and its complete three-line note stay on page 1, and the avoided final row moves
-    intact to page 2 with its complete six-line note. The two-page result is the expected improvement.
-  approvedViewer: git-codex-fix2186-table-footnotes
+    Fix for Issue #2186. Stable places all three body rows and both line-policy footnotes on one page, overlapping the
+    final row and the paragraph after the table. The PR preview reserves the shared footnote area: the first call and
+    its complete three-line note stay on page 1, and the avoided final row moves intact to page 2 with its complete
+    six-line note. The two-page result is the expected improvement.
+  approvedViewer: git-codex-fix2186-table-footnotes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-codex-fix2186-table-footnotes
   actualUrl: >-
     https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-rows.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-rows.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
-- id: "0386"
-  category: Footnotes
+- category: Footnotes
   title: "Line-policy footnote constraints in a table that fits (Issue #2186)"
   file: footnotes/footnotes-in-table-avoided-short-row.html
-  type: difference
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2186. The short final row fits geometrically, but its line-policy footnote constraint must
-    still be respected. Stable keeps it on page 1 and overlaps the following paragraph with the second note.
-    The PR preview keeps the first call and note on page 1 and moves the final row, its complete six-line
-    note, and the following paragraph to page 2 without overlap.
-  approvedViewer: git-codex-fix2186-table-footnotes
+    Fix for Issue #2186. The short final row fits geometrically, but its line-policy footnote constraint must still be
+    respected. Stable keeps it on page 1 and overlaps the following paragraph with the second note. The PR preview keeps
+    the first call and note on page 1 and moves the final row, its complete six-line note, and the following paragraph
+    to page 2 without overlap.
+  approvedViewer: git-codex-fix2186-table-footnotes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-codex-fix2186-table-footnotes
   actualUrl: >-
     https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-short-row.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-short-row.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
-- id: "0387"
-  category: Footnotes
+- category: Footnotes
   title: "Single line-policy footnote in an avoided final table row (Issue #2186)"
   file: footnotes/footnotes-in-table-avoided-single-last-row.html
-  type: difference
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2186. Stable overlaps the only footnote with the avoided final row and the following
-    paragraph on page 1. The PR preview moves the complete row and its six-line footnote to page 2, retaining
-    the repeated table header and the paragraph after the table. Page 1 contains only the first two body rows,
-    with no stale footnote area.
-  approvedViewer: git-codex-fix2186-table-footnotes
+    Fix for Issue #2186. Stable overlaps the only footnote with the avoided final row and the following paragraph on
+    page 1. The PR preview moves the complete row and its six-line footnote to page 2, retaining the repeated table
+    header and the paragraph after the table. Page 1 contains only the first two body rows, with no stale footnote area.
+  approvedViewer: git-codex-fix2186-table-footnotes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-codex-fix2186-table-footnotes
   actualUrl: >-
     https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-single-last-row.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-single-last-row.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
-- id: "0388"
-  category: Footnotes
+- category: Footnotes
   title: "All line-policy footnotes in one avoided table row (Issue #2186)"
   file: footnotes/footnotes-in-table-avoided-both-last-row.html
-  type: difference
-  decision: expected
+  decision: expected  # regression / expected / skip
   notes: >-
-    Fix for Issue #2186. Both line-policy calls belong to the avoided final row. Stable overlaps their shared
-    footnote area with body text on a single page. The PR preview moves the complete row and both complete
-    notes together to page 2, preserving call order, numbering, the repeated table header, and the following
-    paragraph; no orphaned footnotes remain on page 1.
-  approvedViewer: git-codex-fix2186-table-footnotes
+    Fix for Issue #2186. Both line-policy calls belong to the avoided final row. Stable overlaps their shared footnote
+    area with body text on a single page. The PR preview moves the complete row and both complete notes together to page
+    2, preserving call order, numbering, the repeated table header, and the following paragraph; no orphaned footnotes
+    remain on page 1.
+  approvedViewer: git-codex-fix2186-table-footnotes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-codex-fix2186-table-footnotes
   actualUrl: >-
     https://vivliostyle-git-codex-fix2186-table-footnotes-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-both-last-row.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-both-last-row.html&zoom=1&spread=false
-  pageCountActual: 2
-  pageCountBaseline: 1
-  diffPages:
-    - 1
