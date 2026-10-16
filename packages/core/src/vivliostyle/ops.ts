@@ -411,16 +411,19 @@ export class StyleInstance
     this.pubTitle = pubTitle;
     this.docTitle = docTitle;
 
-    this.fontMetrics = new FontMetrics(viewport.document, (family) =>
-      this.faces
-        .filterFontFamily(
-          CssParser.parseValue(
-            style.rootScope,
-            new CssTokenizer.Tokenizer(family, null),
-            "",
-          ),
-        )
-        .toString(),
+    this.fontMetrics = new FontMetrics(
+      viewport.document,
+      (family) =>
+        this.faces
+          .filterFontFamily(
+            CssParser.parseValue(
+              style.rootScope,
+              new CssTokenizer.Tokenizer(family, null),
+              "",
+            ),
+          )
+          .toString(),
+      viewport.scaleRatio,
     );
   }
 

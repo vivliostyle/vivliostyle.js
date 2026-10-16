@@ -119,6 +119,89 @@ describe("vgen", function () {
     }
   });
 
+  it("uses parent normal metrics for font-size while re-resolving inherited normal for ordinary lh", function () {
+    const parent = document.createElement("div");
+    parent.style.cssText = 'font:37px/normal "Courier New";margin-left:1lh';
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.cssText = "font-size:16px;font-family:Arial;width:1lh";
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj: 0, layoutUnitPerPixel: 64 },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+    });
+    try {
+      expectFontMetricLength(
+        factory.getLineHeightUnitSize("font-size"),
+        parseFloat(getComputedStyle(parent).marginLeft),
+      );
+      factory.applyComputedStyles(child, {
+        "font-family": new Css.Str("Arial"),
+        "font-size": new Css.Numeric(16, "px"),
+        width: new Css.Numeric(1, "lh"),
+      });
+      expectFontMetricLength(
+        parseFloat(getComputedStyle(child).width),
+        parseFloat(getComputedStyle(reference).width),
+      );
+      expect(getComputedStyle(child).lineHeight).toBe("normal");
+      const metrics = factory.getComputedFontMetrics(child, {
+        fontSize: 37,
+        lineHeight: 99,
+      });
+      expectFontMetricLength(
+        metrics.lineHeight,
+        parseFloat(getComputedStyle(reference).width),
+      );
+    } finally {
+      parent.remove();
+    }
+  });
+
+  it("preserves normal for explicit line-height resets on the source root", function () {
+    for (const keyword of [
+      Css.ident.initial,
+      Css.ident.inherit,
+      Css.ident.unset,
+    ]) {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      context.fontMetrics = new FontMetrics(document);
+      const source = document.createElement("html");
+      const style = { "line-height": new CssCascade.CascadeValue(keyword, 1) };
+      const factory = {
+        context,
+        regionIds: [],
+        styler: { getStyle: () => style },
+      };
+      const result = Vgen.ViewFactory.prototype.inheritFromSourceParent.call(
+        factory,
+        { sourceNode: source, shadowContext: null, parent: null },
+        style,
+      ).elementStyle;
+      expect([Css.ident.initial, Css.ident.normal]).toContain(
+        result["line-height"].value,
+      );
+    }
+  });
+
   describe("inheritFromSourceParent", function () {
     function inherit(
       fontSize,
@@ -497,6 +580,31 @@ describe("vgen", function () {
       } finally {
         sourceParent.remove();
         renderingParent.remove();
+      }
+    });
+
+    it("uses source-parent normal metrics before applying the child's different font", function () {
+      const parent = document.createElement("div");
+      parent.style.cssText = 'font:20px/normal "Courier New";margin-left:1lh';
+      document.body.append(parent);
+      try {
+        const expected = parseFloat(getComputedStyle(parent).marginLeft);
+        for (const lineHeight of ["normal", "1lh", "calc(1lh + 2px)"]) {
+          const style = inherit("1lh", lineHeight, '"Courier New"', "Arial", {
+            parentLineHeight: "normal",
+          });
+          expectFontMetricLength(style["font-size"].value.num, expected);
+          if (lineHeight === "normal") {
+            expect(style["line-height"].value).toBe(Css.ident.normal);
+          } else {
+            expectFontMetricLength(
+              style["line-height"].value.num,
+              expected + (lineHeight.includes("calc") ? 2 : 0),
+            );
+          }
+        }
+      } finally {
+        parent.remove();
       }
     });
 

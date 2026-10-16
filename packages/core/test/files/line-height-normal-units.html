@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!-- Follow-up to PR #2198: normal line-height metrics for lh and rlh. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lh and rlh with normal line-height</title>
+<style>
+@font-face { font-family: MetricWeb; src: url(fonts/ArchivoBlack/archivo-black-subset.woff2); }
+@page { size: 700px 650px; margin: 30px; }
+html { font: 32.3px/normal MetricWeb, serif; }
+body { font: 16px/normal Arial; }
+h1 { font-size: 22px; }
+.bar { height: 12px; background: seagreen; margin-block: 8px; }
+.root { width: 8rlh; }
+.local { font: 32.3px/normal MetricWeb, serif; width: 8lh; }
+.parent { font: 24px/normal "Courier New"; }
+.child { font-family: Arial; font-size: 1lh; line-height: normal; }
+.note { float: footnote; font-size: 1lh; font-family: Arial; line-height: normal; }
+.vertical { writing-mode: vertical-rl; font: 24px/normal MetricWeb, serif; height: 4lh; border: 1px solid; }
+</style>
+</head>
+<body>
+<h1>normal line-height: lh / rlh</h1>
+<p>The two green bars must have equal widths (source root uses an embedded font).</p>
+<div class="bar root" data-test="root"></div>
+<div class="bar local" data-test="local"></div>
+<div class="parent">Source parent: Courier New 24px
+<p class="child" data-test="child">1lh font size, inherited from the source parent.</p>
+<span class="note" data-test="note">Footnote: same font size as the child above.</span>
+</div>
+<p>Vertical writing, 4lh inline size:</p>
+<div class="vertical" data-test="vertical">Vertical text 水</div>
+</body>
+</html>
