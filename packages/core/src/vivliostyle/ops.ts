@@ -584,6 +584,7 @@ export class StyleInstance
           // geometry. Refresh only scripted documents after their loaders end.
           instance.fontMetrics.clearCache();
           instance.rootFontSize = null;
+          instance.rootFontMetricsReady = false;
           instance.isRelativeRootFontSize = null;
           instance.rootLineHeight =
             instance.initialFontSize * instance.pref.lineHeight;
