@@ -938,6 +938,10 @@ module.exports = [
         file: "text-spacing/line-break-stability.html",
         title: "Line breaking stability with text-spacing (Issue #2142)",
       },
+      {
+        file: "text-spacing/first-line-break-duplication.html",
+        title: "Forced break after ::first-line (Issue #2196)",
+      },
     ],
   },
   {

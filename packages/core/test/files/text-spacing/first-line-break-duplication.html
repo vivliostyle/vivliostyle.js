@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2196: first-line styling duplicates a forced break. -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Forced break after ::first-line</title>
+    <style>
+      @page {
+        size: 300mm 260mm;
+        margin: 15mm;
+      }
+
+      body {
+        font-family: sans-serif;
+        font-size: 40px;
+      }
+
+      .case {
+        margin-bottom: 1em;
+        text-autospace: no-autospace;
+      }
+
+      .autospace {
+        text-autospace: normal;
+      }
+
+      .case::first-line {
+        font-size: 200%;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Control: no-autospace</p>
+    <div class="case">国国XX国<br />国国XX国</div>
+    <p>Comparison: text-autospace: normal</p>
+    <div class="case autospace">国国XX国<br />国国XX国</div>
+  </body>
+</html>
