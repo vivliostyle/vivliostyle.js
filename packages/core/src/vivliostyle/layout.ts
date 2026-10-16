@@ -2537,11 +2537,23 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           linePositions[count - 1],
           true,
         );
-        const childLineBreak =
+        let childLineBreak =
           lineBreak && VtreeImpl.asChildNodeContext(lineBreak);
         if (!childLineBreak) {
           loopFrame.breakLoop();
           return;
+        }
+        // The <br> marker's box belongs to the line it ends, but the marker
+        // itself must be outside the ::first-line fragment. Otherwise peeling
+        // off the line reprocesses the same source <br> and creates a blank
+        // line after the fragment. (Issue #2196)
+        if (
+          childLineBreak.after &&
+          childLineBreak.viewNode?.nodeType === Node.ELEMENT_NODE &&
+          (childLineBreak.viewNode as Element).localName === "br"
+        ) {
+          childLineBreak = childLineBreak.modify();
+          childLineBreak.after = false;
         }
         this.finishBreak(childLineBreak, false, false).then(() => {
           totalLineCount += count;
