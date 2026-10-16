@@ -430,6 +430,10 @@ module.exports = [
         title: "Margins using the ic unit (Issue #2197)",
       },
       {
+        file: "line-height-normal-units.html",
+        title: "lh and rlh with normal line-height (PR #2198 follow-up)",
+      },
+      {
         file: "font-relative-metrics.html",
         title: "Font-relative lengths with actual metrics",
       },

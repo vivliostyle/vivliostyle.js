@@ -701,7 +701,10 @@ export class Context {
     }
     if (unit == "lh" || unit == "rlh") {
       // FIXME: "lh" unit is incorrect, treated same as "rlh"
-      return this.rootLineHeight;
+      return isRoot
+        ? (this.measureFontUnit("lh", this.initialFontSize) ??
+            this.rootLineHeight)
+        : this.rootLineHeight;
     }
 
     if (/^r?(ex|cap|ch|ic)$/.test(unit)) {

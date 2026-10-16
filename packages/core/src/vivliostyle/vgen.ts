@@ -1132,8 +1132,16 @@ export class ViewFactory
       ),
     } as CssCascade.ElementStyle;
     if (isRoot) {
+      const rootLineHeight = CssCascade.getProp(
+        styles[0],
+        "line-height",
+      )?.value;
       props["line-height"] = new CssCascade.CascadeValue(
-        new Css.Num(this.context.pref.lineHeight),
+        // An explicit reset on the source root uses the CSS initial normal;
+        // an unspecified line-height keeps the viewer's preferred default.
+        rootLineHeight && Css.isDefaultingValue(rootLineHeight)
+          ? Css.ident.normal
+          : new Css.Num(this.context.pref.lineHeight),
         0,
       );
     }
@@ -1177,6 +1185,15 @@ export class ViewFactory
       // line height refer to the parent's metrics, and this level's own font
       // size has not been applied here yet. (Review)
       const parentFontSize = inheritanceVisitor.getInheritedFontSize();
+      // Capture normal before this level changes the accumulated font traits.
+      const declaredLineHeight = CssCascade.getProp(
+        style,
+        "line-height",
+      )?.value;
+      const parentLineHeight =
+        declaredLineHeight && CssCascade.usesLineHeightUnit(declaredLineHeight)
+          ? inheritanceVisitor.getInheritedLineHeight(parentFontSize)
+          : null;
 
       for (const name of propList) {
         if (
@@ -1257,8 +1274,7 @@ export class ViewFactory
               name === "line-height" &&
               CssCascade.usesLineHeightUnit(prop.value)
             ) {
-              const inheritedLineHeight =
-                inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+              const inheritedLineHeight = parentLineHeight;
               if (inheritedLineHeight != null) {
                 // Only current-font terms are deferred. lh in line-height
                 // still refers to the source parent's line height.
@@ -1304,8 +1320,7 @@ export class ViewFactory
             // `font-size` with an lh unit is left to the inheritance visitor,
             // which resolves it against the line height that was accumulated
             // for the source parent. (Issue #2174 follow-up, Review)
-            const lhUnitSize =
-              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+            const lhUnitSize = parentLineHeight;
             if (lhUnitSize != null) {
               prop1 = prop.withValue(
                 new Css.Numeric(prop.value.num * lhUnitSize, "px"),
@@ -1322,8 +1337,7 @@ export class ViewFactory
             // accumulated for the parent so far, so that the unit does not
             // fall back to the preferred line height when a descendant
             // resolves its own `lh` unit. (Review)
-            const inheritedLineHeight =
-              inheritanceVisitor.getInheritedLineHeight(parentFontSize);
+            const inheritedLineHeight = parentLineHeight;
             const inheritedFontSize = inheritanceVisitor.getInheritedFontSize();
             if (inheritedLineHeight != null && inheritedFontSize != null) {
               const px = CssCascade.resolveLineHeightValueToPx(
@@ -3894,6 +3908,11 @@ export class ViewFactory
             () => inlineStyle?.lineHeight,
           )
         : null) ??
+      this.measureNormalLineHeight(
+        pageContextStyle,
+        fontSize,
+        pageContextElement,
+      ) ??
       this.context.rootLineHeight ??
       fontSize * this.context.pref.lineHeight;
     return { fontSize, lineHeight };
@@ -3921,6 +3940,7 @@ export class ViewFactory
           "lineHeight",
         ),
       ) ??
+      this.measureNormalLineHeight(style, fontSize, element) ??
       fallback.lineHeight ??
       (fontSize != null ? fontSize * this.context.pref.lineHeight : null);
     return { fontSize, lineHeight };
@@ -4000,40 +4020,42 @@ export class ViewFactory
   } {
     const parentNode = this.getParentViewNode();
     const inlineStyle = getInlineStyle(parentNode);
+    const fontSize =
+      this.computedStyleParentFontSizeOverride ??
+      (parentStyle
+        ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize, () =>
+            this.getLayoutUnitAdjustedBase(
+              parentNode,
+              inlineStyle?.fontSize,
+              "fontSize",
+            ),
+          )
+        : this.context.rootFontSize);
     return {
-      fontSize:
-        this.computedStyleParentFontSizeOverride ??
-        (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.fontSize, () =>
-              this.getLayoutUnitAdjustedBase(
-                parentNode,
-                inlineStyle?.fontSize,
-                "fontSize",
-              ),
-            )
-          : this.context.rootFontSize),
+      fontSize,
       lineHeight:
         this.computedStyleParentLineHeightOverride ??
         (parentStyle
-          ? this.parsePlusLayoutUnitAdj(parentStyle.lineHeight, () =>
+          ? (this.parsePlusLayoutUnitAdj(parentStyle.lineHeight, () =>
               this.getLayoutUnitAdjustedBase(
                 parentNode,
                 inlineStyle?.lineHeight,
                 "lineHeight",
               ),
-            )
+            ) ??
+            this.measureNormalLineHeight(parentStyle, fontSize, parentNode))
           : this.context.rootLineHeight),
     };
   }
 
-  private getParentFontProperties(
+  private getFontProperties(
     style: CSSStyleDeclaration | null,
+    element: Element | null = this.getParentViewNode(),
   ): FontProperties {
     if (!style) return this.context.rootFontProperties;
     const properties: FontProperties = {};
     for (const name of fontMetricProperties)
       properties[name] = style.getPropertyValue(name);
-    let element = this.getParentViewNode();
     while (element) {
       const lang = Base.getLangAttribute(element);
       if (lang != null) {
@@ -4043,6 +4065,20 @@ export class ViewFactory
       element = element.parentElement;
     }
     return properties;
+  }
+
+  private measureNormalLineHeight(
+    style: CSSStyleDeclaration | null,
+    fontSize: number | null,
+    element: Element | null,
+  ): number | null {
+    return style?.lineHeight === "normal" && fontSize != null
+      ? this.context.measureFontUnit(
+          "lh",
+          fontSize,
+          this.getFontProperties(style, element),
+        )
+      : null;
   }
 
   /**
@@ -4130,7 +4166,7 @@ export class ViewFactory
           parentFontSize,
           this.context,
           undefined,
-          this.getParentFontProperties(parentStyle),
+          this.getFontProperties(parentStyle),
         );
         if (fontSizePx.unit !== "px" || !Number.isFinite(fontSizePx.num)) {
           return null; // cannot determine
@@ -4143,6 +4179,9 @@ export class ViewFactory
         return lineHeightNum * parentFontSize;
       }
     }
+    // Inherited normal is re-resolved in this element's font. Let the browser
+    // resolve ordinary lh lengths after all of this element's font traits apply.
+    if (parentStyle?.lineHeight === "normal") return null;
     // parentLineHeight may be null (cannot determine)
     return parentLineHeight;
   }
@@ -4170,7 +4209,7 @@ export class ViewFactory
         parentFontSize,
         this.context,
         undefined,
-        this.getParentFontProperties(parentStyle),
+        this.getFontProperties(parentStyle),
       );
       if (fontSizePx.unit === "px" && Number.isFinite(fontSizePx.num)) {
         return fontSizePx.num;

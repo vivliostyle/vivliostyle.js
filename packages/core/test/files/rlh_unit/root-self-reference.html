@@ -19,8 +19,10 @@
         background: purple;
       }
       .ref-box {
+        /* Resolve normal with the initial font, independently of this root. */
+        font: initial;
         width: 100px;
-        height: 40px;
+        height: 2lh;
         background: green;
       }
       .marker {
@@ -40,8 +42,8 @@
     <div class="rlh-box"></div>
     <div class="ref-box"></div>
     <p class="marker">
-      The teal (1rem), purple (1rlh) and green (40px) boxes above must all be
-      the same height.
+      The teal (1rem), purple (1rlh) and green (twice the initial normal
+      line height) boxes above must all be the same height.
     </p>
   </body>
 </html>

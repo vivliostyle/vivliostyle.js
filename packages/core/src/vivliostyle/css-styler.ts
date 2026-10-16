@@ -669,6 +669,11 @@ export class Styler implements AbstractStyler {
   private determineRootSizes(elemStyle: CssCascade.ElementStyle): void {
     this.context.rootFontMetricsReady = false;
     this.context.resolvingRootFontSize = true;
+    // Root font-size and line-height self-references use initial font metrics,
+    // including when root sizes are recomputed after a script loads fonts.
+    this.context.rootLineHeight =
+      this.context.measureFontUnit("lh", this.context.initialFontSize) ??
+      this.context.initialFontSize * this.context.pref.lineHeight;
     const fontSize = elemStyle["font-size"] as CssCascade.CascadeValue;
     let isRelativeFontSize = true;
     let isInvalidFontSize = false;
@@ -824,10 +829,13 @@ export class Styler implements AbstractStyler {
       this.context.rootFontSize ?? this.context.initialFontSize;
     const lineHeight = elemStyle["line-height"] as CssCascade.CascadeValue;
     let rootLineHeight: number | null = null;
+    let normalLineHeight =
+      !!lineHeight && Css.isDefaultingValue(lineHeight.value);
     let fromRelativeCalc = false;
     if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
       const evaluated = lineHeight.evaluate(this.context);
       const val = this.resolveRootSizingCalc(evaluated);
+      normalLineHeight = CssCascade.hasKeywordName(val, "normal");
       fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Num) {
@@ -915,7 +923,15 @@ export class Styler implements AbstractStyler {
       }
     }
     this.context.rootLineHeight =
-      rootLineHeight ?? this.context.fontSize() * this.context.pref.lineHeight;
+      rootLineHeight ??
+      (normalLineHeight
+        ? this.context.measureFontUnit(
+            "lh",
+            rootFontSize,
+            this.context.rootFontProperties,
+          )
+        : null) ??
+      rootFontSize * this.context.pref.lineHeight;
     this.context.isRootLineHeightFromRelativeCalc = fromRelativeCalc;
   }
 

@@ -44,7 +44,7 @@ describe("font metrics", function () {
           orientation === "horizontal" ? "horizontal-tb" : "vertical-rl";
         const textOrientation =
           orientation === "horizontal" ? "mixed" : orientation;
-        for (const unit of ["ex", "cap", "ch", "ic"]) {
+        for (const unit of ["ex", "cap", "ch", "ic", "lh"]) {
           const properties = {
             "font-family": family,
             "writing-mode": writingMode,
@@ -68,24 +68,176 @@ describe("font metrics", function () {
     }
   });
 
+  it("measures normal independently of fallback text and inherited viewer styles", function () {
+    const metrics = new FontMetrics(document);
+    const previous = document.body.style.cssText;
+    document.body.style.cssText = "font:900 80px/100px Arial";
+    try {
+      for (const size of [0, 16, 37]) {
+        for (const family of ['"Courier New", serif', "Arial, serif"]) {
+          const expected = nativeLength("lh", size, { fontFamily: family });
+          expect(
+            metrics.measure("lh", size, { "font-family": family }),
+          ).toBeCloseTo(expected, 4);
+        }
+      }
+    } finally {
+      document.body.style.cssText = previous;
+    }
+  });
+
+  it("matches normal metrics under the layout viewport's pixel-ratio emulation", function () {
+    for (const zoom of [1, 2, 8]) {
+      const metrics = new FontMetrics(document, (family) => family, zoom);
+      for (const size of [16, 32.3, 37]) {
+        expect(
+          metrics.measure("lh", size, { "font-family": "Arial" }),
+        ).toBeCloseTo(
+          nativeLength("lh", size, { fontFamily: "Arial", zoom: String(zoom) }),
+          4,
+        );
+      }
+    }
+  });
+
+  it("uses initial normal metrics for root self-reference, and source metrics for rlh", function () {
+    for (const fontSize of ["32px", "1lh", "calc(1rlh + 2px)"]) {
+      for (const lineHeight of ["normal", "1rlh", "calc(1lh + 3px)"]) {
+        const context = new Exprs.Context(
+          new Exprs.LexicalScope(null),
+          800,
+          600,
+          16,
+          20,
+        );
+        context.fontMetrics = new FontMetrics(document);
+        const parse = (text) =>
+          new Cascade.CascadeValue(
+            Parser.parseValue(
+              context.rootScope,
+              new Tokenizer.Tokenizer(text, null),
+              "",
+            ),
+            0,
+          );
+        const style = {
+          "font-family": parse('"Courier New"'),
+          "font-size": parse(fontSize),
+          "line-height": parse(lineHeight),
+        };
+        const styler = Object.create(CssStyler.Styler.prototype);
+        styler.context = context;
+        styler.determineRootSizes(style);
+        const initial = nativeLength("lh", 16, {});
+        const expectedSize =
+          fontSize === "32px"
+            ? 32
+            : initial + (fontSize.includes("calc") ? 2 : 0);
+        expect(context.rootFontSize)
+          .withContext(fontSize)
+          .toBeCloseTo(expectedSize, 3);
+        expect(context.rootLineHeight)
+          .withContext(`${fontSize}/${lineHeight}`)
+          .toBeCloseTo(
+            lineHeight === "normal"
+              ? nativeLength("lh", expectedSize, { fontFamily: "Courier New" })
+              : initial + (lineHeight.includes("calc") ? 3 : 0),
+            3,
+          );
+        expect(style["line-height"].value.toString()).toBe(lineHeight);
+        expect(context.queryUnitSize("rlh", true)).toBeCloseTo(initial, 4);
+        expect(context.queryUnitSize("rlh", false)).toBe(
+          context.rootLineHeight,
+        );
+      }
+    }
+  });
+
+  it("keeps the viewer default when root line-height is unspecified, and refreshes explicit normal", function () {
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const styler = Object.create(CssStyler.Styler.prototype);
+    styler.context = context;
+    const style = {
+      "font-family": new Cascade.CascadeValue(new Css.Str("Arial"), 0),
+      "font-size": new Cascade.CascadeValue(new Css.Numeric(32, "px"), 0),
+    };
+    styler.determineRootSizes(style);
+    expect(context.rootLineHeight).toBe(32 * context.pref.lineHeight);
+    style["line-height"] = new Cascade.CascadeValue(Css.ident.normal, 0);
+    styler.determineRootSizes(style);
+    expect(context.rootLineHeight).toBeCloseTo(
+      nativeLength("lh", 32, { fontFamily: "Arial" }),
+      4,
+    );
+    style["font-size"] = new Cascade.CascadeValue(new Css.Numeric(48, "px"), 0);
+    style["font-family"] = new Cascade.CascadeValue(
+      new Css.Str("Courier New"),
+      0,
+    );
+    styler.determineRootSizes(style);
+    expect(context.rootLineHeight).toBeCloseTo(
+      nativeLength("lh", 48, { fontFamily: "Courier New" }),
+      4,
+    );
+  });
+
+  it("resolves inherited normal using the parent's font without fixing the keyword", function () {
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const props = {
+      "font-size": new Cascade.CascadeValue(new Css.Numeric(37, "px"), 0),
+      "font-family": new Cascade.CascadeValue(new Css.Str("Courier New"), 0),
+      "line-height": new Cascade.CascadeValue(Css.ident.normal, 0),
+    };
+    const visitor = new Cascade.InheritanceVisitor(props, context);
+    visitor.setPropName("font-size");
+    expect(new Css.Numeric(1, "lh").visit(visitor).num).toBeCloseTo(
+      nativeLength("lh", 37, { fontFamily: "Courier New" }),
+      4,
+    );
+    expect(props["line-height"].value).toBe(Css.ident.normal);
+    props["font-size"] = new Cascade.CascadeValue(new Css.Numeric(16, "px"), 0);
+    props["font-family"] = new Cascade.CascadeValue(new Css.Str("Arial"), 0);
+    expect(visitor.getInheritedLineHeight()).toBeCloseTo(
+      nativeLength("lh", 16, { fontFamily: "Arial" }),
+      4,
+    );
+  });
+
   it("can remeasure a font after the browser loads it", function () {
     let loaded = false;
     const metrics = new FontMetrics(document, () =>
       loaded ? "Courier New" : "Arial",
     );
     const properties = { "font-family": "ScriptLoadedFont" };
-    const before = metrics.measure("ch", 32, properties);
+    const before = Object.fromEntries(
+      ["ch", "lh"].map((unit) => [unit, metrics.measure(unit, 32, properties)]),
+    );
     loaded = true;
     metrics.clearCache();
-    const after = metrics.measure("ch", 32, properties);
-    expect(before).toBeCloseTo(
-      nativeLength("ch", 32, { fontFamily: "Arial" }),
-      4,
-    );
-    expect(after).toBeCloseTo(
-      nativeLength("ch", 32, { fontFamily: "Courier New" }),
-      4,
-    );
+    for (const unit of ["ch", "lh"]) {
+      expect(before[unit]).toBeCloseTo(
+        nativeLength(unit, 32, { fontFamily: "Arial" }),
+        4,
+      );
+      expect(metrics.measure(unit, 32, properties)).toBeCloseTo(
+        nativeLength(unit, 32, { fontFamily: "Courier New" }),
+        4,
+      );
+    }
   });
 
   it("resolves root units against the document root and initial units during root sizing", function () {

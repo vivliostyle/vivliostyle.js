@@ -53,6 +53,7 @@ export class FontMetrics {
     private readonly document: Document,
     private readonly mapFontFamily: (family: string) => string = (family) =>
       family,
+    private readonly normalLineHeightZoom: number = 1,
   ) {}
 
   clearCache(): void {
@@ -65,7 +66,7 @@ export class FontMetrics {
     properties: FontProperties = {},
   ): number | null {
     if (
-      !["ex", "cap", "ch", "ic"].includes(unit) ||
+      !["ex", "cap", "ch", "ic", "lh"].includes(unit) ||
       !Number.isFinite(fontSize) ||
       fontSize < 0
     ) {
@@ -88,11 +89,20 @@ export class FontMetrics {
       }
       probe.lang = properties.lang || "";
       probe.style.fontSize = `${fontSize}px`;
+      // normal stays a keyword in the source cascade. Only its lh metric is
+      // measured here, without using the height of a line containing fallback
+      // glyphs (which can be taller than the first available font).
+      probe.style.lineHeight = "normal";
       probe.textContent = "水0Hx";
       this.document.body.appendChild(probe);
       sizes = {};
       try {
-        for (const name of ["ex", "cap", "ch", "ic"]) {
+        for (const name of ["ex", "cap", "ch", "ic", "lh"]) {
+          // normal line-height can be rounded to device pixels. Match the
+          // layout viewport's pixel-ratio emulation when measuring lh.
+          if (name === "lh") {
+            probe.style.setProperty("zoom", String(this.normalLineHeightZoom));
+          }
           if (
             this.document.defaultView.CSS.supports("margin-left", `1${name}`)
           ) {

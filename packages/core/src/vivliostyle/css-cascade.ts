@@ -2348,8 +2348,16 @@ export class InheritanceVisitor extends Css.FilterVisitor {
         }
       }
     }
-    // No line-height or `normal`: the multiplier of the preferred line height.
-    return this.context.pref.lineHeight * parentFontSize;
+    // Preserve normal for inheritance; only lh conversion needs its length.
+    return (
+      (value
+        ? this.context.measureFontUnit(
+            "lh",
+            parentFontSize,
+            this.metricProperties(),
+          )
+        : null) ?? this.context.pref.lineHeight * parentFontSize
+    );
   }
 
   private getFontWeight(): number {
@@ -2515,6 +2523,10 @@ export function convertFontRelativeLengthToPx(
     return new Css.Numeric(num * context.fontSize(), "px");
   } else if (unit === "rlh") {
     return new Css.Numeric(num * context.rootLineHeight, "px");
+  } else if (unit === "lh") {
+    // FontMetrics measures normal only. The actual line-height basis must be
+    // supplied by the caller, or resolved by the browser in the final style.
+    return numeric;
   } else {
     const size = context.measureFontUnit(unit, baseFontSize, fontProperties);
     return size != null ? new Css.Numeric(num * size, "px") : numeric;
