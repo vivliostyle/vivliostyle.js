@@ -325,47 +325,71 @@ function findBlockContainer(node: Node): HTMLElement | null {
 }
 
 /**
- * Get the client rect of the last text or replaced element in the node.
+ * Generate the client rects of the content in the node in reverse order:
+ * text, replaced elements and atomic inlines. Out-of-flow elements are
+ * skipped. Returns true at a forced line break or a block-level element.
  */
-function getLastContentRect(node: Node): DOMRect | null {
+function* generateContentRectsBackward(
+  node: Node,
+): Generator<DOMRect, boolean> {
   if (node.nodeType === Node.TEXT_NODE) {
-    if (!/\S/.test(node.textContent)) {
-      return null;
+    if (/\S/.test(node.textContent)) {
+      const rects = RangeClientRects.getClientRectsOfNode(node);
+      for (let i = rects.length - 1; i >= 0; i--) {
+        yield rects[i];
+      }
     }
-    const rects = RangeClientRects.getClientRectsOfNode(node);
-    return rects[rects.length - 1] ?? null;
+    return false;
   }
   if (node.nodeType !== Node.ELEMENT_NODE) {
-    return null;
+    return false;
   }
   const elem = node as Element;
-  if (Base.mediaTags[elem.localName]) {
+  if (elem.localName === "br") {
+    return true;
+  }
+  const style = elem.ownerDocument.defaultView.getComputedStyle(elem);
+  if (
+    style.display === "none" ||
+    style.position === "absolute" ||
+    style.position === "fixed" ||
+    style.float !== "none"
+  ) {
+    return false;
+  }
+  if (Base.mediaTags[elem.localName] || style.display.startsWith("inline-")) {
     const rect = elem.getBoundingClientRect();
-    return rect.width || rect.height ? rect : null;
+    if (rect.width || rect.height) {
+      yield rect;
+    }
+    return false;
+  }
+  if (!/^(inline|contents|ruby)\b/.test(style.display)) {
+    return true;
   }
   for (let child = elem.lastChild; child; child = child.previousSibling) {
-    const rect = getLastContentRect(child);
-    if (rect) {
-      return rect;
+    if (yield* generateContentRectsBackward(child)) {
+      return true;
     }
   }
-  return null;
+  return false;
 }
 
 /**
- * Get the client rect of the text or replaced element preceding the node
- * within the root.
+ * Generate the client rects of the content preceding the node within the
+ * root, from the nearest, up to a forced line break or a block-level element.
  */
-function findPrecedingContentRect(node: Node, root: Node): DOMRect | null {
+function* generatePrecedingContentRects(
+  node: Node,
+  root: Node,
+): Generator<DOMRect, void> {
   for (let n = node; n && n !== root; n = n.parentNode) {
     for (let prev = n.previousSibling; prev; prev = prev.previousSibling) {
-      const rect = getLastContentRect(prev);
-      if (rect) {
-        return rect;
+      if (yield* generateContentRectsBackward(prev)) {
+        return;
       }
     }
   }
-  return null;
 }
 
 /**
@@ -1047,11 +1071,10 @@ class TextSpacingPolyfill {
       // property (e.g., a closing bracket paired with an opening bracket in a
       // left-to-right run in right-to-left text).
       function bidiDirectionClass(): string {
-        const style = document.defaultView.getComputedStyle(outerElem);
         const block = findBlockContainer(outerElem);
         // The preceding content outside the bidi isolate or embedding that
         // the punctuation belongs to does not determine its direction
-        let scope: Node = block;
+        let scope: Element = block;
         for (
           let elem = outerElem.parentElement;
           elem && elem !== block;
@@ -1064,20 +1087,34 @@ class TextSpacingPolyfill {
             break;
           }
         }
+        // Without preceding content on the same line, the punctuation is at
+        // the start of its bidi isolate, embedding or paragraph
+        let rtl =
+          document.defaultView.getComputedStyle(scope ?? outerElem)
+            .direction === "rtl";
         const rect = innerElem.getBoundingClientRect();
-        const prevRect = findPrecedingContentRect(outerElem, scope);
-        let rtl = style.direction === "rtl";
-        if (
-          prevRect &&
-          (vertical
-            ? rect.left < prevRect.right && rect.right > prevRect.left
-            : rect.top < prevRect.bottom && rect.bottom > prevRect.top)
-        ) {
-          const before = vertical
-            ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
-            : rect.left + rect.right < prevRect.left + prevRect.right;
-          // The inline direction is bottom-to-top for ltr in sideways-lr
-          rtl = before !== (style.writingMode === "sideways-lr");
+        // Preceding content on the same line may not overlap the punctuation
+        // (e.g., shifted by vertical-align), so look further back for content
+        // that overlaps it
+        for (const prevRect of generatePrecedingContentRects(
+          outerElem,
+          scope,
+        )) {
+          if (
+            vertical
+              ? rect.left < prevRect.right && rect.right > prevRect.left
+              : rect.top < prevRect.bottom && rect.bottom > prevRect.top
+          ) {
+            const before = vertical
+              ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
+              : rect.left + rect.right < prevRect.left + prevRect.right;
+            // The inline direction is bottom-to-top for ltr in sideways-lr
+            rtl =
+              before !==
+              (document.defaultView.getComputedStyle(outerElem).writingMode ===
+                "sideways-lr");
+            break;
+          }
         }
         return rtl ? " viv-hang-rtl" : " viv-hang-ltr";
       }
