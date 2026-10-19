@@ -1,21 +1,27 @@
-- id: "0001"
-  category: Text Spacing
+- category: General
+  title: Block after ::first-line is not pushed to the next page
+  file: first-line-next-block-pushed.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2205"
+  approvedViewer: git-fix-first-line-overflow-check  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/first-line-next-block-pushed.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/first-line-next-block-pushed.html&zoom=1&spread=false
+- category: Text Spacing
   title: "Forced break and text-autospace after ::first-line (Issue #2196)"
   file: text-spacing/first-line-break-duplication.html
-  type: difference
-  decision: "expected"  # regression / expected / skip
+  decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2204"
-  approvedViewer: "git-fix-first-line-autospace"  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-first-line-autospace  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
-  pageCountActual: 1
-  pageCountBaseline: 2
-  diffPages:
-    - 1
 - category: General
   title: "::first-line line-height on the first line box"
   file: first-line-line-height.html
