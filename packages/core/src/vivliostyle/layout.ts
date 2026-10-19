@@ -2689,46 +2689,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // Text-spacing etc. must be done before calculating edge. (Issue #898)
         this.postLayoutBlock(resNodeContext, checkPoints);
 
-        // Record the height
-        // TODO: should this be done after first-line calculation?
-        // Suppress ancestor block-end padding/border during edge
-        // calculation to prevent false overflow from browser column
-        // breaking. (Issue #1846)
-        const restoreInset = this.suppressOpenAncestorBlockEndInset(
-          resNodeContext ?? nodeContext,
-        );
-        let edge = this.calculateEdge(
-          resNodeContext,
-          checkPoints,
-          checkPointIndex,
-          checkPoints[checkPointIndex].boxOffset,
-        );
-        restoreInset();
-        let overflown = false;
-        if (
-          !resNodeContext ||
-          !LayoutHelper.isOrphan(resNodeContext.viewNode)
-        ) {
-          const offsets = BreakPosition.calculateOffset(
-            resNodeContext,
-            this.collectElementsOffset(),
-          );
-          overflown = this.isOverflown(
-            edge + (this.vertical ? -1 : 1) * offsets.minimum,
-          );
-          if (
-            this.isOverflown(
-              edge + (this.vertical ? -1 : 1) * offsets.current,
-            ) &&
-            !this.nodeContextOverflowingDueToRepetitiveElements
-          ) {
-            this.nodeContextOverflowingDueToRepetitiveElements = resNodeContext;
-          }
-        }
-        if (resNodeContext == null) {
-          edge += this.getTrailingMarginEdgeAdjustment(checkPoints);
-        }
-        this.updateMaxReachedAfterEdge(edge);
         let lineCont: Task.Result<Vtree.NodeContext | null>;
         if (nodeContext.firstPseudo) {
           // possibly need to deal with :first-line and friends
@@ -2740,9 +2700,53 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         } else {
           lineCont = Task.newResult(resNodeContext);
         }
-        lineCont.then((nodeContext) => {
-          // Text-spacing etc. must be done before calculating edge. (Issue #898)
-          // this.postLayoutBlock(nodeContext, checkPoints);
+        lineCont.then((resNodeContext) => {
+          // Record the height. This must be done after the ::first-line
+          // calculation: until then the whole block is laid out with the
+          // ::first-line style, which can make it look taller than it is
+          // and cause a false overflow.
+          let overflown = false;
+          const checkPointIndex = checkPoints.length - 1;
+          if (checkPointIndex >= 0) {
+            // Suppress ancestor block-end padding/border during edge
+            // calculation to prevent false overflow from browser column
+            // breaking. (Issue #1846)
+            const restoreInset = this.suppressOpenAncestorBlockEndInset(
+              resNodeContext ?? nodeContext,
+            );
+            let edge = this.calculateEdge(
+              resNodeContext,
+              checkPoints,
+              checkPointIndex,
+              checkPoints[checkPointIndex].boxOffset,
+            );
+            restoreInset();
+            if (
+              !resNodeContext ||
+              !LayoutHelper.isOrphan(resNodeContext.viewNode)
+            ) {
+              const offsets = BreakPosition.calculateOffset(
+                resNodeContext,
+                this.collectElementsOffset(),
+              );
+              overflown = this.isOverflown(
+                edge + (this.vertical ? -1 : 1) * offsets.minimum,
+              );
+              if (
+                this.isOverflown(
+                  edge + (this.vertical ? -1 : 1) * offsets.current,
+                ) &&
+                !this.nodeContextOverflowingDueToRepetitiveElements
+              ) {
+                this.nodeContextOverflowingDueToRepetitiveElements =
+                  resNodeContext;
+              }
+            }
+            if (resNodeContext == null) {
+              edge += this.getTrailingMarginEdgeAdjustment(checkPoints);
+            }
+            this.updateMaxReachedAfterEdge(edge);
+          }
 
           const lineFootnoteOverflowBreak =
             this.findLineFootnoteOverflowBreak(checkPoints);
@@ -2762,12 +2766,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             this.saveBoxBreakPosition(checkPoints);
 
             // TODO: how to signal overflow in the last pagargaph???
-            if (overflown && !this.isLoneImage(checkPoints) && nodeContext) {
-              nodeContext = nodeContext.modify();
-              nodeContext.overflow = true;
+            if (overflown && !this.isLoneImage(checkPoints) && resNodeContext) {
+              resNodeContext = resNodeContext.modify();
+              resNodeContext.overflow = true;
             }
           }
-          frame.finish(nodeContext);
+          frame.finish(resNodeContext);
         });
       },
     );
