@@ -484,6 +484,10 @@ module.exports = [
       },
       { file: "all-shorthand.html", title: "all shorthand property" },
       { file: "env-doc-title.html", title: "env(doc-title) function" },
+      {
+        file: "first-line-line-height.html",
+        title: "::first-line line-height on the first line box",
+      },
     ],
   },
   {

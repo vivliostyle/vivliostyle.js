@@ -3295,6 +3295,12 @@ export class ViewFactory
             Break.setBoxBreakFlag(parent, "text-start");
           }
           parent.appendChild(this.viewNode);
+          if (isPseudo(this.viewNode, "first-line")) {
+            this.applyFirstLineMetricsToBlock(
+              this.viewNode as HTMLElement,
+              parent as HTMLElement,
+            );
+          }
 
           // Fix overflow caused by forced column breaks
           LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode);
@@ -3678,6 +3684,44 @@ export class ViewFactory
 
   addImageFetchers(bg: Css.Val) {
     addImageFetchersToPage(bg, this.page);
+  }
+
+  /**
+   * The ::first-line span only affects its own inline box, while the strut of
+   * the first line box (and a forced break ending the line) still uses the
+   * block's font. Copy the span's resolved metrics to the block so that the
+   * UA stylesheet applies them to the block's real ::first-line, and the
+   * browser lays out the first line box as for native ::first-line. Resolved values are used because a relative font-size
+   * (e.g. `200%`) would otherwise be applied twice to the span.
+   */
+  private applyFirstLineMetricsToBlock(
+    span: HTMLElement,
+    block: HTMLElement,
+  ): void {
+    if (!span.style || !block.style) {
+      return;
+    }
+    const window = span.ownerDocument.defaultView;
+    if (!window) {
+      return;
+    }
+    const spanStyle = window.getComputedStyle(span);
+    const blockStyle = window.getComputedStyle(block);
+    for (const [propName, customPropName] of [
+      ["font-family", "--viv-firstLineFontFamily"],
+      ["font-size", "--viv-firstLineFontSize"],
+      ["line-height", "--viv-firstLineLineHeight"],
+    ]) {
+      const value = spanStyle.getPropertyValue(propName);
+      if (value && value !== blockStyle.getPropertyValue(propName)) {
+        block.style.setProperty(customPropName, value);
+        if (propName === "font-size") {
+          // The span inherits from the real ::first-line, so a relative
+          // font-size on the span must be resolved now.
+          span.style.fontSize = value;
+        }
+      }
+    }
   }
 
   applyComputedStyles(

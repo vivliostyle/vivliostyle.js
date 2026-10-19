@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- ::first-line font-size and line-height must determine the first line box. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>::first-line line-height on the first line box</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 15mm;
+      }
+
+      body {
+        font-family: sans-serif;
+      }
+
+      /* A large block font-size with a small line-height. Its strut sits far
+         above the baseline of the small ::first-line text, so the first line
+         box becomes much taller if the strut ignores the ::first-line font. */
+      .case {
+        --expected: 20px;
+        font-size: 80px;
+        line-height: 20px;
+        margin: 0 0 10mm 0;
+        outline: 1px solid red;
+        /* Expected first line box */
+        background: linear-gradient(lightskyblue, lightskyblue) 0 0 / 100%
+          var(--expected) no-repeat;
+      }
+
+      .case::first-line {
+        font-size: 16px;
+      }
+
+      .case.relative::first-line {
+        font-size: 20%;
+      }
+
+      .case.line-height {
+        --expected: 30px;
+      }
+
+      .case.line-height::first-line {
+        line-height: 30px;
+      }
+
+      .small {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      In each box, the first line box must exactly match the blue band
+      (20px, 20px, 30px), as in native Chrome. Before the fix, the first line
+      box was about 45px tall and the text sat below the band.
+    </p>
+    <div class="case">First line (font-size: 16px)</div>
+    <div class="case relative">First line (font-size: 20%)</div>
+    <div class="case line-height">
+      First line (line-height: 30px)<br /><span class="small">Second line</span>
+    </div>
+  </body>
+</html>
