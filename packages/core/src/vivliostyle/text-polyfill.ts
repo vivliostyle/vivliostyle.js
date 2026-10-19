@@ -325,6 +325,50 @@ function findBlockContainer(node: Node): HTMLElement | null {
 }
 
 /**
+ * Get the client rect of the last text or replaced element in the node.
+ */
+function getLastContentRect(node: Node): DOMRect | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (!/\S/.test(node.textContent)) {
+      return null;
+    }
+    const rects = RangeClientRects.getClientRectsOfNode(node);
+    return rects[rects.length - 1] ?? null;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return null;
+  }
+  const elem = node as Element;
+  if (Base.mediaTags[elem.localName]) {
+    const rect = elem.getBoundingClientRect();
+    return rect.width || rect.height ? rect : null;
+  }
+  for (let child = elem.lastChild; child; child = child.previousSibling) {
+    const rect = getLastContentRect(child);
+    if (rect) {
+      return rect;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get the client rect of the text or replaced element preceding the node
+ * within the root.
+ */
+function findPrecedingContentRect(node: Node, root: Node): DOMRect | null {
+  for (let n = node; n && n !== root; n = n.parentNode) {
+    for (let prev = n.previousSibling; prev; prev = prev.previousSibling) {
+      const rect = getLastContentRect(prev);
+      if (rect) {
+        return rect;
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * Force the block to be laid out from scratch.
  *
  * After the `viv-ts-*` elements are inserted, the browser may reuse cached
@@ -998,30 +1042,42 @@ class TextSpacingPolyfill {
       }
 
       // Get the class for the bidi direction in which the punctuation is laid
-      // out, i.e., whether it is placed on the left or right of the preceding
-      // text. This may differ from the `direction` property (e.g., a closing
-      // bracket paired with an opening bracket in a left-to-right run in
-      // right-to-left text).
+      // out, i.e., whether it is placed after or before the preceding content
+      // in the inline direction. This may differ from the `direction`
+      // property (e.g., a closing bracket paired with an opening bracket in a
+      // left-to-right run in right-to-left text).
       function bidiDirectionClass(): string {
-        if (vertical) {
-          return "";
+        const style = document.defaultView.getComputedStyle(outerElem);
+        const block = findBlockContainer(outerElem);
+        // The preceding content outside the bidi isolate or embedding that
+        // the punctuation belongs to does not determine its direction
+        let scope: Node = block;
+        for (
+          let elem = outerElem.parentElement;
+          elem && elem !== block;
+          elem = elem.parentElement
+        ) {
+          if (
+            document.defaultView.getComputedStyle(elem).unicodeBidi !== "normal"
+          ) {
+            scope = elem;
+            break;
+          }
         }
         const rect = innerElem.getBoundingClientRect();
-        const prevRects = prevNode
-          ? RangeClientRects.getClientRectsOfNode(prevNode)
-          : [];
-        const prevRect = prevRects[prevRects.length - 1];
-        let rtl: boolean;
+        const prevRect = findPrecedingContentRect(outerElem, scope);
+        let rtl = style.direction === "rtl";
         if (
           prevRect &&
-          rect.top < prevRect.bottom &&
-          rect.bottom > prevRect.top
+          (vertical
+            ? rect.left < prevRect.right && rect.right > prevRect.left
+            : rect.top < prevRect.bottom && rect.bottom > prevRect.top)
         ) {
-          rtl = rect.left + rect.right < prevRect.left + prevRect.right;
-        } else {
-          rtl =
-            document.defaultView.getComputedStyle(outerElem).direction ===
-            "rtl";
+          const before = vertical
+            ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
+            : rect.left + rect.right < prevRect.left + prevRect.right;
+          // The inline direction is bottom-to-top for ltr in sideways-lr
+          rtl = before !== (style.writingMode === "sideways-lr");
         }
         return rtl ? " viv-hang-rtl" : " viv-hang-ltr";
       }

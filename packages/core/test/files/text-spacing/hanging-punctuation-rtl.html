@@ -6,7 +6,7 @@
     <title>hanging-punctuation last/end in RTL</title>
     <style>
       @page {
-        size: 180mm 200mm;
+        size: 180mm 297mm;
         margin: 10mm;
       }
       body {
@@ -34,6 +34,16 @@
         text-align: justify;
         text-align-last: justify;
       }
+      .vertical {
+        writing-mode: vertical-rl;
+        text-orientation: sideways;
+        height: 12em;
+      }
+      .vertical p {
+        width: auto;
+        height: 12em;
+        margin: 0 0 0 0.6em;
+      }
       h2 {
         font-size: 14px;
         margin: 0.8em 0 0.3em;
@@ -51,6 +61,7 @@
     <p class="last justify" dir="rtl" lang="en">Yes <span>)</span></p>
     <p class="last" dir="rtl">abc (def<span>)</span></p>
     <p class="last end" dir="rtl">abc (def<span>)</span></p>
+    <p class="last" dir="rtl">abc (def<img width="16" height="16" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" style="background: #ccc"><span>)</span></p>
 
     <h2>hanging-punctuation: first last (LTR, for comparison)</h2>
     <p class="last" dir="ltr" lang="en">“Abc def ghi.”</p>
@@ -59,6 +70,17 @@
     <p class="last" dir="ltr" lang="en">Abc def <span lang="he">(אבג)</span></p>
     <p class="last" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
     <p class="last end" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
+    <p class="last" dir="ltr" lang="en">abc <span dir="rtl">)</span></p>
+
+    <h2>hanging-punctuation: last (vertical, sideways)</h2>
+    <div class="vertical">
+      <p class="last" dir="rtl">abc (def<span>)</span></p>
+      <p class="last end" dir="rtl">abc (def<span>)</span></p>
+      <p class="last" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
+      <p class="last end" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
+      <p class="last end" dir="rtl">“אבג דהו זחט”</p>
+      <p class="last end" lang="ja" style="text-orientation: mixed">「あいうえおかきくけこ」</p>
+    </div>
 
     <h2>hanging-punctuation: force-end / allow-end (RTL)</h2>
     <p class="force-end end" dir="rtl" lang="ja">あいうえおかきくけこさし、すせそ。</p>
