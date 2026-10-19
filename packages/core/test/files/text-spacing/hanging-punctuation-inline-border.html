@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- Test case for Issue #2194: Inline borders/padding prevent hanging-punctuation first/last -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>hanging-punctuation first/last with inline border/padding</title>
+    <style>
+      @page {
+        size: 180mm 200mm;
+        margin: 10mm;
+      }
+      body {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      p {
+        width: 12em;
+        margin: 0 0 0.6em 0;
+        outline: 1px solid #08f;
+        hanging-punctuation: first last;
+      }
+      /* text-align: end makes hanging-punctuation: last visible */
+      p.end {
+        text-align: end;
+      }
+      .b-start {
+        border-inline-start: 2px solid red;
+      }
+      .b-end {
+        border-inline-end: 2px solid red;
+      }
+      .p-start {
+        padding-inline-start: 4px;
+        background: #fdd;
+      }
+      .p-end {
+        padding-inline-end: 4px;
+        background: #fdd;
+      }
+      .b-both {
+        border: 2px solid green;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        height: 120mm;
+      }
+      .vertical p {
+        width: auto;
+        height: 12em;
+        margin: 0 0 0 0.6em;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 0.8em 0 0.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Hangs (no border/padding)</h2>
+    <p>「あいうえおかきくけこ」</p>
+    <p class="end">「あいうえおかきくけこ」</p>
+    <p><span>「あいうえおかきくけこ」</span></p>
+    <p class="end"><span>「あいうえおかきくけこ」</span></p>
+
+    <h2>Does not hang: border at the line edge side</h2>
+    <p><span class="b-start">「あいうえ</span>おかきくけ<span class="b-end">こ」</span></p>
+    <p class="end"><span class="b-start">「あいうえ</span>おかきくけ<span class="b-end">こ」</span></p>
+    <p><span class="b-both"><span>“Abc def ghi.”</span></span></p>
+    <p class="end"><span class="b-both"><span>“Abc def ghi.”</span></span></p>
+
+    <h2>Does not hang: padding at the line edge side</h2>
+    <p><span class="p-start">「あいうえ</span>おかきくけ<span class="p-end">こ」</span></p>
+    <p class="end"><span class="p-start">「あいうえ</span>おかきくけ<span class="p-end">こ」</span></p>
+
+    <h2>Hangs: border on the opposite side only</h2>
+    <p><span class="b-end">「あいうえ</span>おかきくけ<span class="b-start">こ」</span></p>
+    <p class="end"><span class="b-end">「あいうえ</span>おかきくけ<span class="b-start">こ」</span></p>
+
+    <h2>RTL</h2>
+    <p dir="rtl" lang="he"><span class="b-start">“אבג</span> דהו <span class="b-end">זחט”</span></p>
+    <p class="end" dir="rtl" lang="he"><span class="b-start">“אבג</span> דהו <span class="b-end">זחט”</span></p>
+    <p dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
+    <p class="end" dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
+
+    <div class="vertical">
+      <p>「あいうえおかきくけこ」</p>
+      <p class="end">「あいうえおかきくけこ」</p>
+      <p><span class="b-start">「あいうえ</span>おかきくけ<span class="b-end">こ」</span></p>
+      <p class="end"><span class="b-start">「あいうえ</span>おかきくけ<span class="b-end">こ」</span></p>
+      <p><span class="p-start">「あいうえ</span>おかきくけ<span class="p-end">こ」</span></p>
+      <p class="end"><span class="p-start">「あいうえ</span>おかきくけ<span class="p-end">こ」</span></p>
+      <p><span class="b-end">「あいうえ</span>おかきくけ<span class="b-start">こ」</span></p>
+      <p class="end"><span class="b-end">「あいうえ</span>おかきくけ<span class="b-start">こ」</span></p>
+    </div>
+  </body>
+</html>

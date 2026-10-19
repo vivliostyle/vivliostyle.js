@@ -393,6 +393,60 @@ function* generatePrecedingContentRects(
 }
 
 /**
+ * Check if any inline ancestor of the node, up to its block container, has
+ * non-zero border or padding on its inline-start (or inline-end) side.
+ * Such border or padding between a punctuation and the edge of the line
+ * prevents hanging-punctuation `first` (or `last`). (Issue #2194)
+ */
+function hasInlineBorderOrPaddingAtEdge(
+  node: Node,
+  edge: "start" | "end",
+): boolean {
+  const window = node.ownerDocument?.defaultView;
+  if (!window) {
+    return false;
+  }
+  for (let elem = node.parentElement; elem; elem = elem.parentElement) {
+    if (elem.hasAttribute("data-vivliostyle-column")) {
+      break;
+    }
+    const style = window.getComputedStyle(elem);
+    const { display } = style;
+    if (display === "contents") {
+      continue;
+    }
+    if (display !== "inline" && !display.startsWith("ruby")) {
+      break;
+    }
+    const vertical = !style.writingMode.startsWith("horizontal");
+    // For sideways-lr, the inline-start is the bottom side
+    const reversed =
+      (style.direction === "rtl") !== (style.writingMode === "sideways-lr");
+    const startSide = vertical
+      ? reversed
+        ? "bottom"
+        : "top"
+      : reversed
+        ? "right"
+        : "left";
+    const endSide = {
+      top: "bottom",
+      bottom: "top",
+      left: "right",
+      right: "left",
+    }[startSide];
+    const side = edge === "start" ? startSide : endSide;
+    if (
+      parseFloat(style.getPropertyValue(`border-${side}-width`)) > 0 ||
+      parseFloat(style.getPropertyValue(`padding-${side}`)) > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Force the block to be laid out from scratch.
  *
  * After the `viv-ts-*` elements are inserted, the browser may reuse cached
@@ -982,7 +1036,8 @@ class TextSpacingPolyfill {
     if (
       isFirstInBlock &&
       hangingPunctuation.first &&
-      /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text)
+      /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text) &&
+      !hasInlineBorderOrPaddingAtEdge(textNode, "start")
     ) {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
@@ -990,7 +1045,8 @@ class TextSpacingPolyfill {
     } else if (
       isLastInBlock &&
       hangingPunctuation.last &&
-      /^[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text)
+      /^[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text) &&
+      !hasInlineBorderOrPaddingAtEdge(textNode, "end")
     ) {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
