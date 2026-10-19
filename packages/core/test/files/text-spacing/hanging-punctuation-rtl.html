@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- Test case: hanging-punctuation last/end in right-to-left text -->
+<html lang="he">
+  <head>
+    <meta charset="utf-8" />
+    <title>hanging-punctuation last/end in RTL</title>
+    <style>
+      @page {
+        size: 180mm 200mm;
+        margin: 10mm;
+      }
+      body {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      p {
+        width: 12em;
+        margin: 0 0 0.6em 0;
+        outline: 1px solid #08f;
+      }
+      .last {
+        hanging-punctuation: first last;
+      }
+      .force-end {
+        hanging-punctuation: force-end;
+      }
+      .allow-end {
+        hanging-punctuation: allow-end;
+      }
+      .end {
+        text-align: end;
+      }
+      .justify {
+        text-align: justify;
+        text-align-last: justify;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 0.8em 0 0.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>hanging-punctuation: first last (RTL)</h2>
+    <p class="last" dir="rtl">“אבג דהו זחט”</p>
+    <p class="last end" dir="rtl">“אבג דהו זחט”</p>
+    <p class="last justify" dir="rtl">“אבג דהו זחט”</p>
+    <p class="last end" dir="rtl">אבג דהו זחט (טיח)</p>
+    <p class="last end" dir="rtl" lang="ja">「あいうえおかきくけこ」</p>
+    <p class="last end" dir="rtl">אבג <span lang="en">abc (def)</span></p>
+    <p class="last justify" dir="rtl" lang="en">Yes <span>)</span></p>
+
+    <h2>hanging-punctuation: first last (LTR, for comparison)</h2>
+    <p class="last" dir="ltr" lang="en">“Abc def ghi.”</p>
+    <p class="last end" dir="ltr" lang="en">“Abc def ghi.”</p>
+    <p class="last end" dir="ltr" lang="ja">「あいうえおかきくけこ」</p>
+    <p class="last" dir="ltr" lang="en">Abc def <span lang="he">(אבג)</span></p>
+
+    <h2>hanging-punctuation: force-end / allow-end (RTL)</h2>
+    <p class="force-end end" dir="rtl" lang="ja">あいうえおかきくけこさし、すせそ。</p>
+    <p class="allow-end end" dir="rtl" lang="ja">あいうえおかきくけこさし、すせそ。</p>
+  </body>
+</html>
