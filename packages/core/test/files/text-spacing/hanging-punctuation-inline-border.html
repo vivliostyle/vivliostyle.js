@@ -49,6 +49,19 @@
         height: 12em;
         margin: 0 0 0 0.6em;
       }
+      /* direction without unicode-bidi does not change the bidi level */
+      .d-rtl {
+        direction: rtl;
+      }
+      .d-ltr {
+        direction: ltr;
+      }
+      .b-left {
+        border-left: 2px solid red;
+      }
+      .b-right {
+        border-right: 2px solid red;
+      }
       h2 {
         font-size: 14px;
         margin: 0.8em 0 0.3em;
@@ -81,6 +94,21 @@
     <p class="end" dir="rtl" lang="he"><span class="b-start">“אבג</span> דהו <span class="b-end">זחט”</span></p>
     <p dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
     <p class="end" dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
+
+    <h2>Mixed direction (inline direction ≠ line)</h2>
+    <!-- Does not hang: border at the line edge side -->
+    <p>abc def ghi<span class="d-rtl b-right">)</span></p>
+    <p class="end">abc def ghi<span class="d-rtl b-right">)</span></p>
+    <p><span class="d-rtl b-left">(</span>abc def ghi</p>
+    <!-- Hangs: border on the opposite side only -->
+    <p>abc def ghi<span class="d-rtl b-left">)</span></p>
+    <p class="end">abc def ghi<span class="d-rtl b-left">)</span></p>
+    <p><span class="d-rtl b-right">(</span>abc def ghi</p>
+    <!-- RTL counterparts -->
+    <p dir="rtl" lang="he">אבג דהו <span class="d-ltr b-left">זחט”</span></p>
+    <p class="end" dir="rtl" lang="he">אבג דהו <span class="d-ltr b-left">זחט”</span></p>
+    <p dir="rtl" lang="he">אבג דהו <span class="d-ltr b-right">זחט”</span></p>
+    <p class="end" dir="rtl" lang="he">אבג דהו <span class="d-ltr b-right">זחט”</span></p>
 
     <div class="vertical">
       <p>「あいうえおかきくけこ」</p>
