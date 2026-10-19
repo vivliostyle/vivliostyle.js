@@ -1698,6 +1698,17 @@ span[data-viv-leader] {
   -webkit-initial-letter: var(--viv-initialLetter);
   initial-letter: var(--viv-initialLetter);
 }
+
+/* ::first-line metrics for the first line box's strut */
+[style*="--viv-firstLineFontFamily"]::first-line {
+  font-family: var(--viv-firstLineFontFamily);
+}
+[style*="--viv-firstLineFontSize"]::first-line {
+  font-size: var(--viv-firstLineFontSize);
+}
+[style*="--viv-firstLineLineHeight"]::first-line {
+  line-height: var(--viv-firstLineLineHeight);
+}
 `;
 
 export const UserAgentCounterStylesCss =

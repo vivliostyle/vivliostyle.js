@@ -3295,6 +3295,12 @@ export class ViewFactory
             Break.setBoxBreakFlag(parent, "text-start");
           }
           parent.appendChild(this.viewNode);
+          if (isPseudo(this.viewNode, "first-line")) {
+            this.applyFirstLineMetricsToBlock(
+              this.viewNode as HTMLElement,
+              parent as HTMLElement,
+            );
+          }
 
           // Fix overflow caused by forced column breaks
           LayoutHelper.fixOverflowAtForcedColumnBreak(this.viewNode);
@@ -3678,6 +3684,52 @@ export class ViewFactory
 
   addImageFetchers(bg: Css.Val) {
     addImageFetchersToPage(bg, this.page);
+  }
+
+  /**
+   * The ::first-line span only affects its own inline box, while the strut of
+   * the first line box (and a forced break ending the line) still uses the
+   * block's font. Copy the span's metrics to the block so that the UA
+   * stylesheet applies them to the block's real ::first-line, and the browser
+   * lays out the first line box as for native ::first-line.
+   */
+  private applyFirstLineMetricsToBlock(
+    span: HTMLElement,
+    block: HTMLElement,
+  ): void {
+    if (!span.style || !block.style) {
+      return;
+    }
+    const window = span.ownerDocument.defaultView;
+    if (!window) {
+      return;
+    }
+    const spanStyle = window.getComputedStyle(span);
+    const blockStyle = window.getComputedStyle(block);
+    // font-family and font-size inherit as computed values, so the resolved
+    // values can be forwarded.
+    for (const [propName, customPropName] of [
+      ["font-family", "--viv-firstLineFontFamily"],
+      ["font-size", "--viv-firstLineFontSize"],
+    ]) {
+      const value = spanStyle.getPropertyValue(propName);
+      if (value && value !== blockStyle.getPropertyValue(propName)) {
+        block.style.setProperty(customPropName, value);
+        if (propName === "font-size") {
+          // The span inherits from the real ::first-line, so a relative
+          // font-size (e.g. `200%`) on the span must be resolved now, or it
+          // would be applied twice.
+          span.style.fontSize = value;
+        }
+      }
+    }
+    // A unitless line-height inherits as a number, so forward the span's
+    // specified value only. A resolved length would be inherited by inline
+    // children with other font sizes instead of the number.
+    const lineHeight = span.style.getPropertyValue("line-height");
+    if (lineHeight) {
+      block.style.setProperty("--viv-firstLineLineHeight", lineHeight);
+    }
   }
 
   applyComputedStyles(
