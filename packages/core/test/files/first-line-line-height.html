@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <!-- ::first-line font-size and line-height must determine the first line box. -->
 <html lang="en">
   <head>
@@ -44,21 +44,42 @@
         line-height: 30px;
       }
 
+      /* A unitless line-height must stay a number in the first line, so the
+         40px inline child gets a 40px line-height. */
+      .case.unitless {
+        --expected: 40px;
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .case.unitless::first-line {
+        font-size: 10px;
+      }
+
       .small {
         font-size: 16px;
+      }
+
+      .big {
+        font-size: 40px;
       }
     </style>
   </head>
   <body>
     <p>
-      In each box, the first line box must exactly match the blue band
-      (20px, 20px, 30px), as in native Chrome. Before the fix, the first line
-      box was about 45px tall and the text sat below the band.
+      In each box, the first line box must exactly match the blue band (20px,
+      20px, 30px, 40px), as in native Chrome. Without the fix, the first line
+      box in the first three boxes was about 45px tall and the text sat below
+      the band. In the last box, the 40px "Big" must keep a 40px line-height
+      (inherited unitless <code>line-height: 1</code>).
     </p>
     <div class="case">First line (font-size: 16px)</div>
     <div class="case relative">First line (font-size: 20%)</div>
     <div class="case line-height">
       First line (line-height: 30px)<br /><span class="small">Second line</span>
+    </div>
+    <div class="case unitless">
+      First line <span class="big">Big</span> (line-height: 1)<br />Second line
     </div>
   </body>
 </html>
