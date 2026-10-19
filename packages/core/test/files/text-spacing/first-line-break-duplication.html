@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<!-- Test case for Issue #2196: first-line styling duplicates a forced break. -->
+<!--
+  Test case for Issue #2196: first-line styling duplicates a forced break,
+  and text-autospace is lost on the lines after ::first-line.
+-->
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>Forced break after ::first-line</title>
+    <title>Forced break and text-autospace after ::first-line</title>
     <style>
       @page {
         size: 300mm 260mm;
@@ -12,7 +15,7 @@
 
       body {
         font-family: sans-serif;
-        font-size: 40px;
+        font-size: 24px;
       }
 
       .case {
@@ -27,12 +30,25 @@
       .case::first-line {
         font-size: 200%;
       }
+
+      .narrow {
+        width: 10em;
+      }
     </style>
   </head>
   <body>
-    <p>Control: no-autospace</p>
-    <div class="case">国国XX国<br />国国XX国</div>
-    <p>Comparison: text-autospace: normal</p>
-    <div class="case autospace">国国XX国<br />国国XX国</div>
+    <p>
+      No blank line should follow the first line. With text-autospace: normal,
+      every line should have spacing between the ideographs and the Latin
+      letters.
+    </p>
+    <p>Control: no-autospace, forced break</p>
+    <div class="case">国国XX国<br />国国XX国<br />国国XX国</div>
+    <p>Comparison: text-autospace: normal, forced break</p>
+    <div class="case autospace">国国XX国<br />国国XX国<br />国国XX国</div>
+    <p>Comparison: text-autospace: normal, soft wrap</p>
+    <div class="case autospace narrow">
+      国国XX国国国XX国国国XX国国国XX国国国XX国
+    </div>
   </body>
 </html>

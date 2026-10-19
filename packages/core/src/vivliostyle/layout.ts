@@ -2566,6 +2566,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               this.buildViewToNextBlockEdge(nodeContext, lastCheckPoints).then(
                 (resNodeContextParam) => {
                   resNodeContext = resNodeContextParam;
+                  // The rest of the block has been rebuilt with new view
+                  // nodes, so text-spacing etc. must be applied again.
+                  // (Issue #2196)
+                  if (lastCheckPoints.length > 0) {
+                    this.postLayoutBlock(resNodeContext, lastCheckPoints);
+                  }
                   loopFrame.continueLoop();
                 },
               );
