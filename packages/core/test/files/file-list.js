@@ -944,7 +944,8 @@ module.exports = [
       },
       {
         file: "text-spacing/first-line-break-duplication.html",
-        title: "Forced break after ::first-line (Issue #2196)",
+        title:
+          "Forced break and text-autospace after ::first-line (Issue #2196)",
       },
     ],
   },
