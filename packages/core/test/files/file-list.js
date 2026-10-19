@@ -968,6 +968,10 @@ module.exports = [
         file: "text-spacing/hanging-punctuation-first-indent-ja.html",
         title: "hanging-punctuation:first with text-indent (Japanese)",
       },
+      {
+        file: "text-spacing/hanging-punctuation-rtl.html",
+        title: "hanging-punctuation:last in right-to-left text",
+      },
     ],
   },
   {

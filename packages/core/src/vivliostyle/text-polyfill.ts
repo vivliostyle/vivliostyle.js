@@ -325,6 +325,74 @@ function findBlockContainer(node: Node): HTMLElement | null {
 }
 
 /**
+ * Generate the client rects of the content in the node in reverse order:
+ * text, replaced elements and atomic inlines. Out-of-flow elements are
+ * skipped. Returns true at a forced line break or a block-level element.
+ */
+function* generateContentRectsBackward(
+  node: Node,
+): Generator<DOMRect, boolean> {
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (/\S/.test(node.textContent)) {
+      const rects = RangeClientRects.getClientRectsOfNode(node);
+      for (let i = rects.length - 1; i >= 0; i--) {
+        yield rects[i];
+      }
+    }
+    return false;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return false;
+  }
+  const elem = node as Element;
+  if (elem.localName === "br") {
+    return true;
+  }
+  const style = elem.ownerDocument.defaultView.getComputedStyle(elem);
+  if (
+    style.display === "none" ||
+    style.position === "absolute" ||
+    style.position === "fixed" ||
+    style.float !== "none"
+  ) {
+    return false;
+  }
+  if (Base.mediaTags[elem.localName] || style.display.startsWith("inline-")) {
+    const rect = elem.getBoundingClientRect();
+    if (rect.width || rect.height) {
+      yield rect;
+    }
+    return false;
+  }
+  if (!/^(inline|contents|ruby)\b/.test(style.display)) {
+    return true;
+  }
+  for (let child = elem.lastChild; child; child = child.previousSibling) {
+    if (yield* generateContentRectsBackward(child)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Generate the client rects of the content preceding the node within the
+ * root, from the nearest, up to a forced line break or a block-level element.
+ */
+function* generatePrecedingContentRects(
+  node: Node,
+  root: Node,
+): Generator<DOMRect, void> {
+  for (let n = node; n && n !== root; n = n.parentNode) {
+    for (let prev = n.previousSibling; prev; prev = prev.previousSibling) {
+      if (yield* generateContentRectsBackward(prev)) {
+        return;
+      }
+    }
+  }
+}
+
+/**
  * Force the block to be laid out from scratch.
  *
  * After the `viv-ts-*` elements are inserted, the browser may reuse cached
@@ -997,6 +1065,60 @@ class TextSpacingPolyfill {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
       }
 
+      // Get the class for the bidi direction in which the punctuation is laid
+      // out, i.e., whether it is placed after or before the preceding content
+      // in the inline direction. This may differ from the `direction`
+      // property (e.g., a closing bracket paired with an opening bracket in a
+      // left-to-right run in right-to-left text).
+      function bidiDirectionClass(): string {
+        const block = findBlockContainer(outerElem);
+        // The preceding content outside the bidi isolate or embedding that
+        // the punctuation belongs to does not determine its direction
+        let scope: Element = block;
+        for (
+          let elem = outerElem.parentElement;
+          elem && elem !== block;
+          elem = elem.parentElement
+        ) {
+          if (
+            document.defaultView.getComputedStyle(elem).unicodeBidi !== "normal"
+          ) {
+            scope = elem;
+            break;
+          }
+        }
+        // Without preceding content on the same line, the punctuation is at
+        // the start of its bidi isolate, embedding or paragraph
+        let rtl =
+          document.defaultView.getComputedStyle(scope ?? outerElem)
+            .direction === "rtl";
+        const rect = innerElem.getBoundingClientRect();
+        // Preceding content on the same line may not overlap the punctuation
+        // (e.g., shifted by vertical-align), so look further back for content
+        // that overlaps it
+        for (const prevRect of generatePrecedingContentRects(
+          outerElem,
+          scope,
+        )) {
+          if (
+            vertical
+              ? rect.left < prevRect.right && rect.right > prevRect.left
+              : rect.top < prevRect.bottom && rect.bottom > prevRect.top
+          ) {
+            const before = vertical
+              ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
+              : rect.left + rect.right < prevRect.left + prevRect.right;
+            // The inline direction is bottom-to-top for ltr in sideways-lr
+            rtl =
+              before !==
+              (document.defaultView.getComputedStyle(outerElem).writingMode ===
+                "sideways-lr");
+            break;
+          }
+        }
+        return rtl ? " viv-hang-rtl" : " viv-hang-ltr";
+      }
+
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
           if (hangingFirst) {
@@ -1037,9 +1159,17 @@ class TextSpacingPolyfill {
           }
         } else if (tagName === "viv-ts-close") {
           if (hangingLast) {
-            outerElem.className = isFullWidth
-              ? "viv-hang-last"
-              : "viv-hang-last viv-hang-hw";
+            // The glyph hangs by overflowing a zero-size inline-block at its
+            // end edge (see VivliostylePolyfillCss). Negative letter-spacing
+            // is not used, since browsers differ in which side of the glyph
+            // it is applied to in RTL text, and CSS Text 4 does not apply it
+            // at the end of a line. The inline-block is reordered as a
+            // neutral character in bidi, so it is surrounded with LRM/RLM
+            // (viv-hang-ltr/rtl) to keep the direction in which the
+            // punctuation was laid out with the surrounding text.
+            outerElem.className =
+              (isFullWidth ? "viv-hang-last" : "viv-hang-last viv-hang-hw") +
+              bidiDirectionClass();
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             const linePos = linePosition();
             if (hangingEnd) {
