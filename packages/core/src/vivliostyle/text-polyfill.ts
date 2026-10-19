@@ -997,6 +997,35 @@ class TextSpacingPolyfill {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
       }
 
+      // Get the class for the bidi direction in which the punctuation is laid
+      // out, i.e., whether it is placed on the left or right of the preceding
+      // text. This may differ from the `direction` property (e.g., a closing
+      // bracket paired with an opening bracket in a left-to-right run in
+      // right-to-left text).
+      function bidiDirectionClass(): string {
+        if (vertical) {
+          return "";
+        }
+        const rect = innerElem.getBoundingClientRect();
+        const prevRects = prevNode
+          ? RangeClientRects.getClientRectsOfNode(prevNode)
+          : [];
+        const prevRect = prevRects[prevRects.length - 1];
+        let rtl: boolean;
+        if (
+          prevRect &&
+          rect.top < prevRect.bottom &&
+          rect.bottom > prevRect.top
+        ) {
+          rtl = rect.left + rect.right < prevRect.left + prevRect.right;
+        } else {
+          rtl =
+            document.defaultView.getComputedStyle(outerElem).direction ===
+            "rtl";
+        }
+        return rtl ? " viv-hang-rtl" : " viv-hang-ltr";
+      }
+
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
           if (hangingFirst) {
@@ -1037,9 +1066,17 @@ class TextSpacingPolyfill {
           }
         } else if (tagName === "viv-ts-close") {
           if (hangingLast) {
-            outerElem.className = isFullWidth
-              ? "viv-hang-last"
-              : "viv-hang-last viv-hang-hw";
+            // The glyph hangs by overflowing a zero-size inline-block at its
+            // end edge (see VivliostylePolyfillCss). Negative letter-spacing
+            // is not used, since browsers differ in which side of the glyph
+            // it is applied to in RTL text, and CSS Text 4 does not apply it
+            // at the end of a line. The inline-block is reordered as a
+            // neutral character in bidi, so it is surrounded with LRM/RLM
+            // (viv-hang-ltr/rtl) to keep the direction in which the
+            // punctuation was laid out with the surrounding text.
+            outerElem.className =
+              (isFullWidth ? "viv-hang-last" : "viv-hang-last viv-hang-hw") +
+              bidiDirectionClass();
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             const linePos = linePosition();
             if (hangingEnd) {

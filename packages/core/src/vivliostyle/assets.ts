@@ -1578,10 +1578,7 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
 viv-ts-close.viv-hang-hw > viv-ts-inner {
   letter-spacing: -0.5em;
 }
-/* The glyph overflows the zero-size inline-block at its end edge. Negative
-   letter-spacing is not used here since browsers differ in which side of
-   the glyph it is applied to in right-to-left text, and it is not applied
-   at the end of a line per CSS Text 4 */
+/* see #2206 */
 viv-ts-close.viv-hang-last > viv-ts-inner {
   display: inline-block;
   line-height: 1;
@@ -1590,6 +1587,22 @@ viv-ts-close.viv-hang-last > viv-ts-inner {
   text-align: start;
   text-align-last: start;
   letter-spacing: normal;
+}
+viv-ts-close.viv-hang-last.viv-hang-ltr {
+  direction: ltr;
+  white-space: nowrap;
+}
+viv-ts-close.viv-hang-last.viv-hang-rtl {
+  direction: rtl;
+  white-space: nowrap;
+}
+viv-ts-close.viv-hang-last.viv-hang-ltr::before,
+viv-ts-close.viv-hang-last.viv-hang-ltr::after {
+  content: "\\200E";
+}
+viv-ts-close.viv-hang-last.viv-hang-rtl::before,
+viv-ts-close.viv-hang-last.viv-hang-rtl::after {
+  content: "\\200F";
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   display: inline-block;
