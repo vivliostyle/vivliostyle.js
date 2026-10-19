@@ -488,6 +488,10 @@ module.exports = [
         file: "first-line-line-height.html",
         title: "::first-line line-height on the first line box",
       },
+      {
+        file: "first-line-next-block-pushed.html",
+        title: "Block after ::first-line is not pushed to the next page",
+      },
     ],
   },
   {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+  Test case: a block following a block with ::first-line { font-size: 200% }
+  must not be pushed to the next page when the current page has room.
+-->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Block after ::first-line is not pushed to the next page</title>
+    <style>
+      @page {
+        size: 300mm 260mm;
+        margin: 15mm;
+      }
+
+      body {
+        font-family: sans-serif;
+        font-size: 40px;
+      }
+
+      .case {
+        text-autospace: normal;
+        margin-bottom: 1em;
+      }
+
+      .case::first-line {
+        font-size: 200%;
+      }
+    </style>
+  </head>
+  <body>
+    <p>All content should fit on one page.</p>
+    <p>Forced break:</p>
+    <div class="case">国国XX国<br />国国XX国<br />国国XX国</div>
+    <p>Soft wrap:</p>
+    <div class="case" style="width: 10em">
+      国国XX国国国XX国国国XX国国国XX国国国XX国
+    </div>
+  </body>
+</html>
