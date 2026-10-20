@@ -1,5 +1,5 @@
-- category: Text Spacing
-  title: Text Spacing (Chinese, Traditional)
+- category: Text spacing
+  title: "Text Spacing (Chinese, Traditional, PR #814)"
   file: text-spacing/text-spacing-zh-hant.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2208"
@@ -10,8 +10,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hant.html&zoom=1&spread=false
-- category: Text Spacing
-  title: Text-spacing fillers with inherited spacing properties
+- category: Text spacing
+  title: "Text-spacing fillers with inherited spacing properties (PR #2035)"
   file: text-spacing/inherited-spacing-properties.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2208"
@@ -22,8 +22,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
-- category: Hanging Punctuation
-  title: Hanging Punctuation
+- category: Hanging punctuation
+  title: "Hanging Punctuation (PR #814)"
   file: text-spacing/hanging-punctuation.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2208"
@@ -34,8 +34,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation.html&zoom=1&spread=false
-- category: Hanging Punctuation
-  title: hanging-punctuation:first with text-indent (Japanese)
+- category: Hanging punctuation
+  title: "hanging-punctuation:first with text-indent (Japanese, PR #1084)"
   file: text-spacing/hanging-punctuation-first-indent-ja.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2208"
@@ -46,8 +46,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
-- category: Hanging Punctuation
-  title: hanging-punctuation:last in right-to-left text
+- category: Hanging punctuation
+  title: "hanging-punctuation:last in right-to-left text (PR #2206)"
   file: text-spacing/hanging-punctuation-rtl.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2208Fixed in PR #2206"
@@ -58,7 +58,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-fix-rtl-hanging-punctuation-last-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
-- category: Hanging Punctuation
+- category: Hanging punctuation
   title: "hanging-punctuation first/last with inline border/padding (Issue #2194)"
   file: text-spacing/hanging-punctuation-inline-border.html
   decision: expected  # regression / expected / skip
@@ -70,8 +70,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-fix-hanging-punctuation-inli-ee6e23-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
-- category: General
-  title: Block after ::first-line is not pushed to the next page
+- category: Generated content and pseudo-elements
+  title: "Block after ::first-line is not pushed to the next page (PR #2205)"
   file: first-line-next-block-pushed.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2205"
@@ -82,7 +82,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/first-line-next-block-pushed.html&zoom=1&spread=false
-- category: Text Spacing
+- category: Text spacing
   title: "Forced break and text-autospace after ::first-line (Issue #2196)"
   file: text-spacing/first-line-break-duplication.html
   decision: expected  # regression / expected / skip
@@ -94,8 +94,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
-- category: General
-  title: "::first-line line-height on the first line box"
+- category: Generated content and pseudo-elements
+  title: "::first-line line-height on the first line box (PR #2203)"
   file: first-line-line-height.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2203"
@@ -106,8 +106,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/first-line-line-height.html&zoom=1&spread=false
-- category: General
-  title: "rlh with root line-height: normal"
+- category: Fonts and relative units
+  title: "rlh with root line-height: normal (PR #2071)"
   file: rlh_unit/root-line-height-normal.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2199"
@@ -118,8 +118,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-line-height-normal.html&zoom=1&spread=false
-- category: General
-  title: lh/rlh on the root element itself
+- category: Fonts and relative units
+  title: "lh/rlh on the root element itself (PR #2071)"
   file: rlh_unit/root-self-reference.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2199"
@@ -130,8 +130,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-self-reference.html&zoom=1&spread=false
-- category: General
-  title: lh in calc() on the root line-height
+- category: Fonts and relative units
+  title: "lh in calc() on the root line-height (PR #2071)"
   file: rlh_unit/root-calc-line-height.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2199"
@@ -142,8 +142,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-line-height.html&zoom=1&spread=false
-- category: General
-  title: lh in calc() on the root font-size
+- category: Fonts and relative units
+  title: "lh in calc() on the root font-size (PR #2071)"
   file: rlh_unit/root-calc-font-size.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2199"
@@ -154,8 +154,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/rlh_unit/root-calc-font-size.html&zoom=1&spread=false
-- category: General
-  title: "lh and rlh with normal line-height (PR #2198 follow-up)"
+- category: Fonts and relative units
+  title: "lh and rlh with normal line-height (PR #2199)"
   file: line-height-normal-units.html
   decision: expected  # regression / expected / skip
   notes: "Improved in PR #2199"
@@ -166,8 +166,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/line-height-normal-units.html&zoom=1&spread=false
-- category: General
-  title: "font-size with a browser resolved unit (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "font-size with a browser resolved unit (PR #2176)"
   file: font-size-browser-unit.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -186,8 +186,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-browser-unit.html&zoom=1&spread=false
-- category: General
-  title: "Root font size from a browser resolved unit (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root font size from a browser resolved unit (PR #2176)"
   file: font-size-root-browser-unit.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -207,8 +207,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-root-browser-unit.html&zoom=1&spread=false
-- category: General
-  title: Browser viewport units in shorthands and longhands
+- category: CSS lengths and math functions
+  title: "Browser viewport units in shorthands and longhands (PR #2198)"
   file: browser-viewport-units.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2198"
@@ -219,7 +219,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/browser-viewport-units.html&zoom=1&spread=false
-- category: General
+- category: Fonts and relative units
   title: "Margins using the ic unit (Issue #2197)"
   file: ic-unit-margin.html
   decision: expected  # regression / expected / skip
@@ -231,8 +231,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ic-unit-margin.html&zoom=1&spread=false
-- category: General
-  title: Font-relative lengths with actual metrics
+- category: Fonts and relative units
+  title: "Font-relative lengths with actual metrics (PR #2198)"
   file: font-relative-metrics.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2198"
@@ -243,7 +243,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics.html&zoom=1&spread=false
-- category: General
+- category: Fonts and relative units
   title: "Root metric calculations with initial font size (PR #2198)"
   file: font-relative-metrics-initial.html
   decision: expected  # regression / expected / skip
@@ -255,7 +255,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-initial.html&zoom=1&spread=false
-- category: General
+- category: Fonts and relative units
   title: "Deferred font-relative lengths (PR #2198)"
   file: deferred-font-relative-lengths.html
   decision: expected  # regression / expected / skip
@@ -267,8 +267,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/deferred-font-relative-lengths.html&zoom=1&spread=false
-- category: General
-  title: Actual font metrics in root sizing
+- category: Fonts and relative units
+  title: "Actual font metrics in root sizing (PR #2198)"
   file: font-relative-metrics-root.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2198"
@@ -280,7 +280,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics-root.html&zoom=1&spread=false
 - category: Page floats
-  title: float-min-wrap-block
+  title: "float-min-wrap-block (PR #382)"
   file: page_floats/float-min-wrap-block.html
   decision: expected  # regression / expected / skip
   notes: "Fixed in PR #2198"
@@ -291,8 +291,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_floats/float-min-wrap-block.html&zoom=1&spread=false
-- category: General
-  title: "Page size from standalone math functions (PR #2176 follow-up)"
+- category: CSS lengths and math functions
+  title: "Page size from standalone math functions (PR #2182)"
   file: page-size-math-functions.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -307,8 +307,8 @@
   baselineLabel: git-fix-pr2176followup
   baselineUrl: >-
     https://vivliostyle-git-fix-pr2176followup-vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/page-size-math-functions.html&zoom=1&spread=false
-- category: General
-  title: "calc() in headings and page properties (PR #2176 follow-up)"
+- category: CSS lengths and math functions
+  title: "calc() in headings and page properties (PR #2182)"
   file: calc-page-layout.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -322,8 +322,8 @@
     http://localhost:3300/viewer/lib/vivliostyle-viewer-dev.html#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
   baselineLabel: canary
   baselineUrl: https://vivliostyle.vercel.app/#src=http://localhost:3300/core/test/files/calc-page-layout.html&zoom=1&spread=false
-- category: General
-  title: "calc() with dimensional cancellation (PR #2176 follow-up)"
+- category: CSS lengths and math functions
+  title: "calc() with dimensional cancellation (PR #2182)"
   file: calc-number-division.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -355,8 +355,8 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2172/packages/core/test/files/target-counter-named-page-after-toc.html&zoom=1&spread=false
-- category: General
-  title: "Invalid font sizes from a var() substitution (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Invalid font sizes from a var() substitution (PR #2176)"
   file: invalid-var-font-size.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -391,8 +391,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-size.html&zoom=1&spread=false
-- category: General
-  title: "Root font size with a negative calc() (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root font size with a negative calc() (PR #2176)"
   file: font-size-root-negative-calc.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -408,8 +408,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-negative-calc.html&zoom=1&spread=false
-- category: General
-  title: "Root font size from an invalid substituted unit (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root font size from an invalid substituted unit (PR #2176)"
   file: font-size-invalid-unit-root.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -425,8 +425,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-invalid-unit-root.html&zoom=1&spread=false
-- category: General
-  title: "CSS-wide keyword from a var() substitution (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "CSS-wide keyword from a var() substitution (PR #2176)"
   file: defaulting-keyword-from-var.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -449,8 +449,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/defaulting-keyword-from-var.html&zoom=1&spread=false
-- category: General
-  title: "Invalid font weight from a var() substitution (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Invalid font weight from a var() substitution (PR #2176)"
   file: invalid-var-font-weight.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -468,8 +468,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-font-weight.html&zoom=1&spread=false
-- category: General
-  title: "xxx-large absolute font size keyword (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "xxx-large absolute font size keyword (PR #2176)"
   file: absolute-font-size-keyword-xxx-large.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -487,8 +487,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keyword-xxx-large.html&zoom=1&spread=false
-- category: General
-  title: "line-height: lh with a region rule (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "line-height: lh with a region rule (PR #2176)"
   file: line-height-lh-region-rule.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -506,8 +506,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-lh-region-rule.html&zoom=1&spread=false
-- category: General
-  title: "Font weight from a math function (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Font weight from a math function (PR #2176)"
   file: font-weight-math-function.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -545,8 +545,8 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-weight-math-function.html&zoom=1&spread=false
-- category: General
-  title: "math font size keyword of a footnote (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "math font size keyword of a footnote (PR #2176)"
   file: font-size-math-keyword.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -565,8 +565,8 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-math-keyword.html&zoom=1&spread=false
-- category: General
-  title: "Invalid line-height from a var() substitution (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Invalid line-height from a var() substitution (PR #2176)"
   file: invalid-var-line-height.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -584,8 +584,8 @@
   baselineLabel: canary
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/invalid-var-line-height.html&zoom=1&spread=false
-- category: General
-  title: "Negative computed line-height (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Negative computed line-height (PR #2176)"
   file: line-height-negative-calc.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -605,7 +605,7 @@
   baselineUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-negative-calc.html&zoom=1&spread=false
 - category: General
-  title: all shorthand property
+  title: "all shorthand property (PR #1697)"
   file: all-shorthand.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -661,7 +661,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-vertical.html&zoom=1&spread=false
-- category: General
+- category: Positioning and fragmentation
   title: "Absolutely positioned span in an inline element at a page break (horizontal, Issue #2162)"
   file: absolute-inline-child-page-break-horizontal.html
   decision: expected  # regression / expected / skip
@@ -673,7 +673,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
-- category: General
+- category: Positioning and fragmentation
   title: "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)"
   file: absolute-inline-child-page-break-vertical.html
   decision: expected  # regression / expected / skip
@@ -686,7 +686,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
 - category: General
-  title: Justification
+  title: "Justification (PR #311)"
   file: justification.html
   decision: expected  # regression / expected / skip
   notes: ""
@@ -698,7 +698,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/justification.html&zoom=1&spread=false
 - category: Page breaks
-  title: Page break bug in vertical text (on Firefox)
+  title: "Page break bug in vertical text (on Firefox, PR #263)"
   file: page_breaks/page_break_bug_in_vertical_text.html
   decision: expected  # regression / expected / skip
   notes: ""
@@ -758,7 +758,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting-vertical.html&zoom=1&spread=false
 - category: Multi-column
-  title: "column-fill: balance (vertical writing-mode)"
+  title: "column-fill: balance (vertical writing-mode, PR #387)"
   file: multi-column/column-fill_balance_vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
@@ -770,7 +770,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance_vertical.html&zoom=1&spread=false
 - category: Table
-  title: Table vertical-align (vertical writing-mode)
+  title: "Table vertical-align (vertical writing-mode, PR #311)"
   file: table/table_vertical_align_vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
@@ -782,7 +782,7 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align_vertical.html&zoom=1&spread=false
 - category: Ruby and text emphasis
-  title: Ruby broken pagination
+  title: "Ruby broken pagination (PR #139)"
   file: ruby-text-emphasis/ruby-broken-pagination.html
   decision: expected  # regression / expected / skip
   notes: ""
@@ -865,7 +865,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
-- category: General
+- category: Fonts and relative units
   title: "Relative font keywords on the root element (Issue #2174)"
   file: relative-font-keywords-root.html
   decision: expected  # regression / expected / skip
@@ -881,7 +881,7 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-root.html&zoom=1&spread=false
-- category: General
+- category: Fonts and relative units
   title: "Relative font keywords in a footnote (Issue #2174)"
   file: relative-font-keywords-footnote.html
   decision: expected  # regression / expected / skip
@@ -898,8 +898,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-keywords-footnote.html&zoom=1&spread=false
-- category: General
-  title: "Absolute font size keywords with rem/rlh/em (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Absolute font size keywords with rem/rlh/em (PR #2176)"
   file: absolute-font-size-keywords.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -914,8 +914,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/absolute-font-size-keywords.html&zoom=1&spread=false
-- category: General
-  title: "calc()/clamp()/unitless font size in a footnote (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "calc()/clamp()/unitless font size in a footnote (PR #2176)"
   file: font-size-calc-values.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -938,8 +938,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-values.html&zoom=1&spread=false
-- category: General
-  title: "Font size declared in a footnote resolved against the source parent (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Font size declared in a footnote resolved against the source parent (PR #2176)"
   file: font-size-in-footnote.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -955,8 +955,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-in-footnote.html&zoom=1&spread=false
-- category: General
-  title: "Root font size with a math function (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root font size with a math function (PR #2176)"
   file: font-size-calc-root.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -972,8 +972,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-calc-root.html&zoom=1&spread=false
-- category: General
-  title: "Root font size zero (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root font size zero (PR #2176)"
   file: font-size-root-zero.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -989,8 +989,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-root-zero.html&zoom=1&spread=false
-- category: General
-  title: "Relative font weight in a region rule (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Relative font weight in a region rule (PR #2176)"
   file: relative-font-weight-region-rule.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -1008,8 +1008,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/relative-font-weight-region-rule.html&zoom=1&spread=false
-- category: General
-  title: "lh unit of a detached font-size (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "lh unit of a detached font-size (PR #2176)"
   file: font-size-lh-unit-in-footnote.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -1067,8 +1067,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-lh-unit-in-footnote.html&zoom=1&spread=false
-- category: General
-  title: "font-size: inherit with a region rule (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "font-size: inherit with a region rule (PR #2176)"
   file: font-size-inherit-region-rule.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -1085,8 +1085,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-inherit-region-rule.html&zoom=1&spread=false
-- category: General
-  title: "Root line height from a math function of numbers (Issue #2174 follow-up)"
+- category: Fonts and relative units
+  title: "Root line height from a math function of numbers (PR #2176)"
   file: line-height-root-unitless-function.html
   decision: expected  # regression / expected / skip
   notes: >-
@@ -1103,8 +1103,8 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/line-height-root-unitless-function.html&zoom=1&spread=false
-- category: General
-  title: page viewport-percentage units with calc()
+- category: CSS lengths and math functions
+  title: "page viewport-percentage units with calc() (PR #507)"
   file: page_viewport_unit.html
   decision: expected  # regression / expected / skip
   notes: >-

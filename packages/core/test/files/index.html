@@ -14,6 +14,17 @@
         border: gray solid 1px;
         padding: 0.5em;
       }
+      .category-nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4em 1em;
+        list-style: none;
+        margin: 0.5em 0 2em;
+        padding: 0;
+      }
+      .category-nav li {
+        white-space: nowrap;
+      }
     </style>
   </head>
   <body>
@@ -55,10 +66,43 @@
         : urlOnline;
 
       var fileList = module.exports;
-      fileList.forEach(function (group) {
+      var usedCategoryIds = {};
+      var categories = fileList.map(function (group, index) {
+        var baseId = group.category.replace(/\W+/g, "_");
+        var count = usedCategoryIds[baseId] || 0;
+        usedCategoryIds[baseId] = count + 1;
+        return {
+          group: group,
+          id: count ? baseId + "_" + (count + 1) : baseId,
+          number: index,
+        };
+      });
+
+      var categoryNav = document.createElement("nav");
+      categoryNav.className = "category-nav";
+      categoryNav.setAttribute("aria-label", "Test categories");
+      var categoryLabel = document.createElement("p");
+      categoryLabel.textContent = "Categories";
+      categoryNav.appendChild(categoryLabel);
+      var categoryList = document.createElement("ul");
+      categories.forEach(function (category) {
+        var item = document.createElement("li");
+        item.appendChild(
+          makeA(
+            "#" + category.id,
+            category.number + ". " + category.group.category,
+          ),
+        );
+        categoryList.appendChild(item);
+      });
+      categoryNav.appendChild(categoryList);
+      document.body.appendChild(categoryNav);
+
+      categories.forEach(function (category) {
+        var group = category.group;
         var heading = document.createElement("h2");
-        heading.textContent = group.category;
-        heading.id = group.category.replace(/\W+/g, "_");
+        heading.textContent = category.number + ". " + group.category;
+        heading.id = category.id;
         document.body.appendChild(heading);
         var table = document.createElement("table");
         document.body.appendChild(table);
