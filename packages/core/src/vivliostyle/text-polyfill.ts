@@ -325,127 +325,107 @@ function findBlockContainer(node: Node): HTMLElement | null {
 }
 
 /**
- * Generate the client rects of the content in the node in reverse order:
- * text, replaced elements and atomic inlines. Out-of-flow elements are
- * skipped. Returns true at a forced line break or a block-level element.
+ * Get the direction of the punctuation text node, or null if it differs from
+ * the direction of its block container.
+ *
+ * Text spacing and hanging punctuation are designed for CJK typesetting.
+ * Right-to-left and bidirectional text is supported only to the extent that
+ * the punctuation does not overlap other text: it is assumed to be laid out
+ * in the direction of its block container, so it is not processed where its
+ * own direction differs (e.g., in an element with `dir="rtl"` in
+ * left-to-right text), since it may not face the edge of the line there.
  */
-function* generateContentRectsBackward(
-  node: Node,
-): Generator<DOMRect, boolean> {
-  if (node.nodeType === Node.TEXT_NODE) {
-    if (/\S/.test(node.textContent)) {
-      const rects = RangeClientRects.getClientRectsOfNode(node);
-      for (let i = rects.length - 1; i >= 0; i--) {
-        yield rects[i];
-      }
-    }
-    return false;
+function getTextDirection(textNode: Text): "ltr" | "rtl" | null {
+  const window = textNode.ownerDocument.defaultView;
+  const { direction } = window.getComputedStyle(textNode.parentElement);
+  const block = findBlockContainer(textNode);
+  if (block && window.getComputedStyle(block).direction !== direction) {
+    return null;
   }
-  if (node.nodeType !== Node.ELEMENT_NODE) {
-    return false;
-  }
-  const elem = node as Element;
-  if (elem.localName === "br") {
-    return true;
-  }
-  const style = elem.ownerDocument.defaultView.getComputedStyle(elem);
-  if (
-    style.display === "none" ||
-    style.position === "absolute" ||
-    style.position === "fixed" ||
-    style.float !== "none"
-  ) {
-    return false;
-  }
-  if (Base.mediaTags[elem.localName] || style.display.startsWith("inline-")) {
-    const rect = elem.getBoundingClientRect();
-    if (rect.width || rect.height) {
-      yield rect;
-    }
-    return false;
-  }
-  if (!/^(inline|contents|ruby)\b/.test(style.display)) {
-    return true;
-  }
-  for (let child = elem.lastChild; child; child = child.previousSibling) {
-    if (yield* generateContentRectsBackward(child)) {
-      return true;
-    }
-  }
-  return false;
+  return direction === "rtl" ? "rtl" : "ltr";
 }
 
 /**
- * Generate the client rects of the content preceding the node within the
- * root, from the nearest, up to a forced line break or a block-level element.
+ * Check if the punctuation text node is laid out on the line-end side of the
+ * preceding in-flow character, or the character is not on the same line.
+ * In bidi text, a closing bracket paired with an opening bracket in a run of
+ * the opposite direction is laid out on the other side, where hanging would
+ * make it overlap the preceding text. Characters displaced from the line
+ * (e.g., by vertical-align) are skipped.
  */
-function* generatePrecedingContentRects(
-  node: Node,
-  root: Node,
-): Generator<DOMRect, void> {
-  for (let n = node; n && n !== root; n = n.parentNode) {
-    for (let prev = n.previousSibling; prev; prev = prev.previousSibling) {
-      if (yield* generateContentRectsBackward(prev)) {
-        return;
-      }
-    }
-  }
-}
-
-/**
- * Check if the node (a punctuation, or its wrapper element) is laid out in
- * right-to-left bidi direction, i.e., placed before (left of, or above in
- * vertical writing modes) the preceding content in the inline direction.
- * This may differ from the `direction` property (e.g., a closing bracket
- * paired with an opening bracket in a left-to-right run in right-to-left
- * text).
- */
-function isLaidOutRightToLeft(
-  node: Node,
-  rect: DOMRect | undefined,
+function isAfterPrecedingCharacter(
+  textNode: Text,
+  rtl: boolean,
   vertical: boolean,
 ): boolean {
-  const window = node.ownerDocument.defaultView;
-  const elem =
-    node.nodeType === Node.ELEMENT_NODE
-      ? (node as Element)
-      : node.parentElement;
-  const block = findBlockContainer(node);
-  // The preceding content outside the bidi isolate or embedding that
-  // the punctuation belongs to does not determine its direction
-  let scope: Element = block;
-  for (let e = node.parentElement; e && e !== block; e = e.parentElement) {
-    if (window.getComputedStyle(e).unicodeBidi !== "normal") {
-      scope = e;
-      break;
+  const document = textNode.ownerDocument;
+  const window = document.defaultView;
+  const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
+  const block = findBlockContainer(textNode);
+  if (!rect || !block) {
+    return true;
+  }
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  walker.currentNode = textNode;
+  for (let node = walker.previousNode(); node; node = walker.previousNode()) {
+    const match = node.textContent.match(/\S\s*$/u);
+    if (!match) {
+      continue;
     }
-  }
-  // Without preceding content on the same line, the punctuation is at
-  // the start of its bidi isolate, embedding or paragraph
-  let rtl = window.getComputedStyle(scope ?? elem).direction === "rtl";
-  if (!rect) {
-    return rtl;
-  }
-  // Preceding content on the same line may not overlap the punctuation
-  // (e.g., shifted by vertical-align), so look further back for content
-  // that overlaps it
-  for (const prevRect of generatePrecedingContentRects(node, scope)) {
-    if (
-      vertical
-        ? rect.left < prevRect.right && rect.right > prevRect.left
-        : rect.top < prevRect.bottom && rect.bottom > prevRect.top
+    let skip = false;
+    for (
+      let e = node.parentElement;
+      e && e !== block && !e.contains(textNode);
+      e = e.parentElement
     ) {
-      const before = vertical
-        ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
-        : rect.left + rect.right < prevRect.left + prevRect.right;
-      // The inline direction is bottom-to-top for ltr in sideways-lr
-      rtl =
-        before !==
-        (window.getComputedStyle(elem).writingMode === "sideways-lr");
-      break;
+      const style = window.getComputedStyle(e);
+      const hasRelativeOffset =
+        style.position === "relative" &&
+        [style.top, style.right, style.bottom, style.left].some(
+          (value) =>
+            value !== "auto" &&
+            (!Number.isFinite(Number.parseFloat(value)) ||
+              Number.parseFloat(value) !== 0),
+        );
+      if (
+        (style.position !== "static" &&
+          (style.position !== "relative" || hasRelativeOffset)) ||
+        style.float !== "none" ||
+        (style.verticalAlign !== "baseline" &&
+          parseFloat(style.verticalAlign) !== 0) ||
+        style.display === "ruby-text"
+      ) {
+        skip = true;
+        break;
+      }
     }
+    if (skip) {
+      continue;
+    }
+    const prevRect = RangeClientRects.getClientRectsBetween(
+      RangeClientRects.at(node, match.index),
+      RangeClientRects.at(node, match.index + match[0].trimEnd().length),
+    )[0];
+    if (!prevRect) {
+      continue;
+    }
+    const center = (r: DOMRect, x: boolean) =>
+      x ? r.left + r.width / 2 : r.top + r.height / 2;
+    if (
+      Math.abs(center(prevRect, vertical) - center(rect, vertical)) >
+      (vertical ? rect.width : rect.height) / 2
+    ) {
+      // Not on the same line
+      return true;
+    }
+    // For sideways-lr, the inline direction of ltr is bottom-to-top
+    const reversed =
+      rtl !==
+      (window.getComputedStyle(textNode.parentElement).writingMode ===
+        "sideways-lr");
+    return center(rect, !vertical) > center(prevRect, !vertical) !== reversed;
   }
-  return rtl;
+  return true;
 }
 
 /**
@@ -454,26 +434,17 @@ function isLaidOutRightToLeft(
  * line-start (or line-end) edge. Such border or padding between the
  * punctuation and the edge of the line prevents hanging-punctuation `first`
  * (or `last`). (Issue #2194)
- *
- * The side is determined from the bidi direction in which the punctuation is
- * laid out, not from the `direction` property of each ancestor, which may
- * differ from it (e.g., `direction: rtl` on an inline element with
- * `unicode-bidi: normal` in left-to-right text).
  */
 function hasInlineBorderOrPaddingAtEdge(
   textNode: Text,
   edge: "start" | "end",
+  rtl: boolean,
   vertical: boolean,
 ): boolean {
   const window = textNode.ownerDocument?.defaultView;
   if (!window) {
     return false;
   }
-  const rtl = isLaidOutRightToLeft(
-    textNode,
-    RangeClientRects.getClientRectsOfNode(textNode)[0],
-    vertical,
-  );
   // For sideways-lr, the inline-start is the bottom side
   const reversed =
     rtl !==
@@ -1095,11 +1066,28 @@ class TextSpacingPolyfill {
     let tagName: "viv-ts-open" | "viv-ts-close" | undefined;
     const needsChromiumVoTrFallback = isChromiumVoTrFallback(text, vertical);
 
+    // Right-to-left text is supported only by hanging-punctuation `first` and
+    // `last`, and CJK-specific spacing and hanging are left-to-right only
+    // (see getTextDirection())
+    let direction: "ltr" | "rtl" | null | undefined;
+    function textDirection(): "ltr" | "rtl" | null {
+      if (direction === undefined) {
+        direction = getTextDirection(textNode);
+      }
+      return direction;
+    }
+
     if (
       isFirstInBlock &&
       hangingPunctuation.first &&
       /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text) &&
-      !hasInlineBorderOrPaddingAtEdge(textNode, "start", vertical)
+      textDirection() &&
+      !hasInlineBorderOrPaddingAtEdge(
+        textNode,
+        "start",
+        textDirection() === "rtl",
+        vertical,
+      )
     ) {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
@@ -1108,14 +1096,22 @@ class TextSpacingPolyfill {
       isLastInBlock &&
       hangingPunctuation.last &&
       /^[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text) &&
-      !hasInlineBorderOrPaddingAtEdge(textNode, "end", vertical)
+      textDirection() &&
+      !hasInlineBorderOrPaddingAtEdge(
+        textNode,
+        "end",
+        textDirection() === "rtl",
+        vertical,
+      ) &&
+      isAfterPrecedingCharacter(textNode, textDirection() === "rtl", vertical)
     ) {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
       hangingLast = true;
     } else if (
       (hangingPunctuation.forceEnd || hangingPunctuation.allowEnd) &&
-      /^[、。，．､｡]\p{M}*$/u.test(text)
+      /^[、。，．､｡]\p{M}*$/u.test(text) &&
+      textDirection() === "ltr"
     ) {
       // hanging-punctuation: force-end | allow-end
       tagName = "viv-ts-close";
@@ -1124,7 +1120,8 @@ class TextSpacingPolyfill {
       (spacingTrim.trimStart ||
         spacingTrim.spaceFirst ||
         spacingTrim.trimAdjacent) &&
-      /^[‘“〝（［｛｟〈〈《「『【〔〖〘〚]\p{M}*$/u.test(text)
+      /^[‘“〝（［｛｟〈〈《「『【〔〖〘〚]\p{M}*$/u.test(text) &&
+      textDirection() === "ltr"
     ) {
       // fullwidth opening punctuation
       tagName = "viv-ts-open";
@@ -1134,7 +1131,8 @@ class TextSpacingPolyfill {
         spacingTrim.trimAdjacent) &&
       (/^[’”〞〟）］｝｠〉〉》」』】〕〗〙〛]\p{M}*$/u.test(text) ||
         (lang === "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
-        (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text)))
+        (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text))) &&
+      textDirection() === "ltr"
     ) {
       // fullwidth closing punctuation
       tagName = "viv-ts-close";
@@ -1183,24 +1181,34 @@ class TextSpacingPolyfill {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
       }
 
-      // Get the class for the bidi direction in which the punctuation is laid
-      // out, i.e., whether it is placed after or before the preceding content
-      // in the inline direction. This may differ from the `direction`
-      // property (e.g., a closing bracket paired with an opening bracket in a
-      // left-to-right run in right-to-left text).
-      function bidiDirectionClass(): string {
-        return isLaidOutRightToLeft(
-          outerElem,
-          innerElem.getBoundingClientRect(),
-          vertical,
-        )
-          ? " viv-hang-rtl"
-          : " viv-hang-ltr";
+      // The classes set below reduce the advance of the punctuation by
+      // `--viv-ts-shift` (see VivliostylePolyfillCss): the closing
+      // punctuation gets negative margin-inline-start, and its glyph is
+      // shifted back to where it was with `position: relative`.
+      // - Negative letter-spacing is not used, since browsers apply it on
+      //   different sides of the glyph in RTL text, and CSS Text 4 does not
+      //   apply it at the end of a line.
+      // - Negative margin-inline-end is not used either, since Chromium
+      //   wraps the line before the punctuation if it fits only after the
+      //   reduction.
+      // - An inline-block is not used, since it allows a line break before
+      //   the punctuation, is reordered as a neutral character in bidi, and
+      //   stops text decorations.
+
+      // Set the advance of the punctuation to be cancelled by
+      // hanging-punctuation `first` or `last`
+      function setHangingShift(): void {
+        const rect = innerElem.getBoundingClientRect();
+        innerElem.style.setProperty(
+          "--viv-ts-shift",
+          `${vertical ? rect.height : rect.width}px`,
+        );
       }
 
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {
         if (tagName === "viv-ts-open") {
           if (hangingFirst) {
+            setHangingShift();
             outerElem.className = "viv-hang-first";
           } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
             if (spacingTrim.trimStart) {
@@ -1238,17 +1246,8 @@ class TextSpacingPolyfill {
           }
         } else if (tagName === "viv-ts-close") {
           if (hangingLast) {
-            // The glyph hangs by overflowing a zero-size inline-block at its
-            // end edge (see VivliostylePolyfillCss). Negative letter-spacing
-            // is not used, since browsers differ in which side of the glyph
-            // it is applied to in RTL text, and CSS Text 4 does not apply it
-            // at the end of a line. The inline-block is reordered as a
-            // neutral character in bidi, so it is surrounded with LRM/RLM
-            // (viv-hang-ltr/rtl) to keep the direction in which the
-            // punctuation was laid out with the surrounding text.
-            outerElem.className =
-              (isFullWidth ? "viv-hang-last" : "viv-hang-last viv-hang-hw") +
-              bidiDirectionClass();
+            setHangingShift();
+            outerElem.className = "viv-hang-last";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             const linePos = linePosition();
             if (hangingEnd) {

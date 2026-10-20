@@ -95,12 +95,14 @@
     <p dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
     <p class="end" dir="rtl" lang="he"><span class="b-end">“אבג</span> דהו <span class="b-start">זחט”</span></p>
 
-    <h2>Mixed direction (inline direction ≠ line)</h2>
-    <!-- Does not hang: border at the line edge side -->
+    <h2>Mixed direction (inline direction ≠ line): does not hang</h2>
+    <!-- Hanging punctuation is not supported where the direction of the
+         punctuation differs from that of its block container -->
+    <!-- Border at the line edge side -->
     <p>abc def ghi<span class="d-rtl b-right">)</span></p>
     <p class="end">abc def ghi<span class="d-rtl b-right">)</span></p>
     <p><span class="d-rtl b-left">(</span>abc def ghi</p>
-    <!-- Hangs: border on the opposite side only -->
+    <!-- Border on the opposite side only -->
     <p>abc def ghi<span class="d-rtl b-left">)</span></p>
     <p class="end">abc def ghi<span class="d-rtl b-left">)</span></p>
     <p><span class="d-rtl b-right">(</span>abc def ghi</p>
