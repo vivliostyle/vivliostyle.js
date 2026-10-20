@@ -346,6 +346,73 @@ function getTextDirection(textNode: Text): "ltr" | "rtl" | null {
 }
 
 /**
+ * Check if the punctuation text node is laid out on the line-end side of the
+ * preceding in-flow character, or the character is not on the same line.
+ * In bidi text, a closing bracket paired with an opening bracket in a run of
+ * the opposite direction is laid out on the other side, where hanging would
+ * make it overlap the preceding text.
+ */
+function isAfterPrecedingCharacter(
+  textNode: Text,
+  rtl: boolean,
+  vertical: boolean,
+): boolean {
+  const document = textNode.ownerDocument;
+  const window = document.defaultView;
+  const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
+  const block = findBlockContainer(textNode);
+  if (!rect || !block) {
+    return true;
+  }
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  walker.currentNode = textNode;
+  for (let node = walker.previousNode(); node; node = walker.previousNode()) {
+    const match = node.textContent.match(/\S\s*$/u);
+    if (!match) {
+      continue;
+    }
+    let outOfFlow = false;
+    for (let e = node.parentElement; e && e !== block; e = e.parentElement) {
+      const style = window.getComputedStyle(e);
+      if (
+        style.position === "absolute" ||
+        style.position === "fixed" ||
+        style.float !== "none"
+      ) {
+        outOfFlow = true;
+        break;
+      }
+    }
+    if (outOfFlow) {
+      continue;
+    }
+    const range = document.createRange();
+    range.setStart(node, match.index);
+    range.setEnd(node, match.index + match[0].trimEnd().length);
+    const prevRect = range.getBoundingClientRect();
+    if (!prevRect.width && !prevRect.height) {
+      continue;
+    }
+    const center = (r: DOMRect, x: boolean) =>
+      x ? r.left + r.width / 2 : r.top + r.height / 2;
+    if (
+      Math.abs(center(prevRect, vertical) - center(rect, vertical)) >
+      (vertical ? rect.width : rect.height) / 2
+    ) {
+      // Not on the same line
+      return true;
+    }
+    // For sideways-lr, the inline direction of ltr is bottom-to-top
+    const reversed =
+      rtl !==
+      (window.getComputedStyle(textNode.parentElement).writingMode ===
+        "sideways-lr");
+    return center(rect, !vertical) > center(prevRect, !vertical) !== reversed;
+  }
+  return true;
+}
+
+/**
  * Check if any inline ancestor of the punctuation text node, up to its block
  * container, has non-zero border or padding on the side facing the
  * line-start (or line-end) edge. Such border or padding between the
@@ -1019,7 +1086,8 @@ class TextSpacingPolyfill {
         "end",
         textDirection() === "rtl",
         vertical,
-      )
+      ) &&
+      isAfterPrecedingCharacter(textNode, textDirection() === "rtl", vertical)
     ) {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
@@ -1164,30 +1232,6 @@ class TextSpacingPolyfill {
           if (hangingLast) {
             setHangingShift();
             outerElem.className = "viv-hang-last";
-            // In bidi text, the punctuation may be laid out before the
-            // preceding content (e.g., a closing bracket paired with an
-            // opening bracket in a run of the opposite direction), where the
-            // glyph shifted back would overlap it. Do not hang it then.
-            const rect = innerElem.getBoundingClientRect();
-            const precedingRange = document.createRange();
-            precedingRange.setStart(
-              findBlockContainer(outerElem) ?? outerElem.parentNode,
-              0,
-            );
-            precedingRange.setEndBefore(outerElem);
-            if (
-              Array.from(precedingRange.getClientRects()).some((r) => {
-                const x =
-                  Math.min(r.right, rect.right) - Math.max(r.left, rect.left);
-                const y =
-                  Math.min(r.bottom, rect.bottom) - Math.max(r.top, rect.top);
-                return vertical
-                  ? x > 0 && y > rect.height / 2
-                  : y > 0 && x > rect.width / 2;
-              })
-            ) {
-              outerElem.className = "";
-            }
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             const linePos = linePosition();
             if (hangingEnd) {

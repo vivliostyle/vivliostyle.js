@@ -66,6 +66,7 @@
     <p class="last" dir="rtl">abc (def<img width="16" height="16" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" style="background: #ccc"><span>)</span></p>
     <p class="last" dir="rtl" style="position: relative">abc (def<img width="16" height="16" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" style="background: #ccc; position: absolute; left: 13em; top: 0"><span>)</span></p>
     <p class="last" dir="rtl">abc (de<span style="vertical-align: 2em">f</span><span>)</span></p>
+    <p class="last" dir="rtl">abc (<span>i</span><span>i</span><span>i</span>)</p>
     <!-- Does not hang: the direction differs from the block container -->
     <p class="last" dir="rtl"><span style="direction: ltr">)</span></p>
 
@@ -74,6 +75,9 @@
     <p class="last end" dir="ltr" lang="en">“Abc def ghi.”</p>
     <p class="last end" dir="ltr" lang="ja">「あいうえおかきくけこ」</p>
     <p class="last" dir="ltr" lang="en">Abc def <span lang="he">(אבג)</span></p>
+    <!-- Hangs: a tight line height, and an absolutely positioned box -->
+    <p class="last" lang="ja" style="line-height: 1; text-align: center">「あいうえおかきくけこさしすせそたちつてと」</p>
+    <p class="last" lang="en" style="position: relative"><span style="position: absolute; inset-inline-end: -1.5em; top: 0; width: 2em; height: 1.2em; outline: 1px dashed red"></span>“Abc def ghi.”</p>
     <!-- Does not hang (see the RTL counterparts above) -->
     <p class="last" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
     <p class="last end" dir="ltr" lang="he">אבג (דהו<span>)</span></p>
