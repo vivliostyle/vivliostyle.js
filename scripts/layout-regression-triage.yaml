@@ -1,3 +1,27 @@
+- category: Hanging Punctuation
+  title: "hanging-punctuation first/last with inline border/padding (Issue #2194)"
+  file: text-spacing/hanging-punctuation-inline-border.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2207"
+  approvedViewer: git-fix-hanging-punctuation-inli-ee6e23  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-hanging-punctuation-inline-border-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
+- category: Hanging Punctuation
+  title: hanging-punctuation:last in right-to-left text
+  file: text-spacing/hanging-punctuation-rtl.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2206"
+  approvedViewer: git-fix-rtl-hanging-punctuation-last  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
 - category: General
   title: Block after ::first-line is not pushed to the next page
   file: first-line-next-block-pushed.html
