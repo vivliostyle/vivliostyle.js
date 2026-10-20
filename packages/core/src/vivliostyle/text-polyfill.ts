@@ -393,6 +393,122 @@ function* generatePrecedingContentRects(
 }
 
 /**
+ * Check if the node (a punctuation, or its wrapper element) is laid out in
+ * right-to-left bidi direction, i.e., placed before (left of, or above in
+ * vertical writing modes) the preceding content in the inline direction.
+ * This may differ from the `direction` property (e.g., a closing bracket
+ * paired with an opening bracket in a left-to-right run in right-to-left
+ * text).
+ */
+function isLaidOutRightToLeft(
+  node: Node,
+  rect: DOMRect | undefined,
+  vertical: boolean,
+): boolean {
+  const window = node.ownerDocument.defaultView;
+  const elem =
+    node.nodeType === Node.ELEMENT_NODE
+      ? (node as Element)
+      : node.parentElement;
+  const block = findBlockContainer(node);
+  // The preceding content outside the bidi isolate or embedding that
+  // the punctuation belongs to does not determine its direction
+  let scope: Element = block;
+  for (let e = node.parentElement; e && e !== block; e = e.parentElement) {
+    if (window.getComputedStyle(e).unicodeBidi !== "normal") {
+      scope = e;
+      break;
+    }
+  }
+  // Without preceding content on the same line, the punctuation is at
+  // the start of its bidi isolate, embedding or paragraph
+  let rtl = window.getComputedStyle(scope ?? elem).direction === "rtl";
+  if (!rect) {
+    return rtl;
+  }
+  // Preceding content on the same line may not overlap the punctuation
+  // (e.g., shifted by vertical-align), so look further back for content
+  // that overlaps it
+  for (const prevRect of generatePrecedingContentRects(node, scope)) {
+    if (
+      vertical
+        ? rect.left < prevRect.right && rect.right > prevRect.left
+        : rect.top < prevRect.bottom && rect.bottom > prevRect.top
+    ) {
+      const before = vertical
+        ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
+        : rect.left + rect.right < prevRect.left + prevRect.right;
+      // The inline direction is bottom-to-top for ltr in sideways-lr
+      rtl =
+        before !==
+        (window.getComputedStyle(elem).writingMode === "sideways-lr");
+      break;
+    }
+  }
+  return rtl;
+}
+
+/**
+ * Check if any inline ancestor of the punctuation text node, up to its block
+ * container, has non-zero border or padding on the side facing the
+ * line-start (or line-end) edge. Such border or padding between the
+ * punctuation and the edge of the line prevents hanging-punctuation `first`
+ * (or `last`). (Issue #2194)
+ *
+ * The side is determined from the bidi direction in which the punctuation is
+ * laid out, not from the `direction` property of each ancestor, which may
+ * differ from it (e.g., `direction: rtl` on an inline element with
+ * `unicode-bidi: normal` in left-to-right text).
+ */
+function hasInlineBorderOrPaddingAtEdge(
+  textNode: Text,
+  edge: "start" | "end",
+  vertical: boolean,
+): boolean {
+  const window = textNode.ownerDocument?.defaultView;
+  if (!window) {
+    return false;
+  }
+  const rtl = isLaidOutRightToLeft(
+    textNode,
+    RangeClientRects.getClientRectsOfNode(textNode)[0],
+    vertical,
+  );
+  // For sideways-lr, the inline-start is the bottom side
+  const reversed =
+    rtl !==
+    (window.getComputedStyle(textNode.parentElement).writingMode ===
+      "sideways-lr");
+  const side = vertical
+    ? reversed === (edge === "start")
+      ? "bottom"
+      : "top"
+    : reversed === (edge === "start")
+      ? "right"
+      : "left";
+  for (let elem = textNode.parentElement; elem; elem = elem.parentElement) {
+    if (elem.hasAttribute("data-vivliostyle-column")) {
+      break;
+    }
+    const style = window.getComputedStyle(elem);
+    const { display } = style;
+    if (display === "contents") {
+      continue;
+    }
+    if (display !== "inline" && !display.startsWith("ruby")) {
+      break;
+    }
+    if (
+      parseFloat(style.getPropertyValue(`border-${side}-width`)) > 0 ||
+      parseFloat(style.getPropertyValue(`padding-${side}`)) > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Force the block to be laid out from scratch.
  *
  * After the `viv-ts-*` elements are inserted, the browser may reuse cached
@@ -982,7 +1098,8 @@ class TextSpacingPolyfill {
     if (
       isFirstInBlock &&
       hangingPunctuation.first &&
-      /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text)
+      /^[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*$/u.test(text) &&
+      !hasInlineBorderOrPaddingAtEdge(textNode, "start", vertical)
     ) {
       // hanging-punctuation: first
       tagName = "viv-ts-open";
@@ -990,7 +1107,8 @@ class TextSpacingPolyfill {
     } else if (
       isLastInBlock &&
       hangingPunctuation.last &&
-      /^[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text)
+      /^[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*$/u.test(text) &&
+      !hasInlineBorderOrPaddingAtEdge(textNode, "end", vertical)
     ) {
       // hanging-punctuation: last
       tagName = "viv-ts-close";
@@ -1071,52 +1189,13 @@ class TextSpacingPolyfill {
       // property (e.g., a closing bracket paired with an opening bracket in a
       // left-to-right run in right-to-left text).
       function bidiDirectionClass(): string {
-        const block = findBlockContainer(outerElem);
-        // The preceding content outside the bidi isolate or embedding that
-        // the punctuation belongs to does not determine its direction
-        let scope: Element = block;
-        for (
-          let elem = outerElem.parentElement;
-          elem && elem !== block;
-          elem = elem.parentElement
-        ) {
-          if (
-            document.defaultView.getComputedStyle(elem).unicodeBidi !== "normal"
-          ) {
-            scope = elem;
-            break;
-          }
-        }
-        // Without preceding content on the same line, the punctuation is at
-        // the start of its bidi isolate, embedding or paragraph
-        let rtl =
-          document.defaultView.getComputedStyle(scope ?? outerElem)
-            .direction === "rtl";
-        const rect = innerElem.getBoundingClientRect();
-        // Preceding content on the same line may not overlap the punctuation
-        // (e.g., shifted by vertical-align), so look further back for content
-        // that overlaps it
-        for (const prevRect of generatePrecedingContentRects(
+        return isLaidOutRightToLeft(
           outerElem,
-          scope,
-        )) {
-          if (
-            vertical
-              ? rect.left < prevRect.right && rect.right > prevRect.left
-              : rect.top < prevRect.bottom && rect.bottom > prevRect.top
-          ) {
-            const before = vertical
-              ? rect.top + rect.bottom < prevRect.top + prevRect.bottom
-              : rect.left + rect.right < prevRect.left + prevRect.right;
-            // The inline direction is bottom-to-top for ltr in sideways-lr
-            rtl =
-              before !==
-              (document.defaultView.getComputedStyle(outerElem).writingMode ===
-                "sideways-lr");
-            break;
-          }
-        }
-        return rtl ? " viv-hang-rtl" : " viv-hang-ltr";
+          innerElem.getBoundingClientRect(),
+          vertical,
+        )
+          ? " viv-hang-rtl"
+          : " viv-hang-ltr";
       }
 
       if (isFullWidth || hangingFirst || hangingLast || hangingEnd) {

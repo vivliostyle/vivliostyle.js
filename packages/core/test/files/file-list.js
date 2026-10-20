@@ -972,6 +972,11 @@ module.exports = [
         file: "text-spacing/hanging-punctuation-rtl.html",
         title: "hanging-punctuation:last in right-to-left text",
       },
+      {
+        file: "text-spacing/hanging-punctuation-inline-border.html",
+        title:
+          "hanging-punctuation first/last with inline border/padding (Issue #2194)",
+      },
     ],
   },
   {
