@@ -350,7 +350,8 @@ function getTextDirection(textNode: Text): "ltr" | "rtl" | null {
  * preceding in-flow character, or the character is not on the same line.
  * In bidi text, a closing bracket paired with an opening bracket in a run of
  * the opposite direction is laid out on the other side, where hanging would
- * make it overlap the preceding text.
+ * make it overlap the preceding text. Characters displaced from the line
+ * (e.g., by vertical-align) are skipped.
  */
 function isAfterPrecedingCharacter(
   textNode: Text,
@@ -371,26 +372,31 @@ function isAfterPrecedingCharacter(
     if (!match) {
       continue;
     }
-    let outOfFlow = false;
-    for (let e = node.parentElement; e && e !== block; e = e.parentElement) {
+    let skip = false;
+    for (
+      let e = node.parentElement;
+      e && e !== block && !e.contains(textNode);
+      e = e.parentElement
+    ) {
       const style = window.getComputedStyle(e);
       if (
-        style.position === "absolute" ||
-        style.position === "fixed" ||
-        style.float !== "none"
+        style.position !== "static" ||
+        style.float !== "none" ||
+        style.verticalAlign !== "baseline" ||
+        style.display === "ruby-text"
       ) {
-        outOfFlow = true;
+        skip = true;
         break;
       }
     }
-    if (outOfFlow) {
+    if (skip) {
       continue;
     }
-    const range = document.createRange();
-    range.setStart(node, match.index);
-    range.setEnd(node, match.index + match[0].trimEnd().length);
-    const prevRect = range.getBoundingClientRect();
-    if (!prevRect.width && !prevRect.height) {
+    const prevRect = RangeClientRects.getClientRectsBetween(
+      RangeClientRects.at(node, match.index),
+      RangeClientRects.at(node, match.index + match[0].trimEnd().length),
+    )[0];
+    if (!prevRect) {
       continue;
     }
     const center = (r: DOMRect, x: boolean) =>
