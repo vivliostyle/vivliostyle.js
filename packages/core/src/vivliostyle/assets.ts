@@ -1553,12 +1553,18 @@ viv-ts-open.viv-ts-auto > viv-ts-inner,
 viv-ts-open.viv-ts-trim > viv-ts-inner {
   margin-inline-start: -0.5em;
 }
-viv-ts-close.viv-ts-auto > viv-ts-inner,
-viv-ts-close.viv-ts-trim > viv-ts-inner {
-  letter-spacing: -0.5em;
+/* see TextSpacingPolyfill.processTextSpacing() */
+viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-end, .viv-hang-last)
+  > viv-ts-inner {
+  position: relative;
+  inset-inline-start: var(--viv-ts-shift);
+  margin-inline-start: calc(-1 * var(--viv-ts-shift));
 }
-viv-ts-close.viv-hang-end > viv-ts-inner {
-  letter-spacing: -1em;
+viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-hw) {
+  --viv-ts-shift: 0.5em;
+}
+viv-ts-close.viv-hang-end:not(.viv-hang-hw) {
+  --viv-ts-shift: 1em;
 }
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
@@ -1575,43 +1581,8 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
   /* 0.5em space + 0.5em = 1em */
   letter-spacing: 0.5em;
 }
-viv-ts-close.viv-hang-hw > viv-ts-inner {
-  letter-spacing: -0.5em;
-}
-/* see #2206 */
-viv-ts-close.viv-hang-last > viv-ts-inner {
-  display: inline-block;
-  line-height: 1;
-  inline-size: 0;
-  text-indent: 0;
-  text-align: start;
-  text-align-last: start;
-  letter-spacing: normal;
-}
-viv-ts-close.viv-hang-last.viv-hang-ltr {
-  direction: ltr;
-  white-space: nowrap;
-}
-viv-ts-close.viv-hang-last.viv-hang-rtl {
-  direction: rtl;
-  white-space: nowrap;
-}
-viv-ts-close.viv-hang-last.viv-hang-ltr::before,
-viv-ts-close.viv-hang-last.viv-hang-ltr::after {
-  content: "\\200E";
-}
-viv-ts-close.viv-hang-last.viv-hang-rtl::before,
-viv-ts-close.viv-hang-last.viv-hang-rtl::after {
-  content: "\\200F";
-}
 viv-ts-open.viv-hang-first > viv-ts-inner {
-  display: inline-block;
-  line-height: 1;
-  inline-size: 1em;
-  text-indent: 0;
-  text-align: end;
-  text-align-last: end;
-  margin-inline-start: -1em;
+  margin-inline-start: calc(-1 * var(--viv-ts-shift));
 }
 viv-ts-thin-sp::after {
   content: " ";
