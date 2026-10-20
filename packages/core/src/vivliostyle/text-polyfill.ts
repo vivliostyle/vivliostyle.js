@@ -391,7 +391,8 @@ function isAfterPrecedingCharacter(
         (style.position !== "static" &&
           (style.position !== "relative" || hasRelativeOffset)) ||
         style.float !== "none" ||
-        style.verticalAlign !== "baseline" ||
+        (style.verticalAlign !== "baseline" &&
+          parseFloat(style.verticalAlign) !== 0) ||
         style.display === "ruby-text"
       ) {
         skip = true;
