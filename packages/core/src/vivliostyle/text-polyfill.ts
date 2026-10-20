@@ -379,8 +379,17 @@ function isAfterPrecedingCharacter(
       e = e.parentElement
     ) {
       const style = window.getComputedStyle(e);
+      const hasRelativeOffset =
+        style.position === "relative" &&
+        [style.top, style.right, style.bottom, style.left].some(
+          (value) =>
+            value !== "auto" &&
+            (!Number.isFinite(Number.parseFloat(value)) ||
+              Number.parseFloat(value) !== 0),
+        );
       if (
-        style.position !== "static" ||
+        (style.position !== "static" &&
+          (style.position !== "relative" || hasRelativeOffset)) ||
         style.float !== "none" ||
         style.verticalAlign !== "baseline" ||
         style.display === "ruby-text"

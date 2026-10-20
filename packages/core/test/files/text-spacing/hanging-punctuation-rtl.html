@@ -62,6 +62,7 @@
     <!-- Does not hang: a closing bracket paired with an opening bracket in a
          left-to-right run would be moved by the bidi reordering -->
     <p class="last" dir="rtl">abc (def<span>)</span></p>
+    <p class="last" dir="rtl"><span style="position: relative">abc（de</span>）</p>
     <p class="last end" dir="rtl">abc (def<span>)</span></p>
     <p class="last" dir="rtl">abc (def<img width="16" height="16" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" style="background: #ccc"><span>)</span></p>
     <p class="last" dir="rtl" style="position: relative">abc (def<img width="16" height="16" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" style="background: #ccc; position: absolute; left: 13em; top: 0"><span>)</span></p>
