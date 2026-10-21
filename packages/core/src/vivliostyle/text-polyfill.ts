@@ -800,77 +800,133 @@ function isClosingPunctuation(text: string, lang: string | null): boolean {
 // Characters that cannot start a line (closing punctuation, etc.)
 const NO_BREAK_BEFORE_PATTERN =
   /^[\p{Pe}\p{Pf}、。，．：；！？!?‼⁇⁈⁉・ゝゞヽヾ々〻､｡]/u;
-// Characters that cannot end a line (opening punctuation)
-const NO_BREAK_AFTER_PATTERN = /^[\p{Ps}\p{Pi}]/u;
-// Letters and numerals in which a line is not broken
-const NON_CJK_ALNUM_PATTERN = /^(?![\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠])[\p{L}\p{Nd}]/u;
+// White space after which a line may break
+const BREAKING_SPACE_PATTERN = /^[ \t\n\r\f\u200B]/u;
+// Ideographs and kana before which a line may break, except with
+// `word-break: keep-all`. Small kana and iteration marks are excluded, since
+// a line may not break before them with `line-break: strict`.
+const IDEOGRAPH_LINE_START_PATTERN =
+  /^(?![ぁぃぅぇぉっゃゅょゎゕゖァィゥェォッャュョヮヵヶ々〻])[\p{sc=Han}ぁ-ゖァ-ヺ]/u;
+// Ideographs and kana after which a line may break, except with
+// `word-break: keep-all`
+const IDEOGRAPH_LINE_END_PATTERN = /^[\p{sc=Han}ぁ-ゖゝゞァ-ヺーヽヾ]/u;
+// Fullwidth opening punctuation before which a line may break
+const FULLWIDTH_OPENING_PATTERN = /^[（［｛｟\u2329〈《「『【〔〖〘〚〝]/u;
+// Fullwidth closing punctuation after which a line may break
+const FULLWIDTH_CLOSING_PATTERN =
+  /^[）］｝｠\u232A〉》」』】〕〗〙〛〞〟、。，．､｡]/u;
 
 /**
- * Check if the punctuation at the offset is at the start of a line together
- * with the preceding characters that cannot be separated from it by a line
- * break, so that it may have been moved to the next line because it did not
- * fit at the end of the line.
+ * Check if a line may break between the two characters. Only the certain line
+ * break opportunities are detected: after breaking white space, between
+ * fullwidth closing punctuation and an ideograph or fullwidth opening
+ * punctuation, and between ideographs unless `word-break: keep-all`. The
+ * others (e.g., between ideographs and Latin letters, or within words with
+ * `word-break: break-all`) are not.
+ * @param breaksIdeographs whether a line may break between ideographs (i.e.,
+ *   `word-break` is not `keep-all`)
  */
-function isNearLineStart(
+function isLineBreakOpportunity(
+  prevChar: string,
+  char: string,
+  breaksIdeographs: () => boolean,
+): boolean {
+  if (BREAKING_SPACE_PATTERN.test(prevChar)) {
+    // Not a no-break space (U+00A0, etc.)
+    return !/^\s/u.test(char) && !NO_BREAK_BEFORE_PATTERN.test(char);
+  }
+  return (
+    (FULLWIDTH_OPENING_PATTERN.test(char) ||
+      IDEOGRAPH_LINE_START_PATTERN.test(char)) &&
+    (FULLWIDTH_CLOSING_PATTERN.test(prevChar) ||
+      (IDEOGRAPH_LINE_END_PATTERN.test(prevChar) &&
+        IDEOGRAPH_LINE_START_PATTERN.test(char) &&
+        breaksIdeographs()))
+  );
+}
+
+/**
+ * Get the rect of the characters from the offset to the end offset in the
+ * text node, or undefined if they are not rendered (e.g., white space
+ * collapsed at the end of a line).
+ */
+function getVisibleRect(
   textNode: Text,
-  offset: number,
+  start: number,
+  end: number,
+): DOMRect | undefined {
+  const rect = RangeClientRects.getClientRectsBetween(
+    RangeClientRects.at(textNode, start),
+    RangeClientRects.at(textNode, end),
+  )[0];
+  return rect?.width && rect.height ? rect : undefined;
+}
+
+function isOnDifferentLines(
+  rect1: DOMRect,
+  rect2: DOMRect,
   vertical: boolean,
 ): boolean {
-  const text = textNode.data;
-  // Characters (with combining marks) before the punctuation, in reverse
-  // order, within a bounded range
-  const windowStart = Math.max(0, offset - 256);
-  const chars = (
-    text.slice(windowStart, offset).match(/[^]\p{M}*/gu) ?? []
-  ).reverse();
-  let chunkStart = offset;
-  let char = text.slice(offset).match(/^[^]\p{M}*/u)[0];
-  for (const prevChar of chars) {
-    if (
-      !NO_BREAK_BEFORE_PATTERN.test(char) &&
-      !NO_BREAK_AFTER_PATTERN.test(prevChar) &&
-      !(
-        NON_CJK_ALNUM_PATTERN.test(char) && NON_CJK_ALNUM_PATTERN.test(prevChar)
-      )
-    ) {
-      break;
-    }
-    chunkStart -= prevChar.length;
-    char = prevChar;
-  }
-  if (chunkStart === windowStart) {
-    // The preceding characters may be in other nodes or out of the range
-    return true;
-  }
-  const rectOf = (start: number, end: number): DOMRect | undefined => {
-    const rect = RangeClientRects.getClientRectsBetween(
-      RangeClientRects.at(textNode, start),
-      RangeClientRects.at(textNode, end),
-    )[0];
-    return rect?.width && rect.height ? rect : undefined;
-  };
-  const rect = rectOf(chunkStart, chunkStart + char.length);
-  // The last visible character before the chunk (skipping white space
-  // collapsed at the end of a line)
-  let prevRect: DOMRect | undefined;
-  for (
-    let end = chunkStart, prevChar = text.slice(0, end).match(/[^]\p{M}*$/u);
-    !prevRect && prevChar && end > windowStart;
-    end -= prevChar[0].length,
-      prevChar = text.slice(0, end).match(/[^]\p{M}*$/u)
-  ) {
-    prevRect = rectOf(end - prevChar[0].length, end);
-  }
-  if (!rect || !prevRect) {
-    return true;
-  }
   const center = (r: DOMRect) =>
     vertical ? r.left + r.width / 2 : r.top + r.height / 2;
   const size = (r: DOMRect) => (vertical ? r.width : r.height);
   return (
-    Math.abs(center(rect) - center(prevRect)) >
-    Math.min(size(rect), size(prevRect)) / 2
+    Math.abs(center(rect1) - center(rect2)) >
+    Math.min(size(rect1), size(rect2)) / 2
   );
+}
+
+/**
+ * Check if the punctuation from the offset to the end offset is at the start
+ * of a line together with the preceding characters that may not be separated
+ * from it by a line break, so that it may have been moved to the next line
+ * because it did not fit at the end of the line. Since not all the line break
+ * opportunities are detected (see isLineBreakOpportunity()), this may return
+ * true for punctuation that was not moved.
+ */
+function isNearLineStart(
+  textNode: Text,
+  start: number,
+  end: number,
+  vertical: boolean,
+): boolean {
+  const text = textNode.data;
+  // Characters (with combining marks) before the punctuation within a
+  // bounded range
+  const chars =
+    text.slice(Math.max(0, start - 256), start).match(/[^]\p{M}*/gu) ?? [];
+  let breaksIdeographs: boolean | undefined;
+  const checkBreaksIdeographs = (): boolean =>
+    (breaksIdeographs ??= ["normal", "break-all", "break-word"].includes(
+      textNode.ownerDocument.defaultView.getComputedStyle(
+        textNode.parentElement,
+      ).wordBreak,
+    ));
+  // Find the start of the run of characters ending with the punctuation, in
+  // which no line break opportunity is detected
+  let i = chars.length;
+  let runStart = start;
+  for (let char = text.slice(start, end); i > 0; i--) {
+    const prevChar = chars[i - 1];
+    if (isLineBreakOpportunity(prevChar, char, checkBreaksIdeographs)) {
+      break;
+    }
+    runStart -= prevChar.length;
+    char = prevChar;
+  }
+  // Check if the punctuation is on a different line from the last rendered
+  // character before the run. If the run continues to the text in other
+  // nodes or out of the range, it may be at the start of a line.
+  const rect = getVisibleRect(textNode, start, end);
+  for (let prevEnd = runStart; rect && i > 0; i--) {
+    const prevStart = prevEnd - chars[i - 1].length;
+    const prevRect = getVisibleRect(textNode, prevStart, prevEnd);
+    if (prevRect) {
+      return isOnDifferentLines(rect, prevRect, vertical);
+    }
+    prevEnd = prevStart;
+  }
+  return true;
 }
 
 /**
@@ -879,35 +935,24 @@ function isNearLineStart(
  */
 function isAtLineEnd(
   textNode: Text,
-  offset: number,
+  start: number,
   end: number,
   vertical: boolean,
 ): boolean {
-  const rect = RangeClientRects.getClientRectsBetween(
-    RangeClientRects.at(textNode, offset),
-    RangeClientRects.at(textNode, end),
-  )[0];
+  const rect = getVisibleRect(textNode, start, end);
   if (!rect) {
     return false;
   }
-  const text = textNode.data;
-  for (const match of text.slice(end).matchAll(/[^]\p{M}*/gu)) {
-    const start = end + match.index;
-    const nextRect = RangeClientRects.getClientRectsBetween(
-      RangeClientRects.at(textNode, start),
-      RangeClientRects.at(textNode, start + match[0].length),
-    )[0];
-    if (!nextRect || !nextRect.width || !nextRect.height) {
-      // e.g., collapsed white space
-      continue;
-    }
-    const center = (r: DOMRect) =>
-      vertical ? r.left + r.width / 2 : r.top + r.height / 2;
-    const size = (r: DOMRect) => (vertical ? r.width : r.height);
-    return (
-      Math.abs(center(nextRect) - center(rect)) >
-      Math.min(size(rect), size(nextRect)) / 2
+  for (const match of textNode.data.slice(end).matchAll(/[^]\p{M}*/gu)) {
+    const nextStart = end + match.index;
+    const nextRect = getVisibleRect(
+      textNode,
+      nextStart,
+      nextStart + match[0].length,
     );
+    if (nextRect) {
+      return isOnDifferentLines(rect, nextRect, vertical);
+    }
   }
   return true;
 }
@@ -980,7 +1025,7 @@ function findLineEndPunctuation(
     if (
       (mayBePushed || mayBeAtEnd) &&
       (anywhere ||
-        (mayBePushed && isNearLineStart(textNode, start, vertical)) ||
+        (mayBePushed && isNearLineStart(textNode, start, end, vertical)) ||
         (mayBeAtEnd && isAtLineEnd(textNode, start, end, vertical)))
     ) {
       return [start, end];

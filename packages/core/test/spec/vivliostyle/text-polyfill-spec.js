@@ -232,17 +232,21 @@ describe("text-polyfill", function () {
       ).not.toThrow();
     });
 
-    it("sets the punctuation after an unbreakable word half-width at the end of a line", function () {
+    /**
+     * Check that the full stop after the text is set half-width at the end of
+     * the line, where it fits only at half-width (allow-end) and the run of
+     * the text that may not be separated from it by a line break moves to the
+     * next line otherwise.
+     */
+    function expectHalfWidthAtLineEnd(firstLine, nextLine) {
       element.style.width = "auto";
       element.textContent = "。";
       if (!NativeTextSpacing.supportsTrim(element, "normal", "ja", false)) {
         pending("native text-spacing-trim unavailable");
       }
-      // The full stop fits only at half-width (allow-end), and the whole word
-      // before it moves to the next line otherwise
       const probe = document.createElement("span");
       probe.style.whiteSpace = "nowrap";
-      probe.textContent = "あいうえおかabcdef";
+      probe.textContent = firstLine;
       element.replaceChildren(probe);
       const width = probe.getBoundingClientRect().width;
       element.style.width = `${width + 8.5}px`;
@@ -251,11 +255,13 @@ describe("text-polyfill", function () {
       style.textContent = VivliostylePolyfillCss;
       document.head.appendChild(style);
       try {
-        layout("あいうえおかabcdef。さしすせそ", {
+        layout(`${firstLine}。${nextLine}`, {
           "text-autospace": "no-autospace",
           "text-spacing-trim": "normal",
         });
-        const close = element.querySelector("viv-ts-close");
+        const close = Array.from(element.querySelectorAll("viv-ts-close")).find(
+          (elem) => elem.textContent === "。",
+        );
         expect(close?.className).toBe("viv-ts-auto");
         const range = document.createRange();
         range.selectNodeContents(element.firstChild);
@@ -266,6 +272,19 @@ describe("text-polyfill", function () {
       } finally {
         style.remove();
       }
+    }
+
+    it("sets the punctuation after an unbreakable word half-width at the end of a line", function () {
+      expectHalfWidthAtLineEnd("あいうえおかabcdef", "さしすせそ");
+    });
+
+    it("sets the punctuation after words joined by a no-break space half-width at the end of a line", function () {
+      expectHalfWidthAtLineEnd("あいうえおかabc\u00A0def", "さしすせそ");
+    });
+
+    it("sets the punctuation after ideographs with keep-all half-width at the end of a line", function () {
+      element.style.wordBreak = "keep-all";
+      expectHalfWidthAtLineEnd("さしすせそ、あいうえおかきくけ", "たちつてと");
     });
 
     it("preserves the offsets of split text nodes", function () {
