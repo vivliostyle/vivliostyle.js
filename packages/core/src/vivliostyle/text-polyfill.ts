@@ -769,9 +769,9 @@ function getCommonAncestor(node1: Node, node2: Node): Element | null {
 const OPENING_PUNCTUATION_START_PATTERN =
   /^[ \t\r\n\f]*[‘“〝（［｛｟\u2329〈《「『【〔〖〘〚]\p{M}*/u;
 
-// Fullwidth closing punctuation, which can be set half-width
-const CLOSING_PUNCTUATION_PATTERN =
-  /[’”〞〟）］｝｠\u232A〉》」』】〕〗〙〛：；、。，．]\p{M}*/gu;
+// Punctuation that may be processed at the end of a line
+const LINE_END_PUNCTUATION_PATTERN =
+  /[’”〞〟）］｝｠\u232A〉》」』】〕〗〙〛：；、。，．､｡]\p{M}*/gu;
 
 // Characters before which closing punctuation is trimmed by `trim-adjacent`
 const ADJACENT_CLOSING_START_PATTERN =
@@ -907,7 +907,59 @@ const HANGING_LAST_END_PATTERN =
   /(?![()\[\]{}])[\p{Pe}\p{Pf}\p{Pi}]\p{M}*(?=[ \t\r\n\f]*$)/u;
 
 // Punctuation that hangs with hanging-punctuation `force-end` or `allow-end`
-const HANGING_END_PATTERN = /[、。，．､｡]\p{M}*/gu;
+const HANGING_END_PATTERN = /^[、。，．､｡]\p{M}*$/u;
+
+/**
+ * Find the first punctuation in the text node, after the offset, that the
+ * polyfill needs to process at the end of a line on top of the native
+ * text-spacing-trim (see processTextSpacing()), and return its start and end
+ * offsets. The punctuation is found with the current layout one at a time,
+ * since processing it changes the line breaks after it.
+ * @param anywhere whether to find the punctuation regardless of its position
+ *   in the line
+ */
+function findLineEndPunctuation(
+  textNode: Text,
+  spacing: Spacing,
+  lang: string | null,
+  vertical: boolean,
+  from: number,
+  anywhere: boolean,
+): [number, number] | null {
+  const { allowEnd, trimEnd } = spacing.spacingTrim;
+  const { hangingPunctuation } = spacing;
+  const hangsEnd = hangingPunctuation.forceEnd || hangingPunctuation.allowEnd;
+  if (!spacing.nativeTrim || !(allowEnd || trimEnd || hangsEnd)) {
+    return null;
+  }
+  const text = textNode.data;
+  const pattern = new RegExp(LINE_END_PUNCTUATION_PATTERN);
+  pattern.lastIndex = from;
+  for (let match = pattern.exec(text); match; match = pattern.exec(text)) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (ADJACENT_CLOSING_START_PATTERN.test(text.slice(end))) {
+      continue;
+    }
+    const hangs = hangsEnd && HANGING_END_PATTERN.test(match[0]);
+    // The browser sets closing brackets and quotation marks half-width at
+    // the end of a line if they do not otherwise fit (`allow-end`), but not
+    // the other closing punctuation. It sets them full-width if they fit.
+    const mayBePushed =
+      hangs || ((allowEnd || trimEnd) && isClosingMark(match[0], lang));
+    const mayBeAtEnd =
+      hangs || (trimEnd && isClosingPunctuation(match[0], lang));
+    if (
+      (mayBePushed || mayBeAtEnd) &&
+      (anywhere ||
+        (mayBePushed && isNearLineStart(textNode, start, vertical)) ||
+        (mayBeAtEnd && isAtLineEnd(textNode, start, end, vertical)))
+    ) {
+      return [start, end];
+    }
+  }
+  return null;
+}
 
 /**
  * Get the offsets where the text node needs to be split for the polyfill.
@@ -935,29 +987,8 @@ function getSplitOffsets(
     }
   }
   if (spacing.nativeTrim) {
-    const { allowEnd, trimEnd } = spacing.spacingTrim;
-    if (allowEnd || trimEnd) {
-      for (const match of text.matchAll(CLOSING_PUNCTUATION_PATTERN)) {
-        const end = match.index + match[0].length;
-        if (
-          match.index >= limit ||
-          !isClosingPunctuation(match[0], lang) ||
-          ADJACENT_CLOSING_START_PATTERN.test(text.slice(end))
-        ) {
-          continue;
-        }
-        if (
-          // The browser does the same for closing brackets and quotation
-          // marks (`allow-end`)
-          (isClosingMark(match[0], lang) &&
-            isNearLineStart(textNode, match.index, vertical)) ||
-          // The browser sets it full-width at the end of a line if it fits
-          (trimEnd && isAtLineEnd(textNode, match.index, end, vertical))
-        ) {
-          offsets.push(match.index, end);
-        }
-      }
-    }
+    // The punctuation at the ends of lines is found later, one at a time
+    // (see findLineEndPunctuation())
     if (position.mayBeContinued && spacing.spacingTrim.spaceFirst) {
       addMatch(text.match(OPENING_PUNCTUATION_START_PATTERN));
     }
@@ -971,19 +1002,6 @@ function getSplitOffsets(
       const match = text.match(HANGING_LAST_END_PATTERN);
       if (match) {
         offsets.push(match.index, match.index + match[0].length);
-      }
-    }
-    if (hangingPunctuation.forceEnd || hangingPunctuation.allowEnd) {
-      for (const match of text.matchAll(HANGING_END_PATTERN)) {
-        const end = match.index + match[0].length;
-        if (
-          match.index < limit &&
-          !ADJACENT_CLOSING_START_PATTERN.test(text.slice(end)) &&
-          (isNearLineStart(textNode, match.index, vertical) ||
-            isAtLineEnd(textNode, match.index, end, vertical))
-        ) {
-          offsets.push(match.index, end);
-        }
       }
     }
   } else if (
@@ -1121,6 +1139,33 @@ export class TextSpacingPolyfill {
       element.style.whiteSpace = "pre";
     }
 
+    // Generated content is short, so all the punctuation that may be
+    // processed at the end of a line is split
+    const findAllLineEndPunctuation = (node: Text): number[] => {
+      const offsets: number[] = [];
+      for (
+        let found = findLineEndPunctuation(
+          node,
+          spacing,
+          lang,
+          vertical,
+          0,
+          true,
+        );
+        found;
+        found = findLineEndPunctuation(
+          node,
+          spacing,
+          lang,
+          vertical,
+          found[1],
+          true,
+        )
+      ) {
+        offsets.push(...found);
+      }
+      return offsets;
+    };
     const textWalker = element.ownerDocument.createTreeWalker(
       element,
       NodeFilter.SHOW_TEXT,
@@ -1133,18 +1178,23 @@ export class TextSpacingPolyfill {
     textNodes
       .map((node, i) => ({
         node,
-        offsets: getSplitOffsets(
-          node,
-          spacing,
-          lang,
-          vertical,
-          {
-            mayBeFirstInBlock: i === 0,
-            mayBeContinued: false,
-            mayBeLastInBlock: i === textNodes.length - 1,
-          },
-          node.length,
-        ),
+        offsets: [
+          ...getSplitOffsets(
+            node,
+            spacing,
+            lang,
+            vertical,
+            {
+              mayBeFirstInBlock: i === 0,
+              mayBeContinued: false,
+              mayBeLastInBlock: i === textNodes.length - 1,
+            },
+            node.length,
+          ),
+          ...findAllLineEndPunctuation(node),
+        ]
+          .filter((offset) => offset > 0 && offset < node.length)
+          .sort((a, b) => a - b),
       }))
       .forEach(({ node, offsets }) => splitTextNode(node, offsets));
 
@@ -1548,6 +1598,44 @@ export class TextSpacingPolyfill {
           }
           if (/\b(flex|grid)\b/.test(textP.parent.display ?? "")) {
             // Cannot process if parent is flex or grid. (Issue #926)
+            continue;
+          }
+          // Separate the first punctuation that may need processing at the
+          // end of a line, found with the layout after the preceding text has
+          // been processed, and process the text again from the first part
+          const found = findLineEndPunctuation(
+            textP.viewNode,
+            spacing,
+            getLang(textP),
+            textP.vertical,
+            0,
+            false,
+          );
+          const foundOffsets =
+            found?.filter(
+              (offset) => offset > 0 && offset < textP.viewNode.length,
+            ) ?? [];
+          if (foundOffsets.length) {
+            const original = textP.viewNode;
+            const points = splitCheckPoint(p, foundOffsets);
+            checkPoints.splice(i, 1, ...points);
+            for (let j = i + points.length; j < checkPoints.length; j++) {
+              if (
+                checkPoints[j].after &&
+                checkPoints[j].viewNode === original
+              ) {
+                const after = checkPoints[j].copy().modify();
+                after.viewNode = points[points.length - 1].viewNode;
+                checkPoints[j] = after;
+                break;
+              }
+            }
+            const blockContainer = findBlockContainer(original);
+            if (blockContainer) {
+              splitBlockContainers.add(blockContainer);
+              reshapeTargets.add(blockContainer);
+            }
+            i--;
             continue;
           }
           let prevNode: Node | null = null;

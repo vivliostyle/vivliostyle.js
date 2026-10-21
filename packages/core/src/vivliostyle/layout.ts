@@ -2919,6 +2919,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
           nodeContext = nodeContext.parent;
         }
+      } else if (viewNode.nodeType !== 1 && !nodeContext.after) {
+        // The text in a text-spacing wrapper, which may be split from a
+        // longer text node and have no after check point (see
+        // TextSpacingPolyfill.postLayoutBlock()), fits: break after it.
+        nodeContext = nodeContext.modify();
+        nodeContext.offsetInNode += (viewNode as Text).length;
+        nodeContext.breakBefore = null;
       }
     }
     this.clearOverflownViewNodes(nodeContext, false);

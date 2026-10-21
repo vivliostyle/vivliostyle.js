@@ -456,6 +456,27 @@ describe("text-polyfill", function () {
       ).toBe(true);
     });
 
+    it("does not check an opening punctuation after other characters across elements", function () {
+      element.innerHTML =
+        '漢<span style="font-family: probe-a">「引用」</span>';
+      // Nothing is trimmed: a pair that needs trimming would fail
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          return new DOMRect(0, 0, this.textContent.length * 16, 16);
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrimPair(
+          element,
+          "漢",
+          element.querySelector("span"),
+          "「",
+          "ja",
+          false,
+        ),
+      ).toBe(true);
+    });
+
     it("uses a separate font capability check for vertical text", function () {
       if (!hasTrimProperty) {
         pending("text-spacing-trim unavailable");

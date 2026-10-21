@@ -120,13 +120,19 @@ function isTrimmedPair(
   second: string,
   lang: string | null,
 ): boolean {
+  if (!first || !second) {
+    return false;
+  }
   const isClosing = (char: string) =>
     CLOSING_BRACKETS.includes(char) ||
     (lang !== "zh-hant" && "、。，．".includes(char)) ||
     (lang === "zh-hans" && "：；".includes(char));
   return (
     // Opening punctuation after punctuation
-    OPENING.includes(second) ||
+    (OPENING.includes(second) &&
+      (OPENING.includes(first) ||
+        CLOSING_BRACKETS.includes(first) ||
+        MIDDLE.includes(first))) ||
     // Closing punctuation before closing or middle punctuation
     (isClosing(first) &&
       (CLOSING_BRACKETS.includes(second) || MIDDLE.includes(second)))

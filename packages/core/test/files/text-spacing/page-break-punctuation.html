@@ -1,0 +1,46 @@
+<!doctype html>
+<!-- Test case for a page break after punctuation processed by text-spacing (PR #2211) -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>Page break after text-spacing punctuation</title>
+    <style>
+      @page {
+        size: 80mm 40mm;
+        margin: 5mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 24px;
+        margin: 0;
+      }
+      p {
+        width: 10em;
+        margin: 0;
+      }
+      .fallback {
+        text-spacing-trim: space-first space-end trim-adjacent;
+      }
+      .hanging {
+        hanging-punctuation: force-end;
+      }
+      /* The comma at the end of each line fits only at half-width */
+      .allow-end {
+        width: 9.5em;
+      }
+      .trim-both {
+        text-spacing-trim: trim-both;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Each line ends with punctuation. Each line and page should start
+         with the character after it, without repeating the punctuation. -->
+    <p class="fallback">あいうえおかきくけ。いいうえおかきくけ。ういうえおかきくけ。えいうえおかきくけ。おいうえおかきくけ。かいうえおかきくけ。きいうえおかきくけ。くいうえおかきくけ。</p>
+    <p class="hanging">あいうえおかきくけこ。いいうえおかきくけこ。ういうえおかきくけこ。えいうえおかきくけこ。おいうえおかきくけこ。かいうえおかきくけこ。きいうえおかきくけこ。くいうえおかきくけこ。</p>
+    <p class="allow-end">あいうえおかきくけ、さいうえおかきくけ、しいうえおかきくけ、すいうえおかきくけ、せいうえおかきくけ、そいうえおかきくけ、たいうえおかきくけ、ちいうえおかきくけ、</p>
+    <p class="trim-both">あいうえおかきくけ」さいうえおかきくけ」しいうえおかきくけ」すいうえおかきくけ」せいうえおかきくけ」そいうえおかきくけ」たいうえおかきくけ」ちいうえおかきくけ」</p>
+    <p>あいうえおかきくけ、さいうえおかきくけ、しいうえおかきくけ、すいうえおかきくけ、せいうえおかきくけ、そいうえおかきくけ、たいうえおかきくけ、ちいうえおかきくけ、</p>
+  </body>
+</html>
