@@ -15,6 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { VivliostylePolyfillCss } from "../../../src/vivliostyle/assets";
 import * as Css from "../../../src/vivliostyle/css";
 import * as NativeTextSpacing from "../../../src/vivliostyle/native-text-spacing";
 import {
@@ -216,6 +217,55 @@ describe("text-polyfill", function () {
         "viv-ts-trim",
       );
       expect(element.querySelector("viv-ts-open")).toBeNull();
+    });
+
+    it("does not measure the text detached beyond the lookahead", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      element.append("日本語。", "次の文");
+      const { blockContext, points } = createCheckPoints({
+        "text-spacing-trim": "normal",
+      });
+      // The text after the full stop is detached as a deferred tail
+      element.lastChild.remove();
+      expect(() =>
+        polyfill.postLayoutBlock(blockContext, points),
+      ).not.toThrow();
+    });
+
+    it("sets the punctuation after an unbreakable word half-width at the end of a line", function () {
+      element.style.width = "auto";
+      element.textContent = "。";
+      if (!NativeTextSpacing.supportsTrim(element, "normal", "ja", false)) {
+        pending("native text-spacing-trim unavailable");
+      }
+      // The full stop fits only at half-width (allow-end), and the whole word
+      // before it moves to the next line otherwise
+      const probe = document.createElement("span");
+      probe.style.whiteSpace = "nowrap";
+      probe.textContent = "あいうえおかabcdef";
+      element.replaceChildren(probe);
+      const width = probe.getBoundingClientRect().width;
+      element.style.width = `${width + 8.5}px`;
+      // The polyfill styles the punctuation by the class
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        layout("あいうえおかabcdef。さしすせそ", {
+          "text-autospace": "no-autospace",
+          "text-spacing-trim": "normal",
+        });
+        const close = element.querySelector("viv-ts-close");
+        expect(close?.className).toBe("viv-ts-auto");
+        const range = document.createRange();
+        range.selectNodeContents(element.firstChild);
+        expect(close.getBoundingClientRect().top).toBeCloseTo(
+          range.getBoundingClientRect().top,
+          0,
+        );
+      } finally {
+        style.remove();
+      }
     });
 
     it("preserves the offsets of split text nodes", function () {

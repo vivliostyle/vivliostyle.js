@@ -797,12 +797,19 @@ function isClosingPunctuation(text: string, lang: string | null): boolean {
   );
 }
 
+// Characters that cannot start a line (closing punctuation, etc.)
+const NO_BREAK_BEFORE_PATTERN =
+  /^[\p{Pe}\p{Pf}、。，．：；！？!?‼⁇⁈⁉・ゝゞヽヾ々〻､｡]/u;
+// Characters that cannot end a line (opening punctuation)
+const NO_BREAK_AFTER_PATTERN = /^[\p{Ps}\p{Pi}]/u;
+// Letters and numerals in which a line is not broken
+const NON_CJK_ALNUM_PATTERN = /^(?![\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠])[\p{L}\p{Nd}]/u;
+
 /**
- * Check if a line may start within a few characters before the punctuation
- * at the offset, so that the punctuation may have been moved to the next
- * line with the preceding characters because it did not fit at the end of
- * the line. Line breaking rules keep only a few characters together with the
- * punctuation.
+ * Check if the punctuation at the offset is at the start of a line together
+ * with the preceding characters that cannot be separated from it by a line
+ * break, so that it may have been moved to the next line because it did not
+ * fit at the end of the line.
  */
 function isNearLineStart(
   textNode: Text,
@@ -810,39 +817,60 @@ function isNearLineStart(
   vertical: boolean,
 ): boolean {
   const text = textNode.data;
-  const before = text.slice(0, offset).match(/(?:[^]\p{M}*){0,4}$/u);
-  if (before[0].length === offset) {
-    // The preceding characters may be in other nodes
+  // Characters (with combining marks) before the punctuation, in reverse
+  // order, within a bounded range
+  const windowStart = Math.max(0, offset - 256);
+  const chars = (
+    text.slice(windowStart, offset).match(/[^]\p{M}*/gu) ?? []
+  ).reverse();
+  let chunkStart = offset;
+  let char = text.slice(offset).match(/^[^]\p{M}*/u)[0];
+  for (const prevChar of chars) {
+    if (
+      !NO_BREAK_BEFORE_PATTERN.test(char) &&
+      !NO_BREAK_AFTER_PATTERN.test(prevChar) &&
+      !(
+        NON_CJK_ALNUM_PATTERN.test(char) && NON_CJK_ALNUM_PATTERN.test(prevChar)
+      )
+    ) {
+      break;
+    }
+    chunkStart -= prevChar.length;
+    char = prevChar;
+  }
+  if (chunkStart === windowStart) {
+    // The preceding characters may be in other nodes or out of the range
     return true;
   }
-  const chars = text
-    .slice(before.index, offset + 1)
-    .match(/[^]\p{M}*/gu) as string[];
-  let start = before.index;
-  let prevRect: DOMRect | null = null;
-  for (const char of chars) {
+  const rectOf = (start: number, end: number): DOMRect | undefined => {
     const rect = RangeClientRects.getClientRectsBetween(
       RangeClientRects.at(textNode, start),
-      RangeClientRects.at(textNode, start + char.length),
+      RangeClientRects.at(textNode, end),
     )[0];
-    start += char.length;
-    if (!rect || !rect.width || !rect.height) {
-      continue;
-    }
-    if (prevRect) {
-      const center = (r: DOMRect) =>
-        vertical ? r.left + r.width / 2 : r.top + r.height / 2;
-      const size = (r: DOMRect) => (vertical ? r.width : r.height);
-      if (
-        Math.abs(center(rect) - center(prevRect)) >
-        Math.min(size(rect), size(prevRect)) / 2
-      ) {
-        return true;
-      }
-    }
-    prevRect = rect;
+    return rect?.width && rect.height ? rect : undefined;
+  };
+  const rect = rectOf(chunkStart, chunkStart + char.length);
+  // The last visible character before the chunk (skipping white space
+  // collapsed at the end of a line)
+  let prevRect: DOMRect | undefined;
+  for (
+    let end = chunkStart, prevChar = text.slice(0, end).match(/[^]\p{M}*$/u);
+    !prevRect && prevChar && end > windowStart;
+    end -= prevChar[0].length,
+      prevChar = text.slice(0, end).match(/[^]\p{M}*$/u)
+  ) {
+    prevRect = rectOf(end - prevChar[0].length, end);
   }
-  return false;
+  if (!rect || !prevRect) {
+    return true;
+  }
+  const center = (r: DOMRect) =>
+    vertical ? r.left + r.width / 2 : r.top + r.height / 2;
+  const size = (r: DOMRect) => (vertical ? r.width : r.height);
+  return (
+    Math.abs(center(rect) - center(prevRect)) >
+    Math.min(size(rect), size(prevRect)) / 2
+  );
 }
 
 /**
@@ -1697,6 +1725,11 @@ export class TextSpacingPolyfill {
 
           for (let prev = i - 1; prev >= 0; prev--) {
             const prevP = checkPoints[prev];
+            if (!prevP.viewNode?.parentNode) {
+              // Text beyond the lookahead, detached while processing: it is
+              // neither adjacent text in this column nor the edge of the block
+              break;
+            }
             if (checkIfFirstAfterForcedLineBreak(prevP)) {
               isFirstAfterForcedLineBreak = true;
               break;
@@ -1745,6 +1778,11 @@ export class TextSpacingPolyfill {
           }
           for (let next = i + 1; next < checkPoints.length; next++) {
             const nextP = checkPoints[next];
+            if (!nextP.viewNode?.parentNode) {
+              // Text beyond the lookahead, detached while processing: it is
+              // neither adjacent text in this column nor the edge of the block
+              break;
+            }
             if (checkIfLastBeforeForcedLineBreak(nextP)) {
               isLastBeforeForcedLineBreak = true;
               break;
