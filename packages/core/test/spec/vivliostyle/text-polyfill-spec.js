@@ -305,6 +305,47 @@ describe("text-polyfill", function () {
       );
     });
 
+    it("sets the punctuation half-width at the end of a line after inserting the spacing before the text", async function () {
+      element.style.width = "auto";
+      element.textContent = "。";
+      if (!NativeTextSpacing.supportsTrim(element, "normal", "ja", false)) {
+        pending("native text-spacing-trim unavailable");
+      }
+      // The full stop fits at full width until the spacing is inserted at the
+      // boundary between `A` and `あ`, where the native text-autospace does
+      // not insert it
+      const probe = document.createElement("span");
+      probe.style.whiteSpace = "nowrap";
+      probe.innerHTML = "<code>A</code>あいうえおかきく。";
+      element.replaceChildren(probe);
+      const width = probe.getBoundingClientRect().width;
+      element.style.width = `${width + 1}px`;
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        await document.fonts.load('16px "-viv-ts-sp"');
+        layout(
+          `<code data-props='{"text-autospace":"no-autospace"}'>A</code>あいうえおかきく。さしす`,
+          { "text-autospace": "normal", "text-spacing-trim": "normal" },
+        );
+        expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(1);
+        const close = Array.from(element.querySelectorAll("viv-ts-close")).find(
+          (elem) => elem.textContent === "。",
+        );
+        expect(close?.className).toBe("viv-ts-auto");
+        // On the first line with the text before it
+        const range = document.createRange();
+        range.selectNodeContents(close.previousSibling);
+        expect(close.getBoundingClientRect().top).toBeCloseTo(
+          range.getBoundingClientRect().top,
+          0,
+        );
+      } finally {
+        style.remove();
+      }
+    });
+
     it("preserves the offsets of split text nodes", function () {
       spyOn(CSS, "supports").and.returnValue(false);
       const points = layout(

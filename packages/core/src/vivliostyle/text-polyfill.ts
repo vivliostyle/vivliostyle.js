@@ -1681,23 +1681,24 @@ export class TextSpacingPolyfill {
             continue;
           }
           // Separate the first punctuation that may need processing at the
-          // end of a line, found with the layout after the preceding text has
-          // been processed, and process the text again from the first part.
-          // The parts up to the punctuation need not be checked again.
-          const found = lineEndChecked.has(textP.viewNode)
-            ? null
-            : findLineEndPunctuation(
-                textP.viewNode,
-                spacing,
-                textP.vertical,
-                0,
-                false,
-              );
-          const foundOffsets =
-            found?.filter(
-              (offset) => offset > 0 && offset < textP.viewNode.length,
-            ) ?? [];
-          if (foundOffsets.length) {
+          // end of a line, found with the current layout, so that the text is
+          // processed again from the first part. The parts up to the
+          // punctuation need not be checked again.
+          const splitAtLineEndPunctuation = (): boolean => {
+            const found = findLineEndPunctuation(
+              textP.viewNode,
+              spacing,
+              textP.vertical,
+              0,
+              false,
+            );
+            const foundOffsets =
+              found?.filter(
+                (offset) => offset > 0 && offset < textP.viewNode.length,
+              ) ?? [];
+            if (!foundOffsets.length) {
+              return false;
+            }
             let end = 0;
             for (const point of splitAt(i, foundOffsets)) {
               end += (point.viewNode as Text).length;
@@ -1705,6 +1706,13 @@ export class TextSpacingPolyfill {
                 lineEndChecked.add(point.viewNode);
               }
             }
+            return true;
+          };
+          // The text is checked after the preceding text has been processed
+          if (
+            !lineEndChecked.has(textP.viewNode) &&
+            splitAtLineEndPunctuation()
+          ) {
             i--;
             continue;
           }
@@ -1893,7 +1901,7 @@ export class TextSpacingPolyfill {
           }
           const autospaceAt = (container: Element): Autospace =>
             getAutospaceOf(textP, container, spacing.autospace);
-          const columnOver = this.processTextSpacing(
+          const { columnOver, spacedBefore } = this.processTextSpacing(
             textP.viewNode,
             isFirstAfterBreak,
             isFirstInBlock,
@@ -1913,6 +1921,12 @@ export class TextSpacingPolyfill {
             // (Issue #1256)
             break;
           }
+          // The spacing inserted before the text may move its punctuation to
+          // the next line, so it is checked again. The spacing is not
+          // inserted again when the parts are processed.
+          if (spacedBefore && splitAtLineEndPunctuation()) {
+            i--;
+          }
         }
       }
     } finally {
@@ -1930,6 +1944,12 @@ export class TextSpacingPolyfill {
     }
   }
 
+  /**
+   * Process the text spacing of the text node.
+   * @returns `columnOver`: whether the text is beyond the column (see
+   *   LayoutHelper.checkIfBeyondColumnBreaks()), and `spacedBefore`: whether
+   *   the spacing of text-autospace is inserted before the text
+   */
   private processTextSpacing(
     textNode: Text,
     isFirstAfterBreak: boolean,
@@ -1942,7 +1962,7 @@ export class TextSpacingPolyfill {
     spacing: Spacing,
     autospaceAt: (container: Element) => Autospace,
     vertical: boolean,
-  ): number {
+  ): { columnOver: number; spacedBefore: boolean } {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
     const { spacingTrim, nativeTrim, hangingPunctuation, lang } = spacing;
@@ -2091,7 +2111,7 @@ export class TextSpacingPolyfill {
     if (tagName !== undefined) {
       if (textNode.parentElement?.localName === "viv-ts-inner") {
         // Already processed
-        return 0;
+        return { columnOver: 0, spacedBefore: false };
       }
       // Wrap the textNode as `<{tagName}><viv-ts-inner>{text}<viv-ts-inner></{tagName}>`
       const outerElem = document.createElement(tagName);
@@ -2109,7 +2129,7 @@ export class TextSpacingPolyfill {
       }
 
       if (chromiumVoTrFallbackOnly) {
-        return 0;
+        return { columnOver: 0, spacedBefore: false };
       }
 
       // Check if the punctuation is almost full width
@@ -2364,14 +2384,14 @@ export class TextSpacingPolyfill {
     // text node. The spacing at element boundaries is determined by and
     // rendered within the innermost element that contains the boundary (CSS
     // Text 4 § 8.4). The boundary is processed with the text node on the
-    // ideograph side.
-    function insertAutospace(adjacentNode: Node, isAfter: boolean): void {
+    // ideograph side. Return whether the spacing is inserted.
+    function insertAutospace(adjacentNode: Node, isAfter: boolean): boolean {
       const type = isAfter
         ? getAutospaceType(text, adjacentNode.textContent)
         : getAutospaceType(adjacentNode.textContent, text);
       const container = type && getCommonAncestor(textNode, adjacentNode);
       if (!container) {
-        return;
+        return false;
       }
       const autospace = autospaceAt(container);
       if (
@@ -2383,7 +2403,7 @@ export class TextSpacingPolyfill {
           ? checkNonZeroMarginBorderPadding(textNode, adjacentNode)
           : checkNonZeroMarginBorderPadding(adjacentNode, textNode))
       ) {
-        return;
+        return false;
       }
       // The native text-autospace inserts the spacing at an element boundary
       // only if it is enabled on both sides (see NativeTextSpacing). Since it
@@ -2399,11 +2419,17 @@ export class TextSpacingPolyfill {
         hasNativeAutospace(textNode.parentElement, type) &&
         hasNativeAutospace(adjacentNode.parentElement, type)
       ) {
-        return;
+        return false;
       }
       let ref: ChildNode = textNode;
       while (ref.parentNode !== container) {
         ref = ref.parentElement;
+      }
+      const sibling = (isAfter ? ref.nextSibling : ref.previousSibling) as
+        Element | undefined;
+      if (sibling?.localName === "viv-ts-thin-sp") {
+        // Already inserted before the text node was split
+        return false;
       }
       const thinSp = document.createElement("viv-ts-thin-sp");
       if (isAfter) {
@@ -2411,15 +2437,17 @@ export class TextSpacingPolyfill {
       } else {
         ref.before(thinSp);
       }
+      return true;
     }
 
-    if (prevNode && IDEOGRAPH_START_PATTERN.test(text)) {
+    const spacedBefore =
+      !!prevNode &&
+      IDEOGRAPH_START_PATTERN.test(text) &&
       insertAutospace(prevNode, false);
-    }
     if (nextNode && IDEOGRAPH_END_PATTERN.test(text)) {
       insertAutospace(nextNode, true);
     }
-    return columnOver;
+    return { columnOver, spacedBefore };
   }
 
   registerHooks() {
