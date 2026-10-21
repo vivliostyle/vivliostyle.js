@@ -820,8 +820,8 @@ const FULLWIDTH_CLOSING_PATTERN =
   /^[）］｝｠\u232A〉》」』】〕〗〙〛〞〟、。，．､｡]/u;
 
 /**
- * Check if a line may break between the two characters. Only the certain line
- * break opportunities are detected: after breaking white space, between
+ * Check if a line may break between the two characters in wrapping text.
+ * Only the certain line break opportunities are detected: after breaking white space, between
  * fullwidth closing punctuation and an ideograph or fullwidth opening
  * punctuation, and between ideographs unless `word-break: keep-all`. The
  * others (e.g., between ideographs and Latin letters, or within words with
@@ -832,7 +832,7 @@ const FULLWIDTH_CLOSING_PATTERN =
 function isLineBreakOpportunity(
   prevChar: string,
   char: string,
-  breaksIdeographs: () => boolean,
+  breaksIdeographs: boolean,
 ): boolean {
   if (BREAKING_SPACE_PATTERN.test(prevChar)) {
     // Not a no-break space (U+00A0, etc.)
@@ -844,7 +844,7 @@ function isLineBreakOpportunity(
     (FULLWIDTH_CLOSING_PATTERN.test(prevChar) ||
       (IDEOGRAPH_LINE_END_PATTERN.test(prevChar) &&
         IDEOGRAPH_LINE_START_PATTERN.test(char) &&
-        breaksIdeographs()))
+        breaksIdeographs))
   );
 }
 
@@ -880,6 +880,16 @@ function isOnDifferentLines(
 }
 
 /**
+ * Check if the text with the style does not wrap at soft wrap opportunities.
+ */
+function isNonWrapping(style: CSSStyleDeclaration): boolean {
+  return (
+    style.getPropertyValue("text-wrap-mode") === "nowrap" ||
+    /^(nowrap|pre)$/.test(style.whiteSpace)
+  );
+}
+
+/**
  * Check if the punctuation from the offset to the end offset is at the start
  * of a line together with the preceding characters that may not be separated
  * from it by a line break, so that it may have been moved to the next line
@@ -893,25 +903,29 @@ function isNearLineStart(
   end: number,
   vertical: boolean,
 ): boolean {
+  const style = textNode.ownerDocument.defaultView.getComputedStyle(
+    textNode.parentElement,
+  );
+  if (isNonWrapping(style)) {
+    // No line break opportunity in the text: it may have been moved to the
+    // next line with the preceding text in other nodes
+    return true;
+  }
+  const breaksIdeographs = ["normal", "break-all", "break-word"].includes(
+    style.wordBreak,
+  );
   const text = textNode.data;
   // Characters (with combining marks) before the punctuation within a
   // bounded range
   const chars =
     text.slice(Math.max(0, start - 256), start).match(/[^]\p{M}*/gu) ?? [];
-  let breaksIdeographs: boolean | undefined;
-  const checkBreaksIdeographs = (): boolean =>
-    (breaksIdeographs ??= ["normal", "break-all", "break-word"].includes(
-      textNode.ownerDocument.defaultView.getComputedStyle(
-        textNode.parentElement,
-      ).wordBreak,
-    ));
   // Find the start of the run of characters ending with the punctuation, in
   // which no line break opportunity is detected
   let i = chars.length;
   let runStart = start;
   for (let char = text.slice(start, end); i > 0; i--) {
     const prevChar = chars[i - 1];
-    if (isLineBreakOpportunity(prevChar, char, checkBreaksIdeographs)) {
+    if (isLineBreakOpportunity(prevChar, char, breaksIdeographs)) {
       break;
     }
     runStart -= prevChar.length;
@@ -2102,6 +2116,26 @@ export class TextSpacingPolyfill {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
       }
 
+      // Set the closing punctuation half-width if it then moves to the end of
+      // the previous line (allow-end). `viv-ts-auto` sets a space after it to
+      // keep it full-width in the middle of a line, but the space does not
+      // hang at the end of a line in nonwrapping text, so `viv-ts-trim` is
+      // tried there.
+      function trimIfMovedToLineEnd(isLast: boolean): void {
+        const linePos = linePosition();
+        outerElem.className = "viv-ts-auto";
+        if (linePos !== linePosition()) {
+          return;
+        }
+        outerElem.className = "";
+        if (isNonWrapping(document.defaultView.getComputedStyle(outerElem))) {
+          outerElem.className = "viv-ts-trim";
+          if (linePos === linePosition() || (!isLast && !isAtEndOfLine())) {
+            outerElem.className = "";
+          }
+        }
+      }
+
       // The classes set below reduce the advance of the punctuation by
       // `--viv-ts-shift` (see VivliostylePolyfillCss): the closing
       // punctuation gets negative margin-inline-start, and its glyph is
@@ -2194,10 +2228,7 @@ export class TextSpacingPolyfill {
             } else if (spacingTrim.trimEnd) {
               outerElem.className = "viv-ts-trim";
             } else if (spacingTrim.allowEnd) {
-              outerElem.className = "viv-ts-auto";
-              if (linePos === linePosition()) {
-                outerElem.className = "";
-              }
+              trimIfMovedToLineEnd(true);
             } else {
               outerElem.className = "viv-ts-space";
             }
@@ -2254,11 +2285,7 @@ export class TextSpacingPolyfill {
                 outerElem.className = "viv-ts-auto";
               }
             } else {
-              const linePos = linePosition();
-              outerElem.className = "viv-ts-auto";
-              if (linePos === linePosition()) {
-                outerElem.className = "";
-              }
+              trimIfMovedToLineEnd(false);
             }
           }
         }

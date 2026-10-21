@@ -237,8 +237,15 @@ describe("text-polyfill", function () {
      * the line, where it fits only at half-width (allow-end) and the run of
      * the text that may not be separated from it by a line break moves to the
      * next line otherwise.
+     * @param html the HTML of the text, if it has markup
+     * @param className the class of the punctuation set half-width
      */
-    function expectHalfWidthAtLineEnd(firstLine, nextLine) {
+    function expectHalfWidthAtLineEnd(
+      firstLine,
+      nextLine,
+      html = `${firstLine}。${nextLine}`,
+      className = "viv-ts-auto",
+    ) {
       element.style.width = "auto";
       element.textContent = "。";
       if (!NativeTextSpacing.supportsTrim(element, "normal", "ja", false)) {
@@ -255,14 +262,14 @@ describe("text-polyfill", function () {
       style.textContent = VivliostylePolyfillCss;
       document.head.appendChild(style);
       try {
-        layout(`${firstLine}。${nextLine}`, {
+        layout(html, {
           "text-autospace": "no-autospace",
           "text-spacing-trim": "normal",
         });
         const close = Array.from(element.querySelectorAll("viv-ts-close")).find(
           (elem) => elem.textContent === "。",
         );
-        expect(close?.className).toBe("viv-ts-auto");
+        expect(close?.className).toBe(className);
         const range = document.createRange();
         range.selectNodeContents(element.firstChild);
         expect(close.getBoundingClientRect().top).toBeCloseTo(
@@ -285,6 +292,17 @@ describe("text-polyfill", function () {
     it("sets the punctuation after ideographs with keep-all half-width at the end of a line", function () {
       element.style.wordBreak = "keep-all";
       expectHalfWidthAtLineEnd("さしすせそ、あいうえおかきくけ", "たちつてと");
+    });
+
+    it("sets the punctuation in nonwrapping text half-width at the end of a line", function () {
+      // The space after the punctuation set by `viv-ts-auto` does not hang at
+      // the end of a line in nonwrapping text
+      expectHalfWidthAtLineEnd(
+        "ああいうえおかきくけ",
+        "さしす",
+        'ああ<span style="white-space:nowrap">いうえおかきくけ。</span>さしす',
+        "viv-ts-trim",
+      );
     });
 
     it("preserves the offsets of split text nodes", function () {
