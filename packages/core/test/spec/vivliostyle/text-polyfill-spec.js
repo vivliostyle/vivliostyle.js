@@ -302,6 +302,22 @@ describe("text-polyfill", function () {
       expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
     });
 
+    it("does not insert the spacing between elements with normal in a parent with no-autospace", function () {
+      // Both children enable the native autospace, which would insert the
+      // spacing at the boundary
+      layout(`<span ${normal}>日本</span><span ${normal}>ABC日本</span>`);
+      const spans = element.querySelectorAll("span");
+      if (NativeTextSpacing.supportsAutospace(document, "normal")) {
+        expect(spans[1].style.getPropertyValue("text-autospace")).toBe(
+          "no-autospace",
+        );
+      }
+      // Only the spacing inside the second element is inserted
+      const thinSps = element.querySelectorAll("viv-ts-thin-sp");
+      expect(thinSps.length).toBe(1);
+      expect(thinSps[0].parentNode).toBe(spans[1]);
+    });
+
     it("inserts the spacing outside an element with no-autospace that contains ideographs", function () {
       layout(`<span ${none}>日本</span>abc`, { "text-autospace": "normal" });
       const thinSp = element.querySelector("viv-ts-thin-sp");
@@ -390,6 +406,54 @@ describe("text-polyfill", function () {
       expect(
         NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
       ).toBe(false);
+    });
+
+    it("checks a pair of punctuation across elements with different fonts", function () {
+      if (!hasTrimProperty) {
+        pending("text-spacing-trim unavailable");
+      }
+      element.innerHTML =
+        '漢。<span style="font-family: probe-a">「漢</span>' +
+        '<span style="font-family: probe-b">「漢</span>';
+      const [span1, span2] = element.querySelectorAll("span");
+      // Only punctuation from the same font is trimmed
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          const fonts = new Set(
+            [...this.children].map((child) => child.style.fontFamily),
+          );
+          const trims =
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+            fonts.size <= 1;
+          return new DOMRect(
+            0,
+            0,
+            this.textContent.length * 16 - (trims ? 8 : 0),
+            16,
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrimPair(
+          element,
+          "。",
+          span1,
+          "「",
+          "ja",
+          false,
+        ),
+      ).toBe(false);
+      span2.style.fontFamily = "probe-a";
+      expect(
+        NativeTextSpacing.supportsTrimPair(
+          span1,
+          "「",
+          span2,
+          "「",
+          "ja",
+          false,
+        ),
+      ).toBe(true);
     });
 
     it("uses a separate font capability check for vertical text", function () {

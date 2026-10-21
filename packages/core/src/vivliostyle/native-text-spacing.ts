@@ -133,6 +133,65 @@ function isTrimmedPair(
   );
 }
 
+// The properties that affect the glyphs and the trimming of punctuation
+const TRIM_PROBE_PROPERTIES = [
+  "font-family",
+  "font-size",
+  "font-style",
+  "font-weight",
+  "font-stretch",
+  "font-feature-settings",
+  "font-variation-settings",
+  "font-kerning",
+  "font-optical-sizing",
+  "font-size-adjust",
+  "font-synthesis",
+  "letter-spacing",
+  "word-spacing",
+  "text-transform",
+  "font-variant-east-asian",
+  "font-variant-ligatures",
+  "writing-mode",
+  "text-orientation",
+  "text-combine-upright",
+  "direction",
+];
+
+function getTrimCache(document: Document): Map<string, boolean> {
+  let cache = trimCaches.get(document);
+  if (!cache) {
+    cache = new Map();
+    trimCaches.set(document, cache);
+    document.fonts?.addEventListener("loadingdone", () => cache.clear());
+    document.fonts?.addEventListener("loadingerror", () => cache.clear());
+  }
+  return cache;
+}
+
+/**
+ * Create an element to measure text with the style values of
+ * TRIM_PROBE_PROPERTIES.
+ */
+function createTrimProbe(
+  document: Document,
+  tagName: string,
+  values: string[],
+  lang: string | null,
+): HTMLElement {
+  const probe = document.createElement(tagName);
+  probe.style.cssText =
+    "all:initial;position:absolute;visibility:hidden;display:block;" +
+    "white-space:pre;width:max-content;height:max-content;" +
+    "text-autospace:no-autospace;";
+  TRIM_PROBE_PROPERTIES.forEach((p, i) =>
+    probe.style.setProperty(p, values[i]),
+  );
+  if (lang) {
+    probe.lang = lang;
+  }
+  return probe;
+}
+
 /**
  * Check if the native text-spacing-trim can be used for the value and the
  * punctuation in the element, checking the actual font cascade, including
@@ -152,37 +211,9 @@ export function supportsTrim(
   }
   const document = element.ownerDocument;
   const style = document.defaultView.getComputedStyle(element);
-  const properties = [
-    "font-family",
-    "font-size",
-    "font-style",
-    "font-weight",
-    "font-stretch",
-    "font-feature-settings",
-    "font-variation-settings",
-    "font-kerning",
-    "font-optical-sizing",
-    "font-size-adjust",
-    "font-synthesis",
-    "letter-spacing",
-    "word-spacing",
-    "text-transform",
-    "font-variant-east-asian",
-    "font-variant-ligatures",
-    "writing-mode",
-    "text-orientation",
-    "text-combine-upright",
-    "direction",
-  ];
-  const values = properties.map((p) => style.getPropertyValue(p));
+  const values = TRIM_PROBE_PROPERTIES.map((p) => style.getPropertyValue(p));
   const key = JSON.stringify([lang, vertical, ...values]);
-  let cache = trimCaches.get(document);
-  if (!cache) {
-    cache = new Map();
-    trimCaches.set(document, cache);
-    document.fonts?.addEventListener("loadingdone", () => cache.clear());
-    document.fonts?.addEventListener("loadingerror", () => cache.clear());
-  }
+  const cache = getTrimCache(document);
   const fontSize = parseFloat(style.fontSize);
   const text = element.textContent;
   // Test every punctuation used in the element, not just a representative
@@ -204,15 +235,7 @@ export function supportsTrim(
   let probe: HTMLElement | null = null;
   const measure = (content: string, trim: string): number => {
     if (!probe) {
-      probe = document.createElement("span");
-      probe.style.cssText =
-        "all:initial;position:absolute;visibility:hidden;display:block;" +
-        "white-space:pre;width:max-content;height:max-content;" +
-        "text-autospace:no-autospace;";
-      properties.forEach((p, i) => probe.style.setProperty(p, values[i]));
-      if (lang) {
-        probe.lang = lang;
-      }
+      probe = createTrimProbe(document, "span", values, lang);
       document.body.appendChild(probe);
     }
     probe.style.setProperty("text-spacing-trim", trim);
@@ -237,8 +260,8 @@ export function supportsTrim(
         supported =
           !isFullWidth(first) ||
           !isFullWidth(second) ||
-          measure(`\u6F22${pair}\u6F22`, "space-all") -
-            measure(`\u6F22${pair}\u6F22`, "normal") >
+          measure(`漢${pair}漢`, "space-all") -
+            measure(`漢${pair}漢`, "normal") >
             fontSize * 0.25;
         if (document.fonts?.status !== "loading") {
           cache.set(pairKey, supported);
@@ -252,4 +275,77 @@ export function supportsTrim(
     probe?.remove();
   }
   return true;
+}
+
+/**
+ * Check if the native text-spacing-trim trims the pair of adjacent
+ * punctuation at the boundary of the text in the two elements, with their
+ * actual styles. The browser may not trim punctuation adjacent to one from
+ * another font.
+ */
+export function supportsTrimPair(
+  element1: HTMLElement,
+  char1: string,
+  element2: HTMLElement,
+  char2: string,
+  lang: string | null,
+  vertical: boolean,
+): boolean {
+  if (!isTrimmedPair(char1, char2, lang)) {
+    return true;
+  }
+  const document = element1.ownerDocument;
+  const window = document.defaultView;
+  const style1 = window.getComputedStyle(element1);
+  const style2 = window.getComputedStyle(element2);
+  const values1 = TRIM_PROBE_PROPERTIES.map((p) => style1.getPropertyValue(p));
+  const values2 = TRIM_PROBE_PROPERTIES.map((p) => style2.getPropertyValue(p));
+  const key = JSON.stringify([lang, vertical, values1, values2, char1, char2]);
+  const cache = getTrimCache(document);
+  const cached = cache.get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const probe = createTrimProbe(document, "div", values1, lang);
+  const run1 = createTrimProbe(document, "span", values1, lang);
+  const run2 = createTrimProbe(document, "span", values2, lang);
+  run1.style.display = run2.style.display = "inline";
+  run1.style.position = run2.style.position = "static";
+  probe.append(run1, run2);
+  document.body.appendChild(probe);
+  const measure = (trim: string): number => {
+    probe.style.setProperty("text-spacing-trim", trim);
+    run1.style.setProperty("text-spacing-trim", trim);
+    run2.style.setProperty("text-spacing-trim", trim);
+    const rect = probe.getBoundingClientRect();
+    return vertical ? rect.height : rect.width;
+  };
+  const fontSize = Math.min(
+    parseFloat(style1.fontSize),
+    parseFloat(style2.fontSize),
+  );
+  let supported: boolean;
+  try {
+    // Narrow punctuation needs no trimming
+    run1.textContent = char1;
+    run2.textContent = "";
+    const isFullWidth1 =
+      measure("space-all") > parseFloat(style1.fontSize) * 0.7;
+    run1.textContent = "";
+    run2.textContent = char2;
+    const isFullWidth2 =
+      measure("space-all") > parseFloat(style2.fontSize) * 0.7;
+    run1.textContent = `漢${char1}`;
+    run2.textContent = `${char2}漢`;
+    supported =
+      !isFullWidth1 ||
+      !isFullWidth2 ||
+      measure("space-all") - measure("normal") > fontSize * 0.25;
+  } finally {
+    probe.remove();
+  }
+  if (document.fonts?.status !== "loading") {
+    cache.set(key, supported);
+  }
+  return supported;
 }

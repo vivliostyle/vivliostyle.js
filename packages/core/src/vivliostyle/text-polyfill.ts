@@ -703,6 +703,69 @@ const IDEOGRAPH_START_PATTERN =
 const IDEOGRAPH_END_PATTERN =
   /(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*$/u;
 
+/**
+ * Get the type of text-autospace (`ideograph-alpha` or `ideograph-numeric`)
+ * that applies at the boundary between the end of text1 and the start of
+ * text2, or null if none applies.
+ */
+function getAutospaceType(
+  text1: string,
+  text2: string,
+): "ideograph-alpha" | "ideograph-numeric" | null {
+  if (IDEOGRAPH_END_PATTERN.test(text1)) {
+    return /^(?![\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠])\p{L}/u.test(text2)
+      ? "ideograph-alpha"
+      : /^(?![！-｠])\p{Nd}/u.test(text2)
+        ? "ideograph-numeric"
+        : null;
+  }
+  if (IDEOGRAPH_START_PATTERN.test(text2)) {
+    return /(?![\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠])\p{L}\p{M}*$/u.test(text1)
+      ? "ideograph-alpha"
+      : /(?![！-｠])\p{Nd}\p{M}*$/u.test(text1)
+        ? "ideograph-numeric"
+        : null;
+  }
+  return null;
+}
+
+function isAutospaceEnabled(
+  autospace: Autospace,
+  type: "ideograph-alpha" | "ideograph-numeric",
+): boolean {
+  return type === "ideograph-alpha"
+    ? autospace.ideographAlpha
+    : autospace.ideographNumeric;
+}
+
+/**
+ * Get the text-autospace of the container element of the text, or the
+ * fallback if the container is not found in the ancestors of the text.
+ */
+function getAutospaceOf(
+  textP: Vtree.NodeContext,
+  container: Element,
+  fallback: Autospace,
+): Autospace {
+  for (let p = textP.parent; p; p = p.parent) {
+    if (p.viewNode === container) {
+      return autospaceFromPropertyValue(p.inheritedProps["text-autospace"]);
+    }
+  }
+  return fallback;
+}
+
+/**
+ * Get the innermost element containing both nodes.
+ */
+function getCommonAncestor(node1: Node, node2: Node): Element | null {
+  let container = node1.parentElement;
+  while (container && !container.contains(node2)) {
+    container = container.parentElement;
+  }
+  return container;
+}
+
 const OPENING_PUNCTUATION_START_PATTERN =
   /^[ \t\r\n\f]*[‘“〝（［｛｟\u2329〈《「『【〔〖〘〚]\p{M}*/u;
 
@@ -1284,6 +1347,77 @@ export class TextSpacingPolyfill {
         fallbackBlockContainers.add(blockContainer);
       }
     }
+    // Check the boundaries between the text in different elements, which the
+    // checks for each element do not cover
+    let prevTextP: Vtree.TextNodeContext | null = null;
+    for (const p of checkPoints) {
+      const textP = asTextCheckPoint(p);
+      if (
+        !textP ||
+        !textP.viewNode.parentNode ||
+        Vtree.canIgnore(textP.viewNode, textP.whitespace)
+      ) {
+        continue;
+      }
+      const prevP = prevTextP;
+      prevTextP = textP;
+      const element1 = prevP?.viewNode.parentElement;
+      const element2 = textP.viewNode.parentElement;
+      const spacing1 = spacings.get(element1);
+      const spacing2 = spacings.get(element2);
+      const blockContainer = blockContainers.get(element2);
+      if (
+        element1 === element2 ||
+        !spacing1 ||
+        !spacing2 ||
+        blockContainers.get(element1) !== blockContainer
+      ) {
+        continue;
+      }
+      const text1 = prevP.viewNode.data;
+      const text2 = textP.viewNode.data;
+      // The browser may not trim punctuation adjacent to one from another
+      // font
+      if (
+        spacing1.nativeTrim &&
+        spacing2.nativeTrim &&
+        !fallbackBlockContainers.has(blockContainer) &&
+        !NativeTextSpacing.supportsTrimPair(
+          element1,
+          text1.match(/.\p{M}*$/su)?.[0][0] ?? "",
+          element2,
+          text2[0] ?? "",
+          getLang(textP),
+          textP.vertical,
+        )
+      ) {
+        fallbackBlockContainers.add(blockContainer);
+      }
+      // The native text-autospace inserts the spacing at an element boundary
+      // if it is enabled on both sides, even if it is disabled on the
+      // innermost element containing the boundary (see processTextSpacing()).
+      // Use the polyfill for the text on one side then.
+      const type = getAutospaceType(text1, text2);
+      if (
+        type &&
+        spacing1.nativeAutospace &&
+        spacing2.nativeAutospace &&
+        isAutospaceEnabled(spacing1.autospace, type) &&
+        isAutospaceEnabled(spacing2.autospace, type)
+      ) {
+        const container = getCommonAncestor(prevP.viewNode, textP.viewNode);
+        if (
+          container &&
+          !isAutospaceEnabled(
+            getAutospaceOf(textP, container, spacing2.autospace),
+            type,
+          )
+        ) {
+          spacing2.nativeAutospace = false;
+          element2.style.setProperty("text-autospace", "no-autospace");
+        }
+      }
+    }
     for (const [element, spacing] of spacings) {
       setNativeTrim(
         element,
@@ -1589,17 +1723,8 @@ export class TextSpacingPolyfill {
               }
             }
           }
-          // Get the text-autospace of the element containing the text node
-          const autospaceAt = (container: Element): Autospace => {
-            for (let pp = textP.parent; pp; pp = pp.parent) {
-              if (pp.viewNode === container) {
-                return autospaceFromPropertyValue(
-                  pp.inheritedProps["text-autospace"],
-                );
-              }
-            }
-            return spacing.autospace;
-          };
+          const autospaceAt = (container: Element): Autospace =>
+            getAutospaceOf(textP, container, spacing.autospace);
           const columnOver = this.processTextSpacing(
             textP.viewNode,
             isFirstAfterBreak,
@@ -2065,33 +2190,19 @@ export class TextSpacingPolyfill {
     // Text 4 § 8.4). The boundary is processed with the text node on the
     // ideograph side.
     function insertAutospace(adjacentNode: Node, isAfter: boolean): void {
-      let container = textNode.parentElement;
-      while (container && !container.contains(adjacentNode)) {
-        container = container.parentElement;
-      }
+      const container = getCommonAncestor(textNode, adjacentNode);
       if (!container) {
         return;
       }
-      const adjacentText = adjacentNode.textContent;
-      const type = (isAfter
-        ? /^(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])\p{L}/u
-        : /(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])\p{L}\p{M}*$/u
-      ).test(adjacentText)
-        ? "ideograph-alpha"
-        : (isAfter
-              ? /^(?![\uFF01-\uFF60])\p{Nd}/u
-              : /(?![\uFF01-\uFF60])\p{Nd}\p{M}*$/u
-            ).test(adjacentText)
-          ? "ideograph-numeric"
-          : null;
+      const type = isAfter
+        ? getAutospaceType(text, adjacentNode.textContent)
+        : getAutospaceType(adjacentNode.textContent, text);
       if (!type) {
         return;
       }
       const autospace = autospaceAt(container);
       if (
-        !(type === "ideograph-alpha"
-          ? autospace.ideographAlpha
-          : autospace.ideographNumeric) ||
+        !isAutospaceEnabled(autospace, type) ||
         (vertical &&
           adjacentNode.parentElement !== null &&
           checkUpright(adjacentNode.parentElement)) ||

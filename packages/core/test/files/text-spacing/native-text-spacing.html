@@ -60,6 +60,9 @@
       .font-fallback {
         font-family: "BIZ UDGothic", "UD Digi Kyokasho N-R", "Meiryo", sans-serif;
       }
+      .sans {
+        font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+      }
       .vertical {
         writing-mode: vertical-rl;
         height: 12em;
@@ -81,6 +84,8 @@
     <p class="trim-start">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
     <p class="trim-both">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
     <p class="font-fallback">「非対応フォント」「括弧」、句読点。日本語ABCと123の混植。</p>
+    <p>括弧。<span class="sans">「別のフォント」</span>「括弧」</p>
+    <p>括弧。<span class="font-fallback">「別のフォント」</span>「括弧」</p>
     <p class="alpha">日本語ABC日本語123日本語<span>DEF</span>日本語。</p>
     <p class="hanging">「ぶら下げ処理と詰め処理を組み合わせる。括弧と句読点の配置を確認する。」</p>
 
@@ -90,6 +95,8 @@
     <p><em>日本</em>abc<em>語</em>、<span class="no-autospace">日本</span>abc</p>
     <p>No spacing is expected below, since the parent has <code>text-autospace: no-autospace</code>.</p>
     <p class="no-autospace">abc<span class="normal">日本</span>def</p>
+    <p>Spacing is expected only between C and 日 below (in the second element).</p>
+    <p class="no-autospace"><span class="normal">日本</span><span class="normal">ABC日本</span></p>
 
     <h2>3. Closing punctuation at the end of a line</h2>
     <p>In the boxes of width 9.5em, the 、 and 。 should be set half-width and stay at the end of the first line.</p>
