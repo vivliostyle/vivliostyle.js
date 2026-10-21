@@ -22,6 +22,9 @@ import fastdiff from "fast-diff";
 
 export type Change = (number | string)[];
 
+// The type of a change of the text deleted from the original text
+export const DELETE = fastdiff.DELETE;
+
 export function diffChars(originalText: string, newText: string): Change[] {
   return fastdiff(originalText, newText, 0);
 }

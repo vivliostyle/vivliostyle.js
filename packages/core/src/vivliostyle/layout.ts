@@ -5452,9 +5452,22 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
         : "",
     );
     if (zwj) {
-      const p = nodeContext.preprocessedTextContent[0][1] as string;
-      nodeContext.preprocessedTextContent[0][1] =
-        p.slice(0, viewIndex + 1) + zwj + p.slice(viewIndex + 1);
+      // Insert it after the soft hyphen in the preprocessed text of the whole
+      // source node, from which the text continues. The view text node may
+      // start in the middle of the source node (e.g., when the text continues
+      // from the previous page, or is split by TextSpacingPolyfill).
+      let index = nodeContext.offsetInNode + viewIndex + 1;
+      for (const change of nodeContext.preprocessedTextContent) {
+        const s = change[1] as string;
+        if (change[0] === Diff.DELETE) {
+          continue;
+        }
+        if (index <= s.length) {
+          change[1] = s.slice(0, index) + zwj + s.slice(index);
+          break;
+        }
+        index -= s.length;
+      }
     }
     return viewIndex + 1;
   }
