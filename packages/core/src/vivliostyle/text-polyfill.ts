@@ -1062,8 +1062,15 @@ function getSplitOffsets(
 ): number[] {
   const text = textNode.data;
   const offsets: number[] = [];
+  // Scan only the text up to the limit, since a long text node is processed
+  // again in each column. The combining marks after the limit and the
+  // following code point are included for the patterns to match the same.
+  const scannedText = text.slice(
+    0,
+    limit + text.slice(limit).match(/^[\p{M}\uDC00-\uDFFF]*/u)[0].length + 2,
+  );
   function addMatchEnds(pattern: RegExp): void {
-    for (const match of text.matchAll(pattern)) {
+    for (const match of scannedText.matchAll(pattern)) {
       offsets.push(match.index + match[0].length);
     }
   }
@@ -1085,7 +1092,12 @@ function getSplitOffsets(
     if (position.mayBeFirstInBlock && hangingPunctuation.first) {
       addMatch(text.match(HANGING_FIRST_START_PATTERN));
     }
-    if (position.mayBeLastInBlock && hangingPunctuation.last) {
+    // If the text continues beyond the limit, so does its last punctuation
+    if (
+      position.mayBeLastInBlock &&
+      hangingPunctuation.last &&
+      limit >= text.length
+    ) {
       const match = text.match(HANGING_LAST_END_PATTERN);
       if (match) {
         offsets.push(match.index, match.index + match[0].length);
