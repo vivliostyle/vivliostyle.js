@@ -580,6 +580,8 @@ type Spacing = {
   nativeTrim: boolean;
   hangingPunctuation: HangingPunctuation;
   chromiumVoTrFallback: boolean;
+  // The normalized language of the text (see normalizeLang())
+  lang: string | null;
 };
 
 function isSpacingNone(spacing: Spacing): boolean {
@@ -641,6 +643,7 @@ function resolveSpacing(
     nativeTrim,
     hangingPunctuation,
     chromiumVoTrFallback,
+    lang,
   };
 }
 
@@ -994,13 +997,12 @@ const HANGING_END_PATTERN = /^[、。，．､｡]\p{M}*$/u;
 function findLineEndPunctuation(
   textNode: Text,
   spacing: Spacing,
-  lang: string | null,
   vertical: boolean,
   from: number,
   anywhere: boolean,
 ): [number, number] | null {
   const { allowEnd, trimEnd } = spacing.spacingTrim;
-  const { hangingPunctuation } = spacing;
+  const { hangingPunctuation, lang } = spacing;
   const hangsEnd = hangingPunctuation.forceEnd || hangingPunctuation.allowEnd;
   if (!spacing.nativeTrim || !(allowEnd || trimEnd || hangsEnd)) {
     return null;
@@ -1041,8 +1043,6 @@ function findLineEndPunctuation(
 function getSplitOffsets(
   textNode: Text,
   spacing: Spacing,
-  lang: string | null,
-  vertical: boolean,
   position: TextPosition,
   limit: number,
 ): number[] {
@@ -1191,13 +1191,12 @@ export class TextSpacingPolyfill {
     lang: string | null,
     vertical: boolean,
   ): void {
-    lang = normalizeLang(lang);
     const spacing = resolveSpacing(
       element,
       autospaceVal,
       spacingTrimVal,
       hangingPunctuationVal,
-      lang,
+      normalizeLang(lang),
       vertical,
     );
     setNativeTrim(element, spacing, spacing.nativeTrim);
@@ -1216,26 +1215,10 @@ export class TextSpacingPolyfill {
     // processed at the end of a line is split
     const findAllLineEndPunctuation = (node: Text): number[] => {
       const offsets: number[] = [];
-      for (
-        let found = findLineEndPunctuation(
-          node,
-          spacing,
-          lang,
-          vertical,
-          0,
-          true,
-        );
-        found;
-        found = findLineEndPunctuation(
-          node,
-          spacing,
-          lang,
-          vertical,
-          found[1],
-          true,
-        )
-      ) {
+      let found = findLineEndPunctuation(node, spacing, vertical, 0, true);
+      while (found) {
         offsets.push(...found);
+        found = findLineEndPunctuation(node, spacing, vertical, found[1], true);
       }
       return offsets;
     };
@@ -1255,8 +1238,6 @@ export class TextSpacingPolyfill {
           ...getSplitOffsets(
             node,
             spacing,
-            lang,
-            vertical,
             {
               mayBeFirstInBlock: i === 0,
               mayBeContinued: false,
@@ -1296,7 +1277,6 @@ export class TextSpacingPolyfill {
         nextNode,
         spacing,
         () => spacing.autospace,
-        lang,
         vertical,
       );
       prevNode = node;
@@ -1427,6 +1407,18 @@ export class TextSpacingPolyfill {
         : null;
     }
 
+    // Get the text check point to be processed: a text node in the block,
+    // not detached (see the deferred tails below) or ignorable
+    function getTextToProcess(
+      p: Vtree.RenderedNodeContext,
+    ): Vtree.TextNodeContext | null {
+      const textP = asTextCheckPoint(p);
+      return textP?.viewNode.parentNode &&
+        !Vtree.canIgnore(textP.viewNode, textP.whitespace)
+        ? textP
+        : null;
+    }
+
     function getLang(textP: Vtree.TextNodeContext): string | null {
       return normalizeLang(
         textP.lang ??
@@ -1439,7 +1431,9 @@ export class TextSpacingPolyfill {
     // Resolve the text spacing of the text in each element. The native
     // text-spacing-trim is used only if all the text in the inline formatting
     // context can use it, since the browser cannot trim the punctuation
-    // adjacent to the punctuation trimmed by the polyfill.
+    // adjacent to the punctuation trimmed by the polyfill. The elements of
+    // ignorable white space are included, since a different style from the
+    // adjacent text may change the shaping of the text.
     const spacings = new Map<HTMLElement, Spacing>();
     const blockContainers = new Map<HTMLElement, HTMLElement>();
     const fallbackBlockContainers = new Set<HTMLElement>();
@@ -1474,12 +1468,8 @@ export class TextSpacingPolyfill {
     // checks for each element do not cover
     let prevTextP: Vtree.TextNodeContext | null = null;
     for (const p of checkPoints) {
-      const textP = asTextCheckPoint(p);
-      if (
-        !textP ||
-        !textP.viewNode.parentNode ||
-        Vtree.canIgnore(textP.viewNode, textP.whitespace)
-      ) {
+      const textP = getTextToProcess(p);
+      if (!textP) {
         continue;
       }
       const prevP = prevTextP;
@@ -1510,7 +1500,7 @@ export class TextSpacingPolyfill {
           text1.match(/.\p{M}*$/su)?.[0][0] ?? "",
           element2,
           text2[0] ?? "",
-          getLang(textP),
+          spacing2.lang,
           textP.vertical,
         )
       ) {
@@ -1550,30 +1540,51 @@ export class TextSpacingPolyfill {
       );
     }
 
-    // Split the text nodes where the polyfill needs character boundaries.
-    // All the offsets are found before splitting, which changes the layout.
     const reshapeTargets = new Set<HTMLElement>();
     const splitBlockContainers = new Set<HTMLElement>();
+    // Split the text check point at the index, and update the after check
+    // point of the text node to refer to the last part
+    const splitAt = (
+      index: number,
+      offsets: number[],
+    ): Vtree.RenderedNodeContext[] => {
+      const original = checkPoints[index].viewNode;
+      const blockContainer = blockContainers.get(original.parentElement);
+      const points = splitCheckPoint(checkPoints[index], offsets);
+      checkPoints.splice(index, 1, ...points);
+      for (let j = index + points.length; j < checkPoints.length; j++) {
+        if (checkPoints[j].after && checkPoints[j].viewNode === original) {
+          const after = checkPoints[j].copy().modify();
+          after.viewNode = points[points.length - 1].viewNode;
+          checkPoints[j] = after;
+          break;
+        }
+      }
+      if (blockContainer) {
+        splitBlockContainers.add(blockContainer);
+        reshapeTargets.add(blockContainer);
+      }
+      return points;
+    };
+
+    // Split the text nodes where the polyfill needs character boundaries.
+    // All the offsets are found before splitting, which changes the layout.
     const splits: { index: number; offsets: number[]; deferTail: boolean }[] =
       [];
-    const isTextToProcess = (p: Vtree.RenderedNodeContext): boolean => {
-      const textP = asTextCheckPoint(p);
-      return (
-        !!textP &&
-        !!textP.viewNode.parentNode &&
-        !Vtree.canIgnore(textP.viewNode, textP.whitespace)
-      );
-    };
-    const firstTextIndex = checkPoints.findIndex(isTextToProcess);
+    const firstTextIndex = checkPoints.findIndex(getTextToProcess);
     let lastTextIndex = checkPoints.length - 1;
-    while (lastTextIndex >= 0 && !isTextToProcess(checkPoints[lastTextIndex])) {
+    while (
+      lastTextIndex >= 0 &&
+      !getTextToProcess(checkPoints[lastTextIndex])
+    ) {
       lastTextIndex--;
     }
     checkPoints.forEach((p, index) => {
-      if (!isTextToProcess(p)) {
+      const textP = getTextToProcess(p);
+      const spacing = spacings.get(textP?.viewNode.parentElement);
+      if (!spacing || isSpacingNone(spacing)) {
         return;
       }
-      const textP = asTextCheckPoint(p);
       // The first or last text in an inline-block may be at the start or end
       // of the block (see the main loop below)
       const inInlineBlock = textP.parent.display === "inline-block";
@@ -1583,20 +1594,9 @@ export class TextSpacingPolyfill {
         mayBeContinued: index === firstTextIndex && !isAfterForcedLineBreak,
         mayBeLastInBlock: index === lastTextIndex || inInlineBlock,
       };
-      const spacing = spacings.get(textP.viewNode.parentElement);
-      if (!spacing || isSpacingNone(spacing)) {
-        return;
-      }
       const textNode = textP.viewNode;
       let limit = getLookaheadLimit(textNode, textP.vertical);
-      const offsets = getSplitOffsets(
-        textNode,
-        spacing,
-        getLang(textP),
-        textP.vertical,
-        position,
-        limit,
-      );
+      const offsets = getSplitOffsets(textNode, spacing, position, limit);
       // Separate the text beyond the lookahead, at a character boundary
       limit += textNode.data
         .slice(limit)
@@ -1609,31 +1609,12 @@ export class TextSpacingPolyfill {
         splits.push({ index, offsets, deferTail });
       }
     });
-    const splitNodes = new Map<Node, Text>();
     const deferredNodes: Text[] = [];
     for (const { index, offsets, deferTail } of splits.reverse()) {
-      const points = splitCheckPoint(checkPoints[index], offsets);
-      const lastNode = points[points.length - 1].viewNode as Text;
-      splitNodes.set(checkPoints[index].viewNode, lastNode);
+      const points = splitAt(index, offsets);
       if (deferTail) {
-        deferredNodes.push(lastNode);
+        deferredNodes.push(points[points.length - 1].viewNode as Text);
       }
-      checkPoints.splice(index, 1, ...points);
-      const blockContainer = findBlockContainer(lastNode);
-      if (blockContainer) {
-        splitBlockContainers.add(blockContainer);
-        reshapeTargets.add(blockContainer);
-      }
-    }
-    if (splitNodes.size) {
-      checkPoints.forEach((p, index) => {
-        const lastNode = p.after && splitNodes.get(p.viewNode);
-        if (lastNode) {
-          const after = p.copy().modify();
-          after.viewNode = lastNode;
-          checkPoints[index] = after;
-        }
-      });
     }
 
     // The text beyond the lookahead is not needed while processing the text
@@ -1645,20 +1626,20 @@ export class TextSpacingPolyfill {
       return { node, placeholder };
     });
 
+    // The text checked for the punctuation to be processed at the end of a
+    // line (see below)
+    const lineEndChecked = new Set<Node>();
     let iFirst = -1;
     try {
       for (let i = 0; i < checkPoints.length; i++) {
         const p = checkPoints[i];
-        const textP = asTextCheckPoint(p);
-        if (
-          textP &&
-          textP.viewNode.parentNode &&
-          !Vtree.canIgnore(textP.viewNode, textP.whitespace)
-        ) {
+        const textP = getTextToProcess(p);
+        if (textP) {
           if (iFirst < 0) {
             iFirst = i;
           }
-          const spacing = spacings.get(textP.viewNode.parentElement);
+          const element = textP.viewNode.parentElement;
+          const spacing = spacings.get(element);
           if (
             !spacing ||
             (isSpacingNone(spacing) &&
@@ -1675,38 +1656,28 @@ export class TextSpacingPolyfill {
           }
           // Separate the first punctuation that may need processing at the
           // end of a line, found with the layout after the preceding text has
-          // been processed, and process the text again from the first part
-          const found = findLineEndPunctuation(
-            textP.viewNode,
-            spacing,
-            getLang(textP),
-            textP.vertical,
-            0,
-            false,
-          );
+          // been processed, and process the text again from the first part.
+          // The parts up to the punctuation need not be checked again.
+          const found = lineEndChecked.has(textP.viewNode)
+            ? null
+            : findLineEndPunctuation(
+                textP.viewNode,
+                spacing,
+                textP.vertical,
+                0,
+                false,
+              );
           const foundOffsets =
             found?.filter(
               (offset) => offset > 0 && offset < textP.viewNode.length,
             ) ?? [];
           if (foundOffsets.length) {
-            const original = textP.viewNode;
-            const points = splitCheckPoint(p, foundOffsets);
-            checkPoints.splice(i, 1, ...points);
-            for (let j = i + points.length; j < checkPoints.length; j++) {
-              if (
-                checkPoints[j].after &&
-                checkPoints[j].viewNode === original
-              ) {
-                const after = checkPoints[j].copy().modify();
-                after.viewNode = points[points.length - 1].viewNode;
-                checkPoints[j] = after;
-                break;
+            let end = 0;
+            for (const point of splitAt(i, foundOffsets)) {
+              end += (point.viewNode as Text).length;
+              if (end <= found[1]) {
+                lineEndChecked.add(point.viewNode);
               }
-            }
-            const blockContainer = findBlockContainer(original);
-            if (blockContainer) {
-              splitBlockContainers.add(blockContainer);
-              reshapeTargets.add(blockContainer);
             }
             i--;
             continue;
@@ -1907,13 +1878,9 @@ export class TextSpacingPolyfill {
             nextNode,
             spacing,
             autospaceAt,
-            getLang(textP),
             textP.vertical,
           );
-          const blockContainer = findBlockContainer(textP.viewNode);
-          if (blockContainer) {
-            reshapeTargets.add(blockContainer);
-          }
+          reshapeTargets.add(blockContainers.get(element));
           if (columnOver > 0) {
             // Stop processing if the node is moved to next column
             // because it will be processed again in the next column.
@@ -1948,12 +1915,11 @@ export class TextSpacingPolyfill {
     nextNode: Node | null,
     spacing: Spacing,
     autospaceAt: (container: Element) => Autospace,
-    lang: string | null,
     vertical: boolean,
   ): number {
     const text = textNode.textContent;
     const document = textNode.ownerDocument;
-    const { spacingTrim, nativeTrim, hangingPunctuation } = spacing;
+    const { spacingTrim, nativeTrim, hangingPunctuation, lang } = spacing;
     let columnOver = 0;
 
     function isAtStartOfLine(): boolean {
@@ -2361,14 +2327,11 @@ export class TextSpacingPolyfill {
     // Text 4 § 8.4). The boundary is processed with the text node on the
     // ideograph side.
     function insertAutospace(adjacentNode: Node, isAfter: boolean): void {
-      const container = getCommonAncestor(textNode, adjacentNode);
-      if (!container) {
-        return;
-      }
       const type = isAfter
         ? getAutospaceType(text, adjacentNode.textContent)
         : getAutospaceType(adjacentNode.textContent, text);
-      if (!type) {
+      const container = type && getCommonAncestor(textNode, adjacentNode);
+      if (!container) {
         return;
       }
       const autospace = autospaceAt(container);

@@ -215,29 +215,32 @@ export function supportsTrim(
   if (value === "space-all") {
     return true;
   }
+  // Test every punctuation used in the element, not just a representative
+  // glyph from the first font: different characters can use different fonts.
+  // Test also the adjacent pairs of different punctuation, since the browser
+  // may not trim punctuation adjacent to one from another font.
+  const text = element.textContent;
+  const pairs = new Set<string>();
+  for (const char of text.match(PUNCTUATION_PATTERN) ?? []) {
+    if (isTrimmedPair(char, char, lang)) {
+      pairs.add(char + char);
+    }
+  }
+  for (const match of text.matchAll(PUNCTUATION_PAIR_PATTERN)) {
+    const [first, second] = match[1];
+    if (first !== second && isTrimmedPair(first, second, lang)) {
+      pairs.add(match[1]);
+    }
+  }
+  if (!pairs.size) {
+    return true;
+  }
   const document = element.ownerDocument;
   const style = document.defaultView.getComputedStyle(element);
   const values = TRIM_PROBE_PROPERTIES.map((p) => style.getPropertyValue(p));
   const key = JSON.stringify([lang, vertical, ...values]);
   const cache = getTrimCache(document);
   const fontSize = parseFloat(style.fontSize);
-  const text = element.textContent;
-  // Test every punctuation used in the element, not just a representative
-  // glyph from the first font: different characters can use different fonts.
-  // Test also the adjacent pairs of different punctuation, since the browser
-  // may not trim punctuation adjacent to one from another font.
-  const tests: [string, string][] = [];
-  for (const char of new Set(text.match(PUNCTUATION_PATTERN) ?? [])) {
-    if (isTrimmedPair(char, char, lang)) {
-      tests.push([char, char]);
-    }
-  }
-  for (const match of text.matchAll(PUNCTUATION_PAIR_PATTERN)) {
-    const [first, second] = [...match[1]];
-    if (first !== second && isTrimmedPair(first, second, lang)) {
-      tests.push([first, second]);
-    }
-  }
   let probe: HTMLElement | null = null;
   const measure = (content: string, trim: string): number => {
     if (!probe) {
@@ -250,13 +253,7 @@ export function supportsTrim(
     return vertical ? rect.height : rect.width;
   };
   try {
-    const testedPairs = new Set<string>();
-    for (const [first, second] of tests) {
-      const pair = first + second;
-      if (testedPairs.has(pair)) {
-        continue;
-      }
-      testedPairs.add(pair);
+    for (const pair of pairs) {
       const pairKey = `${key}:${pair}`;
       let supported = cache.get(pairKey);
       if (supported === undefined) {
@@ -264,8 +261,8 @@ export function supportsTrim(
         const isFullWidth = (char: string) =>
           measure(char, "space-all") > fontSize * 0.7;
         supported =
-          !isFullWidth(first) ||
-          !isFullWidth(second) ||
+          !isFullWidth(pair[0]) ||
+          !isFullWidth(pair[1]) ||
           measure(`漢${pair}漢`, "space-all") -
             measure(`漢${pair}漢`, "normal") >
             fontSize * 0.25;
