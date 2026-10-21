@@ -1544,6 +1544,10 @@ span.viv-anonymous-block {
   text-spacing-trim: space-all;
   text-autospace: no-autospace;
 }
+[data-vivliostyle-page-container] svg {
+  text-spacing-trim: initial;
+  text-autospace: initial;
+}
 /* see #2034 */
 @font-face {
   font-family: "-viv-ts-sp";

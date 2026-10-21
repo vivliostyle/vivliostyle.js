@@ -1,0 +1,422 @@
+/**
+ * Copyright 2026 Vivliostyle Foundation
+ *
+ * Vivliostyle.js is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vivliostyle.js is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import * as Css from "../../../src/vivliostyle/css";
+import * as NativeTextSpacing from "../../../src/vivliostyle/native-text-spacing";
+import {
+  TextSpacingPolyfill,
+  splitCheckPoint,
+} from "../../../src/vivliostyle/text-polyfill";
+import * as Vtree from "../../../src/vivliostyle/vtree";
+
+describe("text-polyfill", function () {
+  const polyfill = new TextSpacingPolyfill();
+  // The inline style is not kept if the browser does not support it
+  const hasTrimProperty = CSS.supports("text-spacing-trim", "normal");
+  let element;
+
+  const defaultProps = {
+    "text-autospace": "no-autospace",
+    "text-spacing-trim": "space-all",
+    "hanging-punctuation": "none",
+  };
+
+  /**
+   * Create check points for the view element, whose children are text nodes
+   * or inline elements having text nodes. The text-spacing properties of the
+   * inline elements are given by `data-props` attributes in JSON.
+   */
+  function createCheckPoints(props = {}) {
+    const blockContext = new Vtree.NodeContext(
+      document.createElement("p"),
+      null,
+      0,
+    );
+    blockContext.viewNode = element;
+    blockContext.inline = false;
+    blockContext.display = "block";
+    blockContext.lang = "ja";
+    blockContext.inheritedProps = { ...defaultProps, ...props };
+    const points = [];
+    let boxOffset = 1;
+    function visit(viewNode, parentContext) {
+      for (const child of Array.from(viewNode.childNodes)) {
+        if (child.nodeType === Node.TEXT_NODE) {
+          const source = document.createTextNode(child.data);
+          const point = new Vtree.NodeContext(source, parentContext, boxOffset);
+          point.viewNode = child;
+          points.push(point);
+          boxOffset += child.length;
+          const after = point.copy().modify();
+          after.after = true;
+          after.boxOffset = boxOffset++;
+          points.push(after);
+        } else {
+          const context = new Vtree.NodeContext(
+            document.createElement(child.localName),
+            parentContext,
+            boxOffset++,
+          );
+          context.viewNode = child;
+          context.inline = true;
+          context.inheritedProps = {
+            ...parentContext.inheritedProps,
+            ...JSON.parse(child.dataset.props ?? "{}"),
+          };
+          points.push(context);
+          visit(child, context);
+          const after = context.copy().modify();
+          after.after = true;
+          after.boxOffset = boxOffset++;
+          points.push(after);
+        }
+      }
+    }
+    visit(element, blockContext);
+    return { blockContext, points };
+  }
+
+  function layout(html, props) {
+    element.innerHTML = html;
+    const { blockContext, points } = createCheckPoints(props);
+    polyfill.postLayoutBlock(blockContext, points);
+    return points;
+  }
+
+  beforeEach(function () {
+    element = document.createElement("p");
+    element.lang = "ja";
+    element.style.cssText = 'font:16px "Hiragino Mincho ProN",serif;width:20em';
+    document.body.appendChild(element);
+  });
+
+  afterEach(function () {
+    element.remove();
+  });
+
+  describe("native text spacing and fallback", function () {
+    it("does not split text when all spacing is disabled, even without native support", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      const points = layout("「日本語」ABCと123、“Latin”。");
+      expect(element.childNodes.length).toBe(1);
+      expect(element.textContent).toBe("「日本語」ABCと123、“Latin”。");
+      expect(points.length).toBe(2);
+    });
+
+    it("uses native autospace without inserting thin spaces or splitting text", function () {
+      if (!NativeTextSpacing.supportsAutospace(document, "normal")) {
+        pending("native autospace unavailable");
+      }
+      layout("日本語ABC日本語123", { "text-autospace": "normal" });
+      expect(element.style.getPropertyValue("text-autospace")).toBe("normal");
+      expect(element.childNodes.length).toBe(1);
+    });
+
+    it("falls back for an unsupported autospace value", function () {
+      spyOn(CSS, "supports").and.callFake(
+        (property, value) => value !== "ideograph-alpha",
+      );
+      layout("日本語ABC日本語123", { "text-autospace": "ideograph-alpha" });
+      expect(element.style.getPropertyValue("text-autospace")).toBe(
+        "no-autospace",
+      );
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(2);
+      expect(element.textContent).toBe("日本語ABC日本語123");
+    });
+
+    it("does not split punctuation for an autospace-only fallback", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout("「日本語ABC」。", { "text-autospace": "ideograph-alpha" });
+      expect(element.childNodes.length).toBe(3);
+      expect(element.firstChild.data).toBe("「日本語");
+      expect(element.lastChild.data).toBe("ABC」。");
+    });
+
+    it("processes hanging punctuation with or without native trimming", function () {
+      element.textContent = "「日本語」";
+      const native = NativeTextSpacing.supportsTrim(
+        element,
+        "trim-start",
+        "ja",
+        false,
+      );
+      layout("「日本語」「日本語」", {
+        "text-spacing-trim": "trim-both",
+        "hanging-punctuation": new Css.SpaceList([
+          Css.getName("first"),
+          Css.getName("last"),
+        ]),
+      });
+      if (hasTrimProperty) {
+        expect(element.style.getPropertyValue("text-spacing-trim")).toBe(
+          native ? "trim-start" : "space-all",
+        );
+      }
+      const opens = element.querySelectorAll("viv-ts-open");
+      const closes = element.querySelectorAll("viv-ts-close");
+      expect(opens[0].className).toBe("viv-hang-first");
+      expect(closes[closes.length - 1].className).toBe("viv-hang-last");
+      if (native) {
+        // Only the hanging punctuation is processed by the polyfill
+        expect(opens.length).toBe(1);
+        expect(closes.length).toBe(1);
+        expect(element.childNodes.length).toBe(3);
+      }
+    });
+
+    it("falls back throughout the inline formatting context", function () {
+      if (!hasTrimProperty) {
+        pending("text-spacing-trim unavailable");
+      }
+      // `space-end` has no native equivalent
+      layout(
+        '「日本語」<span data-props=\'{"text-spacing-trim":"normal"}\'>「日本語」</span>',
+        {
+          "text-spacing-trim": new Css.SpaceList([
+            Css.getName("trim-start"),
+            Css.getName("space-end"),
+          ]),
+        },
+      );
+      expect(element.style.getPropertyValue("text-spacing-trim")).toBe(
+        "space-all",
+      );
+      expect(
+        element
+          .querySelector("span")
+          .style.getPropertyValue("text-spacing-trim"),
+      ).toBe("space-all");
+    });
+
+    it("uses native trim-start for trim-both", function () {
+      element.textContent = "「日本語」";
+      if (!NativeTextSpacing.supportsTrim(element, "trim-start", "ja", false)) {
+        pending("native text-spacing-trim unavailable");
+      }
+      layout("「日本語」「日本語」", { "text-spacing-trim": "trim-both" });
+      expect(element.style.getPropertyValue("text-spacing-trim")).toBe(
+        "trim-start",
+      );
+      // The closing punctuation at the end of the line is set half-width
+      expect(element.querySelector("viv-ts-close").className).toBe(
+        "viv-ts-trim",
+      );
+      expect(element.querySelector("viv-ts-open")).toBeNull();
+    });
+
+    it("preserves the offsets of split text nodes", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      const points = layout(
+        '<span data-props=\'{"text-autospace":"normal"}\'>日本語ABC</span>',
+      );
+      const textPoints = points.filter(
+        (p) => p.viewNode.nodeType === 3 && !p.after,
+      );
+      expect(textPoints.map((p) => p.viewNode.data)).toEqual(["日本語", "ABC"]);
+      expect(textPoints.map((p) => p.boxOffset)).toEqual([2, 5]);
+      expect(textPoints.map((p) => p.offsetInNode)).toEqual([0, 3]);
+      // The after check point refers to the last text node
+      const afterPoint = points.find(
+        (p) => p.viewNode.nodeType === 3 && p.after,
+      );
+      expect(afterPoint.viewNode).toBe(textPoints[1].viewNode);
+    });
+
+    it("preserves UTF-16 source and box offsets when splitting a resumed view", function () {
+      element.textContent = "😀「字́」ABC";
+      const source = document.createTextNode(element.textContent);
+      const parent = new Vtree.NodeContext(
+        document.createElement("p"),
+        null,
+        0,
+      );
+      parent.viewNode = element;
+      const point = new Vtree.NodeContext(source, parent, 31);
+      point.viewNode = element.firstChild;
+      point.offsetInNode = 7;
+      const result = splitCheckPoint(point, [2, 3, 5, 6]);
+      let offset = 0;
+      result.forEach((p) => {
+        expect(p.sourceNode).toBe(source);
+        expect(p.offsetInNode).toBe(7 + offset);
+        expect(p.boxOffset).toBe(31 + offset);
+        offset += p.viewNode.length;
+      });
+      expect(result.map((p) => p.viewNode.data)).toEqual([
+        "😀",
+        "「",
+        "字́",
+        "」",
+        "ABC",
+      ]);
+      expect(source.data).toBe("😀「字́」ABC");
+      expect(point.offsetInNode).toBe(7);
+    });
+
+    it("does not split generated content using native autospace", function () {
+      if (!NativeTextSpacing.supportsAutospace(document, "normal")) {
+        pending("native autospace unavailable");
+      }
+      element.textContent = "日本語ABC「引用」";
+      polyfill.processGeneratedContent(
+        element,
+        Css.ident.normal,
+        Css.getName("space-all"),
+        Css.ident.none,
+        "ja",
+        false,
+      );
+      expect(element.childNodes.length).toBe(1);
+      expect(element.style.getPropertyValue("text-autospace")).toBe("normal");
+    });
+  });
+
+  describe("text-autospace at element boundaries", function () {
+    const none = 'data-props=\'{"text-autospace":"no-autospace"}\'';
+    const normal = 'data-props=\'{"text-autospace":"normal"}\'';
+
+    it("inserts the spacing around an element with no-autospace if the parent has normal", function () {
+      layout(`日本<code ${none}>span</code>語`, { "text-autospace": "normal" });
+      const thinSps = element.querySelectorAll("viv-ts-thin-sp");
+      expect(thinSps.length).toBe(2);
+      thinSps.forEach((thinSp) => expect(thinSp.parentNode).toBe(element));
+      expect(element.textContent).toBe("日本span語");
+    });
+
+    it("does not insert the spacing around an element in a parent with no-autospace", function () {
+      layout(`abc<span ${normal}>日本</span>def`);
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
+    });
+
+    it("inserts the spacing outside an element with no-autospace that contains ideographs", function () {
+      layout(`<span ${none}>日本</span>abc`, { "text-autospace": "normal" });
+      const thinSp = element.querySelector("viv-ts-thin-sp");
+      expect(thinSp.parentNode).toBe(element);
+      expect(thinSp.previousSibling.localName).toBe("span");
+    });
+
+    it("leaves the spacing after text directly in the parent to the native autospace", function () {
+      layout("日本<span>span</span>", { "text-autospace": "normal" });
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(
+        NativeTextSpacing.supportsAutospace(document, "normal") ? 0 : 1,
+      );
+    });
+
+    it("inserts the spacing outside an element ending at the boundary", function () {
+      // The native autospace would be rendered within the element
+      layout("<u>日本</u>abc", { "text-autospace": "normal" });
+      const thinSp = element.querySelector("viv-ts-thin-sp");
+      expect(thinSp.parentNode).toBe(element);
+      expect(thinSp.previousSibling.localName).toBe("u");
+    });
+  });
+
+  describe("NativeTextSpacing.supportsTrim", function () {
+    it("does not accept unsupported trim syntax merely because fonts can trim", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(false);
+    });
+
+    it("rejects a font whose full-width punctuation does not actually trim", function () {
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "unsupported-probe-font";
+      element.textContent = "「日本語」";
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          return new DOMRect(0, 0, this.textContent.length * 16, 16);
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(false);
+    });
+
+    it("checks fallback glyphs as well as supported glyphs in the same font cascade", function () {
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "mixed-probe-font";
+      element.textContent = "「日本語」";
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          const trims =
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+            this.textContent.includes("「");
+          return new DOMRect(
+            0,
+            0,
+            this.textContent.length * 16 - (trims ? 8 : 0),
+            16,
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(false);
+    });
+
+    it("checks adjacent pairs of punctuation from different fonts", function () {
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "pair-probe-font";
+      element.textContent = "国。「国";
+      // Only identical punctuation (from the same font) is trimmed
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          const trims =
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+            /([。「])\1/u.test(this.textContent);
+          return new DOMRect(
+            0,
+            0,
+            this.textContent.length * 16 - (trims ? 8 : 0),
+            16,
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(false);
+    });
+
+    it("uses a separate font capability check for vertical text", function () {
+      if (!hasTrimProperty) {
+        pending("text-spacing-trim unavailable");
+      }
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "vertical-probe-font";
+      element.textContent = "「日本語」";
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          const trims =
+            this.style.getPropertyValue("text-spacing-trim") === "normal";
+          return new DOMRect(
+            0,
+            0,
+            this.textContent.length * 16 - (trims ? 8 : 0),
+            this.textContent.length * 16,
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(true);
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", true),
+      ).toBe(false);
+    });
+  });
+});
