@@ -499,7 +499,7 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
 
 - [text-autospace](https://www.w3.org/TR/css-text-4/#text-autospace-property)
   - Supported values: `normal | no-autospace | [ ideograph-alpha || ideograph-numeric ] | auto`
-  - The browser's native `text-autospace` is used where the browser supports the value and inserts the spacing at element boundaries only when it is enabled on both sides (currently Chromium). Otherwise, Vivliostyle's own implementation is used. At element boundaries, the spacing is determined by the innermost element containing the boundary, as defined in CSS Text 4. See [Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151).
+  - The browser's native `text-autospace` is used for the text within an element where the browser supports the value and inserts the spacing at element boundaries only when it is enabled on both sides (currently Chromium). Otherwise, and at element boundaries, Vivliostyle's own implementation is used. At element boundaries, the spacing is determined by the innermost element containing the boundary, as defined in CSS Text 4. See [Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151).
   - In SVG, the browser's default values of `text-autospace` and `text-spacing-trim` apply.
 - [text-spacing-trim](https://www.w3.org/TR/css-text-4/#text-spacing-trim-property)
   - Values: `space-all | normal | space-first | trim-start | trim-both | auto`

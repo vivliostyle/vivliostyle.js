@@ -453,11 +453,25 @@ describe("text-polyfill", function () {
       expect(thinSp.previousSibling.localName).toBe("span");
     });
 
-    it("leaves the spacing after text directly in the parent to the native autospace", function () {
+    it("inserts the spacing at an element boundary after text directly in the parent", function () {
+      // The native autospace may be added to the first character of the
+      // element, which is left at the start of a line after a line break
       layout("日本<span>span</span>", { "text-autospace": "normal" });
-      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(
-        NativeTextSpacing.supportsAutospace(document, "normal") ? 0 : 1,
-      );
+      const thinSp = element.querySelector("viv-ts-thin-sp");
+      expect(thinSp.parentNode).toBe(element);
+      expect(thinSp.nextSibling.localName).toBe("span");
+    });
+
+    it("leaves the spacing between text nodes in the same element to the native autospace", function () {
+      if (!NativeTextSpacing.supportsAutospace(document, "normal")) {
+        pending("native autospace unavailable");
+      }
+      element.replaceChildren("日本", "ABC");
+      const { blockContext, points } = createCheckPoints({
+        "text-autospace": "normal",
+      });
+      polyfill.postLayoutBlock(blockContext, points);
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
     });
 
     it("inserts the spacing outside an element ending at the boundary", function () {

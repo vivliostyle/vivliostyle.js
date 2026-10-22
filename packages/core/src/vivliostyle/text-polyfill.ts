@@ -673,26 +673,6 @@ function hasNativeAutospace(elem: Element | null, type: string): boolean {
   return value === "normal" || value.split(" ").includes(type);
 }
 
-/**
- * Check if the node is in a ruby inside the container element.
- */
-function isInRuby(node: Node, container: Element): boolean {
-  const window = node.ownerDocument.defaultView;
-  for (
-    let elem = node.parentElement;
-    elem && elem !== container;
-    elem = elem.parentElement
-  ) {
-    if (
-      elem.localName === "ruby" ||
-      window.getComputedStyle(elem).display.startsWith("ruby")
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // Boundaries around punctuation
 const PUNCTUATION_BOUNDARY_PATTERN =
   /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030])/gsu;
@@ -2405,19 +2385,18 @@ export class TextSpacingPolyfill {
       ) {
         return false;
       }
-      // The native text-autospace inserts the spacing at an element boundary
-      // only if it is enabled on both sides (see NativeTextSpacing). Since it
-      // is added to the advance of the preceding character, it is rendered
-      // within the innermost element only if the preceding character is
-      // directly in it. Otherwise, the spacing inserted here (which contains
-      // a space character) prevents the native one.
-      // In vertical text, Chromium lays out a ruby base after the native
-      // spacing overlapping the preceding text.
+      // The native text-autospace is used only between text in the same
+      // element. At an element boundary, Chromium may add the spacing to the
+      // following character instead of the preceding one (e.g., if a space
+      // in another element precedes it in the line), which leaves it at the
+      // start of the next line if the line breaks there, and does not
+      // remove it at the end of a line. In vertical text, it lays out a ruby
+      // base after the spacing overlapping the preceding text. The spacing
+      // inserted here contains a space character, which prevents the native
+      // one.
       if (
-        (isAfter ? textNode : adjacentNode).parentElement === container &&
-        !(vertical && isInRuby(isAfter ? adjacentNode : textNode, container)) &&
-        hasNativeAutospace(textNode.parentElement, type) &&
-        hasNativeAutospace(adjacentNode.parentElement, type)
+        textNode.parentElement === adjacentNode.parentElement &&
+        hasNativeAutospace(textNode.parentElement, type)
       ) {
         return false;
       }
