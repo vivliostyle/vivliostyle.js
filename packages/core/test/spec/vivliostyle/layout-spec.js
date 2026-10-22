@@ -67,6 +67,15 @@ describe("layout", function () {
         );
         expect(textNode.replaceData).not.toHaveBeenCalled();
       });
+      it("adds the length of the view text node to `offsetInNode` when nodeContext#after is true and the view text node starts in the middle of the source text.", function () {
+        // The view text continued from the previous page
+        nodeContext.after = true;
+        nodeContext.offsetInNode = 6;
+        textNode.data = "abcde­f ghij";
+        textNode.length = 11;
+        var newContext = breaker.breakTextNode(textNode, nodeContext, 8);
+        expect(newContext.offsetInNode).toEqual(17);
+      });
       it("removes characters after split point and inserts a hyphenation character when splits a text node at the soft-hyphen character.", function () {
         var newContext = breaker.breakTextNode(textNode, nodeContext, 13);
         expect(newContext.offsetInNode).toEqual(11);

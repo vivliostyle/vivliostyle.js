@@ -17,6 +17,7 @@
 
 import { VivliostylePolyfillCss } from "../../../src/vivliostyle/assets";
 import * as Css from "../../../src/vivliostyle/css";
+import { TextNodeBreaker } from "../../../src/vivliostyle/layout";
 import * as NativeTextSpacing from "../../../src/vivliostyle/native-text-spacing";
 import {
   TextSpacingPolyfill,
@@ -125,6 +126,28 @@ describe("text-polyfill", function () {
       layout("日本語ABC日本語123", { "text-autospace": "normal" });
       expect(element.style.getPropertyValue("text-autospace")).toBe("normal");
       expect(element.childNodes.length).toBe(1);
+    });
+
+    it("keeps the source offset of the after check point of split text", function () {
+      spyOn(CSS, "supports").and.callFake(
+        (property, value) => value !== "ideograph-alpha",
+      );
+      const points = layout("日本ABC", { "text-autospace": "ideograph-alpha" });
+      const after = points.find(
+        (p) => p.after && p.viewNode.nodeType === Node.TEXT_NODE,
+      );
+      expect(after.viewNode.data).toBe("ABC");
+      // A break after the text, e.g. at the end of a table cell, is after
+      // the whole source text
+      const nodeContext = TextNodeBreaker.instance.breakTextNode(
+        after.viewNode,
+        after,
+        after.boxOffset,
+        points,
+        points.indexOf(after),
+        false,
+      );
+      expect(nodeContext.offsetInNode).toBe(5);
     });
 
     it("falls back for an unsupported autospace value", function () {

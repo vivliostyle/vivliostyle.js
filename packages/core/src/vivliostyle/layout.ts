@@ -5405,7 +5405,11 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
-      nodeContext.offsetInNode = textNode.length;
+      // The view text node may start in the middle of the source node (e.g.,
+      // when the text continues from the previous page, or is split by
+      // TextSpacingPolyfill), at offsetInNode of the after check point.
+      nodeContext = nodeContext.modify();
+      nodeContext.offsetInNode += textNode.length;
     } else {
       // Character with index low is the last one that fits.
       let viewIndex = low - nodeContext.boxOffset;

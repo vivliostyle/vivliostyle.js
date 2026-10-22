@@ -1552,7 +1552,9 @@ export class TextSpacingPolyfill {
     const reshapeTargets = new Set<HTMLElement>();
     const splitBlockContainers = new Set<HTMLElement>();
     // Split the text check point at the index, and update the after check
-    // point of the text node to refer to the last part
+    // point of the text node to refer to the last part. Its offsetInNode is
+    // the offset of the view text node in the source node, as for the text
+    // check point (see TextNodeBreaker.breakTextNode()).
     const splitAt = (
       index: number,
       offsets: number[],
@@ -1560,11 +1562,13 @@ export class TextSpacingPolyfill {
       const original = checkPoints[index].viewNode;
       const blockContainer = blockContainers.get(original.parentElement);
       const points = splitCheckPoint(checkPoints[index], offsets);
+      const last = points[points.length - 1];
       checkPoints.splice(index, 1, ...points);
       for (let j = index + points.length; j < checkPoints.length; j++) {
         if (checkPoints[j].after && checkPoints[j].viewNode === original) {
           const after = checkPoints[j].copy().modify();
-          after.viewNode = points[points.length - 1].viewNode;
+          after.viewNode = last.viewNode;
+          after.offsetInNode = last.offsetInNode;
           checkPoints[j] = after;
           break;
         }
