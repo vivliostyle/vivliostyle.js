@@ -1,51 +1,291 @@
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis line spacing (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis line spacing (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis start borders (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby and emphasis start borders (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-emphasis-start-border-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby margin reset and important opt-out (horizontal, Issue #1604)"
+  file: ruby-text-emphasis/ruby-margin-reset-horizontal.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
+- category: Ruby and text emphasis
+  title: "Ruby margin reset and important opt-out (vertical, Issue #1604)"
+  file: ruby-text-emphasis/ruby-margin-reset-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
+- category: Cascade layers
+  title: "Cascade layers with @page (Issue #977)"
+  file: cascade-layers-page.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/cascade-layers-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/cascade-layers-page.html&zoom=1&spread=false
+- category: Cross-references
+  title: "target-text() vs Named Strings - first-letter with punctuation (PR #1575)"
+  file: target-text-vs-named-strings-2.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-vs-named-strings-2.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-vs-named-strings-2.html&zoom=1&spread=false
+- category: Counter style and list-style
+  title: "list-style-position (PR #1609)"
+  file: counter-style/list-style-position.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-position.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-style-position.html&zoom=1&spread=false
+- category: Counter style and list-style
+  title: "List-item with text-spacing (Issue #1763)"
+  file: counter-style/list-item-text-spacing.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-item-text-spacing.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/list-item-text-spacing.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Text Spacing (Japanese, PR #814)"
+  file: text-spacing/text-spacing-ja.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-ja.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-ja.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Text Spacing (Chinese, Simplified, PR #814)"
+  file: text-spacing/text-spacing-zh-hans.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hans.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hans.html&zoom=1&spread=false
 - category: Text spacing
   title: "Text Spacing (Chinese, Traditional, PR #814)"
   file: text-spacing/text-spacing-zh-hant.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hant.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hant.html&zoom=1&spread=false
+    https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-zh-hant.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Text-spacing on generated content (PR #853)"
+  file: text-spacing/ts-generated-content.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Text-spacing on generated content (vertical writing-mode, PR #853)"
+  file: text-spacing/ts-generated-content-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-generated-content-vertical.html&zoom=1&spread=false
 - category: Text spacing
   title: "Text-spacing fillers with inherited spacing properties (PR #2035)"
   file: text-spacing/inherited-spacing-properties.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
+    https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/inherited-spacing-properties.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Continuous text decorations across text-autospace (PR #2124)"
+  file: text-spacing/text-decoration.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-decoration.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-decoration.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Line breaking stability with text-spacing (Issue #2142)"
+  file: text-spacing/line-break-stability.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false
+- category: Text spacing
+  title: "Native text spacing and fallback (Issues #2151, #1562)"
+  file: text-spacing/native-text-spacing.html
+  decision: expected  # regression / expected / skip
+  notes: "Added in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/native-text-spacing.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/native-text-spacing.html&zoom=1&spread=false
 - category: Hanging punctuation
   title: "Hanging Punctuation (PR #814)"
   file: text-spacing/hanging-punctuation.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation.html&zoom=1&spread=false
+    https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation.html&zoom=1&spread=false
 - category: Hanging punctuation
   title: "hanging-punctuation:first with text-indent (Japanese, PR #1084)"
   file: text-spacing/hanging-punctuation-first-indent-ja.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
+    https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-first-indent-ja.html&zoom=1&spread=false
+- category: Hanging punctuation
+  title: "hanging-punctuation first/last with inline border/padding (Issue #2194)"
+  file: text-spacing/hanging-punctuation-inline-border.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
+- category: Footnotes
+  title: "Long footnote with footnote-policy: line (Issue #2029)"
+  file: footnotes/footnote-policy-line-long.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy-line-long.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-policy-line-long.html&zoom=1&spread=false
+- category: Footnotes
+  title: "Long footnote fragmentation with target-counter() (Issue #2026)"
+  file: footnotes/footnote-fragmentation-target-counter.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-fragmentation-target-counter.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-fragmentation-target-counter.html&zoom=1&spread=false
 - category: Hanging punctuation
   title: "hanging-punctuation:last in right-to-left text (PR #2206)"
   file: text-spacing/hanging-punctuation-rtl.html
@@ -58,18 +298,6 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-fix-rtl-hanging-punctuation-last-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
-- category: Hanging punctuation
-  title: "hanging-punctuation first/last with inline border/padding (Issue #2194)"
-  file: text-spacing/hanging-punctuation-inline-border.html
-  decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208Fixed in PR #2207"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle-git-fix-hanging-punctuation-inli-ee6e23-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
 - category: Generated content and pseudo-elements
   title: "Block after ::first-line is not pushed to the next page (PR #2205)"
   file: first-line-next-block-pushed.html
@@ -793,78 +1021,6 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-broken-pagination.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby and emphasis line spacing (horizontal, Issue #1604)"
-  file: ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby and emphasis line spacing (vertical, Issue #1604)"
-  file: ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-line-spacing-vertical.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby and emphasis start borders (horizontal, Issue #1604)"
-  file: ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-horizontal.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby and emphasis start borders (vertical, Issue #1604)"
-  file: ruby-text-emphasis/ruby-emphasis-start-border-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-emphasis-start-border-vertical.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby margin reset and important opt-out (horizontal, Issue #1604)"
-  file: ruby-text-emphasis/ruby-margin-reset-horizontal.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-horizontal.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Ruby margin reset and important opt-out (vertical, Issue #1604)"
-  file: ruby-text-emphasis/ruby-margin-reset-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue1604  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: git-fix-issue1604
-  actualUrl: >-
-    https://vivliostyle-git-fix-issue1604-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue1604/packages/core/test/files/ruby-text-emphasis/ruby-margin-reset-vertical.html&zoom=1&spread=false
 - category: Fonts and relative units
   title: "Relative font keywords on the root element (Issue #2174)"
   file: relative-font-keywords-root.html
