@@ -502,8 +502,10 @@ See also: [At-rules in CSS Fonts 3](#css-fonts-3)
   - The browser's native `text-autospace` is used for the text within an element where the browser supports the value. Otherwise, and at element boundaries, where browsers behave differently, Vivliostyle's own implementation is used. At element boundaries, the spacing is determined by the innermost element containing the boundary, as defined in CSS Text 4. See [Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151).
   - In SVG, the browser's default values of `text-autospace` and `text-spacing-trim` apply.
 - [text-spacing-trim](https://www.w3.org/TR/css-text-4/#text-spacing-trim-property)
-  - Values: `space-all | normal | space-first | trim-start | trim-both | auto`
+  - Values: `space-all | normal | space-first | trim-start | trim-both | trim-all | auto`
   - The browser's native `text-spacing-trim` is used where the browser supports it (currently Chromium) and the fonts used can trim all the punctuation in the inline formatting context. Vivliostyle's own implementation is used together with it for the behavior the browser does not provide, such as setting fullwidth closing punctuation half-width at the end of a line for `trim-both`, and `hanging-punctuation`. Otherwise, Vivliostyle's own implementation is used throughout the inline formatting context. See [Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151).
+  - `trim-all` is always processed by Vivliostyle's own implementation, since browsers do not support it. Fullwidth colon punctuation (`：；`) is treated as fullwidth middle dot punctuation except in Simplified Chinese, and fullwidth dot punctuation (`、。，．`) only in Traditional Chinese. See [Issue #2214](https://github.com/vivliostyle/vivliostyle.js/issues/2214).
+  - In vertical text, the fullwidth colon punctuation is not trimmed by Vivliostyle's own implementation, except the fullwidth colon (`：`) in Japanese, since the others are usually not rotated.
 - [text-spacing](https://www.w3.org/TR/css-text-4/#text-spacing-property)
   - Values: `normal | none | auto | [<autospace> || <spacing-trim>]`
   - Note: This is a shorthand property that sets the `text-autospace` and `text-spacing-trim` properties. See [PR #1142](https://github.com/vivliostyle/vivliostyle.js/pull/1142)

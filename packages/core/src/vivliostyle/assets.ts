@@ -537,7 +537,7 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify | inside | outside;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing-trim = auto | normal | space-all | trim-both | trim-auto |
+text-spacing-trim = auto | normal | space-all | trim-both | trim-all | trim-auto |
     [[ trim-start | space-start | space-first ] ||
      [ trim-end | space-end | allow-end ] ||
      [ trim-adjacent | space-adjacent ]];
@@ -1574,8 +1574,16 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw) {
    trimmed again by the native text-spacing-trim */
 viv-ts-open:is(.viv-ts-trim, .viv-ts-auto) > viv-ts-inner,
 viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-end:not(.viv-hang-hw))
-  > viv-ts-inner {
+  > viv-ts-inner,
+viv-ts-middle.viv-ts-trim > viv-ts-inner {
   text-spacing-trim: space-all;
+}
+/* The fullwidth middle dot punctuation set half-width by trim-all is
+   centered in the half-width advance */
+viv-ts-middle.viv-ts-trim > viv-ts-inner {
+  position: relative;
+  inset-inline-start: 0.25em;
+  margin-inline-start: -0.5em;
 }
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,

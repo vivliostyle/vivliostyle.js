@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- Test case for Issue #2214: text-spacing-trim: trim-all -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>text-spacing-trim: trim-all</title>
+    <style>
+      @page {
+        size: 148mm 105mm;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", serif;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      h2.vertical-start {
+        break-before: page;
+      }
+      p {
+        margin: 0.25em 0;
+      }
+      .test {
+        text-spacing-trim: trim-all;
+      }
+      .ref {
+        text-spacing-trim: space-all;
+      }
+      .ref halt {
+        font-feature-settings: "halt";
+      }
+      .box {
+        width: 10em;
+        outline: 1px solid #ccc;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        height: 14em;
+      }
+      .line-end-box {
+        text-spacing-trim: trim-both;
+        inline-size: 3em;
+        text-align: end;
+        outline: 1px solid #ccc;
+      }
+      .hang {
+        hanging-punctuation: force-end;
+      }
+      /* The fullwidth dot punctuation is centered in Traditional Chinese
+         fonts, and drawn to one side in Simplified Chinese fonts */
+      :lang(zh-Hant) {
+        font-family: "Noto Serif CJK TC", "Source Han Serif TC", "Songti TC", "PingFang TC", serif;
+      }
+      :lang(zh-Hans) {
+        font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "PingFang SC", serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>1. Each punctuation (test / reference with halt)</h2>
+    <p class="test">国（国　国）国　国、国　国・国　国。国　国「国　国」国　国：国</p>
+    <p class="ref">国<halt>（</halt>国　国<halt>）</halt>国　国<halt>、</halt>国　国<halt>・</halt>国　国<halt>。</halt>国　国<halt>「</halt>国　国<halt>」</halt>国　国<halt>：</halt>国</p>
+    <p class="test" lang="zh-Hant">國（國　國）國　國、國　國・國　國。國　國「國　國」國　國：國</p>
+    <p class="test" lang="zh-Hans">国（国　国）国　国、国　国·国　国。国　国“国　国”国　国：国</p>
+
+    <h2>2. Line start, line end, and adjacent punctuation</h2>
+    <p class="test box">「かぎ括弧」で始まり、（丸括弧）・「かぎ括弧」。行末の「括弧」</p>
+    <p class="ref box"><halt>「</halt>かぎ括弧<halt>」</halt>で始まり<halt>、（</halt>丸括弧<halt>）・「</halt>かぎ括弧<halt>」。</halt>行末の<halt>「</halt>括弧<halt>」</halt></p>
+
+    <h2>3. Mixed with trim-both in a span</h2>
+    <p class="test">全角（括弧）は<span style="text-spacing-trim: trim-both">（ここは）・（trim-both）</span>で、ここは（trim-all）。</p>
+
+    <h2>4. hanging-punctuation: force-end</h2>
+    <p class="test box hang">あいうえおかきくけこ、あいうえおかきく、けこ。</p>
+
+    <h2 class="vertical-start">5. Vertical text</h2>
+    <div class="vertical">
+      <!-- In vertical text, only the fullwidth colon in Japanese is rotated
+           and set half-width; the fullwidth semicolon and the fullwidth
+           colon in the other languages stay full-width -->
+      <p class="test">国（国）国、国・国。国「国」国：国；国</p>
+      <p class="test" lang="zh-Hant">國（國）國、國・國。國「國」國：國；國</p>
+      <p class="test" lang="zh-Hans">国（国）国、国·国。国“国”国：国；国</p>
+      <!-- With trim-both, the fullwidth colon punctuation in Simplified
+           Chinese is closing punctuation, but not in vertical text, where it
+           is not rotated: it is not trimmed at the end of the line. Each line
+           is aligned to the end of the 3em box: the colon and semicolon stay
+           centered in the last 1em, while the full stop, trimmed half-width,
+           is moved to the end edge. -->
+      <p class="line-end-box" lang="zh-Hans">国国：国国：</p>
+      <p class="line-end-box" lang="zh-Hans">国国；国国；</p>
+      <p class="line-end-box" lang="zh-Hans">国国。国国。</p>
+    </div>
+  </body>
+</html>

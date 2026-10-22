@@ -869,6 +869,10 @@ module.exports = [
         file: "text-spacing/page-break-punctuation.html",
         title: "Page break after text-spacing punctuation (PR #2211)",
       },
+      {
+        file: "text-spacing/text-spacing-trim-all.html",
+        title: "text-spacing-trim: trim-all (Issue #2214)",
+      },
     ],
   },
   {

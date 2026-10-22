@@ -100,8 +100,7 @@ type SpacingTrim = {
   trimEnd: boolean; // trim-end
   allowEnd: boolean; // allow-end
   trimAdjacent: boolean; // trim-adjacent
-  // TODO: add support for:
-  //   trimAll: boolean; // trim-all
+  trimAll: boolean; // trim-all
 };
 
 /**
@@ -114,6 +113,7 @@ const SPACING_TRIM_NONE: SpacingTrim = {
   trimEnd: false,
   allowEnd: false,
   trimAdjacent: false,
+  trimAll: false,
 };
 
 /**
@@ -126,6 +126,7 @@ const SPACING_TRIM_NORMAL: SpacingTrim = {
   trimEnd: false,
   allowEnd: true,
   trimAdjacent: true,
+  trimAll: false,
 };
 
 /**
@@ -140,6 +141,20 @@ const SPACING_TRIM_BOTH: SpacingTrim = {
   trimEnd: true,
   allowEnd: false,
   trimAdjacent: true,
+  trimAll: false,
+};
+
+/**
+ * text-spacing-trim: trim-all
+ *
+ * Fullwidth opening, closing and middle dot punctuation is set half-width
+ * regardless of its position in the line and adjacent characters. The other
+ * flags are set as for `trim-both`, which applies where the polyfill does not
+ * trim the punctuation (e.g., with hanging-punctuation).
+ */
+const SPACING_TRIM_ALL: SpacingTrim = {
+  ...SPACING_TRIM_BOTH,
+  trimAll: true,
 };
 
 function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
@@ -165,6 +180,8 @@ function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
         case "trim-both":
         case "trim-auto":
           return SPACING_TRIM_BOTH;
+        case "trim-all":
+          return SPACING_TRIM_ALL;
         case "space-all":
           return SPACING_TRIM_NONE;
         case "trim-start":
@@ -291,6 +308,10 @@ function isSpacingTrimNone(spacingTrim: SpacingTrim): boolean {
 function spacingTrimToNativeCSS(spacingTrim: SpacingTrim): string | null {
   if (isSpacingTrimNone(spacingTrim)) {
     return "space-all";
+  }
+  // `trim-all` is not supported by browsers (Issue #2214)
+  if (spacingTrim.trimAll) {
+    return null;
   }
   // `trim-end` is processed by the polyfill (see processTextSpacing())
   if (
@@ -678,6 +699,12 @@ function hasNativeAutospace(elem: Element | null, type: string): boolean {
 const PUNCTUATION_BOUNDARY_PATTERN =
   /(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030]\p{M}*(?=\P{M})|.(?=(?![()\[\]{}])[\p{Ps}\p{Pe}\p{Pf}\p{Pi}、。，．：；､｡\u3000\u3030])/gsu;
 
+// Boundaries around fullwidth middle dot punctuation, which is processed only
+// for `trim-all` (the fullwidth colon and dot punctuation is included in
+// PUNCTUATION_BOUNDARY_PATTERN)
+const MIDDLE_DOT_BOUNDARY_PATTERN =
+  /[\u00B7\u2027\u30FB]\p{M}*(?=\P{M})|.(?=[\u00B7\u2027\u30FB])/gsu;
+
 // Boundaries between ideographs and non-ideographic letters or numerals
 const IDEOGRAPH_ALPHA_BOUNDARY_PATTERN =
   /(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF]\p{M}*(?=(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}])|(?![\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60])[\p{L}\p{Nd}]\p{M}*(?=(?!\p{P})[\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF])/gsu;
@@ -762,22 +789,64 @@ const ADJACENT_CLOSING_START_PATTERN =
   /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u;
 
 /**
+ * Check if the text is fullwidth colon punctuation that is not rotated in
+ * vertical text. It has no blank half along the inline axis to be trimmed,
+ * so it is neither closing nor middle dot punctuation there. In Japanese
+ * fonts, the fullwidth colon is rotated but the fullwidth semicolon is not;
+ * in the others, neither is rotated.
+ */
+function isUnrotatedVerticalColon(
+  text: string,
+  lang: string | null,
+  vertical: boolean,
+): boolean {
+  return (
+    vertical &&
+    /^[：；]\p{M}*$/u.test(text) &&
+    !(lang === "ja" && /^：/u.test(text))
+  );
+}
+
+/**
  * Check if the text is fullwidth closing punctuation other than brackets and
  * quotation marks. Chromium's native text-spacing-trim does not set it
  * half-width at the end of a line (`allow-end`), while it does so for
  * closing brackets and quotation marks.
  */
-function isClosingMark(text: string, lang: string | null): boolean {
+function isClosingMark(
+  text: string,
+  lang: string | null,
+  vertical: boolean,
+): boolean {
   return (
-    (lang === "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
+    (lang === "zh-hans" &&
+      /^[：；]\p{M}*$/u.test(text) &&
+      !isUnrotatedVerticalColon(text, lang, vertical)) ||
     (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text))
   );
 }
 
-function isClosingPunctuation(text: string, lang: string | null): boolean {
+/**
+ * Check if the text is fullwidth middle dot punctuation, including the
+ * fullwidth colon and dot punctuation that is centered depending on the
+ * language (CSS Text 4 § 8.5.2).
+ */
+function isMiddleDotPunctuation(text: string, lang: string | null): boolean {
+  return (
+    /^[\u00B7\u2027\u30FB]\p{M}*$/u.test(text) ||
+    (lang !== "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
+    (lang === "zh-hant" && /^[、。，．]\p{M}*$/u.test(text))
+  );
+}
+
+function isClosingPunctuation(
+  text: string,
+  lang: string | null,
+  vertical: boolean,
+): boolean {
   return (
     /^[’”〞〟）］｝｠\u232A〉》」』】〕〗〙〛]\p{M}*$/u.test(text) ||
-    isClosingMark(text, lang)
+    isClosingMark(text, lang, vertical)
   );
 }
 
@@ -1016,9 +1085,10 @@ function findLineEndPunctuation(
     // the end of a line if they do not otherwise fit (`allow-end`), but not
     // the other closing punctuation. It sets them full-width if they fit.
     const mayBePushed =
-      hangs || ((allowEnd || trimEnd) && isClosingMark(match[0], lang));
+      hangs ||
+      ((allowEnd || trimEnd) && isClosingMark(match[0], lang, vertical));
     const mayBeAtEnd =
-      hangs || (trimEnd && isClosingPunctuation(match[0], lang));
+      hangs || (trimEnd && isClosingPunctuation(match[0], lang, vertical));
     if (
       (mayBePushed || mayBeAtEnd) &&
       (anywhere ||
@@ -1090,6 +1160,9 @@ function getSplitOffsets(
     !isHangingPunctuationNone(spacing.hangingPunctuation)
   ) {
     addMatchEnds(PUNCTUATION_BOUNDARY_PATTERN);
+    if (spacing.spacingTrim.trimAll) {
+      addMatchEnds(MIDDLE_DOT_BOUNDARY_PATTERN);
+    }
   }
   if (
     !spacing.nativeAutospace &&
@@ -1941,7 +2014,9 @@ export class TextSpacingPolyfill {
     for (const target of reshapeTargets) {
       if (
         splitBlockContainers.has(target) ||
-        target.querySelector("viv-ts-open, viv-ts-close, viv-ts-thin-sp")
+        target.querySelector(
+          "viv-ts-open, viv-ts-close, viv-ts-middle, viv-ts-thin-sp",
+        )
       ) {
         reshapeBlockContainer(target);
       }
@@ -2024,7 +2099,7 @@ export class TextSpacingPolyfill {
     let hangingFirst = false;
     let hangingLast = false;
     let hangingEnd = false;
-    let tagName: "viv-ts-open" | "viv-ts-close" | undefined;
+    let tagName: "viv-ts-open" | "viv-ts-close" | "viv-ts-middle" | undefined;
     const needsChromiumVoTrFallback =
       spacing.chromiumVoTrFallback && isChromiumVoTrFallback(text, vertical);
 
@@ -2097,16 +2172,25 @@ export class TextSpacingPolyfill {
     } else if (
       (nativeTrim
         ? // The browser does not set it half-width at the end of a line
-          (spacingTrim.allowEnd && isClosingMark(text, lang)) ||
-          (spacingTrim.trimEnd && isClosingPunctuation(text, lang))
+          (spacingTrim.allowEnd && isClosingMark(text, lang, vertical)) ||
+          (spacingTrim.trimEnd && isClosingPunctuation(text, lang, vertical))
         : (spacingTrim.trimEnd ||
             spacingTrim.allowEnd ||
             spacingTrim.trimAdjacent) &&
-          isClosingPunctuation(text, lang)) &&
+          isClosingPunctuation(text, lang, vertical)) &&
       textDirection() === "ltr"
     ) {
       // fullwidth closing punctuation
       tagName = "viv-ts-close";
+    } else if (
+      !nativeTrim &&
+      spacingTrim.trimAll &&
+      isMiddleDotPunctuation(text, lang) &&
+      !isUnrotatedVerticalColon(text, lang, vertical) &&
+      textDirection() === "ltr"
+    ) {
+      // fullwidth middle dot punctuation
+      tagName = "viv-ts-middle";
     } else if (needsChromiumVoTrFallback) {
       tagName = getChromiumVoTrFallbackTagName(text);
       chromiumVoTrFallbackOnly = true;
@@ -2201,7 +2285,7 @@ export class TextSpacingPolyfill {
           if (hangingFirst) {
             setHangingShift();
             outerElem.className = "viv-hang-first";
-          } else if (nativeTrim) {
+          } else if (nativeTrim || spacingTrim.trimAll) {
             outerElem.className = "viv-ts-trim";
           } else if (isFirstInBlock || isFirstAfterForcedLineBreak) {
             if (spacingTrim.trimStart) {
@@ -2241,6 +2325,8 @@ export class TextSpacingPolyfill {
           if (hangingLast) {
             setHangingShift();
             outerElem.className = "viv-hang-last";
+          } else if (spacingTrim.trimAll && !hangingEnd) {
+            outerElem.className = "viv-ts-trim";
           } else if (isLastInBlock || isLastBeforeForcedLineBreak) {
             const linePos = linePosition();
             if (hangingEnd) {
@@ -2324,6 +2410,17 @@ export class TextSpacingPolyfill {
               trimIfMovedToLineEnd(false);
             }
           }
+          if (
+            hangingEnd &&
+            spacingTrim.trimAll &&
+            isFullWidth &&
+            !outerElem.className
+          ) {
+            // The punctuation that does not hang is set half-width as well
+            outerElem.className = "viv-ts-trim";
+          }
+        } else if (tagName === "viv-ts-middle") {
+          outerElem.className = "viv-ts-trim";
         }
       }
 
