@@ -527,7 +527,34 @@ describe("text-polyfill", function () {
         "text-autospace": "normal",
       });
       polyfill.postLayoutBlock(blockContext, points);
+      // WebKit does not insert the native spacing between text nodes
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(
+        NativeTextSpacing.autospacesAcrossTextNodes(document) ? 0 : 1,
+      );
+    });
+
+    it("inserts the spacing across an empty element", function () {
+      layout("日本<b></b>ABC", { "text-autospace": "normal" });
+      const thinSp = element.querySelector("viv-ts-thin-sp");
+      expect(thinSp?.parentNode).toBe(element);
+      expect(thinSp.nextSibling.localName).toBe("b");
+    });
+
+    it("does not insert the spacing where only the following element enables it in a parent with no-autospace", function () {
+      layout(`日本<span ${normal}>ABC</span>`);
       expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
+      // Firefox would insert the native spacing determined by the following
+      // side
+      if (
+        NativeTextSpacing.supportsAutospace(document, "normal") &&
+        NativeTextSpacing.autospacesByFollowingSide(document)
+      ) {
+        expect(
+          element
+            .querySelector("span")
+            .style.getPropertyValue("text-autospace"),
+        ).toBe("no-autospace");
+      }
     });
 
     it("inserts the spacing outside an element ending at the boundary", function () {

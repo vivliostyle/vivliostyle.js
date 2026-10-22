@@ -623,6 +623,7 @@ function resolveSpacing(
   const nativeAutospace = NativeTextSpacing.supportsAutospace(
     element.ownerDocument,
     autospaceValue,
+    vertical,
   );
   element.style.setProperty(
     "text-autospace",
@@ -1512,17 +1513,19 @@ export class TextSpacingPolyfill {
       ) {
         fallbackBlockContainers.add(blockContainer);
       }
-      // The native text-autospace inserts the spacing at an element boundary
-      // if it is enabled on both sides, even if it is disabled on the
-      // innermost element containing the boundary (see processTextSpacing()).
-      // Use the polyfill for the text on one side then.
+      // The native text-autospace may insert the spacing at an element
+      // boundary even if it is disabled on the innermost element containing
+      // the boundary (see processTextSpacing()): Chromium does so if it is
+      // enabled on both sides, and Firefox if it is enabled on the following
+      // side. Use the polyfill for the text on the following side then.
       const type = getAutospaceType(text1, text2);
       if (
         type &&
-        spacing1.nativeAutospace &&
         spacing2.nativeAutospace &&
-        isAutospaceEnabled(spacing1.autospace, type) &&
-        isAutospaceEnabled(spacing2.autospace, type)
+        isAutospaceEnabled(spacing2.autospace, type) &&
+        ((spacing1.nativeAutospace &&
+          isAutospaceEnabled(spacing1.autospace, type)) ||
+          NativeTextSpacing.autospacesByFollowingSide(element2.ownerDocument))
       ) {
         const container = getCommonAncestor(prevP.viewNode, textP.viewNode);
         if (
@@ -2402,17 +2405,21 @@ export class TextSpacingPolyfill {
       ) {
         return false;
       }
-      // The native text-autospace is used only between text in the same
-      // element. At an element boundary, Chromium may add the spacing to the
-      // following character instead of the preceding one (e.g., if a space
-      // in another element precedes it in the line), which leaves it at the
-      // start of the next line if the line breaks there, and does not
-      // remove it at the end of a line. In vertical text, it lays out a ruby
-      // base after the spacing overlapping the preceding text. The spacing
-      // inserted here contains a space character, which prevents the native
-      // one.
+      // The native text-autospace is used only between adjacent text nodes
+      // in the same element, since browsers differ at element boundaries:
+      // Chromium may add the spacing to the following character instead of
+      // the preceding one (e.g., if a space in another element precedes it in
+      // the line), which leaves it at the start of the next line if the line
+      // breaks there, does not remove it at the end of a line, and in
+      // vertical text lays out a ruby base after the spacing overlapping the
+      // preceding text; WebKit does not insert it, even across an empty
+      // element or between text nodes (see NativeTextSpacing); Firefox
+      // determines it by the following side. The spacing inserted here
+      // contains a space character, which prevents the native one.
       if (
-        textNode.parentElement === adjacentNode.parentElement &&
+        (isAfter ? textNode.nextSibling : textNode.previousSibling) ===
+          adjacentNode &&
+        NativeTextSpacing.autospacesAcrossTextNodes(document) &&
         hasNativeAutospace(textNode.parentElement, type)
       ) {
         return false;

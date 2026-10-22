@@ -499,7 +499,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 
 - [text-autospace](https://www.w3.org/TR/css-text-4/#text-autospace-property)
   - サポート値: `normal | no-autospace | [ ideograph-alpha || ideograph-numeric ] | auto`
-  - ブラウザがその値をサポートし、要素境界では両側で有効な場合にだけ間隔を入れるブラウザ（現在は Chromium）では、要素内のテキストにブラウザ本来の `text-autospace` を使用します。それ以外の場合と要素境界では Vivliostyle 独自の実装を使用します。要素境界の間隔は、CSS Text 4 の定義どおり、境界を含む最も内側の要素で決まります。[Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151) を参照
+  - ブラウザがその値をサポートしている場合は、要素内のテキストにブラウザ本来の `text-autospace` を使用します。それ以外の場合と、ブラウザによって挙動が異なる要素境界では、Vivliostyle 独自の実装を使用します。要素境界の間隔は、CSS Text 4 の定義どおり、境界を含む最も内側の要素で決まります。[Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151) を参照
   - SVG では、`text-autospace` と `text-spacing-trim` はブラウザの既定値になります。
 - [text-spacing-trim](https://www.w3.org/TR/css-text-4/#text-spacing-trim-property)
   - 値: `space-all | normal | space-first | trim-start | trim-both | auto`

@@ -18,11 +18,24 @@
  * text-autospace and text-spacing-trim can be used.
  *
  * CSS.supports() only checks the syntax. Native text-autospace is used only
- * if the browser behaves as expected at element boundaries, and native
- * text-spacing-trim only if the fonts can actually trim the punctuation.
+ * if the browser inserts the spacing in text, and native text-spacing-trim
+ * only if the fonts can actually trim the punctuation.
  */
 
-const autospaceBoundaryCaches = new WeakMap<Document, boolean>();
+type AutospaceSupport = {
+  // The spacing is inserted in a text node
+  inText: boolean;
+  // The spacing is inserted between adjacent text nodes in an element
+  acrossTextNodes: boolean;
+  // The spacing is inserted at an element boundary if it is enabled on the
+  // following side, even if not on the preceding side (Firefox)
+  boundaryByFollowingSide: boolean;
+  // In vertical text, the spacing is not inserted next to upright characters
+  // (WebKit inserts it)
+  vertical: boolean;
+};
+
+const autospaceCaches = new WeakMap<Document, AutospaceSupport>();
 const trimCaches = new WeakMap<Document, Map<string, boolean>>();
 
 export function supports(property: string, value: string): boolean {
@@ -30,73 +43,115 @@ export function supports(property: string, value: string): boolean {
 }
 
 /**
- * Check if the browser inserts the native autospace at an element boundary
- * only if the text-autospace values on both sides enable it.
- *
- * Text spacing polyfill inserts the spacing at element boundaries where this
- * does not produce the spacing required by the spec, which is determined by
- * the innermost element containing the boundary. Browsers that behave
- * differently (e.g., use the value on one side only) cannot be used with it.
+ * Check where the browser inserts the native autospace in the text of an
+ * element. The spacing at element boundaries is inserted by the text spacing
+ * polyfill, since browsers differ there (see TextSpacingPolyfill).
  */
-function hasExpectedAutospaceBoundary(document: Document): boolean {
-  let result = autospaceBoundaryCaches.get(document);
-  if (result !== undefined) {
+function getAutospaceSupport(document: Document): AutospaceSupport {
+  let result = autospaceCaches.get(document);
+  if (result) {
     return result;
   }
   const body = document.body;
   if (!body) {
-    return false;
+    return {
+      inText: false,
+      acrossTextNodes: false,
+      boundaryByFollowingSide: false,
+      vertical: false,
+    };
   }
   const probe = document.createElement("div");
   probe.style.cssText =
     "all:initial;position:absolute;visibility:hidden;display:block;" +
     "font:100px/1 serif;white-space:pre;text-spacing-trim:space-all;";
   body.appendChild(probe);
-  const measure = (
-    before: string,
-    middle: string,
-    after: string,
-    outer: string,
-    inner: string,
-  ): number => {
-    const outerElem = document.createElement("span");
-    const innerElem = document.createElement("span");
-    outerElem.style.setProperty("text-autospace", outer);
-    innerElem.style.setProperty("text-autospace", inner);
-    innerElem.textContent = middle;
-    outerElem.append(before, innerElem, after);
-    probe.replaceChildren(outerElem);
-    return outerElem.getBoundingClientRect().width;
+  let vertical = false;
+  // Measure the texts, the second one in an inner element with the style if
+  // given
+  const measure = (texts: string[], value: string, inner?: string): number => {
+    const elem = document.createElement("span");
+    elem.style.setProperty("text-autospace", value);
+    elem.append(...texts);
+    if (inner) {
+      const innerElem = document.createElement("span");
+      innerElem.style.cssText = inner;
+      innerElem.append(elem.childNodes[1]);
+      elem.insertBefore(innerElem, elem.childNodes[1] ?? null);
+    }
+    probe.replaceChildren(elem);
+    const rect = elem.getBoundingClientRect();
+    return vertical ? rect.height : rect.width;
   };
-  // [before, middle, after, inner value, whether spacing is expected]
-  const cases: [string, string, string, string, boolean][] = [
-    ["日", "a", "", "normal", true],
-    ["", "a", "日", "normal", true],
-    ["日", "a", "", "no-autospace", false],
-    ["", "a", "日", "no-autospace", false],
-  ];
-  result = cases.every(([before, middle, after, inner, expected]) => {
-    const spacing =
-      measure(before, middle, after, "normal", inner) -
-      measure(before, middle, after, "no-autospace", "no-autospace");
-    // The spacing is 1/8 of the ideographic advance (12.5px)
-    return spacing > 5 === expected;
-  });
+  // The spacing is 1/8 of the ideographic advance (12.5px)
+  const hasSpacing = (texts: string[], value = "normal", inner?: string) =>
+    measure(texts, value, inner) -
+      measure(
+        texts,
+        "no-autospace",
+        inner && `${inner};text-autospace:no-autospace`,
+      ) >
+    5;
+  result = {
+    inText: hasSpacing(["日a"]) && hasSpacing(["a日"]),
+    acrossTextNodes: hasSpacing(["日", "a"]) && hasSpacing(["a", "日"]),
+    boundaryByFollowingSide: hasSpacing(
+      ["日", "a"],
+      "no-autospace",
+      "text-autospace:normal",
+    ),
+    vertical: false,
+  };
+  probe.style.writingMode = "vertical-rl";
+  vertical = true;
+  const verticalSpacing = hasSpacing(["日1日"]);
+  probe.style.textOrientation = "upright";
+  const uprightSpacing = hasSpacing(["日1日"]);
+  probe.style.textOrientation = "";
+  result.vertical =
+    verticalSpacing &&
+    !uprightSpacing &&
+    !hasSpacing(["日", "12", "日"], "normal", "text-combine-upright:all");
   probe.remove();
-  autospaceBoundaryCaches.set(document, result);
+  autospaceCaches.set(document, result);
   return result;
 }
 
 /**
  * Check if the native text-autospace can be used for the value.
  */
-export function supportsAutospace(document: Document, value: string): boolean {
+export function supportsAutospace(
+  document: Document,
+  value: string,
+  vertical = false,
+): boolean {
   if (value === "no-autospace") {
     return true;
   }
+  const support = getAutospaceSupport(document);
   return (
-    supports("text-autospace", value) && hasExpectedAutospaceBoundary(document)
+    supports("text-autospace", value) &&
+    support.inText &&
+    (!vertical || support.vertical)
   );
+}
+
+/**
+ * Check if the native text-autospace inserts the spacing between adjacent
+ * text nodes in an element (WebKit does not).
+ */
+export function autospacesAcrossTextNodes(document: Document): boolean {
+  return getAutospaceSupport(document).acrossTextNodes;
+}
+
+/**
+ * Check if the native text-autospace inserts the spacing at an element
+ * boundary if it is enabled on the following side, even if not on the
+ * preceding side (Firefox). Otherwise, it does so only if it is enabled on
+ * both sides (Chromium), or does not do so (WebKit).
+ */
+export function autospacesByFollowingSide(document: Document): boolean {
+  return getAutospaceSupport(document).boundaryByFollowingSide;
 }
 
 const OPENING = "‘“〝（［｛｟\u2329〈《「『【〔〖〘〚";
