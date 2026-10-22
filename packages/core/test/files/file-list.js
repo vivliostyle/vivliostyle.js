@@ -861,6 +861,14 @@ module.exports = [
         title:
           "Forced break and text-autospace after ::first-line (Issue #2196)",
       },
+      {
+        file: "text-spacing/native-text-spacing.html",
+        title: "Native text spacing and fallback (Issues #2151, #1562)",
+      },
+      {
+        file: "text-spacing/page-break-punctuation.html",
+        title: "Page break after text-spacing punctuation (PR #2211)",
+      },
     ],
   },
   {

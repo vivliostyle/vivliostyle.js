@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- Test case for Issues #2151 and #1562: native text spacing and fallback -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>Native text spacing and fallback</title>
+    <style>
+      @page {
+        size: 140mm 100mm;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+        break-before: page;
+      }
+      p {
+        margin: 0.25em 0;
+      }
+      .box {
+        width: 9.5em;
+        outline: 1px solid #ccc;
+      }
+      .box10 {
+        width: 10em;
+        outline: 1px solid #ccc;
+      }
+      .end {
+        text-align: end;
+      }
+      .none {
+        text-spacing: none;
+      }
+      .no-autospace {
+        text-autospace: no-autospace;
+      }
+      .normal {
+        text-autospace: normal;
+      }
+      .trim-start {
+        text-spacing-trim: trim-start;
+      }
+      .space-first {
+        text-spacing-trim: space-first;
+      }
+      .trim-both {
+        text-spacing-trim: trim-both;
+      }
+      .alpha {
+        text-autospace: ideograph-alpha;
+      }
+      .hanging {
+        hanging-punctuation: first allow-end last;
+      }
+      .font-fallback {
+        font-family: "BIZ UDGothic", "UD Digi Kyokasho N-R", "Meiryo", sans-serif;
+      }
+      .sans {
+        font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        height: 12em;
+      }
+      code {
+        background: #eee;
+      }
+      em {
+        font-style: normal;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2 style="break-before: auto">1. Native and fallback</h2>
+    <p class="none">「分割不要」日本語ABCと123の混植。“Latin punctuation”もそのまま。</p>
+    <p>「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
+    <p class="trim-start">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
+    <p class="trim-both">「括弧」「括弧」、句読点。日本語ABCと123の混植。「行頭の括弧」「行末の括弧」。</p>
+    <p class="font-fallback">「非対応フォント」「括弧」、句読点。日本語ABCと123の混植。</p>
+    <p>括弧。<span class="sans">「別のフォント」</span>「括弧」</p>
+    <p>括弧。<span class="font-fallback">「別のフォント」</span>「括弧」</p>
+    <p class="alpha">日本語ABC日本語123日本語<span>DEF</span>日本語。</p>
+    <p class="hanging">「ぶら下げ処理と詰め処理を組み合わせる。括弧と句読点の配置を確認する。」</p>
+
+    <h2>2. Autospace at element boundaries</h2>
+    <p>Spacing is expected on both sides of the <code>code</code> elements (determined by the parent with <code>text-autospace: normal</code>), and outside the underlined elements.</p>
+    <p>日本<code>span</code>語、<code>let</code>文、<code>123</code>番</p>
+    <p><em>日本</em>abc<em>語</em>、<span class="no-autospace">日本</span>abc</p>
+    <p>No spacing is expected below, since the parent has <code>text-autospace: no-autospace</code>.</p>
+    <p class="no-autospace">abc<span class="normal">日本</span>def</p>
+    <p>Spacing is expected only between C and 日 below (in the second element).</p>
+    <p class="no-autospace"><span class="normal">日本</span><span class="normal">ABC日本</span></p>
+
+    <h2>3. Closing punctuation at the end of a line</h2>
+    <p>In the boxes of width 9.5em, the 、 and 。 should be set half-width and stay at the end of the first line.</p>
+    <p class="box">あいうえおかきくけ、さしすせそ</p>
+    <p class="box">あいうえおかきくけ。さしすせそ</p>
+    <p class="box">あいうえおかきくけ。</p>
+    <p class="box">あいうえおかきく<em>け</em>、さしすせそ</p>
+    <p class="box">あいうえおかきくけ」さしすせそ</p>
+    <p>In the box of width 10em, the 、 should be set full-width at the end of the first line.</p>
+    <p class="box10">あいうえおかきくけ、さしすせそ</p>
+
+    <h2>3b. trim-both at the end of a line</h2>
+    <p>In the right-aligned boxes below, the 」 and 。 at the ends of the lines should be set half-width, flush with the right edge (also when they do not fit at full width), with <code>trim-both</code>, but full-width with <code>normal</code> where they fit.</p>
+    <p class="box10 trim-both end">あいうえおかきくけ」さしすせそ</p>
+    <p class="box10 trim-both end">あいうえおかきくけ。さしすせそ</p>
+    <p class="box trim-both end">あいうえおかきくけ」さしすせそ</p>
+    <p class="box trim-both end">あいうえおかきくけ。さしすせそ</p>
+    <p class="box10 end">あいうえおかきくけ」さしすせそ</p>
+
+    <h2>4. space-first in a paragraph continued on the next page</h2>
+    <p>The 「 at the start of the first line on the next page should be trimmed as on the other lines except the first line of the paragraph.</p>
+    <p class="box10 space-first">「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ「あいうえおかきくけ</p>
+
+    <h2>5. Vertical text</h2>
+    <p class="vertical">「縦書き」「括弧」、句読点。日本語ABCと123の混植。“引用符”も確認。</p>
+
+    <h2>6. SVG text</h2>
+    <p>SVG text uses the browser's default text spacing.</p>
+    <svg width="300" height="40" viewBox="0 0 300 40">
+      <text x="0" y="28" font-size="16">日本語abc「括弧」「括弧」、句読点。</text>
+    </svg>
+  </body>
+</html>

@@ -2919,6 +2919,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
           nodeContext = nodeContext.parent;
         }
+      } else if (viewNode.nodeType !== 1 && !nodeContext.after) {
+        // The text in a text-spacing wrapper, which may be split from a
+        // longer text node and have no after check point (see
+        // TextSpacingPolyfill.postLayoutBlock()), fits: break after it.
+        nodeContext = nodeContext.modify();
+        nodeContext.offsetInNode += (viewNode as Text).length;
+        nodeContext.breakBefore = null;
       }
     }
     this.clearOverflownViewNodes(nodeContext, false);
@@ -5398,7 +5405,11 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
     force: boolean,
   ): Vtree.NodeContext {
     if (nodeContext.after) {
-      nodeContext.offsetInNode = textNode.length;
+      // The view text node may start in the middle of the source node (e.g.,
+      // when the text continues from the previous page, or is split by
+      // TextSpacingPolyfill), at offsetInNode of the after check point.
+      nodeContext = nodeContext.modify();
+      nodeContext.offsetInNode += textNode.length;
     } else {
       // Character with index low is the last one that fits.
       let viewIndex = low - nodeContext.boxOffset;
@@ -5445,9 +5456,22 @@ export class TextNodeBreaker implements Layout.TextNodeBreaker {
         : "",
     );
     if (zwj) {
-      const p = nodeContext.preprocessedTextContent[0][1] as string;
-      nodeContext.preprocessedTextContent[0][1] =
-        p.slice(0, viewIndex + 1) + zwj + p.slice(viewIndex + 1);
+      // Insert it after the soft hyphen in the preprocessed text of the whole
+      // source node, from which the text continues. The view text node may
+      // start in the middle of the source node (e.g., when the text continues
+      // from the previous page, or is split by TextSpacingPolyfill).
+      let index = nodeContext.offsetInNode + viewIndex + 1;
+      for (const change of nodeContext.preprocessedTextContent) {
+        const s = change[1] as string;
+        if (change[0] === Diff.DELETE) {
+          continue;
+        }
+        if (index <= s.length) {
+          change[1] = s.slice(0, index) + zwj + s.slice(index);
+          break;
+        }
+        index -= s.length;
+      }
     }
     return viewIndex + 1;
   }

@@ -15,6 +15,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as adapt_diff from "../../../src/vivliostyle/diff";
 import * as adapt_layout from "../../../src/vivliostyle/layout";
 import * as adapt_layoutprocessor from "../../../src/vivliostyle/layout-processor";
 import * as adapt_vtree from "../../../src/vivliostyle/vtree";
@@ -66,6 +67,15 @@ describe("layout", function () {
         );
         expect(textNode.replaceData).not.toHaveBeenCalled();
       });
+      it("adds the length of the view text node to `offsetInNode` when nodeContext#after is true and the view text node starts in the middle of the source text.", function () {
+        // The view text continued from the previous page
+        nodeContext.after = true;
+        nodeContext.offsetInNode = 6;
+        textNode.data = "abcde­f ghij";
+        textNode.length = 11;
+        var newContext = breaker.breakTextNode(textNode, nodeContext, 8);
+        expect(newContext.offsetInNode).toEqual(17);
+      });
       it("removes characters after split point and inserts a hyphenation character when splits a text node at the soft-hyphen character.", function () {
         var newContext = breaker.breakTextNode(textNode, nodeContext, 13);
         expect(newContext.offsetInNode).toEqual(11);
@@ -107,6 +117,38 @@ describe("layout", function () {
           newContext.preprocessedTextContent,
         );
         expect(textNode.replaceData).toHaveBeenCalledWith(8, 9, "");
+      });
+      it("inserts a zero width joiner after the soft hyphen in the source text when the view text node starts in the middle of it.", function () {
+        // The view of an Arabic word with a soft hyphen, split from the source
+        // text after an ideograph (e.g., by the text-spacing polyfill)
+        textNode.data = "\u0627\u0628\u00AD\u062C\u062F";
+        textNode.length = 5;
+        nodeContext.preprocessedTextContent = [
+          [0, "\u6F22\u0627\u0628\u00AD\u062C\u062F"],
+        ];
+        nodeContext.offsetInNode = 1;
+        var newContext = breaker.breakTextNode(textNode, nodeContext, 5);
+        expect(newContext.offsetInNode).toEqual(4);
+        expect(
+          adapt_diff
+            .restoreNewText(newContext.preprocessedTextContent)
+            .slice(newContext.offsetInNode),
+        ).toEqual("\u200D\u062C\u062F");
+      });
+      it("inserts a zero width joiner after the soft hyphen in the change containing it.", function () {
+        textNode.data = "\u0627\u0628\u00AD\u062C\u062F";
+        textNode.length = 5;
+        nodeContext.preprocessedTextContent = [
+          [0, "ab"],
+          [1, "\u00AD"],
+          [0, "\u0627\u0628\u00AD\u062C\u062F"],
+        ];
+        nodeContext.offsetInNode = 3;
+        var newContext = breaker.breakTextNode(textNode, nodeContext, 5);
+        expect(newContext.offsetInNode).toEqual(6);
+        expect(newContext.preprocessedTextContent[2][1]).toEqual(
+          "\u0627\u0628\u00AD\u200D\u062C\u062F",
+        );
       });
     });
   });
