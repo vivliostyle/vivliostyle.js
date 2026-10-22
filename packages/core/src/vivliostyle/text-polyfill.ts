@@ -1636,6 +1636,18 @@ export class TextSpacingPolyfill {
     // line (see below)
     const lineEndChecked = new Set<Node>();
     let iFirst = -1;
+    // Whether the text of the block starts beyond the current column
+    let startsBeyondColumn: boolean | undefined;
+    const checkStartsBeyondColumn = (): boolean => {
+      if (startsBeyondColumn === undefined) {
+        const first = checkPoints[iFirst];
+        const rect = RangeClientRects.getClientRectsOfNode(first.viewNode)[0];
+        startsBeyondColumn =
+          !!rect &&
+          LayoutHelper.checkIfBeyondColumnBreaks(rect, first.vertical) > 0;
+      }
+      return startsBeyondColumn;
+    };
     try {
       for (let i = 0; i < checkPoints.length; i++) {
         const p = checkPoints[i];
@@ -1895,10 +1907,15 @@ export class TextSpacingPolyfill {
             textP.vertical,
           );
           reshapeTargets.add(blockContainers.get(element));
-          if (columnOver > 0) {
+          if (columnOver > 0 && !checkStartsBeyondColumn()) {
             // Stop processing if the node is moved to next column
             // because it will be processed again in the next column.
             // (Issue #1256)
+            // The block laid out beyond the column as a whole is processed
+            // to the end (up to the lookahead), since it may fit in the
+            // column after the processing (e.g., a block with
+            // `break-inside: avoid` moved to the next column before its
+            // punctuation is trimmed).
             break;
           }
           // The spacing inserted before the text may move its punctuation to

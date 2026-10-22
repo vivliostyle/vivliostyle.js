@@ -252,6 +252,29 @@ describe("text-polyfill", function () {
       }
     });
 
+    it("processes a block laid out beyond the column to the end", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      // The block is in the next column as a whole (e.g., moved there by
+      // `break-inside: avoid`), and may fit in the column after processing
+      element.style.position = "absolute";
+      element.style.left = "100000px";
+      layout("あいう「えお」かき「くけ」こ", { "text-spacing-trim": "normal" });
+      expect(element.querySelectorAll("viv-ts-open").length).toBe(2);
+      expect(element.querySelectorAll("viv-ts-close").length).toBe(2);
+    });
+
+    it("stops processing at the text beyond the column in a block starting in the column", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      // The text beyond the column is processed again in the next column
+      // (Issue #1256)
+      layout(
+        'あいう「えお」<span style="position:relative;left:100000px">か「き」く</span>',
+        { "text-spacing-trim": "normal" },
+      );
+      expect(element.querySelectorAll("viv-ts-open").length).toBe(2);
+      expect(element.querySelectorAll("viv-ts-close").length).toBe(1);
+    });
+
     it("does not measure the text detached beyond the lookahead", function () {
       spyOn(CSS, "supports").and.returnValue(false);
       element.append("日本語。", "次の文");
