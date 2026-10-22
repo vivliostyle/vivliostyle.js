@@ -194,6 +194,26 @@ function isTrimmedPair(
   );
 }
 
+/**
+ * Check if the punctuation trimmed in the pair (see isTrimmedPair()) needs
+ * trimming, given whether each character is full-width. Narrow punctuation
+ * needs no trimming, and an opening punctuation is not trimmed after a narrow
+ * closing bracket (Issue #1003). Otherwise a narrow neighbor does not prevent
+ * the trimming (e.g., `。` before a narrow `·`).
+ */
+function needsTrimming(
+  first: string,
+  second: string,
+  isFullWidth: (index: number) => boolean,
+): boolean {
+  if (OPENING.includes(second)) {
+    return (
+      isFullWidth(1) && (!CLOSING_BRACKETS.includes(first) || isFullWidth(0))
+    );
+  }
+  return isFullWidth(0);
+}
+
 // The properties that affect the glyphs and the trimming of punctuation
 const TRIM_PROBE_PROPERTIES = [
   "font-family",
@@ -312,12 +332,10 @@ export function supportsTrim(
       const pairKey = `${key}:${pair}`;
       let supported = cache.get(pairKey);
       if (supported === undefined) {
-        // Narrow punctuation needs no trimming
-        const isFullWidth = (char: string) =>
-          measure(char, "space-all") > fontSize * 0.7;
+        const isFullWidth = (index: number) =>
+          measure(pair[index], "space-all") > fontSize * 0.7;
         supported =
-          !isFullWidth(pair[0]) ||
-          !isFullWidth(pair[1]) ||
+          !needsTrimming(pair[0], pair[1], isFullWidth) ||
           measure(`漢${pair}漢`, "space-all") -
             measure(`漢${pair}漢`, "normal") >
             fontSize * 0.25;
@@ -384,21 +402,18 @@ export function supportsTrimPair(
   );
   let supported: boolean;
   try {
-    // Narrow punctuation needs no trimming
-    run1.textContent = char1;
-    run2.textContent = "";
-    const isFullWidth1 =
-      measure("space-all") > parseFloat(style1.fontSize) * 0.7;
-    run1.textContent = "";
-    run2.textContent = char2;
-    const isFullWidth2 =
-      measure("space-all") > parseFloat(style2.fontSize) * 0.7;
-    run1.textContent = `漢${char1}`;
-    run2.textContent = `${char2}漢`;
-    supported =
-      !isFullWidth1 ||
-      !isFullWidth2 ||
-      measure("space-all") - measure("normal") > fontSize * 0.25;
+    const isFullWidth = (index: number): boolean => {
+      run1.textContent = index ? "" : char1;
+      run2.textContent = index ? char2 : "";
+      const style = index ? style2 : style1;
+      return measure("space-all") > parseFloat(style.fontSize) * 0.7;
+    };
+    supported = !needsTrimming(char1, char2, isFullWidth);
+    if (!supported) {
+      run1.textContent = `漢${char1}`;
+      run2.textContent = `${char2}漢`;
+      supported = measure("space-all") - measure("normal") > fontSize * 0.25;
+    }
   } finally {
     probe.remove();
   }

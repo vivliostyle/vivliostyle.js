@@ -633,6 +633,86 @@ describe("text-polyfill", function () {
       ).toBe(false);
     });
 
+    // Width of the text with `’` and `·` narrow, reduced if `trims`
+    function mixedWidth(text, trims) {
+      const width = [...text].reduce(
+        (w, c) => w + ("’·".includes(c) ? 8 : 16),
+        0,
+      );
+      return new DOMRect(0, 0, width - (trims ? 8 : 0), 16);
+    }
+
+    it("checks a full-width punctuation before a narrow middle dot", function () {
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "narrow-dot-probe-font";
+      element.textContent = "国。·国";
+      // Only identical punctuation is trimmed
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          return mixedWidth(
+            this.textContent,
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+              /([。「])\1/u.test(this.textContent),
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(false);
+    });
+
+    it("does not check an opening punctuation after a narrow closing quotation mark", function () {
+      if (!hasTrimProperty) {
+        pending("text-spacing-trim unavailable");
+      }
+      spyOn(CSS, "supports").and.returnValue(true);
+      element.style.fontFamily = "narrow-quote-probe-font";
+      element.textContent = "国’「国";
+      // `’「` is not trimmed, as by the polyfill (Issue #1003)
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          return mixedWidth(
+            this.textContent,
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+              /([。「])\1/u.test(this.textContent),
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrim(element, "normal", "ja", false),
+      ).toBe(true);
+    });
+
+    it("checks a full-width punctuation before a narrow middle dot across elements", function () {
+      if (!hasTrimProperty) {
+        pending("text-spacing-trim unavailable");
+      }
+      element.innerHTML = '国。<span style="font-family: probe-c">·国</span>';
+      // Only punctuation from the same font is trimmed
+      spyOn(Element.prototype, "getBoundingClientRect").and.callFake(
+        function () {
+          const fonts = new Set(
+            [...this.children].map((child) => child.style.fontFamily),
+          );
+          return mixedWidth(
+            this.textContent,
+            this.style.getPropertyValue("text-spacing-trim") === "normal" &&
+              fonts.size <= 1,
+          );
+        },
+      );
+      expect(
+        NativeTextSpacing.supportsTrimPair(
+          element,
+          "。",
+          element.querySelector("span"),
+          "·",
+          "ja",
+          false,
+        ),
+      ).toBe(false);
+    });
+
     it("checks a pair of punctuation across elements with different fonts", function () {
       if (!hasTrimProperty) {
         pending("text-spacing-trim unavailable");
