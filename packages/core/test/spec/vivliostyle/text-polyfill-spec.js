@@ -219,6 +219,39 @@ describe("text-polyfill", function () {
       expect(element.querySelector("viv-ts-open")).toBeNull();
     });
 
+    it("does not trim the closing punctuation set half-width by the polyfill again", function () {
+      element.style.width = "auto";
+      element.textContent = "」";
+      if (!NativeTextSpacing.supportsTrim(element, "trim-start", "ja", false)) {
+        pending("native text-spacing-trim unavailable");
+      }
+      // The last two characters do not fit on the first line even with the
+      // closing bracket at half-width, but would if the browser also set it
+      // half-width at the end of the line (allow-end)
+      const probe = document.createElement("span");
+      probe.style.whiteSpace = "nowrap";
+      probe.textContent = "あいうえおかきくけこ";
+      element.replaceChildren(probe);
+      const width = probe.getBoundingClientRect().width;
+      element.style.width = `${width + 4}px`;
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        layout("あいうえおかきくけこ」", { "text-spacing-trim": "trim-both" });
+        const close = element.querySelector("viv-ts-close");
+        expect(close?.className).toBe("viv-ts-trim");
+        const range = document.createRange();
+        range.setStart(element.firstChild, 0);
+        range.setEnd(element.firstChild, 1);
+        expect(close.getBoundingClientRect().top).toBeGreaterThan(
+          range.getBoundingClientRect().bottom,
+        );
+      } finally {
+        style.remove();
+      }
+    });
+
     it("does not measure the text detached beyond the lookahead", function () {
       spyOn(CSS, "supports").and.returnValue(false);
       element.append("日本語。", "次の文");

@@ -1570,6 +1570,13 @@ viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-hw) {
 viv-ts-close.viv-hang-end:not(.viv-hang-hw) {
   --viv-ts-shift: 1em;
 }
+/* The punctuation reduced by a fixed amount, measured as full-width, is not
+   trimmed again by the native text-spacing-trim */
+viv-ts-open:is(.viv-ts-trim, .viv-ts-auto) > viv-ts-inner,
+viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-end:not(.viv-hang-hw))
+  > viv-ts-inner {
+  text-spacing-trim: space-all;
+}
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {
