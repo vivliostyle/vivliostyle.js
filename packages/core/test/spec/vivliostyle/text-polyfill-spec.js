@@ -647,6 +647,37 @@ describe("text-polyfill", function () {
       }
     });
 
+    it("does not trim the half-width punctuation at the end of the block that does not hang", function () {
+      checkFullWidthFont();
+      element.style.fontFeatureSettings = '"palt"';
+      for (const value of ["trim-all", "trim-both"]) {
+        layout("あいうえお。", {
+          "text-spacing-trim": value,
+          "hanging-punctuation": "allow-end",
+        });
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const stop = Array.from(element.querySelectorAll("viv-ts-close")).find(
+          (e) => e.textContent === "。",
+        );
+        expect(stop?.className ?? "")
+          .withContext(value)
+          .toBe("");
+        // The full stop keeps its advance
+        const marker = document.createElement("span");
+        element.append(marker);
+        const stopRange = document.createRange();
+        const text = element.lastChild.previousSibling;
+        stopRange.selectNodeContents(stop ?? text);
+        expect(
+          marker.getBoundingClientRect().left -
+            stopRange.getBoundingClientRect().left,
+        )
+          .withContext(value)
+          .toBeGreaterThan(4);
+      }
+    });
+
     it("centers the fullwidth dot punctuation in Traditional Chinese that does not hang", function () {
       checkFullWidthFont();
       element.lang = "zh-Hant";

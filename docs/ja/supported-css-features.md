@@ -502,8 +502,10 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
   - ブラウザがその値をサポートしている場合は、要素内のテキストにブラウザ本来の `text-autospace` を使用します。それ以外の場合と、ブラウザによって挙動が異なる要素境界では、Vivliostyle 独自の実装を使用します。要素境界の間隔は、CSS Text 4 の定義どおり、境界を含む最も内側の要素で決まります。[Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151) を参照
   - SVG では、`text-autospace` と `text-spacing-trim` はブラウザの既定値になります。
 - [text-spacing-trim](https://www.w3.org/TR/css-text-4/#text-spacing-trim-property)
-  - 値: `space-all | normal | space-first | trim-start | trim-both | auto`
+  - 値: `space-all | normal | space-first | trim-start | trim-both | trim-all | auto`
   - ブラウザがサポートしていて（現在は Chromium）、インライン整形文脈内のすべての約物を使用フォントで詰められる場合は、ブラウザ本来の `text-spacing-trim` を使用します。`trim-both` で行末の全角の閉じ約物を半角にする処理や `hanging-punctuation` など、ブラウザが提供しない処理には Vivliostyle 独自の実装を併用します。それ以外の場合は、そのインライン整形文脈全体で Vivliostyle 独自の実装を使用します。[Issue #2151](https://github.com/vivliostyle/vivliostyle.js/issues/2151) を参照
+  - `trim-all` はブラウザがサポートしていないため、常に Vivliostyle 独自の実装で処理します。全角のコロン類（`：；`）は簡体字中国語以外では全角の中点類として扱い、全角の句読点類（`、。，．`）は繁体字中国語でのみ全角の中点類として扱います。[Issue #2214](https://github.com/vivliostyle/vivliostyle.js/issues/2214) を参照
+  - 縦書きでは、日本語の全角コロン（`：`）以外の全角のコロン類は通常は回転しないため、Vivliostyle 独自の実装では詰めません。ただし、テキストを横倒しにした場合（`text-orientation: sideways` など）は詰めます。
 - [text-spacing](https://www.w3.org/TR/css-text-4/#text-spacing-property)
   - 値: `normal | none | auto | [<autospace> || <spacing-trim>]`
   - 注: `text-autospace` と `text-spacing-trim` プロパティをまとめて設定するショートハンドプロパティです。[PR #1142](https://github.com/vivliostyle/vivliostyle.js/pull/1142) を参照

@@ -2359,7 +2359,11 @@ export class TextSpacingPolyfill {
                   : "viv-hang-end"
                 : "viv-hang-end viv-hang-hw";
               if (hangingPunctuation.allowEnd && linePos === linePosition()) {
-                if (spacingTrim.trimEnd) {
+                if (!isFullWidth) {
+                  // The punctuation that is already half-width is not
+                  // adjusted if it does not hang
+                  outerElem.className = "";
+                } else if (spacingTrim.trimEnd) {
                   outerElem.className = "viv-ts-trim";
                 } else if (spacingTrim.allowEnd) {
                   outerElem.className = "viv-hang-end";
