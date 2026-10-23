@@ -789,21 +789,38 @@ const ADJACENT_CLOSING_START_PATTERN =
   /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u;
 
 /**
- * Check if the text is fullwidth colon punctuation that is not rotated in
- * vertical text. It has no blank half along the inline axis to be trimmed,
- * so it is neither closing nor middle dot punctuation there. In Japanese
- * fonts, the fullwidth colon is rotated but the fullwidth semicolon is not;
- * in the others, neither is rotated.
+ * Check if the text in the text node is set sideways in vertical text, as in
+ * horizontal text.
+ */
+function isSideways(textNode: Text): boolean {
+  const style = textNode.ownerDocument.defaultView.getComputedStyle(
+    textNode.parentElement,
+  );
+  return (
+    style.textOrientation === "sideways" ||
+    style.writingMode.startsWith("sideways")
+  );
+}
+
+/**
+ * Check if the text in the text node is fullwidth colon punctuation that is
+ * not rotated in vertical text. It has no blank half along the inline axis to
+ * be trimmed, so it is neither closing nor middle dot punctuation there. In
+ * Japanese fonts, the fullwidth colon is rotated but the fullwidth semicolon
+ * is not; in the others, neither is rotated. Both are rotated if the text is
+ * set sideways.
  */
 function isUnrotatedVerticalColon(
   text: string,
   lang: string | null,
   vertical: boolean,
+  textNode: Text,
 ): boolean {
   return (
     vertical &&
     /^[：；]\p{M}*$/u.test(text) &&
-    !(lang === "ja" && /^：/u.test(text))
+    !(lang === "ja" && /^：/u.test(text)) &&
+    !isSideways(textNode)
   );
 }
 
@@ -817,11 +834,12 @@ function isClosingMark(
   text: string,
   lang: string | null,
   vertical: boolean,
+  textNode: Text,
 ): boolean {
   return (
     (lang === "zh-hans" &&
       /^[：；]\p{M}*$/u.test(text) &&
-      !isUnrotatedVerticalColon(text, lang, vertical)) ||
+      !isUnrotatedVerticalColon(text, lang, vertical, textNode)) ||
     (lang !== "zh-hant" && /^[、。，．]\p{M}*$/u.test(text))
   );
 }
@@ -843,10 +861,11 @@ function isClosingPunctuation(
   text: string,
   lang: string | null,
   vertical: boolean,
+  textNode: Text,
 ): boolean {
   return (
     /^[’”〞〟）］｝｠\u232A〉》」』】〕〗〙〛]\p{M}*$/u.test(text) ||
-    isClosingMark(text, lang, vertical)
+    isClosingMark(text, lang, vertical, textNode)
   );
 }
 
@@ -1086,9 +1105,11 @@ function findLineEndPunctuation(
     // the other closing punctuation. It sets them full-width if they fit.
     const mayBePushed =
       hangs ||
-      ((allowEnd || trimEnd) && isClosingMark(match[0], lang, vertical));
+      ((allowEnd || trimEnd) &&
+        isClosingMark(match[0], lang, vertical, textNode));
     const mayBeAtEnd =
-      hangs || (trimEnd && isClosingPunctuation(match[0], lang, vertical));
+      hangs ||
+      (trimEnd && isClosingPunctuation(match[0], lang, vertical, textNode));
     if (
       (mayBePushed || mayBeAtEnd) &&
       (anywhere ||
@@ -2172,12 +2193,14 @@ export class TextSpacingPolyfill {
     } else if (
       (nativeTrim
         ? // The browser does not set it half-width at the end of a line
-          (spacingTrim.allowEnd && isClosingMark(text, lang, vertical)) ||
-          (spacingTrim.trimEnd && isClosingPunctuation(text, lang, vertical))
+          (spacingTrim.allowEnd &&
+            isClosingMark(text, lang, vertical, textNode)) ||
+          (spacingTrim.trimEnd &&
+            isClosingPunctuation(text, lang, vertical, textNode))
         : (spacingTrim.trimEnd ||
             spacingTrim.allowEnd ||
             spacingTrim.trimAdjacent) &&
-          isClosingPunctuation(text, lang, vertical)) &&
+          isClosingPunctuation(text, lang, vertical, textNode)) &&
       textDirection() === "ltr"
     ) {
       // fullwidth closing punctuation
@@ -2186,7 +2209,7 @@ export class TextSpacingPolyfill {
       !nativeTrim &&
       spacingTrim.trimAll &&
       isMiddleDotPunctuation(text, lang) &&
-      !isUnrotatedVerticalColon(text, lang, vertical) &&
+      !isUnrotatedVerticalColon(text, lang, vertical, textNode) &&
       textDirection() === "ltr"
     ) {
       // fullwidth middle dot punctuation
@@ -2418,6 +2441,14 @@ export class TextSpacingPolyfill {
           ) {
             // The punctuation that does not hang is set half-width as well
             outerElem.className = "viv-ts-trim";
+          }
+          if (
+            /^viv-ts-(trim|auto)$/.test(outerElem.className) &&
+            isMiddleDotPunctuation(text, lang)
+          ) {
+            // The fullwidth dot punctuation that may hang in Traditional
+            // Chinese is centered when it is set half-width
+            outerElem.classList.add("viv-ts-mid");
           }
         } else if (tagName === "viv-ts-middle") {
           outerElem.className = "viv-ts-trim";

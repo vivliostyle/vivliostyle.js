@@ -620,6 +620,56 @@ describe("text-polyfill", function () {
       }
     });
 
+    it("trims the fullwidth colon punctuation set sideways in vertical text", function () {
+      checkFullWidthFont();
+      element.style.writingMode = "vertical-rl";
+      element.style.textOrientation = "sideways";
+      element.style.height = element.style.width;
+      element.style.width = "";
+      for (const value of ["trim-all", "trim-both"]) {
+        element.lang = "zh-Hans";
+        element.innerHTML = "国：国；";
+        const { blockContext, points } = createCheckPoints(
+          { "text-spacing-trim": value },
+          { lang: "zh-Hans", vertical: true },
+        );
+        polyfill.postLayoutBlock(blockContext, points);
+        // trim-both trims only the closing punctuation at the end of the
+        // block
+        expect(
+          Array.from(
+            element.querySelectorAll("viv-ts-close.viv-ts-trim"),
+            (e) => e.textContent,
+          ),
+        )
+          .withContext(value)
+          .toEqual(value === "trim-all" ? ["：", "；"] : ["；"]);
+      }
+    });
+
+    it("centers the fullwidth dot punctuation in Traditional Chinese that does not hang", function () {
+      checkFullWidthFont();
+      element.lang = "zh-Hant";
+      element.innerHTML = "國。國";
+      const { blockContext, points } = createCheckPoints(
+        {
+          "text-spacing-trim": "trim-all",
+          "hanging-punctuation": "force-end",
+        },
+        { lang: "zh-Hant" },
+      );
+      polyfill.postLayoutBlock(blockContext, points);
+      const close = element.querySelector("viv-ts-close");
+      expect(close.className).toBe("viv-ts-trim viv-ts-mid");
+      const range = document.createRange();
+      range.setStart(element.firstChild, 0);
+      range.setEnd(element.firstChild, 1);
+      const start = range.getBoundingClientRect().right;
+      const innerRect = close.firstChild.getBoundingClientRect();
+      // Centered in the half-width advance, as with trim-all alone
+      expect(innerRect.left + innerRect.width / 2 - start).toBeCloseTo(4, 0);
+    });
+
     it("does not trim the half-width punctuation that does not hang", function () {
       checkFullWidthFont();
       element.style.fontFeatureSettings = '"palt"';

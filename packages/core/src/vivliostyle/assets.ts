@@ -1585,6 +1585,9 @@ viv-ts-middle.viv-ts-trim > viv-ts-inner {
   inset-inline-start: 0.25em;
   margin-inline-start: -0.5em;
 }
+viv-ts-close.viv-ts-mid:is(.viv-ts-trim, .viv-ts-auto) > viv-ts-inner {
+  inset-inline-start: 0.25em;
+}
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
 viv-ts-close.viv-hang-end::after {

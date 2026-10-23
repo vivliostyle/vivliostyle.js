@@ -76,6 +76,9 @@
 
     <h2>4. hanging-punctuation: force-end</h2>
     <p class="test box hang">あいうえおかきくけこ、あいうえおかきく、けこ。</p>
+    <!-- The fullwidth dot punctuation in Traditional Chinese that does not
+         hang is centered -->
+    <p class="test box hang" lang="zh-Hant">國國國國國國國國國國、國國國國國國國國。國國。</p>
 
     <h2 class="vertical-start">5. Vertical text</h2>
     <div class="vertical">
@@ -85,6 +88,8 @@
       <p class="test">国（国）国、国・国。国「国」国：国；国</p>
       <p class="test" lang="zh-Hant">國（國）國、國・國。國「國」國：國；國</p>
       <p class="test" lang="zh-Hans">国（国）国、国·国。国“国”国：国；国</p>
+      <!-- The fullwidth colon punctuation set sideways is rotated -->
+      <p class="test" lang="zh-Hans" style="text-orientation: sideways">国（国）国、国。国：国；国</p>
       <!-- With trim-both, the fullwidth colon punctuation in Simplified
            Chinese is closing punctuation, but not in vertical text, where it
            is not rotated: it is not trimmed at the end of the line. Each line
