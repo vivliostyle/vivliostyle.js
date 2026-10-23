@@ -832,7 +832,8 @@ function isUnrotatedVerticalColon(
 
 /**
  * Check if the text is fullwidth closing punctuation other than brackets and
- * quotation marks. Chromium's native text-spacing-trim does not set it
+ * quotation marks, except the fullwidth colon punctuation that is not rotated
+ * in vertical text. Chromium's native text-spacing-trim does not set it
  * half-width at the end of a line (`allow-end`), while it does so for
  * closing brackets and quotation marks.
  */
@@ -853,12 +854,20 @@ function isClosingMark(
 /**
  * Check if the text is fullwidth middle dot punctuation, including the
  * fullwidth colon and dot punctuation that is centered depending on the
- * language (CSS Text 4 § 8.5.2).
+ * language (CSS Text 4 § 8.5.2), except the fullwidth colon punctuation that
+ * is not rotated in vertical text.
  */
-function isMiddleDotPunctuation(text: string, lang: string | null): boolean {
+function isMiddleDotPunctuation(
+  text: string,
+  lang: string | null,
+  vertical: boolean,
+  textNode: Text,
+): boolean {
   return (
     /^[\u00B7\u2027\u30FB]\p{M}*$/u.test(text) ||
-    (lang !== "zh-hans" && /^[：；]\p{M}*$/u.test(text)) ||
+    (lang !== "zh-hans" &&
+      /^[：；]\p{M}*$/u.test(text) &&
+      !isUnrotatedVerticalColon(text, lang, vertical, textNode)) ||
     (lang === "zh-hant" && /^[、。，．]\p{M}*$/u.test(text))
   );
 }
@@ -2214,8 +2223,7 @@ export class TextSpacingPolyfill {
     } else if (
       !nativeTrim &&
       spacingTrim.trimAll &&
-      isMiddleDotPunctuation(text, lang) &&
-      !isUnrotatedVerticalColon(text, lang, vertical, textNode) &&
+      isMiddleDotPunctuation(text, lang, vertical, textNode) &&
       textDirection() === "ltr"
     ) {
       // fullwidth middle dot punctuation
@@ -2236,11 +2244,20 @@ export class TextSpacingPolyfill {
       outerElem.appendChild(innerElem);
       textNode.before(outerElem);
       innerElem.appendChild(textNode);
+      // The punctuation that may hang is marked with what the classes set
+      // below do not change: with `trim-all`, it is set half-width where it
+      // does not hang, and the fullwidth dot punctuation in Traditional
+      // Chinese is centered when it is set half-width. This stays correct if
+      // the line is fitted again after it is processed (see
+      // VivliostylePolyfillCss).
       if (hangingEnd && spacingTrim.trimAll) {
-        // The punctuation that hangs is set half-width where it does not
-        // hang, even if the line is fitted again after it is processed
-        // (see VivliostylePolyfillCss)
-        outerElem.setAttribute("data-viv-trim-all", "");
+        outerElem.setAttribute("data-viv-ts-trim-all", "");
+      }
+      if (
+        hangingEnd &&
+        isMiddleDotPunctuation(text, lang, vertical, textNode)
+      ) {
+        outerElem.setAttribute("data-viv-ts-middle", "");
       }
 
       if (needsChromiumVoTrFallback) {
@@ -2357,6 +2374,11 @@ export class TextSpacingPolyfill {
             }
           }
         } else if (tagName === "viv-ts-close") {
+          if (hangingEnd && spacingTrim.trimAll && isFullWidth) {
+            // With trim-all, whether the punctuation hangs at the end of a
+            // line is determined with it set half-width, as it is elsewhere
+            outerElem.className = "viv-ts-trim";
+          }
           if (hangingLast) {
             setHangingShift();
             outerElem.className = "viv-hang-last";
@@ -2453,20 +2475,13 @@ export class TextSpacingPolyfill {
             hangingEnd &&
             spacingTrim.trimAll &&
             isFullWidth &&
-            !outerElem.className
+            (!outerElem.className || outerElem.className === "viv-ts-auto")
           ) {
-            // The punctuation that does not hang is set half-width as well
+            // With trim-all, the punctuation that does not hang is set
+            // half-width as well. The space of `viv-ts-auto` is not used,
+            // since it makes the punctuation full-width if the line is fitted
+            // again and it is no longer at the end of the line.
             outerElem.className = "viv-ts-trim";
-          }
-          if (
-            (/^viv-ts-(trim|auto)$/.test(outerElem.className) ||
-              (spacingTrim.trimAll &&
-                outerElem.className === "viv-hang-end")) &&
-            isMiddleDotPunctuation(text, lang)
-          ) {
-            // The fullwidth dot punctuation that may hang in Traditional
-            // Chinese is centered when it is set half-width
-            outerElem.classList.add("viv-ts-mid");
           }
         } else if (tagName === "viv-ts-middle") {
           outerElem.className = "viv-ts-trim";

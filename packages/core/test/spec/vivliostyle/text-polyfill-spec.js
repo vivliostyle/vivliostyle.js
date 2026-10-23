@@ -696,28 +696,49 @@ describe("text-polyfill", function () {
     it("sets the punctuation that hangs half-width where it does not hang after the line is fitted again", function () {
       checkFullWidthFont();
       element.style.width = "4em";
-      layout("国国。国。", {
-        "text-spacing-trim": "trim-all",
-        "hanging-punctuation": "force-end",
-      });
-      // The first full stop is processed at the end of the first line, but
-      // the following text moves to the line when the last one hangs
-      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-      const lefts = [];
-      while (walker.nextNode()) {
-        const node = walker.currentNode;
-        for (let i = 0; i < node.length; i++) {
-          if (node.data[i] === "国") {
-            const range = document.createRange();
-            range.setStart(node, i);
-            range.setEnd(node, i + 1);
-            lefts.push(range.getBoundingClientRect().left);
+      for (const value of ["force-end", "allow-end"]) {
+        layout("国国。国。", {
+          "text-spacing-trim": "trim-all",
+          "hanging-punctuation": value,
+        });
+        // The first full stop is processed at the end of the first line, but
+        // the following text moves to the line when the last one is
+        // processed
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        const lefts = [];
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          for (let i = 0; i < node.length; i++) {
+            if (node.data[i] === "国") {
+              const range = document.createRange();
+              range.setStart(node, i);
+              range.setEnd(node, i + 1);
+              lefts.push(range.getBoundingClientRect().left);
+            }
           }
         }
+        expect(lefts.length).withContext(value).toBe(3);
+        // 2 ideographs and the half-width full stop before the third
+        // ideograph
+        expect(lefts[2] - lefts[0])
+          .withContext(value)
+          .toBeCloseTo(2.5 * 16, 0);
+        // The last full stop fits in the line when it is half-width, so it
+        // hangs only with force-end
+        const closes = element.querySelectorAll("viv-ts-close");
+        expect(closes[closes.length - 1].className)
+          .withContext(value)
+          .toBe(value === "force-end" ? "viv-hang-end" : "viv-ts-trim");
       }
-      expect(lefts.length).toBe(3);
-      // 2 ideographs and the half-width full stop before the third ideograph
-      expect(lefts[2] - lefts[0]).toBeCloseTo(2.5 * 16, 0);
+      // The last full stop does not fit in the line even when it is
+      // half-width, so it hangs with allow-end
+      layout("国国国国。", {
+        "text-spacing-trim": "trim-all",
+        "hanging-punctuation": "allow-end",
+      });
+      expect(element.querySelector("viv-ts-close").className).toBe(
+        "viv-hang-end",
+      );
     });
 
     it("centers the fullwidth dot punctuation in Traditional Chinese that does not hang", function () {
@@ -733,7 +754,8 @@ describe("text-polyfill", function () {
       );
       polyfill.postLayoutBlock(blockContext, points);
       const close = element.querySelector("viv-ts-close");
-      expect(close.className).toBe("viv-ts-trim viv-ts-mid");
+      expect(close.className).toBe("viv-ts-trim");
+      expect(close.hasAttribute("data-viv-ts-middle")).toBe(true);
       const range = document.createRange();
       range.setStart(element.firstChild, 0);
       range.setEnd(element.firstChild, 1);

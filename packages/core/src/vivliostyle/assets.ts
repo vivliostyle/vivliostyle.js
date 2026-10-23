@@ -1579,13 +1579,15 @@ viv-ts-middle.viv-ts-trim > viv-ts-inner {
   text-spacing-trim: space-all;
 }
 /* The fullwidth middle dot punctuation set half-width by trim-all is
-   centered in the half-width advance */
+   centered in the half-width advance, including the fullwidth dot
+   punctuation in Traditional Chinese that may hang */
 viv-ts-middle.viv-ts-trim > viv-ts-inner {
   position: relative;
   inset-inline-start: 0.25em;
   margin-inline-start: -0.5em;
 }
-viv-ts-close.viv-ts-mid:is(.viv-ts-trim, .viv-ts-auto) > viv-ts-inner {
+viv-ts-close[data-viv-ts-middle]:is(.viv-ts-trim, .viv-ts-auto)
+  > viv-ts-inner {
   inset-inline-start: 0.25em;
 }
 viv-ts-open.viv-ts-auto::before,
@@ -1605,10 +1607,11 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
 }
 /* With trim-all, the hanging punctuation is half-width where it does not
    hang: 0.5em space */
-viv-ts-close[data-viv-trim-all].viv-hang-end:not(.viv-hang-hw)::after {
+viv-ts-close[data-viv-ts-trim-all].viv-hang-end:not(.viv-hang-hw)::after {
   letter-spacing: normal;
 }
-viv-ts-close.viv-ts-mid.viv-hang-end:not(.viv-hang-hw) > viv-ts-inner {
+viv-ts-close[data-viv-ts-trim-all][data-viv-ts-middle].viv-hang-end:not(.viv-hang-hw)
+  > viv-ts-inner {
   /* centered in the half-width advance where it does not hang */
   inset-inline-start: 0.75em;
 }
