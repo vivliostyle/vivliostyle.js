@@ -537,7 +537,7 @@ overflow-wrap = normal | break-word | anywhere;
 [moz]text-align-last = auto | start | end | left | right | center | justify | inside | outside;
 text-justify = auto | none | inter-word | inter-character;
 word-break = normal | keep-all | break-all | break-word;
-text-spacing-trim = auto | normal | space-all | trim-both | trim-auto |
+text-spacing-trim = auto | normal | space-all | trim-both | trim-all | trim-auto |
     [[ trim-start | space-start | space-first ] ||
      [ trim-end | space-end | allow-end ] ||
      [ trim-adjacent | space-adjacent ]];
@@ -1574,8 +1574,21 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw) {
    trimmed again by the native text-spacing-trim */
 viv-ts-open:is(.viv-ts-trim, .viv-ts-auto) > viv-ts-inner,
 viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-end:not(.viv-hang-hw))
-  > viv-ts-inner {
+  > viv-ts-inner,
+viv-ts-middle.viv-ts-trim > viv-ts-inner {
   text-spacing-trim: space-all;
+}
+/* The fullwidth middle dot punctuation set half-width by trim-all is
+   centered in the half-width advance, including the fullwidth dot
+   punctuation in Traditional Chinese that may hang */
+viv-ts-middle.viv-ts-trim > viv-ts-inner {
+  position: relative;
+  inset-inline-start: 0.25em;
+  margin-inline-start: -0.5em;
+}
+viv-ts-close[data-viv-ts-middle]:is(.viv-ts-trim, .viv-ts-auto)
+  > viv-ts-inner {
+  inset-inline-start: 0.25em;
 }
 viv-ts-open.viv-ts-auto::before,
 viv-ts-close.viv-ts-auto::after,
@@ -1591,6 +1604,16 @@ viv-ts-close.viv-hang-end::after {
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
   /* 0.5em space + 0.5em = 1em */
   letter-spacing: 0.5em;
+}
+/* With trim-all, the hanging punctuation is half-width where it does not
+   hang: 0.5em space */
+viv-ts-close[data-viv-ts-trim-all].viv-hang-end:not(.viv-hang-hw)::after {
+  letter-spacing: normal;
+}
+viv-ts-close[data-viv-ts-trim-all][data-viv-ts-middle].viv-hang-end:not(.viv-hang-hw)
+  > viv-ts-inner {
+  /* centered in the half-width advance where it does not hang */
+  inset-inline-start: 0.75em;
 }
 viv-ts-open.viv-hang-first > viv-ts-inner {
   margin-inline-start: calc(-1 * var(--viv-ts-shift));

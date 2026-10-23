@@ -42,7 +42,10 @@ describe("text-polyfill", function () {
    * or inline elements having text nodes. The text-spacing properties of the
    * inline elements are given by `data-props` attributes in JSON.
    */
-  function createCheckPoints(props = {}) {
+  function createCheckPoints(
+    props = {},
+    { lang = "ja", vertical = false } = {},
+  ) {
     const blockContext = new Vtree.NodeContext(
       document.createElement("p"),
       null,
@@ -51,7 +54,8 @@ describe("text-polyfill", function () {
     blockContext.viewNode = element;
     blockContext.inline = false;
     blockContext.display = "block";
-    blockContext.lang = "ja";
+    blockContext.lang = lang;
+    blockContext.vertical = vertical;
     blockContext.inheritedProps = { ...defaultProps, ...props };
     const points = [];
     let boxOffset = 1;
@@ -489,6 +493,315 @@ describe("text-polyfill", function () {
       );
       expect(element.childNodes.length).toBe(1);
       expect(element.style.getPropertyValue("text-autospace")).toBe("normal");
+    });
+  });
+
+  describe("text-spacing-trim: trim-all and fullwidth colon punctuation", function () {
+    let style;
+
+    beforeEach(function () {
+      style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+    });
+
+    afterEach(function () {
+      style.remove();
+    });
+
+    function checkFullWidthFont() {
+      element.textContent = "（・";
+      const width = element.firstChild.length;
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      if (range.getBoundingClientRect().width < width * 16 * 0.9) {
+        pending("full-width punctuation font unavailable");
+      }
+    }
+
+    it("sets all the fullwidth punctuation half-width by the polyfill", function () {
+      checkFullWidthFont();
+      layout("「国（国）国、国・国。国：国」", {
+        "text-spacing-trim": "trim-all",
+      });
+      if (hasTrimProperty) {
+        // Browsers do not support trim-all (Issue #2214)
+        expect(element.style.getPropertyValue("text-spacing-trim")).toBe(
+          "space-all",
+        );
+      }
+      const opens = element.querySelectorAll("viv-ts-open");
+      const closes = element.querySelectorAll("viv-ts-close");
+      const middles = element.querySelectorAll("viv-ts-middle");
+      expect(Array.from(opens, (e) => e.textContent)).toEqual(["「", "（"]);
+      expect(Array.from(closes, (e) => e.textContent)).toEqual([
+        "）",
+        "、",
+        "。",
+        "」",
+      ]);
+      expect(Array.from(middles, (e) => e.textContent)).toEqual(["・", "："]);
+      for (const elem of [...opens, ...closes, ...middles]) {
+        expect(elem.className).toBe("viv-ts-trim");
+      }
+      // 7 ideographs and 8 half-width punctuation
+      const marker = document.createElement("span");
+      element.append(marker);
+      expect(
+        marker.getBoundingClientRect().left -
+          element.getBoundingClientRect().left,
+      ).toBeCloseTo(7 * 16 + 8 * 8, 0);
+      expect(element.textContent).toBe("「国（国）国、国・国。国：国」");
+    });
+
+    it("classifies the fullwidth colon and dot punctuation by language", function () {
+      checkFullWidthFont();
+      element.lang = "zh-Hans";
+      element.innerHTML = "国：国、国";
+      const { blockContext, points } = createCheckPoints(
+        { "text-spacing-trim": "trim-all" },
+        { lang: "zh-Hans" },
+      );
+      polyfill.postLayoutBlock(blockContext, points);
+      expect(element.querySelectorAll("viv-ts-middle").length).toBe(0);
+      expect(element.querySelectorAll("viv-ts-close").length).toBe(2);
+    });
+
+    it("does not trim the fullwidth colon punctuation not rotated in vertical text", function () {
+      checkFullWidthFont();
+      element.style.writingMode = "vertical-rl";
+      element.style.height = element.style.width;
+      element.style.width = "";
+      for (const [lang, text, trimmed] of [
+        ["ja", "国：国；国", ["："]],
+        ["zh-Hant", "國：國；國", []],
+        ["zh-Hans", "国：国；国", []],
+      ]) {
+        element.lang = lang;
+        element.innerHTML = text;
+        const { blockContext, points } = createCheckPoints(
+          { "text-spacing-trim": "trim-all" },
+          { lang, vertical: true },
+        );
+        polyfill.postLayoutBlock(blockContext, points);
+        expect(
+          Array.from(
+            element.querySelectorAll(".viv-ts-trim"),
+            (e) => e.textContent,
+          ),
+        )
+          .withContext(lang)
+          .toEqual(trimmed);
+      }
+    });
+
+    it("does not trim the fullwidth colon punctuation not rotated in vertical text with trim-both", function () {
+      checkFullWidthFont();
+      // Vivliostyle's own implementation
+      spyOn(CSS, "supports").and.returnValue(false);
+      for (const vertical of [false, true]) {
+        element.style.writingMode = vertical ? "vertical-rl" : "";
+        element.lang = "zh-Hans";
+        element.innerHTML = "国国：";
+        const { blockContext, points } = createCheckPoints(
+          { "text-spacing-trim": "trim-both" },
+          { lang: "zh-Hans", vertical },
+        );
+        polyfill.postLayoutBlock(blockContext, points);
+        // Closing punctuation at the end of the block in horizontal text
+        expect(
+          Array.from(
+            element.querySelectorAll(".viv-ts-trim"),
+            (e) => e.textContent,
+          ),
+        )
+          .withContext(vertical ? "vertical" : "horizontal")
+          .toEqual(vertical ? [] : ["："]);
+      }
+    });
+
+    it("trims the fullwidth colon punctuation set sideways in vertical text", function () {
+      checkFullWidthFont();
+      element.style.writingMode = "vertical-rl";
+      element.style.textOrientation = "sideways";
+      element.style.height = element.style.width;
+      element.style.width = "";
+      for (const value of ["trim-all", "trim-both"]) {
+        element.lang = "zh-Hans";
+        element.innerHTML = "国：国；";
+        const { blockContext, points } = createCheckPoints(
+          { "text-spacing-trim": value },
+          { lang: "zh-Hans", vertical: true },
+        );
+        polyfill.postLayoutBlock(blockContext, points);
+        // trim-both trims only the closing punctuation at the end of the
+        // block
+        expect(
+          Array.from(
+            element.querySelectorAll("viv-ts-close.viv-ts-trim"),
+            (e) => e.textContent,
+          ),
+        )
+          .withContext(value)
+          .toEqual(value === "trim-all" ? ["：", "；"] : ["；"]);
+      }
+    });
+
+    it("does not trim the half-width punctuation at the end of the block that does not hang", function () {
+      checkFullWidthFont();
+      element.style.fontFeatureSettings = '"palt"';
+      for (const value of ["trim-all", "trim-both"]) {
+        layout("あいうえお。", {
+          "text-spacing-trim": value,
+          "hanging-punctuation": "allow-end",
+        });
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const stop = Array.from(element.querySelectorAll("viv-ts-close")).find(
+          (e) => e.textContent === "。",
+        );
+        expect(stop?.className ?? "")
+          .withContext(value)
+          .toBe("");
+        // The full stop keeps its advance
+        const marker = document.createElement("span");
+        element.append(marker);
+        const stopRange = document.createRange();
+        const text = element.lastChild.previousSibling;
+        stopRange.selectNodeContents(stop ?? text);
+        expect(
+          marker.getBoundingClientRect().left -
+            stopRange.getBoundingClientRect().left,
+        )
+          .withContext(value)
+          .toBeGreaterThan(4);
+      }
+    });
+
+    it("accepts keywords in any case, as substituted by var()", function () {
+      checkFullWidthFont();
+      layout("国（国）国・国", {
+        "text-spacing-trim": Css.getName("TRIM-ALL"),
+      });
+      expect(element.querySelectorAll(".viv-ts-trim").length).toBe(3);
+      layout("国国国国国国国国国国国国国国国国国国国国、", {
+        "text-spacing-trim": Css.getName("Trim-Both"),
+        "hanging-punctuation": new Css.SpaceList([Css.getName("FORCE-END")]),
+      });
+      expect(element.querySelector("viv-ts-close").className).toBe(
+        "viv-hang-end",
+      );
+    });
+
+    it("sets the punctuation that hangs half-width where it does not hang after the line is fitted again", function () {
+      checkFullWidthFont();
+      element.style.width = "4em";
+      for (const value of ["force-end", "allow-end"]) {
+        layout("国国。国。", {
+          "text-spacing-trim": "trim-all",
+          "hanging-punctuation": value,
+        });
+        // The first full stop is processed at the end of the first line, but
+        // the following text moves to the line when the last one is
+        // processed
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        const lefts = [];
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          for (let i = 0; i < node.length; i++) {
+            if (node.data[i] === "国") {
+              const range = document.createRange();
+              range.setStart(node, i);
+              range.setEnd(node, i + 1);
+              lefts.push(range.getBoundingClientRect().left);
+            }
+          }
+        }
+        expect(lefts.length).withContext(value).toBe(3);
+        // 2 ideographs and the half-width full stop before the third
+        // ideograph
+        expect(lefts[2] - lefts[0])
+          .withContext(value)
+          .toBeCloseTo(2.5 * 16, 0);
+        // The last full stop fits in the line when it is half-width, so it
+        // hangs only with force-end
+        const closes = element.querySelectorAll("viv-ts-close");
+        expect(closes[closes.length - 1].className)
+          .withContext(value)
+          .toBe(value === "force-end" ? "viv-hang-end" : "viv-ts-trim");
+      }
+      // The last full stop does not fit in the line even when it is
+      // half-width, so it hangs with allow-end
+      layout("国国国国。", {
+        "text-spacing-trim": "trim-all",
+        "hanging-punctuation": "allow-end",
+      });
+      expect(element.querySelector("viv-ts-close").className).toBe(
+        "viv-hang-end",
+      );
+    });
+
+    it("centers the fullwidth dot punctuation in Traditional Chinese that does not hang", function () {
+      checkFullWidthFont();
+      element.lang = "zh-Hant";
+      element.innerHTML = "國。國";
+      const { blockContext, points } = createCheckPoints(
+        {
+          "text-spacing-trim": "trim-all",
+          "hanging-punctuation": "force-end",
+        },
+        { lang: "zh-Hant" },
+      );
+      polyfill.postLayoutBlock(blockContext, points);
+      const close = element.querySelector("viv-ts-close");
+      expect(close.className).toBe("viv-ts-trim");
+      expect(close.hasAttribute("data-viv-ts-middle")).toBe(true);
+      const range = document.createRange();
+      range.setStart(element.firstChild, 0);
+      range.setEnd(element.firstChild, 1);
+      const start = range.getBoundingClientRect().right;
+      const innerRect = close.firstChild.getBoundingClientRect();
+      // Centered in the half-width advance, as with trim-all alone
+      expect(innerRect.left + innerRect.width / 2 - start).toBeCloseTo(4, 0);
+    });
+
+    it("does not trim the half-width punctuation that does not hang", function () {
+      checkFullWidthFont();
+      element.style.fontFeatureSettings = '"palt"';
+      layout("あいうえお、かきくけこ。", {
+        "text-spacing-trim": "trim-all",
+        "hanging-punctuation": "force-end",
+      });
+      // The character after the comma does not overlap it
+      const rectOf = (char) => {
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          const index = node.data.indexOf(char);
+          if (index >= 0) {
+            const range = document.createRange();
+            range.setStart(node, index);
+            range.setEnd(node, index + 1);
+            return range.getBoundingClientRect();
+          }
+        }
+        return null;
+      };
+      expect(rectOf("か").left - rectOf("、").left).toBeGreaterThan(4);
+    });
+
+    it("centers the middle dot punctuation in the half-width advance", function () {
+      checkFullWidthFont();
+      layout("国・国", { "text-spacing-trim": "trim-all" });
+      const middle = element.querySelector("viv-ts-middle");
+      const inner = middle.firstChild;
+      const outerRect = middle.getBoundingClientRect();
+      const innerRect = inner.getBoundingClientRect();
+      // The full-width glyph box is centered on the half-width advance
+      expect(innerRect.left + innerRect.width / 2 - outerRect.left).toBeCloseTo(
+        outerRect.width / 2,
+        0,
+      );
     });
   });
 
