@@ -95,6 +95,18 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-vs-named-strings-2.html&zoom=1&spread=false
 - category: Counter style and list-style
+  title: "::marker pseudo-element (PR #1609)"
+  file: counter-style/marker.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/counter-style/marker.html&zoom=1&spread=false
+- category: Counter style and list-style
   title: "list-style-position (PR #1609)"
   file: counter-style/list-style-position.html
   decision: expected  # regression / expected / skip
@@ -215,6 +227,18 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/line-break-stability.html&zoom=1&spread=false
 - category: Text spacing
+  title: "Forced break and text-autospace after ::first-line (Issue #2196)"
+  file: text-spacing/first-line-break-duplication.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
+- category: Text spacing
   title: "Native text spacing and fallback (Issues #2151, #1562)"
   file: text-spacing/native-text-spacing.html
   decision: expected  # regression / expected / skip
@@ -226,6 +250,18 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/native-text-spacing.html&zoom=1&spread=false
+- category: Text spacing
+  title: "text-spacing-trim: trim-all (Issue #2214)"
+  file: text-spacing/text-spacing-trim-all.html
+  decision: expected  # regression / expected / skip
+  notes: "Added in PR #2215"
+  approvedViewer: git-issue2214-trim-all  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-trim-all.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/text-spacing-trim-all.html&zoom=1&spread=false
 - category: Hanging punctuation
   title: "Hanging Punctuation (PR #814)"
   file: text-spacing/hanging-punctuation.html
@@ -262,6 +298,33 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle-git-text-spacing-no-negative-let-ee8ba2-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-inline-border.html&zoom=1&spread=false
+- category: Nth page selector
+  title: "nth() page selector (PR #700)"
+  file: nth-page/nth-page.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&zoom=1&spread=false
+- category: Nth page selector
+  title: "nth() page selector & page counter reset in multiple documents (PR #700)"
+  file:
+    - nth-page/nth-page.html
+    - nth-page/nth-page-counter-reset.html
+    - nth-page/nth-page.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2211"
+  approvedViewer: git-feat-native-text-spacing  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page-counter-reset.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page-counter-reset.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/nth-page/nth-page.html&zoom=1&spread=false
 - category: Footnotes
   title: "Long footnote with footnote-policy: line (Issue #2029)"
   file: footnotes/footnote-policy-line-long.html
@@ -310,18 +373,6 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/first-line-next-block-pushed.html&zoom=1&spread=false
-- category: Text spacing
-  title: "Forced break and text-autospace after ::first-line (Issue #2196)"
-  file: text-spacing/first-line-break-duplication.html
-  decision: expected  # regression / expected / skip
-  notes: "Fixed in PR #2204"
-  approvedViewer: git-fix-first-line-autospace  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/first-line-break-duplication.html&zoom=1&spread=false
 - category: Generated content and pseudo-elements
   title: "::first-line line-height on the first line box (PR #2203)"
   file: first-line-line-height.html
