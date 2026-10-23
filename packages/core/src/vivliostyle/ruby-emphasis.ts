@@ -669,8 +669,7 @@ export function adjustAnnotationsForNodes(
         const block = n.viewNode as HTMLElement;
         const root = block.closest<HTMLElement>("[data-vivliostyle-column]");
         if (root) roots.add(root);
-        if (!inNestedColumns(block, (e) => layout.getElementComputedStyle(e)))
-          blocks.add(block);
+        blocks.add(block);
         break;
       }
     }
@@ -732,7 +731,13 @@ export function adjustAnnotationsForNodes(
       );
     }
     for (const block of blocks) {
-      if (!root.contains(block)) continue;
+      // Checked only here: reading computed styles forces a style recalc,
+      // which ordinary layout without annotations must not pay for.
+      if (
+        !root.contains(block) ||
+        inNestedColumns(block, (e) => layout.getElementComputedStyle(e))
+      )
+        continue;
       prepareEmphasisEnd(block, layout);
       adjustEmphasisBlock(block, layout, !!first && block.contains(first.node));
     }
