@@ -1603,6 +1603,15 @@ viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
   /* 0.5em space + 0.5em = 1em */
   letter-spacing: 0.5em;
 }
+/* With trim-all, the hanging punctuation is half-width where it does not
+   hang: 0.5em space */
+viv-ts-close[data-viv-trim-all].viv-hang-end:not(.viv-hang-hw)::after {
+  letter-spacing: normal;
+}
+viv-ts-close.viv-ts-mid.viv-hang-end:not(.viv-hang-hw) > viv-ts-inner {
+  /* centered in the half-width advance where it does not hang */
+  inset-inline-start: 0.75em;
+}
 viv-ts-open.viv-hang-first > viv-ts-inner {
   margin-inline-start: calc(-1 * var(--viv-ts-shift));
 }

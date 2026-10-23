@@ -28,6 +28,27 @@ import * as Vtree from "./vtree";
 
 type PropertyValue = string | number | Css.Val | undefined;
 
+/**
+ * Get the CSS value of the property value with the keywords in lowercase.
+ * The keywords keep their case when substituted by `var()`.
+ */
+function keywordsFromPropertyValue(
+  value: PropertyValue,
+  defaultValue: Css.Ident,
+): Css.Val {
+  const lowerCase = (val: Css.Val): Css.Val =>
+    val instanceof Css.Ident
+      ? Css.getName(val.name.toLowerCase())
+      : val instanceof Css.SpaceList
+        ? new Css.SpaceList(val.values.map(lowerCase))
+        : val;
+  return value instanceof Css.Val
+    ? lowerCase(value)
+    : typeof value === "string"
+      ? Css.getName(value.toLowerCase())
+      : defaultValue;
+}
+
 type HangingPunctuation = {
   first: boolean;
   forceEnd: boolean; // force-end
@@ -45,12 +66,7 @@ const HANGING_PUNCTUATION_NONE: HangingPunctuation = {
 function hangingPunctuationFromPropertyValue(
   value: PropertyValue,
 ): HangingPunctuation {
-  const cssval =
-    value instanceof Css.Val
-      ? value
-      : typeof value === "string"
-        ? Css.getName(value)
-        : Css.ident.none;
+  const cssval = keywordsFromPropertyValue(value, Css.ident.none);
 
   if (cssval === Css.ident.none) {
     return HANGING_PUNCTUATION_NONE;
@@ -158,12 +174,7 @@ const SPACING_TRIM_ALL: SpacingTrim = {
 };
 
 function spacingTrimFromPropertyValue(value: PropertyValue): SpacingTrim {
-  const cssval =
-    value instanceof Css.Val
-      ? value
-      : typeof value === "string"
-        ? Css.getName(value)
-        : Css.ident.normal;
+  const cssval = keywordsFromPropertyValue(value, Css.ident.normal);
 
   if (cssval === Css.ident.normal) {
     return SPACING_TRIM_NORMAL;
@@ -246,12 +257,7 @@ const AUTOSPACE_NORMAL: Autospace = {
 };
 
 function autospaceFromPropertyValue(value: PropertyValue): Autospace {
-  const cssval =
-    value instanceof Css.Val
-      ? value
-      : typeof value === "string"
-        ? Css.getName(value)
-        : Css.ident.normal;
+  const cssval = keywordsFromPropertyValue(value, Css.ident.normal);
 
   if (cssval === Css.ident.normal || cssval === Css.ident.auto) {
     return AUTOSPACE_NORMAL;
@@ -2230,6 +2236,12 @@ export class TextSpacingPolyfill {
       outerElem.appendChild(innerElem);
       textNode.before(outerElem);
       innerElem.appendChild(textNode);
+      if (hangingEnd && spacingTrim.trimAll) {
+        // The punctuation that hangs is set half-width where it does not
+        // hang, even if the line is fitted again after it is processed
+        // (see VivliostylePolyfillCss)
+        outerElem.setAttribute("data-viv-trim-all", "");
+      }
 
       if (needsChromiumVoTrFallback) {
         const textOrientation =
@@ -2447,7 +2459,9 @@ export class TextSpacingPolyfill {
             outerElem.className = "viv-ts-trim";
           }
           if (
-            /^viv-ts-(trim|auto)$/.test(outerElem.className) &&
+            (/^viv-ts-(trim|auto)$/.test(outerElem.className) ||
+              (spacingTrim.trimAll &&
+                outerElem.className === "viv-hang-end")) &&
             isMiddleDotPunctuation(text, lang)
           ) {
             // The fullwidth dot punctuation that may hang in Traditional
