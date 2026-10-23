@@ -350,17 +350,29 @@
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-fragmentation-target-counter.html&zoom=1&spread=false
 - category: Hanging punctuation
+  title: "ASCII hanging-punctuation first/last (Issue #2192)"
+  file: text-spacing/hanging-punctuation-ascii.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2216: ASCII brackets and quotes hang at block edges, including before trailing collapsible whitespace."
+  approvedViewer: git-codex-fix-ascii-hanging-punctuation  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-ascii.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle-git-codex-fix-ascii-hanging-punctuation-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-ascii.html&zoom=1&spread=false
+- category: Hanging punctuation
   title: "hanging-punctuation:last in right-to-left text (PR #2206)"
   file: text-spacing/hanging-punctuation-rtl.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2208Fixed in PR #2206"
-  approvedViewer: git-text-spacing-no-negative-let-ee8ba2  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: "Improved in PR #2206 and PR #2208; ASCII closing punctuation within a text node also hangs after PR #2216."
+  approvedViewer: git-codex-fix-ascii-hanging-punctuation  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
   baselineLabel: stable
   baselineUrl: >-
-    https://vivliostyle-git-fix-rtl-hanging-punctuation-last-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
+    https://vivliostyle-git-codex-fix-ascii-hanging-punctuation-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-rtl.html&zoom=1&spread=false
 - category: Generated content and pseudo-elements
   title: "Block after ::first-line is not pushed to the next page (PR #2205)"
   file: first-line-next-block-pushed.html
