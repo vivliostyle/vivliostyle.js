@@ -879,6 +879,10 @@ module.exports = [
     category: "Hanging punctuation",
     files: [
       {
+        file: "text-spacing/hanging-punctuation-ascii.html",
+        title: "ASCII hanging-punctuation first/last (Issue #2192)",
+      },
+      {
         file: "text-spacing/hanging-punctuation.html",
         title: "Hanging Punctuation (PR #814)",
       },
