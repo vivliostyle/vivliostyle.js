@@ -1951,8 +1951,12 @@ export class TextSpacingPolyfill {
               nextP.viewNode.nodeType === Node.TEXT_NODE &&
               nextP.viewNode.textContent.length > 0
             ) {
-              nextNode = nextP.viewNode;
-              break;
+              // Keep adjacent white space for autospace and line checks, but
+              // look past ignorable text to find the end of the block.
+              nextNode ||= nextP.viewNode;
+              if (!Vtree.canIgnore(nextP.viewNode, nextP.whitespace)) {
+                break;
+              }
             }
             if (
               (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||

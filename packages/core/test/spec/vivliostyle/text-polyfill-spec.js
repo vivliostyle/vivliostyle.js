@@ -552,12 +552,50 @@ describe("text-polyfill", function () {
             });
           }
 
-          it("handles nested inlines after collapsible white space", function () {
-            layout(" \n<span><em>(Text)</em></span>", {
+          it("handles nested inlines between collapsible white space", function () {
+            layout(" \n<span><em>(Text)</em></span> \n", {
               "hanging-punctuation": firstLast,
             });
             expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
             expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+          });
+
+          it("hangs last punctuation before trailing collapsible white space", function () {
+            for (const html of [
+              "(Text) \n",
+              "<span>「Text」</span> \t<span> \n</span> ",
+            ]) {
+              layout(html, { "hanging-punctuation": firstLast });
+              expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+            }
+          });
+
+          it("respects preserved spaces and segment breaks after punctuation", function () {
+            for (const [whitespace, css, tail, hangs] of [
+              [Vtree.Whitespace.PRESERVE, "pre", " ", false],
+              [Vtree.Whitespace.NEWLINE, "pre-line", "\n", false],
+              [Vtree.Whitespace.NEWLINE, "pre-line", " \t", true],
+            ]) {
+              element.style.whiteSpace = css;
+              element.innerHTML = `<span>(Text)</span>${tail}`;
+              const { blockContext, points } = createCheckPoints({
+                "hanging-punctuation": firstLast,
+              });
+              for (const point of points) {
+                point.whitespace = whitespace;
+              }
+              polyfill.postLayoutBlock(blockContext, points);
+              expect(element.querySelectorAll(".viv-hang-last").length)
+                .withContext(css + JSON.stringify(tail))
+                .toBe(hangs ? 1 : 0);
+            }
+          });
+
+          it("does not hang before content following collapsible white space", function () {
+            layout("Text<span>)</span> \n<span>tail</span>", {
+              "hanging-punctuation": firstLast,
+            });
+            expect(element.querySelector(".viv-hang-last")).toBeNull();
           });
 
           it("does not hang at the interior edges of forced lines", function () {
@@ -939,6 +977,14 @@ describe("text-polyfill", function () {
   describe("text-autospace at element boundaries", function () {
     const none = 'data-props=\'{"text-autospace":"no-autospace"}\'';
     const normal = 'data-props=\'{"text-autospace":"normal"}\'';
+
+    it("does not insert autospace across white space between elements", function () {
+      layout("<span>日本</span> <span>ABC</span>", {
+        "text-autospace": "normal",
+      });
+      expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
+      expect(element.childNodes[1].textContent).toBe(" ");
+    });
 
     it("inserts the spacing around an element with no-autospace if the parent has normal", function () {
       layout(`日本<code ${none}>span</code>語`, { "text-autospace": "normal" });
