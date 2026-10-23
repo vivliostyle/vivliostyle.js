@@ -496,6 +496,137 @@ describe("text-polyfill", function () {
     });
   });
 
+  describe("ASCII hanging punctuation at block edges (Issue #2192)", function () {
+    let style;
+
+    beforeEach(function () {
+      style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+    });
+
+    afterEach(function () {
+      style.remove();
+    });
+
+    for (const native of [true, false]) {
+      describe(
+        native ? "with native trimming" : "without native trimming",
+        function () {
+          beforeEach(function () {
+            if (native) {
+              if (!hasTrimProperty) {
+                pending("native trimming unavailable");
+              }
+            } else {
+              spyOn(CSS, "supports").and.returnValue(false);
+            }
+          });
+
+          const firstLast = new Css.SpaceList([
+            Css.getName("first"),
+            Css.getName("last"),
+          ]);
+
+          for (const [open, close] of [
+            ["(", ")"],
+            ["[", "]"],
+            ["{", "}"],
+            ['"', '"'],
+            ["'", "'"],
+          ]) {
+            it(`hangs ${open} and ${close} within a text node`, function () {
+              const text = `${open}Text (inside), it's [quoted].${close}`;
+              layout(text, { "hanging-punctuation": firstLast });
+              expect(element.querySelector(".viv-hang-first").textContent).toBe(
+                open,
+              );
+              expect(element.querySelector(".viv-hang-last").textContent).toBe(
+                close,
+              );
+              expect(element.childNodes.length).toBe(3);
+              expect(element.childNodes[1].data).toBe(
+                "Text (inside), it's [quoted].",
+              );
+              expect(element.textContent).toBe(text);
+            });
+          }
+
+          it("handles nested inlines after collapsible white space", function () {
+            layout(" \n<span><em>(Text)</em></span>", {
+              "hanging-punctuation": firstLast,
+            });
+            expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
+            expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+          });
+
+          it("does not hang at the interior edges of forced lines", function () {
+            layout("(First)<br>(Last)", { "hanging-punctuation": firstLast });
+            expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
+            expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+            expect(element.firstChild.textContent).toBe("(");
+            expect(element.lastChild.textContent).toBe(")");
+            expect(element.childNodes[1].data).toBe("First)");
+            expect(element.childNodes[3].data).toBe("(Last");
+          });
+
+          it("keeps combining marks with the hanging punctuation", function () {
+            layout("(\u0301Text)\u0301", { "hanging-punctuation": firstLast });
+            expect(element.querySelector(".viv-hang-first").textContent).toBe(
+              "(\u0301",
+            );
+            expect(element.querySelector(".viv-hang-last").textContent).toBe(
+              ")\u0301",
+            );
+          });
+
+          it("only splits the requested edges in ASCII-heavy text", function () {
+            const inside = "Text (inside), it's [quoted]. ".repeat(20);
+            for (const value of ["none", "first", "last"]) {
+              layout(`(${inside})`, { "hanging-punctuation": value });
+              expect(element.childNodes.length).toBe(value === "none" ? 1 : 2);
+              expect(element.querySelectorAll(".viv-hang-first").length).toBe(
+                value === "first" ? 1 : 0,
+              );
+              expect(element.querySelectorAll(".viv-hang-last").length).toBe(
+                value === "last" ? 1 : 0,
+              );
+            }
+          });
+
+          it("preserves inline border and padding suppression", function () {
+            layout(
+              '<span style="border-inline-start:2px solid">(Text</span>' +
+                '<span style="padding-inline-end:4px">text)</span>',
+              { "hanging-punctuation": firstLast },
+            );
+            expect(element.querySelector(".viv-hang-first")).toBeNull();
+            expect(element.querySelector(".viv-hang-last")).toBeNull();
+          });
+
+          it("splits generated ASCII content only at its edges", function () {
+            element.textContent = '"Text (inside)"';
+            polyfill.processGeneratedContent(
+              element,
+              Css.getName("no-autospace"),
+              Css.getName("space-all"),
+              firstLast,
+              "en",
+              false,
+            );
+            expect(element.querySelector(".viv-hang-first").textContent).toBe(
+              '"',
+            );
+            expect(element.querySelector(".viv-hang-last").textContent).toBe(
+              '"',
+            );
+            expect(element.childNodes.length).toBe(3);
+          });
+        },
+      );
+    }
+  });
+
   describe("text-spacing-trim: trim-all and fullwidth colon punctuation", function () {
     let style;
 

@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- Test case for Issue #2192: ASCII hanging punctuation within text nodes -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ASCII hanging punctuation first/last at block edges</title>
+    <style>
+      @page { size: 180mm 200mm; margin: 12mm; }
+      body { font: 18px/1.5 serif; text-autospace: no-autospace; }
+      section + section { break-before: page; }
+      h1 { font-size: 18px; }
+      p { margin: 0.6em 1em; width: 18em; outline: 1px solid #08f;
+          hanging-punctuation: first last; }
+      .end { text-align: end; }
+      .native { text-spacing-trim: space-all; }
+      .fallback { text-spacing-trim: trim-all; }
+      .blocked { border-inline-start: 2px solid red; padding-inline-end: 4px; }
+      .generated::before { content: '"Generated (inside)"'; }
+      .vertical { writing-mode: vertical-rl; text-orientation: sideways;
+                  height: 18em; }
+      .vertical p { width: auto; height: 18em; }
+    </style>
+  </head>
+  <body>
+    <section class="native">
+      <h1>Native trim when available: each pair should align</h1>
+      <p>(Text [inside], it's quoted.)</p>
+      <p><span>(</span>Text [inside], it's quoted.<span>)</span></p>
+      <p class="end">[Text (inside), it's quoted.]</p>
+      <p class="end"><span>[</span>Text (inside), it's quoted.<span>]</span></p>
+      <p>{Text [inside]}</p>
+      <p class="end">"Text (inside)"</p>
+      <p>'Text (inside)'</p>
+      <p class="end"><span><em>"Nested (inside)"</em></span></p>
+      <p><span class="blocked">(No hanging at either edge)</span></p>
+      <p class="generated end"></p>
+    </section>
+    <section class="fallback">
+      <h1>Polyfill trim (trim-all): same ASCII behavior</h1>
+      <p>(Text [inside], it's quoted.)</p>
+      <p><span>(</span>Text [inside], it's quoted.<span>)</span></p>
+      <p class="end">[Text (inside), it's quoted.]</p>
+      <p class="end"><span>[</span>Text (inside), it's quoted.<span>]</span></p>
+      <p>{Text [inside]}</p>
+      <p class="end">"Text (inside)"</p>
+      <p>'Text (inside)'</p>
+      <p class="end"><span><em>"Nested (inside)"</em></span></p>
+      <p><span class="blocked">(No hanging at either edge)</span></p>
+      <p class="generated end"></p>
+    </section>
+    <section class="native">
+      <h1>RTL and vertical text</h1>
+      <p dir="rtl" lang="he">(אבג דהו)</p>
+      <p class="end" dir="rtl" lang="he">"אבג דהו"</p>
+      <div class="vertical">
+        <p>(Vertical [inside])</p>
+        <p class="end">"Vertical (inside)"</p>
+      </div>
+    </section>
+  </body>
+</html>

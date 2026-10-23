@@ -1074,11 +1074,11 @@ type TextPosition = {
 
 // Opening punctuation that hangs with hanging-punctuation `first`
 const HANGING_FIRST_START_PATTERN =
-  /^[ \t\r\n\f]*(?![()\[\]{}])[\p{Ps}\p{Pf}\p{Pi}\u3000]\p{M}*/u;
+  /^[ \t\r\n\f]*[\p{Ps}\p{Pf}\p{Pi}'"\u3000]\p{M}*/u;
 
 // Closing punctuation that hangs with hanging-punctuation `last`
 const HANGING_LAST_END_PATTERN =
-  /(?![()\[\]{}])[\p{Pe}\p{Pf}\p{Pi}]\p{M}*(?=[ \t\r\n\f]*$)/u;
+  /[\p{Pe}\p{Pf}\p{Pi}'"]\p{M}*(?=[ \t\r\n\f]*$)/u;
 
 // Punctuation that hangs with hanging-punctuation `force-end` or `allow-end`
 const HANGING_END_PATTERN = /^[、。，．､｡]\p{M}*$/u;
@@ -1173,23 +1173,6 @@ function getSplitOffsets(
     if (position.mayBeContinued && spacing.spacingTrim.spaceFirst) {
       addMatch(text.match(OPENING_PUNCTUATION_START_PATTERN));
     }
-
-    // The punctuation that may hang (see processTextSpacing())
-    const { hangingPunctuation } = spacing;
-    if (position.mayBeFirstInBlock && hangingPunctuation.first) {
-      addMatch(text.match(HANGING_FIRST_START_PATTERN));
-    }
-    // If the text continues beyond the limit, so does its last punctuation
-    if (
-      position.mayBeLastInBlock &&
-      hangingPunctuation.last &&
-      limit >= text.length
-    ) {
-      const match = text.match(HANGING_LAST_END_PATTERN);
-      if (match) {
-        offsets.push(match.index, match.index + match[0].length);
-      }
-    }
   } else if (
     spacing.chromiumVoTrFallback ||
     !isSpacingTrimNone(spacing.spacingTrim) ||
@@ -1198,6 +1181,23 @@ function getSplitOffsets(
     addMatchEnds(PUNCTUATION_BOUNDARY_PATTERN);
     if (spacing.spacingTrim.trimAll) {
       addMatchEnds(MIDDLE_DOT_BOUNDARY_PATTERN);
+    }
+  }
+  // Split hanging punctuation at block edges with or without native trimming.
+  // ASCII brackets and quotes in the rest of the text need not be split.
+  const { hangingPunctuation } = spacing;
+  if (position.mayBeFirstInBlock && hangingPunctuation.first) {
+    addMatch(text.match(HANGING_FIRST_START_PATTERN));
+  }
+  // If the text continues beyond the limit, so does its last punctuation
+  if (
+    position.mayBeLastInBlock &&
+    hangingPunctuation.last &&
+    limit >= text.length
+  ) {
+    const match = text.match(HANGING_LAST_END_PATTERN);
+    if (match) {
+      offsets.push(match.index, match.index + match[0].length);
     }
   }
   if (
