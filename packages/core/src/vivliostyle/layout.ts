@@ -2711,16 +2711,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // Suppress ancestor block-end padding/border during edge
             // calculation to prevent false overflow from browser column
             // breaking. (Issue #1846)
-            const restoreInset = this.suppressOpenAncestorBlockEndInset(
+            let edge = this.withOpenAncestorBlockEndInsetSuppressed(
               resNodeContext ?? nodeContext,
+              () =>
+                this.calculateEdge(
+                  resNodeContext,
+                  checkPoints,
+                  checkPointIndex,
+                  checkPoints[checkPointIndex].boxOffset,
+                ),
             );
-            let edge = this.calculateEdge(
-              resNodeContext,
-              checkPoints,
-              checkPointIndex,
-              checkPoints[checkPointIndex].boxOffset,
-            );
-            restoreInset();
             if (
               !resNodeContext ||
               !LayoutHelper.isOrphan(resNodeContext.viewNode)
@@ -3623,13 +3623,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * will be removed at actual break points due to box-decoration-break:
    * slice (the default). (Issue #1846)
    *
-   * Returns a cleanup function that restores the original state.
+   * Returns the containers whose padding/border was suppressed, and a cleanup
+   * function that restores the original state.
    */
-  private suppressOpenAncestorBlockEndInset(
-    nodeContext: Vtree.NodeContext,
-  ): () => void {
+  private suppressOpenAncestorBlockEndInset(nodeContext: Vtree.NodeContext): {
+    elements: Element[];
+    restore: () => void;
+  } {
     if (!LayoutHelper.isUsingBrowserColumnBreaking(this)) {
-      return () => {};
+      return { elements: [], restore: () => {} };
     }
     const saved: { element: Element; original: string | null }[] = [];
     for (let nc = nodeContext?.parent; nc; nc = nc.parent) {
@@ -3651,15 +3653,55 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Break.setBoxBreakFlag(element, "block-end");
       saved.push({ element, original });
     }
-    return () => {
-      for (const { element, original } of saved) {
-        if (original === null) {
-          element.removeAttribute("data-viv-box-break");
-        } else {
-          element.setAttribute("data-viv-box-break", original);
+    return {
+      elements: saved.map(({ element }) => element),
+      restore: () => {
+        for (const { element, original } of saved) {
+          if (original === null) {
+            element.removeAttribute("data-viv-box-break");
+          } else {
+            element.setAttribute("data-viv-box-break", original);
+          }
         }
-      }
+      },
     };
+  }
+
+  /**
+   * Measure with the block-end padding/border of open ancestor containers
+   * suppressed (see suppressOpenAncestorBlockEndInset()).
+   *
+   * Chromium does not lay out the content of a container again when only its
+   * block-end padding/border is removed: content that was pushed to the next
+   * column to make room for the padding/border stays there, as if the
+   * padding/border were still present. This happens when the browser laid out
+   * the container with the padding/border between the measurements, and
+   * causes a false overflow. A suppressed container fragmented across columns
+   * may be in that state, so lay it out from scratch and measure again.
+   */
+  private withOpenAncestorBlockEndInsetSuppressed(
+    nodeContext: Vtree.NodeContext,
+    measure: () => number,
+  ): number {
+    const { elements, restore } =
+      this.suppressOpenAncestorBlockEndInset(nodeContext);
+    let result = measure();
+    const fragmented = elements.filter(
+      (element) => this.clientLayout.getElementClientRects(element).length > 1,
+    );
+    if (fragmented.length) {
+      for (const element of fragmented) {
+        const style = (element as HTMLElement).style;
+        const display = style.getPropertyValue("display");
+        const priority = style.getPropertyPriority("display");
+        style.setProperty("display", "none", "important");
+        element.getBoundingClientRect();
+        style.setProperty("display", display, priority);
+      }
+      result = measure();
+    }
+    restore();
+    return result;
   }
 
   /**
@@ -3680,14 +3722,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (LayoutHelper.isOrphan(nodeContext.viewNode)) {
       return false;
     }
-    const restoreInset = this.suppressOpenAncestorBlockEndInset(nodeContext);
-    let edge = LayoutHelper.calculateEdge(
-      nodeContext,
-      this.clientLayout,
-      0,
-      this.vertical,
+    let edge = this.withOpenAncestorBlockEndInsetSuppressed(nodeContext, () =>
+      LayoutHelper.calculateEdge(
+        nodeContext,
+        this.clientLayout,
+        0,
+        this.vertical,
+      ),
     );
-    restoreInset();
     const offsets = BreakPosition.calculateOffset(
       nodeContext,
       this.collectElementsOffset(),

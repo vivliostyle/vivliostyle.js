@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Page breaking with container padding/border and CJK text (vertical)</title>
+    <!--
+      Test: The block-end padding of a container fragmented across pages
+      should not cause incorrect overflow detection, also when the browser
+      lays out the container with the padding between measurements, e.g. for
+      the text-spacing of CJK text. (See also
+      page-breaking-with-container-padding-border.html)
+
+      Page content area: 200px (= 300px page width - 50px*2 margins)
+      Each item: 20px (line-height, in vertical-rl writing mode)
+      Container: 5px block-start padding, 60px block-end padding
+
+      Expected page layout (4 pages), the same for the Latin text and the
+      Japanese text:
+        Page 1: Latin items 1-8 (5 + 8*20 = 165px; item 9 fits too, but a
+                break is needed inside the container before its block-end
+                padding)
+        Page 2: Latin item 9, the block-end padding, and the paragraph
+        Page 3: Japanese items 1-8
+        Page 4: Japanese item 9, the block-end padding, and the paragraph
+
+      Bug (before fix): in Chromium, the Japanese items are broken earlier
+      (page 3 has fewer items), because the browser laid out the container
+      with the block-end padding, which pushed the last items to the next
+      column, and did not lay them out again when the padding was suppressed
+      for the overflow detection.
+    -->
+    <style>
+      @page {
+        size: 300px 500px;
+        margin: 50px;
+        border: rgba(0, 0, 255, 0.2) solid 1px;
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font-size: 14px;
+        line-height: 20px;
+        widows: 1;
+        orphans: 1;
+      }
+      body {
+        margin: 10px 0;
+      }
+      section + section {
+        break-before: page;
+      }
+      .container {
+        padding: 5px;
+        padding-block-end: 60px;
+        background-color: #eee;
+      }
+      ul {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="container">
+        <ul>
+          <li>Latin item 1, text.</li>
+          <li>Latin item 2, text.</li>
+          <li>Latin item 3, text.</li>
+          <li>Latin item 4, text.</li>
+          <li>Latin item 5, text.</li>
+          <li>Latin item 6, text.</li>
+          <li>Latin item 7, text.</li>
+          <li>Latin item 8, text.</li>
+          <li>Latin item 9, text.</li>
+        </ul>
+      </div>
+      <p>After the container.</p>
+    </section>
+    <section lang="ja">
+      <div class="container">
+        <ul>
+          <li>日本語の項目1、テキスト。</li>
+          <li>日本語の項目2、テキスト。</li>
+          <li>日本語の項目3、テキスト。</li>
+          <li>日本語の項目4、テキスト。</li>
+          <li>日本語の項目5、テキスト。</li>
+          <li>日本語の項目6、テキスト。</li>
+          <li>日本語の項目7、テキスト。</li>
+          <li>日本語の項目8、テキスト。</li>
+          <li>日本語の項目9、テキスト。</li>
+        </ul>
+      </div>
+      <p>コンテナの後。</p>
+    </section>
+  </body>
+</html>

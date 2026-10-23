@@ -1194,6 +1194,15 @@ module.exports = [
         title: "Page breaking with container padding/border (Issue #1846)",
       },
       {
+        file: "page_breaks/page-breaking-with-container-padding-border-cjk.html",
+        title: "Page breaking with container padding/border and CJK text",
+      },
+      {
+        file: "page_breaks/page-breaking-with-container-padding-border-cjk-vertical.html",
+        title:
+          "Page breaking with container padding/border and CJK text (vertical writing-mode)",
+      },
+      {
         file: "page_breaks/line-height-inline-br.html",
         title: "Line fitting with inline elements and BR (Issue #2163)",
       },
