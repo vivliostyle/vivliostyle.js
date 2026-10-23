@@ -1553,18 +1553,28 @@ export class TextSpacingPolyfill {
     const spacings = new Map<HTMLElement, Spacing>();
     const blockContainers = new Map<HTMLElement, HTMLElement>();
     const fallbackBlockContainers = new Set<HTMLElement>();
+    // Find the block containers before resolveSpacing() sets the styles, so
+    // that reading the computed styles does not recalculate them each time.
+    const textCheckPoints = new Map<HTMLElement, Vtree.TextNodeContext>();
     for (const p of checkPoints) {
       const textP = asTextCheckPoint(p);
       const element = textP?.viewNode.parentElement;
       if (
         !element ||
-        spacings.has(element) ||
+        textCheckPoints.has(element) ||
         element.namespaceURI !== Base.NS.XHTML ||
         element.localName === "viv-ts-inner" ||
         element.dataset?.["mathTypeset"] === "true"
       ) {
         continue;
       }
+      textCheckPoints.set(element, textP);
+      blockContainers.set(
+        element,
+        findBlockContainer(textP.viewNode) ?? element,
+      );
+    }
+    for (const [element, textP] of textCheckPoints) {
       const spacing = resolveSpacing(
         element,
         textP.inheritedProps["text-autospace"],
@@ -1574,10 +1584,8 @@ export class TextSpacingPolyfill {
         textP.vertical,
       );
       spacings.set(element, spacing);
-      const blockContainer = findBlockContainer(textP.viewNode) ?? element;
-      blockContainers.set(element, blockContainer);
       if (!spacing.nativeTrim) {
-        fallbackBlockContainers.add(blockContainer);
+        fallbackBlockContainers.add(blockContainers.get(element));
       }
     }
     // Check the boundaries between the text in different elements, which the

@@ -1343,6 +1343,17 @@ export class StyleInstance
       {
         acceptNode: (node) => {
           const element = node as Element;
+          // Skip a whole subtree that ends before the offset, so that each
+          // page does not walk all the preceding elements of the document.
+          // Use only an already computed offset of the next sibling:
+          // getElementOffset() would index all the content up to it. A
+          // sibling before the offset has already been styled and indexed.
+          const nextOffset = element.nextElementSibling?.getAttribute(
+            Base.ELEMENT_OFFSET_ATTR,
+          );
+          if (nextOffset && parseInt(nextOffset, 10) <= offset) {
+            return NodeFilter.FILTER_REJECT;
+          }
           if (!this.isNormalFlowElement(element)) {
             return NodeFilter.FILTER_REJECT;
           }
