@@ -449,7 +449,7 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
       const t0 = Date.now();
       await page.goto(
         `${target.url}#src=${viewerSrcParam(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}`,
-        { waitUntil: "domcontentloaded" },
+        { waitUntil: "domcontentloaded", timeout },
       );
       await page.waitForFunction(
         () =>
@@ -471,7 +471,7 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
         src: ctx.srcUrl,
         load: ctx.load,
       });
-      await page.goto(`${ctx.origin}/harness.html?${q}`);
+      await page.goto(`${ctx.origin}/harness.html?${q}`, { timeout });
       await page.waitForFunction(() => window.__layoutPerf, undefined, {
         timeout,
         polling: 100,
@@ -533,6 +533,54 @@ async function measure(browser, ctx) {
   writeJson(ctx, "measure.json", { src: ctx.opts.src, rows, times });
 }
 
+const classPattern =
+  /^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([\w$]+)/;
+const functionPattern =
+  /^(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*([\w$]+)/;
+const methodPattern =
+  /^ {2}(?:(?:public|private|protected|static|async|override|get|set)\s+)*\*?(?!(?:if|for|while|switch|catch|return|await|new|super)\b)([\w$]+)\s*(?:<[^>]*>)?\(/;
+
+/**
+ * Name a function from its source, e.g. "NodeContext.clone",
+ * "Column.layoutNext/(anonymous)", or "supportsTrim/measure": the profile has
+ * only the bundle's function name ("clone", or "measure2" if esbuild renamed
+ * it), which can be shared by different functions or differ between builds.
+ * The enclosing top-level class and method or function are found by
+ * indentation, as formatted by Prettier.
+ */
+function functionIdentity(lines, line, column, bundleName) {
+  const text = lines[line] ?? "";
+  // A function assigned to a variable or property: the name in the source.
+  const assigned = /([\w$]+)\s*[:=]\s*(?:async\s*)?(?:function\b.*)?$/.exec(
+    text.slice(0, column),
+  )?.[1];
+  let name = assigned ?? (bundleName || "(anonymous)");
+  let owner = null;
+  let cls = null;
+  // Set when the function is the method or function defined on its line, so
+  // that the preceding (sibling) methods are not taken as its owner.
+  let defined = false;
+  for (let i = line; i >= 0; i--) {
+    const l = lines[i];
+    if (i < line && /^\}/.test(l)) break; // Left a top-level block.
+    let m;
+    if ((m = classPattern.exec(l))) {
+      cls = m[1];
+      break;
+    }
+    if ((m = functionPattern.exec(l) ?? methodPattern.exec(l))) {
+      if (i === line && !assigned) {
+        name = m[1];
+        defined = true;
+      } else if (!defined) {
+        owner ??= m[1];
+      }
+      if (functionPattern.test(l)) break;
+    }
+  }
+  return `${cls ? `${cls}.` : ""}${owner && owner !== name ? `${owner}/` : ""}${name}`;
+}
+
 /** Summarize a CPU profile by function, mapping core frames to sources. */
 function summarizeProfile(profile, build) {
   const map = build
@@ -542,23 +590,50 @@ function summarizeProfile(profile, build) {
   for (const n of profile.nodes) {
     for (const c of n.children ?? []) nodes.get(c).parent = n.id;
   }
+  const sources = new Map();
+  const sourceLines = (source) => {
+    if (!sources.has(source)) {
+      const file = path.resolve(path.dirname(build.outfile), source);
+      sources.set(
+        source,
+        fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n") : [],
+      );
+    }
+    return sources.get(source);
+  };
+  // The name with the source line, and the key to match a function across
+  // versions (without the line).
   const names = new Map();
+  const keys = new Map();
   const nameOf = (n) => {
     if (names.has(n.id)) return names.get(n.id);
     const cf = n.callFrame;
     let name = cf.functionName || (cf.url ? "(anonymous)" : "(native)");
+    let key = name;
     if (map && cf.url.endsWith(`/builds/${build.file}`)) {
       const e = map.findEntry(cf.lineNumber, cf.columnNumber);
       // Strip the build-specific directory, so that the names of a function
       // are the same in the builds of different versions.
       const file = e?.originalSource?.replace(/^(.*\/)?src[^/]*\//, "");
-      if (file) name += ` ${file}:${e.originalLine + 1}`;
+      if (file) {
+        const id = functionIdentity(
+          sourceLines(e.originalSource),
+          e.originalLine,
+          e.originalColumn,
+          cf.functionName,
+        );
+        key = `${id} ${file}`;
+        name = `${key}:${e.originalLine + 1}`;
+      }
     }
     names.set(n.id, name);
+    keys.set(name, key);
     return name;
   };
   const self = new Map();
   const total = new Map();
+  // Inclusive time per function key, for the comparison between versions.
+  const totalByKey = new Map();
   const callers = [];
   let sum = 0;
   for (let i = 0; i < profile.samples.length; i++) {
@@ -573,13 +648,13 @@ function summarizeProfile(profile, build) {
     for (const name of new Set(stack)) {
       total.set(name, (total.get(name) ?? 0) + dt);
     }
+    for (const key of new Set(stack.map((name) => keys.get(name)))) {
+      totalByKey.set(key, (totalByKey.get(key) ?? 0) + dt);
+    }
     callers.push([stack, dt]);
   }
-  return { sum, self, total, callers };
+  return { sum, self, total, totalByKey, callers };
 }
-
-/** Function name and source file without the line, to match across versions. */
-const stripLine = (name) => name.replace(/:\d+$/, "");
 
 function printTable(title, map, top, filter = () => true) {
   console.log(`\n== ${title} ==`);
@@ -649,9 +724,9 @@ async function profile(browser, ctx) {
   }
   if (summaries.length > 1) {
     const [base, baseSummary] = summaries[0];
-    const baseTotal = byFunction(baseSummary.total);
+    const baseTotal = baseSummary.totalByKey;
     for (const [target, summary] of summaries.slice(1)) {
-      const total = byFunction(summary.total);
+      const total = summary.totalByKey;
       const rows = [...new Set([...baseTotal.keys(), ...total.keys()])]
         .filter((name) => !isSchedulerFrame(name))
         .map((name) => [
@@ -673,15 +748,6 @@ async function profile(browser, ctx) {
       }
     }
   }
-}
-
-function byFunction(total) {
-  const map = new Map();
-  for (const [name, us] of total) {
-    const key = stripLine(name);
-    map.set(key, Math.max(map.get(key) ?? 0, us));
-  }
-  return map;
 }
 
 function printCallers(summary, opts) {
