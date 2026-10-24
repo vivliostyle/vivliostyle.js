@@ -6497,11 +6497,19 @@ export class CascadeInstance {
    */
   applyVarFilter(elementStyles: ElementStyle[], element: Element | null): void {
     const elementStyle = elementStyles[0];
-    const sourceElementStyles = elementStyles.map((style) => ({ ...style }));
     const LIMIT_LOOP = 32; // prevent cyclic or too deep dependency
     const propsLH: ElementStyle = {}; // for shorthand -> longhand cascade
     const pendingPseudoMap = getStyleMap(elementStyle, "_pseudos");
     const propNames = Object.keys(elementStyle).filter(isPropName);
+    // The custom properties are resolved against the values before the
+    // substitution, which modifies elementStyle. The snapshot is used only for
+    // them, so it is not made for an element without custom properties (most
+    // elements; this runs for every element).
+    const sourceElementStyles = propNames.some((name) =>
+      Css.isCustomPropName(name),
+    )
+      ? elementStyles.map((style) => ({ ...style }))
+      : elementStyles;
 
     const applyVarFilterToProperty = (name: string): void => {
       const cascVal = getProp(elementStyle, name);
