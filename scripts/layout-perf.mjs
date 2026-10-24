@@ -855,12 +855,17 @@ async function profile(browser, ctx) {
       console.log(
         `\n== inclusive time: ${target.label} minus ${base.label} (ms) ==`,
       );
-      const top = ctx.opts.top >> 1;
+      // At most --top rows: the largest increases (the extra row for an odd
+      // number), then the largest decreases.
       const sorted = rows.sort((a, b) => b[1] - a[1]);
+      const increases = sorted.filter(([, us]) => us > 0);
+      const decreases = sorted.filter(([, us]) => us < 0);
+      const up = Math.ceil(ctx.opts.top / 2);
+      const down = ctx.opts.top - up;
       for (const [name, us] of [
-        ...sorted.slice(0, top),
-        ...sorted.slice(-top).filter(([, us]) => us < 0),
-      ].filter(([, us]) => us > 0 || us < 0)) {
+        ...increases.slice(0, up),
+        ...decreases.slice(decreases.length - Math.min(down, decreases.length)),
+      ]) {
         console.log(
           `${((us > 0 ? "+" : "") + (us / 1000).toFixed(0)).padStart(8)}  ${name}`,
         );
