@@ -477,22 +477,32 @@ async function cacheRemoteResponses(context) {
     const key = `${request.headers()["origin"] ?? ""} ${url.href}`;
     let entry = remoteCache.get(key);
     if (!entry) {
-      // Keep a redirect as it is, so that the browser follows it and the
-      // document gets its final URL as its base URL. (The request to the
-      // redirect target is not routed here, so it is not cached.)
-      const response = await route.fetch({ maxRedirects: 0 });
-      // The body is decoded, so drop the headers of the encoded one.
-      const headers = { ...response.headers() };
-      delete headers["content-encoding"];
-      delete headers["content-length"];
-      entry = {
-        status: response.status(),
-        headers,
-        body: await response.body(),
-      };
+      try {
+        // Keep a redirect as it is, so that the browser follows it and the
+        // document gets its final URL as its base URL. (The request to the
+        // redirect target is not routed here, so it is not cached.)
+        const response = await route.fetch({ maxRedirects: 0 });
+        // The body is decoded, so drop the headers of the encoded one.
+        const headers = { ...response.headers() };
+        delete headers["content-encoding"];
+        delete headers["content-length"];
+        entry = {
+          status: response.status(),
+          headers,
+          body: await response.body(),
+        };
+      } catch {
+        // E.g. an unresolvable host: fail the request as the browser would.
+        entry = { failed: true };
+      }
       remoteCache.set(key, entry);
     }
-    return route.fulfill(entry);
+    try {
+      if (entry.failed) await route.abort("failed");
+      else await route.fulfill(entry);
+    } catch {
+      // The page was closed before the response, e.g. after the layout.
+    }
   });
 }
 
