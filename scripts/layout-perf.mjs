@@ -74,7 +74,8 @@ Options:
   --no-cache           Fetch remote resources in every run. By default, the
                        responses from remote servers (not localhost) are
                        kept in memory after the first fetch, so that the
-                       network does not distort the timing.
+                       network does not distort the timing. (A redirect
+                       target is not cached; give its final URL instead.)
   --headed             Run the browser headed.
   --channel <name>     Browser channel (default: chrome; "" for Playwright's
                        bundled Chromium).
@@ -471,9 +472,15 @@ async function cacheRemoteResponses(context) {
     ) {
       return route.continue();
     }
-    let entry = remoteCache.get(url.href);
+    // The same URL can get a different response for a different origin, e.g.
+    // with "Access-Control-Allow-Origin: <origin>" and "Vary: Origin".
+    const key = `${request.headers()["origin"] ?? ""} ${url.href}`;
+    let entry = remoteCache.get(key);
     if (!entry) {
-      const response = await route.fetch();
+      // Keep a redirect as it is, so that the browser follows it and the
+      // document gets its final URL as its base URL. (The request to the
+      // redirect target is not routed here, so it is not cached.)
+      const response = await route.fetch({ maxRedirects: 0 });
       // The body is decoded, so drop the headers of the encoded one.
       const headers = { ...response.headers() };
       delete headers["content-encoding"];
@@ -483,7 +490,7 @@ async function cacheRemoteResponses(context) {
         headers,
         body: await response.body(),
       };
-      remoteCache.set(url.href, entry);
+      remoteCache.set(key, entry);
     }
     return route.fulfill(entry);
   });
