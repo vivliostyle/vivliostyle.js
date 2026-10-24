@@ -1403,3 +1403,19 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/codex/fix2186-table-footnotes/packages/core/test/files/footnotes/footnotes-in-table-avoided-both-last-row.html&zoom=1&spread=false
+- category: Page breaks
+  title: "Page breaking with container padding/border and CJK text (PR #2218)"
+  file: page_breaks/page-breaking-with-container-padding-border-cjk.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test in PR #2218. The page breaks are the same as stable (8 + 1 items in both the Latin and the Japanese
+    container). The only difference is a sub-pixel shift (about 0.14px) of the digits after the ideographs in the Japanese
+    items, from the native text-autospace used since PR #2211 instead of the polyfill in stable. The PR preview renders
+    those lines identically to canary.
+  approvedViewer: https://vivliostyle-git-fix-stale-fragmentation-afte-72cc62-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-fix-stale-fragmentation-after-inset-suppression
+  actualUrl: >-
+    https://vivliostyle-git-fix-stale-fragmentation-afte-72cc62-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/stale-fragmentation-after-inset-suppression/packages/core/test/files/page_breaks/page-breaking-with-container-padding-border-cjk.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/stale-fragmentation-after-inset-suppression/packages/core/test/files/page_breaks/page-breaking-with-container-padding-border-cjk.html&zoom=1&spread=false
