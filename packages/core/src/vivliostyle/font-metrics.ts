@@ -45,16 +45,32 @@ export const fontMetricProperties = [
 
 export type FontProperties = { [property: string]: string };
 
+/**
+ * The measured sizes per document, shared by its instances (one for each
+ * spine document laid out in the viewer), which would otherwise measure the
+ * same fonts again, e.g. for the root sizes of each spine document.
+ */
+const documentCaches = new WeakMap<
+  Document,
+  Map<string, { [unit: string]: number }>
+>();
+
 /** Measures CSS units in the source font, independently of the viewer's root. */
 export class FontMetrics {
-  private readonly cache = new Map<string, { [unit: string]: number }>();
+  private readonly cache: Map<string, { [unit: string]: number }>;
 
   constructor(
     private readonly document: Document,
     private readonly mapFontFamily: (family: string) => string = (family) =>
       family,
     private readonly normalLineHeightZoom: number = 1,
-  ) {}
+  ) {
+    this.cache = documentCaches.get(document);
+    if (!this.cache) {
+      this.cache = new Map();
+      documentCaches.set(document, this.cache);
+    }
+  }
 
   clearCache(): void {
     this.cache.clear();
@@ -78,7 +94,12 @@ export class FontMetrics {
         ? this.mapFontFamily(properties[name])
         : properties[name] || "",
     ]);
-    const key = JSON.stringify([fontSize, entries, properties.lang]);
+    const key = JSON.stringify([
+      fontSize,
+      entries,
+      properties.lang,
+      this.normalLineHeightZoom,
+    ]);
     let sizes = this.cache.get(key);
     if (!sizes) {
       const probe = this.document.createElement("span");
