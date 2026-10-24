@@ -64,6 +64,14 @@ const xhtmlElementsRenderedAsDiv = new Set([
   "title",
 ]);
 
+/**
+ * Whether resolving the font size needs the metrics of the font (and thus its
+ * properties, which are read from the computed style).
+ */
+function usesFontMetrics(fontSize: Css.Numeric): boolean {
+  return /^(ex|cap|ch|ic)$/.test(fontSize.unit);
+}
+
 function hasCurrentFontRelativeLength(value: Css.Val): boolean {
   class Visitor extends Css.Visitor {
     found = false;
@@ -1151,22 +1159,32 @@ export class ViewFactory
     );
     let inheritedLanguage = this.context.fontLanguage;
     for (let i = styles.length - 1; i >= 0; --i) {
-      const style = { ...styles[i] };
+      let style = styles[i];
       // Ancestors use their own view conditions, without the detached child's
       // region rules. Their computed font settings form the child's metrics.
+      // Without view-conditional styles, an ancestor's flattened style is its
+      // own style, so it is not flattened (this runs for every ancestor).
       const fontStyle =
         i === 0
           ? flattenedCurrentStyle
-          : CssCascade.flattenCascadedStyle(style, this.context, null, false);
+          : (style["_viewConditionalStyles"] as unknown[] | undefined)?.length
+            ? CssCascade.flattenCascadedStyle(style, this.context, null, false)
+            : null;
       // The current element's font-size still uses the source-parent basis;
       // its winning region/view traits apply after font-size is resolved.
       const fontProperties =
         i === 0
           ? fontMetricProperties
           : ["font-size", "line-height", ...fontMetricProperties];
-      for (const name of fontProperties) {
-        if (fontStyle[name]) {
-          style[name] = fontStyle[name];
+      if (fontStyle) {
+        for (const name of fontProperties) {
+          if (fontStyle[name] && fontStyle[name] !== style[name]) {
+            // Copy the style only when a value differs: it is only read below.
+            if (style === styles[i]) {
+              style = { ...styles[i] };
+            }
+            style[name] = fontStyle[name];
+          }
         }
       }
       const currentLanguage = styleLanguages[i] ?? inheritedLanguage;
@@ -4220,7 +4238,9 @@ export class ViewFactory
           parentFontSize,
           this.context,
           undefined,
-          this.getFontProperties(parentStyle),
+          usesFontMetrics(fontSize)
+            ? this.getFontProperties(parentStyle)
+            : undefined,
         );
         if (fontSizePx.unit !== "px" || !Number.isFinite(fontSizePx.num)) {
           return null; // cannot determine
@@ -4263,7 +4283,9 @@ export class ViewFactory
         parentFontSize,
         this.context,
         undefined,
-        this.getFontProperties(parentStyle),
+        usesFontMetrics(fontSize)
+          ? this.getFontProperties(parentStyle)
+          : undefined,
       );
       if (fontSizePx.unit === "px" && Number.isFinite(fontSizePx.num)) {
         return fontSizePx.num;
