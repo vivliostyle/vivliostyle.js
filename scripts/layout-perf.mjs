@@ -203,25 +203,27 @@ async function buildCore(target, opts, { minify }) {
     const sha = git("rev-parse", "--verify", `${target.spec}^{commit}`);
     key = sha.slice(0, 12);
     dir = path.join(buildsDir, `rev-${key}`);
-    if (!fs.existsSync(path.join(dir, "src", "vivliostyle.ts"))) {
+    // Written after a complete extraction, so that a partial one is redone.
+    const completeMarker = path.join(dir, ".complete");
+    if (!fs.existsSync(completeMarker)) {
       const extractDir = path.join(buildsDir, `tmp-${key}`);
       const tarFile = `${extractDir}.tar`;
       fs.rmSync(extractDir, { recursive: true, force: true });
       fs.mkdirSync(extractDir, { recursive: true });
-      git(
-        "archive",
-        "--format=tar",
-        "-o",
-        tarFile,
-        sha,
-        "packages/core/src",
-        "packages/core/tsconfig.json",
-      );
+      const paths = ["packages/core/src"];
+      try {
+        git("cat-file", "-e", `${sha}:packages/core/tsconfig.json`);
+        paths.push("packages/core/tsconfig.json");
+      } catch {
+        // An old revision without the core's own tsconfig.json.
+      }
+      git("archive", "--format=tar", "-o", tarFile, sha, ...paths);
       execFileSync("tar", ["-xf", tarFile, "-C", extractDir]);
       fs.rmSync(tarFile);
       fs.rmSync(dir, { recursive: true, force: true });
       fs.renameSync(path.join(extractDir, "packages/core"), dir);
       fs.rmSync(extractDir, { recursive: true, force: true });
+      fs.writeFileSync(completeMarker, "");
     }
   }
   const file = `core-${key}-b${buildFormat}${minify ? "" : "-dev"}.js`;
@@ -229,7 +231,9 @@ async function buildCore(target, opts, { minify }) {
   if (key === "worktree" || !fs.existsSync(outfile)) {
     await esbuild.build({
       entryPoints: [path.join(dir, "src", "vivliostyle.ts")],
-      tsconfig: path.join(dir, "tsconfig.json"),
+      tsconfig: fs.existsSync(path.join(dir, "tsconfig.json"))
+        ? path.join(dir, "tsconfig.json")
+        : undefined,
       bundle: true,
       format: "iife",
       globalName: "vivliostyle",
@@ -399,7 +403,10 @@ function resolveSrc(opts) {
 
 function loadMode(opts, srcUrl) {
   if (opts.load !== "auto") return opts.load;
-  return /\.(x?html?)([?#].*)?$/i.test(srcUrl) ? "document" : "publication";
+  // Only the path: the query or fragment may contain other file names.
+  return /\.x?html?$/i.test(new URL(srcUrl).pathname)
+    ? "document"
+    : "publication";
 }
 
 // ---------------------------------------------------------------------------
