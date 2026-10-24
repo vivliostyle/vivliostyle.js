@@ -6511,8 +6511,25 @@ export class CascadeInstance {
       ? elementStyles.map((style) => ({ ...style }))
       : elementStyles;
 
+    // Merge a longhand that was also set by a shorthand with var().
+    const mergeIntoLonghand = (name: string): void => {
+      if (propsLH[name]) {
+        const av = getProp(elementStyle, name);
+        if (av && av.value !== Css.empty) {
+          setPropCascadeValue(propsLH, name, av, this.context);
+        }
+      }
+    };
+
     const applyVarFilterToProperty = (name: string): void => {
       const cascVal = getProp(elementStyle, name);
+      if (!containsVar(cascVal.value)) {
+        // Nothing to substitute: the visitor below would return the value
+        // as it is. Skipping it avoids its allocations for every property of
+        // every element.
+        mergeIntoLonghand(name);
+        return;
+      }
       let value = cascVal.value;
       const lookupElementStyles = Css.isCustomPropName(name)
         ? sourceElementStyles
@@ -6608,12 +6625,7 @@ export class CascadeInstance {
           elementStyle[name] = cascVal.withValue(value);
         }
       }
-      if (propsLH[name]) {
-        const av = getProp(elementStyle, name);
-        if (av && av.value !== Css.empty) {
-          setPropCascadeValue(propsLH, name, av, this.context);
-        }
-      }
+      mergeIntoLonghand(name);
     };
 
     for (const name in elementStyle) {
@@ -8408,6 +8420,32 @@ export const convertToPhysical = <T>(
 /**
  * Convert var() to its value
  */
+class VarFinder extends Css.Visitor {
+  found = false;
+
+  override visitFunc(func: Css.Func): Css.Val | null {
+    if (func.name === "var") {
+      this.found = true;
+      return null;
+    }
+    return super.visitFunc(func);
+  }
+}
+
+/** Whether a value contains var(), cached for the shared parsed values. */
+const containsVarCache = new WeakMap<Css.Val, boolean>();
+
+function containsVar(value: Css.Val): boolean {
+  let found = containsVarCache.get(value);
+  if (found === undefined) {
+    const finder = new VarFinder();
+    value.visit(finder);
+    found = finder.found;
+    containsVarCache.set(value, found);
+  }
+  return found;
+}
+
 export class VarFilterVisitor extends Css.FilterVisitor {
   private resolvingCustomProperties = [] as string[];
   private varResolutionState = { cycleMembers: new Set<string>() };

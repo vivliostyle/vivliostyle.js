@@ -45,19 +45,41 @@ export const fontMetricProperties = [
 
 export type FontProperties = { [property: string]: string };
 
+/**
+ * The sizes measured without a font family, shared by the instances for a
+ * document (one for each spine document laid out in the viewer), which would
+ * otherwise measure them again, e.g. for the root sizes of each spine
+ * document. They use the browser's default font, which no @font-face rule of
+ * a spine document changes. (The sizes for a font family stay with each
+ * instance: the faces that a mapped family selects can differ between the
+ * spine documents.)
+ */
+const documentCaches = new WeakMap<
+  Document,
+  Map<string, { [unit: string]: number }>
+>();
+
 /** Measures CSS units in the source font, independently of the viewer's root. */
 export class FontMetrics {
   private readonly cache = new Map<string, { [unit: string]: number }>();
+  private readonly sharedCache: Map<string, { [unit: string]: number }>;
 
   constructor(
     private readonly document: Document,
     private readonly mapFontFamily: (family: string) => string = (family) =>
       family,
     private readonly normalLineHeightZoom: number = 1,
-  ) {}
+  ) {
+    this.sharedCache = documentCaches.get(document);
+    if (!this.sharedCache) {
+      this.sharedCache = new Map();
+      documentCaches.set(document, this.sharedCache);
+    }
+  }
 
   clearCache(): void {
     this.cache.clear();
+    this.sharedCache.clear();
   }
 
   measure(
@@ -78,8 +100,14 @@ export class FontMetrics {
         ? this.mapFontFamily(properties[name])
         : properties[name] || "",
     ]);
-    const key = JSON.stringify([fontSize, entries, properties.lang]);
-    let sizes = this.cache.get(key);
+    const key = JSON.stringify([
+      fontSize,
+      entries,
+      properties.lang,
+      this.normalLineHeightZoom,
+    ]);
+    const cache = properties["font-family"] ? this.cache : this.sharedCache;
+    let sizes = cache.get(key);
     if (!sizes) {
       const probe = this.document.createElement("span");
       probe.style.cssText =
@@ -117,7 +145,7 @@ export class FontMetrics {
       } finally {
         probe.remove();
       }
-      this.cache.set(key, sizes);
+      cache.set(key, sizes);
     }
     return Number.isFinite(sizes[unit]) ? sizes[unit] : null;
   }
