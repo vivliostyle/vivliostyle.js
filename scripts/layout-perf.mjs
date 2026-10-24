@@ -1,0 +1,784 @@
+#!/usr/bin/env node
+
+/**
+ * Layout performance tool: measure, profile and compare the full layout of a
+ * document with Vivliostyle core builds from git refs or the working tree, or
+ * with deployed viewers.
+ *
+ * Usage: node scripts/layout-perf.mjs <measure|profile|compare> [options] <target>...
+ * Run with --help for details.
+ */
+
+import fs from "node:fs";
+import http from "node:http";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { SourceMap } from "node:module";
+import { fileURLToPath } from "node:url";
+import crypto from "node:crypto";
+import * as esbuild from "esbuild";
+import { chromium } from "playwright";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, "..");
+const coreSrcDir = path.join(repoRoot, "packages/core/src");
+const viewerResourcesDir = path.join(repoRoot, "packages/viewer/resources");
+
+const usage = `Usage: node scripts/layout-perf.mjs <command> [options] <target>...
+
+Commands:
+  measure   Time the layout of all pages, for each target (runs interleaved).
+  profile   Record a CPU profile for each target and summarize it by function.
+            With two or more targets, also show the differences of the
+            inclusive time per function from the first target.
+  compare   Compare the layout result (per-page DOM and element rects) of each
+            target with the first target.
+
+Targets (optionally prefixed with "<label>="):
+  core:<git-ref>   Vivliostyle core built from a git ref (e.g. core:v2.45.2,
+                   core:master, core:HEAD~1)
+  core:worktree    Vivliostyle core built from the working tree
+  viewer:<spec>    A deployed viewer: canary, stable, or a viewer URL
+                   (measure only; includes loading the viewer itself)
+
+Options:
+  --src <url|path>     Document or publication to lay out (required): a URL
+                       that allows CORS, or a local file path. A local file is
+                       served with its directory, e.g. a publication.json and
+                       the files next to it.
+  --serve-root <dir>   Directory to serve for a local --src (default: the
+                       directory of --src).
+  --load <auto|document|publication>
+                       How the core targets load --src (default: auto:
+                       .html/.htm/.xhtml are documents, others publications).
+  --runs <n>           measure: runs per target (default: 3); profile: runs
+                       per target, the profile of the last run is used
+                       (default: 1).
+  --repeat <n>         compare: render each target n times, to detect
+                       nondeterministic results (default: 1).
+  --top <n>            profile: rows per table (default: 40).
+  --callers <regex>    profile: also show the callers of the functions
+                       matching the regex.
+  --sampling-interval <us>
+                       profile: sampling interval in microseconds
+                       (default: 200).
+  --viewport <WxH>     Browser viewport (default: 1280x900).
+  --timeout <sec>      Timeout for one layout (default: 900).
+  --out <dir>          Output directory (default: artifacts/layout-perf).
+  --headed             Run the browser headed.
+  --channel <name>     Browser channel (default: chrome; "" for Playwright's
+                       bundled Chromium).
+
+Examples:
+  node scripts/layout-perf.mjs measure --src http://localhost:8080/book/publication.json core:v2.45.2 core:master core:worktree
+  node scripts/layout-perf.mjs profile --src ./mybook/publication.json before=core:master after=core:worktree
+  node scripts/layout-perf.mjs compare --src ./mybook/publication.json --repeat 2 core:master core:worktree
+  node scripts/layout-perf.mjs measure --src https://example.com/book.html viewer:stable viewer:canary
+`;
+
+function parseArgs(argv) {
+  const opts = {
+    command: argv[0],
+    src: "",
+    serveRoot: "",
+    load: "auto",
+    runs: undefined,
+    repeat: 1,
+    top: 40,
+    callers: "",
+    samplingInterval: 200,
+    viewport: { width: 1280, height: 900 },
+    timeoutSec: 900,
+    outDir: path.join(repoRoot, "artifacts", "layout-perf"),
+    headed: false,
+    channel: "chrome",
+    targets: [],
+  };
+  if (!["measure", "profile", "compare"].includes(opts.command)) {
+    console.log(usage);
+    process.exit(argv.includes("--help") || argv.includes("-h") ? 0 : 1);
+  }
+  for (let i = 1; i < argv.length; i++) {
+    const a = argv[i];
+    const next = () => {
+      if (i + 1 >= argv.length) throw new Error(`Missing value for ${a}`);
+      return argv[++i];
+    };
+    if (a === "--help" || a === "-h") {
+      console.log(usage);
+      process.exit(0);
+    } else if (a === "--src") opts.src = next();
+    else if (a === "--serve-root") opts.serveRoot = next();
+    else if (a === "--load") opts.load = next();
+    else if (a === "--runs") opts.runs = Number(next());
+    else if (a === "--repeat") opts.repeat = Number(next());
+    else if (a === "--top") opts.top = Number(next());
+    else if (a === "--callers") opts.callers = next();
+    else if (a === "--sampling-interval")
+      opts.samplingInterval = Number(next());
+    else if (a === "--viewport") {
+      const [w, h] = next().split("x").map(Number);
+      opts.viewport = { width: w, height: h };
+    } else if (a === "--timeout") opts.timeoutSec = Number(next());
+    else if (a === "--out") opts.outDir = path.resolve(next());
+    else if (a === "--headed") opts.headed = true;
+    else if (a === "--channel") opts.channel = next();
+    else if (a.startsWith("--")) throw new Error(`Unknown option: ${a}`);
+    else opts.targets.push(parseTarget(a));
+  }
+  if (!opts.src) throw new Error("--src is required");
+  if (!opts.targets.length) throw new Error("No targets");
+  opts.runs ??= opts.command === "measure" ? 3 : 1;
+  if (opts.command !== "measure") {
+    const viewers = opts.targets.filter((t) => t.kind === "viewer");
+    if (viewers.length) {
+      throw new Error(`${opts.command} supports only core:<ref> targets`);
+    }
+  }
+  const labels = opts.targets.map((t) => t.label);
+  if (new Set(labels).size !== labels.length) {
+    throw new Error(`Duplicate target labels: ${labels.join(", ")}`);
+  }
+  return opts;
+}
+
+function parseTarget(arg) {
+  const m = /^(?:([\w.-]+)=)?(core|viewer):(.+)$/.exec(arg);
+  if (!m) throw new Error(`Invalid target: ${arg}`);
+  const [, label, kind, spec] = m;
+  if (kind === "viewer") {
+    const url =
+      spec === "canary"
+        ? "https://vivliostyle.vercel.app/"
+        : spec === "stable"
+          ? "https://vivliostyle.org/viewer/"
+          : spec;
+    return { kind, spec, url, label: label || spec };
+  }
+  return { kind, spec, label: label || spec };
+}
+
+// ---------------------------------------------------------------------------
+// Core builds
+
+function git(...args) {
+  return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8" }).trim();
+}
+
+/**
+ * Build the core as an IIFE bundle exposing the global `vivliostyle`.
+ * A minified bundle is used for timing, as in production; an unminified one
+ * with a source map for profiling, to get readable function names.
+ * Builds of a commit are cached by its hash.
+ */
+async function buildCore(target, opts, { minify }) {
+  const buildsDir = path.join(opts.outDir, "builds");
+  fs.mkdirSync(buildsDir, { recursive: true });
+  let srcDir = coreSrcDir;
+  let key;
+  if (target.spec === "worktree") {
+    key = "worktree";
+  } else {
+    const sha = git("rev-parse", "--verify", `${target.spec}^{commit}`);
+    key = sha.slice(0, 12);
+    srcDir = path.join(buildsDir, `src-${key}`);
+    if (!fs.existsSync(path.join(srcDir, "vivliostyle.ts"))) {
+      const extractDir = path.join(buildsDir, `tmp-${key}`);
+      const tarFile = `${extractDir}.tar`;
+      fs.rmSync(extractDir, { recursive: true, force: true });
+      fs.mkdirSync(extractDir, { recursive: true });
+      git("archive", "--format=tar", "-o", tarFile, sha, "packages/core/src");
+      execFileSync("tar", ["-xf", tarFile, "-C", extractDir]);
+      fs.rmSync(tarFile);
+      fs.rmSync(srcDir, { recursive: true, force: true });
+      fs.renameSync(path.join(extractDir, "packages/core/src"), srcDir);
+      fs.rmSync(extractDir, { recursive: true, force: true });
+    }
+  }
+  const file = `core-${key}${minify ? "" : "-dev"}.js`;
+  const outfile = path.join(buildsDir, file);
+  if (key === "worktree" || !fs.existsSync(outfile)) {
+    await esbuild.build({
+      entryPoints: [path.join(srcDir, "vivliostyle.ts")],
+      bundle: true,
+      format: "iife",
+      globalName: "vivliostyle",
+      define: { VIVLIOSTYLE_DEBUG: "false" },
+      target: "es2022",
+      minify,
+      sourcemap: !minify,
+      outfile,
+      nodePaths: [
+        path.join(repoRoot, "packages/core/node_modules"),
+        path.join(repoRoot, "node_modules"),
+      ],
+      logLevel: "warning",
+    });
+  }
+  return { file, outfile, key };
+}
+
+// ---------------------------------------------------------------------------
+// Local server for the harness, the builds and a local --src
+
+const harnessHtml = `<!doctype html>
+<html><head><meta charset="utf-8"><title>layout-perf</title>
+<style>html,body{margin:0;height:100%}#vp{width:100%;height:100%;position:relative}</style>
+</head><body><div id="vp"></div><script>
+const q = new URLSearchParams(location.search);
+const s = document.createElement("script");
+s.src = "builds/" + q.get("build");
+s.onload = () => {
+  const viewer = new vivliostyle.CoreViewer(
+    {
+      viewportElement: document.getElementById("vp"),
+      userAgentRootURL: new URL("resources/", location.href).href,
+    },
+    { renderAllPages: true, autoResize: false, pageViewMode: "singlePage" },
+  );
+  viewer.addListener("error", (p) => console.error("vivliostyle error:", p.content));
+  const t0 = performance.now();
+  viewer.addListener("readystatechange", () => {
+    if (viewer.readyState === "complete") {
+      window.__layoutPerf = {
+        ms: performance.now() - t0,
+        pages: document.querySelectorAll("[data-vivliostyle-page-container]").length,
+      };
+    }
+  });
+  const src = q.get("src");
+  if (q.get("load") === "document") viewer.loadDocument({ url: src });
+  else viewer.loadPublication(src);
+};
+document.head.appendChild(s);
+</script></body></html>`;
+
+const contentTypes = {
+  ".html": "text/html",
+  ".htm": "text/html",
+  ".xhtml": "application/xhtml+xml",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".json": "application/json",
+  ".map": "application/json",
+  ".css": "text/css",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".otf": "font/otf",
+  ".ttf": "font/ttf",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".opf": "application/oebps-package+xml",
+  ".xml": "application/xml",
+};
+
+function serveFile(res, root, relPath) {
+  const filePath = path.resolve(root, relPath);
+  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+    res.writeHead(403).end();
+    return;
+  }
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404).end();
+      return;
+    }
+    res.writeHead(200, {
+      "Content-Type":
+        contentTypes[path.extname(filePath).toLowerCase()] ??
+        "application/octet-stream",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(data);
+  });
+}
+
+async function startServer(opts, serveRoot) {
+  const buildsDir = path.join(opts.outDir, "builds");
+  const server = http.createServer((req, res) => {
+    const url = new URL(req.url, "http://localhost");
+    const p = decodeURIComponent(url.pathname);
+    if (p === "/harness.html") {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end(harnessHtml);
+    } else if (p.startsWith("/builds/")) {
+      serveFile(res, buildsDir, p.slice("/builds/".length));
+    } else if (p.startsWith("/resources/")) {
+      serveFile(res, viewerResourcesDir, p.slice("/resources/".length));
+    } else if (serveRoot && p.startsWith("/src/")) {
+      serveFile(res, serveRoot, p.slice("/src/".length));
+    } else {
+      res.writeHead(404).end();
+    }
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  return { server, origin: `http://localhost:${server.address().port}` };
+}
+
+/** Resolve --src to a URL, serving a local file with its directory. */
+function resolveSrc(opts) {
+  if (/^https?:\/\//.test(opts.src)) {
+    return { srcPath: null, serveRoot: null };
+  }
+  const file = path.resolve(opts.src);
+  if (!fs.statSync(file).isFile()) {
+    throw new Error(`--src must be a URL or a file: ${opts.src}`);
+  }
+  const serveRoot = path.resolve(opts.serveRoot || path.dirname(file));
+  const rel = path.relative(serveRoot, file);
+  if (rel.startsWith("..")) {
+    throw new Error(`--src is outside --serve-root: ${opts.src}`);
+  }
+  return { srcPath: rel.split(path.sep).join("/"), serveRoot };
+}
+
+function loadMode(opts, srcUrl) {
+  if (opts.load !== "auto") return opts.load;
+  return /\.(x?html?)([?#].*)?$/i.test(srcUrl) ? "document" : "publication";
+}
+
+// ---------------------------------------------------------------------------
+// Browser
+
+async function launchBrowser(opts) {
+  return chromium.launch({
+    channel: opts.channel || undefined,
+    headless: !opts.headed,
+    // Allow a deployed https viewer to load a document from localhost.
+    args: [
+      "--disable-features=LocalNetworkAccessChecks,PrivateNetworkAccessSendPreflights,PrivateNetworkAccessRespectPreflightResults,BlockInsecurePrivateNetworkRequests",
+    ],
+  });
+}
+
+/** Lay out all pages; return the layout time in ms and the page count. */
+async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
+  const context = await browser.newContext({ viewport: ctx.opts.viewport });
+  try {
+    const page = await context.newPage();
+    page.on("console", (m) => {
+      if (m.type() === "error" && /vivliostyle error/.test(m.text())) {
+        console.error(`  [${target.label}] ${m.text()}`);
+      }
+    });
+    if (onPage) await onPage.before?.(page);
+    const timeout = ctx.opts.timeoutSec * 1000;
+    let result;
+    if (target.kind === "viewer") {
+      const t0 = Date.now();
+      await page.goto(
+        `${target.url}#src=${encodeURI(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}`,
+        { waitUntil: "domcontentloaded" },
+      );
+      await page.waitForFunction(
+        () =>
+          document.body?.getAttribute("data-vivliostyle-viewer-status") ===
+          "complete",
+        undefined,
+        { timeout, polling: 100 },
+      );
+      const pages = await page.evaluate(
+        () =>
+          document.querySelector(
+            "#vivliostyle-viewer-viewport [data-vivliostyle-spread-container]",
+          )?.children.length ?? 0,
+      );
+      result = { ms: Date.now() - t0, pages };
+    } else {
+      const q = new URLSearchParams({
+        build: build.file,
+        src: ctx.srcUrl,
+        load: ctx.load,
+      });
+      await page.goto(`${ctx.origin}/harness.html?${q}`);
+      await page.waitForFunction(() => window.__layoutPerf, undefined, {
+        timeout,
+        polling: 100,
+      });
+      result = await page.evaluate(() => window.__layoutPerf);
+    }
+    if (onPage) result.extra = await onPage.after?.(page);
+    return result;
+  } finally {
+    await context.close();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Commands
+
+const median = (xs) => {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+async function measure(browser, ctx) {
+  const times = new Map(ctx.opts.targets.map((t) => [t.label, []]));
+  const pages = new Map();
+  for (let r = 0; r < ctx.opts.runs; r++) {
+    for (const target of ctx.opts.targets) {
+      const { ms, pages: n } = await layoutOnce(
+        browser,
+        ctx,
+        target,
+        ctx.builds.get(target.label),
+      );
+      times.get(target.label).push(ms);
+      pages.set(target.label, n);
+      console.log(
+        `  run ${r + 1} ${target.label}: ${Math.round(ms)} ms, ${n} pages`,
+      );
+    }
+  }
+  const rows = ctx.opts.targets.map((t) => {
+    const ts = times.get(t.label);
+    return {
+      target: t.label,
+      median: Math.round(median(ts)),
+      min: Math.round(Math.min(...ts)),
+      max: Math.round(Math.max(...ts)),
+      pages: pages.get(t.label),
+    };
+  });
+  const base = rows[0].median;
+  console.log("\ntarget\tmedian ms\tmin\tmax\tpages\tvs first");
+  for (const r of rows) {
+    const diff = ((r.median / base - 1) * 100).toFixed(1);
+    console.log(
+      `${r.target}\t${r.median}\t${r.min}\t${r.max}\t${r.pages}\t${r === rows[0] ? "" : `${diff > 0 ? "+" : ""}${diff}%`}`,
+    );
+  }
+  writeJson(ctx, "measure.json", { src: ctx.opts.src, rows, times });
+}
+
+/** Summarize a CPU profile by function, mapping core frames to sources. */
+function summarizeProfile(profile, build) {
+  const map = build
+    ? new SourceMap(JSON.parse(fs.readFileSync(`${build.outfile}.map`)))
+    : null;
+  const nodes = new Map(profile.nodes.map((n) => [n.id, n]));
+  for (const n of profile.nodes) {
+    for (const c of n.children ?? []) nodes.get(c).parent = n.id;
+  }
+  const names = new Map();
+  const nameOf = (n) => {
+    if (names.has(n.id)) return names.get(n.id);
+    const cf = n.callFrame;
+    let name = cf.functionName || (cf.url ? "(anonymous)" : "(native)");
+    if (map && cf.url.endsWith(`/builds/${build.file}`)) {
+      const e = map.findEntry(cf.lineNumber, cf.columnNumber);
+      // Strip the build-specific directory, so that the names of a function
+      // are the same in the builds of different versions.
+      const file = e?.originalSource?.replace(/^(.*\/)?src[^/]*\//, "");
+      if (file) name += ` ${file}:${e.originalLine + 1}`;
+    }
+    names.set(n.id, name);
+    return name;
+  };
+  const self = new Map();
+  const total = new Map();
+  const callers = [];
+  let sum = 0;
+  for (let i = 0; i < profile.samples.length; i++) {
+    const dt = profile.timeDeltas[i + 1] ?? 0;
+    sum += dt;
+    let n = nodes.get(profile.samples[i]);
+    self.set(nameOf(n), (self.get(nameOf(n)) ?? 0) + dt);
+    const stack = [];
+    for (; n; n = n.parent != null ? nodes.get(n.parent) : null) {
+      stack.push(nameOf(n));
+    }
+    for (const name of new Set(stack)) {
+      total.set(name, (total.get(name) ?? 0) + dt);
+    }
+    callers.push([stack, dt]);
+  }
+  return { sum, self, total, callers };
+}
+
+/** Function name and source file without the line, to match across versions. */
+const stripLine = (name) => name.replace(/:\d+$/, "");
+
+function printTable(title, map, top, filter = () => true) {
+  console.log(`\n== ${title} ==`);
+  for (const [name, us] of [...map]
+    .filter(([name]) => filter(name))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, top)) {
+    console.log(`${(us / 1000).toFixed(0).padStart(8)}  ${name}`);
+  }
+}
+
+// Frames of the task scheduler that only obscure the actual callers.
+const isSchedulerFrame = (name) =>
+  /[\s/]task\.ts(:|$)|^\((root|program|idle)\)$/.test(name);
+
+async function profile(browser, ctx) {
+  const summaries = [];
+  for (const target of ctx.opts.targets) {
+    const build = ctx.builds.get(target.label);
+    let saved;
+    for (let r = 0; r < ctx.opts.runs; r++) {
+      let cdp;
+      const { ms, pages, extra } = await layoutOnce(
+        browser,
+        ctx,
+        target,
+        build,
+        {
+          onPage: {
+            before: async (page) => {
+              cdp = await page.context().newCDPSession(page);
+              await cdp.send("Profiler.enable");
+              await cdp.send("Profiler.setSamplingInterval", {
+                interval: ctx.opts.samplingInterval,
+              });
+              await cdp.send("Profiler.start");
+            },
+            after: async () => (await cdp.send("Profiler.stop")).profile,
+          },
+        },
+      );
+      saved = extra;
+      console.log(
+        `  run ${r + 1} ${target.label}: ${Math.round(ms)} ms (profiled), ${pages} pages`,
+      );
+    }
+    const file = path.join(
+      ctx.opts.outDir,
+      "profiles",
+      `${target.label.replace(/[^\w.-]+/g, "_")}.cpuprofile`,
+    );
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(saved));
+    const summary = summarizeProfile(saved, build);
+    summaries.push([target, summary]);
+    console.log(
+      `\n### ${target.label}: ${(summary.sum / 1000).toFixed(0)} ms sampled (profile: ${path.relative(repoRoot, file)})`,
+    );
+    printTable("self time (ms)", summary.self, ctx.opts.top);
+    printTable(
+      "inclusive time (ms)",
+      summary.total,
+      ctx.opts.top,
+      (name) => !isSchedulerFrame(name),
+    );
+    if (ctx.opts.callers) printCallers(summary, ctx.opts);
+  }
+  if (summaries.length > 1) {
+    const [base, baseSummary] = summaries[0];
+    const baseTotal = byFunction(baseSummary.total);
+    for (const [target, summary] of summaries.slice(1)) {
+      const total = byFunction(summary.total);
+      const rows = [...new Set([...baseTotal.keys(), ...total.keys()])]
+        .filter((name) => !isSchedulerFrame(name))
+        .map((name) => [
+          name,
+          (total.get(name) ?? 0) - (baseTotal.get(name) ?? 0),
+        ]);
+      console.log(
+        `\n== inclusive time: ${target.label} minus ${base.label} (ms) ==`,
+      );
+      const top = ctx.opts.top >> 1;
+      const sorted = rows.sort((a, b) => b[1] - a[1]);
+      for (const [name, us] of [
+        ...sorted.slice(0, top),
+        ...sorted.slice(-top).filter(([, us]) => us < 0),
+      ].filter(([, us]) => us > 0 || us < 0)) {
+        console.log(
+          `${((us > 0 ? "+" : "") + (us / 1000).toFixed(0)).padStart(8)}  ${name}`,
+        );
+      }
+    }
+  }
+}
+
+function byFunction(total) {
+  const map = new Map();
+  for (const [name, us] of total) {
+    const key = stripLine(name);
+    map.set(key, Math.max(map.get(key) ?? 0, us));
+  }
+  return map;
+}
+
+function printCallers(summary, opts) {
+  const re = new RegExp(opts.callers);
+  const agg = new Map();
+  for (const [stack, dt] of summary.callers) {
+    const i = stack.findIndex((name) => re.test(name));
+    if (i < 0) continue;
+    const chain = stack
+      .slice(i + 1)
+      .filter((name) => !isSchedulerFrame(name))
+      .slice(0, 3);
+    const key = `${stack[i]} <- ${chain.join(" <- ")}`;
+    agg.set(key, (agg.get(key) ?? 0) + dt);
+  }
+  printTable(`callers of /${opts.callers}/ (ms)`, agg, opts.top);
+}
+
+async function compare(browser, ctx) {
+  const compareDir = path.join(ctx.opts.outDir, "compare");
+  fs.rmSync(compareDir, { recursive: true, force: true });
+  const results = [];
+  for (const target of ctx.opts.targets) {
+    for (let r = 0; r < ctx.opts.repeat; r++) {
+      const { pages, extra } = await layoutOnce(
+        browser,
+        ctx,
+        target,
+        ctx.builds.get(target.label),
+        {
+          onPage: {
+            after: (page) =>
+              page.evaluate(() =>
+                [
+                  ...document.querySelectorAll(
+                    "[data-vivliostyle-page-container]",
+                  ),
+                ].map((p) => {
+                  // Pages other than the current one are hidden; show each
+                  // page to measure the rects of its elements.
+                  const display = p.style.display;
+                  p.style.display = "block";
+                  const rects = [...p.querySelectorAll("*")]
+                    .map((e) => {
+                      const b = e.getBoundingClientRect();
+                      return [b.x, b.y, b.width, b.height]
+                        .map((v) => Math.round(v * 4))
+                        .join(",");
+                    })
+                    .join(";");
+                  p.style.display = display;
+                  // Sort the attributes: the order in which some are set
+                  // depends on timing, e.g. the load of an image.
+                  const serialize = (node) =>
+                    node.nodeType === Node.TEXT_NODE
+                      ? node.data
+                      : node.nodeType === Node.ELEMENT_NODE
+                        ? `<${node.localName}${[...node.attributes]
+                            .map((a) => ` ${a.name}="${a.value}"`)
+                            .sort()
+                            .join("")}>${[...node.childNodes]
+                            .map(serialize)
+                            .join("")}</${node.localName}>`
+                        : "";
+                  const html = [...p.childNodes].map(serialize).join("");
+                  return { html, rects };
+                }),
+              ),
+          },
+        },
+      );
+      const label =
+        ctx.opts.repeat > 1 ? `${target.label}#${r + 1}` : target.label;
+      results.push({
+        label,
+        pages: extra.map(({ html, rects }) => ({
+          html,
+          htmlHash: hash(html),
+          rectsHash: hash(rects),
+        })),
+      });
+      console.log(`  ${label}: ${pages} pages`);
+    }
+  }
+  const [base, ...others] = results;
+  const report = [];
+  console.log();
+  for (const other of others) {
+    const n = Math.max(base.pages.length, other.pages.length);
+    const html = [];
+    const rects = [];
+    for (let i = 0; i < n; i++) {
+      if (base.pages[i]?.htmlHash !== other.pages[i]?.htmlHash)
+        html.push(i + 1);
+      if (base.pages[i]?.rectsHash !== other.pages[i]?.rectsHash)
+        rects.push(i + 1);
+    }
+    const same = !html.length && !rects.length;
+    console.log(
+      `${other.label} vs ${base.label}: ${same ? "identical" : `DOM differs on pages [${html.join(", ")}], rects differ on pages [${rects.join(", ")}]`}` +
+        (base.pages.length !== other.pages.length
+          ? ` (page count ${base.pages.length} vs ${other.pages.length})`
+          : ""),
+    );
+    for (const p of html.slice(0, 5)) {
+      fs.mkdirSync(compareDir, { recursive: true });
+      for (const res of [base, other]) {
+        const page = res.pages[p - 1];
+        if (page) {
+          fs.writeFileSync(
+            path.join(
+              compareDir,
+              `${res.label.replace(/[^\w.-]+/g, "_")}-p${p}.html`,
+            ),
+            page.html.replace(/></g, ">\n<"),
+          );
+        }
+      }
+    }
+    report.push({ label: other.label, base: base.label, html, rects });
+  }
+  if (report.some((r) => r.html.length)) {
+    console.log(
+      `\nPage HTML of the first differing pages: ${path.relative(repoRoot, compareDir)}/`,
+    );
+  }
+  writeJson(ctx, "compare.json", { src: ctx.opts.src, report });
+  if (report.some((r) => r.html.length || r.rects.length)) process.exitCode = 2;
+}
+
+const hash = (s) => crypto.createHash("md5").update(s).digest("hex");
+
+function writeJson(ctx, name, data) {
+  fs.mkdirSync(ctx.opts.outDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(ctx.opts.outDir, name),
+    JSON.stringify(
+      data,
+      (k, v) => (v instanceof Map ? Object.fromEntries(v) : v),
+      2,
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  const { srcPath, serveRoot } = resolveSrc(opts);
+  const builds = new Map();
+  for (const target of opts.targets) {
+    if (target.kind !== "core") continue;
+    console.log(`Building ${target.label} (${target.spec})...`);
+    builds.set(
+      target.label,
+      await buildCore(target, opts, { minify: opts.command !== "profile" }),
+    );
+  }
+  const { server, origin } = await startServer(opts, serveRoot);
+  const srcUrl = srcPath ? `${origin}/src/${srcPath}` : opts.src;
+  const ctx = { opts, builds, origin, srcUrl, load: loadMode(opts, srcUrl) };
+  console.log(`Source: ${srcUrl} (${ctx.load})\n`);
+  const browser = await launchBrowser(opts);
+  try {
+    if (opts.command === "measure") await measure(browser, ctx);
+    else if (opts.command === "profile") await profile(browser, ctx);
+    else await compare(browser, ctx);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+}
+
+main().catch((e) => {
+  console.error(e instanceof Error ? e.message : e);
+  process.exit(1);
+});
