@@ -462,7 +462,7 @@ function viewerSrcParam(url) {
  * saved to disk.
  */
 const remoteCache = new Map();
-async function cacheRemoteResponses(context) {
+async function cacheRemoteResponses(context, state) {
   await context.route(/^https?:/, async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -492,6 +492,11 @@ async function cacheRemoteResponses(context) {
           body: await response.body(),
         };
       } catch {
+        if (state.closing) {
+          // Canceled by closing the context, not a failure of the resource:
+          // do not cache it.
+          return;
+        }
         // E.g. an unresolvable host: fail the request as the browser would.
         entry = { failed: true };
       }
@@ -509,7 +514,9 @@ async function cacheRemoteResponses(context) {
 /** Lay out all pages; return the layout time in ms and the page count. */
 async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
   const context = await browser.newContext({ viewport: ctx.opts.viewport });
-  if (ctx.opts.cache) await cacheRemoteResponses(context);
+  // Set before closing the context, which cancels the pending requests.
+  const state = { closing: false };
+  if (ctx.opts.cache) await cacheRemoteResponses(context, state);
   try {
     const page = await context.newPage();
     page.on("console", (m) => {
@@ -558,6 +565,7 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
     if (onPage) result.extra = await onPage.after?.(page);
     return result;
   } finally {
+    state.closing = true;
     await context.close();
   }
 }
