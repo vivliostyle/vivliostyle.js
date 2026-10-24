@@ -2305,6 +2305,16 @@ export class ViewFactory
           if (custom) {
             needToProcessChildren =
               result.getAttribute("data-adapt-process-children") == "true";
+            // A custom-rendered subtree (e.g. MathML imported for MathJax)
+            // keeps the source's style attributes instead of being styled
+            // through Base.setCSSProperty(), which registers the documents
+            // with annotation styles (see ruby-emphasis.ts).
+            if (
+              result.matches('[style*="text-emphasis"]') ||
+              result.querySelector('[style*="text-emphasis"]')
+            ) {
+              Base.markAnnotatedDocument(result.ownerDocument);
+            }
           }
         } else if (computedStyle["display"] === Css.ident.none) {
           // No element should be created if display:none is set.

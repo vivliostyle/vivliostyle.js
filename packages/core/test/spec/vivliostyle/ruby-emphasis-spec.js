@@ -69,6 +69,51 @@ describe("ruby and emphasis boundary leading", () => {
   const startLeading = Base.browserType === "firefox" ? null : "7";
   const startMargin = Base.browserType === "firefox" ? "" : "-7px";
   const emphasisEnabled = Base.browserType === "chromium";
+  // The fixtures write annotation styles directly (e.g. insertAdjacentHTML),
+  // not through Base.setCSSProperty() as the view generation does, so the
+  // document is registered as annotated for each spec.
+  beforeEach(() => {
+    Base.markAnnotatedDocument(document);
+  });
+
+  it("registers documents in which emphasis styles are set", () => {
+    const doc = document.implementation.createHTMLDocument("");
+    const element = doc.createElement("span");
+    doc.body.appendChild(element);
+    Base.setCSSProperty(element, "color", "red");
+    expect(Base.isAnnotatedDocument(doc)).toBe(false);
+    Base.setCSSProperty(element, "text-emphasis-style", "sesame");
+    expect(Base.isAnnotatedDocument(doc)).toBe(true);
+
+    const doc2 = document.implementation.createHTMLDocument("");
+    const element2 = doc2.createElement("span");
+    doc2.body.appendChild(element2);
+    // [style*="text-emphasis"] also matches a value.
+    Base.setCSSProperty(element2, "--x", "text-emphasis");
+    expect(Base.isAnnotatedDocument(doc2)).toBe(true);
+  });
+
+  it("skips documents without annotations", () => {
+    const doc = document.implementation.createHTMLDocument("");
+    const root = doc.createElement("div");
+    root.setAttribute("data-vivliostyle-column", "true");
+    doc.body.appendChild(root);
+    const block = doc.createElement("p");
+    block.insertAdjacentHTML(
+      "beforeend",
+      '<span style="text-emphasis:sesame">文字</span>',
+    );
+    root.appendChild(block);
+    const layout = actualLayout();
+    spyOn(layout, "getElementComputedStyle").and.callThrough();
+    spyOn(layout, "getElementClientRect").and.callThrough();
+    RubyEmphasis.adjustAnnotationsForNodes(
+      [{ viewNode: block, inline: false }],
+      layout,
+    );
+    expect(layout.getElementComputedStyle).not.toHaveBeenCalled();
+    expect(layout.getElementClientRect).not.toHaveBeenCalled();
+  });
   it("maps both components of emphasis-position according to writing-mode", () => {
     expect(RubyEmphasis.emphasisSide("horizontal-tb", "under right")).toBe(
       "end",
