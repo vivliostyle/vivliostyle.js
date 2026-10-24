@@ -462,7 +462,7 @@ function viewerSrcParam(url) {
  * saved to disk.
  */
 const remoteCache = new Map();
-async function cacheRemoteResponses(context) {
+async function cacheRemoteResponses(context, state) {
   await context.route(/^https?:/, async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -477,29 +477,46 @@ async function cacheRemoteResponses(context) {
     const key = `${request.headers()["origin"] ?? ""} ${url.href}`;
     let entry = remoteCache.get(key);
     if (!entry) {
-      // Keep a redirect as it is, so that the browser follows it and the
-      // document gets its final URL as its base URL. (The request to the
-      // redirect target is not routed here, so it is not cached.)
-      const response = await route.fetch({ maxRedirects: 0 });
-      // The body is decoded, so drop the headers of the encoded one.
-      const headers = { ...response.headers() };
-      delete headers["content-encoding"];
-      delete headers["content-length"];
-      entry = {
-        status: response.status(),
-        headers,
-        body: await response.body(),
-      };
+      try {
+        // Keep a redirect as it is, so that the browser follows it and the
+        // document gets its final URL as its base URL. (The request to the
+        // redirect target is not routed here, so it is not cached.)
+        const response = await route.fetch({ maxRedirects: 0 });
+        // The body is decoded, so drop the headers of the encoded one.
+        const headers = { ...response.headers() };
+        delete headers["content-encoding"];
+        delete headers["content-length"];
+        entry = {
+          status: response.status(),
+          headers,
+          body: await response.body(),
+        };
+      } catch {
+        if (state.closing) {
+          // Canceled by closing the context, not a failure of the resource:
+          // do not cache it.
+          return;
+        }
+        // E.g. an unresolvable host: fail the request as the browser would.
+        entry = { failed: true };
+      }
       remoteCache.set(key, entry);
     }
-    return route.fulfill(entry);
+    try {
+      if (entry.failed) await route.abort("failed");
+      else await route.fulfill(entry);
+    } catch {
+      // The page was closed before the response, e.g. after the layout.
+    }
   });
 }
 
 /** Lay out all pages; return the layout time in ms and the page count. */
 async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
   const context = await browser.newContext({ viewport: ctx.opts.viewport });
-  if (ctx.opts.cache) await cacheRemoteResponses(context);
+  // Set before closing the context, which cancels the pending requests.
+  const state = { closing: false };
+  if (ctx.opts.cache) await cacheRemoteResponses(context, state);
   try {
     const page = await context.newPage();
     page.on("console", (m) => {
@@ -548,6 +565,7 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
     if (onPage) result.extra = await onPage.after?.(page);
     return result;
   } finally {
+    state.closing = true;
     await context.close();
   }
 }
