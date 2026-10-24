@@ -46,9 +46,13 @@ export const fontMetricProperties = [
 export type FontProperties = { [property: string]: string };
 
 /**
- * The measured sizes per document, shared by its instances (one for each
- * spine document laid out in the viewer), which would otherwise measure the
- * same fonts again, e.g. for the root sizes of each spine document.
+ * The sizes measured without a font family, shared by the instances for a
+ * document (one for each spine document laid out in the viewer), which would
+ * otherwise measure them again, e.g. for the root sizes of each spine
+ * document. They use the browser's default font, which no @font-face rule of
+ * a spine document changes. (The sizes for a font family stay with each
+ * instance: the faces that a mapped family selects can differ between the
+ * spine documents.)
  */
 const documentCaches = new WeakMap<
   Document,
@@ -57,7 +61,8 @@ const documentCaches = new WeakMap<
 
 /** Measures CSS units in the source font, independently of the viewer's root. */
 export class FontMetrics {
-  private readonly cache: Map<string, { [unit: string]: number }>;
+  private readonly cache = new Map<string, { [unit: string]: number }>();
+  private readonly sharedCache: Map<string, { [unit: string]: number }>;
 
   constructor(
     private readonly document: Document,
@@ -65,15 +70,16 @@ export class FontMetrics {
       family,
     private readonly normalLineHeightZoom: number = 1,
   ) {
-    this.cache = documentCaches.get(document);
-    if (!this.cache) {
-      this.cache = new Map();
-      documentCaches.set(document, this.cache);
+    this.sharedCache = documentCaches.get(document);
+    if (!this.sharedCache) {
+      this.sharedCache = new Map();
+      documentCaches.set(document, this.sharedCache);
     }
   }
 
   clearCache(): void {
     this.cache.clear();
+    this.sharedCache.clear();
   }
 
   measure(
@@ -100,7 +106,8 @@ export class FontMetrics {
       properties.lang,
       this.normalLineHeightZoom,
     ]);
-    let sizes = this.cache.get(key);
+    const cache = properties["font-family"] ? this.cache : this.sharedCache;
+    let sizes = cache.get(key);
     if (!sizes) {
       const probe = this.document.createElement("span");
       probe.style.cssText =
@@ -138,7 +145,7 @@ export class FontMetrics {
       } finally {
         probe.remove();
       }
-      this.cache.set(key, sizes);
+      cache.set(key, sizes);
     }
     return Number.isFinite(sizes[unit]) ? sizes[unit] : null;
   }

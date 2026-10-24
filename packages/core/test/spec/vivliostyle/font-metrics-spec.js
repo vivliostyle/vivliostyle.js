@@ -217,6 +217,21 @@ describe("font metrics", function () {
     );
   });
 
+  it("shares only the sizes without a font family between instances", function () {
+    // Instances for different spine documents share the document, but the
+    // faces that a mapped family selects can differ between them.
+    const first = new FontMetrics(document, () => "Arial");
+    const second = new FontMetrics(document, () => "Arial");
+    const properties = { "font-family": "SpineFace", lang: "x-share-test" };
+    first.measure("ch", 23, properties);
+    first.measure("ch", 23, { lang: "x-share-test" });
+    spyOn(document, "createElement").and.callThrough();
+    second.measure("ch", 23, properties);
+    expect(document.createElement).toHaveBeenCalledTimes(1);
+    second.measure("ch", 23, { lang: "x-share-test" });
+    expect(document.createElement).toHaveBeenCalledTimes(1);
+  });
+
   it("can remeasure a font after the browser loads it", function () {
     let loaded = false;
     const metrics = new FontMetrics(document, () =>
