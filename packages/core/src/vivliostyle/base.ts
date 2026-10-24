@@ -447,6 +447,23 @@ export function getPrefixedPropertyNames(prop: string): string[] | null {
   return null;
 }
 
+/**
+ * The documents in which ruby or text-emphasis annotations may need their
+ * boundary leading adjusted (see ruby-emphasis.ts): an inline style with
+ * "text-emphasis" was set, or a ruby annotation was prepared.
+ */
+const annotatedDocuments = new WeakSet<Document>();
+
+export function markAnnotatedDocument(doc: Document | null): void {
+  if (doc) {
+    annotatedDocuments.add(doc);
+  }
+}
+
+export function isAnnotatedDocument(doc: Document | null): boolean {
+  return !!doc && annotatedDocuments.has(doc);
+}
+
 export function setCSSProperty(
   elem: Element,
   prop: string,
@@ -455,6 +472,9 @@ export function setCSSProperty(
   const elemStyle = (elem as HTMLElement)?.style;
   if (!elemStyle) {
     return;
+  }
+  if (prop.includes("text-emphasis") || value?.includes("text-emphasis")) {
+    markAnnotatedDocument(elem.ownerDocument);
   }
   if (prop.startsWith("--")) {
     elemStyle.setProperty(prop, value || " ");
