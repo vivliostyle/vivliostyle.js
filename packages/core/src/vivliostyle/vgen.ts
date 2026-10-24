@@ -2878,13 +2878,8 @@ export class ViewFactory
       }
       const parentViewNode = parent.viewNode as Element;
       if (parentViewNode) {
-        const style = this.viewport.window.getComputedStyle(parentViewNode);
-        const paddingBlockStart = parseFloat(style.paddingBlockStart);
-        const borderBlockStartWidth = parseFloat(style.borderBlockStartWidth);
-        if (paddingBlockStart || borderBlockStartWidth) {
-          // parent's viewNode has block-start padding or border
-          return null;
-        }
+        // Check the content before the computed style, which forces a style
+        // recalculation.
         let node = parentViewNode?.firstChild;
         while (
           node &&
@@ -2895,6 +2890,13 @@ export class ViewFactory
         }
         if (node && node !== nc.viewNode) {
           // parent's viewNode already has other content
+          return null;
+        }
+        const style = this.viewport.window.getComputedStyle(parentViewNode);
+        const paddingBlockStart = parseFloat(style.paddingBlockStart);
+        const borderBlockStartWidth = parseFloat(style.borderBlockStartWidth);
+        if (paddingBlockStart || borderBlockStartWidth) {
+          // parent's viewNode has block-start padding or border
           return null;
         }
       }
