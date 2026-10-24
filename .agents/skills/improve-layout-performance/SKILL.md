@@ -22,7 +22,7 @@ yarn test:layout-perf <measure|profile|compare> --src <url|path> [options] <targ
 
 - Targets: `core:<git-ref>` (core built from a commit, e.g. `core:v2.45.2`, `core:master`, `core:<sha>`), `core:worktree` (the working tree), `viewer:canary`, `viewer:stable`, `viewer:<url>` (measure only). Prefix a label: `before=core:master`.
 - `--src` is the document to lay out: a URL that allows CORS, or a local file path (the file is served with its directory, e.g. a `publication.json` and the files next to it; use `--serve-root <dir>` if the document uses root-relative URLs or files outside its directory). Use `--load document|publication` if the file extension does not tell.
-- `measure` lays out all pages `--runs` times per target (interleaved) and prints the median, min and max time, after `--warmup` runs per target that are not counted (default 1; the first load of a remote document can take much longer). Core targets use a minified build, as in production, and time only the layout, not the loading of the bundle.
+- `measure` lays out all pages `--runs` times per target (interleaved) and prints the median, min and max time, after `--warmup` runs per target that are not counted (default 1; the first load of a remote document can take much longer). Core targets use a minified build, as in production, and time only the layout, not the loading of the bundle. Responses from remote servers are kept in memory after the first fetch, so that the network does not distort the timing (`--no-cache` to fetch them in every run; documents on localhost are never cached).
 - `profile` records a CPU profile per target with an unminified build and prints the self and inclusive time per function, mapped to the source files. Functions are named from the source, e.g. `NodeContext.clone` or `Column.layoutNext/(anonymous)` (a closure in a method), so that they can be matched between versions. With two targets it prints the change of inclusive time per function; closures may not match when the code structure changed. `--callers <regex>` shows who calls the matching functions.
 - `compare` lays out each target and compares the per-page DOM (attributes sorted) and the rects of all elements with the first target. `--repeat 2` renders each target twice, to tell nondeterministic results from real changes (it also allows a single target). It writes the DOM (`.html`) and the element rects (`.rects.txt`, one line per element with its source offset) of the first differing pages to `artifacts/layout-perf/compare/`, and exits with status 2 if anything differs.
 - Builds are cached by commit in `artifacts/layout-perf/builds/`; profiles and JSON results also go to `artifacts/layout-perf/`.
@@ -34,16 +34,18 @@ The documents used for measuring are often private (e.g. a user's book). Pass th
 ### 1. Establish the Baseline
 
 - Measure the release and the current code with at least 5 runs: `yarn test:layout-perf measure --src <doc> --runs 5 core:<last-release-tag> core:master`.
-- Run-to-run noise is about ±0.5s for a 15s layout, and the first run can be slower. Compare medians, keep other heavy processes off the machine, and repeat a measurement before trusting a difference under about 3%.
+- Run-to-run noise is about ±1–3% (e.g. ±0.5s for a 15s layout, ±50ms for a 3s one). Compare medians, keep other heavy processes off the machine, and repeat a measurement before trusting a difference under about 3%. With `--no-cache`, a remote document adds the network's variation (±10% or more).
 - `viewer:` targets also include loading the viewer and its UI, so compare them only with each other (e.g. `viewer:stable viewer:canary`), not with `core:` targets.
 
 ### 2. Find Where the Time Goes
 
-- If a version is slower, list the core changes since the faster one (`git log --oneline <old>..<new> -- packages/core/src`) and measure the suspect commits as `core:<sha>` targets to find the steps.
+- If a version is slower, list the core changes since the faster one (`git log --oneline <old>..<new> -- packages/core/src`) and measure the commits in between as labeled `core:<sha>` targets in one run (e.g. `2198=core:8f0784175`), so that they are interleaved under the same conditions; then narrow down the steps.
 - Profile old and new: `yarn test:layout-perf profile --src <doc> old=core:<old> new=core:master`. Look at the diff table first, then at the self time of the new version.
 - Most layout time is spent in the browser's style recalculation and layout, which a CPU profile attributes to the JavaScript function that forces it: a function that reads `getComputedStyle()` values, `getBoundingClientRect()`, `getClientRects()`, `offsetWidth` and so on after the DOM was changed. High self time in such a function means it forces a recalculation or reflow, not that its own code is slow.
 - The cost of a forced reflow is the cost of the pending layout. Removing one read can move the cost to the next read, so judge a change by the total time (`measure`), not by the self time of one function.
 - Use `--callers '^getElementClientRect '` (or another function) to see which code paths force the most layouts.
+- Vivliostyle runs the layout as chains of asynchronous tasks, so the inclusive time of the callers can shift between runs and versions by more than the actual change. When the inclusive diff is inconsistent, compare the self time, and the total self time without `(idle)`, `(program)`, and `(garbage collector)`: a step that does not raise it is probably measurement noise.
+- `(idle)` includes waiting outside the layout, e.g. for the network and for the tool to notice the end of the layout, so a difference in idle time alone does not mean slower layout code.
 
 ### 3. Typical Improvements
 

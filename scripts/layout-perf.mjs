@@ -71,6 +71,10 @@ Options:
   --viewport <WxH>     Browser viewport (default: 1280x900).
   --timeout <sec>      Timeout for one layout (default: 900).
   --out <dir>          Output directory (default: artifacts/layout-perf).
+  --no-cache           Fetch remote resources in every run. By default, the
+                       responses from remote servers (not localhost) are
+                       kept in memory after the first fetch, so that the
+                       network does not distort the timing.
   --headed             Run the browser headed.
   --channel <name>     Browser channel (default: chrome; "" for Playwright's
                        bundled Chromium).
@@ -98,6 +102,7 @@ function parseArgs(argv) {
     timeoutSec: 900,
     outDir: path.join(repoRoot, "artifacts", "layout-perf"),
     headed: false,
+    cache: true,
     channel: "chrome",
     targets: [],
   };
@@ -130,6 +135,7 @@ function parseArgs(argv) {
     } else if (a === "--timeout") opts.timeoutSec = Number(next());
     else if (a === "--out") opts.outDir = path.resolve(next());
     else if (a === "--headed") opts.headed = true;
+    else if (a === "--no-cache") opts.cache = false;
     else if (a === "--channel") opts.channel = next();
     else if (a.startsWith("--")) throw new Error(`Unknown option: ${a}`);
     else opts.targets.push(parseTarget(a));
@@ -448,9 +454,45 @@ function viewerSrcParam(url) {
   return url.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
 }
 
+/**
+ * Serve the responses from remote servers from memory after the first fetch,
+ * so that the network does not distort the timing: each layout runs in a new
+ * browser context, which would otherwise fetch everything again. Nothing is
+ * saved to disk.
+ */
+const remoteCache = new Map();
+async function cacheRemoteResponses(context) {
+  await context.route(/^https?:/, async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (
+      request.method() !== "GET" ||
+      ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+    ) {
+      return route.continue();
+    }
+    let entry = remoteCache.get(url.href);
+    if (!entry) {
+      const response = await route.fetch();
+      // The body is decoded, so drop the headers of the encoded one.
+      const headers = { ...response.headers() };
+      delete headers["content-encoding"];
+      delete headers["content-length"];
+      entry = {
+        status: response.status(),
+        headers,
+        body: await response.body(),
+      };
+      remoteCache.set(url.href, entry);
+    }
+    return route.fulfill(entry);
+  });
+}
+
 /** Lay out all pages; return the layout time in ms and the page count. */
 async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
   const context = await browser.newContext({ viewport: ctx.opts.viewport });
+  if (ctx.opts.cache) await cacheRemoteResponses(context);
   try {
     const page = await context.newPage();
     page.on("console", (m) => {
