@@ -512,8 +512,10 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
     let result;
     if (target.kind === "viewer") {
       const t0 = Date.now();
+      // renderAllPages=true: a viewer can be configured not to lay out all
+      // pages by default (the "a" flag), and would never be complete.
       await page.goto(
-        `${target.url}#src=${viewerSrcParam(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}`,
+        `${target.url}#src=${viewerSrcParam(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}&renderAllPages=true`,
         { waitUntil: "domcontentloaded", timeout },
       );
       await page.waitForFunction(
