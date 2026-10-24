@@ -333,7 +333,10 @@ function resolveSrc(opts) {
   if (rel.startsWith("..")) {
     throw new Error(`--src is outside --serve-root: ${opts.src}`);
   }
-  return { srcPath: rel.split(path.sep).join("/"), serveRoot };
+  // Encode each segment, so that e.g. "#" or "?" in a file name is not taken
+  // as a URL delimiter.
+  const srcPath = rel.split(path.sep).map(encodeURIComponent).join("/");
+  return { srcPath, serveRoot };
 }
 
 function loadMode(opts, srcUrl) {
@@ -355,6 +358,15 @@ async function launchBrowser(opts) {
   });
 }
 
+/**
+ * Encode a URL for the viewer's src parameter as the viewer does for a URL
+ * entered in it: the viewer reads the parameter up to the next "&" without
+ * decoding it, so only "&" and a "%" that is not an escape are encoded.
+ */
+function viewerSrcParam(url) {
+  return url.replace(/%(?![0-9A-Fa-f]{2})/g, "%25").replace(/&/g, "%26");
+}
+
 /** Lay out all pages; return the layout time in ms and the page count. */
 async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
   const context = await browser.newContext({ viewport: ctx.opts.viewport });
@@ -371,7 +383,7 @@ async function layoutOnce(browser, ctx, target, build, { onPage } = {}) {
     if (target.kind === "viewer") {
       const t0 = Date.now();
       await page.goto(
-        `${target.url}#src=${encodeURI(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}`,
+        `${target.url}#src=${viewerSrcParam(ctx.srcUrl)}&bookMode=${ctx.load === "publication"}`,
         { waitUntil: "domcontentloaded" },
       );
       await page.waitForFunction(
@@ -658,12 +670,16 @@ async function compare(browser, ctx) {
                   p.style.display = display;
                   // Sort the attributes: the order in which some are set
                   // depends on timing, e.g. the load of an image.
+                  const escape = (str, re) =>
+                    str.replace(re, (c) => `&#${c.charCodeAt(0)};`);
                   const serialize = (node) =>
                     node.nodeType === Node.TEXT_NODE
-                      ? node.data
+                      ? escape(node.data, /[&<>]/g)
                       : node.nodeType === Node.ELEMENT_NODE
                         ? `<${node.localName}${[...node.attributes]
-                            .map((a) => ` ${a.name}="${a.value}"`)
+                            .map(
+                              (a) => ` ${a.name}="${escape(a.value, /[&"]/g)}"`,
+                            )
                             .sort()
                             .join("")}>${[...node.childNodes]
                             .map(serialize)
