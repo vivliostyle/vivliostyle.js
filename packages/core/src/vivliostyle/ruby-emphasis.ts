@@ -144,6 +144,7 @@ export function prepareRubyAnnotation(
   const leading = Math.max(0, (lineHeight - fontSize) / 2);
   if (Number.isFinite(leading) && leading > 0) {
     target.setAttribute(`data-viv-ruby-${side}`, `${leading}`);
+    Base.markAnnotatedDocument(target.ownerDocument);
   }
 }
 
@@ -661,6 +662,10 @@ export function adjustAnnotationsForNodes(
   layout: Vtree.ClientLayout,
 ): void {
   if (!["chromium", "webkit", "firefox"].includes(Base.browserType)) return;
+  // Without any annotation in the document, no column passes the check below,
+  // which scans the whole column for every block.
+  const doc = nodes.find((node) => node?.viewNode)?.viewNode.ownerDocument;
+  if (!Base.isAnnotatedDocument(doc ?? null)) return;
   const roots = new Set<HTMLElement>();
   const blocks = new Set<HTMLElement>();
   for (const node of nodes) {
