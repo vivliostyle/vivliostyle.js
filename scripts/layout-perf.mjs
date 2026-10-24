@@ -171,7 +171,9 @@ function parseTarget(arg) {
         ? "https://vivliostyle.vercel.app/"
         : spec === "stable"
           ? "https://vivliostyle.org/viewer/"
-          : spec;
+          : // A URL copied from an open viewer can have a fragment, e.g.
+            // "#src=...", which would precede the parameters added here.
+            spec.replace(/#.*$/, "");
     return { kind, spec, url, label: label || spec };
   }
   return { kind, spec, label: label || spec };
@@ -310,9 +312,15 @@ const contentTypes = {
   ".xml": "application/xml",
 };
 
+/** Whether a path relative to a directory is outside of it. */
+const isOutside = (rel) =>
+  rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel);
+
 function serveFile(res, root, relPath) {
   const filePath = path.resolve(root, relPath);
-  if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+  // path.relative() also works for a root such as "/", unlike a prefix check.
+  const rel = path.relative(root, filePath);
+  if (isOutside(rel)) {
     res.writeHead(403).end();
     return;
   }
@@ -392,7 +400,7 @@ function resolveSrc(opts) {
   }
   const serveRoot = path.resolve(opts.serveRoot || path.dirname(file));
   const rel = path.relative(serveRoot, file);
-  if (rel.startsWith("..")) {
+  if (isOutside(rel)) {
     throw new Error(`--src is outside --serve-root: ${opts.src}`);
   }
   // Encode each segment, so that e.g. "#" or "?" in a file name is not taken
