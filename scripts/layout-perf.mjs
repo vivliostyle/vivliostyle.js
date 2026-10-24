@@ -502,6 +502,25 @@ const median = (xs) => {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
 
+/** Print a table, padding the first column to the left and others to the right. */
+function printColumns(header, rows) {
+  const widths = header.map((h, i) =>
+    Math.max(h.length, ...rows.map((row) => String(row[i]).length)),
+  );
+  for (const row of [header, ...rows]) {
+    console.log(
+      row
+        .map((cell, i) =>
+          i === 0
+            ? String(cell).padEnd(widths[i])
+            : String(cell).padStart(widths[i]),
+        )
+        .join("  ")
+        .trimEnd(),
+    );
+  }
+}
+
 async function measure(browser, ctx) {
   const times = new Map(ctx.opts.targets.map((t) => [t.label, []]));
   const pages = new Map();
@@ -531,13 +550,21 @@ async function measure(browser, ctx) {
     };
   });
   const base = rows[0].median;
-  console.log("\ntarget\tmedian ms\tmin\tmax\tpages\tvs first");
-  for (const r of rows) {
-    const diff = ((r.median / base - 1) * 100).toFixed(1);
-    console.log(
-      `${r.target}\t${r.median}\t${r.min}\t${r.max}\t${r.pages}\t${r === rows[0] ? "" : `${diff > 0 ? "+" : ""}${diff}%`}`,
-    );
-  }
+  console.log();
+  printColumns(
+    ["target", "median ms", "min ms", "max ms", "pages", "vs first"],
+    rows.map((r) => {
+      const diff = ((r.median / base - 1) * 100).toFixed(1);
+      return [
+        r.target,
+        r.median,
+        r.min,
+        r.max,
+        r.pages,
+        r === rows[0] ? "" : `${diff > 0 ? "+" : ""}${diff}%`,
+      ];
+    }),
+  );
   writeJson(ctx, "measure.json", { src: ctx.opts.src, rows, times });
 }
 
