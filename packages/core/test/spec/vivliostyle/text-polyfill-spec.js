@@ -668,10 +668,14 @@ describe("text-polyfill", function () {
   describe("text-spacing-trim: trim-all and fullwidth colon punctuation", function () {
     let style;
 
-    beforeEach(function () {
+    beforeEach(async function () {
       style = document.createElement("style");
       style.textContent = VivliostylePolyfillCss;
       document.head.appendChild(style);
+      // The spaces of `viv-hang-end` and `viv-ts-auto` have the width of the
+      // fallback font until the font is loaded, which depends on whether the
+      // tests run before have used it
+      await document.fonts.load('16px "-viv-ts-sp"');
     });
 
     afterEach(function () {
