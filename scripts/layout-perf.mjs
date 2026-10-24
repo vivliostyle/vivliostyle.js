@@ -57,6 +57,9 @@ Options:
   --runs <n>           measure: runs per target (default: 3); profile: runs
                        per target, the profile of the last run is used
                        (default: 1).
+  --warmup <n>         measure, profile: runs per target before the measured
+                       runs, not counted; they exclude e.g. the first
+                       connection to a remote --src (default: 1).
   --repeat <n>         compare: render each target n times, to detect
                        nondeterministic results (default: 1).
   --top <n>            profile: rows per table (default: 40).
@@ -86,6 +89,7 @@ function parseArgs(argv) {
     serveRoot: "",
     load: "auto",
     runs: undefined,
+    warmup: 1,
     repeat: 1,
     top: 40,
     callers: "",
@@ -114,6 +118,7 @@ function parseArgs(argv) {
     else if (a === "--serve-root") opts.serveRoot = next();
     else if (a === "--load") opts.load = next();
     else if (a === "--runs") opts.runs = Number(next());
+    else if (a === "--warmup") opts.warmup = Number(next());
     else if (a === "--repeat") opts.repeat = Number(next());
     else if (a === "--top") opts.top = Number(next());
     else if (a === "--callers") opts.callers = next();
@@ -142,6 +147,9 @@ function parseArgs(argv) {
     if (!Number.isInteger(value) || value < 1) {
       throw new Error(`${name} must be a positive integer`);
     }
+  }
+  if (!Number.isInteger(opts.warmup) || opts.warmup < 0) {
+    throw new Error("--warmup must be a non-negative integer");
   }
   if (opts.command !== "measure") {
     const viewers = opts.targets.filter((t) => t.kind === "viewer");
@@ -521,7 +529,23 @@ function printColumns(header, rows) {
   }
 }
 
+/** Lay out the document with each target, without counting the time. */
+async function warmUp(browser, ctx) {
+  for (let r = 0; r < ctx.opts.warmup; r++) {
+    for (const target of ctx.opts.targets) {
+      const { ms } = await layoutOnce(
+        browser,
+        ctx,
+        target,
+        ctx.builds.get(target.label),
+      );
+      console.log(`  warm-up ${target.label}: ${Math.round(ms)} ms`);
+    }
+  }
+}
+
 async function measure(browser, ctx) {
+  await warmUp(browser, ctx);
   const times = new Map(ctx.opts.targets.map((t) => [t.label, []]));
   const pages = new Map();
   for (let r = 0; r < ctx.opts.runs; r++) {
@@ -671,8 +695,16 @@ function summarizeProfile(profile, build) {
   const totalByKey = new Map();
   const callers = [];
   let sum = 0;
+  // timeDeltas[i] is the time from the previous sample to sample i. Each
+  // sample is given the time until the next one (as in Chrome DevTools), and
+  // the last one the time until the end of the profile.
+  let lastTimestamp = profile.startTime;
+  for (const delta of profile.timeDeltas) lastTimestamp += delta;
   for (let i = 0; i < profile.samples.length; i++) {
-    const dt = profile.timeDeltas[i + 1] ?? 0;
+    const dt =
+      i + 1 < profile.samples.length
+        ? profile.timeDeltas[i + 1]
+        : Math.max(0, profile.endTime - lastTimestamp);
     sum += dt;
     let n = nodes.get(profile.samples[i]);
     self.set(nameOf(n), (self.get(nameOf(n)) ?? 0) + dt);
@@ -706,6 +738,7 @@ const isSchedulerFrame = (name) =>
   /[\s/]task\.ts(:|$)|^\((root|program|idle)\)$/.test(name);
 
 async function profile(browser, ctx) {
+  await warmUp(browser, ctx);
   const summaries = [];
   for (const target of ctx.opts.targets) {
     const build = ctx.builds.get(target.label);
@@ -739,7 +772,7 @@ async function profile(browser, ctx) {
     const file = path.join(
       ctx.opts.outDir,
       "profiles",
-      `${target.label.replace(/[^\w.-]+/g, "_")}.cpuprofile`,
+      `${fileLabel(target.label)}.cpuprofile`,
     );
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(saved));
@@ -910,7 +943,7 @@ async function compare(browser, ctx) {
       for (const res of [base, other]) {
         const page = res.pages[p - 1];
         if (page) {
-          const name = `${res.label.replace(/[^\w.-]+/g, "_")}-p${p}`;
+          const name = `${fileLabel(res.label)}-p${p}`;
           fs.writeFileSync(
             path.join(compareDir, `${name}.html`),
             page.html.replace(/></g, ">\n<"),
@@ -934,6 +967,16 @@ async function compare(browser, ctx) {
 }
 
 const hash = (s) => crypto.createHash("md5").update(s).digest("hex");
+
+/**
+ * A target label usable in a file name. When characters had to be replaced,
+ * a hash of the label is appended, so that e.g. "feature/foo" and
+ * "feature_foo" do not get the same file name.
+ */
+function fileLabel(label) {
+  const safe = label.replace(/[^\w.-]+/g, "_");
+  return safe === label ? safe : `${safe}-${hash(label).slice(0, 8)}`;
+}
 
 function writeJson(ctx, name, data) {
   fs.mkdirSync(ctx.opts.outDir, { recursive: true });
