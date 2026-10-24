@@ -48,8 +48,9 @@ Options:
                        that allows CORS, or a local file path. A local file is
                        served with its directory, e.g. a publication.json and
                        the files next to it.
-  --serve-root <dir>   Directory to serve for a local --src (default: the
-                       directory of --src).
+  --serve-root <dir>   Directory to serve at the root of the local server for
+                       a local --src, to which root-relative URLs in the
+                       document resolve (default: the directory of --src).
   --load <auto|document|publication>
                        How the core targets load --src (default: auto:
                        .html/.htm/.xhtml are documents, others publications).
@@ -147,6 +148,11 @@ function parseArgs(argv) {
     if (viewers.length) {
       throw new Error(`${opts.command} supports only core:<ref> targets`);
     }
+  }
+  if (opts.command === "compare" && opts.targets.length * opts.repeat < 2) {
+    throw new Error(
+      "compare needs two targets, or --repeat 2 or more for one target",
+    );
   }
   const labels = opts.targets.map((t) => t.label);
   if (new Set(labels).size !== labels.length) {
@@ -321,8 +327,8 @@ function serveFile(res, root, relPath) {
   });
 }
 
-async function startServer(opts, serveRoot) {
-  const buildsDir = path.join(opts.outDir, "builds");
+/** Start a server on a free port, calling handle() with the decoded path. */
+async function listen(handle) {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, "http://localhost");
     let p;
@@ -333,6 +339,20 @@ async function startServer(opts, serveRoot) {
       res.writeHead(400).end();
       return;
     }
+    handle(res, p);
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  return { server, origin: `http://localhost:${server.address().port}` };
+}
+
+/**
+ * Start the server for the harness and the builds, and for a local --src a
+ * separate server with --serve-root at its root, so that root-relative URLs
+ * in the document (e.g. "/styles.css") resolve as when it is published.
+ */
+async function startServers(opts, serveRoot) {
+  const buildsDir = path.join(opts.outDir, "builds");
+  const app = await listen((res, p) => {
     if (p === "/harness.html") {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(harnessHtml);
@@ -340,14 +360,21 @@ async function startServer(opts, serveRoot) {
       serveFile(res, buildsDir, p.slice("/builds/".length));
     } else if (p.startsWith("/resources/")) {
       serveFile(res, viewerResourcesDir, p.slice("/resources/".length));
-    } else if (serveRoot && p.startsWith("/src/")) {
-      serveFile(res, serveRoot, p.slice("/src/".length));
     } else {
       res.writeHead(404).end();
     }
   });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  return { server, origin: `http://localhost:${server.address().port}` };
+  const src = serveRoot
+    ? await listen((res, p) => serveFile(res, serveRoot, p.slice(1)))
+    : null;
+  return {
+    origin: app.origin,
+    srcOrigin: src?.origin,
+    close: () => {
+      app.server.close();
+      src?.server.close();
+    },
+  };
 }
 
 /** Resolve --src to a URL, serving a local file with its directory. */
@@ -690,14 +717,22 @@ async function compare(browser, ctx) {
                   // page to measure the rects of its elements.
                   const display = p.style.display;
                   p.style.display = "block";
+                  // One line per element: its tag, its source offset if any,
+                  // and its rect rounded to 1/4px.
                   const rects = [...p.querySelectorAll("*")]
                     .map((e) => {
                       const b = e.getBoundingClientRect();
-                      return [b.x, b.y, b.width, b.height]
-                        .map((v) => Math.round(v * 4))
-                        .join(",");
+                      const offset = e.getAttribute("data-adapt-eloff");
+                      return `${e.localName}${offset ? `@${offset}` : ""} ${[
+                        b.x,
+                        b.y,
+                        b.width,
+                        b.height,
+                      ]
+                        .map((v) => Math.round(v * 4) / 4)
+                        .join(",")}`;
                     })
-                    .join(";");
+                    .join("\n");
                   p.style.display = display;
                   // Sort the attributes: the order in which some are set
                   // depends on timing, e.g. the load of an image.
@@ -731,6 +766,7 @@ async function compare(browser, ctx) {
         label,
         pages: extra.map(({ html, rects }) => ({
           html,
+          rects,
           htmlHash: hash(html),
           rectsHash: hash(rects),
         })),
@@ -758,26 +794,31 @@ async function compare(browser, ctx) {
           ? ` (page count ${base.pages.length} vs ${other.pages.length})`
           : ""),
     );
-    for (const p of html.slice(0, 5)) {
+    // Save the DOM and the element rects of the first differing pages; the
+    // rects can differ with the same DOM, e.g. after a stylesheet change.
+    const differing = [...new Set([...html, ...rects])].sort((a, b) => a - b);
+    for (const p of differing.slice(0, 5)) {
       fs.mkdirSync(compareDir, { recursive: true });
       for (const res of [base, other]) {
         const page = res.pages[p - 1];
         if (page) {
+          const name = `${res.label.replace(/[^\w.-]+/g, "_")}-p${p}`;
           fs.writeFileSync(
-            path.join(
-              compareDir,
-              `${res.label.replace(/[^\w.-]+/g, "_")}-p${p}.html`,
-            ),
+            path.join(compareDir, `${name}.html`),
             page.html.replace(/></g, ">\n<"),
+          );
+          fs.writeFileSync(
+            path.join(compareDir, `${name}.rects.txt`),
+            `${page.rects}\n`,
           );
         }
       }
     }
     report.push({ label: other.label, base: base.label, html, rects });
   }
-  if (report.some((r) => r.html.length)) {
+  if (report.some((r) => r.html.length || r.rects.length)) {
     console.log(
-      `\nPage HTML of the first differing pages: ${path.relative(repoRoot, compareDir)}/`,
+      `\nDOM (.html) and element rects (.rects.txt) of the first differing pages: ${path.relative(repoRoot, compareDir)}/`,
     );
   }
   writeJson(ctx, "compare.json", { src: ctx.opts.src, report });
@@ -812,8 +853,9 @@ async function main() {
       await buildCore(target, opts, { minify: opts.command !== "profile" }),
     );
   }
-  const { server, origin } = await startServer(opts, serveRoot);
-  const srcUrl = srcPath ? `${origin}/src/${srcPath}` : opts.src;
+  const servers = await startServers(opts, serveRoot);
+  const { origin } = servers;
+  const srcUrl = srcPath ? `${servers.srcOrigin}/${srcPath}` : opts.src;
   const ctx = { opts, builds, origin, srcUrl, load: loadMode(opts, srcUrl) };
   console.log(`Source: ${srcUrl} (${ctx.load})\n`);
   const browser = await launchBrowser(opts);
@@ -823,7 +865,7 @@ async function main() {
     else await compare(browser, ctx);
   } finally {
     await browser.close();
-    server.close();
+    servers.close();
   }
 }
 
