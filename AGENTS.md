@@ -151,6 +151,19 @@ yarn test:layout-regression --limit 1                     # smoke check
 - Results: `artifacts/layout-regression/report.md`, `diff/*.png`
 - Triage: `yarn test:layout-regression:triage --show-pending`
 
+### Layout Performance
+
+Measure, profile, and compare the layout of a document with core builds from git refs, the working tree, or deployed viewers. See the `improve-layout-performance` skill for the workflow.
+
+```bash
+yarn test:layout-perf measure --src <url|path> --runs 5 core:v2.45.2 core:master core:worktree
+yarn test:layout-perf profile --src <url|path> before=core:master after=core:worktree
+yarn test:layout-perf compare --src <url|path> --repeat 2 core:master core:worktree
+```
+
+- Results: `artifacts/layout-perf/` (builds cached by commit, CPU profiles, differing pages)
+- Pass private documents with `--src` only; never commit them or their output
+
 ## Common Pitfalls
 
 - Build before testing: `yarn build` (tests don't transpile TS)

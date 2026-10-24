@@ -16,6 +16,7 @@
     "ship:prerelease": "yarn ship --dist-tag next",
     "test": "cross-env NODE_OPTIONS=--disable-warning=DEP0169 yarn workspace @vivliostyle/core test",
     "test:layout-regression": "node scripts/layout-regression.mjs",
+    "test:layout-perf": "node scripts/layout-perf.mjs",
     "test:reftest": "node scripts/layout-regression.mjs --mode reftest",
     "test:reftest-diff": "node scripts/layout-regression.mjs --mode reftest-diff",
     "download:wpt-manifest": "node scripts/download-wpt-manifest.mjs",
