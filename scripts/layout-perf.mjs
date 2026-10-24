@@ -21,7 +21,9 @@ import { chromium } from "playwright";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
-const coreSrcDir = path.join(repoRoot, "packages/core/src");
+const coreDir = path.join(repoRoot, "packages/core");
+// Change when the build settings change, to rebuild the cached bundles.
+const buildFormat = 2;
 const viewerResourcesDir = path.join(repoRoot, "packages/viewer/resources");
 
 const usage = `Usage: node scripts/layout-perf.mjs <command> [options] <target>...
@@ -129,6 +131,17 @@ function parseArgs(argv) {
   if (!opts.src) throw new Error("--src is required");
   if (!opts.targets.length) throw new Error("No targets");
   opts.runs ??= opts.command === "measure" ? 3 : 1;
+  for (const [name, value] of [
+    ["--runs", opts.runs],
+    ["--repeat", opts.repeat],
+    ["--top", opts.top],
+    ["--sampling-interval", opts.samplingInterval],
+    ["--timeout", opts.timeoutSec],
+  ]) {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error(`${name} must be a positive integer`);
+    }
+  }
   if (opts.command !== "measure") {
     const viewers = opts.targets.filter((t) => t.kind === "viewer");
     if (viewers.length) {
@@ -169,37 +182,48 @@ function git(...args) {
  * Build the core as an IIFE bundle exposing the global `vivliostyle`.
  * A minified bundle is used for timing, as in production; an unminified one
  * with a source map for profiling, to get readable function names.
- * Builds of a commit are cached by its hash.
+ * Builds of a commit are cached by its hash. The core's tsconfig.json of the
+ * same revision is used, as its compiler options (e.g. useDefineForClassFields)
+ * affect the generated code.
  */
 async function buildCore(target, opts, { minify }) {
   const buildsDir = path.join(opts.outDir, "builds");
   fs.mkdirSync(buildsDir, { recursive: true });
-  let srcDir = coreSrcDir;
+  let dir = coreDir;
   let key;
   if (target.spec === "worktree") {
     key = "worktree";
   } else {
     const sha = git("rev-parse", "--verify", `${target.spec}^{commit}`);
     key = sha.slice(0, 12);
-    srcDir = path.join(buildsDir, `src-${key}`);
-    if (!fs.existsSync(path.join(srcDir, "vivliostyle.ts"))) {
+    dir = path.join(buildsDir, `rev-${key}`);
+    if (!fs.existsSync(path.join(dir, "src", "vivliostyle.ts"))) {
       const extractDir = path.join(buildsDir, `tmp-${key}`);
       const tarFile = `${extractDir}.tar`;
       fs.rmSync(extractDir, { recursive: true, force: true });
       fs.mkdirSync(extractDir, { recursive: true });
-      git("archive", "--format=tar", "-o", tarFile, sha, "packages/core/src");
+      git(
+        "archive",
+        "--format=tar",
+        "-o",
+        tarFile,
+        sha,
+        "packages/core/src",
+        "packages/core/tsconfig.json",
+      );
       execFileSync("tar", ["-xf", tarFile, "-C", extractDir]);
       fs.rmSync(tarFile);
-      fs.rmSync(srcDir, { recursive: true, force: true });
-      fs.renameSync(path.join(extractDir, "packages/core/src"), srcDir);
+      fs.rmSync(dir, { recursive: true, force: true });
+      fs.renameSync(path.join(extractDir, "packages/core"), dir);
       fs.rmSync(extractDir, { recursive: true, force: true });
     }
   }
-  const file = `core-${key}${minify ? "" : "-dev"}.js`;
+  const file = `core-${key}-b${buildFormat}${minify ? "" : "-dev"}.js`;
   const outfile = path.join(buildsDir, file);
   if (key === "worktree" || !fs.existsSync(outfile)) {
     await esbuild.build({
-      entryPoints: [path.join(srcDir, "vivliostyle.ts")],
+      entryPoints: [path.join(dir, "src", "vivliostyle.ts")],
+      tsconfig: path.join(dir, "tsconfig.json"),
       bundle: true,
       format: "iife",
       globalName: "vivliostyle",
@@ -301,7 +325,14 @@ async function startServer(opts, serveRoot) {
   const buildsDir = path.join(opts.outDir, "builds");
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, "http://localhost");
-    const p = decodeURIComponent(url.pathname);
+    let p;
+    try {
+      p = decodeURIComponent(url.pathname);
+    } catch {
+      // A malformed escape, e.g. a literal "%" in a relative resource URL.
+      res.writeHead(400).end();
+      return;
+    }
     if (p === "/harness.html") {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(harnessHtml);
@@ -685,7 +716,9 @@ async function compare(browser, ctx) {
                             .map(serialize)
                             .join("")}</${node.localName}>`
                         : "";
-                  const html = [...p.childNodes].map(serialize).join("");
+                  // Include the page container itself, which has page-level
+                  // state such as the page side and size.
+                  const html = serialize(p);
                   return { html, rects };
                 }),
               ),
