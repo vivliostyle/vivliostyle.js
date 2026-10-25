@@ -35,14 +35,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        browser: [Chrome, Firefox]
+        browser: [Chrome, Firefox, WebKit]
         exclude:
           # Reduce CI time by excluding some combinations
           - os: windows-latest
             browser: Firefox
+          - os: windows-latest
+            browser: WebKit
           # Firefox on Ubuntu consistently times out, tested on macOS instead
           - os: ubuntu-latest
             browser: Firefox
+          # WebKit is rarely used on Linux, tested on macOS only
+          - os: ubuntu-latest
+            browser: WebKit
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +62,10 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Install Playwright WebKit
+        if: matrix.browser == 'WebKit'
+        run: npx playwright install webkit --with-deps
 
       - name: Run tests
         run: |

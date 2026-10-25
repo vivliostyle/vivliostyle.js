@@ -52,9 +52,9 @@ yarn dev        # start watching source files and open browser.
 
 TypeScriptで書かれたソースファイルは、Rollupによってコンパイル・minifyされます。 JavaScriptファイルのminifiedバージョンをビルドするには、（リポジトリのルートディレクトリで）`yarn build` を実行します。 ソースは型チェックされ、minifyされたファイルは `packages/core/lib/` と `packages/viewer/lib` ディレクトリの下に生成されます。
 
-[Jasmine](http://jasmine.github.io/) はユニットテストに使用されます。 スペックファイルは `packages/core/test/spec/` の下にあります。 ローカルマシンでテストを実行するには、`yarn test` を実行します。
+[Jasmine](http://jasmine.github.io/) はユニットテストに使用されます。 スペックファイルは `packages/core/test/spec/` の下にあります。 ローカルマシンでテストを実行するには、`yarn test:core` を実行します（ヘッドレスChromeで実行）。FirefoxやWebKitで実行するには、`TEST_BROWSER=Firefox yarn test:core` または `TEST_BROWSER=WebKit yarn test:core` を実行します。WebKitにはPlaywrightのビルドを使い、`npx playwright install webkit` でインストールします。
 
-ユニットテストはGitHubにプッシュした際に [Travis CI](https://travis-ci.org/vivliostyle/vivliostyle.js) が自動的に実行されます。masterにプッシュされると、すべてのテストに合格した後、コードは自動的に[Canary release](https://vivliostyle.github.io/#canary-release-equivalent-to-master)にデプロイされます。masterへのプッシュ（PRのマージ）には注意してくだい。
+ユニットテストはGitHubにプッシュした際に [GitHub Actions](https://github.com/vivliostyle/vivliostyle.js/actions/workflows/ci.yml) がChrome、Firefox、WebKitで自動的に実行します。masterにプッシュされると、すべてのテストに合格した後、コードは自動的に[Canary release](https://vivliostyle.github.io/#canary-release-equivalent-to-master)にデプロイされます。masterへのプッシュ（PRのマージ）には注意してくだい。
 
 ### 開発モード
 
