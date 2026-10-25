@@ -1,3 +1,15 @@
+- category: Text spacing
+  title: "text-autospace across margin, border, or padding (PR #2228)"
+  file: text-spacing/autospace-margin-border-padding.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2228"
+  approvedViewer: git-fix-autospace-margin-border-padding  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-margin-border-padding.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-margin-border-padding.html&zoom=1&spread=false
 - category: Ruby and text emphasis
   title: "Ruby and emphasis line spacing (horizontal, Issue #1604)"
   file: ruby-text-emphasis/ruby-emphasis-line-spacing-horizontal.html
@@ -1409,9 +1421,9 @@
   decision: expected  # regression / expected / skip
   notes: >-
     New test in PR #2218. The page breaks are the same as stable (8 + 1 items in both the Latin and the Japanese
-    container). The only difference is a sub-pixel shift (about 0.14px) of the digits after the ideographs in the Japanese
-    items, from the native text-autospace used since PR #2211 instead of the polyfill in stable. The PR preview renders
-    those lines identically to canary.
+    container). The only difference is a sub-pixel shift (about 0.14px) of the digits after the ideographs in the
+    Japanese items, from the native text-autospace used since PR #2211 instead of the polyfill in stable. The PR preview
+    renders those lines identically to canary.
   approvedViewer: https://vivliostyle-git-fix-stale-fragmentation-afte-72cc62-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-stale-fragmentation-after-inset-suppression
   actualUrl: >-
