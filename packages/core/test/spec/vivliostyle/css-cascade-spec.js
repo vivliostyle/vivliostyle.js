@@ -4275,7 +4275,11 @@ describe("css-cascade", function () {
         }
         expect(inherited("5ch")).toBeCloseTo(nativeLength("5ch", 16), 3);
         expect(inherited("5ic")).toBe(80);
-        expect(inherited("2.5ex")).toBeCloseTo(nativeLength("2.5ex", 16), 3);
+        // WebKit snaps computed lengths to its 1/64px layout unit, both the
+        // `ex` size this engine measures and the native `2.5ex`.
+        expect(
+          Math.abs(inherited("2.5ex") - nativeLength("2.5ex", 16)),
+        ).toBeLessThanOrEqual(1 / 64);
       });
 
       it("resolves a line height in an internal viewport unit", function () {
