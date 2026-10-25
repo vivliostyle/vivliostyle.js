@@ -123,6 +123,26 @@ const values: {
     ],
   },
 };
+// Sideways modes have the same block axis as their vertical counterparts,
+// but sideways-lr reverses the inline axis.
+values["sideways-rl"] = values["vertical-rl"];
+values["sideways-lr"] = {
+  ltr: values["vertical-lr"].rtl,
+  rtl: values["vertical-lr"].ltr,
+};
+
+export function isVertical(writingMode: string): boolean {
+  return writingMode !== "horizontal-tb";
+}
+
+export function isBlockReversed(writingMode: string): boolean {
+  return writingMode === "vertical-rl" || writingMode === "sideways-rl";
+}
+
+export function isInlineReversed(writingMode: string, rtl: boolean): boolean {
+  return rtl !== (writingMode === "sideways-lr");
+}
+
 const toPhysicalMaps = createRegExpMap(values, true);
 
 export function toPhysical(
@@ -163,6 +183,14 @@ const lineRelativeValues: {
     { logical: "under", physical: "left" },
   ],
 };
+
+lineRelativeValues["sideways-rl"] = lineRelativeValues["vertical-rl"];
+lineRelativeValues["sideways-lr"] = [
+  { logical: "line-left", physical: "bottom" },
+  { logical: "line-right", physical: "top" },
+  { logical: "over", physical: "left" },
+  { logical: "under", physical: "right" },
+];
 
 export function toLineRelative(value: string, writingMode: string): string {
   const maps = lineRelativeValues[writingMode];

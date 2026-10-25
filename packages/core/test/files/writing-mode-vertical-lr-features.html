@@ -1,0 +1,212 @@
+<!doctype html>
+<!-- Test case for Issue #1480: floats, columns, tables and footnotes in vertical-lr. -->
+<html lang="en" style="writing-mode: vertical-lr">
+  <meta charset="utf-8" />
+  <title>Layout features in vertical-lr (Issue #1480)</title>
+  <style>
+    @page {
+      size: 440px 360px;
+      margin: 30px;
+      @bottom-center {
+        content: counter(page);
+        writing-mode: horizontal-tb;
+      }
+      @footnote {
+        border-block-start: 1px solid;
+        margin-block-start: 8px;
+        font-size: 12px;
+      }
+    }
+    body {
+      margin: 0;
+      font: 16px/20px sans-serif;
+    }
+    section {
+      break-before: page;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 10px;
+    }
+    p {
+      margin: 0;
+    }
+    aside {
+      float: inline-start;
+      inline-size: 80px;
+      block-size: 50px;
+      background: lightblue;
+    }
+    .column-side-float {
+      float-reference: page;
+      float: block-start;
+      inline-size: 100%;
+      block-size: 40px;
+      background: lightblue;
+    }
+    .columns {
+      column-count: 2;
+      column-gap: 20px;
+      column-rule: 1px solid teal;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    td,
+    th {
+      border: 1px solid teal;
+      padding: 4px;
+    }
+    .note {
+      float: footnote;
+    }
+    .page-float {
+      float-reference: page;
+      float: block-end;
+      inline-size: 100%;
+      block-size: 40px;
+      background: lightblue;
+    }
+  </style>
+  <body>
+    <section>
+      <h1>Inline float, LTR</h1>
+      <aside>FLOAT</aside>
+      <p>
+        First paragraph: Text must flow around the blue float without
+        overlapping it. ABC abc 123 日本語。
+      </p>
+      <p>
+        Second paragraph: Text must continue in the correct block direction.
+      </p>
+    </section>
+    <section style="direction: rtl">
+      <h1>Inline float, RTL</h1>
+      <aside>FLOAT</aside>
+      <p>
+        First paragraph: Text must flow around the blue float without
+        overlapping it. ABC abc 123 日本語。
+      </p>
+      <p>
+        Second paragraph: Text must continue in the correct block direction.
+      </p>
+    </section>
+    <section>
+      <h1>Two columns</h1>
+      <div class="columns">
+        <div class="column-side-float">COLUMNS FLOAT</div>
+        <p>
+          Paragraph 1: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 2: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 3: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 4: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 5: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 6: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 7: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+        <p>
+          Paragraph 8: ABC abc 123 日本語。 Columns must follow the inline
+          direction.
+        </p>
+      </div>
+    </section>
+    <section>
+      <h1>Table with repeating header</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Header</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Row 1</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 2</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 3</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 4</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 5</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 6</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 7</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 8</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 9</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 10</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 11</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 12</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 13</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+          <tr>
+            <td>Row 14</td>
+            <td>ABC abc 123 日本語。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h1>Footnote and page float</h1>
+      <div class="page-float">PAGE FLOAT</div>
+      <p>
+        Text with a footnote<span class="note"
+          >Footnote: place this at the block-end side, after the page
+          float.</span
+        >. Both the footnote and the blue float must fit inside the page area.
+      </p>
+    </section>
+  </body>
+</html>

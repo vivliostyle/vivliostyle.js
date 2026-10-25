@@ -570,7 +570,8 @@ Vivliostyle supports CSS multi-column layout, but the behavior differs depending
 - [text-combine-upright](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-combine-upright)
 - [text-orientation](https://www.w3.org/TR/css-writing-modes-3/#propdef-text-orientation)
 - [unicode-bidi](https://www.w3.org/TR/css-writing-modes-3/#propdef-unicode-bidi)
-- [writing-mode](https://www.w3.org/TR/css-writing-modes-3/#propdef-writing-mode)
+- [writing-mode](https://www.w3.org/TR/css-writing-modes-4/#propdef-writing-mode)
+  - Supports `horizontal-tb`, `vertical-rl`, `vertical-lr`, `sideways-rl`, and `sideways-lr`.
 
 ### [CSS Flexible Box 1](https://www.w3.org/TR/css-flexbox-1/)
 

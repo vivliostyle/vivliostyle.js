@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- Test case for Issue #1480: pagination in sideways-lr. -->
+<html lang="en" style="writing-mode: sideways-lr">
+  <meta charset="utf-8" />
+  <title>Pagination in sideways-lr (Issue #1480)</title>
+  <style>
+    @page {
+      size: 360px 300px;
+      margin: 30px;
+      @bottom-center {
+        content: counter(page);
+        writing-mode: horizontal-tb;
+      }
+    }
+    body {
+      margin: 0;
+      font: 16px/20px sans-serif;
+    }
+    p {
+      margin: 0;
+      padding: 0;
+      border-block-start: 2px solid teal;
+    }
+  </style>
+  <body>
+    <p data-sequence="1">
+      Paragraph 01: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="2">
+      Paragraph 02: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="3">
+      Paragraph 03: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="4">
+      Paragraph 04: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="5">
+      Paragraph 05: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="6">
+      Paragraph 06: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="7">
+      Paragraph 07: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="8">
+      Paragraph 08: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="9">
+      Paragraph 09: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="10">
+      Paragraph 10: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="11">
+      Paragraph 11: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+    <p data-sequence="12">
+      Paragraph 12: ABC abc 123 日本語。 This text must remain in order and
+      inside the page area.
+    </p>
+  </body>
+</html>

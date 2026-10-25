@@ -917,7 +917,7 @@ export namespace RepetitiveElement {
     getRootNodeContext(
       nodeContext: Vtree.NodeContext,
     ): Vtree.NodeContext | null;
-    initializeRepetitiveElements(vertical: boolean): void;
+    initializeRepetitiveElements(writingMode: boolean | string): void;
   }
 
   export function isInstanceOfRepetitiveElementsOwnerFormattingContext(
@@ -1240,12 +1240,14 @@ export namespace Vtree {
     originY: number;
     snapWidth: number;
     snapHeight: number;
+    writingMode?: string;
     vertical: boolean; // vertical writing
     rtl: boolean;
     borderBoxSizing: boolean;
   }
 
   export interface Container extends ContainerGeometry {
+    writingMode: string;
     exclusions: GeometryUtil.Shape[] | null;
     innerShape: GeometryUtil.Shape | null;
     computedBlockSize: number;
@@ -1360,6 +1362,7 @@ export namespace Vtree {
     viewNode: Element | Text | null;
     clearSpacer: Element | null;
     inheritedProps: { [key: string]: number | string | Css.Val | undefined };
+    writingMode: string;
     vertical: boolean;
     direction: string;
     firstPseudo: FirstPseudo | null;

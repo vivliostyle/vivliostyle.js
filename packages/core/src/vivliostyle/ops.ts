@@ -2184,7 +2184,7 @@ export class StyleInstance
           let columnBoxHeight: number;
           if (layoutContainer.vertical) {
             const columnY =
-              (layoutContainer.rtl
+              (layoutContainer.getInlineDir() < 0
                 ? columnCount - currentColumnIndex - 1
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
@@ -2197,7 +2197,7 @@ export class StyleInstance
             columnBoxHeight = columnWidth;
           } else {
             const columnX =
-              (layoutContainer.rtl
+              (layoutContainer.getInlineDir() < 0
                 ? columnCount - currentColumnIndex - 1
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
@@ -2217,6 +2217,7 @@ export class StyleInstance
             layoutConstraint,
             columnPageFloatLayoutContext,
             {
+              writingMode: layoutContainer.writingMode,
               vertical: layoutContainer.vertical,
               rtl: layoutContainer.rtl,
               snapWidth: layoutContainer.snapWidth,
@@ -2579,6 +2580,7 @@ export class StyleInstance
     }
 
     const container = new Vtree.Container(boxContainer);
+    container.writingMode = boxInstance.writingMode;
     container.vertical = boxInstance.vertical;
     container.rtl = boxInstance.rtl;
     container.borderBoxSizing = boxInstance.borderBoxSizing;

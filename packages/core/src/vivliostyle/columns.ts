@@ -172,7 +172,8 @@ export abstract class ColumnBalancer {
         ) {
           // Preserve the right edge (block-start) while reducing width
           const rightEdge = cssLeft + cssWidth;
-          const newLeft = rightEdge - maxComputedBlockSize;
+          const newLeft =
+            column.getBoxDir() < 0 ? rightEdge - maxComputedBlockSize : cssLeft;
           Base.setCSSProperty(
             column.element,
             "width",

@@ -40,7 +40,10 @@ export function resolvePageProgression(
   const direction = (style["direction"] as CssCascade.CascadeValue)?.value;
   if (
     writingMode === Css.ident.vertical_lr ||
-    (writingMode !== Css.ident.vertical_rl && direction !== Css.ident.rtl)
+    writingMode === Css.ident.sideways_lr ||
+    (writingMode !== Css.ident.vertical_rl &&
+      writingMode !== Css.ident.sideways_rl &&
+      direction !== Css.ident.rtl)
   ) {
     return Constants.PageProgression.LTR;
   } else {

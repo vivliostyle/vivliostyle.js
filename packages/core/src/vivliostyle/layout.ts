@@ -32,6 +32,7 @@ import * as Base from "./base";
 import * as BreakPosition from "./break-position";
 import * as CssCascade from "./css-cascade";
 import * as Css from "./css";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as GeometryUtil from "./geometry-util";
 import * as LayoutHelper from "./layout-helper";
 import * as RubyEmphasis from "./ruby-emphasis";
@@ -511,7 +512,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   getTopEdge(): number {
     return this.vertical
-      ? this.rtl
+      ? this.getInlineDir() < 0
         ? this.endEdge
         : this.startEdge
       : this.beforeEdge;
@@ -519,7 +520,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   getBottomEdge(): number {
     return this.vertical
-      ? this.rtl
+      ? this.getInlineDir() < 0
         ? this.startEdge
         : this.endEdge
       : this.afterEdge;
@@ -527,7 +528,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   getLeftEdge(): number {
     return this.vertical
-      ? this.afterEdge
+      ? this.getBoxDir() < 0
+        ? this.afterEdge
+        : this.beforeEdge
       : this.rtl
         ? this.endEdge
         : this.startEdge;
@@ -535,7 +538,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   getRightEdge(): number {
     return this.vertical
-      ? this.beforeEdge
+      ? this.getBoxDir() < 0
+        ? this.beforeEdge
+        : this.afterEdge
       : this.rtl
         ? this.startEdge
         : this.endEdge;
@@ -601,7 +606,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return false;
     }
 
-    if (this.vertical) {
+    if (this.getBoxDir() < 0) {
       return edge < this.footnoteEdge;
     } else {
       return edge > this.footnoteEdge;
@@ -757,7 +762,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             // the browser's column breaking.
             const columnOver = LayoutHelper.checkIfBeyondColumnBreaks(
               rect,
-              this.vertical,
+              this.writingMode,
             );
             if (columnOver >= 2) {
               // When the box position is beyond two or more column breaks,
@@ -955,6 +960,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @param height float box progression dimension.
    * @return newly created float element.
    */
+  // Geometry bands use top-to-bottom coordinates for the vertical inline
+  // axis. In sideways-lr CSS float:left is at the bottom (line-left).
+  private floatSideInGeometry(side: string): string {
+    return this.writingMode === "sideways-lr"
+      ? side === "left"
+        ? "right"
+        : side === "right"
+          ? "left"
+          : side
+      : side;
+  }
+
   createFloat(
     ref: Node | null,
     side: string,
@@ -981,8 +998,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Base.setCSSProperty(div, "width", `${width}px`);
       Base.setCSSProperty(div, "height", `${height}px`);
     }
-    Base.setCSSProperty(div, "float", side);
-    Base.setCSSProperty(div, "clear", side);
+    Base.setCSSProperty(div, "float", this.floatSideInGeometry(side));
+    Base.setCSSProperty(div, "clear", this.floatSideInGeometry(side));
 
     // enable to visualize
     // Base.setCSSProperty(div, "background-color", "#50F0FF");
@@ -1018,8 +1035,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const bands = this.bands;
     const x1 = this.vertical ? this.getTopEdge() : this.getLeftEdge();
     const x2 = this.vertical ? this.getBottomEdge() : this.getRightEdge();
-    const y1 = this.vertical ? -this.getRightEdge() : this.getTopEdge();
-    const y2 = this.vertical ? -this.getLeftEdge() : this.getBottomEdge();
+    const y1 = this.getBoxDir() * this.beforeEdge;
+    const y2 = this.getBoxDir() * this.afterEdge;
     let foundNonZeroWidthBand: GeometryUtil.Band | null = null;
 
     // First pass: adjust band edges to column edges if they are almost equal
@@ -1167,9 +1184,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         foundNonZeroWidthBand !== lastBand &&
         (lastBand.y2 >= y2 || this.almostEquals(lastBand.y2, y2, y2Precision))
       ) {
-        this.footnoteEdge = this.vertical
-          ? -foundNonZeroWidthBand.y2
-          : foundNonZeroWidthBand.y2;
+        this.footnoteEdge = this.getBoxDir() * foundNonZeroWidthBand.y2;
 
         // Remove unnecessary floats that may cause layout issues
         // (Fix for issue #1662; Partial fix for issue #1490)
@@ -1222,7 +1237,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     ) {
       const sizeProp = this.vertical ? "width" : "height";
       Base.setCSSProperty(this.element, sizeProp, `${blockSize}px`);
-      if (this.vertical) {
+      if (this.getBoxDir() < 0) {
         const left = this.left + (initialBlockSize - blockSize);
         Base.setCSSProperty(this.element, "left", `${left}px`);
       }
@@ -1254,7 +1269,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext,
         this.clientLayout,
         0,
-        this.vertical,
+        this.writingMode,
       );
       if (!isNaN(edge)) {
         return edge;
@@ -1267,7 +1282,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext,
         this.clientLayout,
         offset,
-        this.vertical,
+        this.writingMode,
       );
       if (!isNaN(edge)) {
         return edge;
@@ -1422,11 +1437,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     const frame: Task.Frame<Vtree.NodeContext | null> =
       Task.newFrame("layoutFloat");
     const element = nodeContext.viewNode as Element;
-    const floatSide = PageFloats.resolveInlineFloatDirection(
-      nodeContext.floatSide,
-      nodeContext.vertical,
-      nodeContext.direction,
-      (this.layoutContext as Vgen.ViewFactory).page.side,
+    const floatSide = this.floatSideInGeometry(
+      PageFloats.resolveInlineFloatDirection(
+        nodeContext.floatSide,
+        nodeContext.writingMode,
+        nodeContext.direction,
+        (this.layoutContext as Vgen.ViewFactory).page.side,
+      ),
     );
     Base.setCSSProperty(element, "float", "none");
     Base.setCSSProperty(element, "display", "inline-block");
@@ -1435,7 +1452,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const floatBBox = LayoutHelper.getElementClientRectAdjusted(
         this.clientLayout,
         element,
-        this.vertical,
+        this.writingMode,
       );
       const margin = this.getComputedMargin(element);
       let floatBox = new GeometryUtil.Rect(
@@ -1444,8 +1461,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatBBox.right + margin.right,
         floatBBox.bottom + margin.bottom,
       );
-      let x1 = this.rtl ? this.endEdge : this.startEdge;
-      let x2 = this.rtl ? this.startEdge : this.endEdge;
+      let x1 = this.getInlineDir() < 0 ? this.endEdge : this.startEdge;
+      let x2 = this.getInlineDir() < 0 ? this.startEdge : this.endEdge;
       let parent = nodeContext.parent;
       while (parent && parent.inline) {
         parent = parent.parent;
@@ -1471,14 +1488,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         const parentBox = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           probe,
-          this.vertical,
+          this.writingMode,
         );
         x1 = Math.max(
-          this.rtl ? this.getEndEdge(parentBox) : this.getStartEdge(parentBox),
+          this.getInlineDir() < 0
+            ? this.getEndEdge(parentBox)
+            : this.getStartEdge(parentBox),
           x1,
         );
         x2 = Math.min(
-          this.rtl ? this.getStartEdge(parentBox) : this.getEndEdge(parentBox),
+          this.getInlineDir() < 0
+            ? this.getStartEdge(parentBox)
+            : this.getEndEdge(parentBox),
           x2,
         );
         parentViewNode.removeChild(probe);
@@ -1516,7 +1537,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       );
       let floatHorBox = floatBox;
       if (this.vertical) {
-        floatHorBox = GeometryUtil.rotateBox(floatBox);
+        floatHorBox = GeometryUtil.rotateBox(floatBox, this.getBoxDir());
       }
       const dir = this.getBoxDir();
       if (floatHorBox.y1 < this.bottommostFloatTop * dir) {
@@ -1527,19 +1548,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
       // Handle clear property on inline floats (Issue #1803)
       if (nodeContext.clearSide) {
-        const clearLR =
+        const clearLR = this.floatSideInGeometry(
           /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(
             nodeContext.clearSide,
           )
             ? PageFloats.resolveInlineFloatDirection(
                 nodeContext.clearSide,
-                nodeContext.vertical,
+                nodeContext.writingMode,
                 nodeContext.direction,
                 (this.layoutContext as Vgen.ViewFactory).page.side,
               )
             : nodeContext.clearSide === "same"
-              ? floatSide
-              : nodeContext.clearSide;
+              ? this.floatSideInGeometry(floatSide)
+              : nodeContext.clearSide,
+        );
         let clearEdge = this.beforeEdge;
         if (clearLR !== "right") {
           clearEdge = dir * Math.max(clearEdge * dir, this.leftFloatEdge * dir);
@@ -1565,7 +1587,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
       GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
       if (this.vertical) {
-        floatBox = GeometryUtil.unrotateBox(floatHorBox);
+        floatBox = GeometryUtil.unrotateBox(floatHorBox, this.getBoxDir());
       }
       const insets = this.getComputedInsets(element);
       Base.setCSSProperty(
@@ -1592,7 +1614,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         const probe =
           containingBlockViewNode.ownerDocument.createElement("div");
         probe.style.position = "absolute";
-        if (containingBlockForAbsolute.vertical) {
+        if (
+          CssLogicalUtil.isBlockReversed(containingBlockForAbsolute.writingMode)
+        ) {
           probe.style.right = "0";
         } else {
           probe.style.left = "0";
@@ -1602,7 +1626,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         offsets = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           probe,
-          this.vertical,
+          this.writingMode,
         );
         containingBlockViewNode.removeChild(probe);
       } else {
@@ -1620,8 +1644,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // the float stays inside the containing block. (Issue #1885)
       if (
         containingBlockForAbsolute
-          ? containingBlockForAbsolute.vertical
-          : this.vertical
+          ? CssLogicalUtil.isBlockReversed(
+              containingBlockForAbsolute.writingMode,
+            )
+          : this.getBoxDir() < 0
       ) {
         const rightValue = Math.max(0, offsets.right - floatBox.x2);
         Base.setCSSProperty(element, "right", `${rightValue}px`);
@@ -1635,8 +1661,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext.clearSpacer.remove();
         nodeContext.clearSpacer = null;
       }
-      const floatBoxEdge = this.vertical ? floatBox.x1 : floatBox.y2;
-      const floatBoxTop = this.vertical ? floatBox.x2 : floatBox.y1;
+      const floatBoxEdge = this.vertical
+        ? this.getBoxDir() < 0
+          ? floatBox.x1
+          : floatBox.x2
+        : floatBox.y2;
+      const floatBoxTop = this.vertical
+        ? this.getBoxDir() < 0
+          ? floatBox.x2
+          : floatBox.x1
+        : floatBox.y1;
 
       // TODO: subtract after margin when determining overflow.
       if (!this.isOverflown(floatBoxEdge) || this.breakPositions.length == 0) {
@@ -1649,7 +1683,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           this.getBottomEdge(),
         );
         if (this.vertical) {
-          box = GeometryUtil.rotateBox(box);
+          box = GeometryUtil.rotateBox(box, this.getBoxDir());
         }
         GeometryUtil.addFloatToBands(
           box,
@@ -1785,6 +1819,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       pageFloatLayoutContext,
       parentContainer,
       {
+        writingMode: floatContainer.writingMode,
         vertical: floatContainer.vertical,
         rtl: floatContainer.rtl,
         snapWidth: 0,
@@ -2397,10 +2432,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           const rect = LayoutHelper.getElementClientRectAdjusted(
             this.clientLayout,
             viewNode as Element,
-            this.vertical,
+            this.writingMode,
           );
           if (rect.right >= rect.left && rect.bottom >= rect.top) {
-            return this.vertical ? rect.left : rect.bottom;
+            return this.getAfterEdge(rect);
           }
           return NaN;
         };
@@ -2408,7 +2443,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           nodeContextAfter,
           this.clientLayout,
           0,
-          this.vertical,
+          this.writingMode,
         );
         if (nodeContext.floatSide === "footnote") {
           const footnote = float as Footnote;
@@ -2653,7 +2688,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         break;
       }
       const margin = this.getComputedMargin(nodeContext.viewNode as Element);
-      const m = this.vertical ? -margin.left : margin.bottom;
+      const m = this.vertical
+        ? this.getBoxDir() * (this.getBoxDir() < 0 ? margin.left : margin.right)
+        : margin.bottom;
       if (m > 0) {
         maxPos = Math.max(maxPos, m);
       } else {
@@ -2730,12 +2767,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 this.collectElementsOffset(),
               );
               overflown = this.isOverflown(
-                edge + (this.vertical ? -1 : 1) * offsets.minimum,
+                edge + this.getBoxDir() * offsets.minimum,
               );
               if (
-                this.isOverflown(
-                  edge + (this.vertical ? -1 : 1) * offsets.current,
-                ) &&
+                this.isOverflown(edge + this.getBoxDir() * offsets.current) &&
                 !this.nodeContextOverflowingDueToRepetitiveElements
               ) {
                 this.nodeContextOverflowingDueToRepetitiveElements =
@@ -2807,9 +2842,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // Workaround for Blink not returning correct fractional values for
     // Range.getClientRects.
     // https://bugs.chromium.org/p/chromium/issues/detail?id=629828
-    const effectiveLinePosition = this.vertical
-      ? linePosition - 1
-      : linePosition + 1;
+    const effectiveLinePosition = linePosition + this.getBoxDir();
 
     // find the first character which is out
     let lowCP = 0;
@@ -2833,11 +2866,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         }
       }
       const edge = this.calculateEdge(null, checkPoints, low1, mid);
-      if (
-        this.vertical
-          ? edge <= effectiveLinePosition
-          : edge >= effectiveLinePosition
-      ) {
+      if (this.getBoxDir() * edge >= this.getBoxDir() * effectiveLinePosition) {
         high = mid - 1;
         while (checkPoints[low1].boxOffset == mid) {
           low1--;
@@ -3037,12 +3066,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // Adjust the rects' positions for column breaking, like the other
           // measured boxes, so that the synthetic column offsets of the
           // browser's multi-column layout are normalized. (Issue #2163)
-          LayoutHelper.adjustRectsForColumnBreaking(rects, this.vertical);
+          LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
           LayoutHelper.adjustInlineRectsForLineHeight(
             rects,
             element,
             this.clientLayout,
-            this.vertical,
+            this.writingMode,
           );
           elementBoxes.push({ element, rects });
         }
@@ -3087,7 +3116,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
 
     // Adjust boxes' positions for column breaking
-    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.vertical);
+    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.writingMode);
 
     // Measure the line box instead of the glyph box. (Issue #2163)
     LayoutHelper.adjustTextRectsForLineHeight(
@@ -3115,21 +3144,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     );
 
     // Adjust boxes' positions for column breaking
-    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.vertical);
+    LayoutHelper.adjustRectsForColumnBreaking(boxes, this.writingMode);
 
     if (node.nodeType === 1 && (node as Element).localName !== "br") {
       LayoutHelper.adjustInlineRectsForLineHeight(
         boxes,
         node as Element,
         this.clientLayout,
-        this.vertical,
+        this.writingMode,
       );
       if (Base.browserType === "webkit") {
         RubyEmphasis.includeRubyBaseInLineRects(
           boxes,
           node as Element,
           this.clientLayout,
-          this.vertical,
+          this.writingMode,
         );
       }
     }
@@ -3153,9 +3182,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       checkPoints.at(-1).viewNode,
     );
     boxes.sort(
-      this.vertical
-        ? VtreeImpl.clientrectDecreasingRight
-        : VtreeImpl.clientrectIncreasingTop,
+      (a, b) =>
+        this.getBoxDir() * (this.getBeforeEdge(a) - this.getBeforeEdge(b)),
     );
     let lineBefore = 0;
     let lineAfter = 0;
@@ -3184,7 +3212,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         if (
           lineLength == 0 ||
           overlap >= MID_OVERLAP ||
-          (overlap >= LOW_OVERLAP && this.getStartEdge(box) >= lineEnd - 1)
+          (overlap >= LOW_OVERLAP &&
+            this.getInlineDir() * (this.getStartEdge(box) - lineEnd) >= -1)
         ) {
           lineEnd = this.getEndEdge(box);
           // A box without inline extent (e.g. `<br>`) does not contain any
@@ -3200,24 +3229,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             lineLength > 0 &&
             this.getInlineSize(box) === 0 &&
             this.getBoxSize(box) > 0;
-          if (this.vertical) {
-            lineBoxAfter =
-              lineLength == 0 ? box.left : Math.min(lineBoxAfter, box.left);
-            if (!isLineBreakMarker) {
-              lineBefore =
-                lineLength == 0 ? box.right : Math.max(lineBefore, box.right);
-              lineAfter =
-                lineLength == 0 ? box.left : Math.min(lineAfter, box.left);
-            }
-          } else {
-            lineBoxAfter =
-              lineLength == 0 ? box.bottom : Math.max(lineBoxAfter, box.bottom);
-            if (!isLineBreakMarker) {
-              lineBefore =
-                lineLength == 0 ? box.top : Math.min(lineBefore, box.top);
-              lineAfter =
-                lineLength == 0 ? box.bottom : Math.max(lineAfter, box.bottom);
-            }
+          lineBoxAfter =
+            lineLength === 0
+              ? this.getAfterEdge(box)
+              : dir *
+                Math.max(dir * lineBoxAfter, dir * this.getAfterEdge(box));
+          if (!isLineBreakMarker) {
+            lineBefore =
+              lineLength === 0
+                ? this.getBeforeEdge(box)
+                : dir *
+                  Math.min(dir * lineBefore, dir * this.getBeforeEdge(box));
+            lineAfter =
+              lineLength === 0
+                ? this.getAfterEdge(box)
+                : dir * Math.max(dir * lineAfter, dir * this.getAfterEdge(box));
           }
           lineLength++;
           i++;
@@ -3235,7 +3261,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
     positions.sort(Base.numberCompare);
-    if (this.vertical) {
+    if (this.getBoxDir() < 0) {
       positions.reverse();
     }
     return positions;
@@ -3251,11 +3277,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         const paddingBorders = this.getComputedPaddingBorder(
           nc.viewNode as Element,
         );
+        const dir = CssLogicalUtil.isBlockReversed(nc.writingMode) ? -1 : 1;
         clonedPaddingBorder += nc.vertical
-          ? -paddingBorders.left
+          ? dir * (dir < 0 ? paddingBorders.left : paddingBorders.right)
           : paddingBorders.bottom;
         if (nc.display === "table") {
-          clonedPaddingBorder += (nc.vertical ? -1 : 1) * nc.blockBorderSpacing;
+          clonedPaddingBorder +=
+            (CssLogicalUtil.isBlockReversed(nc.writingMode) ? -1 : 1) *
+            nc.blockBorderSpacing;
         }
       }
     }
@@ -3334,7 +3363,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     let lineIndex = Base.binarySearch(linePositions.length, (i) => {
       const p = linePositions[i];
-      return this.vertical
+      return this.getBoxDir() < 0
         ? p < edge || p <= firstOverflowing.edge
         : p > edge || p >= firstOverflowing.edge;
     });
@@ -3344,8 +3373,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // line just before it.
     const forceCutBeforeOverflowing = lineIndex <= 0;
     if (forceCutBeforeOverflowing) {
-      lineIndex = Base.binarySearch(linePositions.length, (i) =>
-        this.vertical ? linePositions[i] < edge : linePositions[i] > edge,
+      lineIndex = Base.binarySearch(
+        linePositions.length,
+        (i) => this.getBoxDir() * linePositions[i] > this.getBoxDir() * edge,
       );
     }
 
@@ -3419,7 +3449,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         blockParent,
         this.clientLayout,
         0,
-        this.vertical,
+        this.writingMode,
       );
     } else {
       return NaN;
@@ -3584,17 +3614,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Handles both horizontal and vertical writing modes.
    */
   hasNonZeroBlockStartInset(style: CSSStyleDeclaration): boolean {
-    if (this.vertical) {
-      return !(
-        this.isZeroLength(style.paddingRight) &&
-        this.isZeroLength(style.borderRightWidth)
-      );
-    } else {
-      return !(
-        this.isZeroLength(style.paddingTop) &&
-        this.isZeroLength(style.borderTopWidth)
-      );
-    }
+    return !(
+      this.isZeroLength(
+        style.getPropertyValue(
+          `padding-${CssLogicalUtil.toPhysical("block-start", this.writingMode)}`,
+        ),
+      ) &&
+      this.isZeroLength(
+        style.getPropertyValue(
+          `border-${CssLogicalUtil.toPhysical("block-start", this.writingMode)}-width`,
+        ),
+      )
+    );
   }
 
   /**
@@ -3602,17 +3633,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Handles both horizontal and vertical writing modes.
    */
   hasNonZeroBlockEndInset(style: CSSStyleDeclaration): boolean {
-    if (this.vertical) {
-      return !(
-        this.isZeroLength(style.paddingLeft) &&
-        this.isZeroLength(style.borderLeftWidth)
-      );
-    } else {
-      return !(
-        this.isZeroLength(style.paddingBottom) &&
-        this.isZeroLength(style.borderBottomWidth)
-      );
-    }
+    return !(
+      this.isZeroLength(
+        style.getPropertyValue(
+          `padding-${CssLogicalUtil.toPhysical("block-end", this.writingMode)}`,
+        ),
+      ) &&
+      this.isZeroLength(
+        style.getPropertyValue(
+          `border-${CssLogicalUtil.toPhysical("block-end", this.writingMode)}-width`,
+        ),
+      )
+    );
   }
 
   /**
@@ -3727,7 +3759,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         nodeContext,
         this.clientLayout,
         0,
-        this.vertical,
+        this.writingMode,
       ),
     );
     const offsets = BreakPosition.calculateOffset(
@@ -3735,10 +3767,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.collectElementsOffset(),
     );
     const overflown = this.isOverflown(
-      edge + (this.vertical ? -1 : 1) * offsets.minimum,
+      edge + this.getBoxDir() * offsets.minimum,
     );
     if (
-      this.isOverflown(edge + (this.vertical ? -1 : 1) * offsets.current) &&
+      this.isOverflown(edge + this.getBoxDir() * offsets.current) &&
       !this.nodeContextOverflowingDueToRepetitiveElements
     ) {
       this.nodeContextOverflowingDueToRepetitiveElements = nodeContext;
@@ -3749,9 +3781,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         edge + this.getTrailingMarginEdgeAdjustment(trailingEdgeContexts);
       const footnoteEdge =
         this.footnoteEdge - this.getBoxDir() * offsets.current;
-      edge = this.vertical
-        ? Math.min(edge, Math.max(marginEdge, footnoteEdge))
-        : Math.max(edge, Math.min(marginEdge, footnoteEdge));
+      edge =
+        this.getBoxDir() < 0
+          ? Math.min(edge, Math.max(marginEdge, footnoteEdge))
+          : Math.max(edge, Math.min(marginEdge, footnoteEdge));
     }
     this.updateMaxReachedAfterEdge(edge);
     return overflown;
@@ -3809,7 +3842,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (this.vertical) {
       spacer.style.bottom = "0px";
       spacer.style.width = "1px";
-      spacer.style.marginRight = `${margin.right}px`;
+      spacer.style.setProperty(
+        `margin-${CssLogicalUtil.toPhysical("block-start", this.writingMode)}`,
+        `${this.getBoxDir() < 0 ? margin.right : margin.left}px`,
+      );
     } else {
       spacer.style.right = "0px";
       spacer.style.height = "1px";
@@ -3821,7 +3857,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         : LayoutHelper.getElementClientRectAdjusted(
             this.clientLayout,
             spacer,
-            this.vertical,
+            this.writingMode,
           );
     nodeContext.viewNode.parentNode.insertBefore(spacer, nodeContext.viewNode);
     // Use raw spacer geometry for page/column/region clears. Browser
@@ -3830,19 +3866,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let spacerBox = getSpacerBox();
     const edge = this.getBeforeEdge(spacerBox);
     const dir = this.getBoxDir();
-    const clearLR =
+    const clearLR = this.floatSideInGeometry(
       /^(top|bottom|inside|outside|(block|inline)-(start|end))$/.test(clear)
         ? PageFloats.resolveInlineFloatDirection(
             clear,
-            nodeContext.vertical,
+            nodeContext.writingMode,
             nodeContext.direction,
             (this.layoutContext as Vgen.ViewFactory).page.side,
           )
-        : clear;
+        : clear,
+    );
 
     const clearLogical =
       clearLR === "left" || clearLR === "right"
-        ? (nodeContext.direction === "rtl") === (clearLR === "left")
+        ? this.getInlineDir() < 0 === (clearLR === "left")
           ? "inline-end"
           : "inline-start"
         : clearLR;
@@ -3920,12 +3957,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const afterEdge = this.getAfterEdge(spacerBox);
       if (!nodeContext.floatSide) {
         if (this.vertical) {
-          let wAdj = afterEdge - margin.right - clearEdge;
-          if (wAdj > 0 == margin.right >= 0) {
+          const marginBefore = dir < 0 ? margin.right : margin.left;
+          let wAdj = dir * (clearEdge - afterEdge) - marginBefore;
+          if (wAdj > 0 == marginBefore >= 0) {
             // In addition to collapsed portion
-            wAdj += margin.right;
+            wAdj += marginBefore;
           }
-          spacer.style.marginLeft = `${wAdj}px`;
+          spacer.style.setProperty(
+            `margin-${CssLogicalUtil.toPhysical("block-end", this.writingMode)}`,
+            `${wAdj}px`,
+          );
         } else {
           let hAdj = clearEdge - (afterEdge + margin.top);
           if (hAdj > 0 == margin.top >= 0) {
@@ -4885,34 +4926,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       offsetX + this.width,
       offsetY + this.height,
     );
-    this.startEdge = columnBBox
-      ? this.vertical
-        ? this.rtl
-          ? columnBBox.bottom
-          : columnBBox.top
-        : this.rtl
-          ? columnBBox.right
-          : columnBBox.left
-      : 0;
-    this.endEdge = columnBBox
-      ? this.vertical
-        ? this.rtl
-          ? columnBBox.top
-          : columnBBox.bottom
-        : this.rtl
-          ? columnBBox.left
-          : columnBBox.right
-      : 0;
-    this.beforeEdge = columnBBox
-      ? this.vertical
-        ? columnBBox.right
-        : columnBBox.top
-      : 0;
-    this.afterEdge = columnBBox
-      ? this.vertical
-        ? columnBBox.left
-        : columnBBox.bottom
-      : 0;
+    this.startEdge = columnBBox ? this.getStartEdge(columnBBox) : 0;
+    this.endEdge = columnBBox ? this.getEndEdge(columnBBox) : 0;
+    this.beforeEdge = columnBBox ? this.getBeforeEdge(columnBBox) : 0;
+    this.afterEdge = columnBBox ? this.getAfterEdge(columnBBox) : 0;
     this.leftFloatEdge = this.beforeEdge;
     this.rightFloatEdge = this.beforeEdge;
     this.bottommostFloatTop = this.beforeEdge;
@@ -4924,6 +4941,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       8,
       this.snapHeight,
       this.vertical,
+      this.getBoxDir(),
     );
   }
 
@@ -5798,21 +5816,23 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     }
     this.floatMargins.push(this.getComputedMargin(rootViewNode));
     if (this.adjustContentRelativeSize) {
-      const floatSide = this.floatSide;
-      const isVertical = this.parentContainer.vertical;
-      if (isVertical) {
-        if (floatSide === "block-end" || floatSide === "left") {
-          const height = Base.getCSSProperty(rootViewNode, "height");
-          if (height !== "" && height !== "auto") {
-            Base.setCSSProperty(rootViewNode, "margin-top", "auto");
-          }
-        }
-      } else {
-        if (floatSide === "block-end" || floatSide === "bottom") {
-          const width = Base.getCSSProperty(rootViewNode, "width");
-          if (width !== "" && width !== "auto") {
-            Base.setCSSProperty(rootViewNode, "margin-left", "auto");
-          }
+      const container = this.parentContainer;
+      const blockEnd = CssLogicalUtil.toPhysical(
+        "block-end",
+        container.writingMode,
+      );
+      if (this.floatSide === "block-end" || this.floatSide === blockEnd) {
+        const inlineSize = Base.getCSSProperty(
+          rootViewNode,
+          container.vertical ? "height" : "width",
+        );
+        if (inlineSize !== "" && inlineSize !== "auto") {
+          const inlineStart = CssLogicalUtil.toPhysical(
+            "inline-start",
+            container.writingMode,
+            container.rtl ? "rtl" : "ltr",
+          );
+          Base.setCSSProperty(rootViewNode, `margin-${inlineStart}`, "auto");
         }
       }
     }
@@ -5871,7 +5891,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         const box = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           r,
-          this.vertical,
+          this.writingMode,
         );
         const margin = this.floatMargins[i];
         return this.vertical
@@ -5888,7 +5908,11 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     return Math.max(
       ...this.rootViewNodes.map((r, i) => {
         const margin = this.floatMargins[i];
-        return this.vertical ? margin.left : margin.bottom;
+        return this.vertical
+          ? this.getBoxDir() < 0
+            ? margin.left
+            : margin.right
+          : margin.bottom;
       }),
     );
   }
@@ -5982,10 +6006,12 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
       const areaBox = LayoutHelper.getElementClientRectAdjusted(
         this.clientLayout,
         this.element,
-        this.vertical,
+        this.writingMode,
       );
       const contentInsetBefore = this.vertical
-        ? this.borderRight + this.paddingRight
+        ? dir < 0
+          ? this.borderRight + this.paddingRight
+          : this.borderLeft + this.paddingLeft
         : this.borderTop + this.paddingTop;
       // getBoundingClientRect() gives the border box; adding margins here
       // would shrink computedBlockSize and let footnotes protrude below the
@@ -5999,10 +6025,14 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
         const box = LayoutHelper.getElementClientRectAdjusted(
           this.clientLayout,
           node,
-          this.vertical,
+          this.writingMode,
         );
         const margin = this.getComputedMargin(node);
-        const marginAfter = this.vertical ? margin.left : margin.bottom;
+        const marginAfter = this.vertical
+          ? this.getBoxDir() < 0
+            ? margin.left
+            : margin.right
+          : margin.bottom;
         return (
           dir * (this.getAfterEdge(box) - contentBeforeEdge) +
           Math.max(0, marginAfter)

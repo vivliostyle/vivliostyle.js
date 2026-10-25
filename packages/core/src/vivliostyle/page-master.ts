@@ -452,6 +452,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   pageMasterInstance: PageMasterInstance | null = null;
   namedValues: { [key: string]: Exprs.Val } = {};
   namedFuncs: { [key: string]: Exprs.Val } = {};
+  writingMode: string = "horizontal-tb";
   vertical: boolean = false;
   rtl: boolean = false;
   suppressEmptyBoxGeneration: boolean = false;
@@ -563,9 +564,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       } else if (name == "measure") {
         altName = this.vertical ? "height" : "width";
       } else {
-        const map = this.vertical
-          ? CssCascade.couplingMapVert
-          : CssCascade.couplingMapHor;
+        const map = CssCascade.getCouplingMap(this.writingMode, this.rtl);
         altName = name;
         for (const key in map) {
           altName = altName.replace(key, map[key]);
@@ -1001,11 +1000,12 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
         cascMap[name] = cascMap[name].withValue(Css.ident.unset);
       }
     }
-    this.vertical = CssCascade.isVertical(
+    this.writingMode = CssCascade.resolveWritingMode(
       cascMap,
       context,
-      this.parentInstance ? this.parentInstance.vertical : false,
+      this.parentInstance?.writingMode ?? "horizontal-tb",
     );
+    this.vertical = this.writingMode !== "horizontal-tb";
     this.rtl = CssCascade.isRtl(
       cascMap,
       context,
@@ -1021,7 +1021,7 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     CssCascade.convertToPhysical(
       cascMap,
       style,
-      this.vertical,
+      this.writingMode,
       this.rtl,
       isLeftPage,
       (name, cascVal) => cascVal.value,
@@ -1288,7 +1288,9 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     container: Vtree.Container,
   ): void {
     if (this.vertical) {
-      this.assignRightPosition(context, container);
+      if (container.getBoxDir() < 0)
+        this.assignRightPosition(context, container);
+      else this.assignLeftPosition(context, container);
     } else {
       this.assignTopPosition(context, container);
     }
@@ -1299,7 +1301,9 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     container: Vtree.Container,
   ): void {
     if (this.vertical) {
-      this.assignLeftPosition(context, container);
+      if (container.getBoxDir() < 0)
+        this.assignLeftPosition(context, container);
+      else this.assignRightPosition(context, container);
     } else {
       this.assignBottomPosition(context, container);
     }
@@ -1353,12 +1357,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     docFaces: Font.DocumentFaces,
     clientLayout: Vtree.ClientLayout,
   ): void {
-    if (!this.parentInstance || this.vertical != this.parentInstance.vertical) {
-      Base.setCSSProperty(
-        container.element,
-        "writing-mode",
-        this.vertical ? "vertical-rl" : "horizontal-tb",
-      );
+    if (
+      !this.parentInstance ||
+      this.writingMode !== this.parentInstance.writingMode
+    ) {
+      Base.setCSSProperty(container.element, "writing-mode", this.writingMode);
     }
     if (!this.parentInstance || this.rtl != this.parentInstance.rtl) {
       Base.setCSSProperty(
@@ -1636,14 +1639,20 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           const renderedEnd = renderedStart + size;
           const adjustedStart = Math.max(
             renderedStart,
-            isFinite(this.vertical ? blockEndLimit : blockStartLimit)
-              ? Math.max(0, this.vertical ? blockEndLimit : blockStartLimit)
+            isFinite(column.getBoxDir() < 0 ? blockEndLimit : blockStartLimit)
+              ? Math.max(
+                  0,
+                  column.getBoxDir() < 0 ? blockEndLimit : blockStartLimit,
+                )
               : 0,
           );
           const adjustedEnd = Math.min(
             renderedEnd,
-            isFinite(this.vertical ? blockStartLimit : blockEndLimit)
-              ? Math.max(0, this.vertical ? blockStartLimit : blockEndLimit)
+            isFinite(column.getBoxDir() < 0 ? blockStartLimit : blockEndLimit)
+              ? Math.max(
+                  0,
+                  column.getBoxDir() < 0 ? blockStartLimit : blockEndLimit,
+                )
               : renderedEnd,
           );
           const adjustedSize = Math.max(0, adjustedEnd - adjustedStart);

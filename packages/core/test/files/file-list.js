@@ -1016,6 +1016,38 @@ module.exports = [
         title: "writing-mode on @page, vertical root (Issue #2001)",
       },
       {
+        file: "writing-mode-horizontal-tb.html",
+        title: "Pagination in horizontal-tb (Issue #1480)",
+      },
+      {
+        file: "writing-mode-vertical-rl.html",
+        title: "Pagination in vertical-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode-vertical-lr.html",
+        title: "Pagination in vertical-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode-sideways-rl.html",
+        title: "Pagination in sideways-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode-sideways-lr.html",
+        title: "Pagination in sideways-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode-vertical-lr-features.html",
+        title: "Layout features in vertical-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode-sideways-rl-features.html",
+        title: "Layout features in sideways-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode-sideways-lr-features.html",
+        title: "Layout features in sideways-lr (Issue #1480)",
+      },
+      {
         file: "writing-mode-body-page-context.html",
         title:
           "writing-mode on body not inherited by page context (Issue #1122)",
