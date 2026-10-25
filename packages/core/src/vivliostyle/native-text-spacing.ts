@@ -30,6 +30,10 @@ type AutospaceSupport = {
   // The spacing is inserted at an element boundary if it is enabled on the
   // following side, even if not on the preceding side (Firefox)
   boundaryByFollowingSide: boolean;
+  // The spacing is inserted at an element boundary if it is enabled on the
+  // innermost element containing the boundary, even if not on either side
+  // (WebKit)
+  boundaryByContainer: boolean;
   // In vertical text, the spacing is not inserted next to upright characters
   // (WebKit inserts it)
   vertical: boolean;
@@ -58,6 +62,7 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       inText: false,
       acrossTextNodes: false,
       boundaryByFollowingSide: false,
+      boundaryByContainer: false,
       vertical: false,
     };
   }
@@ -67,29 +72,44 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
     "font:100px/1 serif;white-space:pre;text-spacing-trim:space-all;";
   body.appendChild(probe);
   let vertical = false;
-  // Measure the texts, the second one in an inner element with the style if
-  // given
-  const measure = (texts: string[], value: string, inner?: string): number => {
+  // Measure the texts, those at the indexes (the second one by default) in
+  // inner elements with the style if given
+  const measure = (
+    texts: string[],
+    value: string,
+    inner?: string,
+    indexes = [1],
+  ): number => {
     const elem = document.createElement("span");
     elem.style.setProperty("text-autospace", value);
-    elem.append(...texts);
-    if (inner) {
-      const innerElem = document.createElement("span");
-      innerElem.style.cssText = inner;
-      innerElem.append(elem.childNodes[1]);
-      elem.insertBefore(innerElem, elem.childNodes[1] ?? null);
-    }
+    elem.append(
+      ...texts.map((text, i) => {
+        if (!inner || !indexes.includes(i)) {
+          return text;
+        }
+        const innerElem = document.createElement("span");
+        innerElem.style.cssText = inner;
+        innerElem.append(text);
+        return innerElem;
+      }),
+    );
     probe.replaceChildren(elem);
     const rect = elem.getBoundingClientRect();
     return vertical ? rect.height : rect.width;
   };
   // The spacing is 1/8 of the ideographic advance (12.5px)
-  const hasSpacing = (texts: string[], value = "normal", inner?: string) =>
-    measure(texts, value, inner) -
+  const hasSpacing = (
+    texts: string[],
+    value = "normal",
+    inner?: string,
+    indexes?: number[],
+  ) =>
+    measure(texts, value, inner, indexes) -
       measure(
         texts,
         "no-autospace",
         inner && `${inner};text-autospace:no-autospace`,
+        indexes,
       ) >
     5;
   result = {
@@ -99,6 +119,12 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       ["日", "a"],
       "no-autospace",
       "text-autospace:normal",
+    ),
+    boundaryByContainer: hasSpacing(
+      ["日", "a"],
+      "normal",
+      "text-autospace:no-autospace",
+      [0, 1],
     ),
     vertical: false,
   };
@@ -148,10 +174,22 @@ export function autospacesAcrossTextNodes(document: Document): boolean {
  * Check if the native text-autospace inserts the spacing at an element
  * boundary if it is enabled on the following side, even if not on the
  * preceding side (Firefox). Otherwise, it does so only if it is enabled on
- * both sides (Chromium), or does not do so (WebKit).
+ * both sides (Chromium), or determines it by the innermost element containing
+ * the boundary (WebKit, see autospacesByContainer()).
  */
 export function autospacesByFollowingSide(document: Document): boolean {
   return getAutospaceSupport(document).boundaryByFollowingSide;
+}
+
+/**
+ * Check if the native text-autospace inserts the spacing at an element
+ * boundary if it is enabled on the innermost element containing the boundary,
+ * even if not on either side (WebKit). WebKit does not insert it at the start
+ * of an element after text, but does at the end of an element before text and
+ * between elements.
+ */
+export function autospacesByContainer(document: Document): boolean {
+  return getAutospaceSupport(document).boundaryByContainer;
 }
 
 const OPENING = "‘“〝（［｛｟\u2329〈《「『【〔〖〘〚";

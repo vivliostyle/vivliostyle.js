@@ -873,6 +873,10 @@ module.exports = [
         file: "text-spacing/text-spacing-trim-all.html",
         title: "text-spacing-trim: trim-all (Issue #2214)",
       },
+      {
+        file: "text-spacing/autospace-margin-border-padding.html",
+        title: "text-autospace across margin, border, or padding (PR #2228)",
+      },
     ],
   },
   {
