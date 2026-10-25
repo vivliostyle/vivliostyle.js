@@ -45,6 +45,9 @@ jobs:
           # Firefox on Ubuntu consistently times out, tested on macOS instead
           - os: ubuntu-latest
             browser: Firefox
+          # WebKit is rarely used on Linux, tested on macOS only
+          - os: ubuntu-latest
+            browser: WebKit
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
