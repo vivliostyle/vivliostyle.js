@@ -823,13 +823,6 @@ describe("text-polyfill", function () {
     it("does not trim the half-width punctuation at the end of the block that does not hang", function () {
       checkFullWidthFont();
       element.style.fontFeatureSettings = '"palt"';
-      element.textContent = "。";
-      const paltRange = document.createRange();
-      paltRange.selectNodeContents(element);
-      if (paltRange.getBoundingClientRect().width > 16 * 0.75) {
-        // Without the feature the full stop is full-width, which is trimmed
-        pending("proportional punctuation (palt) font unavailable");
-      }
       for (const value of ["trim-all", "trim-both"]) {
         layout("あいうえお。", {
           "text-spacing-trim": value,

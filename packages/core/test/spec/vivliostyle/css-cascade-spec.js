@@ -4211,16 +4211,6 @@ describe("css-cascade", function () {
       return result;
     }
 
-    // WebKit snaps lengths to its 1/64px layout unit: the font metric unit that
-    // this engine measures is snapped before it is multiplied, while the native
-    // length is snapped after. The difference grows with the number of units
-    // and the font (e.g. 1/32px for `5ch` on Linux), so allow 1/16px.
-    function expectNativeLength(actual, text, fontSize) {
-      expect(Math.abs(actual - nativeLength(text, fontSize))).toBeLessThan(
-        1 / 16,
-      );
-    }
-
     describe("getInheritedLineHeight", function () {
       function inheritedLineHeight(fontSize, lineHeight) {
         var props = {
@@ -4283,9 +4273,13 @@ describe("css-cascade", function () {
             newContext(),
           ).getInheritedLineHeight();
         }
-        expectNativeLength(inherited("5ch"), "5ch", 16);
+        expect(inherited("5ch")).toBeCloseTo(nativeLength("5ch", 16), 3);
         expect(inherited("5ic")).toBe(80);
-        expectNativeLength(inherited("2.5ex"), "2.5ex", 16);
+        // WebKit snaps computed lengths to its 1/64px layout unit, both the
+        // `ex` size this engine measures and the native `2.5ex`.
+        expect(
+          Math.abs(inherited("2.5ex") - nativeLength("2.5ex", 16)),
+        ).toBeLessThanOrEqual(1 / 64);
       });
 
       it("resolves a line height in an internal viewport unit", function () {
@@ -4423,10 +4417,9 @@ describe("css-cascade", function () {
         expect(accumulated("line-height", "min(200%, 40px)")).toBe(
           "min(32px,40px)",
         );
-        expectNativeLength(
-          parseFloat(accumulated("line-height", "5ch")),
-          "5ch",
-          16,
+        expect(parseFloat(accumulated("line-height", "5ch"))).toBeCloseTo(
+          nativeLength("5ch", 16),
+          3,
         );
         expect(accumulated("line-height", "2ic")).toBe("32px");
         expect(accumulated("line-height", "calc(1.5)")).toBe("calc(1.5)");
@@ -4478,7 +4471,7 @@ describe("css-cascade", function () {
           32,
           newContext(),
         );
-        expectNativeLength(fromParent.num, "5ch", 32);
+        expect(fromParent.num).toBeCloseTo(nativeLength("5ch", 32), 3);
         expect(fromParent.unit).toBe("px");
         var kept = adapt_csscasc.convertFontSizeToPx(
           new adapt_css.Numeric(5, "ch"),
