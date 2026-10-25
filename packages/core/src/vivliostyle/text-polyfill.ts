@@ -783,6 +783,45 @@ function getCommonAncestor(node1: Node, node2: Node): Element | null {
   return container;
 }
 
+/**
+ * Check if non-zero margin, border, or padding intervenes between the end of
+ * node1 and the start of node2, where no text-autospace is inserted (CSS Text
+ * 4 § 8.4.1).
+ */
+function checkNonZeroMarginBorderPadding(node1: Node, node2: Node): boolean {
+  const getStyle = (node: Node) =>
+    node.ownerDocument.defaultView.getComputedStyle(node as Element);
+  if (node1.nodeType === Node.ELEMENT_NODE) {
+    const style = getStyle(node1);
+    if (
+      parseFloat(style.marginInlineEnd) ||
+      parseFloat(style.borderInlineEndWidth) ||
+      parseFloat(style.paddingInlineEnd)
+    ) {
+      return true;
+    }
+  }
+  const parent1 = node1.parentElement;
+  if (parent1 && !parent1.contains(node2)) {
+    return checkNonZeroMarginBorderPadding(parent1, node2);
+  }
+  if (node2.nodeType === Node.ELEMENT_NODE) {
+    const style = getStyle(node2);
+    if (
+      parseFloat(style.marginInlineStart) ||
+      parseFloat(style.borderInlineStartWidth) ||
+      parseFloat(style.paddingInlineStart)
+    ) {
+      return true;
+    }
+  }
+  const parent2 = node2.parentElement;
+  if (parent2 && !parent2.contains(node1)) {
+    return checkNonZeroMarginBorderPadding(node1, parent2);
+  }
+  return false;
+}
+
 const OPENING_PUNCTUATION_START_PATTERN =
   /^[ \t\r\n\f]*[‘“〝（［｛｟\u2329〈《「『【〔〖〘〚]\p{M}*/u;
 
@@ -1632,29 +1671,51 @@ export class TextSpacingPolyfill {
       }
       // The native text-autospace may insert the spacing at an element
       // boundary even if it is disabled on the innermost element containing
-      // the boundary (see processTextSpacing()): Chromium does so if it is
-      // enabled on both sides, and Firefox if it is enabled on the following
-      // side. Use the polyfill for the text on the following side then.
+      // the boundary (see processTextSpacing()), or if non-zero margin,
+      // border, or padding intervenes (CSS Text 4 § 8.4.1): Chromium does so
+      // if it is enabled on both sides, Firefox if it is enabled on the
+      // following side, and WebKit if it is enabled on the innermost element
+      // containing the boundary. Use the polyfill for the text on the
+      // following side then, or in Chromium for the text on the preceding
+      // side if it is in the element on the following side, so as not to use
+      // the polyfill for the whole text of the element, or in WebKit for the
+      // text of the innermost element containing the boundary.
       const type = getAutospaceType(text1, text2);
-      if (
-        type &&
+      const container =
+        type && getCommonAncestor(prevP.viewNode, textP.viewNode);
+      if (!container) {
+        continue;
+      }
+      const document = element2.ownerDocument;
+      const byContainer = NativeTextSpacing.autospacesByContainer(document);
+      const byFollowingSide =
+        NativeTextSpacing.autospacesByFollowingSide(document);
+      const enabled1 =
+        spacing1.nativeAutospace &&
+        isAutospaceEnabled(spacing1.autospace, type);
+      const enabled2 =
         spacing2.nativeAutospace &&
-        isAutospaceEnabled(spacing2.autospace, type) &&
-        ((spacing1.nativeAutospace &&
-          isAutospaceEnabled(spacing1.autospace, type)) ||
-          NativeTextSpacing.autospacesByFollowingSide(element2.ownerDocument))
+        isAutospaceEnabled(spacing2.autospace, type);
+      if (
+        (byContainer
+          ? hasNativeAutospace(container, type)
+          : enabled2 && (enabled1 || byFollowingSide)) &&
+        (!isAutospaceEnabled(
+          getAutospaceOf(textP, container, spacing2.autospace),
+          type,
+        ) ||
+          checkNonZeroMarginBorderPadding(prevP.viewNode, textP.viewNode))
       ) {
-        const container = getCommonAncestor(prevP.viewNode, textP.viewNode);
-        if (
-          container &&
-          !isAutospaceEnabled(
-            getAutospaceOf(textP, container, spacing2.autospace),
-            type,
-          )
-        ) {
-          spacing2.nativeAutospace = false;
-          element2.style.setProperty("text-autospace", "no-autospace");
+        const element = byContainer
+          ? (container as HTMLElement)
+          : !byFollowingSide && element2.contains(element1)
+            ? element1
+            : element2;
+        const spacing = spacings.get(element);
+        if (spacing) {
+          spacing.nativeAutospace = false;
         }
+        element.style.setProperty("text-autospace", "no-autospace");
       }
     }
     for (const [element, spacing] of spacings) {
@@ -2522,41 +2583,6 @@ export class TextSpacingPolyfill {
       );
     }
 
-    function checkNonZeroMarginBorderPadding(
-      node1: Node,
-      node2: Node,
-    ): boolean {
-      if (node1.nodeType === Node.ELEMENT_NODE) {
-        const style = document.defaultView.getComputedStyle(node1 as Element);
-        if (
-          parseFloat(style.marginInlineEnd) ||
-          parseFloat(style.borderInlineEndWidth) ||
-          parseFloat(style.paddingInlineEnd)
-        ) {
-          return true;
-        }
-      }
-      const parent1 = node1.parentElement;
-      if (parent1 && !parent1.contains(node2)) {
-        return checkNonZeroMarginBorderPadding(parent1, node2);
-      }
-      if (node2.nodeType === Node.ELEMENT_NODE) {
-        const style = document.defaultView.getComputedStyle(node2 as Element);
-        if (
-          parseFloat(style.marginInlineStart) ||
-          parseFloat(style.borderInlineStartWidth) ||
-          parseFloat(style.paddingInlineStart)
-        ) {
-          return true;
-        }
-      }
-      const parent2 = node2.parentElement;
-      if (parent2 && !parent2.contains(node1)) {
-        return checkNonZeroMarginBorderPadding(node1, parent2);
-      }
-      return false;
-    }
-
     // Insert the spacing of text-autospace at the boundary with the adjacent
     // text node. The spacing at element boundaries is determined by and
     // rendered within the innermost element that contains the boundary (CSS
@@ -2589,10 +2615,12 @@ export class TextSpacingPolyfill {
       // the line), which leaves it at the start of the next line if the line
       // breaks there, does not remove it at the end of a line, and in
       // vertical text lays out a ruby base after the spacing overlapping the
-      // preceding text; WebKit does not insert it, even across an empty
-      // element or between text nodes (see NativeTextSpacing); Firefox
-      // determines it by the following side. The spacing inserted here
-      // contains a space character, which prevents the native one.
+      // preceding text; WebKit does not insert it at the start of an element
+      // after text, even across an empty element or between text nodes (see
+      // NativeTextSpacing), and puts the spacing at the end of an element
+      // before the start of the element; Firefox determines it by the
+      // following side. The spacing inserted here contains a space
+      // character, which prevents the native one.
       if (
         (isAfter ? textNode.nextSibling : textNode.previousSibling) ===
           adjacentNode &&

@@ -1081,6 +1081,78 @@ describe("text-polyfill", function () {
       expect(thinSp.parentNode).toBe(element);
       expect(thinSp.previousSibling.localName).toBe("u");
     });
+
+    // Get the width of the content of the element
+    function getContentWidth() {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return range.getBoundingClientRect().width;
+    }
+
+    // Get the width of the content of the element without any spacing
+    function getContentWidthWithoutAutospace() {
+      for (const elem of [element, ...element.querySelectorAll("*")]) {
+        elem.style.setProperty("text-autospace", "no-autospace");
+      }
+      for (const thinSp of element.querySelectorAll("viv-ts-thin-sp")) {
+        thinSp.style.display = "none";
+      }
+      return getContentWidth();
+    }
+
+    for (const [name, style] of [
+      ["margin", "margin:0 2px"],
+      ["border", "border:1px solid"],
+      ["padding", "padding:0 2px"],
+    ]) {
+      it(`does not insert the spacing across non-zero ${name}`, function () {
+        layout(`日本<code style="${style}">ABC</code>語`, {
+          "text-autospace": "normal",
+        });
+        expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
+        // Nor does the native autospace, which browsers insert there
+        const width = getContentWidth();
+        expect(getContentWidthWithoutAutospace()).toBeCloseTo(width, 1);
+      });
+    }
+
+    it("does not insert the spacing across non-zero padding of an ancestor", function () {
+      layout(
+        '<span style="padding:0 2px"><b>ABC</b></span>日本<i>日本</i><span style="padding:0 2px"><b>ABC</b></span>',
+        { "text-autospace": "normal" },
+      );
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
+      const width = getContentWidth();
+      expect(getContentWidthWithoutAutospace()).toBeCloseTo(width, 1);
+    });
+
+    it("inserts the spacing only where no margin, border, or padding intervenes", async function () {
+      layout(
+        '日本<code style="border-inline-start:1px solid">ABC日本</code>ABC語',
+        { "text-autospace": "normal" },
+      );
+      const code = element.querySelector("code");
+      const thinSps = element.querySelectorAll("viv-ts-thin-sp");
+      // Inside the element and outside its end without border, and between
+      // ABC and 語 by the native autospace if available
+      const native = NativeTextSpacing.supportsAutospace(document, "normal");
+      expect(thinSps.length).toBe(native ? 2 : 3);
+      expect(thinSps[0].parentNode).toBe(code);
+      expect(thinSps[1].parentNode).toBe(element);
+      expect(thinSps[1].previousSibling).toBe(code);
+      // The thin spaces are styled by the polyfill
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        await document.fonts.load('16px "-viv-ts-sp"');
+        // 3 spacings (1/8 of 16px) in total
+        const width = getContentWidth();
+        expect(width - getContentWidthWithoutAutospace()).toBeCloseTo(6, 0);
+      } finally {
+        style.remove();
+      }
+    });
   });
 
   describe("NativeTextSpacing.supportsTrim", function () {

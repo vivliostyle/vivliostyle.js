@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- Test case for PR #2228 (PR #2211 follow-up): no text-autospace across non-zero margin, border, or padding -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>text-autospace across margin, border, or padding</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      p {
+        margin: 0;
+      }
+      .normal p {
+        text-autospace: normal;
+      }
+      /* Not supported by browsers, so the polyfill processes it */
+      .alpha p {
+        text-autospace: ideograph-alpha;
+      }
+      .border {
+        border: 1px solid;
+      }
+      .border-start {
+        border-inline-start: 1px solid;
+      }
+      .border-end {
+        border-inline-end: 1px solid;
+      }
+      .padding {
+        padding: 0 2px;
+        background: #ddd;
+      }
+      .margin {
+        margin: 0 2px;
+        background: #ddd;
+      }
+      .bg {
+        background: #ddd;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        height: 10em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      Spacing is inserted only at the boundaries without margin, border, or
+      padding (CSS Text 4 § 8.4.1). The “normal” lines (native in browsers that
+      support it) must be the same as the “ideograph-alpha” lines (polyfill).
+    </p>
+    <div class="normal">
+      <h2>text-autospace: normal</h2>
+      <p>国国国<span class="border">AAA</span>国国国（border: no spacing）</p>
+      <p>国国国<span class="padding">AAA</span>国国国（padding: no spacing）</p>
+      <p>国国国<span class="margin">AAA</span>国国国（margin: no spacing）</p>
+      <p>国国国<span class="bg">AAA</span>国国国（background only: spacing）</p>
+      <p>国国国<span class="border-start">AAA</span>国国国（start border: spacing only after）</p>
+      <p>国国国<span class="border-end">AAA</span>国国国（end border: spacing only before）</p>
+      <p>AAA<span class="border">国国国</span>AAA（border around ideographs）</p>
+      <p>国国国<b><span class="border">AAA</span></b>国国国（nested）</p>
+      <p><span>国国国</span><span class="padding">AAA</span><span>国国国</span>（siblings）</p>
+      <p>国<span class="padding">A国A</span>国（spacing inside）</p>
+    </div>
+    <div class="alpha">
+      <h2>text-autospace: ideograph-alpha</h2>
+      <p>国国国<span class="border">AAA</span>国国国（border: no spacing）</p>
+      <p>国国国<span class="padding">AAA</span>国国国（padding: no spacing）</p>
+      <p>国国国<span class="margin">AAA</span>国国国（margin: no spacing）</p>
+      <p>国国国<span class="bg">AAA</span>国国国（background only: spacing）</p>
+      <p>国国国<span class="border-start">AAA</span>国国国（start border: spacing only after）</p>
+      <p>国国国<span class="border-end">AAA</span>国国国（end border: spacing only before）</p>
+      <p>AAA<span class="border">国国国</span>AAA（border around ideographs）</p>
+      <p>国国国<b><span class="border">AAA</span></b>国国国（nested）</p>
+      <p><span>国国国</span><span class="padding">AAA</span><span>国国国</span>（siblings）</p>
+      <p>国<span class="padding">A国A</span>国（spacing inside）</p>
+    </div>
+    <div class="vertical">
+      <div class="normal">
+        <p>国<span class="border">AA</span>国<span class="bg">AA</span>国</p>
+      </div>
+      <div class="alpha">
+        <p>国<span class="border">AA</span>国<span class="bg">AA</span>国</p>
+      </div>
+    </div>
+  </body>
+</html>
