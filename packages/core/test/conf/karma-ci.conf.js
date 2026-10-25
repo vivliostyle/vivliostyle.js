@@ -38,6 +38,8 @@ module.exports = function (config) {
         "media.navigator.permission.disabled": true,
       },
     };
+  } else if (browser === "WebKit") {
+    browsers = ["PlaywrightWebKit"];
   } else {
     // Default to Chrome
     browsers = ["ChromeHeadless"];
@@ -57,6 +59,7 @@ module.exports = function (config) {
     client: { captureConsole: false },
     browsers: browsers,
     customLaunchers: customLaunchers,
+    plugins: ["karma-*", require("./playwright-webkit-launcher")],
     singleRun: true,
     captureTimeout: 180000,
     browserNoActivityTimeout: 180000,

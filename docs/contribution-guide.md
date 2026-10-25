@@ -52,9 +52,9 @@ The `packages/core/scripts/package-artifacts/samples/` directory holds sample fi
 
 The TypeScript source files are compiled and minified by Rollup. To build the minified version of JavaScript files, run `yarn build` (in the repository root directory). The sources are type-checked and the minified file will be generated under `packages/core/lib/` and `packages/viewer/lib` directories.
 
-[Jasmine](http://jasmine.github.io/) is used for unit testing. Spec files are located under `packages/core/test/spec/`. To run unit tests on a local machine, run `yarn test`.
+[Jasmine](http://jasmine.github.io/) is used for unit testing. Spec files are located under `packages/core/test/spec/`. To run unit tests on a local machine, run `yarn test:core` (in headless Chrome). To run them in Firefox or WebKit, run `TEST_BROWSER=Firefox yarn test:core` or `TEST_BROWSER=WebKit yarn test:core`. WebKit is Playwright's build, installed with `npx playwright install webkit`.
 
-The unit tests is automatically invoked in [Travis CI](https://travis-ci.org/vivliostyle/vivliostyle.js) when pushing to GitHub. When pushed to master, after all tests pass, the code will be automatically deployed as the [Canary release](https://vivliostyle.github.io/#canary-release-equivalent-to-master) so please be careful when pushing to master (merging PR).
+The unit tests are automatically run by [GitHub Actions](https://github.com/vivliostyle/vivliostyle.js/actions/workflows/ci.yml) in Chrome, Firefox and WebKit when pushing to GitHub. When pushed to master, after all tests pass, the code will be automatically deployed as the [Canary release](https://vivliostyle.github.io/#canary-release-equivalent-to-master) so please be careful when pushing to master (merging PR).
 
 ### Development mode
 

@@ -45,6 +45,7 @@ yarn test           # Test
 ### Core Unit Testing
 
 - `yarn test:core` or `cd packages/core/test && yarn test` (Karma + Jasmine, headless browser)
+- `TEST_BROWSER=Firefox yarn test:core` / `TEST_BROWSER=WebKit yarn test:core` for the other browsers (WebKit is Playwright's build: `npx playwright install webkit` first)
 - `yarn test:core-local` or `cd packages/core/test && yarn test-local` (Karma + Jasmine, manual browser for debugging)
 - Tests live in `packages/core/test/spec/vivliostyle/*-spec.js`
 
