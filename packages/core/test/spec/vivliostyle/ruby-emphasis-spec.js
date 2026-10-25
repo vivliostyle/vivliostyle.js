@@ -18,6 +18,7 @@
 import * as Base from "../../../src/vivliostyle/base";
 import * as RubyEmphasis from "../../../src/vivliostyle/ruby-emphasis";
 import * as Layout from "../../../src/vivliostyle/layout";
+import * as LayoutHelper from "../../../src/vivliostyle/layout-helper";
 import * as Css from "../../../src/vivliostyle/css";
 import * as CssCascade from "../../../src/vivliostyle/css-cascade";
 import * as CssParser from "../../../src/vivliostyle/css-parser";
@@ -31,6 +32,13 @@ function paragraph() {
     '<span style="text-emphasis: sesame">文字</span><br><span style="text-emphasis: sesame">文字</span>';
   DomUtil.getDummyContainer().appendChild(element);
   return element;
+}
+
+// WebKit recognizes the ruby display values only on native ruby elements, so
+// the view generation renders CSS ruby spans as those elements there.
+function cssRubyTag(display) {
+  if (Base.browserType !== "webkit") return "span";
+  return { ruby: "ruby", "ruby-base": "rb", "ruby-text": "rt" }[display];
 }
 
 function measuredLayout(
@@ -199,10 +207,9 @@ describe("ruby and emphasis boundary leading", () => {
   });
 
   it("compensates CSS ruby spans like native ruby elements", () => {
-    const element = document.createElement("span");
+    const element = document.createElement(cssRubyTag("ruby"));
     element.style.cssText = "display: ruby; font: 20px/34px serif";
-    element.innerHTML =
-      '<span style="display: ruby-base">ルビ</span><span style="display: ruby-text; font-size: 50%; line-height: 1">るび</span>';
+    element.innerHTML = `<${cssRubyTag("ruby-base")} style="display: ruby-base">ルビ</${cssRubyTag("ruby-base")}><${cssRubyTag("ruby-text")} style="display: ruby-text; font-size: 50%; line-height: 1">るび</${cssRubyTag("ruby-text")}>`;
     DomUtil.getDummyContainer().appendChild(element);
     const text = element.lastElementChild;
     RubyEmphasis.prepareRubyAnnotation(text, element, rtStyle(), window);
@@ -321,11 +328,11 @@ describe("ruby and emphasis boundary leading", () => {
 
   function addRuby(root, position = "over", css = false) {
     const element = css
-      ? document.createElement("span")
+      ? document.createElement(cssRubyTag("ruby"))
       : document.createElement("ruby");
     element.style.cssText = `display:ruby;ruby-position:${position}`;
     element.innerHTML = css
-      ? '<span style="display:ruby-base">文字</span><span style="display:ruby-text;font-size:50%;line-height:1">もじ</span>'
+      ? `<${cssRubyTag("ruby-base")} style="display:ruby-base">文字</${cssRubyTag("ruby-base")}><${cssRubyTag("ruby-text")} style="display:ruby-text;font-size:50%;line-height:1">もじ</${cssRubyTag("ruby-text")}>`
       : '文字<rt style="font-size:50%;line-height:1">もじ</rt>';
     root.appendChild(element);
     RubyEmphasis.prepareRubyAnnotation(
@@ -1084,10 +1091,23 @@ describe("ruby and emphasis boundary leading", () => {
       addRuby(block, "under");
       const before = root.style.cssText;
       RubyEmphasis.adjustAnnotationsForNodes(nodes(block), actualLayout());
+      // WebKit keeps the size and disables the browser's column breaking
+      // instead, which the column layout unsets after the break is found.
+      const webkit = Base.browserType === "webkit";
       expect(
         mode === "horizontal-tb" ? root.style.height : root.style.width,
-      ).toBe(mode === "horizontal-tb" ? "211px" : "307px");
+      ).toBe(
+        mode === "horizontal-tb"
+          ? webkit
+            ? "204px"
+            : "211px"
+          : webkit
+            ? "300px"
+            : "307px",
+      );
+      expect(root.style.columnCount).toBe(webkit ? "auto" : "");
       RubyEmphasis.finishAnnotationLayout(root, actualLayout());
+      LayoutHelper.unsetBrowserColumnBreaking(root);
       expect(root.style.cssText).toBe(before);
     }
   });
