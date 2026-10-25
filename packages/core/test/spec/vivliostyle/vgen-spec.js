@@ -24,10 +24,13 @@ import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
 
-// Firefox can quantize both independently measured values by one layout unit.
-// Allow two 1/60px units, plus CSSOM decimal serialization, when comparing them.
+// Firefox can quantize both independently measured values by one layout unit
+// (1/60px). WebKit snaps the measured font metric unit to its 1/64px layout
+// unit before it is multiplied, and an error in the font size carries over to
+// the metrics of the font at that size (up to about 0.054px on Linux). Allow
+// 0.1px, still far below the difference between the fonts that is tested.
 function expectFontMetricLength(actual, expected) {
-  expect(Math.abs(actual - expected)).toBeLessThan(2 / 60 + 0.0001);
+  expect(Math.abs(actual - expected)).toBeLessThan(0.1);
 }
 
 describe("vgen", function () {
