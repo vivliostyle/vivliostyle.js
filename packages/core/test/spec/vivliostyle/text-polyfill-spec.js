@@ -1008,15 +1008,21 @@ describe("text-polyfill", function () {
       // spacing at the boundary
       layout(`<span ${normal}>日本</span><span ${normal}>ABC日本</span>`);
       const spans = element.querySelectorAll("span");
-      if (NativeTextSpacing.supportsAutospace(document, "normal")) {
+      const native = NativeTextSpacing.supportsAutospace(document, "normal");
+      // WebKit determines it by the parent instead, which disables it
+      const byContainer = NativeTextSpacing.autospacesByContainer(document);
+      if (native && !byContainer) {
         expect(spans[1].style.getPropertyValue("text-autospace")).toBe(
           "no-autospace",
         );
       }
-      // Only the spacing inside the second element is inserted
+      // Only the spacing inside the second element is inserted, by the
+      // native autospace if it is left enabled there
       const thinSps = element.querySelectorAll("viv-ts-thin-sp");
-      expect(thinSps.length).toBe(1);
-      expect(thinSps[0].parentNode).toBe(spans[1]);
+      expect(thinSps.length).toBe(native && byContainer ? 0 : 1);
+      if (thinSps.length) {
+        expect(thinSps[0].parentNode).toBe(spans[1]);
+      }
     });
 
     it("inserts the spacing outside an element with no-autospace that contains ideographs", function () {
@@ -1132,14 +1138,18 @@ describe("text-polyfill", function () {
         { "text-autospace": "normal" },
       );
       const code = element.querySelector("code");
-      const thinSps = element.querySelectorAll("viv-ts-thin-sp");
-      // Inside the element and outside its end without border, and between
-      // ABC and 語 by the native autospace if available
+      // Outside the end of the element without border, but not outside its
+      // start with border
+      expect(code.nextSibling?.localName).toBe("viv-ts-thin-sp");
+      expect(code.previousSibling?.localName).not.toBe("viv-ts-thin-sp");
+      // The native autospace, if available, inserts one of the spacings
+      // between ABC and 日 inside the element and between ABC and 語 outside
+      // it, depending on the element where it is disabled (the paragraph in
+      // WebKit, see processTextSpacing())
       const native = NativeTextSpacing.supportsAutospace(document, "normal");
-      expect(thinSps.length).toBe(native ? 2 : 3);
-      expect(thinSps[0].parentNode).toBe(code);
-      expect(thinSps[1].parentNode).toBe(element);
-      expect(thinSps[1].previousSibling).toBe(code);
+      expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(
+        native ? 2 : 3,
+      );
       // The thin spaces are styled by the polyfill
       const style = document.createElement("style");
       style.textContent = VivliostylePolyfillCss;
