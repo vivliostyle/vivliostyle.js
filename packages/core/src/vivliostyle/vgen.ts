@@ -1145,18 +1145,7 @@ export class ViewFactory
       ),
     } as CssCascade.ElementStyle;
     if (isRoot) {
-      const rootLineHeight = CssCascade.getProp(
-        styles[0],
-        "line-height",
-      )?.value;
-      props["line-height"] = new CssCascade.CascadeValue(
-        // An explicit reset on the source root uses the CSS initial normal;
-        // an unspecified line-height keeps the viewer's preferred default.
-        rootLineHeight && Css.isDefaultingValue(rootLineHeight)
-          ? Css.ident.normal
-          : new Css.Num(this.context.pref.lineHeight),
-        0,
-      );
+      props["line-height"] = new CssCascade.CascadeValue(Css.ident.normal, 0);
     }
     const inheritanceVisitor = new CssCascade.InheritanceVisitor(
       props,
@@ -3998,7 +3987,7 @@ export class ViewFactory
         pageContextElement,
       ) ??
       this.context.rootLineHeight ??
-      fontSize * this.context.pref.lineHeight;
+      fontSize * Exprs.fallbackLineHeightRatio;
     return { fontSize, lineHeight };
   }
 
@@ -4026,7 +4015,7 @@ export class ViewFactory
       ) ??
       this.measureNormalLineHeight(style, fontSize, element) ??
       fallback.lineHeight ??
-      (fontSize != null ? fontSize * this.context.pref.lineHeight : null);
+      (fontSize != null ? fontSize * Exprs.fallbackLineHeightRatio : null);
     return { fontSize, lineHeight };
   }
 

@@ -46,7 +46,7 @@ describe("css-parser", function () {
 
       adapt_task.start(function () {
         adapt_cssparse
-          .parseStylesheet(tokenizer, handler, null, null, null)
+          .parseStylesheet(tokenizer, handler, null, null)
           .then(function (result) {
             expect(result).toBe(true);
             fn();
@@ -1592,7 +1592,7 @@ describe("css-parser", function () {
 
         adapt_task.start(function () {
           adapt_cssparse
-            .parseStylesheet(tokenizer, dispatch, null, null, null)
+            .parseStylesheet(tokenizer, dispatch, null, null)
             .then(function () {
               expect(dispatch.errorMsg).toHaveBeenCalled();
               // A skipping handler would never be taken back, swallowing

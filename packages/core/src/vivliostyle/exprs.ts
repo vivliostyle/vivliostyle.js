@@ -22,13 +22,6 @@ import * as Base from "./base";
 import type { FontMetrics, FontProperties } from "./font-metrics";
 
 export type Preferences = {
-  fontFamily: string;
-  lineHeight: number;
-  margin: number;
-  hyphenate: boolean;
-  columnWidth: number;
-  horizontal: boolean;
-  nightMode: boolean;
   spreadView: boolean;
   pageBorder: number;
   enabledMediaTypes: { [key: string]: boolean };
@@ -37,13 +30,6 @@ export type Preferences = {
 
 export function defaultPreferences(): Preferences {
   return {
-    fontFamily: "serif",
-    lineHeight: 1.25,
-    margin: 8,
-    hyphenate: false,
-    columnWidth: 25,
-    horizontal: false,
-    nightMode: false,
     spreadView: false,
     pageBorder: 1,
     enabledMediaTypes: { vivliostyle: true, print: true },
@@ -53,13 +39,6 @@ export function defaultPreferences(): Preferences {
 
 export function clonePreferences(pref: Preferences): Preferences {
   return {
-    fontFamily: pref.fontFamily,
-    lineHeight: pref.lineHeight,
-    margin: pref.margin,
-    hyphenate: pref.hyphenate,
-    columnWidth: pref.columnWidth,
-    horizontal: pref.horizontal,
-    nightMode: pref.nightMode,
     spreadView: pref.spreadView,
     pageBorder: pref.pageBorder,
     enabledMediaTypes: Object.assign({}, pref.enabledMediaTypes),
@@ -182,27 +161,6 @@ export class LexicalScope {
       this.defineBuiltInName("page-height", function () {
         return this.pageHeight();
       });
-      this.defineBuiltInName("pref-font-family", function () {
-        return this.pref.fontFamily;
-      });
-      this.defineBuiltInName("pref-night-mode", function () {
-        return this.pref.nightMode;
-      });
-      this.defineBuiltInName("pref-hyphenate", function () {
-        return this.pref.hyphenate;
-      });
-      this.defineBuiltInName("pref-margin", function () {
-        return this.pref.margin;
-      });
-      this.defineBuiltInName("pref-line-height", function () {
-        return this.pref.lineHeight;
-      });
-      this.defineBuiltInName("pref-column-width", function () {
-        return this.pref.columnWidth * this.fontSize;
-      });
-      this.defineBuiltInName("pref-horizontal", function () {
-        return this.pref.horizontal;
-      });
       this.defineBuiltInName("pref-spread-view", function () {
         return this.pref.spreadView;
       });
@@ -316,6 +274,13 @@ export const defaultUnitSizes: { [key: string]: number } = {
   dpi: 1 / 96,
   dpcm: 2.54 / 96,
 };
+
+/**
+ * Ratio of the line height to the font size used when `line-height: normal`
+ * cannot be resolved from font metrics.
+ */
+export const fallbackLineHeightRatio =
+  defaultUnitSizes["lh"] / defaultUnitSizes["em"];
 
 /**
  * Returns if a unit should be converted to px before applied to the raw DOM.

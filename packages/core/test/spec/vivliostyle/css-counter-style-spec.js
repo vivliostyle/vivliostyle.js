@@ -31,7 +31,7 @@ describe("css-counter-style", function () {
     var handler = new adapt_ops.StyleParserHandler(validatorSet);
     adapt_task.start(function () {
       adapt_cssparse
-        .parseStylesheetFromText(css, handler, "", null, null)
+        .parseStylesheetFromText(css, handler, "", null)
         .then(function (result) {
           fn(result, handler.counterStyles);
           done();

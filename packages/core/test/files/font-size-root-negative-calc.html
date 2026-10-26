@@ -13,6 +13,9 @@
     Root font size with a negative calc() (Issue #2174 follow-up)
   </title>
   <style>
+    html {
+      line-height: 1.25;
+    }
     @page { size: 120mm 80mm; margin: 10mm; }
     :root { font-size: calc(10px - 20px); } /* clamped to 0px */
     .rem-box {

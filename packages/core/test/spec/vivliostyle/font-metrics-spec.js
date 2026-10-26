@@ -153,7 +153,7 @@ describe("font metrics", function () {
     }
   });
 
-  it("keeps the viewer default when root line-height is unspecified, and refreshes explicit normal", function () {
+  it("treats unspecified root line-height as normal, and refreshes it with the font", function () {
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
       800,
@@ -169,7 +169,10 @@ describe("font metrics", function () {
       "font-size": new Cascade.CascadeValue(new Css.Numeric(32, "px"), 0),
     };
     styler.determineRootSizes(style);
-    expect(context.rootLineHeight).toBe(32 * context.pref.lineHeight);
+    expect(context.rootLineHeight).toBeCloseTo(
+      nativeLength("lh", 32, { fontFamily: "Arial" }),
+      4,
+    );
     style["line-height"] = new Cascade.CascadeValue(Css.ident.normal, 0);
     styler.determineRootSizes(style);
     expect(context.rootLineHeight).toBeCloseTo(

@@ -2357,7 +2357,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
             parentFontSize,
             this.metricProperties(),
           )
-        : null) ?? this.context.pref.lineHeight * parentFontSize
+        : null) ?? Exprs.fallbackLineHeightRatio * parentFontSize
     );
   }
 

@@ -11,6 +11,9 @@
   <meta charset="UTF-8">
   <title>font-size declared in detached content (Issue #2174 follow-up)</title>
   <style>
+    html {
+      line-height: 1.25;
+    }
     @page { size: 160mm 100mm; margin: 10mm; }
     /* The root font size differs from the font size of the source parent
        below, so a page-based resolve would be visible. */

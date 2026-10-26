@@ -1458,55 +1458,6 @@ export class Parser {
     return null;
   }
 
-  makeCondition(
-    classes: string | null,
-    condition: Exprs.Val | null,
-  ): Css.Expr | null {
-    const scope = this.handler.getScope();
-    condition = condition || scope._true;
-    if (classes) {
-      const classList = classes.split(/\s+/);
-      for (const className of classList) {
-        switch (className) {
-          case "vertical":
-            condition = Exprs.and(
-              scope,
-              condition,
-              new Exprs.Not(scope, new Exprs.Named(scope, "pref-horizontal")),
-            );
-            break;
-          case "horizontal":
-            condition = Exprs.and(
-              scope,
-              condition,
-              new Exprs.Named(scope, "pref-horizontal"),
-            );
-            break;
-          case "day":
-            condition = Exprs.and(
-              scope,
-              condition,
-              new Exprs.Not(scope, new Exprs.Named(scope, "pref-night-mode")),
-            );
-            break;
-          case "night":
-            condition = Exprs.and(
-              scope,
-              condition,
-              new Exprs.Named(scope, "pref-night-mode"),
-            );
-            break;
-          default:
-            condition = scope._false;
-        }
-      }
-    }
-    if (condition === scope._true) {
-      return null;
-    }
-    return new Css.Expr(condition);
-  }
-
   isInsidePropertyOnlyRule(): boolean {
     switch (this.ruleStack.at(-1)) {
       case "[selector]":
@@ -3100,7 +3051,6 @@ export function parseStylesheet(
   tokenizer: CssTokenizer.Tokenizer,
   handler: DispatchParserHandler,
   baseURL: string | null,
-  classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
   // A style sheet given as text alone has no base. resolveURL() reads the
@@ -3112,18 +3062,16 @@ export function parseStylesheet(
       new CssTokenizer.Tokenizer(expandedText, handler),
       handler,
       base,
-      classes,
       media,
     );
   }
-  return parseStylesheetInternal(tokenizer, handler, base, classes, media);
+  return parseStylesheetInternal(tokenizer, handler, base, media);
 }
 
 function parseStylesheetInternal(
   tokenizer: CssTokenizer.Tokenizer,
   handler: DispatchParserHandler,
   baseURL: string,
-  classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
@@ -3136,7 +3084,6 @@ function parseStylesheetInternal(
       baseURL,
     );
   }
-  condition = parser.makeCondition(classes, condition && condition.toExpr());
   if (condition) {
     handler.startMediaRule(condition);
     handler.startRuleBody();
@@ -3160,7 +3107,7 @@ function parseStylesheetInternal(
           const innerFrame: Task.Frame<boolean> = Task.newFrame(
             "parseStylesheet.import",
           );
-          parseStylesheetFromURL(resolvedURL, handler, null, null).then(() => {
+          parseStylesheetFromURL(resolvedURL, handler, null).then(() => {
             if (parser.importCondition) {
               handler.endRule();
             }
@@ -3196,14 +3143,13 @@ export function parseStylesheetFromText(
   text: string,
   handler: DispatchParserHandler,
   baseURL: string | null,
-  classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
   return Task.handle(
     "parseStylesheetFromText",
     (frame) => {
       const tok = new CssTokenizer.Tokenizer(text, handler);
-      parseStylesheet(tok, handler, baseURL, classes, media).thenFinish(frame);
+      parseStylesheet(tok, handler, baseURL, media).thenFinish(frame);
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
@@ -3215,7 +3161,6 @@ export function parseStylesheetFromText(
 export function parseStylesheetFromURL(
   url: string,
   handler: DispatchParserHandler,
-  classes: string | null,
   media: string | null,
 ): Task.Result<boolean> {
   return Task.handle(
@@ -3229,7 +3174,6 @@ export function parseStylesheetFromURL(
             response.responseText,
             handler,
             url,
-            classes,
             media,
           ).then((result) => {
             if (!result) {

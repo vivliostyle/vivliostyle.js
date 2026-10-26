@@ -5,6 +5,9 @@
     <meta charset="utf-8" />
     <title>Lowercase doctype test</title>
     <style>
+      html {
+        line-height: 1.25;
+      }
       @page {
         size: 200mm 150mm;
         @bottom-center {
