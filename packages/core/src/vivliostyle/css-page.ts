@@ -36,13 +36,17 @@ import * as Vtree from "./vtree";
 export function resolvePageProgression(
   style: CssCascade.ElementStyle,
 ): Constants.PageProgression {
-  const writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value;
+  // Substitution preserves identifier casing; compare the same canonical
+  // keywords used by writing-mode geometry.
+  const writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value
+    .toString()
+    .toLowerCase();
   const direction = (style["direction"] as CssCascade.CascadeValue)?.value;
   if (
-    writingMode === Css.ident.vertical_lr ||
-    writingMode === Css.ident.sideways_lr ||
-    (writingMode !== Css.ident.vertical_rl &&
-      writingMode !== Css.ident.sideways_rl &&
+    writingMode === "vertical-lr" ||
+    writingMode === "sideways-lr" ||
+    (writingMode !== "vertical-rl" &&
+      writingMode !== "sideways-rl" &&
       direction !== Css.ident.rtl)
   ) {
     return Constants.PageProgression.LTR;

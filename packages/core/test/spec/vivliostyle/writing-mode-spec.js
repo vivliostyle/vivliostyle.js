@@ -9,6 +9,8 @@ import * as Exprs from "../../../src/vivliostyle/exprs";
 import * as CssPage from "../../../src/vivliostyle/css-page";
 import * as Constants from "../../../src/vivliostyle/constants";
 import * as PageMaster from "../../../src/vivliostyle/page-master";
+import * as Ops from "../../../src/vivliostyle/ops";
+import * as PageFloats from "../../../src/vivliostyle/page-floats";
 
 describe("writing-mode layout geometry", () => {
   const box = {
@@ -324,5 +326,70 @@ describe("writing-mode review regressions", () => {
         );
       });
     }
+  }
+});
+
+describe("substituted writing modes in page and region contexts", () => {
+  for (const mode of [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    for (const direction of ["ltr", "rtl"]) {
+      it(`uses ${mode} page progression after uppercase substitution, ${direction}`, () => {
+        const style = {
+          "writing-mode": new Cascade.CascadeValue(
+            Css.getName(mode.toUpperCase()),
+            0,
+          ),
+          direction: new Cascade.CascadeValue(Css.getName(direction), 0),
+        };
+        const expected =
+          mode.endsWith("-rl") ||
+          (mode === "horizontal-tb" && direction === "rtl")
+            ? Constants.PageProgression.RTL
+            : Constants.PageProgression.LTR;
+        expect(CssPage.resolvePageProgression(style)).toBe(expected);
+      });
+    }
+    it(`uses canonical ${mode} in a region float context`, () => {
+      const root = PageFloats.RootPageFloatLayoutContext.createRoot();
+      const parent = PageFloats.PageFloatLayoutContext.createWithContainer(
+        new Vtree.Container(document.createElement("div")),
+        root,
+        PageFloats.FloatReference.PAGE,
+        null,
+        null,
+        Css.ident.horizontal_tb,
+        Css.ident.ltr,
+      );
+      const box = Object.create(PageMaster.PartitionInstance.prototype);
+      box.writingMode = mode;
+      box.getProp = (_context, name) =>
+        name === "writing-mode"
+          ? Css.getName(mode.toUpperCase())
+          : Css.ident.ltr;
+      const container = new Vtree.Container(document.createElement("div"));
+      container.writingMode = mode;
+      const region =
+        Ops.StyleInstance.prototype.getRegionPageFloatLayoutContext.call(
+          {},
+          parent,
+          box,
+          container,
+          "body",
+        );
+      expect(region.writingMode.toString()).toBe(mode);
+      expect(() => region.toPhysical("block-start")).not.toThrow();
+      expect(region.toPhysical("block-start")).toBe(
+        mode === "horizontal-tb"
+          ? "top"
+          : mode.endsWith("-lr")
+            ? "left"
+            : "right",
+      );
+    });
   }
 });

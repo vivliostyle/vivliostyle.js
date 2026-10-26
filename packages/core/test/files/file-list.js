@@ -1048,6 +1048,11 @@ module.exports = [
         title: "Layout features in sideways-lr (Issue #1480)",
       },
       {
+        file: "writing-mode-variable-page-floats.html",
+        title:
+          "Substituted writing-mode with page and region floats (Issue #1480)",
+      },
+      {
         file: "writing-mode-body-page-context.html",
         title:
           "writing-mode on body not inherited by page context (Issue #1122)",

@@ -2304,7 +2304,7 @@ export class StyleInstance
     flowName: string,
   ): PageFloats.AttachedPageFloatLayoutContext {
     Asserts.assert(boxInstance instanceof PageMaster.PartitionInstance);
-    const writingMode = boxInstance.getProp(this, "writing-mode") || null;
+    const writingMode = Css.getName(boxInstance.writingMode);
     const direction = boxInstance.getProp(this, "direction") || null;
     return PageFloats.PageFloatLayoutContext.createWithContainer(
       layoutContainer,
@@ -3321,9 +3321,9 @@ export class StyleInstance
         evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
     }
 
-    const writingMode =
-      (!isTocBox && pageMaster.getProp(this, "writing-mode")) ||
-      Css.ident.horizontal_tb;
+    const writingMode = Css.getName(
+      isTocBox ? "horizontal-tb" : pageMaster.writingMode,
+    );
 
     this.pageVertical = writingMode != Css.ident.horizontal_tb;
 
