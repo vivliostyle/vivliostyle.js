@@ -3247,6 +3247,35 @@ describe("css-cascade", function () {
       expect(style.color.value.toString()).toBe("green");
     });
 
+    it("resolves substituted writing-mode keywords and inherits invalid values", () => {
+      for (const [input, expected] of [
+        ["VERTICAL-LR", "vertical-lr"],
+        ["SIDEWAYS-RL", "sideways-rl"],
+        ["SIDEWAYS-LR", "sideways-lr"],
+        ["10px", "vertical-rl"],
+        ['"vertical-lr"', "vertical-rl"],
+        ["unknown", "vertical-rl"],
+        ["INITIAL", "horizontal-tb"],
+        ["UNSET", "vertical-rl"],
+      ]) {
+        const element = document.createElement("div");
+        const style = {
+          "--wm": createCascadeValue(input),
+          "writing-mode": createCascadeValue("var(--wm)"),
+        };
+        applyVarFilter(style, element);
+        const resolved = adapt_csscasc.resolveWritingMode(
+          style,
+          {},
+          "vertical-rl",
+        );
+        expect(resolved).withContext(input).toBe(expected);
+        expect(() =>
+          adapt_csscasc.getCouplingMap(resolved, false),
+        ).not.toThrow();
+      }
+    });
+
     it("treats unresolved var() in ordinary properties as unset", function () {
       var element = document.createElement("div");
       var style = {

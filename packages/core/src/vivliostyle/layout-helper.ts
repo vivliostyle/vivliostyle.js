@@ -832,7 +832,7 @@ export function calculateEdge(
               rects,
               element,
               clientLayout,
-              vertical,
+              writingMode,
             );
             if (rects.length) {
               return vertical

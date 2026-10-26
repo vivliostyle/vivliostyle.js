@@ -1546,14 +1546,19 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       this.assignStartEndPosition(context, container);
     }
     if (this.vertical ? this.isAutoWidth : this.isAutoHeight) {
-      if (
-        this.vertical
-          ? this.isRightDependentOnAutoWidth
-          : this.isTopDependentOnAutoHeight
-      ) {
-        this.assignBeforePosition(context, container);
+      // Finalize physical sizes in dependency order. assignLeftPosition()
+      // writes both left and width, even when block-start is the left edge.
+      if (this.vertical) {
+        if (this.isRightDependentOnAutoWidth) {
+          this.assignRightPosition(context, container);
+        }
+        this.assignLeftPosition(context, container);
+      } else {
+        if (this.isTopDependentOnAutoHeight) {
+          this.assignTopPosition(context, container);
+        }
+        this.assignBottomPosition(context, container);
       }
-      this.assignAfterPosition(context, container);
     }
     if (columnCount > 1) {
       const ruleWidth = this.getPropAsNumber(context, "column-rule-width");

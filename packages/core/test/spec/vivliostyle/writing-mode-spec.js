@@ -8,6 +8,7 @@ import * as Css from "../../../src/vivliostyle/css";
 import * as Exprs from "../../../src/vivliostyle/exprs";
 import * as CssPage from "../../../src/vivliostyle/css-page";
 import * as Constants from "../../../src/vivliostyle/constants";
+import * as PageMaster from "../../../src/vivliostyle/page-master";
 
 describe("writing-mode layout geometry", () => {
   const box = {
@@ -191,4 +192,137 @@ describe("writing-mode cascade and page progression", () => {
       ),
     ).toBe("horizontal-tb");
   });
+});
+
+describe("writing-mode review regressions", () => {
+  const context = new Exprs.Context(new Exprs.LexicalScope(null), 800, 600, 16);
+  for (const mode of [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    it(`normalizes substituted ${mode} keywords`, () => {
+      const style = {
+        "writing-mode": new Cascade.CascadeValue(
+          Css.getName(mode.toUpperCase()),
+          0,
+        ),
+      };
+      const resolved = Cascade.resolveWritingMode(
+        style,
+        context,
+        "horizontal-tb",
+      );
+      expect(resolved).toBe(mode);
+      expect(() => Cascade.getCouplingMap(resolved, false)).not.toThrow();
+    });
+  }
+  for (const value of [
+    Css.getName("unknown"),
+    new Css.Numeric(10, "px"),
+    new Css.Str("vertical-lr"),
+    new Css.SpaceList([Css.ident.vertical_lr, Css.ident.vertical_rl]),
+  ]) {
+    it(`inherits the mode for an invalid substituted value: ${value}`, () => {
+      expect(
+        Cascade.resolveWritingMode(
+          { "writing-mode": new Cascade.CascadeValue(value, 0) },
+          context,
+          "sideways-lr",
+        ),
+      ).toBe("sideways-lr");
+    });
+  }
+  for (const mode of [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    it(`retains ruby end allowance at a closing inline checkpoint in ${mode}`, () => {
+      const wrapper = document.createElement("div");
+      wrapper.style.writingMode = mode;
+      const annotation = document.createElement("span");
+      annotation.style.writingMode = mode;
+      annotation.setAttribute("data-viv-ruby-end", "5");
+      annotation.textContent = "ruby";
+      wrapper.appendChild(annotation);
+      document.body.appendChild(wrapper);
+      try {
+        const rect = {
+          left: 10,
+          right: 110,
+          top: 20,
+          bottom: 220,
+          width: 100,
+          height: 200,
+        };
+        const layout = {
+          getElementClientRect: () => ({ ...rect }),
+          getElementClientRects: () => [{ ...rect }],
+          getElementComputedStyle: (element) => getComputedStyle(element),
+        };
+        const edge = Helper.calculateEdge(
+          { viewNode: annotation, after: true, inline: true, parent: null },
+          layout,
+          0,
+          mode,
+        );
+        expect(edge).toBe(
+          mode === "horizontal-tb" ? 215 : mode.endsWith("-rl") ? 15 : 105,
+        );
+      } finally {
+        wrapper.remove();
+      }
+    });
+  }
+  for (const mode of [
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    for (const rightDependsOnWidth of [false, true]) {
+      it(`finalizes auto width in ${mode} with ${rightDependsOnWidth ? "left" : "right"} fixed`, () => {
+        const instance = Object.create(PageMaster.PageBoxInstance.prototype);
+        instance.writingMode = mode;
+        instance.vertical = true;
+        instance.isAutoWidth = true;
+        instance.isAutoHeight = false;
+        instance.isRightDependentOnAutoWidth = rightDependsOnWidth;
+        instance.getPropAsNumber = (_context, name) => {
+          if (name === "width") return instance.calculatedWidth;
+          if (name === "left")
+            return rightDependsOnWidth
+              ? 20
+              : 400 - 20 - instance.calculatedWidth;
+          return 0;
+        };
+        instance.getProp = () => null;
+        instance.propagateProperty = () => {};
+        const container = new Vtree.Container(document.createElement("div"));
+        container.writingMode = mode;
+        container.setHorizontalPosition(80, 300);
+        container.computedBlockSize = 80;
+        instance.finishContainer(
+          context,
+          container,
+          { delayedItems: [], fetchers: [] },
+          container,
+          1,
+          {},
+          {},
+        );
+        expect(container.width).toBe(80);
+        expect(container.left).toBe(rightDependsOnWidth ? 20 : 300);
+        expect(container.element.style.width).toBe("80px");
+        expect(container.element.style.left).toBe(
+          rightDependsOnWidth ? "20px" : "300px",
+        );
+      });
+    }
+  }
 });

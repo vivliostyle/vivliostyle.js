@@ -8247,20 +8247,30 @@ export function resolveWritingMode(
   inherited: string,
 ): string {
   const value = cascaded["writing-mode"]?.evaluate(context, "writing-mode");
-  const mode =
-    !value ||
-    value === Css.ident.inherit ||
-    value === Css.ident.unset ||
-    Css.isRollbackValue(value)
-      ? inherited
-      : value === Css.ident.initial
-        ? "horizontal-tb"
-        : value.toString();
-  // Obsolete SVG 1.1 values remain accepted for existing documents. The
-  // browser receives the original value; geometry uses the Level 4 mode.
-  if (["lr", "rl", "lr-tb", "rl-tb"].includes(mode)) return "horizontal-tb";
-  if (mode === "tb" || mode === "tb-rl") return "vertical-rl";
-  return mode;
+  // Custom-property substitution preserves casing and can introduce values
+  // that are invalid at computed-value time for this inherited property.
+  if (!value?.isIdent()) return inherited;
+  const mode = value.toString().toLowerCase();
+  switch (mode) {
+    case "initial":
+    case "lr":
+    case "rl":
+    case "lr-tb":
+    case "rl-tb":
+      return "horizontal-tb";
+    case "tb":
+    case "tb-rl":
+      return "vertical-rl";
+    case "horizontal-tb":
+    case "vertical-rl":
+    case "vertical-lr":
+    case "sideways-rl":
+    case "sideways-lr":
+      return mode;
+    default:
+      // Includes inherit, unset, rollback keywords and invalid substitutions.
+      return inherited;
+  }
 }
 
 export function isVertical(
