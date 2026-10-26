@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- Test case for Issue #1480: footnote geometry must retain the used writing mode propagated from body. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Footnotes with writing-mode propagated from body (Issue #1480)
+    </title>
+    <style>
+      @page {
+        size: 460px 360px;
+        margin: 30px;
+        @bottom-center {
+          content: counter(page);
+        }
+        @footnote {
+          border-block-start: 1px solid;
+          margin-block-start: 8px;
+          font-size: 12px;
+        }
+      }
+      body {
+        writing-mode: vertical-lr;
+        direction: rtl;
+        margin: 0;
+        font: 16px/20px sans-serif;
+      }
+      p {
+        margin: 0;
+      }
+      .note {
+        float: footnote;
+      }
+      .note::footnote-call {
+        content: "*";
+      }
+    </style>
+  </head>
+  <body>
+    <p data-sequence="1">
+      Paragraph 1: ABC abc 123 日本語。<span
+        class="note"
+        data-review-note="true"
+        >Footnote text: ABC abc 123 日本語。 Keep this inside the page at
+        block-end.</span
+      >
+      All text must fit inside the page.
+    </p>
+    <p data-sequence="2">
+      Paragraph 2: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="3">
+      Paragraph 3: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="4">
+      Paragraph 4: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="5">
+      Paragraph 5: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="6">
+      Paragraph 6: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="7">
+      Paragraph 7: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+    <p data-sequence="8">
+      Paragraph 8: ABC abc 123 日本語。 All text must fit inside the page.
+    </p>
+  </body>
+</html>

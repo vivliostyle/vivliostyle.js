@@ -570,7 +570,7 @@ text-overflow = [clip | ellipsis | STRING]{1,2};
 text-combine-upright = none | all; /* relaxed */
 [epub,webkit]text-orientation = mixed | upright | sideways-right | sideways-left | sideways | use-glyph-orientation /* the following values are kept for backward-compatibility */ | vertical-right | rotate-right | rotate-left | rotate-normal | auto;
 unicode-bidi = normal | embed | isolate | bidi-override | isolate-override | plaintext;
-[epub,webkit]writing-mode = horizontal-tb | vertical-rl | lr-tb | rl-tb | tb-rl | lr | rl | tb;
+[epub,webkit]writing-mode = horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr | lr-tb | rl-tb | tb-rl | lr | rl | tb;
 
 /* CSS Flex box */
 FLEX_BASIS = content | PAPLENGTH;

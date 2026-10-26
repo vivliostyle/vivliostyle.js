@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Test case for Issue #1480: balanced columns must preserve block-start in left-to-right writing modes. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Balanced columns preserve block-start (Issue #1480)</title>
+    <style>
+      @page {
+        size: 460px 360px;
+        margin: 30px;
+      }
+      :root {
+        writing-mode: vertical-lr;
+        column-count: 2;
+        column-gap: 20px;
+        column-fill: balance;
+        font: 16px/20px sans-serif;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p data-sequence="1">Line 1. ABC.</p>
+    <p data-sequence="2">Line 2. ABC.</p>
+    <p data-sequence="3">Line 3. ABC.</p>
+    <p data-sequence="4">Line 4. ABC.</p>
+    <p data-sequence="5">Line 5. ABC.</p>
+    <p data-sequence="6">Line 6. ABC.</p>
+    <p data-sequence="7">Line 7. ABC.</p>
+    <p data-sequence="8">Line 8. ABC.</p>
+  </body>
+</html>

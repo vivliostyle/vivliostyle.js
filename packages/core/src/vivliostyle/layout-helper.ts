@@ -17,6 +17,7 @@
  * @fileoverview LayoutHelper - Helper functions of Layout.
  */
 import * as Base from "./base";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as Display from "./display";
 import * as RangeClientRects from "./range-client-rects";
 import * as RubyEmphasis from "./ruby-emphasis";
@@ -86,15 +87,20 @@ export function setAsRootColumn(column: Vtree.Container): void {
  * in a column beyond the current one due to the browser's column breaking.
  *
  * @param rect - The client rectangle to check.
- * @param vertical - Whether the layout is vertical.
+ * @param writingMode - Writing mode; legacy booleans select vertical-rl or horizontal-tb.
  * @return the number of columns the end edge of the rectangle is after the current column.
  */
 export function checkIfBeyondColumnBreaks(
   rect: Vtree.ClientRect,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): number {
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+
   const distance = vertical
-    ? rect.bottom
+    ? Math.max(Math.abs(rect.top), Math.abs(rect.bottom))
     : Math.max(Math.abs(rect.left), Math.abs(rect.right));
   return Math.round(distance / BIG_GAP);
 }
@@ -109,32 +115,52 @@ export function checkIfBeyondColumnBreaks(
  * block-progression position.
  *
  * @param rect - The client rectangle to check.
- * @param vertical - Whether the layout is vertical.
+ * @param writingMode - Writing mode; legacy booleans select vertical-rl or horizontal-tb.
  * @return the number of columns the start edge of the rectangle is after the current column.
  */
 export function adjustRectForColumnBreaking(
   rect: Vtree.ClientRect,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): number {
-  const columnOverEnd = checkIfBeyondColumnBreaks(rect, vertical);
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+  const blockReversed =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isBlockReversed(writingMode);
+
+  const columnOverEnd = checkIfBeyondColumnBreaks(rect, writingMode);
   if (columnOverEnd === 0) {
     return 0;
   }
   const distanceStart = vertical
-    ? rect.top
+    ? Math.min(Math.abs(rect.top), Math.abs(rect.bottom))
     : Math.min(Math.abs(rect.left), Math.abs(rect.right));
   const columnOverStart = Math.round(distanceStart / BIG_GAP);
   const shiftStart = columnOverStart * BIG_GAP;
   let shiftEnd = columnOverEnd * BIG_GAP;
   if (vertical) {
-    // vertical writing mode, columns are top to bottom
-    rect.top -= shiftStart;
-    rect.bottom -= shiftEnd;
-    if (rect.bottom < rect.top) {
-      rect.bottom += BIG_GAP;
+    const inlineSign = rect.top < -BIG_GAP / 2 ? -1 : 1;
+    if (inlineSign < 0) {
+      rect.bottom += shiftStart;
+      rect.top += shiftEnd;
+    } else {
+      rect.top -= shiftStart;
+      rect.bottom -= shiftEnd;
     }
-    rect.right -= shiftStart;
-    rect.left -= shiftEnd;
+    if (rect.bottom < rect.top) {
+      if (inlineSign < 0) rect.top -= BIG_GAP;
+      else rect.bottom += BIG_GAP;
+    }
+    if (blockReversed) {
+      rect.right -= shiftStart;
+      rect.left -= shiftEnd;
+    } else {
+      rect.left += shiftStart;
+      rect.right += shiftEnd;
+    }
   } else if (rect.left < -BIG_GAP / 2) {
     // columns are right to left
     rect.right += shiftStart;
@@ -165,10 +191,10 @@ export function adjustRectForColumnBreaking(
  */
 export function adjustRectsForColumnBreaking(
   rects: Vtree.ClientRect[],
-  vertical: boolean,
+  writingMode: boolean | string,
 ): void {
   for (let i = 0; i < rects.length; i++) {
-    adjustRectForColumnBreaking(rects[i], vertical);
+    adjustRectForColumnBreaking(rects[i], writingMode);
   }
 }
 
@@ -211,8 +237,13 @@ export function adjustTextRectsForLineHeight(
   rects: Vtree.ClientRect[],
   element: Element | null,
   clientLayout: Vtree.ClientLayout,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): void {
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+
   if (!element || !rects.length) {
     return;
   }
@@ -256,9 +287,14 @@ export function adjustInlineRectsForLineHeight(
   rects: Vtree.ClientRect[],
   element: Element,
   clientLayout: Vtree.ClientLayout,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): void {
-  RubyEmphasis.adjustRubyEndRects(rects, element, vertical);
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+
+  RubyEmphasis.adjustRubyEndRects(rects, element, writingMode);
   if (
     Base.mediaTags[element.localName] ||
     /^r(uby|[bt]c?)$/.test(element.localName)
@@ -337,10 +373,10 @@ function getLineBoxHeight(
 export function getElementClientRectAdjusted(
   clientLayout: Vtree.ClientLayout,
   element: Element,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): Vtree.ClientRect {
   const rect = clientLayout.getElementClientRect(element);
-  const columnOver = adjustRectForColumnBreaking(rect, vertical);
+  const columnOver = adjustRectForColumnBreaking(rect, writingMode);
 
   if (columnOver > 0) {
     let style = clientLayout.getElementComputedStyle(element);
@@ -482,16 +518,20 @@ export function fixOverflowAtForcedColumnBreak(node: Node): void {
       nonRootMultiColumn,
     );
   const { writingMode, direction, columnGap, fontSize } = multiColumnStyle;
-  const vertical =
-    writingMode === "vertical-rl" || writingMode === "vertical-lr";
-  const isRtl = direction === "rtl";
+  const vertical = CssLogicalUtil.isVertical(writingMode);
+  const isRtl = CssLogicalUtil.isInlineReversed(
+    writingMode,
+    direction === "rtl",
+  );
   const halfGap = (parseFloat(columnGap) || parseFloat(fontSize) || 16) / 2;
 
   // Check if the element is overflowing the multi-column box
   const multiColumnRect = nonRootMultiColumn.getBoundingClientRect();
   const elementRect = element.getBoundingClientRect();
   const columnOverflow = vertical
-    ? elementRect.top > multiColumnRect.bottom + halfGap
+    ? isRtl
+      ? elementRect.bottom < multiColumnRect.top - halfGap
+      : elementRect.top > multiColumnRect.bottom + halfGap
     : isRtl
       ? elementRect.right < multiColumnRect.left - halfGap
       : elementRect.left > multiColumnRect.right + halfGap;
@@ -520,7 +560,7 @@ export function checkRootColumnOverflow(column: Layout.Column): number {
   if (!rect) {
     return 0;
   }
-  const columnOver = checkIfBeyondColumnBreaks(rect, column.vertical);
+  const columnOver = checkIfBeyondColumnBreaks(rect, column.writingMode);
   return columnOver;
 }
 
@@ -622,8 +662,17 @@ export function fixAutoFillMultiColumnBoxes(column: Layout.Column): void {
 function calculateInlineAnchorEdge(
   element: Element,
   clientLayout: Vtree.ClientLayout,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): number {
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+  const blockReversed =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isBlockReversed(writingMode);
+
   const marker = element.ownerDocument.createElement("span");
   element.before(marker);
   const markerRect = clientLayout.getElementClientRect(marker);
@@ -633,14 +682,18 @@ function calculateInlineAnchorEdge(
     (markerRect.right > markerRect.left || markerRect.bottom > markerRect.top)
   ) {
     const rects = [markerRect];
-    adjustRectsForColumnBreaking(rects, vertical);
+    adjustRectsForColumnBreaking(rects, writingMode);
     adjustTextRectsForLineHeight(
       rects,
       element.parentElement,
       clientLayout,
       vertical,
     );
-    const edge = vertical ? rects[0].left : rects[0].bottom;
+    const edge = vertical
+      ? blockReversed
+        ? rects[0].left
+        : rects[0].right
+      : rects[0].bottom;
     if (Number.isFinite(edge)) {
       return edge;
     }
@@ -658,8 +711,17 @@ export function calculateEdge(
   nodeContext: Vtree.NodeContext,
   clientLayout: Vtree.ClientLayout,
   extraOffset: number,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): number {
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+  const blockReversed =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isBlockReversed(writingMode);
+
   const node = nodeContext.viewNode;
   if (!node) {
     return NaN;
@@ -685,15 +747,17 @@ export function calculateEdge(
     const element = outOfFlowContext.viewNode as HTMLElement;
     const style = element.style;
     const blockStart =
-      (vertical ? style.right : style.top) || style.insetBlockStart;
+      (vertical ? (blockReversed ? style.right : style.left) : style.top) ||
+      style.insetBlockStart;
     const blockEnd =
-      (vertical ? style.left : style.bottom) || style.insetBlockEnd;
+      (vertical ? (blockReversed ? style.left : style.right) : style.bottom) ||
+      style.insetBlockEnd;
     if (
       style.position === "absolute" &&
       (!blockStart || blockStart === "auto") &&
       (!blockEnd || blockEnd === "auto")
     ) {
-      return calculateInlineAnchorEdge(element, clientLayout, vertical);
+      return calculateInlineAnchorEdge(element, clientLayout, writingMode);
     }
     return NaN;
   }
@@ -727,7 +791,7 @@ export function calculateEdge(
     if (element.localName === "br") {
       // Use the line-height-adjusted marker so a fitting line does not leave
       // its BR on the next page as an extra blank line. (Issue #2163)
-      return calculateInlineAnchorEdge(element, clientLayout, vertical);
+      return calculateInlineAnchorEdge(element, clientLayout, writingMode);
     }
     if (nodeContext.after || !nodeContext.inline) {
       if (
@@ -744,7 +808,7 @@ export function calculateEdge(
       const cbox = getElementClientRectAdjusted(
         clientLayout,
         element,
-        vertical,
+        writingMode,
       );
       if (
         cbox.left === 0 &&
@@ -763,25 +827,35 @@ export function calculateEdge(
             // their bounding rectangle, which would collapse several lines
             // to a single line-height.
             const rects = clientLayout.getElementClientRects(element);
-            adjustRectsForColumnBreaking(rects, vertical);
+            adjustRectsForColumnBreaking(rects, writingMode);
             adjustInlineRectsForLineHeight(
               rects,
               element,
               clientLayout,
-              vertical,
+              writingMode,
             );
             if (rects.length) {
               return vertical
-                ? Math.min(...rects.map((rect) => rect.left))
+                ? blockReversed
+                  ? Math.min(...rects.map((rect) => rect.left))
+                  : Math.max(...rects.map((rect) => rect.right))
                 : Math.max(...rects.map((rect) => rect.bottom));
             }
           }
           const allowance = nodeContext.inline
             ? 0
-            : RubyEmphasis.blockEndAllowance(element, clientLayout, vertical);
-          return vertical ? cbox.left + allowance : cbox.bottom - allowance;
+            : RubyEmphasis.blockEndAllowance(
+                element,
+                clientLayout,
+                writingMode,
+              );
+          return vertical
+            ? blockReversed
+              ? cbox.left + allowance
+              : cbox.right - allowance
+            : cbox.bottom - allowance;
         } else {
-          return vertical ? cbox.right : cbox.top;
+          return vertical ? (blockReversed ? cbox.right : cbox.left) : cbox.top;
         }
       }
     }
@@ -805,13 +879,13 @@ export function calculateEdge(
     );
 
     // Adjust boxes' positions for column breaking
-    adjustRectsForColumnBreaking(boxes, vertical);
+    adjustRectsForColumnBreaking(boxes, writingMode);
 
     // Measure the character edge with the line box instead of the glyph box
     // when the line-height is smaller than the font's ascent + descent.
     // (Issue #2163)
     adjustTextRectsForLineHeight(boxes, element, clientLayout, vertical);
-    RubyEmphasis.adjustRubyEndRects(boxes, element, vertical);
+    RubyEmphasis.adjustRubyEndRects(boxes, element, writingMode);
 
     // Prefer non-zero-area rects for stable edge calculation.
     // Fallback to block-direction-only rects only in preformatted contexts
@@ -840,7 +914,9 @@ export function calculateEdge(
       return NaN;
     }
     if (vertical) {
-      edge = Math.min(...boxes.map((box) => box.left));
+      edge = blockReversed
+        ? Math.min(...boxes.map((box) => box.left))
+        : Math.max(...boxes.map((box) => box.right));
     } else {
       edge = Math.max(...boxes.map((box) => box.bottom));
     }
@@ -851,8 +927,13 @@ export function calculateEdge(
 export function getElementHeight(
   element: Element,
   column: Layout.Column,
-  vertical: boolean,
+  writingMode: boolean | string,
 ): number {
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+
   const usingBrowserColumnBreaking = isUsingBrowserColumnBreaking(column);
   if (usingBrowserColumnBreaking) {
     unsetBrowserColumnBreaking(column);

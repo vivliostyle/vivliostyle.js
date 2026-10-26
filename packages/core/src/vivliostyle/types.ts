@@ -818,8 +818,14 @@ export namespace PageFloats {
       condition: PageFloatPlacementCondition,
     ): string | null;
     getMaxReachedAfterEdge(): number;
-    getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number;
-    getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number;
+    getBlockEndEdgeOfBlockStartFloats(
+      inlinePos?: number,
+      writingMode?: string,
+    ): number;
+    getBlockStartEdgeOfBlockEndFloats(
+      inlinePos?: number,
+      writingMode?: string,
+    ): number;
     getPageFloatClearEdge(clear: string, column: Layout.Column): number;
     getPageFloatPlacementCondition(
       float: PageFloat,
@@ -917,7 +923,7 @@ export namespace RepetitiveElement {
     getRootNodeContext(
       nodeContext: Vtree.NodeContext,
     ): Vtree.NodeContext | null;
-    initializeRepetitiveElements(vertical: boolean): void;
+    initializeRepetitiveElements(writingMode: boolean | string): void;
   }
 
   export function isInstanceOfRepetitiveElementsOwnerFormattingContext(
@@ -1123,13 +1129,13 @@ export namespace Vtree {
     /**
      * Apply styles to footnote container.
      * @param target element to apply styles to
-     * @return vertical
+     * @return resolved writing mode
      */
     applyFootnoteStyle(
-      vertical: boolean,
+      inheritedWritingMode: string,
       rtl: boolean,
       target: Element,
-    ): Task.Result<boolean>;
+    ): Task.Result<string>;
     /**
      * Peel off innermost first-XXX pseudoelement, create and create view nodes
      * after the end of that pseudoelement.
@@ -1240,12 +1246,14 @@ export namespace Vtree {
     originY: number;
     snapWidth: number;
     snapHeight: number;
+    writingMode?: string;
     vertical: boolean; // vertical writing
     rtl: boolean;
     borderBoxSizing: boolean;
   }
 
   export interface Container extends ContainerGeometry {
+    writingMode: string;
     exclusions: GeometryUtil.Shape[] | null;
     innerShape: GeometryUtil.Shape | null;
     computedBlockSize: number;
@@ -1360,6 +1368,7 @@ export namespace Vtree {
     viewNode: Element | Text | null;
     clearSpacer: Element | null;
     inheritedProps: { [key: string]: number | string | Css.Val | undefined };
+    writingMode: string;
     vertical: boolean;
     direction: string;
     firstPseudo: FirstPseudo | null;

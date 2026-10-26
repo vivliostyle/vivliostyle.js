@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- Test case for Issue #1480: substituted writing-mode keywords must set page progression and float contexts consistently. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Substituted writing-mode with page and region floats (Issue #1480)
+    </title>
+    <style>
+      @page {
+        size: 400px 300px;
+        margin: 30px;
+        @bottom-center {
+          content: counter(page);
+          writing-mode: horizontal-tb;
+        }
+      }
+      :root {
+        --wm: SIDEWAYS-LR;
+        writing-mode: var(--wm);
+        direction: rtl;
+        font: 16px/20px sans-serif;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      .page-float {
+        float-reference: page;
+        float: block-end;
+        block-size: 40px;
+        inline-size: 100%;
+        background: lightblue;
+      }
+      .region-float {
+        float-reference: region;
+        float: block-start;
+        block-size: 40px;
+        inline-size: 100%;
+        background: lightgreen;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="page-float" data-review-float="page">PAGE FLOAT</aside>
+    <aside class="region-float" data-review-float="region">REGION FLOAT</aside>
+    <p data-sequence="1">
+      Paragraph 1: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="2">
+      Paragraph 2: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="3">
+      Paragraph 3: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="4">
+      Paragraph 4: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="5">
+      Paragraph 5: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="6">
+      Paragraph 6: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="7">
+      Paragraph 7: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="8">
+      Paragraph 8: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="9">
+      Paragraph 9: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="10">
+      Paragraph 10: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="11">
+      Paragraph 11: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+    <p data-sequence="12">
+      Paragraph 12: ABC abc 123 日本語。 The text must paginate without errors
+      and preserve its order.
+    </p>
+  </body>
+</html>

@@ -1001,6 +1001,95 @@ module.exports = [
     ],
   },
   {
+    category: "Writing modes",
+    files: [
+      {
+        file: "writing-mode/horizontal-tb.html",
+        title: "Pagination in horizontal-tb (Issue #1480)",
+      },
+      {
+        file: "writing-mode/vertical-rl.html",
+        title: "Pagination in vertical-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode/vertical-lr.html",
+        title: "Pagination in vertical-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/sideways-rl.html",
+        title: "Pagination in sideways-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode/sideways-lr.html",
+        title: "Pagination in sideways-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/vertical-lr-features.html",
+        title: "Layout features in vertical-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/sideways-rl-features.html",
+        title: "Layout features in sideways-rl (Issue #1480)",
+      },
+      {
+        file: "writing-mode/sideways-lr-features.html",
+        title: "Layout features in sideways-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/variable-page-floats.html",
+        title:
+          "Substituted writing-mode with page and region floats (Issue #1480)",
+      },
+      {
+        file: "writing-mode/balanced-columns.html",
+        title: "Balanced columns preserve block-start (Issue #1480)",
+      },
+      {
+        file: "writing-mode/margin-align.html",
+        title: "Page-margin alignment in sideways-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/detached-clear.html",
+        title: "Clear inside detached vertical float areas (Issue #1480)",
+      },
+      {
+        file: "writing-mode/footnote-override.html",
+        title: "Footnotes with a different writing mode (Issue #1480)",
+      },
+      {
+        file: "writing-mode/opposite-column-rules.html",
+        title: "Column rules with opposite ancestor progression (Issue #1480)",
+      },
+      {
+        file: "writing-mode/opposite-float-wrap.html",
+        title:
+          "Opposite ancestor and column float wrap directions (Issue #1480)",
+      },
+      {
+        file: "writing-mode/ancestor-float-wrap.html",
+        title: "Ancestor float minimum wrap in vertical-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode/page-area-direction.html",
+        title: "Page float direction differs from page context (Issue #1480)",
+      },
+      {
+        file: "writing-mode/body-page-units.html",
+        title:
+          "Logical page units with writing-mode propagated from body (Issue #1480)",
+      },
+      {
+        file: "writing-mode/body-footnotes.html",
+        title: "Footnotes with writing-mode propagated from body (Issue #1480)",
+      },
+      {
+        file: "writing-mode/wrapped-following-content-sideways-lr.html",
+        title:
+          "leader() followed by wrapped content in sideways-lr (Issue #1480)",
+      },
+    ],
+  },
+  {
     category: "Page properties and margin boxes",
     files: [
       {

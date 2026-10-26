@@ -93,11 +93,12 @@ export function isPageFloat(floatReference: FloatReference): boolean {
  */
 export function resolveInlineFloatDirection(
   floatSide: string,
-  vertical: boolean,
+  mode: boolean | string,
   direction: string,
   pageSide: Constants.PageSide | null,
 ): string {
-  const writingMode = vertical ? "vertical-rl" : "horizontal-tb";
+  const writingMode =
+    typeof mode === "string" ? mode : mode ? "vertical-rl" : "horizontal-tb";
   if (floatSide === "top" || floatSide === "bottom") {
     floatSide = CssLogicalUtil.toLogical(floatSide, writingMode, direction);
   }
@@ -355,12 +356,17 @@ export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   }
 }
 
+type PageFloatAxes = Pick<
+  PageFloatLayoutContext,
+  "writingMode" | "direction" | "pageSide"
+>;
+
 /**
  * The sides a float can take are relative to the writing mode and direction of
  * the context, and `inside` / `outside` also to which side of the spread the
  * page is on.
  */
-function toLogicalSide(side: string, context: PageFloatLayoutContext): string {
+function toLogicalSide(side: string, context: PageFloatAxes): string {
   if (side === "inside" || side === "outside") {
     const isLeftPage = context.pageSide === Constants.PageSide.LEFT;
     side =
@@ -379,7 +385,7 @@ function toLogicalSide(side: string, context: PageFloatLayoutContext): string {
   );
 }
 
-function toPhysicalSide(side: string, context: PageFloatLayoutContext): string {
+function toPhysicalSide(side: string, context: PageFloatAxes): string {
   return CssLogicalUtil.toPhysical(
     side,
     context.writingMode.toString(),
@@ -389,7 +395,7 @@ function toPhysicalSide(side: string, context: PageFloatLayoutContext): string {
 
 function toLogicalFloatSides(
   floatSide: string,
-  context: PageFloatLayoutContext,
+  context: PageFloatAxes,
 ): string[] {
   const sides = floatSide.split(" ");
 
@@ -1032,16 +1038,20 @@ export abstract class PageFloatLayoutContext
     this.state.invalidated = false;
   }
 
+  protected getAxes(): PageFloatAxes {
+    return this;
+  }
+
   protected toLogical(side: string): string {
-    return toLogicalSide(side, this);
+    return toLogicalSide(side, this.getAxes());
   }
 
   protected toPhysical(side: string): string {
-    return toPhysicalSide(side, this);
+    return toPhysicalSide(side, this.getAxes());
   }
 
   protected toLogicalFloatSides(floatSide: string): string[] {
-    return toLogicalFloatSides(floatSide, this);
+    return toLogicalFloatSides(floatSide, this.getAxes());
   }
 
   discardStashedFragments(floatReference: FloatReference) {
@@ -1288,6 +1298,22 @@ export class AttachedPageFloatLayoutContext
   extends ParentPageFloatLayoutContext
   implements PageFloats.AttachedPageFloatLayoutContext
 {
+  protected override getAxes(): PageFloatAxes {
+    // Detached contexts have no inherited axes. Geometry follows the current
+    // container, including writing-mode overrides applied to a footnote later.
+    if (!this.container.writingMode) return this;
+    return {
+      writingMode: Css.getName(this.container.writingMode),
+      direction:
+        this.container.rtl == null
+          ? this.direction
+          : this.container.rtl
+            ? Css.ident.rtl
+            : Css.ident.ltr,
+      pageSide: this.pageSide,
+    };
+  }
+
   asAttached(): AttachedPageFloatLayoutContext {
     return this;
   }
@@ -1805,30 +1831,7 @@ export class AttachedPageFloatLayoutContext
       logicalSide2,
       excludedArea,
     );
-    switch (logicalSide) {
-      case "block-start":
-        return this.container.vertical ? limits.right : limits.top;
-      case "block-end":
-        return this.container.vertical ? limits.left : limits.bottom;
-      case "inline-start":
-        return this.container.vertical
-          ? this.container.rtl
-            ? limits.bottom
-            : limits.top
-          : this.container.rtl
-            ? limits.right
-            : limits.left;
-      case "inline-end":
-        return this.container.vertical
-          ? this.container.rtl
-            ? limits.top
-            : limits.bottom
-          : this.container.rtl
-            ? limits.left
-            : limits.right;
-      default:
-        throw new Error(`Unknown logical side: ${logicalSide}`);
-    }
+    return limits[this.toPhysical(logicalSide)];
   }
 
   private getLimitValuesInner(
@@ -1918,77 +1921,51 @@ export class AttachedPageFloatLayoutContext
         }
         const area = f.area;
         const floatMinWrapBlock = f.continuations[0].float.floatMinWrapBlock;
-        const outerBlockEnd = area.vertical
-          ? area.left + area.getInsetLeft() + area.width + area.getInsetRight()
-          : area.top + area.getInsetTop() + area.height + area.getInsetBottom();
-        const outerInlineEnd = area.vertical
-          ? area.top + area.getInsetTop() + area.height + area.getInsetBottom()
-          : area.left + area.getInsetLeft() + area.width + area.getInsetRight();
-        let top = l.top;
-        let left = l.left;
-        let bottom = l.bottom;
-        let right = l.right;
-        let floatMinWrapBlockStart = l.floatMinWrapBlockStart;
-        let floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
-        switch (logicalFloatSide) {
-          case "inline-start":
-            if (area.vertical) {
-              top = Math.max(top, outerInlineEnd);
-            } else {
-              left = Math.max(left, outerInlineEnd);
-            }
+        const physicalSide = this.toPhysical(logicalFloatSide);
+        const outerRight =
+          area.left + area.getInsetLeft() + area.width + area.getInsetRight();
+        const outerBottom =
+          area.top + area.getInsetTop() + area.height + area.getInsetBottom();
+        let {
+          top,
+          left,
+          bottom,
+          right,
+          floatMinWrapBlockStart,
+          floatMinWrapBlockEnd,
+        } = l;
+        const oldLimit = l[physicalSide];
+        switch (physicalSide) {
+          case "top":
+            top = Math.max(top, outerBottom);
             break;
-          case "block-start":
-            if (area.vertical) {
-              if (floatMinWrapBlock && area.left < right) {
-                floatMinWrapBlockStart = resolveLengthPercentage(
-                  floatMinWrapBlock,
-                  (area as any).rootViewNodes[0],
-                  paddingRect.x2 - paddingRect.x1,
-                ) as number;
-              }
-              right = Math.min(right, area.left);
-            } else {
-              if (floatMinWrapBlock && outerBlockEnd > top) {
-                floatMinWrapBlockStart = resolveLengthPercentage(
-                  floatMinWrapBlock,
-                  (area as any).rootViewNodes[0],
-                  paddingRect.y2 - paddingRect.y1,
-                ) as number;
-              }
-              top = Math.max(top, outerBlockEnd);
-            }
+          case "bottom":
+            bottom = Math.min(bottom, area.top);
             break;
-          case "inline-end":
-            if (area.vertical) {
-              bottom = Math.min(bottom, area.top);
-            } else {
-              right = Math.min(right, area.left);
-            }
+          case "left":
+            left = Math.max(left, outerRight);
             break;
-          case "block-end":
-            if (area.vertical) {
-              if (floatMinWrapBlock && outerBlockEnd > left) {
-                floatMinWrapBlockEnd = resolveLengthPercentage(
-                  floatMinWrapBlock,
-                  (area as any).rootViewNodes[0],
-                  paddingRect.x2 - paddingRect.x1,
-                ) as number;
-              }
-              left = Math.max(left, outerBlockEnd);
-            } else {
-              if (floatMinWrapBlock && area.top < bottom) {
-                floatMinWrapBlockEnd = resolveLengthPercentage(
-                  floatMinWrapBlock,
-                  (area as any).rootViewNodes[0],
-                  paddingRect.y2 - paddingRect.y1,
-                ) as number;
-              }
-              bottom = Math.min(bottom, area.top);
-            }
+          case "right":
+            right = Math.min(right, area.left);
             break;
           default:
             throw new Error(`Unknown logical float side: ${logicalFloatSide}`);
+        }
+        const newLimit = { top, left, bottom, right }[physicalSide];
+        if (
+          floatMinWrapBlock &&
+          newLimit !== oldLimit &&
+          logicalFloatSide.startsWith("block-")
+        ) {
+          const wrap = resolveLengthPercentage(
+            floatMinWrapBlock,
+            (area as any).rootViewNodes[0],
+            area.vertical
+              ? paddingRect.x2 - paddingRect.x1
+              : paddingRect.y2 - paddingRect.y1,
+          ) as number;
+          if (logicalFloatSide === "block-start") floatMinWrapBlockStart = wrap;
+          else floatMinWrapBlockEnd = wrap;
         }
         return {
           top,
@@ -2094,6 +2071,27 @@ export class AttachedPageFloatLayoutContext
       includeParentLimits,
       area,
     );
+    // A footnote can change the progression of either axis without changing
+    // their orientation. Limits arrive in the containing context's axes, but
+    // sizes and positioning below use the area's own axes.
+    const parallelAxes = area.vertical === this.container.vertical;
+    const reverseBlock =
+      parallelAxes && area.getBoxDir() !== this.container.getBoxDir();
+    const reverseInline =
+      parallelAxes && area.getInlineDir() !== this.container.getInlineDir();
+    if (reverseBlock) [blockStart, blockEnd] = [blockEnd, blockStart];
+    if (reverseInline) [inlineStart, inlineEnd] = [inlineEnd, inlineStart];
+    const areaSide = (side: string): string => {
+      if (
+        (side.startsWith("block-") && reverseBlock) ||
+        (side.startsWith("inline-") && reverseInline)
+      ) {
+        return side.endsWith("start")
+          ? side.replace("start", "end")
+          : side.replace("end", "start");
+      }
+      return side;
+    };
     const blockOffset = area.vertical ? area.originX : area.originY;
     const inlineOffset = area.vertical ? area.originY : area.originX;
     // For footnotes, skip clamping blockStart/blockEnd to the area's own
@@ -2103,40 +2101,41 @@ export class AttachedPageFloatLayoutContext
     // After positioning, the block dimension is clamped to max-block-size
     // in setupFloatArea. (Issue #1878)
     if (!area.isFootnote) {
-      blockStart = area.vertical
-        ? Math.min(
-            blockStart,
-            area.left +
-              area.getInsetLeft() +
-              area.width +
-              area.getInsetRight() +
-              blockOffset,
-          )
-        : Math.max(blockStart, area.top + blockOffset);
-      blockEnd = area.vertical
-        ? Math.max(blockEnd, area.left + blockOffset)
-        : Math.min(
-            blockEnd,
-            area.top +
-              area.getInsetTop() +
-              area.height +
-              area.getInsetBottom() +
-              blockOffset,
-          );
+      const start = area.vertical
+        ? area.getBoxDir() < 0
+          ? area.left + area.getInsetLeft() + area.width + area.getInsetRight()
+          : area.left
+        : area.top;
+      const end = area.vertical
+        ? area.getBoxDir() < 0
+          ? area.left
+          : area.left + area.getInsetLeft() + area.width + area.getInsetRight()
+        : area.top + area.getInsetTop() + area.height + area.getInsetBottom();
+      const dir = area.getBoxDir();
+      blockStart =
+        dir * Math.max(dir * blockStart, dir * (start + blockOffset));
+      blockEnd = dir * Math.min(dir * blockEnd, dir * (end + blockOffset));
     }
 
     function limitBlockStartEndValueWithOpenRect(getRect, rect) {
       let openRect = getRect(area.bands, rect);
       if (openRect) {
         if (area.vertical) {
-          openRect = GeometryUtil.unrotateBox(openRect);
+          openRect = GeometryUtil.unrotateBox(openRect, area.getBoxDir());
         }
-        blockStart = area.vertical
-          ? Math.min(blockStart, openRect.x2)
-          : Math.max(blockStart, openRect.y1);
-        blockEnd = area.vertical
-          ? Math.max(blockEnd, openRect.x1)
-          : Math.min(blockEnd, openRect.y2);
+        const start = area.vertical
+          ? area.getBoxDir() < 0
+            ? openRect.x2
+            : openRect.x1
+          : openRect.y1;
+        const end = area.vertical
+          ? area.getBoxDir() < 0
+            ? openRect.x1
+            : openRect.x2
+          : openRect.y2;
+        const dir = area.getBoxDir();
+        blockStart = dir * Math.max(dir * blockStart, dir * start);
+        blockEnd = dir * Math.min(dir * blockEnd, dir * end);
         return true;
       } else {
         return force;
@@ -2149,13 +2148,19 @@ export class AttachedPageFloatLayoutContext
     if (init) {
       const rect = area.vertical
         ? GeometryUtil.rotateBox(
-            new GeometryUtil.Rect(blockEnd, inlineStart, blockStart, inlineEnd),
+            new GeometryUtil.Rect(
+              Math.min(blockStart, blockEnd),
+              Math.min(inlineStart, inlineEnd),
+              Math.max(blockStart, blockEnd),
+              Math.max(inlineStart, inlineEnd),
+            ),
+            area.getBoxDir(),
           )
         : new GeometryUtil.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
       if (
-        logicalFloatSides[0] === "block-start" ||
+        areaSide(logicalFloatSides[0]) === "block-start" ||
         logicalFloatSides[0] === "snap-block" ||
-        logicalFloatSides[0] === "inline-start" ||
+        areaSide(logicalFloatSides[0]) === "inline-start" ||
         logicalFloatSides[0] === "snap-inline"
       ) {
         if (
@@ -2168,9 +2173,9 @@ export class AttachedPageFloatLayoutContext
         }
       }
       if (
-        logicalFloatSides[0] === "block-end" ||
+        areaSide(logicalFloatSides[0]) === "block-end" ||
         logicalFloatSides[0] === "snap-block" ||
-        logicalFloatSides[0] === "inline-end" ||
+        areaSide(logicalFloatSides[0]) === "inline-end" ||
         logicalFloatSides[0] === "snap-inline"
       ) {
         if (
@@ -2193,7 +2198,12 @@ export class AttachedPageFloatLayoutContext
         isFinite(anchorEdge) &&
         logicalFloatSides[0] === "block-end"
       ) {
-        if (area.vertical) {
+        if (reverseBlock) {
+          blockEnd =
+            this.container.getBoxDir() < 0
+              ? Math.min(blockEnd, anchorEdge)
+              : Math.max(blockEnd, anchorEdge);
+        } else if (area.getBoxDir() < 0) {
           blockStart = Math.min(blockStart, anchorEdge);
         } else {
           blockStart = Math.max(blockStart, anchorEdge);
@@ -2205,11 +2215,12 @@ export class AttachedPageFloatLayoutContext
       // in multi-column re-layout), this limits the footnote area.
       if (area.isFootnote && this.footnoteMaxBlockSize != null) {
         outerBlockSize = Math.min(outerBlockSize, this.footnoteMaxBlockSize);
-        // Adjust blockStart accordingly for correct positioning
-        if (area.vertical) {
-          blockStart = blockEnd + outerBlockSize;
+        // Keep the containing page's block-end fixed, even if the footnote
+        // uses the opposite block progression.
+        if (reverseBlock) {
+          blockEnd = blockStart + area.getBoxDir() * outerBlockSize;
         } else {
-          blockStart = blockEnd - outerBlockSize;
+          blockStart = blockEnd - area.getBoxDir() * outerBlockSize;
         }
       }
       blockSize = Math.max(
@@ -2252,10 +2263,18 @@ export class AttachedPageFloatLayoutContext
           const fromStart =
             this.container.getBoxDir() *
             (anchorEdge -
-              (this.container.vertical ? containerRect.x2 : containerRect.y1));
+              (this.container.vertical
+                ? this.container.getBoxDir() < 0
+                  ? containerRect.x2
+                  : containerRect.x1
+                : containerRect.y1));
           const fromEnd =
             this.container.getBoxDir() *
-            ((this.container.vertical ? containerRect.x1 : containerRect.y2) -
+            ((this.container.vertical
+              ? this.container.getBoxDir() < 0
+                ? containerRect.x1
+                : containerRect.x2
+              : containerRect.y2) -
               anchorEdge -
               outerBlockSize);
           if (fromStart <= fromEnd) {
@@ -2315,19 +2334,21 @@ export class AttachedPageFloatLayoutContext
     blockEnd -= blockOffset;
     inlineStart -= inlineOffset;
     inlineEnd -= inlineOffset;
+    const placementFloatSides = logicalFloatSides.map(areaSide);
 
     if (
-      logicalFloatSides.some(
+      placementFloatSides.some(
         (s) => s === "inline-start" || s === "snap-inline",
       ) ||
-      (logicalFloatSides.length === 1 &&
-        (logicalFloatSides[0] === "block-start" ||
-          logicalFloatSides[0] === "snap-block"))
+      (placementFloatSides.length === 1 &&
+        (placementFloatSides[0] === "block-start" ||
+          placementFloatSides[0] === "snap-block"))
     ) {
       area.setInlinePosition(inlineStart, inlineSize);
     } else if (
-      logicalFloatSides.some((s) => s === "inline-end") ||
-      (logicalFloatSides.length === 1 && logicalFloatSides[0] === "block-end")
+      placementFloatSides.some((s) => s === "inline-end") ||
+      (placementFloatSides.length === 1 &&
+        placementFloatSides[0] === "block-end")
     ) {
       area.setInlinePosition(
         inlineEnd - outerInlineSize * area.getInlineDir(),
@@ -2335,17 +2356,18 @@ export class AttachedPageFloatLayoutContext
       );
     }
     if (
-      logicalFloatSides.some(
+      placementFloatSides.some(
         (s) => s === "block-start" || s === "snap-block",
       ) ||
-      (logicalFloatSides.length === 1 &&
-        (logicalFloatSides[0] === "inline-start" ||
-          logicalFloatSides[0] === "snap-inline"))
+      (placementFloatSides.length === 1 &&
+        (placementFloatSides[0] === "inline-start" ||
+          placementFloatSides[0] === "snap-inline"))
     ) {
       area.setBlockPosition(blockStart, blockSize);
     } else if (
-      logicalFloatSides.some((s) => s === "block-end") ||
-      (logicalFloatSides.length === 1 && logicalFloatSides[0] === "inline-end")
+      placementFloatSides.some((s) => s === "block-end") ||
+      (placementFloatSides.length === 1 &&
+        placementFloatSides[0] === "inline-end")
     ) {
       const blockPosition = blockEnd - outerBlockSize * area.getBoxDir();
       area.setBlockPosition(blockPosition, blockSize);
@@ -2364,92 +2386,80 @@ export class AttachedPageFloatLayoutContext
   }
 
   getMaxReachedAfterEdge(): number {
-    const isVertical = this.container.vertical;
+    const dir = this.container.getBoxDir();
     return this.floatFragments.reduce(
       (edge, fragment) => {
         const rect = fragment.getOuterRect();
-        if (isVertical) {
-          return Math.min(edge, rect.x1);
-        } else {
-          return Math.max(edge, rect.y2);
-        }
+        const after = this.container.vertical
+          ? dir < 0
+            ? rect.x1
+            : rect.x2
+          : rect.y2;
+        return dir * Math.max(dir * edge, dir * after);
       },
-      isVertical ? Infinity : 0,
+      dir < 0 ? Infinity : 0,
     );
   }
 
-  getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number {
-    const isVertical = this.container.vertical;
-    let edge = NaN;
-    this.floatFragments
-      .filter((fragment) => fragment.floatSide.includes("block-start"))
-      .filter((fragment) => {
-        if (inlinePos === undefined || !isFinite(inlinePos)) {
-          return true;
-        }
-        const rect = fragment.getOuterRect();
-        return isVertical
-          ? rect.y1 <= inlinePos && inlinePos <= rect.y2
-          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
-      })
-      .forEach((fragment) => {
-        const rect = fragment.getOuterRect();
-        const fragmentEdge = isVertical ? rect.x1 : rect.y2;
-        edge = isFinite(edge)
-          ? isVertical
-            ? Math.min(edge, fragmentEdge)
-            : Math.max(edge, fragmentEdge)
-          : fragmentEdge;
-      });
-    const attachedParent = this.attachedParent;
-    if (attachedParent) {
-      const parentEdge =
-        attachedParent.getBlockEndEdgeOfBlockStartFloats(inlinePos);
-      if (isFinite(parentEdge)) {
-        edge = isFinite(edge)
-          ? isVertical
-            ? Math.min(edge, parentEdge)
-            : Math.max(edge, parentEdge)
-          : parentEdge;
-      }
-    }
-    return edge;
+  /** Limits are expressed in the requesting column's axes through all ancestors. */
+  getBlockEndEdgeOfBlockStartFloats(
+    inlinePos?: number,
+    writingMode: string = this.container.writingMode,
+  ): number {
+    return this.getFloatEdge(
+      CssLogicalUtil.toPhysical("block-start", writingMode),
+      inlinePos,
+    );
   }
 
-  getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number {
-    const isVertical = this.container.vertical;
+  getBlockStartEdgeOfBlockEndFloats(
+    inlinePos?: number,
+    writingMode: string = this.container.writingMode,
+  ): number {
+    return this.getFloatEdge(
+      CssLogicalUtil.toPhysical("block-end", writingMode),
+      inlinePos,
+    );
+  }
+
+  private getFloatEdge(physicalSide: string, inlinePos?: number): number {
+    const vertical = physicalSide === "left" || physicalSide === "right";
+    const lowSide = physicalSide === "left" || physicalSide === "top";
+    const merge = lowSide ? Math.max : Math.min;
     let edge = NaN;
-    this.floatFragments
-      .filter((fragment) => fragment.floatSide.includes("block-end"))
-      .filter((fragment) => {
-        if (inlinePos === undefined || !isFinite(inlinePos)) {
-          return true;
-        }
-        const rect = fragment.getOuterRect();
-        return isVertical
+    for (const fragment of this.floatFragments) {
+      if (
+        !this.toLogicalFloatSides(fragment.floatSide).some(
+          (side) => this.toPhysical(side) === physicalSide,
+        )
+      )
+        continue;
+      const rect = fragment.getOuterRect();
+      if (
+        inlinePos !== undefined &&
+        isFinite(inlinePos) &&
+        !(vertical
           ? rect.y1 <= inlinePos && inlinePos <= rect.y2
-          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
-      })
-      .forEach((fragment) => {
-        const rect = fragment.getOuterRect();
-        const fragmentEdge = isVertical ? rect.x2 : rect.y1;
-        edge = isFinite(edge)
-          ? isVertical
-            ? Math.max(edge, fragmentEdge)
-            : Math.min(edge, fragmentEdge)
-          : fragmentEdge;
-      });
-    const attachedParent = this.attachedParent;
-    if (attachedParent) {
-      const parentEdge =
-        attachedParent.getBlockStartEdgeOfBlockEndFloats(inlinePos);
-      if (isFinite(parentEdge)) {
-        edge = isFinite(edge)
-          ? isVertical
-            ? Math.max(edge, parentEdge)
-            : Math.min(edge, parentEdge)
-          : parentEdge;
-      }
+          : rect.x1 <= inlinePos && inlinePos <= rect.x2)
+      )
+        continue;
+      const fragmentEdge = vertical
+        ? lowSide
+          ? rect.x2
+          : rect.x1
+        : lowSide
+          ? rect.y2
+          : rect.y1;
+      edge = isFinite(edge) ? merge(edge, fragmentEdge) : fragmentEdge;
+    }
+    // Preserve the physical side instead of reinterpreting a logical side in
+    // an ancestor whose block progression can run in the opposite direction.
+    const parentEdge = this.attachedParent?.getFloatEdge(
+      physicalSide,
+      inlinePos,
+    );
+    if (parentEdge !== undefined && isFinite(parentEdge)) {
+      edge = isFinite(edge) ? merge(edge, parentEdge) : parentEdge;
     }
     return edge;
   }
@@ -2500,7 +2510,11 @@ export class AttachedPageFloatLayoutContext
       );
     }
     const columnRect = column.getPaddingRect();
-    const columnBlockEnd = column.vertical ? columnRect.x1 : columnRect.y2;
+    const columnBlockEnd = column.vertical
+      ? column.getBoxDir() < 0
+        ? columnRect.x1
+        : columnRect.x2
+      : columnRect.y2;
     let context: AttachedPageFloatLayoutContext | null = this;
     while (context) {
       if (
@@ -2686,23 +2700,42 @@ export class AttachedPageFloatLayoutContext
       context = context.attachedParent
     ) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);
+      // Read the source constraint in the ancestor's axes; its logical block
+      // sides can be opposite to the destination column's block sides.
+      const ancestorAxes = context.getAxes();
+      const wrapAt = (physicalSide: string): number => {
+        const side = toLogicalSide(physicalSide, ancestorAxes);
+        return side === "block-start"
+          ? l.floatMinWrapBlockStart
+          : side === "block-end"
+            ? l.floatMinWrapBlockEnd
+            : 0;
+      };
       if (column.vertical) {
+        const rightWrap =
+          column.getBoxDir() < 0
+            ? "floatMinWrapBlockStart"
+            : "floatMinWrapBlockEnd";
+        const leftWrap =
+          column.getBoxDir() < 0
+            ? "floatMinWrapBlockEnd"
+            : "floatMinWrapBlockStart";
         if (l.right < limits.right) {
           limits.right = l.right;
-          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+          limits[rightWrap] = wrapAt("right");
         }
         if (l.left > limits.left) {
           limits.left = l.left;
-          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+          limits[leftWrap] = wrapAt("left");
         }
       } else {
         if (l.top > limits.top) {
           limits.top = l.top;
-          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+          limits.floatMinWrapBlockStart = wrapAt("top");
         }
         if (l.bottom < limits.bottom) {
           limits.bottom = l.bottom;
-          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+          limits.floatMinWrapBlockEnd = wrapAt("bottom");
         }
       }
     }

@@ -24,6 +24,7 @@ import * as Base from "./base";
 import * as CmykStore from "./cmyk-store";
 import * as CounterStyle from "./counter-style";
 import * as Css from "./css";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as CssParser from "./css-parser";
 import * as CssProp from "./css-prop";
 import * as CssTokenizer from "./css-tokenizer";
@@ -4769,10 +4770,7 @@ function getContentWidth(
 
   const totalWidth = rects.reduce(
     (acc, rect) =>
-      acc +
-      (writingMode === "vertical-rl" || writingMode === "vertical-lr"
-        ? rect.height
-        : rect.width),
+      acc + (CssLogicalUtil.isVertical(writingMode) ? rect.height : rect.width),
     0,
   );
 
@@ -4881,24 +4879,31 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       previousLineBreak.remove();
     }
 
-    const vertical =
-      writingMode === "vertical-rl" || writingMode === "vertical-lr";
+    const vertical = CssLogicalUtil.isVertical(writingMode);
     const [inlineLowSide, inlineHighSide] = vertical
       ? (["top", "bottom"] as const)
       : (["left", "right"] as const);
     const [blockLowSide, blockHighSide] = vertical
       ? (["left", "right"] as const)
       : (["top", "bottom"] as const);
-    const [blockStartSide, blockEndSide] =
-      writingMode === "vertical-rl"
-        ? ([blockHighSide, blockLowSide] as const)
-        : ([blockLowSide, blockHighSide] as const);
-    const blockSign = writingMode === "vertical-rl" ? -1 : 1;
-    const [inlineStartSide, inlineEndSide] =
-      direction === "rtl"
-        ? ([inlineHighSide, inlineLowSide] as const)
-        : ([inlineLowSide, inlineHighSide] as const);
-    const inlineSign = direction === "rtl" ? -1 : 1;
+    const [blockStartSide, blockEndSide] = CssLogicalUtil.isBlockReversed(
+      writingMode,
+    )
+      ? ([blockHighSide, blockLowSide] as const)
+      : ([blockLowSide, blockHighSide] as const);
+    const blockSign = CssLogicalUtil.isBlockReversed(writingMode) ? -1 : 1;
+    const [inlineStartSide, inlineEndSide] = CssLogicalUtil.isInlineReversed(
+      writingMode,
+      direction === "rtl",
+    )
+      ? ([inlineHighSide, inlineLowSide] as const)
+      : ([inlineLowSide, inlineHighSide] as const);
+    const inlineSign = CssLogicalUtil.isInlineReversed(
+      writingMode,
+      direction === "rtl",
+    )
+      ? -1
+      : 1;
     const inlineSizeOf = (rect: Vtree.ClientRect) =>
       rect[inlineHighSide] - rect[inlineLowSide];
     // The comparisons below run between client rects that separate layout
@@ -4923,8 +4928,12 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       container.viewNode,
     );
     const lineIsRtl = containerStyle.direction === "rtl";
-    const lineStartSide = lineIsRtl ? inlineHighSide : inlineLowSide;
-    const lineSign = lineIsRtl ? -1 : 1;
+    const lineIsReversed = CssLogicalUtil.isInlineReversed(
+      writingMode,
+      lineIsRtl,
+    );
+    const lineStartSide = lineIsReversed ? inlineHighSide : inlineLowSide;
+    const lineSign = lineIsReversed ? -1 : 1;
     const leaderRunsWithTheLine = lineIsRtl === (direction === "rtl");
 
     // The client rect of the block container is its border box, while its
@@ -8236,24 +8245,50 @@ export function parseStyleAttribute(
   return handler.elementStyle;
 }
 
+export function resolveWritingMode(
+  cascaded: { [key: string]: CascadeValue },
+  context: Exprs.Context,
+  inherited: string,
+): string {
+  const value = cascaded["writing-mode"]?.evaluate(context, "writing-mode");
+  // Custom-property substitution preserves casing and can introduce values
+  // that are invalid at computed-value time for this inherited property.
+  if (!value?.isIdent()) return inherited;
+  const mode = value.toString().toLowerCase();
+  switch (mode) {
+    case "initial":
+    case "lr":
+    case "rl":
+    case "lr-tb":
+    case "rl-tb":
+      return "horizontal-tb";
+    case "tb":
+    case "tb-rl":
+      return "vertical-rl";
+    case "horizontal-tb":
+    case "vertical-rl":
+    case "vertical-lr":
+    case "sideways-rl":
+    case "sideways-lr":
+      return mode;
+    default:
+      // Includes inherit, unset, rollback keywords and invalid substitutions.
+      return inherited;
+  }
+}
+
 export function isVertical(
   cascaded: { [key: string]: CascadeValue },
   context: Exprs.Context,
   vertical: boolean,
 ): boolean {
-  const writingModeCasc = cascaded["writing-mode"];
-  if (writingModeCasc) {
-    const writingMode = writingModeCasc.evaluate(context, "writing-mode");
-    if (
-      writingMode &&
-      writingMode !== Css.ident.inherit &&
-      writingMode !== Css.ident.unset &&
-      !Css.isRollbackValue(writingMode)
-    ) {
-      return writingMode === Css.ident.vertical_rl;
-    }
-  }
-  return vertical;
+  return CssLogicalUtil.isVertical(
+    resolveWritingMode(
+      cascaded,
+      context,
+      vertical ? "vertical-rl" : "horizontal-tb",
+    ),
+  );
 }
 
 export function isRtl(
@@ -8340,6 +8375,30 @@ export function mergeStyle(
   }
 }
 
+const writingModeCouplingMaps = new Map<string, { [key: string]: string }>();
+
+export function getCouplingMap(
+  writingMode: string,
+  rtl: boolean,
+): { [key: string]: string } {
+  const direction = rtl ? "rtl" : "ltr";
+  const key = `${writingMode}:${direction}`;
+  const cached = writingModeCouplingMaps.get(key);
+  if (cached) return cached;
+  const sideMap = Object.fromEntries(
+    ["block-start", "block-end", "inline-start", "inline-end"].map((side) => [
+      side,
+      CssLogicalUtil.toPhysical(side, writingMode, direction),
+    ]),
+  );
+  const map = buildCouplingMap(sideMap, {
+    "block-size": CssLogicalUtil.isVertical(writingMode) ? "width" : "height",
+    "inline-size": CssLogicalUtil.isVertical(writingMode) ? "height" : "width",
+  });
+  writingModeCouplingMaps.set(key, map);
+  return map;
+}
+
 /**
  * Convert logical properties to physical ones, taking specificity into account.
  * @param src Source properties map
@@ -8352,19 +8411,19 @@ export function mergeStyle(
 export const convertToPhysical = <T>(
   src: { [key: string]: CascadeValue },
   dest: { [key: string]: T },
-  vertical: boolean,
+  vertical: boolean | string,
   rtl: boolean,
   leftPageSide: boolean,
   transform: (p1: string, p2: CascadeValue) => T,
 ) => {
   // for logical properties
-  const couplingMap1 = vertical
-    ? rtl
-      ? couplingMapVertRtl
-      : couplingMapVert
-    : rtl
-      ? couplingMapHorRtl
-      : couplingMapHor;
+  const writingMode =
+    typeof vertical === "string"
+      ? vertical
+      : vertical
+        ? "vertical-rl"
+        : "horizontal-tb";
+  const couplingMap1 = getCouplingMap(writingMode, rtl);
 
   // for margin-inside/outside properties
   const couplingMap2 = leftPageSide

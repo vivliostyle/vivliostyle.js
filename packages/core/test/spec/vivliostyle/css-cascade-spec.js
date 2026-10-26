@@ -24,6 +24,8 @@ import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_csstok from "../../../src/vivliostyle/css-tokenizer";
 import * as adapt_task from "../../../src/vivliostyle/task";
+import * as CssPage from "../../../src/vivliostyle/css-page";
+import * as Constants from "../../../src/vivliostyle/constants";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
 import * as vivliostyle_test_util_mock_plugin from "../../util/mock/vivliostyle/plugin-mock";
 
@@ -3245,6 +3247,53 @@ describe("css-cascade", function () {
       expect(style["--b"].value.toString()).toBe("green");
       expect(style["--a"].value.toString()).toBe("green");
       expect(style.color.value.toString()).toBe("green");
+    });
+
+    it("resolves substituted writing-mode keywords and inherits invalid values", () => {
+      for (const [input, expected] of [
+        ["VERTICAL-LR", "vertical-lr"],
+        ["SIDEWAYS-RL", "sideways-rl"],
+        ["SIDEWAYS-LR", "sideways-lr"],
+        ["10px", "vertical-rl"],
+        ['"vertical-lr"', "vertical-rl"],
+        ["unknown", "vertical-rl"],
+        ["INITIAL", "horizontal-tb"],
+        ["UNSET", "vertical-rl"],
+      ]) {
+        const element = document.createElement("div");
+        const style = {
+          "--wm": createCascadeValue(input),
+          "writing-mode": createCascadeValue("var(--wm)"),
+        };
+        applyVarFilter(style, element);
+        const resolved = adapt_csscasc.resolveWritingMode(
+          style,
+          {},
+          "vertical-rl",
+        );
+        expect(resolved).withContext(input).toBe(expected);
+        expect(() =>
+          adapt_csscasc.getCouplingMap(resolved, false),
+        ).not.toThrow();
+      }
+    });
+
+    it("uses substituted mode casing for page progression independently of direction", () => {
+      for (const [mode, direction, expected] of [
+        ["SIDEWAYS-RL", "ltr", Constants.PageProgression.RTL],
+        ["SIDEWAYS-LR", "rtl", Constants.PageProgression.LTR],
+        ["VERTICAL-LR", "rtl", Constants.PageProgression.LTR],
+      ]) {
+        const style = {
+          "--wm": createCascadeValue(mode),
+          "writing-mode": createCascadeValue("var(--wm)"),
+          direction: createCascadeValue(direction),
+        };
+        applyVarFilter(style, document.createElement("div"));
+        expect(CssPage.resolvePageProgression(style))
+          .withContext(`${mode}, ${direction}`)
+          .toBe(expected);
+      }
     });
 
     it("treats unresolved var() in ordinary properties as unset", function () {

@@ -769,15 +769,15 @@ export class ViewFactory
   }
 
   /**
-   * @return vertical
+   * @return used writing mode
    */
   computeStyle(
-    vertical: boolean,
+    inheritedWritingMode: string,
     rtl: boolean,
     style: CssCascade.ElementStyle,
     computedStyle: { [key: string]: Css.Val },
     cascadedMargins?: { [key: string]: CssCascade.CascadeValue },
-  ): boolean {
+  ): string {
     const context = this.context;
     const cascMap = CssCascade.flattenCascadedStyle(
       style,
@@ -814,8 +814,13 @@ export class ViewFactory
         cascMap["direction"] = rootDirection;
       }
     }
-    const verticalParent = vertical;
-    vertical = CssCascade.isVertical(cascMap, context, vertical);
+    const verticalParent = inheritedWritingMode !== "horizontal-tb";
+    const writingMode = CssCascade.resolveWritingMode(
+      cascMap,
+      context,
+      inheritedWritingMode,
+    );
+    const vertical = writingMode !== "horizontal-tb";
     // When writing-mode is propagated from the body element to the root
     // element as a used value (CSS Writing Modes spec), the root element's
     // used writing mode is the propagated one although its computed style is
@@ -823,7 +828,7 @@ export class ViewFactory
     // body element is not treated as a writing-mode change (which would
     // cause the vertical-in-horizontal treatment (Issue #1264), e.g.,
     // `inline-size: auto` becoming `max-content`). (Issue #1122 follow-up)
-    let usedVertical = vertical;
+    let usedWritingMode = writingMode;
     if (isRoot && !vertical) {
       const rootWritingModeCasc = this.styler.rootStyle[
         "writing-mode"
@@ -832,10 +837,10 @@ export class ViewFactory
         rootWritingModeCasc &&
         this.styler.bodyPropagatedStyle["writing-mode"] === rootWritingModeCasc
       ) {
-        usedVertical = CssCascade.isVertical(
+        usedWritingMode = CssCascade.resolveWritingMode(
           { "writing-mode": rootWritingModeCasc },
           context,
-          vertical,
+          writingMode,
         );
       }
     }
@@ -876,7 +881,7 @@ export class ViewFactory
     CssCascade.convertToPhysical(
       cascMap,
       computedStyle,
-      vertical,
+      writingMode,
       rtl,
       isLeftPage,
       transform,
@@ -897,7 +902,7 @@ export class ViewFactory
       CssCascade.convertToPhysical(
         margins,
         cascadedMargins,
-        vertical,
+        writingMode,
         rtl,
         isLeftPage,
         (_name, value) => value,
@@ -918,7 +923,7 @@ export class ViewFactory
       // Running elements
       computedStyle["position"] = Css.ident.fixed;
       computedStyle["visibility"] = Css.ident.hidden;
-      return usedVertical;
+      return usedWritingMode;
     }
 
     // Compute values of display, position and float
@@ -941,7 +946,7 @@ export class ViewFactory
         computedStyle[name] = displayValues[name];
       }
     });
-    return usedVertical;
+    return usedWritingMode;
   }
 
   private inheritFromSourceParent(
@@ -1699,13 +1704,14 @@ export class ViewFactory
       this.context,
       semanticFootnoteStyleAccess,
     );
-    nodeContext.vertical = this.computeStyle(
-      nodeContext.vertical,
+    nodeContext.writingMode = this.computeStyle(
+      nodeContext.writingMode,
       nodeContext.direction === "rtl",
       elementStyle,
       computedStyle,
       cascadedMargins,
     );
+    nodeContext.vertical = nodeContext.writingMode !== "horizontal-tb";
     if (
       floatReference &&
       PageFloats.isPageFloat(floatReference) &&
@@ -1791,14 +1797,10 @@ export class ViewFactory
       const position = computedStyle["position"] as Css.Ident;
       let floatSide: Css.Val | null = computedStyle["float"];
       let clearSide: Css.Ident | null = computedStyle["clear"] as Css.Ident;
-      const writingMode = nodeContext.vertical
-        ? Css.ident.vertical_rl
-        : Css.ident.horizontal_tb;
-      const parentWritingMode = nodeContext.parent
-        ? nodeContext.parent.vertical
-          ? Css.ident.vertical_rl
-          : Css.ident.horizontal_tb
-        : writingMode;
+      const writingMode = Css.getName(nodeContext.writingMode);
+      const parentWritingMode = Css.getName(
+        nodeContext.parent?.writingMode ?? nodeContext.writingMode,
+      );
       const isFlowRoot = Display.isFlowRoot(element);
       const columnCount = computedStyle["column-count"];
       const columnWidth = computedStyle["column-width"];
@@ -3167,7 +3169,7 @@ export class ViewFactory
       const computedStyle: { [key: string]: Css.Val } = {};
       const elementStyle = styler.getStyle(child as Element, false);
       this.computeStyle(
-        nodeContext.vertical,
+        nodeContext.writingMode,
         nodeContext.direction === "rtl",
         elementStyle,
         computedStyle,
@@ -3192,7 +3194,7 @@ export class ViewFactory
         );
       (
         nodeContext.formattingContext as RepetitiveElement.RepetitiveElementsOwnerFormattingContext
-      ).initializeRepetitiveElements(nodeContext.vertical);
+      ).initializeRepetitiveElements(nodeContext.writingMode);
       return;
     }
   }
@@ -4327,12 +4329,13 @@ export class ViewFactory
       return;
     }
     const computedStyle: { [key: string]: Css.Val } = {};
-    nodeContext.vertical = this.computeStyle(
-      nodeContext.vertical,
+    nodeContext.writingMode = this.computeStyle(
+      nodeContext.writingMode,
       nodeContext.direction === "rtl",
       elementStyle,
       computedStyle,
     );
+    nodeContext.vertical = nodeContext.writingMode !== "horizontal-tb";
     const content = computedStyle["content"];
     if (Vtree.nonTrivialContent(content)) {
       content.visit(
@@ -4429,10 +4432,10 @@ export class ViewFactory
 
   /** @override */
   applyFootnoteStyle(
-    vertical: boolean,
+    inheritedWritingMode: string,
     rtl: boolean,
     target: Element,
-  ): Task.Result<boolean> {
+  ): Task.Result<string> {
     const computedStyle: { [key: string]: Css.Val } = {};
     const fetchers: TaskUtil.Fetcher<string>[] = [];
 
@@ -4449,7 +4452,16 @@ export class ViewFactory
     }
 
     const pseudoMap = CssCascade.getStyleMap(footnoteStyle, "_pseudos");
-    vertical = this.computeStyle(vertical, rtl, footnoteStyle, computedStyle);
+    const writingMode = this.computeStyle(
+      inheritedWritingMode,
+      rtl,
+      footnoteStyle,
+      computedStyle,
+    );
+    // The used mode can be propagated from body while the page context's
+    // computed mode stays horizontal. Match the browser's fragmentainer to
+    // the resolved geometry rather than inheriting its unrelated DOM mode.
+    computedStyle["writing-mode"] = Css.getName(writingMode);
     const inheritedMetrics = this.getFootnoteAreaInheritedMetrics();
     if (!computedStyle["font-size"] && inheritedMetrics.fontSize != null) {
       computedStyle["font-size"] = new Css.Numeric(
@@ -4482,7 +4494,7 @@ export class ViewFactory
         const span = this.createElement(Base.NS.XHTML, "span");
         PseudoElement.setPseudoName(span, "before");
         target.appendChild(span);
-        this.computeStyle(vertical, rtl, pseudoStyle, childComputedStyle);
+        this.computeStyle(writingMode, rtl, pseudoStyle, childComputedStyle);
         if (!hasSpecifiedDisplay) {
           childComputedStyle["display"] = Css.ident.block;
         }
@@ -4550,9 +4562,9 @@ export class ViewFactory
       this.computedStyleParentLineHeightOverride = prevLineHeightOverride;
     }
     if (fetchers.length) {
-      return TaskUtil.waitForFetchers(fetchers).thenReturn(vertical);
+      return TaskUtil.waitForFetchers(fetchers).thenReturn(writingMode);
     }
-    return Task.newResult(vertical);
+    return Task.newResult(writingMode);
   }
 
   /** @override */

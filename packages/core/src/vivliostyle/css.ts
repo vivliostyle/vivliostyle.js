@@ -714,6 +714,8 @@ export const ident: { [key: string]: Ident } = {
   top: getName("top"),
   transparent: getName("transparent"),
   unset: getName("unset"),
+  sideways_lr: getName("sideways-lr"),
+  sideways_rl: getName("sideways-rl"),
   vertical_lr: getName("vertical-lr"),
   vertical_rl: getName("vertical-rl"),
   visible: getName("visible"),

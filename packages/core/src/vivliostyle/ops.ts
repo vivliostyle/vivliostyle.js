@@ -2184,20 +2184,23 @@ export class StyleInstance
           let columnBoxHeight: number;
           if (layoutContainer.vertical) {
             const columnY =
-              (layoutContainer.rtl
+              (layoutContainer.getInlineDir() < 0
                 ? columnCount - currentColumnIndex - 1
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
               layoutContainer.paddingTop;
             const outerWidth = parseFloat(boxContainer.style.width);
             columnLeft =
-              layoutContainer.paddingLeft + outerWidth - layoutContainer.width;
+              layoutContainer.paddingLeft +
+              (layoutContainer.getBoxDir() < 0
+                ? outerWidth - layoutContainer.width
+                : 0);
             columnBoxWidth = layoutContainer.width;
             columnTop = columnY;
             columnBoxHeight = columnWidth;
           } else {
             const columnX =
-              (layoutContainer.rtl
+              (layoutContainer.getInlineDir() < 0
                 ? columnCount - currentColumnIndex - 1
                 : currentColumnIndex) *
                 (columnWidth + columnGap) +
@@ -2217,6 +2220,7 @@ export class StyleInstance
             layoutConstraint,
             columnPageFloatLayoutContext,
             {
+              writingMode: layoutContainer.writingMode,
               vertical: layoutContainer.vertical,
               rtl: layoutContainer.rtl,
               snapWidth: layoutContainer.snapWidth,
@@ -2296,6 +2300,35 @@ export class StyleInstance
     return frame.result();
   }
 
+  getPagePageFloatLayoutContext(
+    pageMaster: PageMaster.PageMasterInstance,
+    isTocBox: boolean,
+    pageSide: Constants.PageSide,
+  ): PageFloats.UnattachedPageFloatLayoutContext {
+    // Page floats use the page area's resolved axes, including propagation
+    // from body. Keep the page context unchanged for margin box inheritance.
+    let pageAreaBox: PageMaster.PageBoxInstance &
+      PageMaster.PageAreaEstablishing = pageMaster;
+    while (pageAreaBox.pageAreaEstablishingChild) {
+      pageAreaBox = pageAreaBox.pageAreaEstablishingChild;
+    }
+    const direction = isTocBox
+      ? pageMaster.getProp(this, "direction") || Css.ident.ltr
+      : pageAreaBox.rtl
+        ? Css.ident.rtl
+        : Css.ident.ltr;
+    return PageFloats.PageFloatLayoutContext.create(
+      this.rootPageFloatLayoutContext,
+      PageFloats.FloatReference.PAGE,
+      null,
+      null,
+      Css.getName(isTocBox ? "horizontal-tb" : pageAreaBox.writingMode),
+      direction,
+      null,
+      pageSide,
+    );
+  }
+
   getRegionPageFloatLayoutContext(
     pagePageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
     boxInstance: PageMaster.PageBoxInstance,
@@ -2303,7 +2336,7 @@ export class StyleInstance
     flowName: string,
   ): PageFloats.AttachedPageFloatLayoutContext {
     Asserts.assert(boxInstance instanceof PageMaster.PartitionInstance);
-    const writingMode = boxInstance.getProp(this, "writing-mode") || null;
+    const writingMode = Css.getName(boxInstance.writingMode);
     const direction = boxInstance.getProp(this, "direction") || null;
     return PageFloats.PageFloatLayoutContext.createWithContainer(
       layoutContainer,
@@ -2579,6 +2612,7 @@ export class StyleInstance
     }
 
     const container = new Vtree.Container(boxContainer);
+    container.writingMode = boxInstance.writingMode;
     container.vertical = boxInstance.vertical;
     container.rtl = boxInstance.rtl;
     container.borderBoxSizing = boxInstance.borderBoxSizing;
@@ -3319,23 +3353,15 @@ export class StyleInstance
         evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
     }
 
-    const writingMode =
-      (!isTocBox && pageMaster.getProp(this, "writing-mode")) ||
-      Css.ident.horizontal_tb;
-
-    this.pageVertical = writingMode != Css.ident.horizontal_tb;
-
-    const direction = pageMaster.getProp(this, "direction") || Css.ident.ltr;
-    const pageFloatLayoutContext = PageFloats.PageFloatLayoutContext.create(
-      this.rootPageFloatLayoutContext,
-      PageFloats.FloatReference.PAGE,
-      null,
-      null,
-      writingMode,
-      direction,
-      null,
+    const pageFloatLayoutContext = this.getPagePageFloatLayoutContext(
+      pageMaster,
+      isTocBox,
       page.side,
     );
+    // Logical viewport units follow the used page-area mode, including body
+    // propagation. The page master's computed mode still governs inheritance.
+    this.pageVertical =
+      pageFloatLayoutContext.writingMode !== Css.ident.horizontal_tb;
     const frame: Task.Frame<Vtree.LayoutPosition | null> =
       Task.newFrame("layoutNextPage");
     let attachedPageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext | null =

@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- Test case for Issue #1480: sideways page-margin text must honor physical top/bottom alignment. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Page-margin alignment in sideways-lr (Issue #1480)</title>
+    <style>
+      @page {
+        size: 500px 400px;
+        margin: 80px;
+        @left-middle {
+          content: "TOP";
+          width: 60px;
+          height: 200px;
+          writing-mode: sideways-lr;
+          direction: ltr;
+          vertical-align: top;
+          background: #def;
+          font: 16px/20px sans-serif;
+        }
+        @right-middle {
+          content: "BOTTOM";
+          width: 60px;
+          height: 200px;
+          writing-mode: sideways-lr;
+          direction: ltr;
+          vertical-align: bottom;
+          background: #def;
+          font: 16px/20px sans-serif;
+        }
+        @top-center {
+          content: "MIDDLE";
+          width: 200px;
+          height: 60px;
+          writing-mode: sideways-lr;
+          direction: ltr;
+          vertical-align: middle;
+          background: #def;
+          font: 16px/20px sans-serif;
+        }
+      }
+      body {
+        margin: 0;
+        font: 16px/20px sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      TOP must touch the top of the left box. BOTTOM must touch the bottom of
+      the right box. MIDDLE must be vertically centered in the top box.
+    </p>
+  </body>
+</html>

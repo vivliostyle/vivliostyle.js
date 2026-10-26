@@ -254,26 +254,38 @@ export function floor(v: number, unit: number): number {
   return unit ? Math.floor(v / unit) * unit : v;
 }
 
-export function rotatePoint(point: Point): Point {
-  return new Point(point.y, -point.x);
+export function rotatePoint(point: Point, blockDirection = -1): Point {
+  return new Point(point.y, blockDirection * point.x);
 }
 
 /**
  * Vertical box to pseudo-horizontal coords.
  */
-export function rotateBox(box: Rect): Rect {
-  return new Rect(box.y1, -box.x2, box.y2, -box.x1);
+export function rotateBox(box: Rect, blockDirection = -1): Rect {
+  return new Rect(
+    box.y1,
+    blockDirection < 0 ? -box.x2 : box.x1,
+    box.y2,
+    blockDirection < 0 ? -box.x1 : box.x2,
+  );
 }
 
 /**
  * Pseudo-horizontal coords to vertical.
  */
-export function unrotateBox(box: Rect): Rect {
-  return new Rect(-box.y2, box.x1, -box.y1, box.x2);
+export function unrotateBox(box: Rect, blockDirection = -1): Rect {
+  return new Rect(
+    blockDirection < 0 ? -box.y2 : box.y1,
+    box.x1,
+    blockDirection < 0 ? -box.y1 : box.y2,
+    box.x2,
+  );
 }
 
-export function rotateShape(shape: Shape): Shape {
-  return new Shape(shape.points.map((point) => rotatePoint(point)));
+export function rotateShape(shape: Shape, blockDirection = -1): Shape {
+  return new Shape(
+    shape.points.map((point) => rotatePoint(point, blockDirection)),
+  );
 }
 
 export function shapesToBands(
@@ -283,11 +295,12 @@ export function shapesToBands(
   granularity: number,
   snapHeight: number,
   vertical: boolean,
+  blockDirection = -1,
 ): Band[] {
   if (vertical) {
-    box = rotateBox(box);
-    include = include.map((shape) => rotateShape(shape));
-    exclude = exclude.map((shape) => rotateShape(shape));
+    box = rotateBox(box, blockDirection);
+    include = include.map((shape) => rotateShape(shape, blockDirection));
+    exclude = exclude.map((shape) => rotateShape(shape, blockDirection));
   }
   const includeCount = include.length;
   const excludeCount = exclude ? exclude.length : 0;

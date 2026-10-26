@@ -22,6 +22,7 @@ import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
@@ -36,11 +37,21 @@ import * as Vtree from "./vtree";
 export function resolvePageProgression(
   style: CssCascade.ElementStyle,
 ): Constants.PageProgression {
-  const writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value;
+  // Substitution preserves identifier casing; compare the same canonical
+  // keywords used by writing-mode geometry.
+  let writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value
+    .toString()
+    .toLowerCase();
+  if (writingMode === "tb" || writingMode === "tb-rl") {
+    writingMode = "vertical-rl";
+  }
   const direction = (style["direction"] as CssCascade.CascadeValue)?.value;
   if (
-    writingMode === Css.ident.vertical_lr ||
-    (writingMode !== Css.ident.vertical_rl && direction !== Css.ident.rtl)
+    writingMode === "vertical-lr" ||
+    writingMode === "sideways-lr" ||
+    (writingMode !== "vertical-rl" &&
+      writingMode !== "sideways-rl" &&
+      direction !== Css.ident.rtl)
   ) {
     return Constants.PageProgression.LTR;
   } else {
@@ -2153,7 +2164,11 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     Base.setCSSProperty(
       element,
       "flex-flow",
-      this.vertical ? (this.rtl ? "row-reverse" : "row") : "column",
+      this.vertical
+        ? CssLogicalUtil.isInlineReversed(this.writingMode, this.rtl)
+          ? "row-reverse"
+          : "row"
+        : "column",
     );
     const verticalAlign: Css.Val = this.getProp(context, "vertical-align");
     let flexAlign: string | null = null;

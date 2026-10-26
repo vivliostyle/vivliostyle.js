@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Test case for Issue #1480: clear:both inside detached float areas must not add space when no float needs clearing. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clear inside detached vertical float areas (Issue #1480)</title>
+    <style>
+      @page {
+        size: 500px 400px;
+        margin: 40px;
+        @footnote {
+          writing-mode: sideways-lr;
+          font-size: 12px;
+        }
+      }
+      :root {
+        writing-mode: vertical-lr;
+        direction: ltr;
+        font: 16px/20px sans-serif;
+      }
+      body {
+        margin: 0;
+      }
+      .page-float {
+        float-reference: page;
+        float: block-start;
+        inline-size: 100%;
+        block-size: 60px;
+        background: lightblue;
+      }
+      .note {
+        float: footnote;
+      }
+      .block {
+        float-reference: inline;
+        display: block;
+        clear: both;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="page-float">
+      <div class="block" data-clear-block="float">
+        Page float: no clearance is needed.
+      </div>
+    </aside>
+    <div>
+      Anchor<span class="note"
+        ><span class="block" data-clear-block="note"
+          >Footnote: no clearance is needed.</span
+        ></span
+      >
+      Main text must fit alongside the page float and footnote.
+    </div>
+  </body>
+</html>

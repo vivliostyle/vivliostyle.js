@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Test case for Issue #1480: ancestor and column progressions may be opposite when merging float minimum-wrap constraints. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Opposite ancestor and column float wrap directions (Issue #1480)
+    </title>
+    <style>
+      @page {
+        size: 200px 300px;
+        margin: 0;
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font: 16px/20px sans-serif;
+      }
+      body {
+        writing-mode: vertical-lr;
+        margin: 0;
+      }
+      p {
+        margin: 0;
+      }
+      @-epubx-page-master {
+        writing-mode: vertical-rl;
+        @-epubx-partition body {
+          -epubx-flow-from: body;
+          -epubx-required: true;
+          top: 0;
+          left: 0;
+          width: 200px;
+          height: 300px;
+          writing-mode: vertical-lr;
+          column-count: 2;
+          column-gap: 20px;
+        }
+      }
+      aside {
+        float-reference: page;
+        float: block-start;
+        block-size: 160px;
+        inline-size: 100%;
+        float-min-wrap-block: 50px;
+        background: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>PAGE FLOAT</aside>
+    <p>
+      Text and the float must be on separate pages. The remaining 40px is less
+      than the 50px minimum wrap size.
+    </p>
+    <p>ABC abc 123 日本語。 Keep all text outside the narrow strip.</p>
+  </body>
+</html>

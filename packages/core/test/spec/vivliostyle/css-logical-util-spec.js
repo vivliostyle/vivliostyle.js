@@ -282,3 +282,54 @@ describe("css-logical-util", function () {
     });
   });
 });
+
+describe("CSS Writing Modes Level 4", () => {
+  // Expected physical axes, independent of the conversion implementation.
+  const cases = [
+    ["horizontal-tb", "top", "bottom", "left", "right"],
+    ["vertical-rl", "right", "left", "top", "bottom"],
+    ["vertical-lr", "left", "right", "top", "bottom"],
+    ["sideways-rl", "right", "left", "top", "bottom"],
+    ["sideways-lr", "left", "right", "bottom", "top"],
+  ];
+  for (const [mode, before, after, start, end] of cases) {
+    for (const direction of ["ltr", "rtl"]) {
+      it(`maps both axes in ${mode}, ${direction}`, () => {
+        const sides = [
+          before,
+          after,
+          direction === "ltr" ? start : end,
+          direction === "ltr" ? end : start,
+        ];
+        const logical = [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end",
+        ];
+        logical.forEach((side, i) => {
+          expect(vivliostyle_logical.toPhysical(side, mode, direction)).toBe(
+            sides[i],
+          );
+          expect(vivliostyle_logical.toLogical(sides[i], mode, direction)).toBe(
+            side,
+          );
+        });
+      });
+    }
+  }
+  it("maps sideways-lr line-relative directions independently of direction", () => {
+    expect(vivliostyle_logical.toLineRelative("bottom", "sideways-lr")).toBe(
+      "line-left",
+    );
+    expect(vivliostyle_logical.toLineRelative("top", "sideways-lr")).toBe(
+      "line-right",
+    );
+    expect(vivliostyle_logical.toLineRelative("left", "sideways-lr")).toBe(
+      "over",
+    );
+    expect(vivliostyle_logical.toLineRelative("right", "sideways-lr")).toBe(
+      "under",
+    );
+  });
+});

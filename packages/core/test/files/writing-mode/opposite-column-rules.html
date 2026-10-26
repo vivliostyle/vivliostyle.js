@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- Test case for Issue #1480: column rules must clip ancestor floats in physical coordinates when block progressions are opposite. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Column rules with opposite ancestor progression (Issue #1480)</title>
+    <style>
+      @page {
+        size: 200px 300px;
+        margin: 0;
+      }
+      :root {
+        writing-mode: vertical-rl;
+        font: 16px/20px sans-serif;
+      }
+      body {
+        writing-mode: vertical-lr;
+        margin: 0;
+      }
+      p {
+        margin: 0;
+      }
+      @-epubx-page-master {
+        writing-mode: vertical-rl;
+        @-epubx-partition body {
+          -epubx-flow-from: body;
+          -epubx-required: true;
+          top: 0;
+          left: 0;
+          width: 200px;
+          height: 300px;
+          writing-mode: vertical-lr;
+          column-count: 2;
+          column-gap: 20px;
+          column-rule: 2px solid red;
+        }
+      }
+      aside {
+        writing-mode: vertical-rl;
+        float-reference: page;
+        float: block-start;
+        block-size: 160px;
+        inline-size: 100%;
+        background: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>PAGE FLOAT</aside>
+    <p>ABC DEF.</p>
+    <p>GHI JKL.</p>
+  </body>
+</html>

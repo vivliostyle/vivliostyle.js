@@ -123,7 +123,7 @@ export class EdgeBreakPosition
         this.position,
         column.clientLayout,
         0,
-        column.vertical,
+        column.writingMode,
       ) + clonedPaddingBorder;
 
     if (!this.position.after && !this.position.inline) {
@@ -133,7 +133,7 @@ export class EdgeBreakPosition
           this.position.viewNode as Element,
         ).marginBlockStart,
       );
-      this.edge -= (column.vertical ? -1 : 1) * marginBlockStart;
+      this.edge -= column.getBoxDir() * marginBlockStart;
     } else if (
       this.position.after &&
       this.position.shadowContext?.root.id === "table-cell"
@@ -167,7 +167,7 @@ export class EdgeBreakPosition
           }
           if (elem === table) break;
         }
-        this.edge += (column.vertical ? -1 : 1) * (padding + border);
+        this.edge += column.getBoxDir() * (padding + border);
       }
     }
 
@@ -181,10 +181,10 @@ export class EdgeBreakPosition
     const edge = this.edge;
     const offsets = this.calculateOffset(column);
     this.overflowIfRepetitiveElementsDropped = column.isOverflown(
-      edge + (column.vertical ? -1 : 1) * offsets.minimum,
+      edge + column.getBoxDir() * offsets.minimum,
     );
     this.overflows = this.position.overflow = column.isOverflown(
-      edge + (column.vertical ? -1 : 1) * offsets.current,
+      edge + column.getBoxDir() * offsets.current,
     );
   }
 

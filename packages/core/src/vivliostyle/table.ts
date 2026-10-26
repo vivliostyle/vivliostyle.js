@@ -357,6 +357,7 @@ export class TableFormattingContext
   implements Table.TableFormattingContext
 {
   formattingContextType: FormattingContextType = "Table";
+  writingMode: string = "horizontal-tb";
   vertical: boolean = false;
   columnCount: number = -1;
   tableWidth: number = 0;
@@ -1653,9 +1654,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
   private getColumnWidths(
     lastRow: Element,
     columnCount: number,
-    vertical: boolean,
+    writingMode: string,
     clientLayout: Vtree.ClientLayout,
   ): number[] {
+    const vertical = writingMode !== "horizontal-tb";
     const doc = lastRow.ownerDocument;
     const dummyRow = doc.createElement("tr");
     const dummyCells: HTMLTableCellElement[] = [];
@@ -1669,7 +1671,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       const rect = LayoutHelper.getElementClientRectAdjusted(
         clientLayout,
         cell,
-        vertical,
+        writingMode,
       );
       const width = vertical ? rect["height"] : rect["width"];
       // Workaround for issue #958
@@ -1769,7 +1771,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const colWidths = (formattingContext.colWidths = this.getColumnWidths(
       lastRow,
       columnCount,
-      vertical,
+      formattingContext.writingMode,
       column.clientLayout,
     ));
 
@@ -1801,8 +1803,9 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
     const formattingContext = getTableFormattingContext(
       nodeContext.formattingContext,
     );
+    formattingContext.writingMode = nodeContext.writingMode;
     formattingContext.vertical = nodeContext.vertical;
-    formattingContext.initializeRepetitiveElements(nodeContext.vertical);
+    formattingContext.initializeRepetitiveElements(nodeContext.writingMode);
     const tableLayoutOption = getTableLayoutOption(nodeContext.sourceNode);
     clearTableLayoutOptionCache(nodeContext.sourceNode);
     const frame = Task.newFrame<Vtree.NodeContext | null>(
@@ -1832,11 +1835,11 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
       const tableBBox = LayoutHelper.getElementClientRectAdjusted(
         column.clientLayout,
         tableElement,
-        column.vertical,
+        column.writingMode,
       );
-      let edge = column.vertical ? tableBBox.left : tableBBox.bottom;
+      let edge = column.getAfterEdge(tableBBox);
       edge +=
-        (column.vertical ? -1 : 1) *
+        column.getBoxDir() *
         BreakPosition.calculateOffset(
           nodeContext,
           column.collectElementsOffset(),
@@ -2196,15 +2199,15 @@ function adjustCellHeight(
   const cellElementRect = LayoutHelper.getElementClientRectAdjusted(
     column.clientLayout,
     cellElement,
-    vertical,
+    formattingContext.writingMode,
   );
   const padding = column.getComputedPaddingBorder(cellElement);
   if (vertical) {
     const width =
-      cellElementRect.right -
-      column.footnoteEdge -
+      column.getBoxDir() *
+        (column.footnoteEdge - column.getBeforeEdge(cellElementRect)) -
       repetitiveElements.calculateOffset(breakNodeContext) -
-      padding.right;
+      (column.getBoxDir() < 0 ? padding.right : padding.left);
     Base.setCSSProperty(cellContentElement, "max-width", `${width}px`);
   } else {
     const height =

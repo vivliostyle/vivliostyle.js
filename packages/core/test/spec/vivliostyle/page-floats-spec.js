@@ -2436,6 +2436,8 @@ describe("page-floats", function () {
       function container(vertical) {
         return {
           vertical: vertical,
+          writingMode: vertical ? "vertical-rl" : "horizontal-tb",
+          getBoxDir: () => (vertical ? -1 : 1),
           element: {},
           clear: jasmine.createSpy("clear"),
         };

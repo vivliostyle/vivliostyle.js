@@ -22,6 +22,7 @@
  * End-side overflow is a bounded break-measurement allowance, not a margin.
  */
 import * as Base from "./base";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
 import * as Display from "./display";
@@ -118,7 +119,7 @@ export function prepareRubyAnnotation(
       ? atStart
         ? "top"
         : "bottom"
-      : (style.writingMode === "vertical-lr") === atStart
+      : style.writingMode.endsWith("-lr") === atStart
         ? "left"
         : "right";
   // Ignore normal zero resets, even when explicitly targeted at ruby-text.
@@ -157,11 +158,11 @@ const savedMargins = new WeakMap<
 
 /** Convert line-relative emphasis position to a logical block side. */
 export function emphasisSide(writingMode: string, position: string): BlockSide {
-  if (writingMode === "horizontal-tb") {
+  if (writingMode === "horizontal-tb" || writingMode.startsWith("sideways-")) {
     return position.includes("under") ? "end" : "start";
   }
   const right = !position.includes("left");
-  return right !== (writingMode === "vertical-lr") ? "start" : "end";
+  return right !== writingMode.endsWith("-lr") ? "start" : "end";
 }
 
 function halfLeading(style: CSSStyleDeclaration): number {
@@ -212,7 +213,7 @@ export function adjustEmphasisBlock(
     return;
   }
   const vertical = style.writingMode !== "horizontal-tb";
-  const leftToRight = style.writingMode === "vertical-lr";
+  const leftToRight = style.writingMode.endsWith("-lr");
   // Fixed-size boxes and nested block layout require a different model.
   if (
     block.style.getPropertyValue(vertical ? "width" : "height") ||
@@ -420,11 +421,7 @@ function hasStartBoundary(
 ): boolean {
   const mode = layout.getElementComputedStyle(element).writingMode;
   const side =
-    mode === "horizontal-tb"
-      ? "top"
-      : mode === "vertical-lr"
-        ? "left"
-        : "right";
+    mode === "horizontal-tb" ? "top" : mode.endsWith("-lr") ? "left" : "right";
   for (let e: Element | null = element; e; e = e.parentElement) {
     // Page decoration never changes the content's compensation policy.
     if (e.hasAttribute("data-vivliostyle-page-box")) break;
@@ -777,15 +774,11 @@ export function adjustAnnotationsForNodes(
         ),
       ),
       ...(Base.browserType === "webkit" &&
-      rootStyle.writingMode === "vertical-rl"
+      CssLogicalUtil.isBlockReversed(rootStyle.writingMode)
         ? selected.map((e) => parseFloat(e.getAttribute("data-viv-ruby-start")))
         : []),
     );
-    if (
-      !(amount > 0) ||
-      !["horizontal-tb", "vertical-rl"].includes(rootStyle.writingMode)
-    )
-      continue;
+    if (!(amount > 0)) continue;
     const property = vertical ? "width" : "height";
     if (!savedColumnSizes.has(root))
       savedColumnSizes.set(root, {
@@ -809,7 +802,10 @@ export function adjustAnnotationsForNodes(
         size + amount,
       );
       root.style.setProperty(property, `${extended}px`, saved.priority);
-      if (vertical && Number.isFinite(parseFloat(saved.left)))
+      if (
+        CssLogicalUtil.isBlockReversed(rootStyle.writingMode) &&
+        Number.isFinite(parseFloat(saved.left))
+      )
         root.style.setProperty(
           "left",
           `${parseFloat(saved.left) - extended + size}px`,
@@ -841,8 +837,12 @@ export function finishAnnotationLayout(
 export function adjustRubyEndRects(
   rects: Vtree.ClientRect[],
   element: Element,
-  vertical: boolean,
+  mode: boolean | string,
 ): void {
+  const writingMode =
+    typeof mode === "string" ? mode : mode ? "vertical-rl" : "horizontal-tb";
+  const vertical = CssLogicalUtil.isVertical(writingMode);
+  const blockReversed = CssLogicalUtil.isBlockReversed(writingMode);
   const annotation = element.closest("[data-viv-ruby-end]");
   const amount = parseFloat(
     annotation?.getAttribute("data-viv-ruby-end") || "0",
@@ -854,14 +854,15 @@ export function adjustRubyEndRects(
     )
   )
     return;
-  const mode =
+  const annotationMode =
     annotation.ownerDocument.defaultView.getComputedStyle(
       annotation,
     ).writingMode;
-  if (mode !== (vertical ? "vertical-rl" : "horizontal-tb")) return;
+  if (annotationMode !== writingMode) return;
   for (const rect of rects) {
     if (vertical) {
-      rect.left = Math.min(rect.right, rect.left + amount);
+      if (blockReversed) rect.left = Math.min(rect.right, rect.left + amount);
+      else rect.right = Math.max(rect.left, rect.right - amount);
       rect.width = rect.right - rect.left;
     } else {
       rect.bottom = Math.max(rect.top, rect.bottom - amount);
@@ -881,14 +882,17 @@ export function includeRubyBaseInLineRects(
   rects: Vtree.ClientRect[],
   element: Element,
   layout: Vtree.ClientLayout,
-  vertical: boolean,
+  mode: boolean | string,
 ): void {
+  const writingMode =
+    typeof mode === "string" ? mode : mode ? "vertical-rl" : "horizontal-tb";
+  const vertical = CssLogicalUtil.isVertical(writingMode);
+  const blockReversed = CssLogicalUtil.isBlockReversed(writingMode);
   const annotation = element.closest("[data-viv-ruby-end]");
   if (
     !annotation ||
     inNestedColumns(annotation, (e) => layout.getElementComputedStyle(e)) ||
-    layout.getElementComputedStyle(annotation).writingMode !==
-      (vertical ? "vertical-rl" : "horizontal-tb")
+    layout.getElementComputedStyle(annotation).writingMode !== writingMode
   )
     return;
   const bases = annotationBases(annotation, layout);
@@ -899,7 +903,8 @@ export function includeRubyBaseInLineRects(
         : Math.min(rect.right, base.right) - Math.max(rect.left, base.left);
       if (!(overlap > 0)) continue;
       if (vertical) {
-        rect.right = Math.max(rect.right, base.right);
+        if (blockReversed) rect.right = Math.max(rect.right, base.right);
+        else rect.left = Math.min(rect.left, base.left);
         rect.width = rect.right - rect.left;
       } else {
         rect.top = Math.min(rect.top, base.top);
@@ -913,8 +918,12 @@ export function includeRubyBaseInLineRects(
 export function blockEndAllowance(
   element: Element,
   layout: Vtree.ClientLayout,
-  vertical: boolean,
+  mode: boolean | string,
 ): number {
+  const writingMode =
+    typeof mode === "string" ? mode : mode ? "vertical-rl" : "horizontal-tb";
+  const vertical = CssLogicalUtil.isVertical(writingMode);
+  const blockReversed = CssLogicalUtil.isBlockReversed(writingMode);
   if (
     !element.hasAttribute("data-viv-ruby-end") &&
     !element.hasAttribute("data-viv-emphasis-end") &&
@@ -924,18 +933,14 @@ export function blockEndAllowance(
   if (inNestedColumns(element, (e) => layout.getElementComputedStyle(e)))
     return 0;
   const style = layout.getElementComputedStyle(element);
-  if (
-    style.writingMode &&
-    style.writingMode !== (vertical ? "vertical-rl" : "horizontal-tb")
-  )
-    return 0;
+  if (style.writingMode && style.writingMode !== writingMode) return 0;
   if (
     parseFloat(style.paddingBlockEnd) > 0 ||
     parseFloat(style.borderBlockEndWidth) > 0
   )
     return 0;
   const box = layout.getElementClientRect(element);
-  const end = vertical ? -box.left : box.bottom;
+  const end = vertical ? (blockReversed ? -box.left : box.right) : box.bottom;
   let allowance = 0;
   for (const candidate of [
     element,
@@ -952,7 +957,13 @@ export function blockEndAllowance(
     );
     if (!(amount > 0)) continue;
     const rect = layout.getElementClientRect(candidate);
-    if (Math.abs(end - (vertical ? -rect.left : rect.bottom)) <= amount + 0.5)
+    if (
+      Math.abs(
+        end -
+          (vertical ? (blockReversed ? -rect.left : rect.right) : rect.bottom),
+      ) <=
+      amount + 0.5
+    )
       allowance = Math.max(allowance, amount);
   }
   return allowance;

@@ -82,7 +82,7 @@ export class RepetitiveElementsOwnerFormattingContext
     return null;
   }
 
-  initializeRepetitiveElements(vertical: boolean) {
+  initializeRepetitiveElements(writingMode: boolean | string) {
     if (this.repetitiveElements) {
       return;
     }
@@ -95,7 +95,7 @@ export class RepetitiveElementsOwnerFormattingContext
     });
     if (!found) {
       this.repetitiveElements = new RepetitiveElements(
-        vertical,
+        writingMode,
         this.rootSourceNode,
       );
       Shared.repetitiveElementsCache.push({
@@ -141,7 +141,7 @@ export class RepetitiveElements
   allowInsertRepeatitiveElements: boolean = false;
 
   constructor(
-    private readonly vertical: boolean,
+    private readonly writingMode: boolean | string,
     public ownerSourceNode: Element,
   ) {}
 
@@ -174,7 +174,7 @@ export class RepetitiveElements
       this.headerHeight = LayoutHelper.getElementHeight(
         this.headerViewNode,
         column,
-        this.vertical,
+        this.writingMode,
       );
       this.headerViewNode = null;
     }
@@ -182,7 +182,7 @@ export class RepetitiveElements
       this.footerHeight = LayoutHelper.getElementHeight(
         this.footerViewNode,
         column,
-        this.vertical,
+        this.writingMode,
       );
       this.footerViewNode = null;
     }
