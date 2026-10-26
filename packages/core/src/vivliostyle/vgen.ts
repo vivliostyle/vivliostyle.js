@@ -1143,10 +1143,11 @@ export class ViewFactory
         new Css.Numeric(fontSize, "px"),
         0,
       ),
+      // The initial value that every source ancestor chain starts from, so
+      // that detached content inherits `normal` from a source that declares no
+      // line-height.
+      "line-height": new CssCascade.CascadeValue(Css.ident.normal, 0),
     } as CssCascade.ElementStyle;
-    if (isRoot) {
-      props["line-height"] = new CssCascade.CascadeValue(Css.ident.normal, 0);
-    }
     const inheritanceVisitor = new CssCascade.InheritanceVisitor(
       props,
       this.context,

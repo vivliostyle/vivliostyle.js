@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- Test case for PR #2233: when no source ancestor declares `line-height`, the
+     parent's line height is `normal`, so the `lh` unit of a footnote font size
+     must be resolved with the font metrics of the source parent, as for the
+     inline reference. The footnote "One" must be as large as the inline
+     reference "One" (same letter-spacing). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>lh unit of a detached font-size, line-height normal (PR #2233)</title>
+    <style>
+      @page {
+        size: 160mm 100mm;
+        margin: 10mm;
+      }
+      html,
+      body {
+        font-family: serif;
+        font-size: 16px;
+      }
+      .fn,
+      .ref {
+        font-size: 1lh;
+        letter-spacing: 2em;
+      }
+      .fn {
+        float: footnote;
+      }
+      ::footnote-marker {
+        content: "";
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The footnote "One" below must be as large as this inline reference "One":
+      <span class="ref">One</span><span class="fn">One</span>
+    </p>
+  </body>
+</html>

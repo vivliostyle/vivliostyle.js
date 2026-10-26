@@ -836,7 +836,11 @@ export class Styler implements AbstractStyler {
     if (lineHeight && !Css.isDefaultingValue(lineHeight.value)) {
       const evaluated = lineHeight.evaluate(this.context);
       const val = this.resolveRootSizingCalc(evaluated);
-      normalLineHeight = CssCascade.hasKeywordName(val, "normal");
+      // A value that the browser rejects, e.g. an invalid var() substitution,
+      // leaves the initial `normal`.
+      normalLineHeight =
+        CssCascade.hasKeywordName(val, "normal") ||
+        CssCascade.isInvalidLineHeight(this.context, val);
       fromRelativeCalc =
         evaluated instanceof Css.Func && val instanceof Css.Numeric;
       if (val instanceof Css.Num) {
