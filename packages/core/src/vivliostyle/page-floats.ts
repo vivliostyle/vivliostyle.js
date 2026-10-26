@@ -2046,6 +2046,27 @@ export class AttachedPageFloatLayoutContext
       includeParentLimits,
       area,
     );
+    // A footnote can change the progression of either axis without changing
+    // their orientation. Limits arrive in the containing context's axes, but
+    // sizes and positioning below use the area's own axes.
+    const parallelAxes = area.vertical === this.container.vertical;
+    const reverseBlock =
+      parallelAxes && area.getBoxDir() !== this.container.getBoxDir();
+    const reverseInline =
+      parallelAxes && area.getInlineDir() !== this.container.getInlineDir();
+    if (reverseBlock) [blockStart, blockEnd] = [blockEnd, blockStart];
+    if (reverseInline) [inlineStart, inlineEnd] = [inlineEnd, inlineStart];
+    const areaSide = (side: string): string => {
+      if (
+        (side.startsWith("block-") && reverseBlock) ||
+        (side.startsWith("inline-") && reverseInline)
+      ) {
+        return side.endsWith("start")
+          ? side.replace("start", "end")
+          : side.replace("end", "start");
+      }
+      return side;
+    };
     const blockOffset = area.vertical ? area.originX : area.originY;
     const inlineOffset = area.vertical ? area.originY : area.originX;
     // For footnotes, skip clamping blockStart/blockEnd to the area's own
@@ -2112,9 +2133,9 @@ export class AttachedPageFloatLayoutContext
           )
         : new GeometryUtil.Rect(inlineStart, blockStart, inlineEnd, blockEnd);
       if (
-        logicalFloatSides[0] === "block-start" ||
+        areaSide(logicalFloatSides[0]) === "block-start" ||
         logicalFloatSides[0] === "snap-block" ||
-        logicalFloatSides[0] === "inline-start" ||
+        areaSide(logicalFloatSides[0]) === "inline-start" ||
         logicalFloatSides[0] === "snap-inline"
       ) {
         if (
@@ -2127,9 +2148,9 @@ export class AttachedPageFloatLayoutContext
         }
       }
       if (
-        logicalFloatSides[0] === "block-end" ||
+        areaSide(logicalFloatSides[0]) === "block-end" ||
         logicalFloatSides[0] === "snap-block" ||
-        logicalFloatSides[0] === "inline-end" ||
+        areaSide(logicalFloatSides[0]) === "inline-end" ||
         logicalFloatSides[0] === "snap-inline"
       ) {
         if (
@@ -2152,7 +2173,12 @@ export class AttachedPageFloatLayoutContext
         isFinite(anchorEdge) &&
         logicalFloatSides[0] === "block-end"
       ) {
-        if (area.getBoxDir() < 0) {
+        if (reverseBlock) {
+          blockEnd =
+            this.container.getBoxDir() < 0
+              ? Math.min(blockEnd, anchorEdge)
+              : Math.max(blockEnd, anchorEdge);
+        } else if (area.getBoxDir() < 0) {
           blockStart = Math.min(blockStart, anchorEdge);
         } else {
           blockStart = Math.max(blockStart, anchorEdge);
@@ -2164,8 +2190,13 @@ export class AttachedPageFloatLayoutContext
       // in multi-column re-layout), this limits the footnote area.
       if (area.isFootnote && this.footnoteMaxBlockSize != null) {
         outerBlockSize = Math.min(outerBlockSize, this.footnoteMaxBlockSize);
-        // Adjust blockStart accordingly for correct positioning
-        blockStart = blockEnd - area.getBoxDir() * outerBlockSize;
+        // Keep the containing page's block-end fixed, even if the footnote
+        // uses the opposite block progression.
+        if (reverseBlock) {
+          blockEnd = blockStart + area.getBoxDir() * outerBlockSize;
+        } else {
+          blockStart = blockEnd - area.getBoxDir() * outerBlockSize;
+        }
       }
       blockSize = Math.max(
         0,
@@ -2278,19 +2309,21 @@ export class AttachedPageFloatLayoutContext
     blockEnd -= blockOffset;
     inlineStart -= inlineOffset;
     inlineEnd -= inlineOffset;
+    const placementFloatSides = logicalFloatSides.map(areaSide);
 
     if (
-      logicalFloatSides.some(
+      placementFloatSides.some(
         (s) => s === "inline-start" || s === "snap-inline",
       ) ||
-      (logicalFloatSides.length === 1 &&
-        (logicalFloatSides[0] === "block-start" ||
-          logicalFloatSides[0] === "snap-block"))
+      (placementFloatSides.length === 1 &&
+        (placementFloatSides[0] === "block-start" ||
+          placementFloatSides[0] === "snap-block"))
     ) {
       area.setInlinePosition(inlineStart, inlineSize);
     } else if (
-      logicalFloatSides.some((s) => s === "inline-end") ||
-      (logicalFloatSides.length === 1 && logicalFloatSides[0] === "block-end")
+      placementFloatSides.some((s) => s === "inline-end") ||
+      (placementFloatSides.length === 1 &&
+        placementFloatSides[0] === "block-end")
     ) {
       area.setInlinePosition(
         inlineEnd - outerInlineSize * area.getInlineDir(),
@@ -2298,17 +2331,18 @@ export class AttachedPageFloatLayoutContext
       );
     }
     if (
-      logicalFloatSides.some(
+      placementFloatSides.some(
         (s) => s === "block-start" || s === "snap-block",
       ) ||
-      (logicalFloatSides.length === 1 &&
-        (logicalFloatSides[0] === "inline-start" ||
-          logicalFloatSides[0] === "snap-inline"))
+      (placementFloatSides.length === 1 &&
+        (placementFloatSides[0] === "inline-start" ||
+          placementFloatSides[0] === "snap-inline"))
     ) {
       area.setBlockPosition(blockStart, blockSize);
     } else if (
-      logicalFloatSides.some((s) => s === "block-end") ||
-      (logicalFloatSides.length === 1 && logicalFloatSides[0] === "inline-end")
+      placementFloatSides.some((s) => s === "block-end") ||
+      (placementFloatSides.length === 1 &&
+        placementFloatSides[0] === "inline-end")
     ) {
       const blockPosition = blockEnd - outerBlockSize * area.getBoxDir();
       area.setBlockPosition(blockPosition, blockSize);
@@ -2663,13 +2697,21 @@ export class AttachedPageFloatLayoutContext
     ) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);
       if (column.vertical) {
+        const rightWrap =
+          column.getBoxDir() < 0
+            ? "floatMinWrapBlockStart"
+            : "floatMinWrapBlockEnd";
+        const leftWrap =
+          column.getBoxDir() < 0
+            ? "floatMinWrapBlockEnd"
+            : "floatMinWrapBlockStart";
         if (l.right < limits.right) {
           limits.right = l.right;
-          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+          limits[rightWrap] = l[rightWrap];
         }
         if (l.left > limits.left) {
           limits.left = l.left;
-          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+          limits[leftWrap] = l[leftWrap];
         }
       } else {
         if (l.top > limits.top) {

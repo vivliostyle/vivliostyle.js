@@ -4928,8 +4928,12 @@ const postLayoutBlockLeader: Plugin.PostLayoutBlockHook = (
       container.viewNode,
     );
     const lineIsRtl = containerStyle.direction === "rtl";
-    const lineStartSide = lineIsRtl ? inlineHighSide : inlineLowSide;
-    const lineSign = lineIsRtl ? -1 : 1;
+    const lineIsReversed = CssLogicalUtil.isInlineReversed(
+      writingMode,
+      lineIsRtl,
+    );
+    const lineStartSide = lineIsReversed ? inlineHighSide : inlineLowSide;
+    const lineSign = lineIsReversed ? -1 : 1;
     const leaderRunsWithTheLine = lineIsRtl === (direction === "rtl");
 
     // The client rect of the block container is its border box, while its

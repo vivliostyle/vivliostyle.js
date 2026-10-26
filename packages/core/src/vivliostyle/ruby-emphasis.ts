@@ -158,7 +158,7 @@ const savedMargins = new WeakMap<
 
 /** Convert line-relative emphasis position to a logical block side. */
 export function emphasisSide(writingMode: string, position: string): BlockSide {
-  if (writingMode === "horizontal-tb") {
+  if (writingMode === "horizontal-tb" || writingMode.startsWith("sideways-")) {
     return position.includes("under") ? "end" : "start";
   }
   const right = !position.includes("left");

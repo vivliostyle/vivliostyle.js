@@ -688,6 +688,11 @@ module.exports = [
           "leader() followed by content that wraps before the leader expands (PR #2154)",
       },
       {
+        file: "leader/wrapped-following-content-sideways-lr.html",
+        title:
+          "leader() followed by wrapped content in sideways-lr (Issue #1480)",
+      },
+      {
         file: "leader/wrapped-following-content-vertical.html",
         title:
           "leader() followed by content that wraps before the leader expands (Vertical, PR #2154)",
@@ -1055,6 +1060,14 @@ module.exports = [
       {
         file: "writing-mode-balanced-columns.html",
         title: "Balanced columns preserve block-start (Issue #1480)",
+      },
+      {
+        file: "writing-mode-footnote-override.html",
+        title: "Footnotes with a different writing mode (Issue #1480)",
+      },
+      {
+        file: "writing-mode-ancestor-float-wrap.html",
+        title: "Ancestor float minimum wrap in vertical-lr (Issue #1480)",
       },
       {
         file: "writing-mode-page-area-direction.html",

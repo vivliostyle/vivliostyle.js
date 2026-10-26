@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Test case for Issue #1480: ancestor page floats leave too little block space for column text. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ancestor float minimum wrap in vertical-lr (Issue #1480)</title>
+    <style>
+      @page {
+        size: 260px 360px;
+        margin: 30px;
+      }
+      :root {
+        writing-mode: vertical-lr;
+        column-count: 2;
+        column-gap: 20px;
+        font: 16px/20px sans-serif;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      aside {
+        float-reference: page;
+        float: block-start;
+        block-size: 160px;
+        inline-size: 100%;
+        float-min-wrap-block: 50px;
+        background: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>PAGE FLOAT</aside>
+    <p>
+      Text and the page float must be on separate pages because the remaining
+      40px is less than the 50px minimum wrap size.
+    </p>
+    <p>
+      ABC abc 123 日本語。 Keep this paragraph outside the narrow space next to
+      the page float.
+    </p>
+  </body>
+</html>

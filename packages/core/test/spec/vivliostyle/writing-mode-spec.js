@@ -13,6 +13,7 @@ import * as Ops from "../../../src/vivliostyle/ops";
 import * as PageFloats from "../../../src/vivliostyle/page-floats";
 import * as Footnotes from "../../../src/vivliostyle/footnotes";
 import * as Vgen from "../../../src/vivliostyle/vgen";
+import * as RubyEmphasis from "../../../src/vivliostyle/ruby-emphasis";
 import * as Task from "../../../src/vivliostyle/task";
 
 describe("writing-mode layout geometry", () => {
@@ -558,4 +559,127 @@ describe("page float direction follows page-area geometry", () => {
       expect(context.direction).toBe(direction);
     });
   }
+});
+
+describe("writing-mode review: float constraints and emphasis", () => {
+  const modes = [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ];
+  function container(mode) {
+    const c = new Vtree.Container(document.createElement("div"));
+    c.writingMode = mode;
+    c.width = c.height = 200;
+    return c;
+  }
+  function context(c, parent, reference) {
+    return PageFloats.PageFloatLayoutContext.createWithContainer(
+      c,
+      parent,
+      reference,
+      null,
+      null,
+      Css.getName(c.writingMode),
+      Css.ident.ltr,
+    );
+  }
+  for (const mode of modes)
+    for (const side of ["block-start", "block-end"]) {
+      it(`retains an ancestor's ${side} minimum wrap in ${mode}`, () => {
+        const parent = context(
+          container(mode),
+          PageFloats.RootPageFloatLayoutContext.createRoot(),
+          PageFloats.FloatReference.PAGE,
+        );
+        const column = container(mode);
+        column.layoutContext = column.clientLayout = {};
+        const child = context(column, parent, PageFloats.FloatReference.COLUMN);
+        const bounds = {
+          left: 0,
+          right: 200,
+          top: 0,
+          bottom: 200,
+          floatMinWrapBlockStart: 0,
+          floatMinWrapBlockEnd: 0,
+        };
+        const limited = { ...bounds };
+        const physical = parent.toPhysical(side);
+        limited[physical] =
+          physical === "left" || physical === "top" ? 160 : 40;
+        const field =
+          side === "block-start"
+            ? "floatMinWrapBlockStart"
+            : "floatMinWrapBlockEnd";
+        limited[field] = 50;
+        spyOn(child, "getLimitValuesInner").and.callFake(() => ({ ...bounds }));
+        spyOn(parent, "getLimitValuesInner").and.callFake(() => ({
+          ...limited,
+        }));
+        expect(child.isColumnFullWithPageFloats(column)).toBe(true);
+        limited[field] = 30;
+        expect(child.isColumnFullWithPageFloats(column)).toBe(false);
+      });
+    }
+  for (const mode of ["sideways-rl", "sideways-lr"])
+    for (const position of [
+      "over right",
+      "over left",
+      "under right",
+      "under left",
+    ]) {
+      it(`uses horizontal typographic emphasis placement for ${mode}, ${position}`, () => {
+        expect(RubyEmphasis.emphasisSide(mode, position)).toBe(
+          position.startsWith("under") ? "end" : "start",
+        );
+      });
+    }
+  for (const pageMode of ["vertical-lr", "vertical-rl"])
+    for (const noteMode of ["sideways-lr", "sideways-rl"])
+      for (const force of [false, true]) {
+        it(`sizes ${noteMode} footnotes on ${pageMode} pages, force=${force}`, () => {
+          const page = container(pageMode);
+          const parent = context(
+            page,
+            PageFloats.RootPageFloatLayoutContext.createRoot(),
+            PageFloats.FloatReference.PAGE,
+          );
+          const bounds = { left: 0, right: 200, top: 0, bottom: 200 };
+          spyOn(parent, "getLimitValue").and.callFake(
+            (side) => bounds[parent.toPhysical(side)],
+          );
+          const area = container(noteMode);
+          area.isFootnote = true;
+          area.layoutContext = area.clientLayout = {};
+          area.bands = [];
+          area.getContentBlockMarginAfter = () => 0;
+          area.computedBlockSize = 40;
+          parent.footnoteMaxBlockSize = 100;
+          const args = [
+            area,
+            PageFloats.FloatReference.PAGE,
+            "block-end",
+            pageMode.endsWith("-lr") ? 60 : 140,
+          ];
+          expect(
+            parent.setFloatAreaDimensions(...args, true, force, {
+              "block-end": true,
+            }),
+          ).toBe("block-end");
+          expect(area.width).toBe(100);
+          expect(area.left).toBe(pageMode.endsWith("-lr") ? 100 : 0);
+          expect(area.height).toBe(200);
+          expect(
+            parent.setFloatAreaDimensions(...args, false, force, {
+              "block-end": true,
+            }),
+          ).toBe("block-end");
+          expect(area.width).toBe(40);
+          expect(area.height).toBe(200);
+          expect(area.left).toBe(pageMode.endsWith("-lr") ? 160 : 0);
+          expect(area.top).toBe(0);
+        });
+      }
 });
