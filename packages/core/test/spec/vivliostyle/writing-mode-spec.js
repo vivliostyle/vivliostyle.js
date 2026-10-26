@@ -683,3 +683,98 @@ describe("writing-mode review: float constraints and emphasis", () => {
         });
       }
 });
+
+describe("detached float axes and page-margin alignment", () => {
+  const modes = [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ];
+  for (const mode of modes)
+    for (const rtl of [false, true]) {
+      it(`uses current container axes for detached clear limits in ${mode}, rtl=${rtl}`, () => {
+        const outer = PageFloats.PageFloatLayoutContext.createWithContainer(
+          new Vtree.Container(document.createElement("div")),
+          PageFloats.RootPageFloatLayoutContext.createRoot(),
+          PageFloats.FloatReference.PAGE,
+          null,
+          null,
+          null,
+          null,
+        );
+        const area = new Vtree.Container(document.createElement("div"));
+        area.layoutContext = area.clientLayout = {};
+        const rect = new Geometry.Rect(10, 30, 210, 330);
+        spyOn(area, "getPaddingRect").and.returnValue(rect);
+        const detached = PageFloats.PageFloatLayoutContext.createDetached(
+          outer,
+          PageFloats.FloatReference.COLUMN,
+          "body",
+          null,
+        ).withContainer(area);
+        expect(detached.getPageFloatClearEdge("both", area)).toBe(30);
+        // Footnote styling can override the mode after the context is attached.
+        area.writingMode = mode;
+        area.rtl = rtl;
+        expect(detached.getPageFloatClearEdge("both", area)).toBe(
+          area.getBeforeEdge({ left: 10, right: 210, top: 30, bottom: 330 }),
+        );
+        expect(detached.getLimitValue("inline-start", null, {}, {})).toBe(
+          mode === "horizontal-tb"
+            ? rtl
+              ? 210
+              : 10
+            : (mode === "sideways-lr") !== rtl
+              ? 330
+              : 30,
+        );
+        const child = new Vtree.Container(document.createElement("div"));
+        child.writingMode = mode;
+        child.rtl = rtl;
+        child.layoutContext = child.clientLayout = {};
+        spyOn(child, "getPaddingRect").and.returnValue(
+          new Geometry.Rect(20, 40, 200, 320),
+        );
+        const childContext =
+          PageFloats.PageFloatLayoutContext.createWithContainer(
+            child,
+            detached,
+            PageFloats.FloatReference.COLUMN,
+            null,
+            null,
+            null,
+            null,
+          );
+        expect(childContext.getPageFloatClearEdge("both", child)).toBe(
+          child.getBeforeEdge({ left: 20, right: 200, top: 40, bottom: 320 }),
+        );
+      });
+      for (const align of ["top", "middle", "bottom"]) {
+        it(`aligns page-margin content physically ${align} in ${mode}, rtl=${rtl}`, () => {
+          const box = Object.create(
+            CssPage.PageMarginBoxPartitionInstance.prototype,
+          );
+          box.writingMode = mode;
+          box.vertical = mode !== "horizontal-tb";
+          box.rtl = rtl;
+          box.boxInfo = CssPage.pageMarginBoxes["left-middle"];
+          box.getProp = (_context, name) =>
+            name === "vertical-align" ? Css.getName(align) : Css.ident.none;
+          const element = document.createElement("div");
+          box.applyVerticalAlign({}, element);
+          expect(element.style.flexDirection).toBe(
+            mode === "horizontal-tb"
+              ? "column"
+              : (mode === "sideways-lr") !== rtl
+                ? "row-reverse"
+                : "row",
+          );
+          expect(element.style.justifyContent).toBe(
+            { top: "flex-start", middle: "center", bottom: "flex-end" }[align],
+          );
+        });
+      }
+    }
+});

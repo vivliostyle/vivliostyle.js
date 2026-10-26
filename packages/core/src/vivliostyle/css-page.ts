@@ -22,6 +22,7 @@ import * as Base from "./base";
 import * as Constants from "./constants";
 import * as Css from "./css";
 import * as CssCascade from "./css-cascade";
+import * as CssLogicalUtil from "./css-logical-util";
 import * as CssParser from "./css-parser";
 import * as CssValidator from "./css-validator";
 import * as Exprs from "./exprs";
@@ -2163,7 +2164,11 @@ export class PageMarginBoxPartitionInstance extends PageMaster.PartitionInstance
     Base.setCSSProperty(
       element,
       "flex-flow",
-      this.vertical ? (this.rtl ? "row-reverse" : "row") : "column",
+      this.vertical
+        ? CssLogicalUtil.isInlineReversed(this.writingMode, this.rtl)
+          ? "row-reverse"
+          : "row"
+        : "column",
     );
     const verticalAlign: Css.Val = this.getProp(context, "vertical-align");
     let flexAlign: string | null = null;

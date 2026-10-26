@@ -1062,6 +1062,14 @@ module.exports = [
         title: "Balanced columns preserve block-start (Issue #1480)",
       },
       {
+        file: "writing-mode-margin-align.html",
+        title: "Page-margin alignment in sideways-lr (Issue #1480)",
+      },
+      {
+        file: "writing-mode-detached-clear.html",
+        title: "Clear inside detached vertical float areas (Issue #1480)",
+      },
+      {
         file: "writing-mode-footnote-override.html",
         title: "Footnotes with a different writing mode (Issue #1480)",
       },

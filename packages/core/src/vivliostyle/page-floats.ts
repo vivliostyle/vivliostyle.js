@@ -356,12 +356,17 @@ export class PageFloatContinuation implements PageFloats.PageFloatContinuation {
   }
 }
 
+type PageFloatAxes = Pick<
+  PageFloatLayoutContext,
+  "writingMode" | "direction" | "pageSide"
+>;
+
 /**
  * The sides a float can take are relative to the writing mode and direction of
  * the context, and `inside` / `outside` also to which side of the spread the
  * page is on.
  */
-function toLogicalSide(side: string, context: PageFloatLayoutContext): string {
+function toLogicalSide(side: string, context: PageFloatAxes): string {
   if (side === "inside" || side === "outside") {
     const isLeftPage = context.pageSide === Constants.PageSide.LEFT;
     side =
@@ -380,7 +385,7 @@ function toLogicalSide(side: string, context: PageFloatLayoutContext): string {
   );
 }
 
-function toPhysicalSide(side: string, context: PageFloatLayoutContext): string {
+function toPhysicalSide(side: string, context: PageFloatAxes): string {
   return CssLogicalUtil.toPhysical(
     side,
     context.writingMode.toString(),
@@ -390,7 +395,7 @@ function toPhysicalSide(side: string, context: PageFloatLayoutContext): string {
 
 function toLogicalFloatSides(
   floatSide: string,
-  context: PageFloatLayoutContext,
+  context: PageFloatAxes,
 ): string[] {
   const sides = floatSide.split(" ");
 
@@ -1033,16 +1038,20 @@ export abstract class PageFloatLayoutContext
     this.state.invalidated = false;
   }
 
+  protected getAxes(): PageFloatAxes {
+    return this;
+  }
+
   protected toLogical(side: string): string {
-    return toLogicalSide(side, this);
+    return toLogicalSide(side, this.getAxes());
   }
 
   protected toPhysical(side: string): string {
-    return toPhysicalSide(side, this);
+    return toPhysicalSide(side, this.getAxes());
   }
 
   protected toLogicalFloatSides(floatSide: string): string[] {
-    return toLogicalFloatSides(floatSide, this);
+    return toLogicalFloatSides(floatSide, this.getAxes());
   }
 
   discardStashedFragments(floatReference: FloatReference) {
@@ -1289,6 +1298,22 @@ export class AttachedPageFloatLayoutContext
   extends ParentPageFloatLayoutContext
   implements PageFloats.AttachedPageFloatLayoutContext
 {
+  protected override getAxes(): PageFloatAxes {
+    // Detached contexts have no inherited axes. Geometry follows the current
+    // container, including writing-mode overrides applied to a footnote later.
+    if (!this.container.writingMode) return this;
+    return {
+      writingMode: Css.getName(this.container.writingMode),
+      direction:
+        this.container.rtl == null
+          ? this.direction
+          : this.container.rtl
+            ? Css.ident.rtl
+            : Css.ident.ltr,
+      pageSide: this.pageSide,
+    };
+  }
+
   asAttached(): AttachedPageFloatLayoutContext {
     return this;
   }
