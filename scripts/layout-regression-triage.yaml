@@ -1,3 +1,207 @@
+- category: Writing modes
+  title: "Pagination in vertical-lr (Issue #1480)"
+  file: writing-mode/vertical-lr.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/vertical-lr.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/vertical-lr.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Pagination in sideways-rl (Issue #1480)"
+  file: writing-mode/sideways-rl.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-rl.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-rl.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Pagination in sideways-lr (Issue #1480)"
+  file: writing-mode/sideways-lr.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-lr.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-lr.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Layout features in vertical-lr (Issue #1480)"
+  file: writing-mode/vertical-lr-features.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/vertical-lr-features.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/vertical-lr-features.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Balanced columns preserve block-start (Issue #1480)"
+  file: writing-mode/balanced-columns.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/balanced-columns.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/balanced-columns.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Page-margin alignment in sideways-lr (Issue #1480)"
+  file: writing-mode/margin-align.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/margin-align.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/margin-align.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Clear inside detached vertical float areas (Issue #1480)"
+  file: writing-mode/detached-clear.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/detached-clear.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/detached-clear.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Footnotes with a different writing mode (Issue #1480)"
+  file: writing-mode/footnote-override.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/footnote-override.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/footnote-override.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Column rules with opposite ancestor progression (Issue #1480)"
+  file: writing-mode/opposite-column-rules.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/opposite-column-rules.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/opposite-column-rules.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Opposite ancestor and column float wrap directions (Issue #1480)"
+  file: writing-mode/opposite-float-wrap.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/opposite-float-wrap.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/opposite-float-wrap.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Ancestor float minimum wrap in vertical-lr (Issue #1480)"
+  file: writing-mode/ancestor-float-wrap.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/ancestor-float-wrap.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/ancestor-float-wrap.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Page float direction differs from page context (Issue #1480)"
+  file: writing-mode/page-area-direction.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/page-area-direction.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/page-area-direction.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Footnotes with writing-mode propagated from body (Issue #1480)"
+  file: writing-mode/body-footnotes.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/body-footnotes.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/body-footnotes.html&zoom=1&spread=false
+- category: Writing modes
+  title: "leader() followed by wrapped content in sideways-lr (Issue #1480)"
+  file: writing-mode/wrapped-following-content-sideways-lr.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/wrapped-following-content-sideways-lr.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/wrapped-following-content-sideways-lr.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Layout features in sideways-rl (Issue #1480)"
+  file: writing-mode/sideways-rl-features.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-rl-features.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-rl-features.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Layout features in sideways-lr (Issue #1480)"
+  file: writing-mode/sideways-lr-features.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-lr-features.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/sideways-lr-features.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Substituted writing-mode with page and region floats (Issue #1480)"
+  file: writing-mode/variable-page-floats.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2231"
+  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/variable-page-floats.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/variable-page-floats.html&zoom=1&spread=false
 - category: Text spacing
   title: "text-autospace across margin, border, or padding (PR #2228)"
   file: text-spacing/autospace-margin-border-padding.html
