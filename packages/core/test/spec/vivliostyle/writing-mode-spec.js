@@ -488,3 +488,74 @@ describe("legacy progression and propagated footnote writing modes", () => {
     });
   }
 });
+
+describe("page float direction follows page-area geometry", () => {
+  for (const mode of [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    for (const areaRtl of [false, true]) {
+      it(`uses ${mode}, ${areaRtl ? "rtl" : "ltr"} when the page context has the opposite direction`, () => {
+        const area = {
+          writingMode: mode,
+          rtl: areaRtl,
+          pageAreaEstablishingChild: null,
+        };
+        const intermediate = { pageAreaEstablishingChild: area };
+        const master = {
+          writingMode: "horizontal-tb",
+          rtl: !areaRtl,
+          pageAreaEstablishingChild: intermediate,
+          getProp: () => (areaRtl ? Css.ident.ltr : Css.ident.rtl),
+        };
+        const root = PageFloats.RootPageFloatLayoutContext.createRoot();
+        const context =
+          Ops.StyleInstance.prototype.getPagePageFloatLayoutContext.call(
+            { rootPageFloatLayoutContext: root },
+            master,
+            false,
+            Constants.PageSide.LEFT,
+          );
+        expect(context.writingMode.toString()).toBe(mode);
+        expect(context.direction).toBe(areaRtl ? Css.ident.rtl : Css.ident.ltr);
+        expect(context.toPhysical("inline-start")).toBe(
+          mode === "horizontal-tb"
+            ? areaRtl
+              ? "right"
+              : "left"
+            : (mode === "sideways-lr") !== areaRtl
+              ? "bottom"
+              : "top",
+        );
+        expect(context.pageSide).toBe(Constants.PageSide.LEFT);
+        expect(master.rtl).toBe(!areaRtl);
+        expect(master.writingMode).toBe("horizontal-tb");
+      });
+    }
+  }
+  for (const direction of [Css.ident.ltr, Css.ident.rtl]) {
+    it(`preserves the TOC page context's ${direction} direction and horizontal mode`, () => {
+      const master = {
+        writingMode: "sideways-lr",
+        rtl: direction !== Css.ident.rtl,
+        pageAreaEstablishingChild: null,
+        getProp: () => direction,
+      };
+      const context =
+        Ops.StyleInstance.prototype.getPagePageFloatLayoutContext.call(
+          {
+            rootPageFloatLayoutContext:
+              PageFloats.RootPageFloatLayoutContext.createRoot(),
+          },
+          master,
+          true,
+          Constants.PageSide.RIGHT,
+        );
+      expect(context.writingMode).toBe(Css.ident.horizontal_tb);
+      expect(context.direction).toBe(direction);
+    });
+  }
+});

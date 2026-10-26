@@ -2300,6 +2300,35 @@ export class StyleInstance
     return frame.result();
   }
 
+  getPagePageFloatLayoutContext(
+    pageMaster: PageMaster.PageMasterInstance,
+    isTocBox: boolean,
+    pageSide: Constants.PageSide,
+  ): PageFloats.UnattachedPageFloatLayoutContext {
+    // Page floats use the page area's resolved axes, including propagation
+    // from body. Keep the page context unchanged for margin box inheritance.
+    let pageAreaBox: PageMaster.PageBoxInstance &
+      PageMaster.PageAreaEstablishing = pageMaster;
+    while (pageAreaBox.pageAreaEstablishingChild) {
+      pageAreaBox = pageAreaBox.pageAreaEstablishingChild;
+    }
+    const direction = isTocBox
+      ? pageMaster.getProp(this, "direction") || Css.ident.ltr
+      : pageAreaBox.rtl
+        ? Css.ident.rtl
+        : Css.ident.ltr;
+    return PageFloats.PageFloatLayoutContext.create(
+      this.rootPageFloatLayoutContext,
+      PageFloats.FloatReference.PAGE,
+      null,
+      null,
+      Css.getName(isTocBox ? "horizontal-tb" : pageAreaBox.writingMode),
+      direction,
+      null,
+      pageSide,
+    );
+  }
+
   getRegionPageFloatLayoutContext(
     pagePageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext,
     boxInstance: PageMaster.PageBoxInstance,
@@ -3330,22 +3359,9 @@ export class StyleInstance
 
     this.pageVertical = writingMode != Css.ident.horizontal_tb;
 
-    const direction = pageMaster.getProp(this, "direction") || Css.ident.ltr;
-    // Page floats use the page area's used mode, including propagation from
-    // body. The page context keeps its computed mode for margin box inheritance.
-    let pageAreaBox: PageMaster.PageBoxInstance &
-      PageMaster.PageAreaEstablishing = pageMaster;
-    while (pageAreaBox.pageAreaEstablishingChild) {
-      pageAreaBox = pageAreaBox.pageAreaEstablishingChild;
-    }
-    const pageFloatLayoutContext = PageFloats.PageFloatLayoutContext.create(
-      this.rootPageFloatLayoutContext,
-      PageFloats.FloatReference.PAGE,
-      null,
-      null,
-      Css.getName(isTocBox ? "horizontal-tb" : pageAreaBox.writingMode),
-      direction,
-      null,
+    const pageFloatLayoutContext = this.getPagePageFloatLayoutContext(
+      pageMaster,
+      isTocBox,
       page.side,
     );
     const frame: Task.Frame<Vtree.LayoutPosition | null> =

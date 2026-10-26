@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- Test case for Issue #1480: page floats use the document page area's direction, independently of @page. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Page float direction differs from page context (Issue #1480)</title>
+    <style>
+      @page {
+        size: 460px 360px;
+        margin: 30px;
+        direction: rtl;
+        @bottom-center {
+          content: counter(page);
+        }
+      }
+      :root {
+        writing-mode: vertical-lr;
+        direction: ltr;
+        font: 16px/20px sans-serif;
+      }
+      body,
+      p {
+        margin: 0;
+      }
+      .page-float {
+        float-reference: page;
+        float: block-end;
+        block-size: 40px;
+        inline-size: 100%;
+        background: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <aside class="page-float" data-review-float="page">PAGE FLOAT</aside>
+    <p data-sequence="1">
+      Paragraph 1: ABC abc 123 日本語。 Keep all text inside the page.
+    </p>
+    <p data-sequence="2">
+      Paragraph 2: ABC abc 123 日本語。 Keep all text inside the page.
+    </p>
+    <p data-sequence="3">
+      Paragraph 3: ABC abc 123 日本語。 Keep all text inside the page.
+    </p>
+    <p data-sequence="4">
+      Paragraph 4: ABC abc 123 日本語。 Keep all text inside the page.
+    </p>
+  </body>
+</html>
