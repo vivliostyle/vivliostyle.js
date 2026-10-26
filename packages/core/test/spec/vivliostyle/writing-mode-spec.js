@@ -787,3 +787,88 @@ describe("detached float axes and page-margin alignment", () => {
       }
     }
 });
+
+describe("float-edge clipping across different block progressions", () => {
+  const modes = ["vertical-rl", "vertical-lr", "sideways-rl", "sideways-lr"];
+  function container(mode) {
+    const c = new Vtree.Container(document.createElement("div"));
+    c.writingMode = mode;
+    return c;
+  }
+  function context(c, parent, reference) {
+    return PageFloats.PageFloatLayoutContext.createWithContainer(
+      c,
+      parent,
+      reference,
+      null,
+      null,
+      Css.getName(c.writingMode),
+      Css.ident.ltr,
+    );
+  }
+  for (const ancestorMode of modes)
+    for (const columnMode of modes)
+      for (const side of ["block-start", "block-end"]) {
+        it(`clips ${columnMode} rules around ${ancestorMode} ${side} floats`, () => {
+          const ancestor = context(
+            container(ancestorMode),
+            PageFloats.RootPageFloatLayoutContext.createRoot(),
+            PageFloats.FloatReference.PAGE,
+          );
+          const child = context(
+            container(columnMode),
+            ancestor,
+            PageFloats.FloatReference.REGION,
+          );
+          const physical = ancestor.toPhysical(side);
+          const rect = {
+            x1: physical === "left" ? 0 : 40,
+            x2: physical === "left" ? 160 : 200,
+            y1: 0,
+            y2: 120,
+          };
+          const f = new PageFloats.PageFloat(
+            { steps: [], offsetInNode: 0, after: false },
+            PageFloats.FloatReference.PAGE,
+            side,
+            null,
+            "body",
+          );
+          ancestor.addPageFloat(f);
+          ancestor.addPageFloatFragment(
+            new PageFloats.PageFloatFragment(
+              f.floatReference,
+              side,
+              null,
+              [new PageFloats.PageFloatContinuation(f, {})],
+              { getOuterRect: () => rect },
+              false,
+            ),
+          );
+          const atStart =
+            (columnMode.endsWith("-lr") ? "left" : "right") === physical;
+          const endOfStart = physical === "left" ? 160 : 40;
+          for (const c of [child, ancestor]) {
+            const start = c.getBlockEndEdgeOfBlockStartFloats(50, columnMode);
+            const end = c.getBlockStartEdgeOfBlockEndFloats(50, columnMode);
+            if (atStart) {
+              expect(start).toBe(endOfStart);
+              expect(Number.isNaN(end)).toBe(true);
+            } else {
+              expect(Number.isNaN(start)).toBe(true);
+              expect(end).toBe(endOfStart);
+            }
+            expect(
+              Number.isNaN(
+                c.getBlockEndEdgeOfBlockStartFloats(200, columnMode),
+              ),
+            ).toBe(true);
+            expect(
+              Number.isNaN(
+                c.getBlockStartEdgeOfBlockEndFloats(200, columnMode),
+              ),
+            ).toBe(true);
+          }
+        });
+      }
+});

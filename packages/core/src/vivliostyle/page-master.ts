@@ -1585,9 +1585,11 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
             parent?: {
               getBlockEndEdgeOfBlockStartFloats?: (
                 inlinePos?: number,
+                writingMode?: string,
               ) => number;
               getBlockStartEdgeOfBlockEndFloats?: (
                 inlinePos?: number,
+                writingMode?: string,
               ) => number;
             };
           };
@@ -1611,10 +1613,12 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
           const blockStartFloatEndEdge =
             columnLike.pageFloatLayoutContext?.parent?.getBlockEndEdgeOfBlockStartFloats?.(
               physicalInlinePos,
+              column.writingMode,
             ) ?? NaN;
           const blockEndFloatStartEdge =
             columnLike.pageFloatLayoutContext?.parent?.getBlockStartEdgeOfBlockEndFloats?.(
               physicalInlinePos,
+              column.writingMode,
             ) ?? NaN;
           const blockStartLimit = isFinite(blockStartFloatEndEdge)
             ? this.vertical

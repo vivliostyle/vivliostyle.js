@@ -2401,86 +2401,65 @@ export class AttachedPageFloatLayoutContext
     );
   }
 
-  getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number {
-    const isVertical = this.container.vertical;
-    let edge = NaN;
-    this.floatFragments
-      .filter((fragment) => fragment.floatSide.includes("block-start"))
-      .filter((fragment) => {
-        if (inlinePos === undefined || !isFinite(inlinePos)) {
-          return true;
-        }
-        const rect = fragment.getOuterRect();
-        return isVertical
-          ? rect.y1 <= inlinePos && inlinePos <= rect.y2
-          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
-      })
-      .forEach((fragment) => {
-        const rect = fragment.getOuterRect();
-        const fragmentEdge = isVertical
-          ? this.container.getBoxDir() < 0
-            ? rect.x1
-            : rect.x2
-          : rect.y2;
-        edge = isFinite(edge)
-          ? this.container.getBoxDir() < 0
-            ? Math.min(edge, fragmentEdge)
-            : Math.max(edge, fragmentEdge)
-          : fragmentEdge;
-      });
-    const attachedParent = this.attachedParent;
-    if (attachedParent) {
-      const parentEdge =
-        attachedParent.getBlockEndEdgeOfBlockStartFloats(inlinePos);
-      if (isFinite(parentEdge)) {
-        edge = isFinite(edge)
-          ? this.container.getBoxDir() < 0
-            ? Math.min(edge, parentEdge)
-            : Math.max(edge, parentEdge)
-          : parentEdge;
-      }
-    }
-    return edge;
+  /** Limits are expressed in the requesting column's axes through all ancestors. */
+  getBlockEndEdgeOfBlockStartFloats(
+    inlinePos?: number,
+    writingMode: string = this.container.writingMode,
+  ): number {
+    return this.getFloatEdge(
+      CssLogicalUtil.toPhysical("block-start", writingMode),
+      inlinePos,
+    );
   }
 
-  getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number {
-    const isVertical = this.container.vertical;
+  getBlockStartEdgeOfBlockEndFloats(
+    inlinePos?: number,
+    writingMode: string = this.container.writingMode,
+  ): number {
+    return this.getFloatEdge(
+      CssLogicalUtil.toPhysical("block-end", writingMode),
+      inlinePos,
+    );
+  }
+
+  private getFloatEdge(physicalSide: string, inlinePos?: number): number {
+    const vertical = physicalSide === "left" || physicalSide === "right";
+    const lowSide = physicalSide === "left" || physicalSide === "top";
+    const merge = lowSide ? Math.max : Math.min;
     let edge = NaN;
-    this.floatFragments
-      .filter((fragment) => fragment.floatSide.includes("block-end"))
-      .filter((fragment) => {
-        if (inlinePos === undefined || !isFinite(inlinePos)) {
-          return true;
-        }
-        const rect = fragment.getOuterRect();
-        return isVertical
+    for (const fragment of this.floatFragments) {
+      if (
+        !this.toLogicalFloatSides(fragment.floatSide).some(
+          (side) => this.toPhysical(side) === physicalSide,
+        )
+      )
+        continue;
+      const rect = fragment.getOuterRect();
+      if (
+        inlinePos !== undefined &&
+        isFinite(inlinePos) &&
+        !(vertical
           ? rect.y1 <= inlinePos && inlinePos <= rect.y2
-          : rect.x1 <= inlinePos && inlinePos <= rect.x2;
-      })
-      .forEach((fragment) => {
-        const rect = fragment.getOuterRect();
-        const fragmentEdge = isVertical
-          ? this.container.getBoxDir() < 0
-            ? rect.x2
-            : rect.x1
+          : rect.x1 <= inlinePos && inlinePos <= rect.x2)
+      )
+        continue;
+      const fragmentEdge = vertical
+        ? lowSide
+          ? rect.x2
+          : rect.x1
+        : lowSide
+          ? rect.y2
           : rect.y1;
-        edge = isFinite(edge)
-          ? this.container.getBoxDir() < 0
-            ? Math.max(edge, fragmentEdge)
-            : Math.min(edge, fragmentEdge)
-          : fragmentEdge;
-      });
-    const attachedParent = this.attachedParent;
-    if (attachedParent) {
-      const parentEdge =
-        attachedParent.getBlockStartEdgeOfBlockEndFloats(inlinePos);
-      if (isFinite(parentEdge)) {
-        edge = isFinite(edge)
-          ? this.container.getBoxDir() < 0
-            ? Math.max(edge, parentEdge)
-            : Math.min(edge, parentEdge)
-          : parentEdge;
-      }
+      edge = isFinite(edge) ? merge(edge, fragmentEdge) : fragmentEdge;
+    }
+    // Preserve the physical side instead of reinterpreting a logical side in
+    // an ancestor whose block progression can run in the opposite direction.
+    const parentEdge = this.attachedParent?.getFloatEdge(
+      physicalSide,
+      inlinePos,
+    );
+    if (parentEdge !== undefined && isFinite(parentEdge)) {
+      edge = isFinite(edge) ? merge(edge, parentEdge) : parentEdge;
     }
     return edge;
   }

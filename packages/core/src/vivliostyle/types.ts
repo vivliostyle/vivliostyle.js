@@ -818,8 +818,14 @@ export namespace PageFloats {
       condition: PageFloatPlacementCondition,
     ): string | null;
     getMaxReachedAfterEdge(): number;
-    getBlockEndEdgeOfBlockStartFloats(inlinePos?: number): number;
-    getBlockStartEdgeOfBlockEndFloats(inlinePos?: number): number;
+    getBlockEndEdgeOfBlockStartFloats(
+      inlinePos?: number,
+      writingMode?: string,
+    ): number;
+    getBlockStartEdgeOfBlockEndFloats(
+      inlinePos?: number,
+      writingMode?: string,
+    ): number;
     getPageFloatClearEdge(clear: string, column: Layout.Column): number;
     getPageFloatPlacementCondition(
       float: PageFloat,
