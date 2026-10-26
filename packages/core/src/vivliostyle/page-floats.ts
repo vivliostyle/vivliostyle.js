@@ -2721,6 +2721,17 @@ export class AttachedPageFloatLayoutContext
       context = context.attachedParent
     ) {
       const l = context.getLimitValuesInner(layoutContext, clientLayout);
+      // Read the source constraint in the ancestor's axes; its logical block
+      // sides can be opposite to the destination column's block sides.
+      const ancestorAxes = context.getAxes();
+      const wrapAt = (physicalSide: string): number => {
+        const side = toLogicalSide(physicalSide, ancestorAxes);
+        return side === "block-start"
+          ? l.floatMinWrapBlockStart
+          : side === "block-end"
+            ? l.floatMinWrapBlockEnd
+            : 0;
+      };
       if (column.vertical) {
         const rightWrap =
           column.getBoxDir() < 0
@@ -2732,20 +2743,20 @@ export class AttachedPageFloatLayoutContext
             : "floatMinWrapBlockStart";
         if (l.right < limits.right) {
           limits.right = l.right;
-          limits[rightWrap] = l[rightWrap];
+          limits[rightWrap] = wrapAt("right");
         }
         if (l.left > limits.left) {
           limits.left = l.left;
-          limits[leftWrap] = l[leftWrap];
+          limits[leftWrap] = wrapAt("left");
         }
       } else {
         if (l.top > limits.top) {
           limits.top = l.top;
-          limits.floatMinWrapBlockStart = l.floatMinWrapBlockStart;
+          limits.floatMinWrapBlockStart = wrapAt("top");
         }
         if (l.bottom < limits.bottom) {
           limits.bottom = l.bottom;
-          limits.floatMinWrapBlockEnd = l.floatMinWrapBlockEnd;
+          limits.floatMinWrapBlockEnd = wrapAt("bottom");
         }
       }
     }

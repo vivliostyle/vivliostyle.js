@@ -1074,6 +1074,11 @@ module.exports = [
         title: "Footnotes with a different writing mode (Issue #1480)",
       },
       {
+        file: "writing-mode-opposite-float-wrap.html",
+        title:
+          "Opposite ancestor and column float wrap directions (Issue #1480)",
+      },
+      {
         file: "writing-mode-ancestor-float-wrap.html",
         title: "Ancestor float minimum wrap in vertical-lr (Issue #1480)",
       },

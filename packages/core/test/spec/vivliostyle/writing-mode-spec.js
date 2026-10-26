@@ -587,42 +587,51 @@ describe("writing-mode review: float constraints and emphasis", () => {
     );
   }
   for (const mode of modes)
-    for (const side of ["block-start", "block-end"]) {
-      it(`retains an ancestor's ${side} minimum wrap in ${mode}`, () => {
-        const parent = context(
-          container(mode),
-          PageFloats.RootPageFloatLayoutContext.createRoot(),
-          PageFloats.FloatReference.PAGE,
-        );
-        const column = container(mode);
-        column.layoutContext = column.clientLayout = {};
-        const child = context(column, parent, PageFloats.FloatReference.COLUMN);
-        const bounds = {
-          left: 0,
-          right: 200,
-          top: 0,
-          bottom: 200,
-          floatMinWrapBlockStart: 0,
-          floatMinWrapBlockEnd: 0,
-        };
-        const limited = { ...bounds };
-        const physical = parent.toPhysical(side);
-        limited[physical] =
-          physical === "left" || physical === "top" ? 160 : 40;
-        const field =
-          side === "block-start"
-            ? "floatMinWrapBlockStart"
-            : "floatMinWrapBlockEnd";
-        limited[field] = 50;
-        spyOn(child, "getLimitValuesInner").and.callFake(() => ({ ...bounds }));
-        spyOn(parent, "getLimitValuesInner").and.callFake(() => ({
-          ...limited,
-        }));
-        expect(child.isColumnFullWithPageFloats(column)).toBe(true);
-        limited[field] = 30;
-        expect(child.isColumnFullWithPageFloats(column)).toBe(false);
-      });
-    }
+    for (const columnMode of modes.filter(
+      (value) => (value === "horizontal-tb") === (mode === "horizontal-tb"),
+    ))
+      for (const side of ["block-start", "block-end"]) {
+        it(`retains an ancestor's ${side} minimum wrap from ${mode} in ${columnMode}`, () => {
+          const parent = context(
+            container(mode),
+            PageFloats.RootPageFloatLayoutContext.createRoot(),
+            PageFloats.FloatReference.PAGE,
+          );
+          const column = container(columnMode);
+          column.layoutContext = column.clientLayout = {};
+          const child = context(
+            column,
+            parent,
+            PageFloats.FloatReference.COLUMN,
+          );
+          const bounds = {
+            left: 0,
+            right: 200,
+            top: 0,
+            bottom: 200,
+            floatMinWrapBlockStart: 0,
+            floatMinWrapBlockEnd: 0,
+          };
+          const limited = { ...bounds };
+          const physical = parent.toPhysical(side);
+          limited[physical] =
+            physical === "left" || physical === "top" ? 160 : 40;
+          const field =
+            side === "block-start"
+              ? "floatMinWrapBlockStart"
+              : "floatMinWrapBlockEnd";
+          limited[field] = 50;
+          spyOn(child, "getLimitValuesInner").and.callFake(() => ({
+            ...bounds,
+          }));
+          spyOn(parent, "getLimitValuesInner").and.callFake(() => ({
+            ...limited,
+          }));
+          expect(child.isColumnFullWithPageFloats(column)).toBe(true);
+          limited[field] = 30;
+          expect(child.isColumnFullWithPageFloats(column)).toBe(false);
+        });
+      }
   for (const mode of ["sideways-rl", "sideways-lr"])
     for (const position of [
       "over right",
