@@ -1091,6 +1091,11 @@ module.exports = [
         title: "Page float direction differs from page context (Issue #1480)",
       },
       {
+        file: "writing-mode-body-page-units.html",
+        title:
+          "Logical page units with writing-mode propagated from body (Issue #1480)",
+      },
+      {
         file: "writing-mode-body-footnotes.html",
         title: "Footnotes with writing-mode propagated from body (Issue #1480)",
       },

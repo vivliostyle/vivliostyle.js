@@ -3353,17 +3353,15 @@ export class StyleInstance
         evaluatedPageSizeAndBleed.bleedOffset + evaluatedPageSizeAndBleed.bleed;
     }
 
-    const writingMode = Css.getName(
-      isTocBox ? "horizontal-tb" : pageMaster.writingMode,
-    );
-
-    this.pageVertical = writingMode != Css.ident.horizontal_tb;
-
     const pageFloatLayoutContext = this.getPagePageFloatLayoutContext(
       pageMaster,
       isTocBox,
       page.side,
     );
+    // Logical viewport units follow the used page-area mode, including body
+    // propagation. The page master's computed mode still governs inheritance.
+    this.pageVertical =
+      pageFloatLayoutContext.writingMode !== Css.ident.horizontal_tb;
     const frame: Task.Frame<Vtree.LayoutPosition | null> =
       Task.newFrame("layoutNextPage");
     let attachedPageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext | null =

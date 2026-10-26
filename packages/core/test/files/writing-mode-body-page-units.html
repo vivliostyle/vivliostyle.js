@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- Test case for Issue #1480: logical page viewport units use the page area's mode propagated from body. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Logical page units with writing-mode propagated from body (Issue #1480)
+    </title>
+    <style>
+      @page {
+        size: 460px 360px;
+        margin: 30px;
+        @bottom-center {
+          content: "PAGE MARGIN";
+          font: 12px sans-serif;
+        }
+      }
+      body {
+        writing-mode: vertical-rl;
+        margin: 0;
+      }
+      .probe {
+        display: inline-block;
+        line-height: 1;
+        margin: 0;
+        padding: 0;
+      }
+      #pvi {
+        font-size: 10pvi;
+      }
+      #pvb {
+        font-size: 10pvb;
+      }
+      #vi {
+        font-size: 10vi;
+      }
+      #vb {
+        font-size: 10vb;
+      }
+      #dimensions {
+        width: 20pvi;
+        height: 20pvb;
+        background: lightblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pvi" class="probe">I</div>
+    <div id="pvb" class="probe">B</div>
+    <div id="vi" class="probe">i</div>
+    <div id="vb" class="probe">b</div>
+    <div id="dimensions"></div>
+  </body>
+</html>
