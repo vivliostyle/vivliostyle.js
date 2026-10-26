@@ -2191,7 +2191,10 @@ export class StyleInstance
               layoutContainer.paddingTop;
             const outerWidth = parseFloat(boxContainer.style.width);
             columnLeft =
-              layoutContainer.paddingLeft + outerWidth - layoutContainer.width;
+              layoutContainer.paddingLeft +
+              (layoutContainer.getBoxDir() < 0
+                ? outerWidth - layoutContainer.width
+                : 0);
             columnBoxWidth = layoutContainer.width;
             columnTop = columnY;
             columnBoxHeight = columnWidth;
@@ -3328,12 +3331,19 @@ export class StyleInstance
     this.pageVertical = writingMode != Css.ident.horizontal_tb;
 
     const direction = pageMaster.getProp(this, "direction") || Css.ident.ltr;
+    // Page floats use the page area's used mode, including propagation from
+    // body. The page context keeps its computed mode for margin box inheritance.
+    let pageAreaBox: PageMaster.PageBoxInstance &
+      PageMaster.PageAreaEstablishing = pageMaster;
+    while (pageAreaBox.pageAreaEstablishingChild) {
+      pageAreaBox = pageAreaBox.pageAreaEstablishingChild;
+    }
     const pageFloatLayoutContext = PageFloats.PageFloatLayoutContext.create(
       this.rootPageFloatLayoutContext,
       PageFloats.FloatReference.PAGE,
       null,
       null,
-      writingMode,
+      Css.getName(isTocBox ? "horizontal-tb" : pageAreaBox.writingMode),
       direction,
       null,
       page.side,

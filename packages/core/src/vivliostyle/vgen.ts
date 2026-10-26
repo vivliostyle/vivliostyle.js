@@ -4432,10 +4432,10 @@ export class ViewFactory
 
   /** @override */
   applyFootnoteStyle(
-    vertical: boolean,
+    inheritedWritingMode: string,
     rtl: boolean,
     target: Element,
-  ): Task.Result<boolean> {
+  ): Task.Result<string> {
     const computedStyle: { [key: string]: Css.Val } = {};
     const fetchers: TaskUtil.Fetcher<string>[] = [];
 
@@ -4453,13 +4453,15 @@ export class ViewFactory
 
     const pseudoMap = CssCascade.getStyleMap(footnoteStyle, "_pseudos");
     const writingMode = this.computeStyle(
-      target.ownerDocument.defaultView.getComputedStyle(target).writingMode ||
-        (vertical ? "vertical-rl" : "horizontal-tb"),
+      inheritedWritingMode,
       rtl,
       footnoteStyle,
       computedStyle,
     );
-    vertical = writingMode !== "horizontal-tb";
+    // The used mode can be propagated from body while the page context's
+    // computed mode stays horizontal. Match the browser's fragmentainer to
+    // the resolved geometry rather than inheriting its unrelated DOM mode.
+    computedStyle["writing-mode"] = Css.getName(writingMode);
     const inheritedMetrics = this.getFootnoteAreaInheritedMetrics();
     if (!computedStyle["font-size"] && inheritedMetrics.fontSize != null) {
       computedStyle["font-size"] = new Css.Numeric(
@@ -4560,9 +4562,9 @@ export class ViewFactory
       this.computedStyleParentLineHeightOverride = prevLineHeightOverride;
     }
     if (fetchers.length) {
-      return TaskUtil.waitForFetchers(fetchers).thenReturn(vertical);
+      return TaskUtil.waitForFetchers(fetchers).thenReturn(writingMode);
     }
-    return Task.newResult(vertical);
+    return Task.newResult(writingMode);
   }
 
   /** @override */

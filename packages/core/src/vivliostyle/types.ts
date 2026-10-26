@@ -1123,13 +1123,13 @@ export namespace Vtree {
     /**
      * Apply styles to footnote container.
      * @param target element to apply styles to
-     * @return vertical
+     * @return resolved writing mode
      */
     applyFootnoteStyle(
-      vertical: boolean,
+      inheritedWritingMode: string,
       rtl: boolean,
       target: Element,
-    ): Task.Result<boolean>;
+    ): Task.Result<string>;
     /**
      * Peel off innermost first-XXX pseudoelement, create and create view nodes
      * after the end of that pseudoelement.

@@ -1053,6 +1053,14 @@ module.exports = [
           "Substituted writing-mode with page and region floats (Issue #1480)",
       },
       {
+        file: "writing-mode-balanced-columns.html",
+        title: "Balanced columns preserve block-start (Issue #1480)",
+      },
+      {
+        file: "writing-mode-body-footnotes.html",
+        title: "Footnotes with writing-mode propagated from body (Issue #1480)",
+      },
+      {
         file: "writing-mode-body-page-context.html",
         title:
           "writing-mode on body not inherited by page context (Issue #1122)",

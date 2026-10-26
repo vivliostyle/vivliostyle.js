@@ -460,14 +460,13 @@ export class FootnoteLayoutStrategy
     Asserts.assert(element);
     return column.layoutContext
       .applyFootnoteStyle(
-        floatContainer.vertical,
+        floatContainer.writingMode,
         (column.layoutContext as any).nodeContext &&
           (column.layoutContext as any).nodeContext.direction === "rtl",
         element,
       )
-      .thenAsync((vertical) => {
-        floatArea.vertical = vertical;
-        floatArea.writingMode = getComputedStyle(element).writingMode;
+      .thenAsync((writingMode) => {
+        floatArea.writingMode = writingMode;
         floatArea.convertPercentageSizesToPx(element);
         column.setComputedInsets(element, floatArea);
         column.setComputedWidthAndHeight(element, floatArea);

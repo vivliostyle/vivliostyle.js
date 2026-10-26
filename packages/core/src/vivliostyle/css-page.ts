@@ -38,9 +38,12 @@ export function resolvePageProgression(
 ): Constants.PageProgression {
   // Substitution preserves identifier casing; compare the same canonical
   // keywords used by writing-mode geometry.
-  const writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value
+  let writingMode = (style["writing-mode"] as CssCascade.CascadeValue)?.value
     .toString()
     .toLowerCase();
+  if (writingMode === "tb" || writingMode === "tb-rl") {
+    writingMode = "vertical-rl";
+  }
   const direction = (style["direction"] as CssCascade.CascadeValue)?.value;
   if (
     writingMode === "vertical-lr" ||

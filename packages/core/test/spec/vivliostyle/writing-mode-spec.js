@@ -11,6 +11,9 @@ import * as Constants from "../../../src/vivliostyle/constants";
 import * as PageMaster from "../../../src/vivliostyle/page-master";
 import * as Ops from "../../../src/vivliostyle/ops";
 import * as PageFloats from "../../../src/vivliostyle/page-floats";
+import * as Footnotes from "../../../src/vivliostyle/footnotes";
+import * as Vgen from "../../../src/vivliostyle/vgen";
+import * as Task from "../../../src/vivliostyle/task";
 
 describe("writing-mode layout geometry", () => {
   const box = {
@@ -390,6 +393,98 @@ describe("substituted writing modes in page and region contexts", () => {
             ? "left"
             : "right",
       );
+    });
+  }
+});
+
+describe("legacy progression and propagated footnote writing modes", () => {
+  for (const alias of ["tb", "tb-rl", "TB", "TB-RL"]) {
+    for (const direction of ["ltr", "rtl"]) {
+      it(`uses vertical-rl progression for ${alias}, ${direction}`, () => {
+        expect(
+          CssPage.resolvePageProgression({
+            "writing-mode": new Cascade.CascadeValue(Css.getName(alias), 0),
+            direction: new Cascade.CascadeValue(Css.getName(direction), 0),
+          }),
+        ).toBe(Constants.PageProgression.RTL);
+      });
+    }
+  }
+  for (const mode of [
+    "horizontal-tb",
+    "vertical-rl",
+    "vertical-lr",
+    "sideways-rl",
+    "sideways-lr",
+  ]) {
+    it(`returns the resolved footnote mode ${mode} without re-reading DOM inheritance`, () => {
+      const element = document.createElement("div");
+      element.style.writingMode = "horizontal-tb";
+      document.body.appendChild(element);
+      try {
+        const factory = Object.create(Vgen.ViewFactory.prototype);
+        factory.footnoteStyle = {};
+        factory.computeStyle = jasmine
+          .createSpy("computeStyle")
+          .and.callFake((_inherited, _rtl, _style, computed) => {
+            computed["font-size"] = new Css.Numeric(16, "px");
+            return mode;
+          });
+        factory.getFootnoteAreaInheritedMetrics = () => ({
+          fontSize: 16,
+          lineHeight: 20,
+        });
+        factory.getComputedFontMetrics = () => ({
+          fontSize: 16,
+          lineHeight: 20,
+        });
+        factory.applyComputedStyles = (target, computed) => {
+          if (computed["writing-mode"])
+            target.style.writingMode = computed["writing-mode"].toString();
+        };
+        const result = factory.applyFootnoteStyle(mode, false, element);
+        expect(result.get()).toBe(mode);
+        expect(factory.computeStyle.calls.mostRecent().args[0]).toBe(mode);
+        expect(getComputedStyle(element).writingMode).toBe(mode);
+      } finally {
+        element.remove();
+      }
+    });
+    it(`retains resolved ${mode} geometry in the footnote float area`, () => {
+      const element = document.createElement("div");
+      element.style.writingMode = "horizontal-tb";
+      document.body.appendChild(element);
+      try {
+        const area = new Vtree.Container(element);
+        area.convertPercentageSizesToPx = () => {};
+        const container = new Vtree.Container(document.createElement("div"));
+        container.writingMode = mode;
+        const apply = jasmine
+          .createSpy("applyFootnoteStyle")
+          .and.returnValue(Task.newResult(mode));
+        const column = {
+          layoutContext: {
+            applyFootnoteStyle: apply,
+            nodeContext: { direction: "ltr" },
+          },
+          setComputedInsets: () => {},
+          setComputedWidthAndHeight: () => {},
+          clientLayout: {
+            getElementComputedStyle: () => ({ boxSizing: "content-box" }),
+          },
+          pageFloatLayoutContext: null,
+        };
+        new Footnotes.FootnoteLayoutStrategy().adjustPageFloatArea(
+          area,
+          container,
+          column,
+        );
+        expect(apply.calls.mostRecent().args[0]).toBe(mode);
+        expect(area.writingMode).toBe(mode);
+        expect(area.vertical).toBe(mode !== "horizontal-tb");
+      } finally {
+        element.remove();
+      }
     });
   }
 });
