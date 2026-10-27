@@ -310,7 +310,9 @@ class CounterResolver implements CssCascade.CounterResolver {
   private getTargetPageCounters(
     transformedId: string,
   ): CssCascade.CounterValues | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    if (
+      this.counterStore.currentPage.getReferenceTargets(transformedId).length
+    ) {
       return this.counterStore.currentPageCounters;
     } else {
       return this.counterStore.pageCountersById[transformedId] || null;
@@ -325,7 +327,9 @@ class CounterResolver implements CssCascade.CounterResolver {
   private getTargetPageDocCounters(
     transformedId: string,
   ): CssCascade.CounterValues | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    if (
+      this.counterStore.currentPage.getReferenceTargets(transformedId).length
+    ) {
       return this.counterStore.currentPageDocCounters;
     } else {
       return this.counterStore.pageDocCountersById[transformedId] || null;
@@ -368,10 +372,10 @@ class CounterResolver implements CssCascade.CounterResolver {
     transformedId: string,
     pseudoElement: string,
   ): string | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    const elements =
+      this.counterStore.currentPage.getReferenceTargets(transformedId);
+    if (elements.length) {
       // Element is on current page - extract text for specific pseudo-element
-      const elements =
-        this.counterStore.currentPage.elementsById[transformedId];
       if (elements && elements.length > 0) {
         const element = elements[0];
 
@@ -1324,7 +1328,9 @@ export class CounterStore {
    * @param pageIndex Index of the currently laid out page in its spine item
    */
   finishPage(spineIndex: number, pageIndex: number) {
-    const ids = Object.keys(this.currentPage.elementsById);
+    const ids = Object.keys(this.currentPage.elementsById).filter(
+      (id) => this.currentPage.getReferenceTargets(id).length > 0,
+    );
     if (ids.length > 0) {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
       const currentPageDocCounters = this.currentPageDocCounters
@@ -1337,7 +1343,7 @@ export class CounterStore {
         }
 
         // Capture text content for target-text()
-        const elements = this.currentPage.elementsById[id];
+        const elements = this.currentPage.getReferenceTargets(id);
         if (elements && elements.length > 0) {
           const element = elements[0];
           this.pageTextById[id] = {
@@ -2206,6 +2212,12 @@ class LayoutConstraint implements Layout.LayoutConstraint {
       (viewNode as Element).getAttribute("id") ||
       (viewNode as Element).getAttribute("name");
     if (!id) {
+      return null;
+    }
+    if (
+      this.counterStore.currentPage &&
+      !this.counterStore.currentPage.isReferenceTarget(viewNode as Element, id)
+    ) {
       return null;
     }
     if (

@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- Test case for Issue #2150: cross-references select the canonical fragment target. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Duplicate fragment targets</title>
+    <style>
+      @page { size: 140mm 100mm; margin: 10mm }
+      body { font: 14px/1.4 sans-serif }
+      a[href]::after { content: ' → ' target-text(attr(href), content) ' (page ' target-counter(attr(href), page) ')' }
+      .next-page { break-before: page }
+    </style>
+  </head>
+  <body>
+    <p id="duplicate">First ID</p>
+    <p id="duplicate">Second ID</p>
+    <p><a href="#duplicate">Duplicate ID: expected First ID, page 1</a></p>
+    <p><a name="shared">Earlier name</a></p>
+    <p><a href="#shared">ID versus name: expected Later ID, page 2</a></p>
+    <div class="next-page">
+      <p id="shared">Later ID</p>
+      <p id="duplicate">Third ID</p>
+      <p><a href="#duplicate">Duplicate ID from page 2: expected First ID, page 1</a></p>
+    </div>
+  </body>
+</html>

@@ -2463,7 +2463,15 @@ export class ViewFactory
                 anchorElem.style.position = "absolute";
                 result.appendChild(anchorElem);
 
-                this.page.registerElementWithId(result, transformedValue);
+                // A fragment resolves to the first matching source element.
+                // Retain every element for navigation and triggers, but do not
+                // let later duplicates supply cross-reference snapshots.
+                const target = this.xmldoc.getElement(`#${attributeValue}`);
+                this.page.registerElementWithId(
+                  result,
+                  transformedValue,
+                  !target || target === element,
+                );
                 continue;
               }
             }

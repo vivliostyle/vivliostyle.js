@@ -40,6 +40,50 @@ function createNodeContext(id) {
 }
 
 describe("cross-reference layout constraint", function () {
+  it("tracks duplicate status separately for each fragment on an element", function () {
+    const container = document.createElement("div");
+    const page = new Vtree.Page(container, container);
+    const element = document.createElement("a");
+    page.registerElementWithId(element, "duplicate-name", false);
+    page.registerElementWithId(element, "unique-id", true);
+
+    expect(page.elementsById["duplicate-name"]).toEqual([element]);
+    expect(page.getReferenceTargets("duplicate-name")).toEqual([]);
+    expect(page.getReferenceTargets("unique-id")).toEqual([element]);
+  });
+
+  it("uses only the canonical target for snapshots and layout constraints", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const container = document.createElement("div");
+    const page = new Vtree.Page(container, container);
+    const first = document.createElement("div");
+    first.textContent = "first";
+    const duplicate = document.createElement("div");
+    duplicate.textContent = "later";
+    page.registerElementWithId(duplicate, "target", false);
+    page.registerElementWithId(first, "target", true);
+    store.setCurrentPage(page);
+    store.finishPage(0, 0);
+    expect(page.elementsById.target).toEqual([duplicate, first]);
+    expect(store.pageTextById.target.content).toBe("first");
+    expect(store.pageIndicesById.target.pageIndex).toBe(0);
+
+    const nextContainer = document.createElement("div");
+    const nextPage = new Vtree.Page(nextContainer, nextContainer);
+    const nodeContext = createNodeContext("target");
+    nextPage.registerElementWithId(nodeContext.viewNode, "target", false);
+    store.setCurrentPage(nextPage);
+    store.resolvedReferences.target = [
+      new Counters.TargetCounterReference("target", true),
+    ];
+    store.pageIndicesById.target.pageIndex = 2;
+    expect(store.createLayoutConstraint(1).allowLayout(nodeContext)).toBe(true);
+    store.finishPage(0, 1);
+    expect(store.pageIndicesById.target.pageIndex).toBe(2);
+    expect(store.pageTextById.target.content).toBe("first");
+    expect(store.resolvedReferences.target[0].isResolved()).toBe(true);
+  });
+
   it("refreshes retained target-text first-letter nodes", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const container = document.createElement("div");

@@ -124,6 +124,7 @@ export class Page extends Base.SimpleEventTarget {
   delayedItems: DelayedItem[] = [];
   hrefHandler: (e: Event) => void;
   elementsById: { [key: string]: Element[] } = {};
+  private nonReferenceTargets = new WeakMap<Element, Set<string>>();
   dimensions: { width: number; height: number } = { width: 0, height: 0 };
   isFirstPage: boolean = false;
   isLastPage: boolean = false;
@@ -189,13 +190,35 @@ export class Page extends Base.SimpleEventTarget {
     }
   }
 
-  registerElementWithId(element: Element, id: string) {
+  registerElementWithId(
+    element: Element,
+    id: string,
+    isReferenceTarget = true,
+  ) {
     const arr = this.elementsById[id];
     if (!arr) {
       this.elementsById[id] = [element];
     } else {
       arr.push(element);
     }
+    if (!isReferenceTarget) {
+      let ids = this.nonReferenceTargets.get(element);
+      if (!ids) {
+        ids = new Set();
+        this.nonReferenceTargets.set(element, ids);
+      }
+      ids.add(id);
+    }
+  }
+
+  isReferenceTarget(element: Element, id: string): boolean {
+    return !this.nonReferenceTargets.get(element)?.has(id);
+  }
+
+  getReferenceTargets(id: string): Element[] {
+    return (this.elementsById[id] || []).filter((element) =>
+      this.isReferenceTarget(element, id),
+    );
   }
 
   finish(triggers: Trigger[], clientLayout: ClientLayout): void {
