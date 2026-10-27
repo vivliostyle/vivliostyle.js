@@ -1,3 +1,27 @@
+- category: Fonts and relative units
+  title: "lh unit of a detached font-size, line-height normal (PR #2233)"
+  file: font-size-lh-unit-in-footnote-normal.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2233"
+  approvedViewer: git-fix-default-root-line-height-normal  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-lh-unit-in-footnote-normal.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-size-lh-unit-in-footnote-normal.html&zoom=1&spread=false
+- category: Page breaks
+  title: "Flex break with normal root line-height (Issue #2234)"
+  file: page_breaks/break-before-flex-normal-line-height.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2234"
+  approvedViewer: git-codex-fix-issue-2234  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/break-before-flex-normal-line-height.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/break-before-flex-normal-line-height.html&zoom=1&spread=false
 - category: Writing modes
   title: "Pagination in vertical-lr (Issue #1480)"
   file: writing-mode/vertical-lr.html
