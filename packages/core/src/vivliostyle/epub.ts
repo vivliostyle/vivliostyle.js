@@ -2429,6 +2429,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
                       this.counterStore.updatePageCounterNodesInPages(
                         laterItem.pages,
                         laterItem.pageCounterStarts,
+                        pageDelta,
                       );
                     }
                     // Shift the saved source-spine counter state so that
