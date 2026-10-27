@@ -679,8 +679,11 @@ class CounterResolver implements CssCascade.CounterResolver {
           const format =
             store.getPageCounterFormat(ex) ||
             ((arr: number[]) => (arr.length ? String(arr.at(-1)) : ""));
+          // The assignment element is in the same spine item as the current
+          // page, whose margin boxes use this named string.
           const patchExpr = store.getOrCreateNamedStringPageCounterExpr(
             this.pageScope,
+            store.currentPage.spineIndex,
             offset,
             counterName,
             format,
@@ -908,13 +911,15 @@ export class CounterStore {
   // start element offset, recorded when each page is finished. Used to resolve
   // page-based counters in named strings (string-set) against the page that
   // actually contains the assignment element, regardless of which page first
-  // uses the named string.
+  // uses the named string. Element offsets are numbered per source document,
+  // so the snapshots are kept per spine index (Issue #2232).
   hasDeferredNamedStrings = false;
   namedStringPageSnapshots: {
-    [startOffset: number]: {
-      lastOffset: number;
-      spineIndex: number;
-      counters: CssCascade.CounterValues;
+    [spineIndex: number]: {
+      [startOffset: number]: {
+        lastOffset: number;
+        counters: CssCascade.CounterValues;
+      };
     };
   } = Object.create(null);
   // Issue #1997: patchable counter(page) expressions used inside named strings,
@@ -924,6 +929,7 @@ export class CounterStore {
   namedStringPageCounterExprMap: {
     [exprKey: string]: {
       expr: Exprs.Val;
+      spineIndex: number;
       offset: number;
       counterName: string;
       format: (p1: number[]) => string;
@@ -1444,8 +1450,9 @@ export class CounterStore {
    * offset range, so page-based counters in named strings (string-set) can be
    * resolved against the page that contains the assignment element (Issue
    * #1997). Re-finishing a page (relayout) overwrites the previous snapshot.
-   * The spine index is stored so the snapshot can be shifted together with
-   * pageCountersById when a preceding spine's page count changes (see
+   * The snapshots are kept per spine index, since element offsets are numbered
+   * per source document (Issue #2232), and so they can be shifted together
+   * with pageCountersById when a preceding spine's page count changes (see
    * adjustPageCountersOfLaterSpines).
    */
   private recordNamedStringPageSnapshot(spineIndex: number) {
@@ -1468,36 +1475,45 @@ export class CounterStore {
     // (a fragmented element, or a blank page using offset-1), and in that case
     // the earlier page's snapshot must remain the one returned so counter(page)
     // freezes to the assignment page (Issue #1997).
-    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+    const snapshots =
+      this.namedStringPageSnapshots[spineIndex] ||
+      (this.namedStringPageSnapshots[spineIndex] = Object.create(null));
+    for (const key of Object.keys(snapshots)) {
       const existingStart = parseInt(key, 10);
       if (existingStart <= startOffset) continue;
-      const existing = this.namedStringPageSnapshots[existingStart];
+      const existing = snapshots[existingStart];
       if (existingStart <= lastOffset && startOffset <= existing.lastOffset) {
-        delete this.namedStringPageSnapshots[existingStart];
+        delete snapshots[existingStart];
       }
     }
-    this.namedStringPageSnapshots[startOffset] = {
+    snapshots[startOffset] = {
       lastOffset,
-      spineIndex,
       counters: cloneCounterValues(this.currentPageCounters),
     };
   }
 
   /**
-   * Return the page counters captured for the finished page whose element
-   * offset range contains the given offset, or null when no such page has been
-   * finished yet (Issue #1997).
+   * Return the page counters captured for the finished page of the given spine
+   * item whose element offset range contains the given offset, or null when no
+   * such page has been finished yet (Issue #1997).
    */
-  getPageCountersForOffset(offset: number): CssCascade.CounterValues | null {
+  getPageCountersForOffset(
+    spineIndex: number,
+    offset: number,
+  ): CssCascade.CounterValues | null {
+    const snapshots = this.namedStringPageSnapshots[spineIndex];
+    if (!snapshots) {
+      return null;
+    }
     // Snapshot keys are numeric page start offsets; Object.keys returns them in
     // ascending order, so once a page starts after the target offset no later
     // page can contain it.
-    for (const key of Object.keys(this.namedStringPageSnapshots)) {
+    for (const key of Object.keys(snapshots)) {
       const startOffset = parseInt(key, 10);
       if (startOffset > offset) {
         break;
       }
-      const snap = this.namedStringPageSnapshots[startOffset];
+      const snap = snapshots[startOffset];
       if (offset <= snap.lastOffset) {
         return snap.counters;
       }
@@ -1533,14 +1549,17 @@ export class CounterStore {
     // counter(page) for deferred named strings) in sync with the shifted page
     // numbers so running headers assigned in later spines stay correct.
     for (const key of Object.keys(this.namedStringPageSnapshots)) {
-      const snap = this.namedStringPageSnapshots[parseInt(key, 10)];
-      if (
-        snap.spineIndex > expandedSpineIndex &&
-        snap.counters["page"] &&
-        !adjusted.has(snap.counters)
-      ) {
-        adjusted.add(snap.counters);
-        snap.counters["page"] = snap.counters["page"].map((v) => v + pageDelta);
+      const spineIndex = parseInt(key, 10);
+      if (spineIndex <= expandedSpineIndex) continue;
+      const snapshots = this.namedStringPageSnapshots[spineIndex];
+      for (const startKey of Object.keys(snapshots)) {
+        const snap = snapshots[parseInt(startKey, 10)];
+        if (snap.counters["page"] && !adjusted.has(snap.counters)) {
+          adjusted.add(snap.counters);
+          snap.counters["page"] = snap.counters["page"].map(
+            (v) => v + pageDelta,
+          );
+        }
       }
     }
   }
@@ -1572,9 +1591,9 @@ export class CounterStore {
     }
 
     for (const key of Object.keys(this.namedStringPageSnapshots)) {
-      const snapshot = this.namedStringPageSnapshots[parseInt(key, 10)];
-      if (snapshot.spineIndex >= firstSpineIndex) {
-        delete this.namedStringPageSnapshots[parseInt(key, 10)];
+      const spineIndex = parseInt(key, 10);
+      if (spineIndex >= firstSpineIndex) {
+        delete this.namedStringPageSnapshots[spineIndex];
       }
     }
 
@@ -1738,7 +1757,10 @@ export class CounterStore {
         const key = node.getAttribute(NAMED_STRING_PAGE_COUNTER_ATTR);
         const entry = this.namedStringPageCounterExprMap[key];
         if (!entry) continue;
-        const counters = this.getPageCountersForOffset(entry.offset);
+        const counters = this.getPageCountersForOffset(
+          entry.spineIndex,
+          entry.offset,
+        );
         const values = counters?.[entry.counterName];
         if (values) {
           node.textContent = entry.format(values);
@@ -1859,21 +1881,27 @@ export class CounterStore {
 
   /**
    * Get (or lazily create) a patchable expression for a counter(page) used
-   * inside a named string assigned at the given element offset. The expression
-   * reads its value from the assignment-page snapshot so it stays correct after
-   * cross-spine repagination shifts page numbers (Issue #1997). The same
-   * (offset, counterName) pair always reuses the same expression to avoid
-   * unbounded growth across margin-box re-renders.
+   * inside a named string assigned at the given element offset in the given
+   * spine item. The expression reads its value from the assignment-page
+   * snapshot so it stays correct after cross-spine repagination shifts page
+   * numbers (Issue #1997). The same (spineIndex, offset, counterName) always
+   * reuses the same expression to avoid unbounded growth across margin-box
+   * re-renders.
    */
   getOrCreateNamedStringPageCounterExpr(
     pageScope: Exprs.LexicalScope,
+    spineIndex: number,
     offset: number,
     counterName: string,
     format: (p1: number[]) => string,
   ): Exprs.Val {
     for (const key in this.namedStringPageCounterExprMap) {
       const entry = this.namedStringPageCounterExprMap[key];
-      if (entry.offset === offset && entry.counterName === counterName) {
+      if (
+        entry.spineIndex === spineIndex &&
+        entry.offset === offset &&
+        entry.counterName === counterName
+      ) {
         return entry.expr;
       }
     }
@@ -1881,7 +1909,9 @@ export class CounterStore {
       pageScope,
       () => {
         const counters =
-          offset >= 0 ? this.getPageCountersForOffset(offset) : null;
+          offset >= 0
+            ? this.getPageCountersForOffset(spineIndex, offset)
+            : null;
         const values =
           (counters || this.currentPageCounters)[counterName] || [];
         return format(values);
@@ -1890,6 +1920,7 @@ export class CounterStore {
     );
     this.namedStringPageCounterExprMap[expr.key] = {
       expr,
+      spineIndex,
       offset,
       counterName,
       format,
@@ -1930,14 +1961,11 @@ export class CounterStore {
         node.setAttribute("data-viv-leader-value", val);
         return node;
       } else if (expr.str.startsWith("running-element-")) {
-        const elemList =
-          val &&
-          document.querySelectorAll(`[${Base.ELEMENT_OFFSET_ATTR}="${val}"]`);
-        if (!elemList || elemList.length === 0) {
+        const runningElem = val && this.findRunningElement(val, document);
+        if (!runningElem) {
           return null;
         }
-        const lastElem = elemList[elemList.length - 1];
-        const clonedElem = lastElem.cloneNode(true) as HTMLElement;
+        const clonedElem = runningElem.cloneNode(true) as HTMLElement;
         this.fixPageCounterInRunningElement(clonedElem);
         clonedElem.style.position = "";
         clonedElem.style.visibility = "";
@@ -1979,6 +2007,26 @@ export class CounterStore {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Find the laid-out running element at the given element offset. Element
+   * offsets are numbered per source document while the pages of all source
+   * documents share the viewport document, so search only the pages of the
+   * current page's spine item (Issue #2232). The last match is used, which is
+   * the one in the page being laid out if it is there.
+   */
+  private findRunningElement(
+    offset: string,
+    document: Document,
+  ): Element | null {
+    if (!this.currentPage) {
+      return null;
+    }
+    const elemList = document.querySelectorAll(
+      `[${Base.SPINE_INDEX_ATTR}="${this.currentPage.spineIndex}"] [${Base.ELEMENT_OFFSET_ATTR}="${offset}"]`,
+    );
+    return elemList.length ? elemList[elemList.length - 1] : null;
   }
 
   private fixPageCounterInRunningElement(runningElem: Element): void {

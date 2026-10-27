@@ -44,6 +44,13 @@ export const firstLetterPattern =
  */
 export const ELEMENT_OFFSET_ATTR = "data-adapt-eloff";
 
+/**
+ * Indicates the spine index of the source document of a page container.
+ * Element offsets are numbered per source document, so this is needed to find
+ * an element by its offset among the pages of all source documents.
+ */
+export const SPINE_INDEX_ATTR = "data-vivliostyle-spine-index";
+
 export let emptyObj = {};
 
 export type JSON = any;

@@ -7,7 +7,9 @@
  * (at your option) any later version.
  */
 
+import * as Base from "../../../src/vivliostyle/base";
 import * as Counters from "../../../src/vivliostyle/counters";
+import * as Exprs from "../../../src/vivliostyle/exprs";
 import * as Layout from "../../../src/vivliostyle/layout";
 import * as LayoutProcessor from "../../../src/vivliostyle/layout-processor";
 import * as Vtree from "../../../src/vivliostyle/vtree";
@@ -279,15 +281,11 @@ describe("cross-reference layout constraint", function () {
     store.pageIndicesById.retained = { spineIndex: 1, pageIndex: 0 };
     store.pageCountersById.retained = retainedCounters;
     store.pageTextById.retained = retainedText;
-    store.namedStringPageSnapshots[10] = {
-      lastOffset: 19,
-      spineIndex: 1,
-      counters: { page: [3] },
+    store.namedStringPageSnapshots[1] = {
+      10: { lastOffset: 19, counters: { page: [3] } },
     };
-    store.namedStringPageSnapshots[20] = {
-      lastOffset: 29,
-      spineIndex: 2,
-      counters: { page: [4] },
+    store.namedStringPageSnapshots[2] = {
+      20: { lastOffset: 29, counters: { page: [4] } },
     };
 
     store.discardReferencesFromSpine(2);
@@ -303,7 +301,75 @@ describe("cross-reference layout constraint", function () {
     expect(store.pageTextById.target).toBeUndefined();
     expect(store.pageCountersById.retained).toBe(retainedCounters);
     expect(store.pageTextById.retained).toBe(retainedText);
-    expect(store.namedStringPageSnapshots[10]).toBeDefined();
-    expect(store.namedStringPageSnapshots[20]).toBeUndefined();
+    expect(store.namedStringPageSnapshots[1]).toBeDefined();
+    expect(store.namedStringPageSnapshots[2]).toBeUndefined();
+  });
+});
+
+describe("element offsets in multiple source documents (Issue #2232)", function () {
+  function createPageContainer(spineIndex, offset, text) {
+    const container = document.createElement("div");
+    container.setAttribute("data-vivliostyle-page-container", "true");
+    container.setAttribute(Base.SPINE_INDEX_ATTR, String(spineIndex));
+    const elem = document.createElement("div");
+    elem.setAttribute(Base.ELEMENT_OFFSET_ATTR, String(offset));
+    elem.textContent = text;
+    container.appendChild(elem);
+    return container;
+  }
+
+  it("takes a running element from the pages of the current spine item", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const root = document.createElement("div");
+    const spine0Page = createPageContainer(0, 12, "Chapter 1");
+    const spine1Page = createPageContainer(1, 12, "Chapter 2");
+    root.append(spine0Page, spine1Page);
+    document.body.appendChild(root);
+    try {
+      // The current page (being re-rendered) belongs to spine 0, and has no
+      // running element of its own.
+      const currentContainer = document.createElement("div");
+      currentContainer.setAttribute(Base.SPINE_INDEX_ATTR, "0");
+      root.appendChild(currentContainer);
+      const page = new Vtree.Page(currentContainer, currentContainer);
+      page.spineIndex = 0;
+      store.setCurrentPage(page);
+
+      const expr = new Exprs.Native(
+        new Exprs.LexicalScope(null),
+        () => "12",
+        "running-element-first-chapter",
+      );
+      const listener = store.getExprContentListener();
+      const node = listener(expr, "12", document);
+      expect(node.textContent).toBe("Chapter 1");
+
+      // Another document's element with the same offset is never used.
+      spine0Page.remove();
+      expect(listener(expr, "12", document)).toBeNull();
+    } finally {
+      root.remove();
+    }
+  });
+
+  it("keeps named-string page snapshots per spine item", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    store.hasDeferredNamedStrings = true;
+    for (const [spineIndex, pageNumber] of [
+      [0, 2],
+      [1, 8],
+    ]) {
+      const container = createPageContainer(spineIndex, 20, "");
+      const page = new Vtree.Page(container, container);
+      page.spineIndex = spineIndex;
+      page.offset = 10;
+      store.setCurrentPage(page);
+      store.currentPageCounters = { page: [pageNumber] };
+      store.finishPage(spineIndex, 1);
+    }
+
+    expect(store.getPageCountersForOffset(0, 15)).toEqual({ page: [2] });
+    expect(store.getPageCountersForOffset(1, 15)).toEqual({ page: [8] });
+    expect(store.getPageCountersForOffset(2, 15)).toBeNull();
   });
 });

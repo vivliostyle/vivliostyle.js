@@ -1217,6 +1217,15 @@ module.exports = [
         title: "Page Margin Boxes (PR #1170)",
       },
       {
+        file: [
+          "running-elements/cross-document/ch1.html",
+          "running-elements/cross-document/ch2.html",
+          "running-elements/cross-document/ch3.html",
+        ],
+        title:
+          "Running elements and named strings across documents (Issue #2232)",
+      },
+      {
         file: "counter_in_running.html",
         title: "Counter in running element (PR #1327)",
       },

@@ -2482,10 +2482,6 @@ export class OPFView implements Vgen.CustomRendererFactory {
           "data-vivliostyle-page-index",
           currentPageIndex,
         );
-        currentPage.container.setAttribute(
-          "data-vivliostyle-spine-index",
-          currentPage.spineIndex,
-        );
         frame.finish(currentPage);
       });
     return frame.result();
@@ -3852,6 +3848,9 @@ export class OPFView implements Vgen.CustomRendererFactory {
     pageCont.appendChild(bleedBox);
     const page = new Vtree.Page(pageCont, bleedBox);
     page.spineIndex = viewItem.item.spineIndex;
+    // Set the spine index before layout so that the elements of the page being
+    // laid out can be found by their offsets (Issue #2232).
+    pageCont.setAttribute(Base.SPINE_INDEX_ATTR, String(page.spineIndex));
     page.position = pos;
     page.offset = viewItem.instance.getPosition(pos);
     if (
