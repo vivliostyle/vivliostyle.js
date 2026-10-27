@@ -2464,19 +2464,23 @@ export class OPFView implements Vgen.CustomRendererFactory {
         });
       })
       .then(() => {
+        let currentPageIndex = pageIndex;
         if (!currentPage.container.parentElement) {
-          // page is replaced
-          currentPage = viewItem.pages[pageIndex];
+          // A recursive target-counter rerender can remove the current page
+          // when its content moves onto an earlier page. In that case the
+          // last surviving page contains the old page's start position.
+          currentPageIndex = Math.min(pageIndex, viewItem.pages.length - 1);
+          currentPage = viewItem.pages[currentPageIndex];
         }
         currentPage.isLastPage =
-          !nextLayoutPosition &&
+          !viewItem.layoutPositions[currentPageIndex + 1] &&
           viewItem.item.spineIndex === this.opf.spine.length - 1;
         if (currentPage.isLastPage) {
           this.counterStore.finishLastPage(this.viewport);
         }
         currentPage.container.setAttribute(
           "data-vivliostyle-page-index",
-          pageIndex,
+          currentPageIndex,
         );
         currentPage.container.setAttribute(
           "data-vivliostyle-spine-index",
@@ -3004,7 +3008,13 @@ export class OPFView implements Vgen.CustomRendererFactory {
             ),
           )
           .then((resolvedPage) => {
-            if (!pos && !inCounterResolveScopeAtStart) {
+            // Reference resolution may have replaced this page or moved its
+            // contents to an earlier slot. Return the surviving page's actual
+            // position and continuation instead of the stale render slot.
+            const resolvedPageIndex = viewItem.pages.indexOf(resolvedPage);
+            const resolvedNextPosition =
+              viewItem.layoutPositions[resolvedPageIndex + 1] || null;
+            if (!resolvedNextPosition && !inCounterResolveScopeAtStart) {
               // A final page can be produced by a nested relayout while
               // resolving a target reference. Mark the spine complete only
               // after that asynchronous work settles, otherwise navigation
@@ -3013,8 +3023,11 @@ export class OPFView implements Vgen.CustomRendererFactory {
             }
             restorePageNumberContext();
             frame.finish({
-              pageAndPosition: makePageAndPosition(resolvedPage, pageIndex),
-              nextLayoutPosition: pos,
+              pageAndPosition: makePageAndPosition(
+                resolvedPage,
+                resolvedPageIndex,
+              ),
+              nextLayoutPosition: resolvedNextPosition,
             });
           });
       });

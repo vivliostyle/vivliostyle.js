@@ -1250,6 +1250,10 @@ module.exports = [
         title: "Combine break value regressions (Issue #1842)",
       },
       {
+        file: "page_breaks/break-before-flex-normal-line-height.html",
+        title: "Flex break with normal root line-height (Issue #2234)",
+      },
+      {
         file: "page_breaks/break-before-flex-at-page-start.html",
         title: "Consumed break-before on a flex box at page start (PR #2132)",
       },
