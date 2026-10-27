@@ -1333,7 +1333,9 @@ export function isInvalidLineHeight(
   if (value instanceof Css.Numeric) {
     return value.num < 0 || !CSS.supports("line-height", checkableText(value));
   }
-  return value instanceof Css.Ident;
+  // Any other form, i.e. an identifier other than `normal`, a string or a
+  // list that a var() substitution put into the declaration, is rejected.
+  return true;
 }
 
 /**
@@ -2357,7 +2359,7 @@ export class InheritanceVisitor extends Css.FilterVisitor {
             parentFontSize,
             this.metricProperties(),
           )
-        : null) ?? this.context.pref.lineHeight * parentFontSize
+        : null) ?? Exprs.fallbackLineHeightRatio * parentFontSize
     );
   }
 

@@ -11,6 +11,9 @@
     Root font size from an invalid substituted unit (Issue #2174 follow-up)
   </title>
   <style>
+    html {
+      line-height: 1.25;
+    }
     @page { size: 120mm 80mm; margin: 10mm; }
     :root { --size: 5s; font-size: var(--size); }
     .rem-box { width: 1rem; height: 20px; background: #9cf; } /* 16px */

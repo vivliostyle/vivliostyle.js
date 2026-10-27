@@ -19,6 +19,9 @@
     Invalid font weight from a var() substitution (Issue #2174 follow-up)
   </title>
   <style>
+    html {
+      line-height: 1.25;
+    }
     @page { size: 140mm 100mm; margin: 10mm; }
     body { font-weight: 700; }
     /* invalid: the browser rejects both declarations and inherits 700 */

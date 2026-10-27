@@ -368,6 +368,10 @@ module.exports = [
         title: "lh unit of a detached font-size (PR #2176)",
       },
       {
+        file: "font-size-lh-unit-in-footnote-normal.html",
+        title: "lh unit of a detached font-size, line-height normal (PR #2233)",
+      },
+      {
         file: "font-size-inherit-region-rule.html",
         title: "font-size: inherit with a region rule (PR #2176)",
       },

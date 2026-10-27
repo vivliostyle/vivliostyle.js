@@ -195,7 +195,7 @@ export class Style {
         viewportWidth,
         viewportHeight,
         fontSize,
-        fontSize * Exprs.defaultPreferencesInstance.lineHeight,
+        fontSize * Exprs.fallbackLineHeightRatio,
       );
       const viewportProps = CssCascade.mergeAll(context, this.viewportProps);
       const width = viewportProps["width"] as CssCascade.CascadeValue;
@@ -382,7 +382,7 @@ export class StyleInstance
       viewport.width,
       viewport.height,
       viewport.fontSize,
-      viewport.fontSize * pref.lineHeight,
+      viewport.fontSize * Exprs.fallbackLineHeightRatio,
     );
     this.lang = xmldoc.lang || defaultLang;
     this.fontLanguage = this.lang;
@@ -590,7 +590,7 @@ export class StyleInstance
           instance.rootFontMetricsReady = false;
           instance.isRelativeRootFontSize = null;
           instance.rootLineHeight =
-            instance.initialFontSize * instance.pref.lineHeight;
+            instance.initialFontSize * Exprs.fallbackLineHeightRatio;
           instance.isRootLineHeightFromRelativeCalc = false;
           instance.pageSheetSize = {};
           instance.initializeLayout();
@@ -647,7 +647,7 @@ export class StyleInstance
         this.pageWidth(),
         this.pageHeight(),
         this.initialFontSize,
-        this.initialFontSize * Exprs.defaultPreferencesInstance.lineHeight,
+        this.initialFontSize * Exprs.fallbackLineHeightRatio,
       );
       const counterListener = this.counterStore.createCounterListener(
         xmldoc.url,
@@ -3741,7 +3741,6 @@ export type StyleSheetParam =
 
 export type StyleSource = StyleSheetParam & {
   flavor: CssParser.StylesheetFlavor;
-  classes: string | null;
   media: string | null;
 };
 
@@ -3753,12 +3752,12 @@ function toStyleSource(
     const url = stylesheet.url
       ? Base.resolveURL(Base.convertSpecialURL(stylesheet.url), Base.baseURL)
       : stylesheet.url;
-    return { url, text: stylesheet.text, flavor, classes: null, media: null };
+    return { url, text: stylesheet.text, flavor, media: null };
   }
   const url = stylesheet.url
     ? Base.resolveURL(Base.convertSpecialURL(stylesheet.url), Base.baseURL)
     : stylesheet.url;
-  return { url, flavor, classes: null, media: null };
+  return { url, flavor, media: null };
 }
 
 export function parseOPSResource(
@@ -3879,14 +3878,12 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           url: Base.resolveURL("user-agent-base.css", Base.resourceBaseURL),
           text: UserAgentBaseCss,
           flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          classes: null,
           media: null,
         });
         sources.push({
           url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
           text: UserAgentPageCss,
           flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          classes: null,
           media: null,
         });
         sources.push({
@@ -3896,7 +3893,6 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           ),
           text: UserAgentCounterStylesCss,
           flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          classes: null,
           media: null,
         });
         if (isTocBox) {
@@ -3904,7 +3900,6 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
             text: UserAgentTocCss,
             flavor: CssParser.StylesheetFlavor.USER_AGENT,
-            classes: null,
             media: null,
           });
         } else {
@@ -3915,32 +3910,26 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             const localName = elem.localName;
             if (ns == Base.NS.XHTML) {
               if (localName == "style") {
-                const classes = elem.getAttribute("class");
                 const media = elem.getAttribute("media");
-                const title = elem.getAttribute("title");
                 sources.push({
                   url,
                   text: elem.textContent,
                   flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  classes: title ? classes : null,
                   media,
                 });
               } else if (localName == "link") {
                 const href = elem.getAttribute("href");
                 const rel = elem.getAttribute("rel")?.split(/\s+/);
-                const classes = elem.getAttribute("class");
                 const media = elem.getAttribute("media");
                 if (
                   href &&
                   rel?.includes("stylesheet") &&
-                  (!rel.includes("alternate") || classes)
+                  !rel.includes("alternate")
                 ) {
                   const src = Base.resolveURL(href, url);
-                  const title = elem.getAttribute("title");
                   sources.push({
                     url: src,
                     text: null,
-                    classes: title ? classes : null,
                     media,
                     flavor: CssParser.StylesheetFlavor.AUTHOR,
                   });
@@ -3953,7 +3942,6 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   url,
                   text: this.processViewportMeta(elem),
                   flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  classes: null,
                   media: null,
                 });
               }
@@ -3995,14 +3983,12 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                       source.text,
                       sph,
                       source.url,
-                      source.classes,
                       source.media,
                     ).thenReturn(true);
                   } else {
                     return CssParser.parseStylesheetFromURL(
                       source.url,
                       sph,
-                      source.classes,
                       source.media,
                     );
                   }

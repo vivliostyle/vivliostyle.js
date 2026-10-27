@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <title>list-item counter in the pseudo-elements of an ordered list</title>
     <style>
+      html {
+        line-height: 1.25;
+      }
       ol::before {
         display: block;
         content: "before=" counter(list-item) " (should be 4)";

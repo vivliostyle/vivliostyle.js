@@ -50,7 +50,7 @@ describe("css-validator", function () {
     handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
     adapt_task.start(function () {
       adapt_cssparse
-        .parseStylesheetFromText(cssText, handler.owner, null, null, null)
+        .parseStylesheetFromText(cssText, handler.owner, null, null)
         .then(function (result) {
           expect(result).toBe(true);
           callback(handler.finish(), handler);
@@ -734,7 +734,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -795,7 +794,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -820,7 +818,6 @@ describe("css-validator", function () {
           .parseStylesheetFromText(
             '@namespace epub "http://www.idpf.org/2007/ops";\n:not(a[epub|type~="noteref"], a[epub\\:type~="noteref"], a[role~="doc-noteref"])::footnote-call { content: counter(footnote); }',
             handler.owner,
-            null,
             null,
             null,
           )
@@ -848,7 +845,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -873,7 +869,6 @@ describe("css-validator", function () {
           .parseStylesheetFromText(
             ".test { foo: bar; }\n.test2 { foo: bar baz boo; }",
             handler.owner,
-            null,
             null,
             null,
           )
@@ -903,7 +898,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -931,7 +925,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -957,7 +950,6 @@ describe("css-validator", function () {
           .parseStylesheetFromText(
             ".test { spacefoo: none; }\n.test2 { spacefoo: bar baz; }\n .test3 { spacefoo: bar; }",
             handler.owner,
-            null,
             null,
             null,
           )
@@ -996,7 +988,6 @@ describe("css-validator", function () {
             handler.owner,
             null,
             null,
-            null,
           )
           .then(function (result) {
             expect(result).toBe(true);
@@ -1021,7 +1012,6 @@ describe("css-validator", function () {
           .parseStylesheetFromText(
             ".test { foo: bar( 10 / 10 ) ; }\n" + ".test2 { foo: bar( 10 ) ; }",
             handler.owner,
-            null,
             null,
             null,
           )
@@ -1076,7 +1066,6 @@ describe("css-validator", function () {
               '.test6 { font: small-caps wider oblique 12px "Times" ; }\n' +
               ".test7 { font: status-bar ; }",
             handler.owner,
-            null,
             null,
             null,
           )

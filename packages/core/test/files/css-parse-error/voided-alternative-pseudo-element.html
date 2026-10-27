@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <title>Pseudo-element in a voided alternative</title>
     <style>
+      html {
+        line-height: 1.25;
+      }
       div:is(.x, # ::before) span {
         color: green;
       }

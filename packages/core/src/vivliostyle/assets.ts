@@ -882,9 +882,6 @@ export const UserAgentXml = `
 export const UserAgentPageCss = `
 @namespace "http://www.w3.org/1999/xhtml";
 
-:root {
-  hyphens: -epubx-expr(pref-hyphenate? "auto": "manual");
-}
 :root[data-vivliostyle-epub-spine-properties~="page-spread-left"] {
   break-before: left;
 }

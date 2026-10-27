@@ -1157,7 +1157,7 @@ describe("css-cascade", function () {
       handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
       adapt_task.start(function () {
         adapt_cssparse
-          .parseStylesheetFromText(cssText, handler.owner, null, null, null)
+          .parseStylesheetFromText(cssText, handler.owner, null, null)
           .then(function (parsed) {
             expect(parsed).toBe(true);
             callback(handler.finish());
@@ -2398,7 +2398,7 @@ describe("css-cascade", function () {
 
         adapt_task.start(function () {
           adapt_cssparse
-            .parseStylesheet(tokenizer, handler.owner, null, null, null)
+            .parseStylesheet(tokenizer, handler.owner, null, null)
             .then(function (result) {
               expect(result).toBe(true);
               fn(handler);

@@ -153,7 +153,7 @@ describe("font metrics", function () {
     }
   });
 
-  it("keeps the viewer default when root line-height is unspecified, and refreshes explicit normal", function () {
+  it("treats unspecified root line-height as normal, and refreshes it with the font", function () {
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
       800,
@@ -169,7 +169,10 @@ describe("font metrics", function () {
       "font-size": new Cascade.CascadeValue(new Css.Numeric(32, "px"), 0),
     };
     styler.determineRootSizes(style);
-    expect(context.rootLineHeight).toBe(32 * context.pref.lineHeight);
+    expect(context.rootLineHeight).toBeCloseTo(
+      nativeLength("lh", 32, { fontFamily: "Arial" }),
+      4,
+    );
     style["line-height"] = new Cascade.CascadeValue(Css.ident.normal, 0);
     styler.determineRootSizes(style);
     expect(context.rootLineHeight).toBeCloseTo(
@@ -186,6 +189,37 @@ describe("font metrics", function () {
       nativeLength("lh", 48, { fontFamily: "Courier New" }),
       4,
     );
+  });
+
+  it("measures an invalid root line-height as normal", function () {
+    const invalidValues = [
+      Css.getName("nonsense"),
+      new Css.Str("bad"),
+      new Css.SpaceList([new Css.Numeric(10, "px"), new Css.Numeric(20, "px")]),
+      new Css.CommaList([Css.getName("a"), Css.getName("b")]),
+    ];
+    for (const value of invalidValues) {
+      const context = new Exprs.Context(
+        new Exprs.LexicalScope(null),
+        800,
+        600,
+        16,
+        20,
+      );
+      context.fontMetrics = new FontMetrics(document);
+      const styler = Object.create(CssStyler.Styler.prototype);
+      styler.context = context;
+      const style = {
+        "font-family": new Cascade.CascadeValue(new Css.Str("Arial"), 0),
+        "font-size": new Cascade.CascadeValue(new Css.Numeric(32, "px"), 0),
+        "line-height": new Cascade.CascadeValue(value, 0),
+      };
+      styler.determineRootSizes(style);
+      expect(context.rootLineHeight).toBeCloseTo(
+        nativeLength("lh", 32, { fontFamily: "Arial" }),
+        4,
+      );
+    }
   });
 
   it("resolves inherited normal using the parent's font without fixing the keyword", function () {
