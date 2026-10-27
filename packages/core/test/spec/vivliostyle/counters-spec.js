@@ -40,6 +40,140 @@ function createNodeContext(id) {
 }
 
 describe("cross-reference layout constraint", function () {
+  it("updates page counters from each page's own post-increment snapshot", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const expr = { key: "page-key", str: "page-counter-page" };
+    store.pageCounterExprs = [
+      { expr, format: (values) => String(values.at(-1)) },
+    ];
+
+    function finishPage(pageIndex, pageNumber, ids) {
+      const container = document.createElement("div");
+      const counterNode = document.createElement("span");
+      counterNode.setAttribute(Counters.PAGE_COUNTER_ATTR, expr.key);
+      container.appendChild(counterNode);
+      const page = new Vtree.Page(container, container);
+      for (const [id, isTarget] of ids) {
+        page.registerElementWithId(document.createElement("div"), id, isTarget);
+      }
+      store.setCurrentPage(page);
+      store.currentPageCounters = { page: [pageNumber] };
+      store.finishPage(1, pageIndex);
+      return { page, counterNode };
+    }
+
+    const first = finishPage(0, 10, [["duplicate", true]]);
+    const mixed = finishPage(1, 20, [
+      ["duplicate", false],
+      ["unique", true],
+    ]);
+    const duplicateOnly = finishPage(2, 30, [["duplicate", false]]);
+    const noIds = finishPage(3, 40, []);
+    const pages = [first, mixed, duplicateOnly, noIds];
+    // Page starts do not necessarily differ from the page counter by one:
+    // @page may reset, set, or increment the counter by another amount.
+    const starts = pages.map(() => ({ page: [0] }));
+
+    store.adjustPageCountersOfLaterSpines(0, 2);
+    store.updatePageCounterNodesInPages(
+      pages.map(({ page }) => page),
+      starts,
+      2,
+    );
+    expect(pages.map(({ counterNode }) => counterNode.textContent)).toEqual([
+      "12",
+      "22",
+      "32",
+      "42",
+    ]);
+    expect(store.pageCountersById.duplicate.page).toEqual([12]);
+    expect(starts).toEqual(pages.map(() => ({ page: [0] })));
+
+    store.adjustPageCountersOfLaterSpines(0, 1);
+    store.updatePageCounterNodesInPages(
+      pages.map(({ page }) => page),
+      starts,
+      1,
+    );
+    expect(pages.map(({ counterNode }) => counterNode.textContent)).toEqual([
+      "13",
+      "23",
+      "33",
+      "43",
+    ]);
+  });
+
+  it("ignores duplicate IDs when falling back to target snapshots", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const container = document.createElement("div");
+    const node = document.createElement("span");
+    node.setAttribute(Counters.PAGE_COUNTER_ATTR, "page-key");
+    container.appendChild(node);
+    const page = new Vtree.Page(container, container);
+    const duplicate = document.createElement("div");
+    const unique = document.createElement("div");
+    page.registerElementWithId(duplicate, "duplicate", false);
+    page.registerElementWithId(unique, "unique", true);
+    store.pageCountersById.duplicate = { page: [2] };
+    store.pageCountersById.unique = { page: [3] };
+    store.pageCounterExprs = [
+      {
+        expr: { key: "page-key", str: "page-counter-page" },
+        format: (values) => String(values.at(-1)),
+      },
+    ];
+
+    store.updatePageCounterNodesInPages([page], [{ page: [4] }]);
+    expect(node.textContent).toBe("3");
+    delete page.elementsById.unique;
+    store.updatePageCounterNodesInPages([page], [{ page: [4] }]);
+    expect(node.textContent).toBe("4");
+  });
+
+  it("tracks duplicate status separately for each fragment on an element", function () {
+    const container = document.createElement("div");
+    const page = new Vtree.Page(container, container);
+    const element = document.createElement("a");
+    page.registerElementWithId(element, "duplicate-name", false);
+    page.registerElementWithId(element, "unique-id", true);
+
+    expect(page.elementsById["duplicate-name"]).toEqual([element]);
+    expect(page.getReferenceTargets("duplicate-name")).toEqual([]);
+    expect(page.getReferenceTargets("unique-id")).toEqual([element]);
+  });
+
+  it("uses only the canonical target for snapshots and layout constraints", function () {
+    const store = new Counters.CounterStore(documentURLTransformer);
+    const container = document.createElement("div");
+    const page = new Vtree.Page(container, container);
+    const first = document.createElement("div");
+    first.textContent = "first";
+    const duplicate = document.createElement("div");
+    duplicate.textContent = "later";
+    page.registerElementWithId(duplicate, "target", false);
+    page.registerElementWithId(first, "target", true);
+    store.setCurrentPage(page);
+    store.finishPage(0, 0);
+    expect(page.elementsById.target).toEqual([duplicate, first]);
+    expect(store.pageTextById.target.content).toBe("first");
+    expect(store.pageIndicesById.target.pageIndex).toBe(0);
+
+    const nextContainer = document.createElement("div");
+    const nextPage = new Vtree.Page(nextContainer, nextContainer);
+    const nodeContext = createNodeContext("target");
+    nextPage.registerElementWithId(nodeContext.viewNode, "target", false);
+    store.setCurrentPage(nextPage);
+    store.resolvedReferences.target = [
+      new Counters.TargetCounterReference("target", true),
+    ];
+    store.pageIndicesById.target.pageIndex = 2;
+    expect(store.createLayoutConstraint(1).allowLayout(nodeContext)).toBe(true);
+    store.finishPage(0, 1);
+    expect(store.pageIndicesById.target.pageIndex).toBe(2);
+    expect(store.pageTextById.target.content).toBe("first");
+    expect(store.resolvedReferences.target[0].isResolved()).toBe(true);
+  });
+
   it("refreshes retained target-text first-letter nodes", function () {
     const store = new Counters.CounterStore(documentURLTransformer);
     const container = document.createElement("div");

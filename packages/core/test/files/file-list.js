@@ -582,6 +582,14 @@ module.exports = [
         title: "target-text() - Basic Tests (PR #1575)",
       },
       {
+        file: "target-text-duplicate-id.html",
+        title: "target-text() with duplicate IDs across pages (Issue #2150)",
+      },
+      {
+        file: "duplicate-fragment-targets.html",
+        title: "Cross-references to duplicate fragment targets (Issue #2150)",
+      },
+      {
         file: "target-text-running-element.html",
         title: "target-text() in Running Elements (PR #1575)",
       },

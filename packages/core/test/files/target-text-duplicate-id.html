@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- Test case for Issue #2150: duplicate cross-reference targets across a page break. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Duplicate target-text IDs</title>
+    <style>
+      @page {
+        size: 480px 480px;
+        margin: 40px;
+        @top-center { content: "Duplicate IDs and target-text()" }
+        @bottom-center { content: "Page " counter(page) }
+      }
+      * { margin: 0 }
+      /* Four times the dimensions of the original reproduction. */
+      body { font: 16px/20px serif }
+      a::before { content: target-text(attr(href), content) }
+      .target { break-after: avoid }
+      .spacer { height: 240px; background: #eee }
+      .following { height: 104px; background: #ddd }
+    </style>
+  </head>
+  <body>
+    <div id="target" class="target">First target</div>
+    <div class="spacer"></div>
+    <p><a href="#target"> (expected: First target)</a></p>
+    <div id="target" class="target">Second target</div>
+    <div class="following"></div>
+  </body>
+</html>

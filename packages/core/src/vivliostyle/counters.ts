@@ -310,7 +310,9 @@ class CounterResolver implements CssCascade.CounterResolver {
   private getTargetPageCounters(
     transformedId: string,
   ): CssCascade.CounterValues | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    if (
+      this.counterStore.currentPage.getReferenceTargets(transformedId).length
+    ) {
       return this.counterStore.currentPageCounters;
     } else {
       return this.counterStore.pageCountersById[transformedId] || null;
@@ -325,7 +327,9 @@ class CounterResolver implements CssCascade.CounterResolver {
   private getTargetPageDocCounters(
     transformedId: string,
   ): CssCascade.CounterValues | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    if (
+      this.counterStore.currentPage.getReferenceTargets(transformedId).length
+    ) {
       return this.counterStore.currentPageDocCounters;
     } else {
       return this.counterStore.pageDocCountersById[transformedId] || null;
@@ -368,10 +372,10 @@ class CounterResolver implements CssCascade.CounterResolver {
     transformedId: string,
     pseudoElement: string,
   ): string | null {
-    if (this.counterStore.currentPage.elementsById[transformedId]) {
+    const elements =
+      this.counterStore.currentPage.getReferenceTargets(transformedId);
+    if (elements.length) {
       // Element is on current page - extract text for specific pseudo-element
-      const elements =
-        this.counterStore.currentPage.elementsById[transformedId];
       if (elements && elements.length > 0) {
         const element = elements[0];
 
@@ -904,6 +908,12 @@ export class CounterStore {
   } = Object.create(null);
   currentPageCounters: CssCascade.CounterValues = Object.create(null);
   previousPageCounters: CssCascade.CounterValues = Object.create(null);
+  // Finished-page values include @page counter resets, sets, and increments.
+  // Keep them independently of IDs so every page can be patched after a shift.
+  private pageCountersByPage = new WeakMap<
+    Vtree.Page,
+    CssCascade.CounterValues
+  >();
   // Issue #1999: remember the page-counter base from before a page-local
   // override so later pages can resume the inherited sequence.
   pageCountersBeforeOverride: CssCascade.CounterValues = Object.create(null);
@@ -1324,7 +1334,13 @@ export class CounterStore {
    * @param pageIndex Index of the currently laid out page in its spine item
    */
   finishPage(spineIndex: number, pageIndex: number) {
-    const ids = Object.keys(this.currentPage.elementsById);
+    this.pageCountersByPage.set(
+      this.currentPage,
+      cloneCounterValues(this.currentPageCounters),
+    );
+    const ids = Object.keys(this.currentPage.elementsById).filter(
+      (id) => this.currentPage.getReferenceTargets(id).length > 0,
+    );
     if (ids.length > 0) {
       const currentPageCounters = cloneCounterValues(this.currentPageCounters);
       const currentPageDocCounters = this.currentPageDocCounters
@@ -1337,7 +1353,7 @@ export class CounterStore {
         }
 
         // Capture text content for target-text()
-        const elements = this.currentPage.elementsById[id];
+        const elements = this.currentPage.getReferenceTargets(id);
         if (elements && elements.length > 0) {
           const element = elements[0];
           this.pageTextById[id] = {
@@ -1703,22 +1719,20 @@ export class CounterStore {
   /**
    * Resolve page-level counter values for a page.
    *
-   * Prefer an explicit per-page snapshot when one is supplied. Otherwise fall
-   * back to looking up tracked element IDs on the page via pageCountersById.
-   *
-   * Note: explicitCounters are pageCounterStarts (pre-increment snapshots),
-   * while pageCountersById stores post-increment values. When using
-   * explicitCounters as a fallback, the caller should be aware of this
-   * distinction. For the "page" counter the difference is +1, but this
-   * method returns whichever snapshot it finds without adjustment.
+   * Prefer the finished page's own post-increment snapshot. For pages without
+   * one, use a canonical target's snapshot or the supplied starting counters.
    */
   private getPageCountersForPage(
     page: Vtree.Page,
     explicitCounters?: CssCascade.CounterValues | null,
   ): CssCascade.CounterValues | null {
-    // First try pageCountersById (post-render values) via any tracked element
+    const pageCounters = this.pageCountersByPage.get(page);
+    if (pageCounters) {
+      return pageCounters;
+    }
     const elementIds = Object.keys(page.elementsById);
     for (const elementId of elementIds) {
+      if (!page.getReferenceTargets(elementId).length) continue;
       const counters = this.pageCountersById[elementId];
       if (counters) {
         return counters;
@@ -1733,19 +1747,25 @@ export class CounterStore {
 
   /**
    * Walk through page-counter DOM nodes in the given page containers and
-   * update their text content from the adjusted pageCountersById snapshots.
-   * Called after adjustPageCountersOfLaterSpines has shifted the counters.
+   * update their text content from their finished-page counter snapshots.
+   * Called after adjustPageCountersOfLaterSpines has shifted target snapshots.
    *
-   * When available, pass explicit per-page counter snapshots aligned with the
-   * given pages so pages without tracked element IDs are also updated.
+   * Pass the page-count change to shift the finished-page snapshots, and pass
+   * page-start counters as a fallback for pages without a finished snapshot.
    */
   updatePageCounterNodesInPages(
     pages: Vtree.Page[],
     pageCountersByPage?: Array<CssCascade.CounterValues | null>,
+    pageDelta = 0,
   ): void {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
       if (!page?.container) continue;
+
+      const pageCounters = this.pageCountersByPage.get(page);
+      if (pageDelta && pageCounters?.["page"]) {
+        pageCounters["page"] = pageCounters["page"].map((v) => v + pageDelta);
+      }
 
       // Issue #1997: patch counter(page) nodes inside named strings from the
       // assignment-page snapshot (which adjustPageCountersOfLaterSpines has
@@ -2206,6 +2226,12 @@ class LayoutConstraint implements Layout.LayoutConstraint {
       (viewNode as Element).getAttribute("id") ||
       (viewNode as Element).getAttribute("name");
     if (!id) {
+      return null;
+    }
+    if (
+      this.counterStore.currentPage &&
+      !this.counterStore.currentPage.isReferenceTarget(viewNode as Element, id)
+    ) {
       return null;
     }
     if (
