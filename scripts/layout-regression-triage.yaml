@@ -1,3 +1,18 @@
+- category: Running elements
+  title: "Running elements and named strings across documents (Issue #2232)"
+  file:
+    - running-elements/cross-document/ch1.html
+    - running-elements/cross-document/ch2.html
+    - running-elements/cross-document/ch3.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2236"
+  approvedViewer: git-fix-running-elements-across-ca5869  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch1.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch2.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch3.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch1.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch2.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/running-elements/cross-document/ch3.html&zoom=1&spread=false
 - category: Fonts and relative units
   title: "lh unit of a detached font-size, line-height normal (PR #2233)"
   file: font-size-lh-unit-in-footnote-normal.html
