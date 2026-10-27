@@ -1,0 +1,74 @@
+@page {
+  size: 148mm 105mm;
+  margin: 18mm 15mm 15mm;
+  font-size: 10pt;
+
+  @top-left {
+    content: element(chapter);
+  }
+  @top-right {
+    content: element(section);
+  }
+  @bottom-left {
+    content: string(section-page);
+  }
+  @bottom-center {
+    content: counter(page);
+  }
+}
+
+html {
+  font-size: 10pt;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+}
+
+/* Running elements: the background color tells which chapter they come from */
+.chapter {
+  position: running(chapter);
+  padding: 0 0.5em;
+  border-radius: 0.3em;
+}
+.chapter-1 {
+  background-color: #cde6ff;
+}
+.chapter-2 {
+  background-color: #ffd6e0;
+}
+.chapter-3 {
+  background-color: #d9f2c7;
+}
+
+.section {
+  position: running(section);
+  font-style: italic;
+}
+
+h1 {
+  margin: 0 0 0.5em;
+  font-size: 1.6em;
+}
+
+h2 {
+  margin: 0.5em 0;
+  font-size: 1.2em;
+  break-before: page;
+  /* The page number must be the one of the page of this h2 */
+  string-set: section-page content() " / p." counter(page);
+}
+
+p {
+  margin: 0 0 0.5em;
+}
+
+a.xref::after {
+  content: " (page " target-counter(attr(href url), page) ")";
+}
+
+.note {
+  border: 1px solid gray;
+  padding: 0.3em 0.5em;
+}

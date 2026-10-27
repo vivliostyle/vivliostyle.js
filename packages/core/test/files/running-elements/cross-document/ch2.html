@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chapter 2 - Running elements across documents (Issue #2232)</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="chapter chapter-2">Chapter 2</div>
+    <h1>Chapter 2</h1>
+    <div class="note">
+      <p>Every page header must show the chapter of the page (with its background color)
+      on the left and its section on the right, also on the pages that have a
+      <code>target-counter()</code> referring to another document. The bottom left
+      must show the section with the page number where its heading is.</p>
+    </div>
+    <section id="sec2-1">
+      <h2>2.1 Introduction</h2>
+      <div class="section">2: 2.1 Introduction</div>
+      <p>This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document.</p>
+    </section>
+    <section id="sec2-2">
+      <h2>2.2 Target section</h2>
+      <div class="section">2: 2.2 Target section</div>
+      <p>This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document.</p>
+      <p>See <a class="xref" href="ch3.html#sec3-3">section 3.3 in chapter 3</a>.</p>
+      <p>This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document.</p>
+    </section>
+    <section id="sec2-3">
+      <h2>2.3 Long section</h2>
+      <div class="section">2: 2.3 Long section</div>
+      <p>This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document.</p>
+    </section>
+    <section id="sec2-4">
+      <h2>2.4 Last section</h2>
+      <div class="section">2: 2.4 Last section</div>
+      <p>This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document. This paragraph is filler text to make the section long enough. The page header shows the chapter and the section of this page, taken from the running elements of the same document.</p>
+    </section>
+  </body>
+</html>
