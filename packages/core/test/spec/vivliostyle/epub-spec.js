@@ -913,6 +913,66 @@ describe("epub", function () {
       expect(epageCountCallback).not.toHaveBeenCalled();
     });
 
+    it("returns the surviving page and its position after a recursive rerender shrinks pagination", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var oldPage = { spineIndex: 0, offset: 100 };
+        var survivingPage = { spineIndex: 0, offset: 100 };
+        var viewItem = {
+          item: { spineIndex: 0 },
+          layoutPositions: [{}, {}, {}],
+          pages: [{}, survivingPage],
+          pageCounterStarts: [],
+          instance: {
+            getPageNumberContextDepth: function () {
+              return 0;
+            },
+            pushPageNumberContext: function () {},
+            restorePageNumberContextDepth: function () {},
+            layoutNextPage: function () {
+              return adapt_task.newResult(null);
+            },
+          },
+        };
+        view.counterStore = { finishPage: function () {} };
+        view.deferredReferencePages = [];
+        view.isInCounterResolveScope = function () {
+          return false;
+        };
+        view.preparePageCountersForRender = function () {
+          return null;
+        };
+        view.makePage = function () {
+          return oldPage;
+        };
+        view.resolvePageTypeForRenderSlot = function () {};
+        view.finishPageContainer = function (item, page, index) {
+          item.pages[index] = page;
+        };
+        view.reportPaginationProgress = function () {};
+        view.maybeRelayoutFollowingPage = function () {
+          return adapt_task.newResult(true);
+        };
+        view.resolveUnresolvedReferencesForPage = function () {
+          viewItem.pages.pop();
+          viewItem.layoutPositions.pop();
+          return adapt_task.newResult(survivingPage);
+        };
+        view.markSpineItemCompleteIfReady = jasmine.createSpy();
+
+        view.renderSinglePage(viewItem, { page: 2 }).then(function (result) {
+          expect(result.pageAndPosition.page).toBe(survivingPage);
+          expect(result.pageAndPosition.position.pageIndex).toBe(1);
+          expect(result.nextLayoutPosition).toBeNull();
+          expect(view.markSpineItemCompleteIfReady).toHaveBeenCalledWith(
+            viewItem,
+          );
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("defers final-page completion while a counter scope is still pushed", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
@@ -1563,7 +1623,11 @@ describe("epub", function () {
           },
           spineIndex: 0,
         };
-        var viewItem = { pages: [page], item: { spineIndex: 0 } };
+        var viewItem = {
+          pages: [page],
+          item: { spineIndex: 0 },
+          layoutPositions: [{}, { page: 1 }],
+        };
         view.deferredReferencePages = [];
         var nextLayoutPosition = { page: 1 };
         var ref = {
@@ -1795,6 +1859,50 @@ describe("epub", function () {
       });
     });
 
+    it("uses the surviving final page when reference resolution removes the current page", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var container = document.createElement("div");
+        document.body.appendChild(container);
+        var surviving = new adapt_vtree.Page(container, container);
+        surviving.spineIndex = 0;
+        var removed = new adapt_vtree.Page(
+          document.createElement("div"),
+          container,
+        );
+        removed.spineIndex = 0;
+        var viewItem = {
+          item: { spineIndex: 0 },
+          pages: [{}, surviving],
+          layoutPositions: [{}, {}],
+        };
+        view.opf = { spine: [{}] };
+        view.counterStore = {
+          getUnresolvedRefsToPage: function () {
+            return [];
+          },
+          finishLastPage: jasmine.createSpy(),
+        };
+        view.isInCounterResolveScope = function () {
+          return false;
+        };
+
+        view
+          .resolveUnresolvedReferencesForPage(viewItem, removed, 2, null)
+          .then(function (result) {
+            expect(result).toBe(surviving);
+            expect(result.isLastPage).toBe(true);
+            expect(container.getAttribute("data-vivliostyle-page-index")).toBe(
+              "1",
+            );
+            expect(view.counterStore.finishLastPage).toHaveBeenCalled();
+            container.remove();
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("skips references discarded after the resolution worklist was captured", function (done) {
       adapt_task.start(function () {
         var view = Object.create(adapt_epub.OPFView.prototype);
@@ -1802,7 +1910,11 @@ describe("epub", function () {
         document.body.appendChild(container);
         var page = new adapt_vtree.Page(container, container);
         page.spineIndex = 0;
-        var viewItem = { item: { spineIndex: 0 }, pages: [page] };
+        var viewItem = {
+          item: { spineIndex: 0 },
+          pages: [page],
+          layoutPositions: [{}, { page: 1 }],
+        };
         var discardedRef = {
           isResolved: function () {
             return false;
@@ -1952,8 +2064,11 @@ describe("epub", function () {
         return { spineIndex: 0, offset: 0, fetchers: [] };
       };
       view.resolvePageTypeForRenderSlot = function () {};
-      view.finishPageContainer = function () {};
-      view.maybeRelayoutFollowingPage = function () {
+      view.finishPageContainer = function (item, page, index) {
+        item.pages[index] = page;
+      };
+      view.maybeRelayoutFollowingPage = function (item, nextPosition) {
+        item.layoutPositions[nextPosition.page] = nextPosition;
         return adapt_task.newResult(true);
       };
       view.resolveUnresolvedReferencesForPage = function (viewItem, page) {
@@ -1962,6 +2077,7 @@ describe("epub", function () {
 
       var viewItem = createFakeViewItem(view, 0, 100);
       view.spineItems[0] = viewItem;
+      viewItem.layoutPositions = [null];
       viewItem.instance.getPageNumberContextDepth = function () {
         return 0;
       };
