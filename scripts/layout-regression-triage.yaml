@@ -1,3 +1,27 @@
+- category: Cross-references
+  title: "target-text() with duplicate IDs across pages (Issue #2150)"
+  file: target-text-duplicate-id.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2237"
+  approvedViewer: git-codex-fix-duplicate-target-ids  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-duplicate-id.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-text-duplicate-id.html&zoom=1&spread=false
+- category: Cross-references
+  title: "Cross-references to duplicate fragment targets (Issue #2150)"
+  file: duplicate-fragment-targets.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2237"
+  approvedViewer: git-codex-fix-duplicate-target-ids  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/duplicate-fragment-targets.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/duplicate-fragment-targets.html&zoom=1&spread=false
 - category: Running elements
   title: "Running elements and named strings across documents (Issue #2232)"
   file:
