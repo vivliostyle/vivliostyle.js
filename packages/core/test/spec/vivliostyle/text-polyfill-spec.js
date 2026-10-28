@@ -79,6 +79,7 @@ describe("text-polyfill", function () {
           );
           context.viewNode = child;
           context.inline = true;
+          context.display = child.style.display || null;
           context.inheritedProps = {
             ...parentContext.inheritedProps,
             ...JSON.parse(child.dataset.props ?? "{}"),
@@ -988,6 +989,37 @@ describe("text-polyfill", function () {
       });
       expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
       expect(element.childNodes[1].textContent).toBe(" ");
+    });
+
+    it("ignores ruby annotations when spacing adjacent base text", function () {
+      layout(
+        'a<ruby style="display:ruby">　あ　<rt style="display:ruby-text">ああ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
+
+      layout(
+        'a<ruby style="display:ruby">あ<rt style="display:ruby-text">ああ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      const spaces = element.querySelectorAll("viv-ts-thin-sp");
+      expect(spaces.length).toBe(2);
+      spaces.forEach((space) => expect(space.parentNode).toBe(element));
+    });
+
+    it("preserves punctuation boundaries in a ruby formatting context", function () {
+      layout(
+        'あ」　<ruby style="display:ruby">あ<rt style="display:ruby-text">ああ</rt></ruby>　「あ',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.firstChild.textContent).toBe("あ");
+      expect(element.firstChild.nextSibling.textContent).toBe("」");
     });
 
     it("inserts the spacing around an element with no-autospace if the parent has normal", function () {

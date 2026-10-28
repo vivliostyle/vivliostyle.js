@@ -854,19 +854,7 @@ export class ViewFactory
       // The percent value of inline-size on vertical-in-horizontal or
       // horizontal-in-vertical block needs to be resolved against the
       // page area height or width. (Fix for issue #1264)
-      let percentRef: number | undefined;
-      if (verticalChanged) {
-        if (vertical) {
-          if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
-            percentRef = context.pageAreaHeight ?? undefined;
-          }
-        } else {
-          if (/^(min-|max-)?(width|inline-size)$/.test(name)) {
-            percentRef = context.pageAreaWidth ?? undefined;
-          }
-        }
-      }
-      let value = cascVal.evaluate(context, name, percentRef, vertical);
+      let value = cascVal.evaluate(context, name, undefined, vertical);
       if (name == "font-family" || name == "--viv-marker-font-family") {
         value = this.docFaces.filterFontFamily(value);
       }
@@ -907,16 +895,6 @@ export class ViewFactory
         isLeftPage,
         (_name, value) => value,
       );
-    }
-
-    if (verticalChanged) {
-      // The auto value of inline-size on vertical-in-horizontal or
-      // horizontal-in-vertical block is changed to max-content.
-      // (Fix for issue #1264)
-      const inlineSize = computedStyle[vertical ? "height" : "width"];
-      if (!inlineSize || inlineSize === Css.ident.auto) {
-        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
-      }
     }
 
     if (Display.isRunning(computedStyle["position"])) {
