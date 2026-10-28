@@ -2082,7 +2082,9 @@ export class TextSpacingPolyfill {
               !annotation.contains(nextP.viewNode)
             ) {
               isLastBeforeForcedLineBreak = true;
-              isLastInBlock = !nextNode;
+              // Only ignorable trailing text can be retained in nextNode
+              // when the scan reaches the end of the annotation.
+              isLastInBlock = true;
               break;
             }
             const nextAnnotation = rubyAnnotation(nextP.viewNode);

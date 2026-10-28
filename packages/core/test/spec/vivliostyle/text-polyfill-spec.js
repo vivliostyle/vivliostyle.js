@@ -1092,6 +1092,26 @@ describe("text-polyfill", function () {
       expect(element.querySelector("rtc > viv-ts-thin-sp")).not.toBeNull();
     });
 
+    it("hangs annotation-ending punctuation only before collapsible whitespace", function () {
+      for (const [whitespace, css, tail, hangs] of [
+        [Vtree.Whitespace.IGNORE, "normal", " ", true],
+        [Vtree.Whitespace.IGNORE, "normal", " あ", false],
+        [Vtree.Whitespace.PRESERVE, "pre", " ", false],
+        [Vtree.Whitespace.NEWLINE, "pre-line", "\n", false],
+        [Vtree.Whitespace.NEWLINE, "pre-line", " ", true],
+      ]) {
+        element.innerHTML = `<ruby style="display:ruby">漢<rt style="display:ruby-text;white-space:${css}"><span>あ」</span>${tail}</rt></ruby>後`;
+        const { blockContext, points } = createCheckPoints({
+          "hanging-punctuation": Css.getName("last"),
+        });
+        for (const point of points) point.whitespace = whitespace;
+        polyfill.postLayoutBlock(blockContext, points);
+        expect(element.querySelectorAll("rt .viv-hang-last").length)
+          .withContext(css + JSON.stringify(tail))
+          .toBe(hangs ? 1 : 0);
+      }
+    });
+
     it("trims punctuation at the end of a ruby annotation", function () {
       spyOn(CSS, "supports").and.returnValue(false);
       for (const value of ["trim-end", "trim-both"]) {
