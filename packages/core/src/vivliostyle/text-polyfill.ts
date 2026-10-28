@@ -1185,6 +1185,7 @@ function getSplitOffsets(
   spacing: Spacing,
   position: TextPosition,
   limit: number,
+  splitRubyPunctuation = false,
 ): number[] {
   const text = textNode.data;
   const offsets: number[] = [];
@@ -1205,6 +1206,12 @@ function getSplitOffsets(
     if (match) {
       offsets.push(match[0].match(/^[ \t\r\n\f]*/)[0].length, match[0].length);
     }
+  }
+  // Chromium lays out ruby overhang at different fractional positions when
+  // punctuation and adjacent characters share a text run. Keep the earlier
+  // character boundaries in inline formatting contexts containing ruby.
+  if (splitRubyPunctuation) {
+    addMatchEnds(PUNCTUATION_BOUNDARY_PATTERN);
   }
   if (spacing.nativeTrim) {
     // The punctuation at the ends of lines is found later, one at a time
@@ -1770,6 +1777,13 @@ export class TextSpacingPolyfill {
     ) {
       lastTextIndex--;
     }
+    const rubyBlocks = new Set<HTMLElement>();
+    for (const p of checkPoints) {
+      if (p.display === "ruby" && p.viewNode?.parentNode) {
+        const block = findBlockContainer(p.viewNode);
+        if (block) rubyBlocks.add(block);
+      }
+    }
     checkPoints.forEach((p, index) => {
       const textP = getTextToProcess(p);
       const spacing = spacings.get(textP?.viewNode.parentElement);
@@ -1787,7 +1801,13 @@ export class TextSpacingPolyfill {
       };
       const textNode = textP.viewNode;
       let limit = getLookaheadLimit(textNode, textP.vertical);
-      const offsets = getSplitOffsets(textNode, spacing, position, limit);
+      const offsets = getSplitOffsets(
+        textNode,
+        spacing,
+        position,
+        limit,
+        rubyBlocks.has(blockContainers.get(textNode.parentElement)),
+      );
       // Separate the text beyond the lookahead, at a character boundary
       limit += textNode.data
         .slice(limit)
@@ -1950,8 +1970,33 @@ export class TextSpacingPolyfill {
             return false;
           }
 
+          // Ruby annotations form a separate text stream from their bases and
+          // surrounding text; they are not adjacent for text spacing.
+          function rubyAnnotation(node: Node): Element | null {
+            for (
+              let element = node.parentElement;
+              element;
+              element = element.parentElement
+            ) {
+              if (element.style.display === "ruby-text") {
+                return element;
+              }
+            }
+            return null;
+          }
+          const annotation = rubyAnnotation(textP.viewNode);
+          // Once an annotation's subtree ends, no later checkpoint can belong
+          // to it. Stop there to avoid scanning the paragraph for every ruby.
+
           for (let prev = i - 1; prev >= 0; prev--) {
             const prevP = checkPoints[prev];
+            if (
+              annotation &&
+              prevP.viewNode !== annotation &&
+              !annotation.contains(prevP.viewNode)
+            ) {
+              break;
+            }
             if (!prevP.viewNode?.parentNode) {
               // Text beyond the lookahead, detached while processing: it is
               // neither adjacent text in this column nor the edge of the block
@@ -1966,6 +2011,9 @@ export class TextSpacingPolyfill {
               prevP.viewNode.nodeType === Node.TEXT_NODE &&
               prevP.viewNode.textContent.length > 0
             ) {
+              if (rubyAnnotation(prevP.viewNode) !== annotation) {
+                continue;
+              }
               prevNode = prevP.viewNode;
               break;
             }
@@ -2005,6 +2053,13 @@ export class TextSpacingPolyfill {
           }
           for (let next = i + 1; next < checkPoints.length; next++) {
             const nextP = checkPoints[next];
+            if (
+              annotation &&
+              nextP.viewNode !== annotation &&
+              !annotation.contains(nextP.viewNode)
+            ) {
+              break;
+            }
             if (!nextP.viewNode?.parentNode) {
               // Text beyond the lookahead, detached while processing: it is
               // neither adjacent text in this column nor the edge of the block
@@ -2020,6 +2075,9 @@ export class TextSpacingPolyfill {
               nextP.viewNode.nodeType === Node.TEXT_NODE &&
               nextP.viewNode.textContent.length > 0
             ) {
+              if (rubyAnnotation(nextP.viewNode) !== annotation) {
+                continue;
+              }
               // Keep adjacent white space for autospace and line checks, but
               // look past ignorable text to find the end of the block.
               nextNode ||= nextP.viewNode;
