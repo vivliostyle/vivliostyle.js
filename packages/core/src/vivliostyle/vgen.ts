@@ -852,6 +852,26 @@ export class ViewFactory
     let useOrthogonalFallback = false;
     if (verticalChanged) {
       const inlineSizeName = vertical ? "height" : "width";
+      const displays = new Map<HTMLElement, string>();
+      const getDisplay = (element: HTMLElement): string => {
+        let display = displays.get(element);
+        if (display === undefined) {
+          display = element.style?.display ?? "";
+          if (
+            /^(inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
+              display,
+            )
+          ) {
+            // Orthogonal inline boxes can be inline-blockified even though
+            // their specified view style still says display:inline.
+            display =
+              element.ownerDocument.defaultView?.getComputedStyle(element)
+                .display || display;
+          }
+          displays.set(element, display);
+        }
+        return display;
+      };
       const findContainingBlock = (
         element: HTMLElement | null,
       ): HTMLElement | null => {
@@ -861,7 +881,7 @@ export class ViewFactory
           element &&
           element !== this.viewRoot &&
           /^(contents|inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
-            element.style?.display,
+            getDisplay(element),
           )
         ) {
           element = element.parentElement;
@@ -871,6 +891,13 @@ export class ViewFactory
       const containingBlock = findContainingBlock(
         this.nodeContext?.parent?.viewNode as HTMLElement,
       );
+      const isFlexOrGrid = (element: HTMLElement | null): boolean =>
+        !!element &&
+        element !== this.viewRoot &&
+        /^(inline-)?(grid|flex)$/.test(getDisplay(element));
+      const hasLayoutSizing = (element: HTMLElement): boolean =>
+        isFlexOrGrid(element) ||
+        isFlexOrGrid(findContainingBlock(element.parentElement));
       // Cache all four states per element for this decision. Percentage and
       // ratio dependencies otherwise revisit the same ancestors exponentially.
       const definiteSizes = new Map<HTMLElement, Map<string, boolean>>();
@@ -894,8 +921,8 @@ export class ViewFactory
         }
         const style = element.style;
         const size = style?.[dimension] ?? "";
-        let definite = false;
-        if (size.includes("%")) {
+        let definite = hasLayoutSizing(element);
+        if (!definite && size.includes("%")) {
           // An unresolved percentage behaves as auto, so a preferred ratio
           // may still supply this axis from a definite opposite dimension.
           definite = hasDefiniteSize(
@@ -903,6 +930,7 @@ export class ViewFactory
             dimension,
           );
         } else if (
+          !definite &&
           size &&
           !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
             size,
@@ -933,19 +961,10 @@ export class ViewFactory
         cached.set(key, definite);
         return definite;
       };
-      let insideFlexOrGrid = false;
-      for (
-        let ancestor = containingBlock;
-        ancestor && ancestor !== this.viewRoot;
-        ancestor = ancestor.parentElement
-      ) {
-        if (/^(inline-)?(grid|flex)$/.test(ancestor.style?.display)) {
-          insideFlexOrGrid = true;
-          break;
-        }
-      }
-      useOrthogonalFallback =
-        !insideFlexOrGrid && !hasDefiniteSize(containingBlock, inlineSizeName);
+      // Flex/grid sizing only crosses the item/container boundary. An
+      // ordinary auto-sized descendant does not acquire a definite basis
+      // merely because some distant ancestor participates in that layout.
+      useOrthogonalFallback = !hasDefiniteSize(containingBlock, inlineSizeName);
     }
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 

@@ -93,13 +93,17 @@ describe("vgen", function () {
       }
       options.configure?.({ parent, ancestor, factory });
       const result = {};
-      factory.computeStyle(
-        vertical ? "horizontal-tb" : "vertical-lr",
-        false,
-        style,
-        result,
-      );
-      return result[dimension];
+      try {
+        factory.computeStyle(
+          vertical ? "horizontal-tb" : "vertical-lr",
+          false,
+          style,
+          result,
+        );
+        return result[dimension];
+      } finally {
+        ancestor.remove();
+      }
     }
 
     it("bounds repeated percentage/ratio resolution in deeply nested wrappers", function () {
@@ -270,6 +274,57 @@ describe("vgen", function () {
               },
             }),
           ).toBe(Css.ident.max_content);
+        }
+      });
+      it(`recognizes writing-mode-induced inline-block parents in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const display of ["inline", "inline-block"]) {
+          expect(
+            compute(mode, "100px", "block", percent, display, "", "", {
+              configure({ parent, ancestor }) {
+                const vertical = mode !== "horizontal-tb";
+                ancestor.style.writingMode = mode;
+                parent.style.writingMode = vertical
+                  ? "horizontal-tb"
+                  : "vertical-lr";
+                document.body.append(ancestor);
+                expect(getComputedStyle(parent).display).toBe("inline-block");
+              },
+            }),
+          ).toEqual(percent);
+        }
+      });
+      it(`retains fallback for indefinite wrappers inside flex/grid items in ${mode}`, function () {
+        const fallback = new Css.Numeric(
+          mode === "horizontal-tb" ? 700 : 500,
+          "px",
+        );
+        for (const display of ["flex", "grid"]) {
+          for (const wrapper of ["flow-root", "block"]) {
+            expect(
+              compute(
+                mode,
+                "",
+                "block",
+                new Css.Numeric(100, "%"),
+                wrapper,
+                "",
+                "200px",
+                {
+                  configure({ ancestor }) {
+                    const layout = document.createElement("div");
+                    layout.style.display = display;
+                    layout.append(ancestor);
+                  },
+                },
+              ),
+            ).toEqual(fallback);
+          }
+          expect(
+            compute(mode, "", "block", undefined, "", "", "", {
+              ancestorStyle: { display },
+            }),
+          ).toBeUndefined();
         }
       });
       it(`retains the page-area fallback for indefinite blocks in ${mode}`, function () {
