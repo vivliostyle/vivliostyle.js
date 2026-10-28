@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Orthogonal fallback in indefinite containing blocks</title>
+  <style>
+    @page { size: 360px 300px; margin: 20px; }
+    body { margin: 0; }
+    section { break-before: page; }
+    .child { writing-mode: vertical-lr; height: 100%; width: 40px; background: green; }
+  </style>
+  <body>
+    <!-- Each page should contain a 40px by 260px green rectangle. -->
+    <section style="display: flow-root"><div class="child"></div></section>
+    <section style="overflow: hidden"><div class="child"></div></section>
+    <section style="aspect-ratio: auto"><div class="child"></div></section>
+    <section><div style="height: 100%"><div class="child"></div></div></section>
+    <section><div style="height: calc(100% - 10px)"><div class="child"></div></div></section>
+  </body>
+</html>

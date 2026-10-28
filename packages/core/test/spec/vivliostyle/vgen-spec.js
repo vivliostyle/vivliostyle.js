@@ -38,8 +38,9 @@ describe("vgen", function () {
       parentSize,
       display,
       size,
-      insideBFC = false,
+      parentDisplay = "",
       ratio = "",
+      ancestorSize = "",
     ) {
       const scope = new Exprs.LexicalScope(null);
       scope.defineName("left-page", new Exprs.Const(scope, false));
@@ -52,6 +53,14 @@ describe("vgen", function () {
       const parent = document.createElement("div");
       parent.style[dimension] = parentSize;
       parent.style.aspectRatio = ratio;
+      parent.style.display = parentDisplay;
+      parent.style.overflow = parentDisplay === "block" ? "hidden" : "";
+      if (ratio && ratio !== "auto") {
+        parent.style[vertical ? "width" : "height"] = "100px";
+      }
+      const ancestor = document.createElement("div");
+      ancestor.style[dimension] = ancestorSize;
+      ancestor.appendChild(parent);
       const source = document.createElement(
         display === "inline" ? "progress" : "div",
       );
@@ -60,7 +69,7 @@ describe("vgen", function () {
         context,
         nodeContext: {
           parent: { viewNode: parent },
-          isInsideBFC: () => insideBFC,
+          isInsideBFC: () => !!parentDisplay,
         },
         sourceNode: source,
         xmldoc: { root: document.createElement("html") },
@@ -109,15 +118,42 @@ describe("vgen", function () {
         expect(compute(mode, "", "inline")).toBeUndefined();
       });
       it(`lets browser formatting contexts resolve orthogonal sizes in ${mode}`, function () {
-        expect(compute(mode, "", "block", undefined, true)).toBeUndefined();
+        expect(compute(mode, "", "block", undefined, "flex")).toBeUndefined();
         const percent = new Css.Numeric(100, "%");
-        expect(compute(mode, "", "block", percent, true)).toEqual(percent);
+        expect(compute(mode, "", "block", percent, "flex")).toEqual(percent);
       });
       it(`preserves percentage resolution with a parent aspect ratio in ${mode}`, function () {
         const percent = new Css.Numeric(100, "%");
-        expect(compute(mode, "", "block", percent, false, "1 / 1")).toEqual(
+        expect(compute(mode, "", "block", percent, "", "1 / 1")).toEqual(
           percent,
         );
+      });
+      it(`retains fallback inside indefinite ordinary BFCs in ${mode}`, function () {
+        for (const display of ["flow-root", "block"]) {
+          const expected = new Css.Numeric(
+            mode === "horizontal-tb" ? 700 : 500,
+            "px",
+          );
+          expect(
+            compute(mode, "", "block", new Css.Numeric(100, "%"), display),
+          ).toEqual(expected);
+        }
+      });
+      it(`treats an auto aspect ratio as omitted in ${mode}`, function () {
+        expect(compute(mode, "", "block", undefined, "", "auto")).toBe(
+          Css.ident.max_content,
+        );
+      });
+      it(`resolves parent percentage bases before suppressing fallback in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const parentSize of ["100%", "calc(100% - 10px)"]) {
+          expect(compute(mode, parentSize, "block", percent)).toEqual(
+            new Css.Numeric(mode === "horizontal-tb" ? 700 : 500, "px"),
+          );
+          expect(
+            compute(mode, parentSize, "block", percent, "", "", "200px"),
+          ).toEqual(percent);
+        }
       });
       it(`retains the page-area fallback for indefinite blocks in ${mode}`, function () {
         expect(compute(mode, "", "block")).toBe(Css.ident.max_content);

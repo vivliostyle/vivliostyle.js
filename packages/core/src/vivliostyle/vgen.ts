@@ -851,14 +851,56 @@ export class ViewFactory
     // after margins. (Issue #1264)
     const inlineSizeName = vertical ? "height" : "width";
     const containingBlock = this.nodeContext?.parent?.viewNode as HTMLElement;
-    const containingSize = containingBlock?.style?.[inlineSizeName];
+    const hasDefiniteSize = (
+      element: HTMLElement | null,
+      dimension: "width" | "height",
+      allowAspectRatio = true,
+    ): boolean => {
+      const style = element?.style;
+      if (!style) {
+        return false;
+      }
+      const size = style[dimension];
+      if (size.includes("%")) {
+        // A percentage (including calc()) is only definite when its
+        // containing block supplies a definite percentage basis.
+        return hasDefiniteSize(element.parentElement, dimension);
+      }
+      if (
+        size &&
+        !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
+          size,
+        )
+      ) {
+        return true;
+      }
+      // An explicit initial value supplies no ratio. A preferred ratio
+      // determines this axis only when the opposite axis is definite.
+      return (
+        allowAspectRatio &&
+        /[0-9]/.test(style.aspectRatio) &&
+        hasDefiniteSize(
+          element,
+          dimension === "height" ? "width" : "height",
+          false,
+        )
+      );
+    };
+    let insideFlexOrGrid = false;
+    for (
+      let ancestor = containingBlock;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
+      if (/^(inline-)?(grid|flex)$/.test(ancestor.style?.display)) {
+        insideFlexOrGrid = true;
+        break;
+      }
+    }
     const useOrthogonalFallback =
       verticalChanged &&
-      !this.nodeContext?.isInsideBFC() &&
-      !/^(inline-)?(grid|flex)$/.test(containingBlock?.style?.display) &&
-      !containingBlock?.style?.aspectRatio &&
-      (!containingSize ||
-        /^(auto|min-content|max-content|fit-content)$/.test(containingSize));
+      !insideFlexOrGrid &&
+      !hasDefiniteSize(containingBlock, inlineSizeName);
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 
     const transform = (

@@ -1016,6 +1016,10 @@ module.exports = [
     category: "Writing modes",
     files: [
       {
+        file: "writing-mode/orthogonal-indefinite-containing-block.html",
+        title: "Orthogonal fallback in indefinite containing blocks",
+      },
+      {
         file: "writing-mode/orthogonal-inline-sizing.html",
         title: "Orthogonal intrinsic and percentage sizing",
       },
