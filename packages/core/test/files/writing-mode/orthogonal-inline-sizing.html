@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Orthogonal intrinsic and percentage sizing</title>
+  <style>
+    @page { size: 700px 950px; margin: 30px; }
+    body { margin: 0; font: 16px/20px sans-serif; }
+    section { margin-bottom: 20px; }
+    .container { width: 300px; height: 100px; background: red; }
+    .percentage { writing-mode: vertical-lr; width: 100%; height: 100%; background: green; }
+    .available { width: 300px; height: 160px; background: cyan; }
+    .auto { writing-mode: vertical-lr; margin: 10%; background: green; font: 20px/20px monospace; }
+    progress { writing-mode: sideways-lr; }
+    .fallback { writing-mode: vertical-rl; width: 30px; background: green; }
+  </style>
+  <body>
+    <section>
+      <p>The control should be visible and run upwards.</p>
+      <progress value="3" max="4"></progress>
+    </section>
+    <section>
+      <p>A 300 by 100 green rectangle, with no red.</p>
+      <div class="container"><div class="percentage"></div></div>
+    </section>
+    <section>
+      <p>Green text columns should wrap inside the cyan box.</p>
+      <div class="available"><div class="auto">AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP</div></div>
+    </section>
+    <section>
+      <p>The green column should have its intrinsic text height.</p>
+      <div class="fallback">Orthogonal fallback</div>
+    </section>
+  </body>
+</html>

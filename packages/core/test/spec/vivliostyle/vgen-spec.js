@@ -20,6 +20,7 @@ import * as CssCascade from "../../../src/vivliostyle/css-cascade";
 import * as CssParser from "../../../src/vivliostyle/css-parser";
 import * as CssTokenizer from "../../../src/vivliostyle/css-tokenizer";
 import * as CssValidator from "../../../src/vivliostyle/css-validator";
+import * as Display from "../../../src/vivliostyle/display";
 import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
@@ -31,6 +32,102 @@ function expectFontMetricLength(actual, expected) {
 }
 
 describe("vgen", function () {
+  describe("orthogonal inline sizing", function () {
+    function compute(
+      mode,
+      parentSize,
+      display,
+      size,
+      insideBFC = false,
+      ratio = "",
+    ) {
+      const scope = new Exprs.LexicalScope(null);
+      scope.defineName("left-page", new Exprs.Const(scope, false));
+      const context = new Exprs.Context(scope, 800, 600, 16);
+      context.style = { pageScope: scope };
+      context.pageAreaWidth = 700;
+      context.pageAreaHeight = 500;
+      const vertical = mode !== "horizontal-tb";
+      const dimension = vertical ? "height" : "width";
+      const parent = document.createElement("div");
+      parent.style[dimension] = parentSize;
+      parent.style.aspectRatio = ratio;
+      const source = document.createElement(
+        display === "inline" ? "progress" : "div",
+      );
+      const factory = Object.create(Vgen.ViewFactory.prototype);
+      Object.assign(factory, {
+        context,
+        nodeContext: {
+          parent: { viewNode: parent },
+          isInsideBFC: () => insideBFC,
+        },
+        sourceNode: source,
+        xmldoc: { root: document.createElement("html") },
+        regionIds: [],
+      });
+      const style = {
+        "writing-mode": new CssCascade.CascadeValue(Css.getName(mode), 1),
+        display: new CssCascade.CascadeValue(Css.getName(display), 1),
+      };
+      if (size) {
+        style[dimension] = new CssCascade.CascadeValue(size, 1);
+      }
+      const result = {};
+      factory.computeStyle(
+        vertical ? "horizontal-tb" : "vertical-lr",
+        false,
+        style,
+        result,
+      );
+      return result[dimension];
+    }
+
+    for (const display of [Css.ident.inline_grid, Css.ident.inline_flex]) {
+      it(`establishes a browser formatting context for ${display}`, function () {
+        expect(Display.establishesBFC(display)).toBeTrue();
+      });
+    }
+    for (const mode of [
+      "vertical-rl",
+      "vertical-lr",
+      "sideways-rl",
+      "sideways-lr",
+      "horizontal-tb",
+    ]) {
+      it(`preserves percentages against a definite containing block in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "100px", "block", percent)).toEqual(percent);
+      });
+      it(`preserves auto sizing and available margin space in ${mode}`, function () {
+        expect(compute(mode, "200px", "block")).toBeUndefined();
+        expect(compute(mode, "200px", "block", Css.ident.auto)).toBe(
+          Css.ident.auto,
+        );
+      });
+      it(`keeps intrinsic inline control sizing in ${mode}`, function () {
+        expect(compute(mode, "", "inline")).toBeUndefined();
+      });
+      it(`lets browser formatting contexts resolve orthogonal sizes in ${mode}`, function () {
+        expect(compute(mode, "", "block", undefined, true)).toBeUndefined();
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "", "block", percent, true)).toEqual(percent);
+      });
+      it(`preserves percentage resolution with a parent aspect ratio in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "", "block", percent, false, "1 / 1")).toEqual(
+          percent,
+        );
+      });
+      it(`retains the page-area fallback for indefinite blocks in ${mode}`, function () {
+        expect(compute(mode, "", "block")).toBe(Css.ident.max_content);
+        expect(compute(mode, "", "block", new Css.Numeric(100, "%"))).toEqual(
+          new Css.Numeric(mode === "horizontal-tb" ? 700 : 500, "px"),
+        );
+      });
+    }
+  });
+
   it("preserves em and lh for a browser-resolved font shorthand", function () {
     const scope = new Exprs.LexicalScope(null);
     const context = new Exprs.Context(scope, 800, 600, 16, 20);

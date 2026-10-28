@@ -845,6 +845,20 @@ export class ViewFactory
       }
     }
     const verticalChanged = !isRoot && vertical !== verticalParent;
+    // Only use the page-area fallback when the containing block does not
+    // supply the orthogonal inline size. A definite size must remain under
+    // browser control, including percentage resolution and available space
+    // after margins. (Issue #1264)
+    const inlineSizeName = vertical ? "height" : "width";
+    const containingBlock = this.nodeContext?.parent?.viewNode as HTMLElement;
+    const containingSize = containingBlock?.style?.[inlineSizeName];
+    const useOrthogonalFallback =
+      verticalChanged &&
+      !this.nodeContext?.isInsideBFC() &&
+      !/^(inline-)?(grid|flex)$/.test(containingBlock?.style?.display) &&
+      !containingBlock?.style?.aspectRatio &&
+      (!containingSize ||
+        /^(auto|min-content|max-content|fit-content)$/.test(containingSize));
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 
     const transform = (
@@ -855,7 +869,7 @@ export class ViewFactory
       // horizontal-in-vertical block needs to be resolved against the
       // page area height or width. (Fix for issue #1264)
       let percentRef: number | undefined;
-      if (verticalChanged) {
+      if (useOrthogonalFallback) {
         if (vertical) {
           if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
             percentRef = context.pageAreaHeight ?? undefined;
@@ -909,7 +923,10 @@ export class ViewFactory
       );
     }
 
-    if (verticalChanged) {
+    if (
+      useOrthogonalFallback &&
+      Display.isBlockLevel(computedStyle["display"])
+    ) {
       // The auto value of inline-size on vertical-in-horizontal or
       // horizontal-in-vertical block is changed to max-content.
       // (Fix for issue #1264)

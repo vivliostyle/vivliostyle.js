@@ -1016,6 +1016,10 @@ module.exports = [
     category: "Writing modes",
     files: [
       {
+        file: "writing-mode/orthogonal-inline-sizing.html",
+        title: "Orthogonal intrinsic and percentage sizing",
+      },
+      {
         file: "writing-mode/horizontal-tb.html",
         title: "Pagination in horizontal-tb (Issue #1480)",
       },
