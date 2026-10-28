@@ -79,6 +79,7 @@ describe("text-polyfill", function () {
           );
           context.viewNode = child;
           context.inline = true;
+          context.display = child.style.display || null;
           context.inheritedProps = {
             ...parentContext.inheritedProps,
             ...JSON.parse(child.dataset.props ?? "{}"),
@@ -988,6 +989,164 @@ describe("text-polyfill", function () {
       });
       expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
       expect(element.childNodes[1].textContent).toBe(" ");
+    });
+
+    it("ignores ruby annotations when spacing adjacent base text", function () {
+      layout(
+        'a<ruby style="display:ruby">　あ　<rt style="display:ruby-text">ああ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
+
+      layout(
+        'a<ruby style="display:ruby">あ<rt style="display:ruby-text">ああ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      const spaces = element.querySelectorAll("viv-ts-thin-sp");
+      expect(spaces.length).toBe(2);
+      spaces.forEach((space) => expect(space.parentNode).toBe(element));
+    });
+
+    it("keeps annotation neighbor searches within their ruby text", function () {
+      layout(
+        'a<ruby style="display:ruby">あ<rt style="display:ruby-text"><span>あ</span><span>A</span></rt></ruby>b<ruby style="display:ruby">い<rt style="display:ruby-text">い</rt></ruby>c',
+        { "text-autospace": "normal" },
+      );
+      const annotations = element.querySelectorAll("rt");
+      expect(annotations[0].querySelectorAll("viv-ts-thin-sp").length).toBe(1);
+      expect(annotations[1].querySelector("viv-ts-thin-sp")).toBeNull();
+      expect(element.querySelectorAll(":scope > viv-ts-thin-sp").length).toBe(
+        4,
+      );
+    });
+
+    it("scans ruby annotation checkpoints in linear time", function () {
+      function countCheckpointReads(count) {
+        element.innerHTML =
+          '<ruby style="display:ruby">あ<rt style="display:ruby-text">あ</rt></ruby>'.repeat(
+            count,
+          );
+        const { blockContext, points } = createCheckPoints({
+          "text-autospace": "normal",
+        });
+        let reads = 0;
+        for (const point of points) {
+          let node = point.viewNode;
+          Object.defineProperty(point, "viewNode", {
+            configurable: true,
+            get() {
+              reads++;
+              return node;
+            },
+            set(value) {
+              node = value;
+            },
+          });
+        }
+        polyfill.postLayoutBlock(blockContext, points);
+        return reads;
+      }
+      const small = countCheckpointReads(40);
+      const large = countCheckpointReads(80);
+      expect(large).toBeLessThan(small * 2.8);
+    });
+
+    it("trims punctuation at the start of a ruby annotation", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      for (const value of ["trim-start", "trim-both"]) {
+        layout(
+          '<ruby style="display:ruby">漢<rt style="display:ruby-text">「かん」</rt></ruby>後',
+          {
+            "text-spacing-trim": value,
+          },
+        );
+        expect(
+          element.querySelector("rt viv-ts-open.viv-ts-trim"),
+        ).not.toBeNull();
+      }
+    });
+
+    it("does not treat direct ruby text container content as base text", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">　あ　<rtc style="display:ruby-text-container">ああ</rtc></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector(":scope > viv-ts-thin-sp")).toBeNull();
+    });
+
+    it("ignores replaced elements in nested annotations when spacing outer annotations", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">漢<rtc style="display:ruby-text-container">あ<rt style="display:ruby-text"><img width="1" height="1">い</rt>a</rtc></ruby>',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector("rtc > viv-ts-thin-sp")).not.toBeNull();
+    });
+
+    it("hangs annotation-ending punctuation only before collapsible whitespace", function () {
+      for (const [whitespace, css, tail, hangs] of [
+        [Vtree.Whitespace.IGNORE, "normal", " ", true],
+        [Vtree.Whitespace.IGNORE, "normal", " あ", false],
+        [Vtree.Whitespace.PRESERVE, "pre", " ", false],
+        [Vtree.Whitespace.NEWLINE, "pre-line", "\n", false],
+        [Vtree.Whitespace.NEWLINE, "pre-line", " ", true],
+      ]) {
+        element.innerHTML = `<ruby style="display:ruby">漢<rt style="display:ruby-text;white-space:${css}"><span>あ」</span>${tail}</rt></ruby>後`;
+        const { blockContext, points } = createCheckPoints({
+          "hanging-punctuation": Css.getName("last"),
+        });
+        for (const point of points) point.whitespace = whitespace;
+        polyfill.postLayoutBlock(blockContext, points);
+        expect(element.querySelectorAll("rt .viv-hang-last").length)
+          .withContext(css + JSON.stringify(tail))
+          .toBe(hangs ? 1 : 0);
+      }
+    });
+
+    it("trims punctuation at the end of a ruby annotation", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      for (const value of ["trim-end", "trim-both"]) {
+        layout(
+          '<ruby style="display:ruby">あ<rt style="display:ruby-text">あ」</rt></ruby>後',
+          {
+            "text-spacing-trim": value,
+          },
+        );
+        expect(
+          element.querySelector("rt viv-ts-close.viv-ts-trim"),
+        ).not.toBeNull();
+      }
+    });
+
+    it("skips replaced elements in annotations when spacing base text", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">あ<rt style="display:ruby-text">あ<img width="1" height="1">あ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector(":scope > viv-ts-thin-sp")).not.toBeNull();
+    });
+
+    it("preserves punctuation boundaries in a ruby formatting context", function () {
+      layout(
+        'あ」　<ruby style="display:ruby">あ<rt style="display:ruby-text">ああ</rt></ruby>　「あ',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.firstChild.textContent).toBe("あ");
+      expect(element.firstChild.nextSibling.textContent).toBe("」");
     });
 
     it("inserts the spacing around an element with no-autospace if the parent has normal", function () {
