@@ -91,6 +91,7 @@ describe("vgen", function () {
             1,
           );
       }
+      options.configure?.({ parent, ancestor, factory });
       const result = {};
       factory.computeStyle(
         vertical ? "horizontal-tb" : "vertical-lr",
@@ -101,6 +102,57 @@ describe("vgen", function () {
       return result[dimension];
     }
 
+    it("bounds repeated percentage/ratio resolution in deeply nested wrappers", function () {
+      let reads = 0;
+      const result = compute(
+        "vertical-lr",
+        "100%",
+        "block",
+        undefined,
+        "",
+        "1 / 1",
+        "",
+        {
+          configure({ parent, ancestor }) {
+            let child = parent;
+            for (let i = 0; i < 20; i++) {
+              child.style.cssText = "width:100%;height:100%;aspect-ratio:1/1";
+              const style = child.style;
+              Object.defineProperty(child, "style", {
+                get() {
+                  if (++reads > 500)
+                    throw new Error("Repeated sizing states exceeded bound");
+                  return style;
+                },
+              });
+              const wrapper = document.createElement("div");
+              ancestor.appendChild(wrapper);
+              wrapper.appendChild(child);
+              child = wrapper;
+            }
+          },
+        },
+      );
+      expect(result).toBe(Css.ident.max_content);
+      expect(reads).toBeLessThan(500);
+    });
+    it("does not read ancestor styles without a writing-axis change", function () {
+      expect(
+        compute("horizontal-tb", "", "block", undefined, "", "", "", {
+          configure({ parent, factory }) {
+            const original = factory.computeStyle;
+            factory.computeStyle = function (_mode, ...args) {
+              return original.call(this, "horizontal-tb", ...args);
+            };
+            Object.defineProperty(parent, "style", {
+              get() {
+                throw new Error("Unnecessary ancestor traversal");
+              },
+            });
+          },
+        }),
+      ).toBeUndefined();
+    });
     for (const display of [Css.ident.inline_grid, Css.ident.inline_flex]) {
       it(`establishes a browser formatting context for ${display}`, function () {
         expect(Display.establishesBFC(display)).toBeTrue();
@@ -196,6 +248,27 @@ describe("vgen", function () {
         for (const options of [{ float: "left" }, { position: "absolute" }]) {
           expect(
             compute(mode, "", "inline", undefined, "", "", "", options),
+          ).toBe(Css.ident.max_content);
+        }
+      });
+      it(`retains fallback for degenerate preferred ratios in ${mode}`, function () {
+        for (const ratio of ["0 / 1", "1 / 0", "0 / 0", "auto 0 / 1"]) {
+          expect(compute(mode, "", "block", undefined, "", ratio)).toBe(
+            Css.ident.max_content,
+          );
+        }
+      });
+      it(`ignores host flex/grid styles beyond viewRoot in ${mode}`, function () {
+        for (const display of ["flex", "grid"]) {
+          expect(
+            compute(mode, "", "block", undefined, "", "", "", {
+              configure({ ancestor, factory }) {
+                factory.viewRoot = ancestor;
+                const host = document.createElement("div");
+                host.style.display = display;
+                host.appendChild(ancestor);
+              },
+            }),
           ).toBe(Css.ident.max_content);
         }
       });

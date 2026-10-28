@@ -849,78 +849,104 @@ export class ViewFactory
     // supply the orthogonal inline size. A definite size must remain under
     // browser control, including percentage resolution and available space
     // after margins. (Issue #1264)
-    const inlineSizeName = vertical ? "height" : "width";
-    const findContainingBlock = (
-      element: HTMLElement | null,
-    ): HTMLElement | null => {
-      // Boxless and non-atomic inline ancestors do not establish the
-      // containing block for these block-level orthogonal flow roots.
-      while (
-        element &&
-        /^(contents|inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
-          element.style?.display,
-        )
-      ) {
-        element = element.parentElement;
-      }
-      return element;
-    };
-    const containingBlock = findContainingBlock(
-      this.nodeContext?.parent?.viewNode as HTMLElement,
-    );
-    const hasDefiniteSize = (
-      element: HTMLElement | null,
-      dimension: "width" | "height",
-      allowAspectRatio = true,
-    ): boolean => {
-      const style = element?.style;
-      if (!style) {
-        return false;
-      }
-      const size = style[dimension];
-      if (size.includes("%")) {
-        // An unresolved percentage behaves as auto, so a preferred ratio
-        // may still supply this axis from a definite opposite dimension.
-        if (
-          hasDefiniteSize(findContainingBlock(element.parentElement), dimension)
+    let useOrthogonalFallback = false;
+    if (verticalChanged) {
+      const inlineSizeName = vertical ? "height" : "width";
+      const findContainingBlock = (
+        element: HTMLElement | null,
+      ): HTMLElement | null => {
+        // Boxless and non-atomic inline ancestors do not establish the
+        // containing block for these block-level orthogonal flow roots.
+        while (
+          element &&
+          element !== this.viewRoot &&
+          /^(contents|inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
+            element.style?.display,
+          )
         ) {
-          return true;
+          element = element.parentElement;
         }
-      } else if (
-        size &&
-        !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
-          size,
-        )
-      ) {
-        return true;
-      }
-      // An explicit initial value supplies no ratio. A preferred ratio
-      // determines this axis only when the opposite axis is definite.
-      return (
-        allowAspectRatio &&
-        /[0-9]/.test(style.aspectRatio) &&
-        hasDefiniteSize(
-          element,
-          dimension === "height" ? "width" : "height",
-          false,
-        )
+        return element === this.viewRoot ? null : element;
+      };
+      const containingBlock = findContainingBlock(
+        this.nodeContext?.parent?.viewNode as HTMLElement,
       );
-    };
-    let insideFlexOrGrid = false;
-    for (
-      let ancestor = containingBlock;
-      ancestor;
-      ancestor = ancestor.parentElement
-    ) {
-      if (/^(inline-)?(grid|flex)$/.test(ancestor.style?.display)) {
-        insideFlexOrGrid = true;
-        break;
+      // Cache all four states per element for this decision. Percentage and
+      // ratio dependencies otherwise revisit the same ancestors exponentially.
+      const definiteSizes = new Map<HTMLElement, Map<string, boolean>>();
+      const hasDefiniteSize = (
+        element: HTMLElement | null,
+        dimension: "width" | "height",
+        allowAspectRatio = true,
+      ): boolean => {
+        if (!element || element === this.viewRoot) {
+          return false;
+        }
+        const key = `${dimension}:${allowAspectRatio}`;
+        let cached = definiteSizes.get(element);
+        const cachedValue = cached?.get(key);
+        if (cachedValue !== undefined) {
+          return cachedValue;
+        }
+        if (!cached) {
+          cached = new Map();
+          definiteSizes.set(element, cached);
+        }
+        const style = element.style;
+        const size = style?.[dimension] ?? "";
+        let definite = false;
+        if (size.includes("%")) {
+          // An unresolved percentage behaves as auto, so a preferred ratio
+          // may still supply this axis from a definite opposite dimension.
+          definite = hasDefiniteSize(
+            findContainingBlock(element.parentElement),
+            dimension,
+          );
+        } else if (
+          size &&
+          !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
+            size,
+          )
+        ) {
+          definite = true;
+        }
+        if (!definite && allowAspectRatio) {
+          const components = (style?.aspectRatio ?? "")
+            .replace(/\bauto\b/g, "")
+            .trim()
+            .split("/");
+          const numerator = Number(components[0]);
+          const denominator =
+            components.length === 1 ? 1 : Number(components[1]);
+          // Degenerate ratios behave as auto and supply no preferred size.
+          definite =
+            numerator > 0 &&
+            Number.isFinite(numerator) &&
+            denominator > 0 &&
+            Number.isFinite(denominator) &&
+            hasDefiniteSize(
+              element,
+              dimension === "height" ? "width" : "height",
+              false,
+            );
+        }
+        cached.set(key, definite);
+        return definite;
+      };
+      let insideFlexOrGrid = false;
+      for (
+        let ancestor = containingBlock;
+        ancestor && ancestor !== this.viewRoot;
+        ancestor = ancestor.parentElement
+      ) {
+        if (/^(inline-)?(grid|flex)$/.test(ancestor.style?.display)) {
+          insideFlexOrGrid = true;
+          break;
+        }
       }
+      useOrthogonalFallback =
+        !insideFlexOrGrid && !hasDefiniteSize(containingBlock, inlineSizeName);
     }
-    const useOrthogonalFallback =
-      verticalChanged &&
-      !insideFlexOrGrid &&
-      !hasDefiniteSize(containingBlock, inlineSizeName);
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 
     const transform = (
