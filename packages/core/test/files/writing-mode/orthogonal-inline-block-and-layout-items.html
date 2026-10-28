@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Orthogonal inline blocks and nested layout items</title>
+  <style>
+    @page { size: 360px 300px; margin: 20px; }
+    body { margin: 0; }
+    section { break-before: page; min-height: 1px; }
+    .inline-parent { display: inline; writing-mode: vertical-lr; width: 120px; height: 100px; }
+    .horizontal { writing-mode: horizontal-tb; width: 100%; height: 40px; background: green; }
+    .layout { width: 120px; height: 200px; }
+    .item { width: 120px; height: 200px; }
+    .vertical { writing-mode: vertical-lr; width: 40px; height: 100%; background: green; }
+  </style>
+  <body>
+    <!-- Pages 1/2: green 120x40px. Pages 3/4: green 40x260px. Pages 5/6: green 40x200px. -->
+    <section><span class="inline-parent"><div class="horizontal"></div></span></section>
+    <section><span class="inline-parent" style="display: inline-block"><div class="horizontal"></div></span></section>
+    <section><div class="layout" style="display: flex"><div class="item"><div style="overflow: hidden"><div class="vertical"></div></div></div></div></section>
+    <section><div class="layout" style="display: grid"><div class="item"><div style="display: flow-root"><div class="vertical"></div></div></div></div></section>
+    <section><div class="layout" style="display: flex"><div class="item"><div class="vertical"></div></div></div></section>
+    <section><div class="layout" style="display: grid"><div class="item"><div class="vertical"></div></div></div></section>
+  </body>
+</html>

@@ -219,7 +219,9 @@ export function establishesBFC(
     display === Css.ident.table_cell ||
     display === Css.ident.table_caption ||
     display == Css.ident.flex ||
+    display == Css.ident.inline_flex ||
     display == Css.ident.grid ||
+    display == Css.ident.inline_grid ||
     display == Css.ident.flow_root ||
     ((display === Css.ident.block || display === Css.ident.list_item) &&
       !!overflow &&

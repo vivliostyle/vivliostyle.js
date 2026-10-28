@@ -845,6 +845,127 @@ export class ViewFactory
       }
     }
     const verticalChanged = !isRoot && vertical !== verticalParent;
+    // Only use the page-area fallback when the containing block does not
+    // supply the orthogonal inline size. A definite size must remain under
+    // browser control, including percentage resolution and available space
+    // after margins. (Issue #1264)
+    let useOrthogonalFallback = false;
+    if (verticalChanged) {
+      const inlineSizeName = vertical ? "height" : "width";
+      const displays = new Map<HTMLElement, string>();
+      const getDisplay = (element: HTMLElement): string => {
+        let display = displays.get(element);
+        if (display === undefined) {
+          display = element.style?.display ?? "";
+          if (
+            /^(inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
+              display,
+            )
+          ) {
+            // Orthogonal inline boxes can be inline-blockified even though
+            // their specified view style still says display:inline.
+            display =
+              element.ownerDocument.defaultView?.getComputedStyle(element)
+                .display || display;
+          }
+          displays.set(element, display);
+        }
+        return display;
+      };
+      const findContainingBlock = (
+        element: HTMLElement | null,
+      ): HTMLElement | null => {
+        // Boxless and non-atomic inline ancestors do not establish the
+        // containing block for these block-level orthogonal flow roots.
+        while (
+          element &&
+          element !== this.viewRoot &&
+          /^(contents|inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
+            getDisplay(element),
+          )
+        ) {
+          element = element.parentElement;
+        }
+        return element === this.viewRoot ? null : element;
+      };
+      const containingBlock = findContainingBlock(
+        this.nodeContext?.parent?.viewNode as HTMLElement,
+      );
+      const isFlexOrGrid = (element: HTMLElement | null): boolean =>
+        !!element &&
+        element !== this.viewRoot &&
+        /^(inline-)?(grid|flex)$/.test(getDisplay(element));
+      const hasLayoutSizing = (element: HTMLElement): boolean =>
+        isFlexOrGrid(element) ||
+        isFlexOrGrid(findContainingBlock(element.parentElement));
+      // Cache all four states per element for this decision. Percentage and
+      // ratio dependencies otherwise revisit the same ancestors exponentially.
+      const definiteSizes = new Map<HTMLElement, Map<string, boolean>>();
+      const hasDefiniteSize = (
+        element: HTMLElement | null,
+        dimension: "width" | "height",
+        allowAspectRatio = true,
+      ): boolean => {
+        if (!element || element === this.viewRoot) {
+          return false;
+        }
+        const key = `${dimension}:${allowAspectRatio}`;
+        let cached = definiteSizes.get(element);
+        const cachedValue = cached?.get(key);
+        if (cachedValue !== undefined) {
+          return cachedValue;
+        }
+        if (!cached) {
+          cached = new Map();
+          definiteSizes.set(element, cached);
+        }
+        const style = element.style;
+        const size = style?.[dimension] ?? "";
+        let definite = hasLayoutSizing(element);
+        if (!definite && size.includes("%")) {
+          // An unresolved percentage behaves as auto, so a preferred ratio
+          // may still supply this axis from a definite opposite dimension.
+          definite = hasDefiniteSize(
+            findContainingBlock(element.parentElement),
+            dimension,
+          );
+        } else if (
+          !definite &&
+          size &&
+          !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
+            size,
+          )
+        ) {
+          definite = true;
+        }
+        if (!definite && allowAspectRatio) {
+          const components = (style?.aspectRatio ?? "")
+            .replace(/\bauto\b/g, "")
+            .trim()
+            .split("/");
+          const numerator = Number(components[0]);
+          const denominator =
+            components.length === 1 ? 1 : Number(components[1]);
+          // Degenerate ratios behave as auto and supply no preferred size.
+          definite =
+            numerator > 0 &&
+            Number.isFinite(numerator) &&
+            denominator > 0 &&
+            Number.isFinite(denominator) &&
+            hasDefiniteSize(
+              element,
+              dimension === "height" ? "width" : "height",
+              false,
+            );
+        }
+        cached.set(key, definite);
+        return definite;
+      };
+      // Flex/grid sizing only crosses the item/container boundary. An
+      // ordinary auto-sized descendant does not acquire a definite basis
+      // merely because some distant ancestor participates in that layout.
+      useOrthogonalFallback = !hasDefiniteSize(containingBlock, inlineSizeName);
+    }
     rtl = CssCascade.isRtl(cascMap, context, rtl);
 
     const transform = (
@@ -855,7 +976,7 @@ export class ViewFactory
       // horizontal-in-vertical block needs to be resolved against the
       // page area height or width. (Fix for issue #1264)
       let percentRef: number | undefined;
-      if (verticalChanged) {
+      if (useOrthogonalFallback) {
         if (vertical) {
           if (/^(min-|max-)?(height|inline-size)$/.test(name)) {
             percentRef = context.pageAreaHeight ?? undefined;
@@ -909,16 +1030,6 @@ export class ViewFactory
       );
     }
 
-    if (verticalChanged) {
-      // The auto value of inline-size on vertical-in-horizontal or
-      // horizontal-in-vertical block is changed to max-content.
-      // (Fix for issue #1264)
-      const inlineSize = computedStyle[vertical ? "height" : "width"];
-      if (!inlineSize || inlineSize === Css.ident.auto) {
-        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
-      }
-    }
-
     if (Display.isRunning(computedStyle["position"])) {
       // Running elements
       computedStyle["position"] = Css.ident.fixed;
@@ -946,6 +1057,19 @@ export class ViewFactory
         computedStyle[name] = displayValues[name];
       }
     });
+    if (
+      useOrthogonalFallback &&
+      Display.isBlockLevel(computedStyle["display"])
+    ) {
+      // The auto value of inline-size on vertical-in-horizontal or
+      // horizontal-in-vertical block is changed to max-content.
+      // (Fix for issue #1264)
+      const inlineSize = computedStyle[vertical ? "height" : "width"];
+      if (!inlineSize || inlineSize === Css.ident.auto) {
+        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
+      }
+    }
+
     return usedWritingMode;
   }
 

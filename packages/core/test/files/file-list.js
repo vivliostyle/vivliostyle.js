@@ -1016,6 +1016,22 @@ module.exports = [
     category: "Writing modes",
     files: [
       {
+        file: "writing-mode/orthogonal-inline-block-and-layout-items.html",
+        title: "Orthogonal inline blocks and nested layout items (PR #2240)",
+      },
+      {
+        file: "writing-mode/orthogonal-containing-block-resolution.html",
+        title: "Orthogonal containing block and normalized display (PR #2240)",
+      },
+      {
+        file: "writing-mode/orthogonal-indefinite-containing-block.html",
+        title: "Orthogonal fallback in indefinite containing blocks (PR #2240)",
+      },
+      {
+        file: "writing-mode/orthogonal-inline-sizing.html",
+        title: "Orthogonal intrinsic and percentage sizing (PR #2240)",
+      },
+      {
         file: "writing-mode/horizontal-tb.html",
         title: "Pagination in horizontal-tb (Issue #1480)",
       },

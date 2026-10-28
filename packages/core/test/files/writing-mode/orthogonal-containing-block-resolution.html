@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Orthogonal containing block and normalized display</title>
+  <style>
+    @page { size: 360px 300px; margin: 20px; }
+    body { margin: 0; }
+    section { break-before: page; min-height: 1px; position: relative; }
+    .child { writing-mode: vertical-lr; height: 100%; width: 40px; background: green; }
+    .intrinsic { writing-mode: vertical-lr; width: 40px; background: green; }
+    .intrinsic > i { display: inline-block; width: 20px; height: 100px; }
+  </style>
+  <body>
+    <!-- Expected green heights by page: 260, 100, 260, 100, 100, 260, 100, 100, 100 px. -->
+    <section><div style="display: contents; height: 100px"><div class="child"></div></div></section>
+    <section><div style="height: 100px"><div style="display: contents"><div class="child"></div></div></div></section>
+    <section><span style="height: 100px"><div class="child"></div></span></section>
+    <section><div style="height: 100px"><span><div class="child"></div></span></div></section>
+    <section><div style="width: 100px; height: 100%; aspect-ratio: 1/1"><div class="child"></div></div></section>
+    <section><div style="display: contents; height: 100px"><div style="height: 100%"><div class="child"></div></div></div></section>
+    <section><div style="height: 100px"><div style="display: contents"><div style="height: 100%"><div class="child"></div></div></div></div></section>
+    <section><span class="intrinsic" style="float: left"><i></i></span></section>
+    <section><span class="intrinsic" style="position: absolute"><i></i></span></section>
+  </body>
+</html>

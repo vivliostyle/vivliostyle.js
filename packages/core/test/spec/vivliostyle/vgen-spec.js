@@ -20,6 +20,7 @@ import * as CssCascade from "../../../src/vivliostyle/css-cascade";
 import * as CssParser from "../../../src/vivliostyle/css-parser";
 import * as CssTokenizer from "../../../src/vivliostyle/css-tokenizer";
 import * as CssValidator from "../../../src/vivliostyle/css-validator";
+import * as Display from "../../../src/vivliostyle/display";
 import * as Exprs from "../../../src/vivliostyle/exprs";
 import { FontMetrics } from "../../../src/vivliostyle/font-metrics";
 import * as Vgen from "../../../src/vivliostyle/vgen";
@@ -31,6 +32,310 @@ function expectFontMetricLength(actual, expected) {
 }
 
 describe("vgen", function () {
+  describe("orthogonal inline sizing", function () {
+    function compute(
+      mode,
+      parentSize,
+      display,
+      size,
+      parentDisplay = "",
+      ratio = "",
+      ancestorSize = "",
+      options = {},
+    ) {
+      const scope = new Exprs.LexicalScope(null);
+      scope.defineName("left-page", new Exprs.Const(scope, false));
+      const context = new Exprs.Context(scope, 800, 600, 16);
+      context.style = { pageScope: scope };
+      context.pageAreaWidth = 700;
+      context.pageAreaHeight = 500;
+      const vertical = mode !== "horizontal-tb";
+      const dimension = vertical ? "height" : "width";
+      const parent = document.createElement("div");
+      parent.style[dimension] = parentSize;
+      parent.style.aspectRatio = ratio;
+      parent.style.display = parentDisplay;
+      parent.style.overflow = parentDisplay === "block" ? "hidden" : "";
+      if (ratio && ratio !== "auto") {
+        parent.style[vertical ? "width" : "height"] = "100px";
+      }
+      const ancestor = document.createElement("div");
+      ancestor.style[dimension] = ancestorSize;
+      ancestor.appendChild(parent);
+      Object.assign(ancestor.style, options.ancestorStyle);
+      const source = document.createElement(
+        display === "inline" ? "progress" : "div",
+      );
+      const factory = Object.create(Vgen.ViewFactory.prototype);
+      Object.assign(factory, {
+        context,
+        nodeContext: {
+          parent: { viewNode: parent },
+          isInsideBFC: () => !!parentDisplay,
+        },
+        sourceNode: source,
+        xmldoc: { root: document.createElement("html") },
+        regionIds: [],
+      });
+      const style = {
+        "writing-mode": new CssCascade.CascadeValue(Css.getName(mode), 1),
+        display: new CssCascade.CascadeValue(Css.getName(display), 1),
+      };
+      if (size) {
+        style[dimension] = new CssCascade.CascadeValue(size, 1);
+      }
+      for (const name of ["float", "position"]) {
+        if (options[name])
+          style[name] = new CssCascade.CascadeValue(
+            Css.getName(options[name]),
+            1,
+          );
+      }
+      options.configure?.({ parent, ancestor, factory });
+      const result = {};
+      try {
+        factory.computeStyle(
+          vertical ? "horizontal-tb" : "vertical-lr",
+          false,
+          style,
+          result,
+        );
+        return result[dimension];
+      } finally {
+        ancestor.remove();
+      }
+    }
+
+    it("bounds repeated percentage/ratio resolution in deeply nested wrappers", function () {
+      let reads = 0;
+      const result = compute(
+        "vertical-lr",
+        "100%",
+        "block",
+        undefined,
+        "",
+        "1 / 1",
+        "",
+        {
+          configure({ parent, ancestor }) {
+            let child = parent;
+            for (let i = 0; i < 20; i++) {
+              child.style.cssText = "width:100%;height:100%;aspect-ratio:1/1";
+              const style = child.style;
+              Object.defineProperty(child, "style", {
+                get() {
+                  if (++reads > 500)
+                    throw new Error("Repeated sizing states exceeded bound");
+                  return style;
+                },
+              });
+              const wrapper = document.createElement("div");
+              ancestor.appendChild(wrapper);
+              wrapper.appendChild(child);
+              child = wrapper;
+            }
+          },
+        },
+      );
+      expect(result).toBe(Css.ident.max_content);
+      expect(reads).toBeLessThan(500);
+    });
+    it("does not read ancestor styles without a writing-axis change", function () {
+      expect(
+        compute("horizontal-tb", "", "block", undefined, "", "", "", {
+          configure({ parent, factory }) {
+            const original = factory.computeStyle;
+            factory.computeStyle = function (_mode, ...args) {
+              return original.call(this, "horizontal-tb", ...args);
+            };
+            Object.defineProperty(parent, "style", {
+              get() {
+                throw new Error("Unnecessary ancestor traversal");
+              },
+            });
+          },
+        }),
+      ).toBeUndefined();
+    });
+    for (const display of [Css.ident.inline_grid, Css.ident.inline_flex]) {
+      it(`establishes a browser formatting context for ${display}`, function () {
+        expect(Display.establishesBFC(display)).toBeTrue();
+      });
+    }
+    for (const mode of [
+      "vertical-rl",
+      "vertical-lr",
+      "sideways-rl",
+      "sideways-lr",
+      "horizontal-tb",
+    ]) {
+      it(`preserves percentages against a definite containing block in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "100px", "block", percent)).toEqual(percent);
+      });
+      it(`preserves auto sizing and available margin space in ${mode}`, function () {
+        expect(compute(mode, "200px", "block")).toBeUndefined();
+        expect(compute(mode, "200px", "block", Css.ident.auto)).toBe(
+          Css.ident.auto,
+        );
+      });
+      it(`keeps intrinsic inline control sizing in ${mode}`, function () {
+        expect(compute(mode, "", "inline")).toBeUndefined();
+      });
+      it(`lets browser formatting contexts resolve orthogonal sizes in ${mode}`, function () {
+        expect(compute(mode, "", "block", undefined, "flex")).toBeUndefined();
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "", "block", percent, "flex")).toEqual(percent);
+      });
+      it(`preserves percentage resolution with a parent aspect ratio in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        expect(compute(mode, "", "block", percent, "", "1 / 1")).toEqual(
+          percent,
+        );
+      });
+      it(`retains fallback inside indefinite ordinary BFCs in ${mode}`, function () {
+        for (const display of ["flow-root", "block"]) {
+          const expected = new Css.Numeric(
+            mode === "horizontal-tb" ? 700 : 500,
+            "px",
+          );
+          expect(
+            compute(mode, "", "block", new Css.Numeric(100, "%"), display),
+          ).toEqual(expected);
+        }
+      });
+      it(`treats an auto aspect ratio as omitted in ${mode}`, function () {
+        expect(compute(mode, "", "block", undefined, "", "auto")).toBe(
+          Css.ident.max_content,
+        );
+      });
+      it(`resolves parent percentage bases before suppressing fallback in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const parentSize of ["100%", "calc(100% - 10px)"]) {
+          expect(compute(mode, parentSize, "block", percent)).toEqual(
+            new Css.Numeric(mode === "horizontal-tb" ? 700 : 500, "px"),
+          );
+          expect(
+            compute(mode, parentSize, "block", percent, "", "", "200px"),
+          ).toEqual(percent);
+        }
+      });
+      it(`skips boxless and inline parents when finding the containing block in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        const fallback = new Css.Numeric(
+          mode === "horizontal-tb" ? 700 : 500,
+          "px",
+        );
+        for (const display of ["contents", "inline"]) {
+          expect(compute(mode, "100px", "block", percent, display)).toEqual(
+            fallback,
+          );
+          expect(
+            compute(mode, "", "block", percent, display, "", "200px"),
+          ).toEqual(percent);
+          expect(
+            compute(mode, "100%", "block", percent, "", "", "200px", {
+              ancestorStyle: { display },
+            }),
+          ).toEqual(fallback);
+        }
+      });
+      it(`uses the ratio after an unresolved percentage becomes auto in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const parentSize of ["100%", "calc(100% - 10px)"]) {
+          expect(
+            compute(mode, parentSize, "block", percent, "", "1 / 1"),
+          ).toEqual(percent);
+        }
+      });
+      it(`uses normalized display for blockified inline fallback in ${mode}`, function () {
+        for (const options of [{ float: "left" }, { position: "absolute" }]) {
+          expect(
+            compute(mode, "", "inline", undefined, "", "", "", options),
+          ).toBe(Css.ident.max_content);
+        }
+      });
+      it(`retains fallback for degenerate preferred ratios in ${mode}`, function () {
+        for (const ratio of ["0 / 1", "1 / 0", "0 / 0", "auto 0 / 1"]) {
+          expect(compute(mode, "", "block", undefined, "", ratio)).toBe(
+            Css.ident.max_content,
+          );
+        }
+      });
+      it(`ignores host flex/grid styles beyond viewRoot in ${mode}`, function () {
+        for (const display of ["flex", "grid"]) {
+          expect(
+            compute(mode, "", "block", undefined, "", "", "", {
+              configure({ ancestor, factory }) {
+                factory.viewRoot = ancestor;
+                const host = document.createElement("div");
+                host.style.display = display;
+                host.appendChild(ancestor);
+              },
+            }),
+          ).toBe(Css.ident.max_content);
+        }
+      });
+      it(`recognizes writing-mode-induced inline-block parents in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const display of ["inline", "inline-block"]) {
+          expect(
+            compute(mode, "100px", "block", percent, display, "", "", {
+              configure({ parent, ancestor }) {
+                const vertical = mode !== "horizontal-tb";
+                ancestor.style.writingMode = mode;
+                parent.style.writingMode = vertical
+                  ? "horizontal-tb"
+                  : "vertical-lr";
+                document.body.append(ancestor);
+                expect(getComputedStyle(parent).display).toBe("inline-block");
+              },
+            }),
+          ).toEqual(percent);
+        }
+      });
+      it(`retains fallback for indefinite wrappers inside flex/grid items in ${mode}`, function () {
+        const fallback = new Css.Numeric(
+          mode === "horizontal-tb" ? 700 : 500,
+          "px",
+        );
+        for (const display of ["flex", "grid"]) {
+          for (const wrapper of ["flow-root", "block"]) {
+            expect(
+              compute(
+                mode,
+                "",
+                "block",
+                new Css.Numeric(100, "%"),
+                wrapper,
+                "",
+                "200px",
+                {
+                  configure({ ancestor }) {
+                    const layout = document.createElement("div");
+                    layout.style.display = display;
+                    layout.append(ancestor);
+                  },
+                },
+              ),
+            ).toEqual(fallback);
+          }
+          expect(
+            compute(mode, "", "block", undefined, "", "", "", {
+              ancestorStyle: { display },
+            }),
+          ).toBeUndefined();
+        }
+      });
+      it(`retains the page-area fallback for indefinite blocks in ${mode}`, function () {
+        expect(compute(mode, "", "block")).toBe(Css.ident.max_content);
+        expect(compute(mode, "", "block", new Css.Numeric(100, "%"))).toEqual(
+          new Css.Numeric(mode === "horizontal-tb" ? 700 : 500, "px"),
+        );
+      });
+    }
+  });
+
   it("preserves em and lh for a browser-resolved font shorthand", function () {
     const scope = new Exprs.LexicalScope(null);
     const context = new Exprs.Context(scope, 800, 600, 16, 20);
