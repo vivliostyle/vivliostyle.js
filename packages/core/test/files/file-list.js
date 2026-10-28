@@ -1016,6 +1016,10 @@ module.exports = [
     category: "Writing modes",
     files: [
       {
+        file: "writing-mode/orthogonal-containing-block-resolution.html",
+        title: "Orthogonal containing block and normalized display",
+      },
+      {
         file: "writing-mode/orthogonal-indefinite-containing-block.html",
         title: "Orthogonal fallback in indefinite containing blocks",
       },

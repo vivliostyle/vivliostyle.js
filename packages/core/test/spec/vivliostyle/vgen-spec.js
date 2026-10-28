@@ -41,6 +41,7 @@ describe("vgen", function () {
       parentDisplay = "",
       ratio = "",
       ancestorSize = "",
+      options = {},
     ) {
       const scope = new Exprs.LexicalScope(null);
       scope.defineName("left-page", new Exprs.Const(scope, false));
@@ -61,6 +62,7 @@ describe("vgen", function () {
       const ancestor = document.createElement("div");
       ancestor.style[dimension] = ancestorSize;
       ancestor.appendChild(parent);
+      Object.assign(ancestor.style, options.ancestorStyle);
       const source = document.createElement(
         display === "inline" ? "progress" : "div",
       );
@@ -81,6 +83,13 @@ describe("vgen", function () {
       };
       if (size) {
         style[dimension] = new CssCascade.CascadeValue(size, 1);
+      }
+      for (const name of ["float", "position"]) {
+        if (options[name])
+          style[name] = new CssCascade.CascadeValue(
+            Css.getName(options[name]),
+            1,
+          );
       }
       const result = {};
       factory.computeStyle(
@@ -153,6 +162,41 @@ describe("vgen", function () {
           expect(
             compute(mode, parentSize, "block", percent, "", "", "200px"),
           ).toEqual(percent);
+        }
+      });
+      it(`skips boxless and inline parents when finding the containing block in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        const fallback = new Css.Numeric(
+          mode === "horizontal-tb" ? 700 : 500,
+          "px",
+        );
+        for (const display of ["contents", "inline"]) {
+          expect(compute(mode, "100px", "block", percent, display)).toEqual(
+            fallback,
+          );
+          expect(
+            compute(mode, "", "block", percent, display, "", "200px"),
+          ).toEqual(percent);
+          expect(
+            compute(mode, "100%", "block", percent, "", "", "200px", {
+              ancestorStyle: { display },
+            }),
+          ).toEqual(fallback);
+        }
+      });
+      it(`uses the ratio after an unresolved percentage becomes auto in ${mode}`, function () {
+        const percent = new Css.Numeric(100, "%");
+        for (const parentSize of ["100%", "calc(100% - 10px)"]) {
+          expect(
+            compute(mode, parentSize, "block", percent, "", "1 / 1"),
+          ).toEqual(percent);
+        }
+      });
+      it(`uses normalized display for blockified inline fallback in ${mode}`, function () {
+        for (const options of [{ float: "left" }, { position: "absolute" }]) {
+          expect(
+            compute(mode, "", "inline", undefined, "", "", "", options),
+          ).toBe(Css.ident.max_content);
         }
       });
       it(`retains the page-area fallback for indefinite blocks in ${mode}`, function () {

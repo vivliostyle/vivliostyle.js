@@ -850,7 +850,24 @@ export class ViewFactory
     // browser control, including percentage resolution and available space
     // after margins. (Issue #1264)
     const inlineSizeName = vertical ? "height" : "width";
-    const containingBlock = this.nodeContext?.parent?.viewNode as HTMLElement;
+    const findContainingBlock = (
+      element: HTMLElement | null,
+    ): HTMLElement | null => {
+      // Boxless and non-atomic inline ancestors do not establish the
+      // containing block for these block-level orthogonal flow roots.
+      while (
+        element &&
+        /^(contents|inline|ruby|ruby-base|ruby-text|ruby-base-container|ruby-text-container)$/.test(
+          element.style?.display,
+        )
+      ) {
+        element = element.parentElement;
+      }
+      return element;
+    };
+    const containingBlock = findContainingBlock(
+      this.nodeContext?.parent?.viewNode as HTMLElement,
+    );
     const hasDefiniteSize = (
       element: HTMLElement | null,
       dimension: "width" | "height",
@@ -862,11 +879,14 @@ export class ViewFactory
       }
       const size = style[dimension];
       if (size.includes("%")) {
-        // A percentage (including calc()) is only definite when its
-        // containing block supplies a definite percentage basis.
-        return hasDefiniteSize(element.parentElement, dimension);
-      }
-      if (
+        // An unresolved percentage behaves as auto, so a preferred ratio
+        // may still supply this axis from a definite opposite dimension.
+        if (
+          hasDefiniteSize(findContainingBlock(element.parentElement), dimension)
+        ) {
+          return true;
+        }
+      } else if (
         size &&
         !/^(auto|min-content|max-content|fit-content|stretch|inherit|initial|unset|revert)/.test(
           size,
@@ -965,19 +985,6 @@ export class ViewFactory
       );
     }
 
-    if (
-      useOrthogonalFallback &&
-      Display.isBlockLevel(computedStyle["display"])
-    ) {
-      // The auto value of inline-size on vertical-in-horizontal or
-      // horizontal-in-vertical block is changed to max-content.
-      // (Fix for issue #1264)
-      const inlineSize = computedStyle[vertical ? "height" : "width"];
-      if (!inlineSize || inlineSize === Css.ident.auto) {
-        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
-      }
-    }
-
     if (Display.isRunning(computedStyle["position"])) {
       // Running elements
       computedStyle["position"] = Css.ident.fixed;
@@ -1005,6 +1012,19 @@ export class ViewFactory
         computedStyle[name] = displayValues[name];
       }
     });
+    if (
+      useOrthogonalFallback &&
+      Display.isBlockLevel(computedStyle["display"])
+    ) {
+      // The auto value of inline-size on vertical-in-horizontal or
+      // horizontal-in-vertical block is changed to max-content.
+      // (Fix for issue #1264)
+      const inlineSize = computedStyle[vertical ? "height" : "width"];
+      if (!inlineSize || inlineSize === Css.ident.auto) {
+        computedStyle[vertical ? "height" : "width"] = Css.ident.max_content;
+      }
+    }
+
     return usedWritingMode;
   }
 
