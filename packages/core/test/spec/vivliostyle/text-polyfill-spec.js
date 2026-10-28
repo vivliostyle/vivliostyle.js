@@ -1055,6 +1055,43 @@ describe("text-polyfill", function () {
       expect(large).toBeLessThan(small * 2.8);
     });
 
+    it("trims punctuation at the start of a ruby annotation", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      for (const value of ["trim-start", "trim-both"]) {
+        layout(
+          '<ruby style="display:ruby">漢<rt style="display:ruby-text">「かん」</rt></ruby>後',
+          {
+            "text-spacing-trim": value,
+          },
+        );
+        expect(
+          element.querySelector("rt viv-ts-open.viv-ts-trim"),
+        ).not.toBeNull();
+      }
+    });
+
+    it("does not treat direct ruby text container content as base text", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">　あ　<rtc style="display:ruby-text-container">ああ</rtc></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector(":scope > viv-ts-thin-sp")).toBeNull();
+    });
+
+    it("ignores replaced elements in nested annotations when spacing outer annotations", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">漢<rtc style="display:ruby-text-container">あ<rt style="display:ruby-text"><img width="1" height="1">い</rt>a</rtc></ruby>',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector("rtc > viv-ts-thin-sp")).not.toBeNull();
+    });
+
     it("trims punctuation at the end of a ruby annotation", function () {
       spyOn(CSS, "supports").and.returnValue(false);
       for (const value of ["trim-end", "trim-both"]) {

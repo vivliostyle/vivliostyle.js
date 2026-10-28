@@ -1983,8 +1983,11 @@ export class TextSpacingPolyfill {
               element = element.parentElement
             ) {
               if (
-                element.style.display === "ruby-text" ||
-                (element.localName === "rt" && !element.style.display)
+                /^(ruby-text|ruby-text-container)$/.test(
+                  element.style.display,
+                ) ||
+                ((element.localName === "rt" || element.localName === "rtc") &&
+                  !element.style.display)
               ) {
                 return element;
               }
@@ -2001,6 +2004,12 @@ export class TextSpacingPolyfill {
               // Detached lookahead is not the edge of the text stream.
               break;
             }
+            if (annotation && prevP.viewNode === annotation && !prevP.after) {
+              isFirstAfterBreak = true;
+              isFirstInBlock = true;
+              isFirstAfterForcedLineBreak = true;
+              break;
+            }
             if (
               annotation &&
               prevP.viewNode !== annotation &&
@@ -2008,7 +2017,8 @@ export class TextSpacingPolyfill {
             ) {
               break;
             }
-            if (!annotation && rubyAnnotation(prevP.viewNode)) {
+            const prevAnnotation = rubyAnnotation(prevP.viewNode);
+            if (prevAnnotation && prevAnnotation !== annotation) {
               continue;
             }
             if (checkIfFirstAfterForcedLineBreak(prevP)) {
@@ -2075,7 +2085,8 @@ export class TextSpacingPolyfill {
               isLastInBlock = !nextNode;
               break;
             }
-            if (!annotation && rubyAnnotation(nextP.viewNode)) {
+            const nextAnnotation = rubyAnnotation(nextP.viewNode);
+            if (nextAnnotation && nextAnnotation !== annotation) {
               continue;
             }
             if (checkIfLastBeforeForcedLineBreak(nextP)) {
