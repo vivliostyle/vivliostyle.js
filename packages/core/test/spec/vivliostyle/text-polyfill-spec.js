@@ -1055,6 +1055,32 @@ describe("text-polyfill", function () {
       expect(large).toBeLessThan(small * 2.8);
     });
 
+    it("trims punctuation at the end of a ruby annotation", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      for (const value of ["trim-end", "trim-both"]) {
+        layout(
+          '<ruby style="display:ruby">あ<rt style="display:ruby-text">あ」</rt></ruby>後',
+          {
+            "text-spacing-trim": value,
+          },
+        );
+        expect(
+          element.querySelector("rt viv-ts-close.viv-ts-trim"),
+        ).not.toBeNull();
+      }
+    });
+
+    it("skips replaced elements in annotations when spacing base text", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout(
+        '<ruby style="display:ruby">あ<rt style="display:ruby-text">あ<img width="1" height="1">あ</rt></ruby>a',
+        {
+          "text-autospace": "normal",
+        },
+      );
+      expect(element.querySelector(":scope > viv-ts-thin-sp")).not.toBeNull();
+    });
+
     it("preserves punctuation boundaries in a ruby formatting context", function () {
       layout(
         'あ」　<ruby style="display:ruby">あ<rt style="display:ruby-text">ああ</rt></ruby>　「あ',

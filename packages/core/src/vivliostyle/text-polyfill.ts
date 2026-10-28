@@ -1779,7 +1779,11 @@ export class TextSpacingPolyfill {
     }
     const rubyBlocks = new Set<HTMLElement>();
     for (const p of checkPoints) {
-      if (p.display === "ruby" && p.viewNode?.parentNode) {
+      if (
+        (p.display === "ruby" ||
+          (!p.display && (p.viewNode as Element)?.localName === "ruby")) &&
+        p.viewNode?.parentNode
+      ) {
         const block = findBlockContainer(p.viewNode);
         if (block) rubyBlocks.add(block);
       }
@@ -1978,7 +1982,10 @@ export class TextSpacingPolyfill {
               element;
               element = element.parentElement
             ) {
-              if (element.style.display === "ruby-text") {
+              if (
+                element.style.display === "ruby-text" ||
+                (element.localName === "rt" && !element.style.display)
+              ) {
                 return element;
               }
             }
@@ -1990,6 +1997,10 @@ export class TextSpacingPolyfill {
 
           for (let prev = i - 1; prev >= 0; prev--) {
             const prevP = checkPoints[prev];
+            if (!prevP.viewNode?.parentNode) {
+              // Detached lookahead is not the edge of the text stream.
+              break;
+            }
             if (
               annotation &&
               prevP.viewNode !== annotation &&
@@ -1997,10 +2008,8 @@ export class TextSpacingPolyfill {
             ) {
               break;
             }
-            if (!prevP.viewNode?.parentNode) {
-              // Text beyond the lookahead, detached while processing: it is
-              // neither adjacent text in this column nor the edge of the block
-              break;
+            if (!annotation && rubyAnnotation(prevP.viewNode)) {
+              continue;
             }
             if (checkIfFirstAfterForcedLineBreak(prevP)) {
               isFirstAfterForcedLineBreak = true;
@@ -2053,17 +2062,21 @@ export class TextSpacingPolyfill {
           }
           for (let next = i + 1; next < checkPoints.length; next++) {
             const nextP = checkPoints[next];
+            if (!nextP.viewNode?.parentNode) {
+              // Detached lookahead is not the edge of the text stream.
+              break;
+            }
             if (
               annotation &&
               nextP.viewNode !== annotation &&
               !annotation.contains(nextP.viewNode)
             ) {
+              isLastBeforeForcedLineBreak = true;
+              isLastInBlock = !nextNode;
               break;
             }
-            if (!nextP.viewNode?.parentNode) {
-              // Text beyond the lookahead, detached while processing: it is
-              // neither adjacent text in this column nor the edge of the block
-              break;
+            if (!annotation && rubyAnnotation(nextP.viewNode)) {
+              continue;
             }
             if (checkIfLastBeforeForcedLineBreak(nextP)) {
               isLastBeforeForcedLineBreak = true;
