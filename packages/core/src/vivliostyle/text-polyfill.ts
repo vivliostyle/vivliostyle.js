@@ -2451,15 +2451,24 @@ export class TextSpacingPolyfill {
       // hang at the end of a line in nonwrapping text, so `viv-ts-trim` is
       // tried there.
       function trimIfMovedToLineEnd(isLast: boolean): void {
-        const linePos = linePosition();
+        // Font fallback and the added spacing can change the inline box's
+        // ascent without moving it to another line. Comparing offsetTop (or
+        // offsetLeft) exactly would retain an unnecessary wrapper, which can
+        // itself change the punctuation's fallback font.
+        const rect = outerElem.getBoundingClientRect();
         outerElem.className = "viv-ts-auto";
-        if (linePos !== linePosition()) {
+        const afterAutoRect = outerElem.getBoundingClientRect();
+        if (isOnDifferentLines(rect, afterAutoRect, vertical)) {
           return;
         }
         outerElem.className = "";
         if (isNonWrapping(document.defaultView.getComputedStyle(outerElem))) {
           outerElem.className = "viv-ts-trim";
-          if (linePos === linePosition() || (!isLast && !isAtEndOfLine())) {
+          const afterTrimRect = outerElem.getBoundingClientRect();
+          if (
+            !isOnDifferentLines(rect, afterTrimRect, vertical) ||
+            (!isLast && !isAtEndOfLine())
+          ) {
             outerElem.className = "";
           }
         }
