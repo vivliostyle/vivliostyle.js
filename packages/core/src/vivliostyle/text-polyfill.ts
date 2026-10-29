@@ -2456,16 +2456,19 @@ export class TextSpacingPolyfill {
         // offsetLeft) exactly would retain an unnecessary wrapper, which can
         // itself change the punctuation's fallback font.
         const rect = outerElem.getBoundingClientRect();
-        const movedLine = () =>
-          isOnDifferentLines(rect, outerElem.getBoundingClientRect(), vertical);
         outerElem.className = "viv-ts-auto";
-        if (movedLine()) {
+        const afterAutoRect = outerElem.getBoundingClientRect();
+        if (isOnDifferentLines(rect, afterAutoRect, vertical)) {
           return;
         }
         outerElem.className = "";
         if (isNonWrapping(document.defaultView.getComputedStyle(outerElem))) {
           outerElem.className = "viv-ts-trim";
-          if (!movedLine() || (!isLast && !isAtEndOfLine())) {
+          const afterTrimRect = outerElem.getBoundingClientRect();
+          if (
+            !isOnDifferentLines(rect, afterTrimRect, vertical) ||
+            (!isLast && !isAtEndOfLine())
+          ) {
             outerElem.className = "";
           }
         }

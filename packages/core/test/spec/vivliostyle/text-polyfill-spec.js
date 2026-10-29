@@ -238,11 +238,12 @@ describe("text-polyfill", function () {
       style.textContent = VivliostylePolyfillCss;
       document.head.appendChild(style);
       try {
+        element.textContent = "贰、陆、";
+        if (!NativeTextSpacing.supportsTrim(element, "normal", "en", false)) {
+          pending("native text-spacing-trim unavailable");
+        }
         for (const text of ["贰、", "陆、"]) {
           element.textContent = text;
-          if (!NativeTextSpacing.supportsTrim(element, "normal", "en", false)) {
-            pending("native text-spacing-trim unavailable");
-          }
           const { blockContext, points } = createCheckPoints(
             { "text-spacing-trim": "normal" },
             { lang: "en" },
