@@ -231,6 +231,31 @@ describe("text-polyfill", function () {
       ).toBe("space-all");
     });
 
+    it("does not retain line-end wrappers after fallback-font ascent changes", function () {
+      element.lang = "en";
+      element.style.cssText = "font:25px Times,serif;width:400px";
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        for (const text of ["贰、", "陆、"]) {
+          element.textContent = text;
+          if (!NativeTextSpacing.supportsTrim(element, "normal", "en", false)) {
+            pending("native text-spacing-trim unavailable");
+          }
+          const { blockContext, points } = createCheckPoints(
+            { "text-spacing-trim": "normal" },
+            { lang: "en" },
+          );
+          polyfill.postLayoutBlock(blockContext, points);
+          expect(element.querySelector("viv-ts-close")).toBeNull();
+          expect(element.textContent).toBe(text);
+        }
+      } finally {
+        style.remove();
+      }
+    });
+
     it("uses native trim-start for trim-both", function () {
       element.textContent = "「日本語」";
       if (!NativeTextSpacing.supportsTrim(element, "trim-start", "ja", false)) {
