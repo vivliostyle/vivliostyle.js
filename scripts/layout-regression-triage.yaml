@@ -1,3 +1,51 @@
+- category: Writing modes
+  title: "Orthogonal inline blocks and nested layout items (PR #2240)"
+  file: writing-mode/orthogonal-inline-block-and-layout-items.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2240"
+  approvedViewer: git-codex-fix-orthogonal-sizing-9a50f6  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-inline-block-and-layout-items.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-inline-block-and-layout-items.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Orthogonal containing block and normalized display (PR #2240)"
+  file: writing-mode/orthogonal-containing-block-resolution.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2240"
+  approvedViewer: git-codex-fix-orthogonal-sizing-9a50f6  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-containing-block-resolution.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-containing-block-resolution.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Orthogonal fallback in indefinite containing blocks (PR #2240)"
+  file: writing-mode/orthogonal-indefinite-containing-block.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2240"
+  approvedViewer: git-codex-fix-orthogonal-sizing-9a50f6  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-indefinite-containing-block.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-indefinite-containing-block.html&zoom=1&spread=false
+- category: Writing modes
+  title: "Orthogonal intrinsic and percentage sizing (PR #2240)"
+  file: writing-mode/orthogonal-inline-sizing.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2240"
+  approvedViewer: git-codex-fix-orthogonal-sizing-9a50f6  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-inline-sizing.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/orthogonal-inline-sizing.html&zoom=1&spread=false
 - category: Cross-references
   title: "target-text() with duplicate IDs across pages (Issue #2150)"
   file: target-text-duplicate-id.html
