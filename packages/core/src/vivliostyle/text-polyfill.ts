@@ -1841,6 +1841,30 @@ export class TextSpacingPolyfill {
       return { node, placeholder };
     });
 
+    // Ruby annotations form a separate text stream from their bases and
+    // surrounding text; they are not adjacent for text spacing. The annotation
+    // containing each element is cached, since it is looked up for every check
+    // point scanned for the adjacent text, and the processing below does not
+    // move or restyle the existing elements.
+    const rubyAnnotations = new Map<Element, Element | null>();
+    function rubyAnnotation(node: Node): Element | null {
+      const element = node.parentElement;
+      if (!element) {
+        return null;
+      }
+      let annotation = rubyAnnotations.get(element);
+      if (annotation === undefined) {
+        annotation =
+          /^(ruby-text|ruby-text-container)$/.test(element.style.display) ||
+          ((element.localName === "rt" || element.localName === "rtc") &&
+            !element.style.display)
+            ? element
+            : rubyAnnotation(element);
+        rubyAnnotations.set(element, annotation);
+      }
+      return annotation;
+    }
+
     // The text checked for the punctuation to be processed at the end of a
     // line (see below)
     const lineEndChecked = new Set<Node>();
@@ -1974,26 +1998,6 @@ export class TextSpacingPolyfill {
             return false;
           }
 
-          // Ruby annotations form a separate text stream from their bases and
-          // surrounding text; they are not adjacent for text spacing.
-          function rubyAnnotation(node: Node): Element | null {
-            for (
-              let element = node.parentElement;
-              element;
-              element = element.parentElement
-            ) {
-              if (
-                /^(ruby-text|ruby-text-container)$/.test(
-                  element.style.display,
-                ) ||
-                ((element.localName === "rt" || element.localName === "rtc") &&
-                  !element.style.display)
-              ) {
-                return element;
-              }
-            }
-            return null;
-          }
           const annotation = rubyAnnotation(textP.viewNode);
           // Once an annotation's subtree ends, no later checkpoint can belong
           // to it. Stop there to avoid scanning the paragraph for every ruby.
@@ -2030,7 +2034,7 @@ export class TextSpacingPolyfill {
               prevP.viewNode.nodeType === Node.TEXT_NODE &&
               prevP.viewNode.textContent.length > 0
             ) {
-              if (rubyAnnotation(prevP.viewNode) !== annotation) {
+              if (prevAnnotation !== annotation) {
                 continue;
               }
               prevNode = prevP.viewNode;
@@ -2101,7 +2105,7 @@ export class TextSpacingPolyfill {
               nextP.viewNode.nodeType === Node.TEXT_NODE &&
               nextP.viewNode.textContent.length > 0
             ) {
-              if (rubyAnnotation(nextP.viewNode) !== annotation) {
+              if (nextAnnotation !== annotation) {
                 continue;
               }
               // Keep adjacent white space for autospace and line checks, but

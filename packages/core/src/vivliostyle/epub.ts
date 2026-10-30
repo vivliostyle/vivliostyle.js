@@ -36,6 +36,7 @@ import * as OPS from "./ops";
 import * as Plugin from "./plugin";
 import * as SemanticFootnote from "./semantic-footnote";
 import * as Task from "./task";
+import * as TaskUtil from "./task-util";
 import * as Toc from "./toc";
 import * as Vgen from "./vgen";
 import * as Vtree from "./vtree";
@@ -3370,17 +3371,18 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.renderPagesUpto(finalPosition, false).then((initialResult) => {
       result = initialResult;
       const finishAfterImages = () => {
-        // Wait until all images are loaded (Issue #1321)
+        // Wait until all images are loaded (Issue #1321). The images that have
+        // not loaded are waited for, rather than checked at intervals, which
+        // delayed the completion by up to the interval, and the pages are
+        // checked again for images added meanwhile.
         frame
           .loopWithFrame((loopFrame) => {
-            if (
-              this.spineItems.some((viewItem) =>
-                viewItem?.pages.some((page) =>
-                  page?.fetchers.some((fetcher) => !fetcher.arrived),
-                ),
-              )
-            ) {
-              frame.sleep(100).then(() => {
+            const pending = this.spineItems
+              .flatMap((viewItem) => viewItem?.pages ?? [])
+              .flatMap((page) => page?.fetchers ?? [])
+              .filter((fetcher) => !fetcher.arrived);
+            if (pending.length) {
+              TaskUtil.waitForFetchers(pending).then(() => {
                 loopFrame.continueLoop();
               });
             } else {
