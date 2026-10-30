@@ -19,6 +19,7 @@
 import * as adapt_epub from "../../../src/vivliostyle/epub";
 import * as adapt_viewer from "../../../src/vivliostyle/adaptive-viewer";
 import * as adapt_task from "../../../src/vivliostyle/task";
+import * as adapt_taskutil from "../../../src/vivliostyle/task-util";
 import * as adapt_vtree from "../../../src/vivliostyle/vtree";
 import * as adapt_xmldoc from "../../../src/vivliostyle/xml-doc";
 import * as vivliostyle_plugin from "../../../src/vivliostyle/plugin";
@@ -1431,6 +1432,71 @@ describe("epub", function () {
           expect(view.renderingAllPages).toBe(false);
           expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(5);
           done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("waits for the images of the pages, including those added while waiting", function (done) {
+      adapt_task.start(function () {
+        var view = Object.create(adapt_epub.OPFView.prototype);
+        var initialResult = { id: "initial" };
+        var continuations = {};
+        var createFetcher = function (name) {
+          var fetcher = new adapt_taskutil.Fetcher(function () {
+            var frame = adapt_task.newFrame("fetch " + name);
+            continuations[name] = frame.suspend();
+            return frame.result();
+          }, name);
+          fetcher.start();
+          return fetcher;
+        };
+        var first = createFetcher("first");
+        // Added to the page while the first image is waited for
+        var second = createFetcher("second");
+        var page = { fetchers: [first] };
+        view.opf = { spine: [{}] };
+        view.spineItems = [
+          { pages: [page], instance: { pageNumberOffset: 0 } },
+        ];
+        view.deferredFollowingSpineRelayoutStart = null;
+        view.pageSheetSizeTruncator = jasmine.createSpy(
+          "pageSheetSizeTruncator",
+        );
+        spyOn(view, "renderPagesUpto").and.returnValue(
+          adapt_task.newResult(initialResult),
+        );
+
+        var finished = false;
+        view.renderAllPages().then(function (result) {
+          finished = true;
+          expect(result).toBe(initialResult);
+          expect(first.arrived).toBe(true);
+          expect(second.arrived).toBe(true);
+          expect(view.renderingAllPages).toBe(false);
+          expect(view.pageSheetSizeTruncator).toHaveBeenCalledOnceWith(1);
+          done();
+        });
+        // Let the scheduler run the tasks before each step. If it finished
+        // before an image loaded, the expectations above fail and the test
+        // ends, so the remaining steps are skipped.
+        var later = function (fn) {
+          setTimeout(function () {
+            if (!finished) {
+              fn();
+            }
+          }, 20);
+        };
+        later(function () {
+          expect(view.renderingAllPages).toBe(true);
+          page.fetchers.push(second);
+          continuations.first.schedule("load");
+          later(function () {
+            expect(first.arrived).toBe(true);
+            expect(view.renderingAllPages).toBe(true);
+            expect(view.pageSheetSizeTruncator).not.toHaveBeenCalled();
+            continuations.second.schedule("load");
+          });
         });
         return adapt_task.newResult(true);
       });
