@@ -501,14 +501,22 @@ describe("vgen", function () {
     // adjustment would leave the ch box about 0.05px or more narrower than the
     // reference. em resolves against the font size itself, which is not
     // floored, so compensating it like ch would make the subtraction about
-    // 0.08px or more smaller than the reference.
+    // 0.08px or more smaller than the reference. The font size without the
+    // adjustment is quantized as well, e.g. 15.333px to 15.33px, the same as
+    // 15.333px - 0.0025px, so a ch length at that size must stay as it is.
     const layoutUnitAdj = 0.0025;
     const parent = document.createElement("div");
     parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
     const child = parent.appendChild(document.createElement("div"));
     const emChild = parent.appendChild(document.createElement("div"));
+    const fractionalChild = parent.appendChild(document.createElement("div"));
     const reference = parent.appendChild(document.createElement("div"));
     reference.style.cssText = "width:40ch;margin-left:calc(960px - 40em)";
+    const fractionalReference = parent.appendChild(
+      document.createElement("div"),
+    );
+    fractionalReference.style.cssText =
+      "font-size:15.333px;margin-left:calc(960px - 40ch)";
     document.body.append(parent);
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
@@ -544,6 +552,14 @@ describe("vgen", function () {
           "",
         ),
       });
+      factory.applyComputedStyles(fractionalChild, {
+        "font-size": new Css.Numeric(15.333, "px"),
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(960px - 40ch)", null),
+          "",
+        ),
+      });
       const referenceStyle = getComputedStyle(reference);
       expect(
         Math.abs(
@@ -555,6 +571,12 @@ describe("vgen", function () {
         Math.abs(
           parseFloat(getComputedStyle(emChild).marginLeft) -
             parseFloat(referenceStyle.marginLeft),
+        ),
+      ).toBeLessThan(0.02);
+      expect(
+        Math.abs(
+          parseFloat(getComputedStyle(fractionalChild).marginLeft) -
+            parseFloat(getComputedStyle(fractionalReference).marginLeft),
         ),
       ).toBeLessThan(0.02);
     } finally {

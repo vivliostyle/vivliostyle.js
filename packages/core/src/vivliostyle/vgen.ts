@@ -4036,14 +4036,21 @@ export class ViewFactory
         (adjustsValue || !isFontSizeOrLineHeight) &&
         hasCurrentFontRelativeLength(value)
       ) {
+        // The lengths are scaled to what the browser resolves them to without
+        // the adjustment: em against the font size, and the other units
+        // against the font metrics of the font size quantized by the browser.
         const emUnitSize = this.getEmUnitSize(propName, fontSize);
-        const fontMetricsSize =
-          emUnitSize != null ? this.getAdjustedFontMetricsSize(emUnitSize) : 0;
-        if (fontMetricsSize > 0) {
+        const adjustedEmUnitSize =
+          emUnitSize != null ? emUnitSize - this.viewport.layoutUnitAdj : 0;
+        const adjustedFontMetricsSize =
+          adjustedEmUnitSize > 0
+            ? this.getFontMetricsSize(adjustedEmUnitSize)
+            : 0;
+        if (adjustedFontMetricsSize > 0) {
           value = value.visit(
             new FontSizeAdjustmentCompensator(
-              emUnitSize / (emUnitSize - this.viewport.layoutUnitAdj),
-              emUnitSize / fontMetricsSize,
+              emUnitSize / adjustedEmUnitSize,
+              this.getFontMetricsSize(emUnitSize) / adjustedFontMetricsSize,
             ),
           );
         }
@@ -4107,22 +4114,21 @@ export class ViewFactory
 
   /**
    * Returns the size of the font whose metrics (ex, cap, ch, ic) the browser
-   * uses for a font size adjusted by layoutUnitAdj. Chromium floors the zoomed
-   * font size to a multiple of 1/100 px (FontDescription::EffectiveFontSize()),
-   * and on Linux, ChromeOS and Android, Skia's Fontations backend further
-   * truncates it to a multiple of 1/64 px, like FreeType. So the metrics shrink
-   * by more than the adjustment. (Issue #1590)
-   * @param fontSize font size in px before the adjustment
+   * uses for a font size. Chromium floors the zoomed font size to a multiple
+   * of 1/100 px (FontDescription::EffectiveFontSize()), and on Linux, ChromeOS
+   * and Android, Skia's Fontations backend further truncates it to a multiple
+   * of 1/64 px, like FreeType. So the metrics of a font size adjusted by
+   * layoutUnitAdj can shrink by more than the adjustment. (Issue #1590)
+   * @param fontSize font size in px
    */
-  private getAdjustedFontMetricsSize(fontSize: number): number {
-    const adjusted = fontSize - this.viewport.layoutUnitAdj;
+  private getFontMetricsSize(fontSize: number): number {
     if (Base.browserType !== "chromium") {
-      return adjusted;
+      return fontSize;
     }
     const zoom = this.viewport.layoutUnitPerPixel / 64;
     // The small epsilons keep a size that is a multiple of the unit from
     // being floored to the next lower one by floating-point error.
-    let size = Math.floor(adjusted * zoom * 100 + 1e-6) / 100;
+    let size = Math.floor(fontSize * zoom * 100 + 1e-6) / 100;
     if (/\b(Linux|CrOS|Android)\b/.test(navigator.userAgent)) {
       size = Math.floor(size * 64 + 1e-6) / 64;
     }
