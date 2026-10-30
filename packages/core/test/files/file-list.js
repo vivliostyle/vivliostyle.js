@@ -318,6 +318,10 @@ module.exports = [
         title: "Margins using the ic unit (Issue #2197)",
       },
       {
+        file: "font-relative-units-fit.html",
+        title: "Boxes sized with ic and ch units (Issue #1590)",
+      },
+      {
         file: "web_font_in_page_margin.html",
         title: "Web font in page margin (PR #161)",
       },

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1590: boxes sized with font-metric units (ic, ch) must hold as many characters as their size says. -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Boxes sized with ic and ch units (Issue #1590)</title>
+  <style>
+    @page { size: 180mm 200mm; margin: 10mm; }
+    body { font-family: sans-serif; font-size: 16px; line-height: 1.5; }
+    p { margin: 0.5em 0 0; }
+    .box { outline: 1px solid #08f; margin-top: 2px; text-autospace: no-autospace; text-spacing-trim: space-all; }
+    .box span:nth-child(odd) { background: #fd8; }
+    .ic { inline-size: 20ic; }
+    .ic-calc { inline-size: calc(10ic + 10em); }
+    .ic-fs { font-size: 15.3px; inline-size: 20ic; }
+    .ic-pt { font-size: 10pt; inline-size: 20ic; }
+    .em { inline-size: 20em; }
+    /* Digits have no break opportunities between them without break-all. */
+    .ch { font-family: monospace; inline-size: 30ch; word-break: break-all; }
+    .ch-pt { font-size: 10pt; }
+    .vertical { writing-mode: vertical-rl; block-size: 22em; margin-top: 1em; }
+    .vertical .box { margin: 0 2px 0 0; }
+  </style>
+</head>
+<body>
+  <p>Each blue box should hold its text on one line. Every character is in its own span.</p>
+  <p>inline-size: 20ic</p>
+  <div class="box ic"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  <p>inline-size: calc(10ic + 10em)</p>
+  <div class="box ic-calc"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  <p>font-size: 15.3px; inline-size: 20ic</p>
+  <div class="box ic-fs"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  <p>font-size: 10pt; inline-size: 20ic</p>
+  <div class="box ic-pt"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  <p>inline-size: 20em (reference)</p>
+  <div class="box em"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  <p>font-family: monospace; inline-size: 30ch</p>
+  <div class="box ch"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+  <p>font-family: monospace; font-size: 10pt; inline-size: 30ch</p>
+  <div class="box ch ch-pt"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+  <div class="vertical">
+    <div class="box ic"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+    <div class="box ic-pt"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+    <div class="box em"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span><span>十</span></div>
+  </div>
+</body>
+</html>

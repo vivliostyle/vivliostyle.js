@@ -15,6 +15,7 @@
  * along with Vivliostyle.js. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Base from "../../../src/vivliostyle/base";
 import * as Css from "../../../src/vivliostyle/css";
 import * as CssCascade from "../../../src/vivliostyle/css-cascade";
 import * as CssParser from "../../../src/vivliostyle/css-parser";
@@ -419,6 +420,123 @@ describe("vgen", function () {
         factory.getEmUnitSize("margin-left", new Css.Numeric(2, "cap")),
         parseFloat(getComputedStyle(child).fontSize),
       );
+    } finally {
+      parent.remove();
+    }
+  });
+
+  it("compensates font-relative lengths for the font-size adjustment (Issue #1590)", function () {
+    // A large adjustment makes an uncompensated length differ by far more
+    // than the tolerance.
+    const layoutUnitAdj = 0.25;
+    const parent = document.createElement("div");
+    parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const calcChild = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.cssText =
+      "width:20ch;line-height:2ch;margin-left:calc(10em + 10ch)";
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 64 },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+      getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
+    });
+    try {
+      factory.applyComputedStyles(child, {
+        "font-size": new Css.Numeric(16, "px"),
+        "line-height": new Css.Numeric(2, "ch"),
+        width: new Css.Numeric(20, "ch"),
+      });
+      factory.applyComputedStyles(calcChild, {
+        "font-size": new Css.Numeric(16, "px"),
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(10em + 10ch)", null),
+          "",
+        ),
+      });
+      const referenceStyle = getComputedStyle(reference);
+      expect(parseFloat(getComputedStyle(child).fontSize)).toBe(
+        16 - layoutUnitAdj,
+      );
+      expectFontMetricLength(
+        parseFloat(getComputedStyle(child).width),
+        parseFloat(referenceStyle.width),
+      );
+      // The line height is still adjusted once, like a px line height.
+      expectFontMetricLength(
+        parseFloat(getComputedStyle(child).lineHeight),
+        parseFloat(referenceStyle.lineHeight) - layoutUnitAdj,
+      );
+      expectFontMetricLength(
+        parseFloat(getComputedStyle(calcChild).marginLeft),
+        parseFloat(referenceStyle.marginLeft),
+      );
+    } finally {
+      parent.remove();
+    }
+  });
+
+  it("compensates for the font size that Chromium floors to 1/100 px (Issue #1590)", function () {
+    if (Base.browserType !== "chromium") {
+      pending("Only Chromium floors the font size used for font metrics.");
+    }
+    // Chromium floors the font size scaled by the device pixel ratio (the
+    // zoom of the layout), e.g. 16px - 0.0025px to 15.99px at a ratio of 1
+    // and to 15.995px at 2. Compensating only the adjustment would leave the
+    // box about 0.05px or more narrower than the reference.
+    const layoutUnitAdj = 0.0025;
+    const parent = document.createElement("div");
+    parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.cssText = "width:40ch";
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: {
+        window,
+        layoutUnitAdj,
+        layoutUnitPerPixel: 64 * window.devicePixelRatio,
+      },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+      getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
+    });
+    try {
+      factory.applyComputedStyles(child, {
+        "font-size": new Css.Numeric(16, "px"),
+        width: new Css.Numeric(40, "ch"),
+      });
+      expect(
+        Math.abs(
+          parseFloat(getComputedStyle(child).width) -
+            parseFloat(getComputedStyle(reference).width),
+        ),
+      ).toBeLessThan(0.02);
     } finally {
       parent.remove();
     }

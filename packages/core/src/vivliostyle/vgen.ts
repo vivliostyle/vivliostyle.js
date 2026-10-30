@@ -86,6 +86,25 @@ function hasCurrentFontRelativeLength(value: Css.Val): boolean {
   return visitor.found;
 }
 
+/**
+ * Scales the lengths in units of the current font (em, ex, cap, ch, ic) that
+ * the browser resolves, to undo the font-size adjustment by layoutUnitAdj.
+ * Without this, a box sized with such a unit shrinks with the adjusted font
+ * and loses the room the adjustment makes for the text, e.g. 20 characters in
+ * a `20ic` box wrap. (Issue #1590)
+ */
+class FontSizeAdjustmentCompensator extends Css.FilterVisitor {
+  constructor(private readonly factor: number) {
+    super();
+  }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    return /^(em|ex|cap|ch|ic)$/i.test(numeric.unit)
+      ? new Css.AnyToken(`calc(${numeric.toString()} * ${this.factor})`)
+      : numeric;
+  }
+}
+
 function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
   if (markerContent instanceof Css.Str) {
     return markerContent;
@@ -3969,33 +3988,56 @@ export class ViewFactory
         }
       }
 
-      if (propName === "font-size" || propName === "line-height") {
+      const isFontSizeOrLineHeight =
+        propName === "font-size" || propName === "line-height";
+      if (isFontSizeOrLineHeight) {
         if (propName === "font-size") {
           fontSize = value;
         } else {
           lineHeight = value;
         }
+      }
 
-        // Adjust font-size and line-height to prevent rounding issues
-        // when calculating the size of text and line boxes. (Issue #1590)
-        //
-        // Chromium and Firefox round to the nearest multiple of LayoutUnit
-        // (the smallest unit of length in the browser) when positioning boxes,
-        // which may cause the box size to be slightly larger than specified,
-        // resulting in text not fitting in the specified number of characters/lines.
-        // To prevent this, we adjust the font size and line height to be
-        // 1 LayoutUnit less.
-        if (
-          this.viewport.layoutUnitAdj &&
-          value instanceof Css.Numeric &&
-          value.unit !== "%" &&
-          value.unit !== "em" &&
-          value.unit !== "lh"
-        ) {
-          value = new Css.AnyToken(
-            `calc(${value.toString()} - var(--viv-layoutUnitAdj))`,
+      // Adjust font-size and line-height to prevent rounding issues
+      // when calculating the size of text and line boxes. (Issue #1590)
+      //
+      // Chromium and Firefox round to the nearest multiple of LayoutUnit
+      // (the smallest unit of length in the browser) when positioning boxes,
+      // which may cause the box size to be slightly larger than specified,
+      // resulting in text not fitting in the specified number of characters/lines.
+      // To prevent this, we adjust the font size and line height to be
+      // 1 LayoutUnit less.
+      const adjustsValue =
+        isFontSizeOrLineHeight &&
+        !!this.viewport.layoutUnitAdj &&
+        value instanceof Css.Numeric &&
+        value.unit !== "%" &&
+        value.unit !== "em" &&
+        value.unit !== "lh";
+
+      // Font-size and line-height values that are not adjusted, e.g. calc(),
+      // stay smaller by resolving against the adjusted font. Compensating them
+      // would undo the adjustment.
+      if (
+        this.viewport.layoutUnitAdj &&
+        !Css.isCustomPropName(propName) &&
+        (adjustsValue || !isFontSizeOrLineHeight) &&
+        hasCurrentFontRelativeLength(value)
+      ) {
+        const emUnitSize = this.getEmUnitSize(propName, fontSize);
+        const adjustedEmUnitSize =
+          emUnitSize != null ? this.getAdjustedFontSize(emUnitSize) : 0;
+        if (adjustedEmUnitSize > 0) {
+          value = value.visit(
+            new FontSizeAdjustmentCompensator(emUnitSize / adjustedEmUnitSize),
           );
         }
+      }
+
+      if (adjustsValue) {
+        value = new Css.AnyToken(
+          `calc(${value.toString()} - var(--viv-layoutUnitAdj))`,
+        );
       }
 
       if (
@@ -4046,6 +4088,24 @@ export class ViewFactory
         Base.setCSSProperty(target, propName, value.toString());
       }
     }
+  }
+
+  /**
+   * Returns the size of the font whose metrics the browser uses for a font
+   * size adjusted by layoutUnitAdj. Chromium floors the zoomed font size to a
+   * multiple of 1/100 px (FontDescription::EffectiveFontSize()), so the
+   * metrics shrink by more than the adjustment. (Issue #1590)
+   * @param fontSize font size in px before the adjustment
+   */
+  private getAdjustedFontSize(fontSize: number): number {
+    const adjusted = fontSize - this.viewport.layoutUnitAdj;
+    if (Base.browserType !== "chromium") {
+      return adjusted;
+    }
+    const zoom = this.viewport.layoutUnitPerPixel / 64;
+    // The small epsilon keeps a size that is a multiple of 1/100 px from
+    // being floored to the next lower one by floating-point error.
+    return Math.floor(adjusted * zoom * 100 + 1e-6) / 100 / zoom;
   }
 
   /**
