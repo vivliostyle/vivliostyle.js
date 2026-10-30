@@ -92,15 +92,27 @@ function hasCurrentFontRelativeLength(value: Css.Val): boolean {
  * Without this, a box sized with such a unit shrinks with the adjusted font
  * and loses the room the adjustment makes for the text, e.g. 20 characters in
  * a `20ic` box wrap. (Issue #1590)
+ *
+ * `em` resolves against the adjusted font size itself, while the other units
+ * resolve against the font metrics, which the browser may take from a smaller
+ * font size, so they have their own factors.
  */
 class FontSizeAdjustmentCompensator extends Css.FilterVisitor {
-  constructor(private readonly factor: number) {
+  constructor(
+    private readonly emFactor: number,
+    private readonly fontMetricFactor: number,
+  ) {
     super();
   }
 
   override visitNumeric(numeric: Css.Numeric): Css.Val {
-    return /^(em|ex|cap|ch|ic)$/i.test(numeric.unit)
-      ? new Css.AnyToken(`calc(${numeric.toString()} * ${this.factor})`)
+    const factor = /^em$/i.test(numeric.unit)
+      ? this.emFactor
+      : /^(ex|cap|ch|ic)$/i.test(numeric.unit)
+        ? this.fontMetricFactor
+        : 1;
+    return factor !== 1
+      ? new Css.AnyToken(`calc(${numeric.toString()} * ${factor})`)
       : numeric;
   }
 }
@@ -4025,11 +4037,14 @@ export class ViewFactory
         hasCurrentFontRelativeLength(value)
       ) {
         const emUnitSize = this.getEmUnitSize(propName, fontSize);
-        const adjustedEmUnitSize =
-          emUnitSize != null ? this.getAdjustedFontSize(emUnitSize) : 0;
-        if (adjustedEmUnitSize > 0) {
+        const fontMetricsSize =
+          emUnitSize != null ? this.getAdjustedFontMetricsSize(emUnitSize) : 0;
+        if (fontMetricsSize > 0) {
           value = value.visit(
-            new FontSizeAdjustmentCompensator(emUnitSize / adjustedEmUnitSize),
+            new FontSizeAdjustmentCompensator(
+              emUnitSize / (emUnitSize - this.viewport.layoutUnitAdj),
+              emUnitSize / fontMetricsSize,
+            ),
           );
         }
       }
@@ -4091,21 +4106,27 @@ export class ViewFactory
   }
 
   /**
-   * Returns the size of the font whose metrics the browser uses for a font
-   * size adjusted by layoutUnitAdj. Chromium floors the zoomed font size to a
-   * multiple of 1/100 px (FontDescription::EffectiveFontSize()), so the
-   * metrics shrink by more than the adjustment. (Issue #1590)
+   * Returns the size of the font whose metrics (ex, cap, ch, ic) the browser
+   * uses for a font size adjusted by layoutUnitAdj. Chromium floors the zoomed
+   * font size to a multiple of 1/100 px (FontDescription::EffectiveFontSize()),
+   * and on Linux, ChromeOS and Android, Skia's Fontations backend further
+   * truncates it to a multiple of 1/64 px, like FreeType. So the metrics shrink
+   * by more than the adjustment. (Issue #1590)
    * @param fontSize font size in px before the adjustment
    */
-  private getAdjustedFontSize(fontSize: number): number {
+  private getAdjustedFontMetricsSize(fontSize: number): number {
     const adjusted = fontSize - this.viewport.layoutUnitAdj;
     if (Base.browserType !== "chromium") {
       return adjusted;
     }
     const zoom = this.viewport.layoutUnitPerPixel / 64;
-    // The small epsilon keeps a size that is a multiple of 1/100 px from
+    // The small epsilons keep a size that is a multiple of the unit from
     // being floored to the next lower one by floating-point error.
-    return Math.floor(adjusted * zoom * 100 + 1e-6) / 100 / zoom;
+    let size = Math.floor(adjusted * zoom * 100 + 1e-6) / 100;
+    if (/\b(Linux|CrOS|Android)\b/.test(navigator.userAgent)) {
+      size = Math.floor(size * 64 + 1e-6) / 64;
+    }
+    return size / zoom;
   }
 
   /**

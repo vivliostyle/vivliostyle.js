@@ -490,20 +490,25 @@ describe("vgen", function () {
     }
   });
 
-  it("compensates for the font size that Chromium floors to 1/100 px (Issue #1590)", function () {
+  it("compensates for the font size that Chromium uses for font metrics (Issue #1590)", function () {
     if (Base.browserType !== "chromium") {
       pending("Only Chromium floors the font size used for font metrics.");
     }
     // Chromium floors the font size scaled by the device pixel ratio (the
-    // zoom of the layout), e.g. 16px - 0.0025px to 15.99px at a ratio of 1
-    // and to 15.995px at 2. Compensating only the adjustment would leave the
-    // box about 0.05px or more narrower than the reference.
+    // zoom of the layout) for the font metrics, e.g. 16px - 0.0025px to
+    // 15.99px at a ratio of 1 and to 15.995px at 2, and further truncates it
+    // to 15.984375px (a multiple of 1/64 px) on Linux. Compensating only the
+    // adjustment would leave the ch box about 0.05px or more narrower than the
+    // reference. em resolves against the font size itself, which is not
+    // floored, so compensating it like ch would make the subtraction about
+    // 0.08px or more smaller than the reference.
     const layoutUnitAdj = 0.0025;
     const parent = document.createElement("div");
     parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
     const child = parent.appendChild(document.createElement("div"));
+    const emChild = parent.appendChild(document.createElement("div"));
     const reference = parent.appendChild(document.createElement("div"));
-    reference.style.cssText = "width:40ch";
+    reference.style.cssText = "width:40ch;margin-left:calc(960px - 40em)";
     document.body.append(parent);
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
@@ -531,10 +536,25 @@ describe("vgen", function () {
         "font-size": new Css.Numeric(16, "px"),
         width: new Css.Numeric(40, "ch"),
       });
+      factory.applyComputedStyles(emChild, {
+        "font-size": new Css.Numeric(16, "px"),
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(960px - 40em)", null),
+          "",
+        ),
+      });
+      const referenceStyle = getComputedStyle(reference);
       expect(
         Math.abs(
           parseFloat(getComputedStyle(child).width) -
-            parseFloat(getComputedStyle(reference).width),
+            parseFloat(referenceStyle.width),
+        ),
+      ).toBeLessThan(0.02);
+      expect(
+        Math.abs(
+          parseFloat(getComputedStyle(emChild).marginLeft) -
+            parseFloat(referenceStyle.marginLeft),
         ),
       ).toBeLessThan(0.02);
     } finally {
