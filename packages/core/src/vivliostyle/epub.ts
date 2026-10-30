@@ -3370,17 +3370,17 @@ export class OPFView implements Vgen.CustomRendererFactory {
     this.renderPagesUpto(finalPosition, false).then((initialResult) => {
       result = initialResult;
       const finishAfterImages = () => {
-        // Wait until all images are loaded (Issue #1321)
+        // Wait until all images are loaded (Issue #1321). Each image is waited
+        // for, rather than checked at intervals, which delayed the completion
+        // by up to the interval.
         frame
           .loopWithFrame((loopFrame) => {
-            if (
-              this.spineItems.some((viewItem) =>
-                viewItem?.pages.some((page) =>
-                  page?.fetchers.some((fetcher) => !fetcher.arrived),
-                ),
-              )
-            ) {
-              frame.sleep(100).then(() => {
+            const pending = this.spineItems
+              .flatMap((viewItem) => viewItem?.pages ?? [])
+              .flatMap((page) => page?.fetchers ?? [])
+              .find((fetcher) => !fetcher.arrived);
+            if (pending) {
+              pending.get().then(() => {
                 loopFrame.continueLoop();
               });
             } else {

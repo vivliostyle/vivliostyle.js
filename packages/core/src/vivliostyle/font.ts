@@ -312,15 +312,29 @@ export class Mapper {
     if (unloadedCount === 0) {
       return Task.newResult(true);
     }
+    // Wait until no font is loading. The fonts are waited for, rather than
+    // checked at intervals, which delayed every document by the interval even
+    // when the fonts were loaded at once (e.g. from the cache).
     const frame: Task.Frame<boolean> = Task.newFrame("waitFontLoading");
     frame
       .loop(() => {
-        return frame.sleep(20).thenAsync(() => {
-          if (fonts.status === "loading") {
-            return Task.newResult(true); // continue
+        const loading: Promise<FontFace>[] = [];
+        fonts.forEach((fontFace) => {
+          if (fontFace.status === "loading") {
+            loading.push(fontFace.loaded);
           }
-          return Task.newResult(false); // break
         });
+        if (loading.length === 0) {
+          return Task.newResult(false); // break
+        }
+        const loopFrame: Task.Frame<boolean> = Task.newFrame(
+          "waitFontLoading.loop",
+        );
+        const continuation = loopFrame.suspend();
+        Promise.allSettled(loading).then(() => {
+          continuation.schedule(true); // continue
+        });
+        return loopFrame.result();
       })
       .thenFinish(frame);
     return frame.result();
