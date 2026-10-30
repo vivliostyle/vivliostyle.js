@@ -504,14 +504,18 @@ describe("vgen", function () {
     // 0.08px or more smaller than the reference. The font size without the
     // adjustment is quantized as well, e.g. 15.333px to 15.33px, the same as
     // 15.333px - 0.0025px, so a ch length at that size must stay as it is.
+    // ic falls back to em for a font without 水 (e.g. a monospace font), and
+    // then resolves against the font size itself like em.
     const layoutUnitAdj = 0.0025;
     const parent = document.createElement("div");
     parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
     const child = parent.appendChild(document.createElement("div"));
     const emChild = parent.appendChild(document.createElement("div"));
     const fractionalChild = parent.appendChild(document.createElement("div"));
+    const icChild = parent.appendChild(document.createElement("div"));
     const reference = parent.appendChild(document.createElement("div"));
-    reference.style.cssText = "width:40ch;margin-left:calc(960px - 40em)";
+    reference.style.cssText =
+      "width:40ch;margin-left:calc(960px - 40em);margin-right:calc(960px - 40ic)";
     const fractionalReference = parent.appendChild(
       document.createElement("div"),
     );
@@ -552,6 +556,14 @@ describe("vgen", function () {
           "",
         ),
       });
+      factory.applyComputedStyles(icChild, {
+        "font-size": new Css.Numeric(16, "px"),
+        "margin-right": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(960px - 40ic)", null),
+          "",
+        ),
+      });
       factory.applyComputedStyles(fractionalChild, {
         "font-size": new Css.Numeric(15.333, "px"),
         "margin-left": CssParser.parseValue(
@@ -579,8 +591,68 @@ describe("vgen", function () {
             parseFloat(getComputedStyle(fractionalReference).marginLeft),
         ),
       ).toBeLessThan(0.02);
+      expect(
+        Math.abs(
+          parseFloat(getComputedStyle(icChild).marginRight) -
+            parseFloat(referenceStyle.marginRight),
+        ),
+      ).toBeLessThan(0.02);
     } finally {
       parent.remove();
+    }
+  });
+
+  it("compensates lengths only for an inherited font size that is adjusted (Issue #1590)", function () {
+    const layoutUnitAdj = 0.25;
+    const lengths = "calc(960px - 40em)";
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const container = document.createElement("div");
+    container.style.cssText = `font-family:monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    document.body.append(container);
+    // An absolute font size in a function is not adjusted, so the em of a
+    // child resolves against the specified 16px already. The generated
+    // adjusted declaration of 16.25px computes to 16px as well, but em must
+    // be the 16.25px that is specified.
+    const cases = [
+      ["clamp(16px, 16px, 16px)", "16px"],
+      [`calc(16.25px - var(--viv-layoutUnitAdj))`, "16.25px"],
+    ];
+    try {
+      for (const [declaration, specified] of cases) {
+        const parent = container.appendChild(document.createElement("div"));
+        parent.style.fontSize = declaration;
+        const child = parent.appendChild(document.createElement("div"));
+        const reference = container.appendChild(document.createElement("div"));
+        reference.style.cssText = `font-size:${specified};margin-left:${lengths}`;
+        const factory = Object.create(Vgen.ViewFactory.prototype);
+        Object.assign(factory, {
+          context,
+          viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 64 },
+          xmldoc: { url: document.URL },
+          sourceNode: child,
+          nodeContext: { parent: { viewNode: parent } },
+        });
+        factory.applyComputedStyles(child, {
+          "margin-left": CssParser.parseValue(
+            context.scope,
+            new CssTokenizer.Tokenizer(lengths, null),
+            "",
+          ),
+        });
+        expectFontMetricLength(
+          parseFloat(getComputedStyle(child).marginLeft),
+          parseFloat(getComputedStyle(reference).marginLeft),
+        );
+      }
+    } finally {
+      container.remove();
     }
   });
 
