@@ -3614,17 +3614,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Handles both horizontal and vertical writing modes.
    */
   hasNonZeroBlockStartInset(style: CSSStyleDeclaration): boolean {
+    const side = CssLogicalUtil.toPhysical("block-start", this.writingMode);
     return !(
-      this.isZeroLength(
-        style.getPropertyValue(
-          `padding-${CssLogicalUtil.toPhysical("block-start", this.writingMode)}`,
-        ),
-      ) &&
-      this.isZeroLength(
-        style.getPropertyValue(
-          `border-${CssLogicalUtil.toPhysical("block-start", this.writingMode)}-width`,
-        ),
-      )
+      this.isZeroLength(style.getPropertyValue(`padding-${side}`)) &&
+      this.isZeroLength(style.getPropertyValue(`border-${side}-width`))
     );
   }
 
@@ -3633,17 +3626,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Handles both horizontal and vertical writing modes.
    */
   hasNonZeroBlockEndInset(style: CSSStyleDeclaration): boolean {
+    const side = CssLogicalUtil.toPhysical("block-end", this.writingMode);
     return !(
-      this.isZeroLength(
-        style.getPropertyValue(
-          `padding-${CssLogicalUtil.toPhysical("block-end", this.writingMode)}`,
-        ),
-      ) &&
-      this.isZeroLength(
-        style.getPropertyValue(
-          `border-${CssLogicalUtil.toPhysical("block-end", this.writingMode)}-width`,
-        ),
-      )
+      this.isZeroLength(style.getPropertyValue(`padding-${side}`)) &&
+      this.isZeroLength(style.getPropertyValue(`border-${side}-width`))
     );
   }
 
