@@ -656,6 +656,144 @@ describe("vgen", function () {
     }
   });
 
+  it("compensates lengths under a font-size function only when it keeps the adjustment (Issue #1590)", function () {
+    const layoutUnitAdj = 0.25;
+    const lengths = "calc(960px - 40em)";
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const parseValue = (text) =>
+      CssParser.parseValue(
+        context.scope,
+        new CssTokenizer.Tokenizer(text, null),
+        "",
+      );
+    const createFactory = (sourceNode, parent) => {
+      const factory = Object.create(Vgen.ViewFactory.prototype);
+      return Object.assign(factory, {
+        context,
+        viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 64 },
+        xmldoc: { url: document.URL },
+        sourceNode,
+        nodeContext: { parent: { viewNode: parent } },
+      });
+    };
+    const container = document.createElement("div");
+    container.style.cssText = `font-family:monospace;font-size:calc(16.25px - var(--viv-layoutUnitAdj));--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    document.body.append(container);
+    // The 16.25px of the container is adjusted to 16px. An absolute argument
+    // that wins over the em, e.g. the 16.25px minimum of the first clamp(),
+    // gives a font size that the adjustment does not change, while the em of
+    // the last clamp() wins and keeps the adjustment.
+    const cases = [
+      ["clamp(16.25px, 1em, 24px)", "16.25px"],
+      ["max(12px, 0.5em)", "12px"],
+      ["clamp(10px, 1em, 24px)", "16.25px"],
+    ];
+    try {
+      for (const [declaration, specified] of cases) {
+        const parent = container.appendChild(document.createElement("div"));
+        const child = parent.appendChild(document.createElement("div"));
+        const reference = container.appendChild(document.createElement("div"));
+        reference.style.cssText = `font-size:${specified};margin-left:${lengths}`;
+        createFactory(parent, container).applyComputedStyles(parent, {
+          "font-size": parseValue(declaration),
+        });
+        createFactory(child, parent).applyComputedStyles(child, {
+          "margin-left": parseValue(lengths),
+        });
+        expectFontMetricLength(
+          parseFloat(getComputedStyle(child).marginLeft),
+          parseFloat(getComputedStyle(reference).marginLeft),
+        );
+      }
+      // An element that declares the inherited font size, e.g. with
+      // `font-size: inherit`, compensates its lengths like one that does not
+      // declare it.
+      for (const keyword of [Css.ident.inherit, Css.ident.unset]) {
+        const element = container.appendChild(document.createElement("div"));
+        const reference = container.appendChild(document.createElement("div"));
+        reference.style.cssText = `font-size:16.25px;margin-left:${lengths}`;
+        createFactory(element, container).applyComputedStyles(element, {
+          "font-size": keyword,
+          "margin-left": parseValue(lengths),
+        });
+        expectFontMetricLength(
+          parseFloat(getComputedStyle(element).marginLeft),
+          parseFloat(getComputedStyle(reference).marginLeft),
+        );
+      }
+    } finally {
+      container.remove();
+    }
+  });
+
+  it("measures the font metrics of font-family: initial in the initial font (Issue #1590)", function () {
+    if (Base.browserType !== "chromium") {
+      pending("Only Chromium floors the font size used for font metrics.");
+    }
+    const layoutUnitAdj = 0.0025;
+    const fontFamily = '"Hiragino Sans", "Noto Sans CJK JP", "Yu Gothic"';
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const parent = document.createElement("div");
+    parent.lang = "en";
+    parent.style.cssText = `font-family:${fontFamily};font-size:calc(16px - var(--viv-layoutUnitAdj));--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.cssText = "font-size:16px;font-family:initial;width:40ic";
+    document.body.append(parent);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: {
+        window,
+        layoutUnitAdj,
+        layoutUnitPerPixel: 64 * window.devicePixelRatio,
+      },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+    });
+    try {
+      // ic resolves against the quantized font size for a font that has 水,
+      // e.g. a Japanese font, and falls back to em for one that does not,
+      // e.g. the initial font for English in a headless browser. The child
+      // must be measured in the initial font, not in the parent's one.
+      if (
+        factory.isFontMetricQuantized("ic", {
+          "font-family": fontFamily,
+          lang: "en",
+        }) === factory.isFontMetricQuantized("ic", { lang: "en" })
+      ) {
+        pending("Needs a Japanese font and an initial font without 水.");
+      }
+      factory.applyComputedStyles(child, {
+        "font-family": Css.ident.initial,
+        width: new Css.Numeric(40, "ic"),
+      });
+      expect(
+        Math.abs(
+          parseFloat(getComputedStyle(child).width) -
+            parseFloat(getComputedStyle(reference).width),
+        ),
+      ).toBeLessThan(0.02);
+    } finally {
+      parent.remove();
+    }
+  });
+
   it("uses parent normal metrics for font-size while re-resolving inherited normal for ordinary lh", function () {
     const parent = document.createElement("div");
     parent.style.cssText = 'font:37px/normal "Courier New";margin-left:1lh';

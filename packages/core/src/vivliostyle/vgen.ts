@@ -133,6 +133,15 @@ function fontSizeCarriesAdjustment(declaration: string): boolean | null {
   return false;
 }
 
+/**
+ * The view elements whose font-size declaration looks as if it took the
+ * adjustment of the parent font size along (see fontSizeCarriesAdjustment()),
+ * but resolves to a length that the adjustment does not change, e.g.
+ * `clamp(16px, 1em, 24px)` with a 16px parent, whose 16px minimum wins.
+ * (Issue #1590)
+ */
+const fontSizesWithoutParentAdjustment = new WeakSet<Element>();
+
 function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
   if (markerContent instanceof Css.Str) {
     return markerContent;
@@ -4050,6 +4059,16 @@ export class ViewFactory
         ownFontSizeAdjusted = adjustsValue
           ? true
           : fontSizeCarriesAdjustment(value.toString());
+        if (
+          ownFontSizeAdjusted == null &&
+          value instanceof Css.Func &&
+          this.resolvesWithoutParentAdjustment(value)
+        ) {
+          ownFontSizeAdjusted = false;
+          fontSizesWithoutParentAdjustment.add(target);
+        } else {
+          fontSizesWithoutParentAdjustment.delete(target);
+        }
       }
 
       // Font-size and line-height values that are not adjusted, e.g. calc(),
@@ -4144,7 +4163,14 @@ export class ViewFactory
     computedStyle: { [key: string]: Css.Val },
     target: Element,
   ): Css.Val {
-    const emUnitSize = this.getEmUnitSize(propName, fontSize);
+    // A CSS-wide value that means inheritance, e.g. `font-size: inherit`,
+    // takes the parent font size, as no declaration does.
+    const emUnitSize = this.getEmUnitSize(
+      propName,
+      fontSize instanceof Css.Ident && /^(inherit|unset)$/i.test(fontSize.name)
+        ? undefined
+        : fontSize,
+    );
     const adjustedEmUnitSize =
       emUnitSize != null ? emUnitSize - this.viewport.layoutUnitAdj : 0;
     if (!(adjustedEmUnitSize > 0)) {
@@ -4186,13 +4212,44 @@ export class ViewFactory
     ) {
       const declaration = getInlineStyle(node)?.fontSize;
       if (declaration) {
-        const adjusted = fontSizeCarriesAdjustment(declaration);
+        const adjusted = fontSizesWithoutParentAdjustment.has(node)
+          ? false
+          : fontSizeCarriesAdjustment(declaration);
         if (adjusted != null) {
           return adjusted;
         }
       }
     }
     return false;
+  }
+
+  /**
+   * Whether a font-size function of the parent font size resolves to the same
+   * length with and without the adjustment of the parent font size by
+   * layoutUnitAdj, e.g. `clamp(16px, 1em, 24px)` with a 16px parent, so that
+   * the font size of the element is not adjusted. (Issue #1590)
+   */
+  private resolvesWithoutParentAdjustment(fontSize: Css.Func): boolean {
+    const parentFontSize = this.getParentComputedMetrics(
+      this.getParentViewStyle(),
+    ).fontSize;
+    if (parentFontSize == null) {
+      return false;
+    }
+    const size = CssCascade.resolveFontSizeValueToPx(
+      this.context,
+      fontSize,
+      parentFontSize,
+    );
+    return (
+      size != null &&
+      size ===
+        CssCascade.resolveFontSizeValueToPx(
+          this.context,
+          fontSize,
+          parentFontSize - this.viewport.layoutUnitAdj,
+        )
+    );
   }
 
   /**
@@ -4210,7 +4267,15 @@ export class ViewFactory
     if (propName !== "font-size") {
       for (const name of fontMetricProperties) {
         const value = computedStyle[name];
-        if (value && !Css.isDefaultingValue(value)) {
+        if (!value) {
+          continue;
+        }
+        if (Css.canonicalWideKeyword(value) === Css.ident.initial) {
+          // The probe has the initial value of a property it is not given,
+          // while the other CSS-wide values keep the parent's value: these
+          // properties are inherited.
+          delete properties[name];
+        } else if (!Css.isDefaultingValue(value)) {
           properties[name] = value.toString();
         }
       }
