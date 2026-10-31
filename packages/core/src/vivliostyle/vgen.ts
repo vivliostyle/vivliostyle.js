@@ -72,19 +72,91 @@ function usesFontMetrics(fontSize: Css.Numeric): boolean {
   return /^(ex|cap|ch|ic)$/.test(fontSize.unit);
 }
 
-function hasCurrentFontRelativeLength(value: Css.Val): boolean {
-  class Visitor extends Css.Visitor {
-    found = false;
+const currentFontRelativeUnitPattern = /^(em|ex|cap|ch|ic)$/i;
 
-    override visitNumeric(numeric: Css.Numeric): Css.Val | null {
-      this.found ||= /^(em|ex|cap|ch|ic)$/i.test(numeric.unit);
-      return null;
-    }
+class CurrentFontRelativeLengthVisitor extends Css.Visitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+    this.found ||= currentFontRelativeUnitPattern.test(numeric.unit);
+    return null;
   }
-  const visitor = new Visitor();
+}
+
+function hasCurrentFontRelativeLength(value: Css.Val): boolean {
+  // This is checked for every property of every element, and most values are
+  // a single length or keyword. Only lists and functions contain values that
+  // Css.Visitor visits.
+  if (value instanceof Css.Numeric) {
+    return currentFontRelativeUnitPattern.test(value.unit);
+  }
+  if (!(
+    value instanceof Css.SpaceList ||
+    value instanceof Css.CommaList ||
+    value instanceof Css.Func
+  )) {
+    return false;
+  }
+  const visitor = new CurrentFontRelativeLengthVisitor();
   value.visit(visitor);
   return visitor.found;
 }
+
+/**
+ * Scales the lengths in units of the current font (em, ex, cap, ch, ic) that
+ * the browser resolves, to undo the font-size adjustment by layoutUnitAdj.
+ * Without this, a box sized with such a unit shrinks with the adjusted font
+ * and loses the room the adjustment makes for the text, e.g. 20 characters in
+ * a `20ic` box wrap. (Issue #1590)
+ *
+ * `em` resolves against the adjusted font size itself, while the other units
+ * resolve against the font metrics, which the browser may take from a smaller
+ * font size, so each unit has its own factor.
+ */
+class FontSizeAdjustmentCompensator extends Css.FilterVisitor {
+  constructor(private readonly getFactor: (unit: string) => number) {
+    super();
+  }
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val {
+    const unit = numeric.unit.toLowerCase();
+    const factor = /^(em|ex|cap|ch|ic)$/.test(unit) ? this.getFactor(unit) : 1;
+    return factor !== 1
+      ? new Css.AnyToken(`calc(${numeric.toString()} * ${factor})`)
+      : numeric;
+  }
+}
+
+/**
+ * Whether a font-size declaration of a view element carries the font-size
+ * adjustment by layoutUnitAdj: true for a generated
+ * `calc(<length> - var(--viv-layoutUnitAdj))`, null for a value that takes
+ * the adjustment of the parent font size along (a percentage, a relative unit
+ * or keyword, or a CSS-wide value that means inheritance), and false for any
+ * other value, e.g. `clamp(16px, 16px, 16px)`, which is not adjusted.
+ * (Issue #1590)
+ */
+function fontSizeCarriesAdjustment(declaration: string): boolean | null {
+  if (/-\s*var\(--viv-layoutUnitAdj\)\s*\)\s*$/.test(declaration)) {
+    return true;
+  }
+  if (
+    /^(inherit|unset)$/i.test(declaration.trim()) ||
+    /%|\d(em|ex|cap|ch|ic|lh)\b|\b(larger|smaller)\b/i.test(declaration)
+  ) {
+    return null;
+  }
+  return false;
+}
+
+/**
+ * The view elements whose font-size declaration looks as if it took the
+ * adjustment of the parent font size along (see fontSizeCarriesAdjustment()),
+ * but resolves to a length that the adjustment does not change, e.g.
+ * `clamp(16px, 1em, 24px)` with a 16px parent, whose 16px minimum wins.
+ * (Issue #1590)
+ */
+const fontSizesWithoutParentAdjustment = new WeakSet<Element>();
 
 function getWebKitMarkerListStyleType(markerContent: Css.Val): Css.Str | null {
   if (markerContent instanceof Css.Str) {
@@ -3933,6 +4005,9 @@ export class ViewFactory
     propList.sort(Css.processingOrderFn);
     let fontSize: Css.Val | undefined;
     let lineHeight: Css.Val | undefined;
+    // Whether this element's own font size carries the adjustment by
+    // layoutUnitAdj, or null when it takes that of the parent along.
+    let ownFontSizeAdjusted: boolean | null = null;
 
     for (const propName of propList) {
       if (propertiesNotPassedToDOM[propName]) {
@@ -3969,33 +4044,76 @@ export class ViewFactory
         }
       }
 
-      if (propName === "font-size" || propName === "line-height") {
+      const isFontSizeOrLineHeight =
+        propName === "font-size" || propName === "line-height";
+      if (isFontSizeOrLineHeight) {
         if (propName === "font-size") {
           fontSize = value;
         } else {
           lineHeight = value;
         }
+      }
 
-        // Adjust font-size and line-height to prevent rounding issues
-        // when calculating the size of text and line boxes. (Issue #1590)
-        //
-        // Chromium and Firefox round to the nearest multiple of LayoutUnit
-        // (the smallest unit of length in the browser) when positioning boxes,
-        // which may cause the box size to be slightly larger than specified,
-        // resulting in text not fitting in the specified number of characters/lines.
-        // To prevent this, we adjust the font size and line height to be
-        // 1 LayoutUnit less.
+      // Adjust font-size and line-height to prevent rounding issues
+      // when calculating the size of text and line boxes. (Issue #1590)
+      //
+      // Chromium and Firefox round to the nearest multiple of LayoutUnit
+      // (the smallest unit of length in the browser) when positioning boxes,
+      // which may cause the box size to be slightly larger than specified,
+      // resulting in text not fitting in the specified number of characters/lines.
+      // To prevent this, we adjust the font size and line height to be
+      // 1 LayoutUnit less.
+      const adjustsValue =
+        isFontSizeOrLineHeight &&
+        !!this.viewport.layoutUnitAdj &&
+        value instanceof Css.Numeric &&
+        value.unit !== "%" &&
+        value.unit !== "em" &&
+        value.unit !== "lh";
+
+      if (propName === "font-size" && this.viewport.layoutUnitAdj) {
+        ownFontSizeAdjusted = adjustsValue
+          ? true
+          : fontSizeCarriesAdjustment(value.toString());
         if (
-          this.viewport.layoutUnitAdj &&
-          value instanceof Css.Numeric &&
-          value.unit !== "%" &&
-          value.unit !== "em" &&
-          value.unit !== "lh"
+          ownFontSizeAdjusted == null &&
+          value instanceof Css.Func &&
+          this.resolvesWithoutParentAdjustment(value)
         ) {
-          value = new Css.AnyToken(
-            `calc(${value.toString()} - var(--viv-layoutUnitAdj))`,
-          );
+          ownFontSizeAdjusted = false;
+          fontSizesWithoutParentAdjustment.add(target);
+        } else {
+          fontSizesWithoutParentAdjustment.delete(target);
         }
+      }
+
+      // Font-size and line-height values that are not adjusted, e.g. calc(),
+      // stay smaller by resolving against the adjusted font. Compensating them
+      // would undo the adjustment.
+      if (
+        this.viewport.layoutUnitAdj &&
+        !Css.isCustomPropName(propName) &&
+        (adjustsValue || !isFontSizeOrLineHeight) &&
+        hasCurrentFontRelativeLength(value) &&
+        // The font that the units resolve against (the parent's one for
+        // font-size) may not be adjusted, e.g. that of a parent with
+        // `font-size: clamp(16px, 16px, 16px)`.
+        ((propName === "font-size" ? null : ownFontSizeAdjusted) ??
+          this.isInheritedFontSizeAdjusted())
+      ) {
+        value = this.compensateFontSizeAdjustment(
+          value,
+          propName,
+          fontSize,
+          computedStyle,
+          target,
+        );
+      }
+
+      if (adjustsValue) {
+        value = new Css.AnyToken(
+          `calc(${value.toString()} - var(--viv-layoutUnitAdj))`,
+        );
       }
 
       if (
@@ -4046,6 +4164,190 @@ export class ViewFactory
         Base.setCSSProperty(target, propName, value.toString());
       }
     }
+  }
+
+  /**
+   * Scales the lengths in units of the current font in a value to what the
+   * browser resolves them to without the font-size adjustment: em against the
+   * font size, and the other units against the font metrics of the font size
+   * quantized by the browser. (Issue #1590)
+   */
+  private compensateFontSizeAdjustment(
+    value: Css.Val,
+    propName: string,
+    fontSize: Css.Val | undefined,
+    computedStyle: { [key: string]: Css.Val },
+    target: Element,
+  ): Css.Val {
+    // A CSS-wide value that means inheritance, e.g. `font-size: inherit`,
+    // takes the parent font size, as no declaration does.
+    const emUnitSize = this.getEmUnitSize(
+      propName,
+      fontSize instanceof Css.Ident && /^(inherit|unset)$/i.test(fontSize.name)
+        ? undefined
+        : fontSize,
+    );
+    const adjustedEmUnitSize =
+      emUnitSize != null ? emUnitSize - this.viewport.layoutUnitAdj : 0;
+    if (!(adjustedEmUnitSize > 0)) {
+      return value;
+    }
+    const emFactor = emUnitSize / adjustedEmUnitSize;
+    const fontMetricFactor =
+      this.getFontMetricsSize(emUnitSize) /
+      this.getFontMetricsSize(adjustedEmUnitSize);
+    let fontProperties: FontProperties | undefined;
+    return value.visit(
+      new FontSizeAdjustmentCompensator((unit) => {
+        if (unit === "em" || fontMetricFactor === emFactor) {
+          return emFactor;
+        }
+        fontProperties ??= this.getCurrentFontProperties(
+          propName,
+          computedStyle,
+          target,
+        );
+        return this.isFontMetricQuantized(unit, fontProperties)
+          ? fontMetricFactor
+          : emFactor;
+      }),
+    );
+  }
+
+  /**
+   * Whether the font size that an element inherits from its view parent
+   * carries the adjustment by layoutUnitAdj, found from the nearest font-size
+   * declaration of the parent and its ancestors (the font size of the root
+   * element is declared on the page box). (Issue #1590)
+   */
+  private isInheritedFontSizeAdjusted(): boolean {
+    for (
+      let node: Element | null = this.getParentViewNode();
+      node;
+      node = node.parentElement
+    ) {
+      const declaration = getInlineStyle(node)?.fontSize;
+      if (declaration) {
+        const adjusted = fontSizesWithoutParentAdjustment.has(node)
+          ? false
+          : fontSizeCarriesAdjustment(declaration);
+        if (adjusted != null) {
+          return adjusted;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Whether a font-size function of the parent font size resolves to the same
+   * length with and without the adjustment of the parent font size by
+   * layoutUnitAdj, e.g. `clamp(16px, 1em, 24px)` with a 16px parent, so that
+   * the font size of the element is not adjusted. (Issue #1590)
+   */
+  private resolvesWithoutParentAdjustment(fontSize: Css.Func): boolean {
+    const parentFontSize = this.getParentComputedMetrics(
+      this.getParentViewStyle(),
+    ).fontSize;
+    if (parentFontSize == null) {
+      return false;
+    }
+    const size = CssCascade.resolveFontSizeValueToPx(
+      this.context,
+      fontSize,
+      parentFontSize,
+    );
+    return (
+      size != null &&
+      size ===
+        CssCascade.resolveFontSizeValueToPx(
+          this.context,
+          fontSize,
+          parentFontSize - this.viewport.layoutUnitAdj,
+        )
+    );
+  }
+
+  /**
+   * Returns the properties of the font that the units of the current font in
+   * a value of a property resolve against: the parent's font for font-size,
+   * and for the others the parent's font with the element's own font
+   * properties.
+   */
+  private getCurrentFontProperties(
+    propName: string,
+    computedStyle: { [key: string]: Css.Val },
+    target: Element,
+  ): FontProperties {
+    const properties = this.getFontProperties(this.getParentViewStyle());
+    if (propName !== "font-size") {
+      for (const name of fontMetricProperties) {
+        const value = computedStyle[name];
+        if (!value) {
+          continue;
+        }
+        if (Css.canonicalWideKeyword(value) === Css.ident.initial) {
+          // The probe has the initial value of a property it is not given,
+          // while the other CSS-wide values keep the parent's value: these
+          // properties are inherited.
+          delete properties[name];
+        } else if (!Css.isDefaultingValue(value)) {
+          properties[name] = value.toString();
+        }
+      }
+      const lang = Base.getLangAttribute(target);
+      if (lang != null) {
+        properties.lang = lang;
+      }
+    }
+    return properties;
+  }
+
+  /**
+   * Whether the browser resolves a unit of the font metrics (ex, cap, ch, ic)
+   * of a font against the quantized font size (see getFontMetricsSize()). It
+   * does when it takes the metric from the font, e.g. ic from the advance of
+   * 水, but not when the font lacks it and the unit falls back to em, e.g. ic
+   * for a Latin font, which then resolves against the font size itself. The
+   * quantized size is the same for 100px and 100.002px at device pixel ratios
+   * up to 4, while the font size itself differs. (Issue #1590)
+   */
+  private isFontMetricQuantized(
+    unit: string,
+    fontProperties: FontProperties,
+  ): boolean {
+    const size = this.context.measureFontUnit(unit, 100, fontProperties);
+    const largerSize = this.context.measureFontUnit(
+      unit,
+      100.002,
+      fontProperties,
+    );
+    return (
+      size == null || largerSize == null || Math.abs(largerSize - size) < 5e-4
+    );
+  }
+
+  /**
+   * Returns the size of the font whose metrics (ex, cap, ch, ic) the browser
+   * uses for a font size. Chromium floors the zoomed font size to a multiple
+   * of 1/100 px (FontDescription::EffectiveFontSize()), and on Linux, ChromeOS
+   * and Android, Skia's Fontations backend further truncates it to a multiple
+   * of 1/64 px, like FreeType. So the metrics of a font size adjusted by
+   * layoutUnitAdj can shrink by more than the adjustment. (Issue #1590)
+   * @param fontSize font size in px
+   */
+  private getFontMetricsSize(fontSize: number): number {
+    if (Base.browserType !== "chromium") {
+      return fontSize;
+    }
+    const zoom = this.viewport.layoutUnitPerPixel / 64;
+    // The small epsilons keep a size that is a multiple of the unit from
+    // being floored to the next lower one by floating-point error.
+    let size = Math.floor(fontSize * zoom * 100 + 1e-6) / 100;
+    if (/\b(Linux|CrOS|Android)\b/.test(navigator.userAgent)) {
+      size = Math.floor(size * 64 + 1e-6) / 64;
+    }
+    return size / zoom;
   }
 
   /**

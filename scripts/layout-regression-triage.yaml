@@ -1,3 +1,195 @@
+- category: Backgrounds, images, and effects
+  title: "SVG properties (PR #296)"
+  file: svg_properties.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2243: the em offsets of drop-shadow() are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/svg_properties.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/svg_properties.html&zoom=1&spread=false
+- category: Fonts and relative units
+  title: "Boxes sized with ic and ch units (PR #2243)"
+  file: font-relative-units-fit.html
+  decision: expected  # regression / expected / skip
+  notes: "Added in PR #2243"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/font-relative-units-fit.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/font-relative-units-fit.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() followed by content that wraps before the leader expands (PR #2154)"
+  file: leader/wrapped-following-content.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/wrapped-following-content.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/wrapped-following-content.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() followed by content that wraps before the leader expands (Vertical, PR #2154)"
+  file: leader/wrapped-following-content-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/wrapped-following-content-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/wrapped-following-content-vertical.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() in a block container with padding beside its lines (PR #2156)"
+  file: leader/container-padding.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/container-padding.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/container-padding.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() in a block container taller than its lines (PR #2157)"
+  file: leader/block-size.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/block-size.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/block-size.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() in a block container taller than its lines (Vertical, PR #2157)"
+  file: leader/block-size-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/block-size-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/block-size-vertical.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() followed by an atomic inline box (PR #2157)"
+  file: leader/atomic-inline-following-content.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/atomic-inline-following-content.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/atomic-inline-following-content.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() followed by an atomic inline box (Vertical, PR #2157)"
+  file: leader/atomic-inline-following-content-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/atomic-inline-following-content-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/atomic-inline-following-content-vertical.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() followed by content displaced along the block axis (PR #2156)"
+  file: leader/displaced-following-content.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/displaced-following-content.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/displaced-following-content.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() that does not fit beside the content before it (PR #2157)"
+  file: leader/line-break-before-leader.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/line-break-before-leader.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/line-break-before-leader.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() that does not fit beside the content before it (Vertical, PR #2157)"
+  file: leader/line-break-before-leader-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/line-break-before-leader-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/line-break-before-leader-vertical.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() running against the direction of its line (PR #2160)"
+  file: leader/opposite-directions.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/opposite-directions.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/opposite-directions.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() running against the direction of its line (Vertical, PR #2160)"
+  file: leader/opposite-directions-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/opposite-directions-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/opposite-directions-vertical.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() in a block container that continues in another column (PR #2159)"
+  file: leader/column-fragment.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/column-fragment.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/column-fragment.html&zoom=1&spread=false
+- category: Leader
+  title: "leader() in a block container that continues in another column (Vertical, PR #2159)"
+  file: leader/column-fragment-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "Changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size adjustment"
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: git-claude-vivliostyle-issue-1590-a7614d
+  actualUrl: >-
+    https://vivliostyle-git-claude-vivliostyle-issue-159-6e14a0-vivliostyle.vercel.app#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/column-fragment-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/claude/vivliostyle-issue-1590-a7614d/packages/core/test/files/leader/column-fragment-vertical.html&zoom=1&spread=false
 - category: Writing modes
   title: "Orthogonal inline blocks and nested layout items (PR #2240)"
   file: writing-mode/orthogonal-inline-block-and-layout-items.html
@@ -269,8 +461,10 @@
   title: "leader() followed by wrapped content in sideways-lr (Issue #1480)"
   file: writing-mode/wrapped-following-content-sideways-lr.html
   decision: expected  # regression / expected / skip
-  notes: "Improved in PR #2231"
-  approvedViewer: git-codex-support-writing-modes-1480  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: >-
+    Improved in PR #2231; changed in PR #2243: boxes sized with the ch unit are no longer shrunk by the font-size
+    adjustment
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/writing-mode/wrapped-following-content-sideways-lr.html&zoom=1&spread=false
@@ -853,8 +1047,10 @@
   title: "Font-relative lengths with actual metrics (PR #2198)"
   file: font-relative-metrics.html
   decision: expected  # regression / expected / skip
-  notes: "Fixed in PR #2198"
-  approvedViewer: git-fix-issue2197  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  notes: >-
+    Fixed in PR #2198; changed in PR #2243: line-height: 2cap is no longer shrunk by the font-size adjustment, which
+    shifts the following lines by a sub-pixel amount
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/font-relative-metrics.html&zoom=1&spread=false
@@ -1605,8 +1801,9 @@
     resolves the names with `Exprs.Context.evalName()` and lets them through the calculation keyword guard. The PR
     branch resolves those ancestor values level by level against the font size of the level that the value belongs to,
     reduces the math functions of a line height to px, replaces the `lh` unit of such a value with the line height that
-    the element inherits, and resolves the lh unit against the source parent, like content in the normal flow.
-  approvedViewer: git-fix-issue2174  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+    the element inherits, and resolves the lh unit against the source parent, like content in the normal flow. Changed
+    in PR #2243: a footnote call on page 7 moves by a sub-pixel amount.
+  approvedViewer: git-claude-vivliostyle-issue-159-6e14a0  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: git-fix-issue2174
   actualUrl: >-
     https://vivliostyle-git-fix-issue2174-vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2174/packages/core/test/files/font-size-lh-unit-in-footnote.html&zoom=1&spread=false
