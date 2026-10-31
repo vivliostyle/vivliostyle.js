@@ -4098,6 +4098,13 @@ export class ViewFactory
         this.viewport.layoutUnitAdj &&
         !Css.isCustomPropName(propName) &&
         (adjustsValue || !isFontSizeOrLineHeight) &&
+        // Letter-spacing and word-spacing are added to the advances of the
+        // text, which shrink with the adjusted font, and stay in proportion
+        // to them, e.g. `letter-spacing: 1ch` to the advance of a space in a
+        // monospace font, which tab-size is measured in. Shrinking them takes
+        // no room away from the text.
+        propName !== "letter-spacing" &&
+        propName !== "word-spacing" &&
         hasCurrentFontRelativeLength(value) &&
         // The font that the units resolve against (the parent's one for
         // font-size) may not be adjusted, e.g. that of a parent with
