@@ -4218,12 +4218,18 @@ export class ViewFactory
     // A negative length is invalid for a property that accepts only
     // non-negative lengths, e.g. `max-height: -1ex`, and the browser rejects
     // the declaration, while it accepts calc() of the length and clamps it to
-    // zero. Such a value is kept as it is, so that it stays invalid.
-    if (
-      compensator.scaledNegative &&
-      !CSS.supports(propName, Css.withoutPageViewportUnits(value.toString()))
-    ) {
-      return value;
+    // zero. Such a value is kept as it is, so that it stays invalid. It is
+    // checked under the names that Base.setCSSProperty() sets, e.g.
+    // `-webkit-text-stroke-width` for `text-stroke-width`.
+    if (compensator.scaledNegative) {
+      const text = Css.withoutPageViewportUnits(value.toString());
+      if (
+        !Base.getPrefixedPropertyNames(propName)?.some((name) =>
+          CSS.supports(name, text),
+        )
+      ) {
+        return value;
+      }
     }
     return compensated;
   }

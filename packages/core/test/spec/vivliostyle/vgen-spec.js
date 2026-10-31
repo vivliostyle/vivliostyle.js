@@ -500,6 +500,10 @@ describe("vgen", function () {
     const child = parent.appendChild(document.createElement("div"));
     const reference = parent.appendChild(document.createElement("div"));
     reference.style.marginLeft = "-10em";
+    reference.style.setProperty(
+      "-webkit-text-stroke-width",
+      "calc(-1em + 20px)",
+    );
     document.body.append(parent);
     const context = new Exprs.Context(
       new Exprs.LexicalScope(null),
@@ -528,12 +532,29 @@ describe("vgen", function () {
           new CssTokenizer.Tokenizer("calc(-10em)", null),
           "",
         ),
+        // The browser knows this property only with the prefix that
+        // Base.setCSSProperty() adds.
+        "text-stroke-width": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(-1em + 20px)", null),
+          "",
+        ),
       });
       expect(getComputedStyle(child).maxHeight).toBe("none");
       // A negative length that the property accepts is still compensated.
       expectFontMetricLength(
         parseFloat(getComputedStyle(child).marginLeft),
         parseFloat(getComputedStyle(reference).marginLeft),
+      );
+      expectFontMetricLength(
+        parseFloat(
+          getComputedStyle(child).getPropertyValue("-webkit-text-stroke-width"),
+        ),
+        parseFloat(
+          getComputedStyle(reference).getPropertyValue(
+            "-webkit-text-stroke-width",
+          ),
+        ),
       );
     } finally {
       parent.remove();
