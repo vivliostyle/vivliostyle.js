@@ -522,7 +522,12 @@ describe("vgen", function () {
       factory.applyComputedStyles(child, {
         "font-size": new Css.Numeric(16, "px"),
         "max-height": new Css.Numeric(-1, "ch"),
-        "margin-left": new Css.Numeric(-10, "em"),
+        // A top-level em length is converted to px before the compensation.
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(-10em)", null),
+          "",
+        ),
       });
       expect(getComputedStyle(child).maxHeight).toBe("none");
       // A negative length that the property accepts is still compensated.
