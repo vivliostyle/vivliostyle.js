@@ -490,6 +490,53 @@ describe("vgen", function () {
     }
   });
 
+  it("leaves letter-spacing and word-spacing in proportion to the adjusted font (Issue #1590)", function () {
+    // They are added to the advances of the text, e.g. `letter-spacing: 1ch`
+    // in WPT css/css-text/tab-size/tab-size-spacing-002.html is compared with
+    // the advance of a space in a monospace font.
+    const layoutUnitAdj = 0.25;
+    const parent = document.createElement("div");
+    parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.cssText = `font-size:${16 - layoutUnitAdj}px;letter-spacing:1ch;word-spacing:calc(1em + 1ch)`;
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 64 },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+      getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
+    });
+    try {
+      factory.applyComputedStyles(child, {
+        "font-size": new Css.Numeric(16, "px"),
+        "letter-spacing": new Css.Numeric(1, "ch"),
+        "word-spacing": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(1em + 1ch)", null),
+          "",
+        ),
+      });
+      const childStyle = getComputedStyle(child);
+      const referenceStyle = getComputedStyle(reference);
+      expect(childStyle.letterSpacing).toBe(referenceStyle.letterSpacing);
+      expect(childStyle.wordSpacing).toBe(referenceStyle.wordSpacing);
+    } finally {
+      parent.remove();
+    }
+  });
+
   it("keeps negative font-relative lengths that a property rejects invalid (Issue #1590)", function () {
     // The browser rejects a negative max-height, e.g. `max-height: -1ex` in
     // WPT css/CSS2/normal-flow/max-height-078.xht, while it accepts calc() of
