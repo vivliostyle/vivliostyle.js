@@ -72,16 +72,32 @@ function usesFontMetrics(fontSize: Css.Numeric): boolean {
   return /^(ex|cap|ch|ic)$/.test(fontSize.unit);
 }
 
-function hasCurrentFontRelativeLength(value: Css.Val): boolean {
-  class Visitor extends Css.Visitor {
-    found = false;
+const currentFontRelativeUnitPattern = /^(em|ex|cap|ch|ic)$/i;
 
-    override visitNumeric(numeric: Css.Numeric): Css.Val | null {
-      this.found ||= /^(em|ex|cap|ch|ic)$/i.test(numeric.unit);
-      return null;
-    }
+class CurrentFontRelativeLengthVisitor extends Css.Visitor {
+  found = false;
+
+  override visitNumeric(numeric: Css.Numeric): Css.Val | null {
+    this.found ||= currentFontRelativeUnitPattern.test(numeric.unit);
+    return null;
   }
-  const visitor = new Visitor();
+}
+
+function hasCurrentFontRelativeLength(value: Css.Val): boolean {
+  // This is checked for every property of every element, and most values are
+  // a single length or keyword. Only lists and functions contain values that
+  // Css.Visitor visits.
+  if (value instanceof Css.Numeric) {
+    return currentFontRelativeUnitPattern.test(value.unit);
+  }
+  if (!(
+    value instanceof Css.SpaceList ||
+    value instanceof Css.CommaList ||
+    value instanceof Css.Func
+  )) {
+    return false;
+  }
+  const visitor = new CurrentFontRelativeLengthVisitor();
   value.visit(visitor);
   return visitor.found;
 }
