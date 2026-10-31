@@ -114,6 +114,8 @@ function hasCurrentFontRelativeLength(value: Css.Val): boolean {
  * font size, so each unit has its own factor.
  */
 class FontSizeAdjustmentCompensator extends Css.FilterVisitor {
+  scaledNegative = false;
+
   constructor(private readonly getFactor: (unit: string) => number) {
     super();
   }
@@ -121,9 +123,11 @@ class FontSizeAdjustmentCompensator extends Css.FilterVisitor {
   override visitNumeric(numeric: Css.Numeric): Css.Val {
     const unit = numeric.unit.toLowerCase();
     const factor = /^(em|ex|cap|ch|ic)$/.test(unit) ? this.getFactor(unit) : 1;
-    return factor !== 1
-      ? new Css.AnyToken(`calc(${numeric.toString()} * ${factor})`)
-      : numeric;
+    if (factor === 1) {
+      return numeric;
+    }
+    this.scaledNegative ||= numeric.num < 0;
+    return new Css.AnyToken(`calc(${numeric.toString()} * ${factor})`);
   }
 }
 
@@ -4197,21 +4201,31 @@ export class ViewFactory
       this.getFontMetricsSize(emUnitSize) /
       this.getFontMetricsSize(adjustedEmUnitSize);
     let fontProperties: FontProperties | undefined;
-    return value.visit(
-      new FontSizeAdjustmentCompensator((unit) => {
-        if (unit === "em" || fontMetricFactor === emFactor) {
-          return emFactor;
-        }
-        fontProperties ??= this.getCurrentFontProperties(
-          propName,
-          computedStyle,
-          target,
-        );
-        return this.isFontMetricQuantized(unit, fontProperties)
-          ? fontMetricFactor
-          : emFactor;
-      }),
-    );
+    const compensator = new FontSizeAdjustmentCompensator((unit) => {
+      if (unit === "em" || fontMetricFactor === emFactor) {
+        return emFactor;
+      }
+      fontProperties ??= this.getCurrentFontProperties(
+        propName,
+        computedStyle,
+        target,
+      );
+      return this.isFontMetricQuantized(unit, fontProperties)
+        ? fontMetricFactor
+        : emFactor;
+    });
+    const compensated = value.visit(compensator);
+    // A negative length is invalid for a property that accepts only
+    // non-negative lengths, e.g. `max-height: -1ex`, and the browser rejects
+    // the declaration, while it accepts calc() of the length and clamps it to
+    // zero. Such a value is kept as it is, so that it stays invalid.
+    if (
+      compensator.scaledNegative &&
+      !CSS.supports(propName, Css.withoutPageViewportUnits(value.toString()))
+    ) {
+      return value;
+    }
+    return compensated;
   }
 
   /**
