@@ -490,6 +490,77 @@ describe("vgen", function () {
     }
   });
 
+  it("keeps negative font-relative lengths that a property rejects invalid (Issue #1590)", function () {
+    // The browser rejects a negative max-height, e.g. `max-height: -1ex` in
+    // WPT css/CSS2/normal-flow/max-height-078.xht, while it accepts calc() of
+    // the length and clamps it to zero.
+    const layoutUnitAdj = 0.25;
+    const parent = document.createElement("div");
+    parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.marginLeft = "-10em";
+    reference.style.setProperty(
+      "-webkit-text-stroke-width",
+      "calc(-1em + 20px)",
+    );
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    context.fontMetrics = new FontMetrics(document);
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 64 },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+      getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
+    });
+    try {
+      factory.applyComputedStyles(child, {
+        "font-size": new Css.Numeric(16, "px"),
+        "max-height": new Css.Numeric(-1, "ch"),
+        // A top-level em length is converted to px before the compensation.
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(-10em)", null),
+          "",
+        ),
+        // The browser knows this property only with the prefix that
+        // Base.setCSSProperty() adds.
+        "text-stroke-width": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer("calc(-1em + 20px)", null),
+          "",
+        ),
+      });
+      expect(getComputedStyle(child).maxHeight).toBe("none");
+      // A negative length that the property accepts is still compensated.
+      expectFontMetricLength(
+        parseFloat(getComputedStyle(child).marginLeft),
+        parseFloat(getComputedStyle(reference).marginLeft),
+      );
+      expectFontMetricLength(
+        parseFloat(
+          getComputedStyle(child).getPropertyValue("-webkit-text-stroke-width"),
+        ),
+        parseFloat(
+          getComputedStyle(reference).getPropertyValue(
+            "-webkit-text-stroke-width",
+          ),
+        ),
+      );
+    } finally {
+      parent.remove();
+    }
+  });
+
   it("compensates for the font size that Chromium uses for font metrics (Issue #1590)", function () {
     if (Base.browserType !== "chromium") {
       pending("Only Chromium floors the font size used for font metrics.");
