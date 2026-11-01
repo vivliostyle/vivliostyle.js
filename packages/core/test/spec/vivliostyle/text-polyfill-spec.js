@@ -1262,6 +1262,34 @@ describe("text-polyfill", function () {
         });
       }
 
+      it("does not leave the spacing to the native autospace in a ruby of another font size", function () {
+        if (!autospacesAfterRuby()) {
+          pending("native autospace at the end of a ruby unavailable");
+        }
+        // Chromium adds the native spacing before the ruby to its base, by
+        // whose font size it is determined
+        layout(
+          'ABC<ruby style="display:ruby;font-size:1.5em">漢<rt style="display:ruby-text">かんじ</rt></ruby>DEF',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("measures the whole base split by the polyfill", function () {
+        spyOn(CSS, "supports").and.returnValue(false);
+        // The annotation is wider than 漢 but narrower than the whole base,
+        // which the polyfill splits at ABC|漢
+        layout(
+          'ABC<ruby style="display:ruby">ABC漢<rt style="display:ruby-text">かんじ</rt></ruby>DEF',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
       it("keeps the native spacing that Chromium does not stop after a ruby at the start of a block", function () {
         const html =
           '<ruby style="display:ruby">PHP<rt style="display:ruby-text">ぴーえいちぴー</rt></ruby>による';

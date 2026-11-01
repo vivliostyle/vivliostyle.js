@@ -1073,30 +1073,39 @@ function checkRubyAnnotationSpacing(
   if (!rect1 || !rect2 || isOnDifferentLines(rect1, rect2, vertical)) {
     return null;
   }
+  // Get the sibling of the node, skipping hidden elements (e.g., <rp>) and
+  // white space
+  const getSibling = (node: Node, next: boolean) => {
+    let sibling = next ? node.nextSibling : node.previousSibling;
+    while (
+      sibling &&
+      (sibling.nodeType === Node.ELEMENT_NODE
+        ? window.getComputedStyle(sibling as Element).display === "none"
+        : sibling.nodeType === Node.TEXT_NODE && !sibling.textContent.trim())
+    ) {
+      sibling = next ? sibling.nextSibling : sibling.previousSibling;
+    }
+    return sibling as HTMLElement | null;
+  };
   // Get the annotation of the base text: the <rt> after the text or the <rb>
-  // of the text in the ruby, skipping hidden elements (e.g., <rp>) and white
-  // space. Consecutive <rb> elements are not supported, which browsers do not
-  // pair with consecutive <rt> elements.
+  // of the text in the ruby. The text must be the whole base, which may have
+  // been split by the polyfill (see getSplitOffsets()). Consecutive <rb>
+  // elements are not supported, which browsers do not pair with consecutive
+  // <rt> elements.
   const getAnnotation = (text: Text, ruby: HTMLElement) => {
     const parent = text.parentElement;
+    const previous = parent === ruby && getSibling(text, false);
     const base =
       parent === ruby
-        ? text
+        ? !previous || previous.localName === "rt"
+          ? text
+          : null
         : parent?.localName === "rb" &&
             parent.parentElement === ruby &&
             parent.childNodes.length === 1
           ? parent
           : null;
-    let annotation = base?.nextSibling as HTMLElement | null;
-    while (
-      annotation &&
-      (annotation.nodeType === Node.ELEMENT_NODE
-        ? window.getComputedStyle(annotation).display === "none"
-        : annotation.nodeType === Node.TEXT_NODE &&
-          !annotation.textContent.trim())
-    ) {
-      annotation = annotation.nextSibling as HTMLElement | null;
-    }
+    const annotation = base && getSibling(base, true);
     if (
       annotation?.localName !== "rt" ||
       (text.data.match(/[^]\p{M}*/gu)?.length > 1 &&
@@ -1152,9 +1161,8 @@ function checkRubyAnnotationSpacing(
   // The native spacing in a ruby base widens the annotation distributed over
   // it
   const getAnnotationRect = (annotation: HTMLElement) => {
-    const range = annotation.ownerDocument.createRange();
-    range.selectNodeContents(annotation);
-    const rect = range.getBoundingClientRect();
+    const rect =
+      RangeClientRects.getBoundingClientRectOfNodeContents(annotation);
     return rect.width && rect.height ? rect : null;
   };
   const annotationRect1 = annotation1 && getAnnotationRect(annotation1);
@@ -2997,7 +3005,11 @@ export class TextSpacingPolyfill {
       // to the following character, so where the line breaks at the
       // boundary, it is inserted here instead, which is removed at the line
       // break with its space character. In vertical text, Chromium draws the
-      // following character over the ruby base.
+      // following character over the ruby base. The spacing is determined
+      // by the font size of the following character, which must be that of
+      // the container.
+      const getFontSize = (elem: Element) =>
+        document.defaultView.getComputedStyle(elem).fontSize;
       if (
         !vertical &&
         NativeTextSpacing.autospacesAfterRubyOutside(document) &&
@@ -3006,6 +3018,7 @@ export class TextSpacingPolyfill {
           (precedingRuby && followingNode.parentNode === container)) &&
         hasNativeAutospace(precedingNode.parentElement, type) &&
         hasNativeAutospace(followingNode.parentElement, type) &&
+        getFontSize(followingNode.parentElement) === getFontSize(container) &&
         !(isAfter ? isAtEndOfLine() : isAtStartOfLine())
       ) {
         return false;

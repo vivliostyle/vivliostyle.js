@@ -103,6 +103,14 @@ export function getClientRectsOfNode(node: Node): DOMRectList {
   );
 }
 
+export function getBoundingClientRectOfNodeContents(node: Node): DOMRect {
+  return measure(
+    node,
+    (range) => range.selectNodeContents(node),
+    (range) => range.getBoundingClientRect(),
+  );
+}
+
 export function getLayoutClientRectsBetween(
   clientLayout: Vtree.ClientLayout,
   start: RangeBoundary,
