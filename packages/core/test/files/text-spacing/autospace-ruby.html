@@ -45,12 +45,10 @@
       The spacing between the ruby base and the adjacent text is 1/8em, unless
       the ruby annotation wider than the base already keeps the text that far
       apart from the base after overhanging it (“PHP” in the second line). If
-      the overhang leaves less (“漢” between Latin letters), the native spacing
-      in Chromium keeps the overhang, with the base slightly off the center of
-      the annotation, and the polyfill stops the overhang if the annotation
-      then keeps the text apart (Firefox does not overhang). The spacing at the
-      end of a ruby keeps the overhang in the “normal” lines in Chromium (the
-      native spacing), but not in the “ideograph-alpha” lines (the polyfill).
+      the overhang leaves less (“漢” between Latin letters), the overhang is
+      stopped, so that the annotation keeps the text apart (Firefox does not
+      overhang). The ruby annotation stays centered on the base. The “normal”
+      lines must be the same as the “ideograph-alpha” lines (the polyfill).
     </p>
     <div class="normal">
       <h2>text-autospace: normal</h2>

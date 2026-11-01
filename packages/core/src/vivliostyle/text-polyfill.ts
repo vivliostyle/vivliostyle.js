@@ -1106,12 +1106,11 @@ function getAutospaceClass(char: string): "ideograph" | "alpha" | null {
  * of text1 and the start of text2 at the end of ruby1 and/or the start of
  * ruby2. If so, the native spacing is disabled on the base text, which keeps
  * the overhang (a space character, even zero-width, reduces it in Chromium),
- * and "apart" is returned. However, Chromium may keep inserting the native
- * spacing after a ruby even if it is disabled on the base text, and "native"
- * is returned then. If the overhang leaves less than the spacing,
+ * and "apart" is returned. If the overhang leaves less than the spacing,
  * "block-overhang" is returned if the annotations extend at least the
  * spacing beyond the bases, so that stopping the overhang leaves enough, or
- * "overhang" otherwise.
+ * "overhang" otherwise. "block-overhang" is also returned where Chromium
+ * keeps the native spacing after a ruby whose base text disables it.
  *
  * Laying out the content again is costly, so the layout is not read: the
  * sizes of the annotation and the base are measured with a canvas, and the
@@ -1130,7 +1129,7 @@ function checkRubyAnnotationSpacing(
   ruby2: HTMLElement | null,
   container: Element,
   type: "ideograph-alpha" | "ideograph-numeric",
-): "apart" | "native" | "block-overhang" | "overhang" | null {
+): "apart" | "block-overhang" | "overhang" | null {
   const window = container.ownerDocument.defaultView;
   // Get the sibling of the node, skipping hidden elements (e.g., <rp>) and
   // empty text, and collapsible white space if skipsWhiteSpace
@@ -1290,7 +1289,7 @@ function checkRubyAnnotationSpacing(
       getAutospaceClass(before.textContent.match(/[^]\p{M}*$/u)[0]) !==
         getAutospaceClass(text2.data.match(/^[^]\p{M}*/u)[0])
     ) {
-      return "native";
+      return "block-overhang";
     }
   }
   for (const elem of elements) {
@@ -1304,22 +1303,6 @@ function checkRubyAnnotationSpacing(
     }
   }
   return "apart";
-}
-
-/**
- * Check if the line breaks between the end of text1 and the start of text2,
- * or it is unknown since either is not rendered.
- */
-function isLineBreakBetween(
-  text1: Text,
-  text2: Text,
-  vertical: boolean,
-): boolean {
-  const last = text1.data.match(/[^]\p{M}*$/u);
-  const first = text2.data.match(/^[^]\p{M}*/u);
-  const rect1 = last && getVisibleRect(text1, last.index, text1.length);
-  const rect2 = first && getVisibleRect(text2, 0, first[0].length);
-  return !rect1 || !rect2 || isOnDifferentLines(rect1, rect2, vertical);
 }
 
 /**
@@ -3026,9 +3009,7 @@ export class TextSpacingPolyfill {
         return false;
       }
       // The native text-autospace is used only between adjacent text nodes
-      // in the same element (and at the boundaries of a ruby whose
-      // annotation overhangs the text in Chromium, see below), since browsers
-      // differ at element boundaries:
+      // in the same element, since browsers differ at element boundaries:
       // Chromium may add the spacing to the following character instead of
       // the preceding one (e.g., if a space in another element precedes it in
       // the line), which leaves it at the start of the next line if the line
@@ -3050,13 +3031,9 @@ export class TextSpacingPolyfill {
       }
       // At the boundaries of a ruby, no spacing is needed if the ruby
       // annotation wider than the base already keeps the text apart from the
-      // base. If Chromium keeps the native spacing there, it is used in
-      // horizontal text, where it keeps the annotation overhanging the text
-      // (see below), and stopped with an almost zero-width space
-      // (`viv-ts-zero`) in vertical text. If the annotation overhangs the
-      // text more, the native spacing in Chromium keeps the overhang (see
-      // below). Otherwise, the almost zero-width space stops the overhang if
-      // the annotation then keeps the text apart, or the spacing is inserted.
+      // base. Otherwise, an almost zero-width space (`viv-ts-zero`) stops the
+      // overhang of the annotation if the annotation then keeps the text
+      // apart, or the spacing is inserted.
       const precedingNode = (isAfter ? textNode : adjacentNode) as Text;
       const followingNode = (isAfter ? adjacentNode : textNode) as Text;
       const precedingRuby = findRuby(precedingNode, container);
@@ -3071,40 +3048,7 @@ export class TextSpacingPolyfill {
           container,
           type,
         );
-      // Chromium leaves the native spacing at the start of the next line if
-      // the line breaks at the boundary (see below)
-      if (
-        rubySpacing === "apart" ||
-        (rubySpacing === "native" &&
-          !vertical &&
-          !isLineBreakBetween(precedingNode, followingNode, vertical))
-      ) {
-        return false;
-      }
-      // At the boundaries of a ruby whose annotation overhangs the text, the
-      // native spacing is used if the browser inserts it outside the ruby
-      // after it (Chromium, see NativeTextSpacing.autospacesAfterRubyOutside()),
-      // since the space character inserted here stops the annotation from
-      // overhanging the text. Chromium adds it to the following character,
-      // which is in the ruby base at the start of a ruby and shifts the base
-      // slightly off the center of the annotation. So the spacing is
-      // determined by the font size of the following character, which must
-      // be that of the container. Where the line breaks at the boundary,
-      // Chromium leaves the native spacing at the start of the next line, so
-      // it is inserted here instead, which is removed at the line break with
-      // its space character. In vertical text, Chromium draws the following
-      // character over the ruby base.
-      const getFontSize = (elem: Element) =>
-        document.defaultView.getComputedStyle(elem).fontSize;
-      if (
-        !vertical &&
-        (rubySpacing === "block-overhang" || rubySpacing === "overhang") &&
-        NativeTextSpacing.autospacesAfterRubyOutside(document) &&
-        hasNativeAutospace(precedingNode.parentElement, type) &&
-        hasNativeAutospace(followingNode.parentElement, type) &&
-        getFontSize(followingNode.parentElement) === getFontSize(container) &&
-        !isLineBreakBetween(precedingNode, followingNode, vertical)
-      ) {
+      if (rubySpacing === "apart") {
         return false;
       }
       let ref: ChildNode = textNode;
@@ -3118,7 +3062,7 @@ export class TextSpacingPolyfill {
         return false;
       }
       const thinSp = document.createElement("viv-ts-thin-sp");
-      if (rubySpacing === "native" || rubySpacing === "block-overhang") {
+      if (rubySpacing === "block-overhang") {
         thinSp.className = "viv-ts-zero";
       }
       if (isAfter) {

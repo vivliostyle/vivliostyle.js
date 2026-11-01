@@ -53,8 +53,7 @@ export function supports(property: string, value: string): boolean {
 /**
  * Check where the browser inserts the native autospace in the text of an
  * element. The spacing at element boundaries is inserted by the text spacing
- * polyfill, since browsers differ there (see TextSpacingPolyfill), except at
- * the end of a ruby in Chromium (see autospacesAfterRubyOutside()).
+ * polyfill, since browsers differ there (see TextSpacingPolyfill).
  */
 function getAutospaceSupport(document: Document): AutospaceSupport {
   let result = autospaceCaches.get(document);
@@ -221,9 +220,9 @@ export function autospacesByContainer(document: Document): boolean {
 
 /**
  * Check if the native text-autospace inserts the spacing at the end of a ruby
- * before text outside the ruby, before the text, which keeps the ruby
- * annotation overhanging the text (Chromium). WebKit inserts it in the ruby
- * base, and Firefox does not insert it.
+ * before text outside the ruby, before the text (Chromium), where disabling
+ * it on the ruby base does not always stop it (see TextSpacingPolyfill).
+ * WebKit inserts it in the ruby base, and Firefox does not insert it.
  */
 export function autospacesAfterRubyOutside(document: Document): boolean {
   return getAutospaceSupport(document).boundaryAfterRubyOutside;
