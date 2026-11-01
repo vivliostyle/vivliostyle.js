@@ -376,12 +376,13 @@ function sharesInlineFormattingContext(display: string): boolean {
   if (display === "contents" || display.startsWith("ruby")) {
     return true;
   }
-  // An inline box has the inner display type flow, which may be omitted,
-  // e.g., "inline list-item"
+  // An inline box or a ruby container with two or more keywords, e.g.,
+  // "inline list-item" and "inline ruby", which are kept as specified if the
+  // browser supports them
   const keywords = display.split(" ");
   return (
     keywords.includes("inline") &&
-    keywords.every((keyword) => /^(inline|flow|list-item)$/.test(keyword))
+    keywords.every((keyword) => /^(inline|flow|ruby|list-item)$/.test(keyword))
   );
 }
 
