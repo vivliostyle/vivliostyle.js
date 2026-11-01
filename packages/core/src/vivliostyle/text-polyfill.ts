@@ -1263,6 +1263,22 @@ function checkRubyAnnotationSpacing(
 }
 
 /**
+ * Check if the line breaks between the end of text1 and the start of text2,
+ * or it is unknown since either is not rendered.
+ */
+function isLineBreakBetween(
+  text1: Text,
+  text2: Text,
+  vertical: boolean,
+): boolean {
+  const last = text1.data.match(/[^]\p{M}*$/u);
+  const first = text2.data.match(/^[^]\p{M}*/u);
+  const rect1 = last && getVisibleRect(text1, last.index, text1.length);
+  const rect2 = first && getVisibleRect(text2, 0, first[0].length);
+  return !rect1 || !rect2 || isOnDifferentLines(rect1, rect2, vertical);
+}
+
+/**
  * Check if the text with the style does not wrap at soft wrap opportunities.
  */
 function isNonWrapping(style: CSSStyleDeclaration): boolean {
@@ -3017,7 +3033,7 @@ export class TextSpacingPolyfill {
         rubySpacing === "apart" ||
         (rubySpacing === "native" &&
           !vertical &&
-          !(isAfter ? isAtEndOfLine() : isAtStartOfLine()))
+          !isLineBreakBetween(precedingNode, followingNode, vertical))
       ) {
         return false;
       }
@@ -3043,7 +3059,7 @@ export class TextSpacingPolyfill {
         hasNativeAutospace(precedingNode.parentElement, type) &&
         hasNativeAutospace(followingNode.parentElement, type) &&
         getFontSize(followingNode.parentElement) === getFontSize(container) &&
-        !(isAfter ? isAtEndOfLine() : isAtStartOfLine())
+        !isLineBreakBetween(precedingNode, followingNode, vertical)
       ) {
         return false;
       }

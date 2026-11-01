@@ -1333,6 +1333,22 @@ describe("text-polyfill", function () {
         );
       });
 
+      it("leaves the spacing to the native autospace after text of several lines", function () {
+        if (!autospacesAfterRuby()) {
+          pending("native autospace at the end of a ruby unavailable");
+        }
+        // The annotation overhangs の (also with the narrower kana of the
+        // fonts on Linux), and the text before the ruby starts two lines
+        // before
+        element.style.width = "10em";
+        layout(
+          'あいうえおかきくけこさしすせそたちつてとなにぬねの<ruby style="display:ruby">H<rt style="display:ruby-text">えいち</rt></ruby>です',
+          { "text-autospace": "normal" },
+        );
+        expect(rectOfChar("H").top).toBeCloseTo(rectOfChar("な").top, 0);
+        expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
+      });
+
       it("measures the whole base split by the polyfill", function () {
         spyOn(CSS, "supports").and.returnValue(false);
         // The annotation is wider than 漢 but narrower than the whole base,
