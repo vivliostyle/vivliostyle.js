@@ -1042,7 +1042,7 @@ describe("text-polyfill", function () {
         },
       );
       const spaces = element.querySelectorAll("viv-ts-thin-sp");
-      expect(spaces.length).toBe(autospacesAfterRuby() ? 1 : 2);
+      expect(spaces.length).toBe(2);
       spaces.forEach((space) => expect(space.parentNode).toBe(element));
     });
 
@@ -1055,7 +1055,7 @@ describe("text-polyfill", function () {
       expect(annotations[0].querySelectorAll("viv-ts-thin-sp").length).toBe(1);
       expect(annotations[1].querySelector("viv-ts-thin-sp")).toBeNull();
       expect(element.querySelectorAll(":scope > viv-ts-thin-sp").length).toBe(
-        autospacesAfterRuby() ? 2 : 4,
+        4,
       );
     });
 
@@ -1239,8 +1239,9 @@ describe("text-polyfill", function () {
             // the overhang
             expect(thinSps.length).toBe(0);
           } else {
-            // Stopping the overhang leaves the spacing (Firefox does not
-            // overhang)
+            // Stopping the overhang leaves the spacing (Firefox, which does
+            // not overhang, is not distinguished)
+            expect(thinSps.length).toBe(2);
             thinSps.forEach((thinSp) =>
               expect(thinSp.className).toBe("viv-ts-zero"),
             );
@@ -1257,8 +1258,12 @@ describe("text-polyfill", function () {
           layout(html, { "text-autospace": "normal" });
           expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
           // Nor does the native autospace
-          expect(rectOfChar("H").left - left).toBeCloseTo(0, 0);
-          expect(rectOfChar("よ").left - next).toBeCloseTo(0, 0);
+          expect(rectOfChar("H").left - left)
+            .withContext("base")
+            .toBeCloseTo(0, 0);
+          expect(rectOfChar("よ").left - next)
+            .withContext("following text")
+            .toBeCloseTo(0, 0);
         });
       }
 
@@ -1273,6 +1278,27 @@ describe("text-polyfill", function () {
           { "text-autospace": "normal" },
         );
         expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+        // Nor after the ruby before text of another font size
+        layout(
+          '<ruby style="display:ruby">漢<rt style="display:ruby-text">かんじ</rt></ruby><span style="font-size:2em">DEF</span>',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("does not measure one of consecutive <rb> elements as the whole base", function () {
+        spyOn(CSS, "supports").and.returnValue(false);
+        // Browsers pair the bases with the first annotation, which is much
+        // wider than 漢 but not than ABC漢
+        layout(
+          '<ruby style="display:ruby"><rb style="display:ruby-base">ABC</rb><rb style="display:ruby-base">漢</rb><rt style="display:ruby-text">かんじかん</rt><rt style="display:ruby-text">かんじ</rt></ruby>DEF',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
           "viv-ts-thin-sp",
         );
       });
