@@ -900,7 +900,7 @@ module.exports = [
       {
         file: "text-spacing/autospace-inline-block.html",
         title:
-          "text-autospace and text-spacing-trim at inline-block boundaries",
+          "text-autospace and text-spacing-trim at inline-block boundaries (PR #2247)",
       },
     ],
   },
