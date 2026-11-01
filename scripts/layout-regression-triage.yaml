@@ -1480,7 +1480,7 @@
   file: ruby-text-emphasis/absolute-rt-page-break-horizontal.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-horizontal.html&zoom=1&spread=false
@@ -1492,7 +1492,7 @@
   file: ruby-text-emphasis/absolute-rt-page-break-vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-vertical.html&zoom=1&spread=false
@@ -1504,7 +1504,7 @@
   file: absolute-inline-child-page-break-horizontal.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
@@ -1516,7 +1516,7 @@
   file: absolute-inline-child-page-break-vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
@@ -1528,7 +1528,7 @@
   file: justification.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/justification.html&zoom=1&spread=false
@@ -1540,7 +1540,7 @@
   file: page_breaks/page_break_bug_in_vertical_text.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/page_break_bug_in_vertical_text.html&zoom=1&spread=false
@@ -1552,7 +1552,7 @@
   file: page_breaks/line-height-inline-br.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br.html&zoom=1&spread=false
@@ -1564,7 +1564,7 @@
   file: page_breaks/line-height-inline-br-vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br-vertical.html&zoom=1&spread=false
@@ -1576,7 +1576,7 @@
   file: page_breaks/line-height-line-fitting.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting.html&zoom=1&spread=false
@@ -1588,7 +1588,7 @@
   file: page_breaks/line-height-line-fitting-vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting-vertical.html&zoom=1&spread=false
@@ -1600,7 +1600,7 @@
   file: multi-column/column-fill_balance_vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance_vertical.html&zoom=1&spread=false
@@ -1612,7 +1612,7 @@
   file: table/table_vertical_align_vertical.html
   decision: expected  # regression / expected / skip
   notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
     https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align_vertical.html&zoom=1&spread=false
