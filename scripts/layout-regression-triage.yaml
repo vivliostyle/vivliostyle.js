@@ -1,4 +1,16 @@
 - category: Text spacing
+  title: "text-autospace and text-spacing-trim at inline-block boundaries (PR #2247)"
+  file: text-spacing/autospace-inline-block.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2247"
+  approvedViewer: git-fix-autospace-inline-block-boundary  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-inline-block.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-inline-block.html&zoom=1&spread=false
+- category: Text spacing
   title: "text-autospace at ruby boundaries (PR #2246)"
   file: text-spacing/autospace-ruby.html
   decision: expected  # regression / expected / skip
@@ -1463,150 +1475,6 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/fix/issue2167/packages/core/test/files/ruby-text-emphasis/text-emphasis-position-root-lang.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Absolutely positioned rt at a page break (horizontal, Issue #2162)"
-  file: ruby-text-emphasis/absolute-rt-page-break-horizontal.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-horizontal.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-horizontal.html&zoom=1&spread=false
-- category: Ruby and text emphasis
-  title: "Absolutely positioned rt at a page break (vertical, Issue #2162)"
-  file: ruby-text-emphasis/absolute-rt-page-break-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/ruby-text-emphasis/absolute-rt-page-break-vertical.html&zoom=1&spread=false
-- category: Positioning and fragmentation
-  title: "Absolutely positioned span in an inline element at a page break (horizontal, Issue #2162)"
-  file: absolute-inline-child-page-break-horizontal.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-horizontal.html&zoom=1&spread=false
-- category: Positioning and fragmentation
-  title: "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)"
-  file: absolute-inline-child-page-break-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2162  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-inline-child-page-break-vertical.html&zoom=1&spread=false
-- category: General
-  title: "Justification (PR #311)"
-  file: justification.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/justification.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/justification.html&zoom=1&spread=false
-- category: Page breaks
-  title: "Page break bug in vertical text (on Firefox, PR #263)"
-  file: page_breaks/page_break_bug_in_vertical_text.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/page_break_bug_in_vertical_text.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/page_break_bug_in_vertical_text.html&zoom=1&spread=false
-- category: Page breaks
-  title: "Line fitting with inline elements and BR (Issue #2163)"
-  file: page_breaks/line-height-inline-br.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br.html&zoom=1&spread=false
-- category: Page breaks
-  title: "Line fitting with inline elements and BR, vertical writing-mode (Issue #2163)"
-  file: page_breaks/line-height-inline-br-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-inline-br-vertical.html&zoom=1&spread=false
-- category: Page breaks
-  title: "Line fitting with line-height smaller than font ascent + descent (Issue #2163)"
-  file: page_breaks/line-height-line-fitting.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting.html&zoom=1&spread=false
-- category: Page breaks
-  title: "Line fitting with line-height smaller than font ascent + descent, vertical writing-mode (Issue #2163)"
-  file: page_breaks/line-height-line-fitting-vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting-vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/line-height-line-fitting-vertical.html&zoom=1&spread=false
-- category: Multi-column
-  title: "column-fill: balance (vertical writing-mode, PR #387)"
-  file: multi-column/column-fill_balance_vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance_vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/multi-column/column-fill_balance_vertical.html&zoom=1&spread=false
-- category: Table
-  title: "Table vertical-align (vertical writing-mode, PR #311)"
-  file: table/table_vertical_align_vertical.html
-  decision: expected  # regression / expected / skip
-  notes: ""
-  approvedViewer: git-fix-issue2163  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
-  actualLabel: canary
-  actualUrl: >-
-    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align_vertical.html&zoom=1&spread=false
-  baselineLabel: stable
-  baselineUrl: >-
-    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/table/table_vertical_align_vertical.html&zoom=1&spread=false
 - category: Ruby and text emphasis
   title: "Ruby broken pagination (PR #139)"
   file: ruby-text-emphasis/ruby-broken-pagination.html
