@@ -2376,8 +2376,12 @@ export class TextSpacingPolyfill {
               if (prevAnnotation !== annotation) {
                 continue;
               }
-              prevNode = prevP.viewNode;
-              break;
+              // Keep adjacent white space for autospace and line checks, but
+              // look past ignorable text to find the start of the block.
+              prevNode ||= prevP.viewNode;
+              if (!Vtree.canIgnore(prevP.viewNode, prevP.whitespace)) {
+                break;
+              }
             }
             // Issue #868: Look inside footnote-call for the last text node.
             // BUT skip and look further back if we're inside that same footnote-call.
@@ -2393,7 +2397,7 @@ export class TextSpacingPolyfill {
                 prevP.viewNode,
               );
               if (lastText) {
-                prevNode = lastText;
+                prevNode ||= lastText;
                 break;
               }
             }
@@ -2408,7 +2412,7 @@ export class TextSpacingPolyfill {
                 if (prevP.after) {
                   // The atomic inline before the text is used only to check
                   // the line position (see processTextSpacing())
-                  prevNode = prevP.viewNode;
+                  prevNode ||= prevP.viewNode;
                 } else {
                   // The text is first in the atomic inline, which is a block
                   // container

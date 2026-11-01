@@ -1748,6 +1748,12 @@ describe("text-polyfill", function () {
         expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
         layout(html, { "hanging-punctuation": "last" });
         expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+        // and with collapsible white space at the start of the inline-block
+        layout(
+          'Text <span style="display:inline-block"> <b>(Text)</b></span> Text',
+          { "hanging-punctuation": "first" },
+        );
+        expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
       } finally {
         style.remove();
       }
