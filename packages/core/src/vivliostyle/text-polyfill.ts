@@ -784,6 +784,24 @@ function getCommonAncestor(node1: Node, node2: Node): Element | null {
 }
 
 /**
+ * Find the ruby (`display: ruby`) in the container that contains the node.
+ */
+function findRuby(node: Node, container: Element): HTMLElement | null {
+  for (
+    let elem = node.parentElement;
+    elem && elem !== container;
+    elem = elem.parentElement
+  ) {
+    if (
+      elem.ownerDocument.defaultView.getComputedStyle(elem).display === "ruby"
+    ) {
+      return elem;
+    }
+  }
+  return null;
+}
+
+/**
  * Check if non-zero margin, border, or padding intervenes between the end of
  * node1 and the start of node2, where no text-autospace is inserted (CSS Text
  * 4 § 8.4.1).
@@ -1000,6 +1018,221 @@ function isOnDifferentLines(
     Math.abs(center(rect1) - center(rect2)) >
     Math.min(size(rect1), size(rect2)) / 2
   );
+}
+
+// IDEOGRAPH_ALPHA_BOUNDARY_PATTERN without the global flag
+const IDEOGRAPH_ALPHA_BOUNDARY_TEST = new RegExp(
+  IDEOGRAPH_ALPHA_BOUNDARY_PATTERN.source,
+  "su",
+);
+
+/**
+ * Check if the annotation of a ruby wider than its base keeps the text on the
+ * other side of the boundary at least the spacing of text-autospace apart
+ * from the base, after overhanging the text, at the boundary between the end
+ * of text1 and the start of text2 at the end of ruby1 and/or the start of
+ * ruby2. If so, the native spacing on the base text stays disabled, which
+ * keeps the overhang (a space character, even zero-width, reduces it in
+ * Chromium), and "apart" is returned. However, Chromium may keep inserting
+ * the native spacing after a ruby at the start of a block even if it is
+ * disabled on the base text, and "native" is returned then. If the overhang
+ * leaves less than the spacing, "block-overhang" is returned if the
+ * annotations extend at least the spacing beyond the bases, so that stopping
+ * the overhang leaves enough, or "overhang" otherwise. The native spacing on
+ * the base text is restored unless "apart" is returned.
+ *
+ * The rects of the base characters may include the space to center the base
+ * on the annotation (Chromium and Firefox), so the base is assumed to be
+ * centered on the annotation, with the width measured without the
+ * annotation. Only a base text node, or an <rb> of it, followed by its
+ * annotation and without justification opportunities (e.g., a word of
+ * letters or a single ideograph), which `ruby-align` does not distribute, is
+ * supported.
+ */
+function checkRubyAnnotationSpacing(
+  text1: Text,
+  text2: Text,
+  ruby1: HTMLElement | null,
+  ruby2: HTMLElement | null,
+  container: Element,
+  type: "ideograph-alpha" | "ideograph-numeric",
+  vertical: boolean,
+): "apart" | "native" | "block-overhang" | "overhang" | null {
+  const window = container.ownerDocument.defaultView;
+  const style = window.getComputedStyle(container);
+  const rtl = style.direction === "rtl";
+  // Inline-axis coordinates, increasing in the inline direction
+  const start = (r: DOMRect) =>
+    vertical ? (rtl ? -r.bottom : r.top) : rtl ? -r.right : r.left;
+  const end = (r: DOMRect) =>
+    vertical ? (rtl ? -r.top : r.bottom) : rtl ? -r.left : r.right;
+  const last = text1.data.match(/[^]\p{M}*$/u);
+  const first = text2.data.match(/^[^]\p{M}*/u);
+  const rect1 = last && getVisibleRect(text1, last.index, text1.length);
+  const rect2 = first && getVisibleRect(text2, 0, first[0].length);
+  if (!rect1 || !rect2 || isOnDifferentLines(rect1, rect2, vertical)) {
+    return null;
+  }
+  // Get the annotation of the base text: the <rt> after the text or the <rb>
+  // of the text in the ruby, skipping hidden elements (e.g., <rp>) and white
+  // space. Consecutive <rb> elements are not supported, which browsers do not
+  // pair with consecutive <rt> elements.
+  const getAnnotation = (text: Text, ruby: HTMLElement) => {
+    const parent = text.parentElement;
+    const base =
+      parent === ruby
+        ? text
+        : parent?.localName === "rb" &&
+            parent.parentElement === ruby &&
+            parent.childNodes.length === 1
+          ? parent
+          : null;
+    let annotation = base?.nextSibling as HTMLElement | null;
+    while (
+      annotation &&
+      (annotation.nodeType === Node.ELEMENT_NODE
+        ? window.getComputedStyle(annotation).display === "none"
+        : annotation.nodeType === Node.TEXT_NODE &&
+          !annotation.textContent.trim())
+    ) {
+      annotation = annotation.nextSibling as HTMLElement | null;
+    }
+    if (
+      annotation?.localName !== "rt" ||
+      (text.data.match(/[^]\p{M}*/gu)?.length > 1 &&
+        /[\s\p{sc=Han}\u3041-\u30FF\u31C0-\u31FF\uFF01-\uFF60]/u.test(
+          text.data,
+        )) ||
+      /^(start|end|left|right)$/.test(
+        window.getComputedStyle(ruby).getPropertyValue("ruby-align"),
+      )
+    ) {
+      return null;
+    }
+    return annotation;
+  };
+  const annotation1 = ruby1 && getAnnotation(text1, ruby1);
+  const annotation2 = ruby2 && getAnnotation(text2, ruby2);
+  if ((ruby1 && !annotation1) || (ruby2 && !annotation2)) {
+    return null;
+  }
+  // Measure the base text without the annotations and the native spacing,
+  // which is disabled on the element of the base text (e.g., <rb>) and on the
+  // ruby, by which WebKit determines it at the end of the ruby. This is not
+  // done if the base text has its own spacing, for which the text is not
+  // split (see getSplitOffsets()).
+  const baseElement1 = annotation1 && text1.parentElement;
+  const baseElement2 = annotation2 && text2.parentElement;
+  const elements = [
+    ...new Set([
+      baseElement1,
+      annotation1 && ruby1,
+      baseElement2,
+      annotation2 && ruby2,
+    ]),
+  ].filter((elem) => elem && hasNativeAutospace(elem, type));
+  if (
+    elements.some((elem) =>
+      IDEOGRAPH_ALPHA_BOUNDARY_TEST.test(
+        Array.from(elem.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.textContent)
+          .join(""),
+      ),
+    )
+  ) {
+    return null;
+  }
+  const autospaces = elements.map((elem) =>
+    elem.style.getPropertyValue("text-autospace"),
+  );
+  for (const elem of elements) {
+    elem.style.setProperty("text-autospace", "no-autospace");
+  }
+  // The native spacing in a ruby base widens the annotation distributed over
+  // it
+  const getAnnotationRect = (annotation: HTMLElement) => {
+    const range = annotation.ownerDocument.createRange();
+    range.selectNodeContents(annotation);
+    const rect = range.getBoundingClientRect();
+    return rect.width && rect.height ? rect : null;
+  };
+  const annotationRect1 = annotation1 && getAnnotationRect(annotation1);
+  const annotationRect2 = annotation2 && getAnnotationRect(annotation2);
+  // The text on the other side, which the native spacing may have moved
+  const textRect1 = annotation1
+    ? null
+    : getVisibleRect(text1, last.index, text1.length);
+  const textRect2 = annotation2
+    ? null
+    : getVisibleRect(text2, 0, first[0].length);
+  const hidden = [annotation1, annotation2]
+    .filter((annotation) => annotation)
+    .map((annotation) => {
+      const display = annotation.style.getPropertyValue("display");
+      const priority = annotation.style.getPropertyPriority("display");
+      annotation.style.setProperty("display", "none", "important");
+      return { annotation, display, priority };
+    });
+  const getBaseSize = (text: Text) => {
+    const rect = getVisibleRect(text, 0, text.length);
+    return rect ? end(rect) - start(rect) : 0;
+  };
+  const baseSize1 = annotation1 ? getBaseSize(text1) : 0;
+  const baseSize2 = annotation2 ? getBaseSize(text2) : 0;
+  for (const { annotation, display, priority } of hidden) {
+    annotation.style.setProperty("display", display, priority);
+  }
+  // An annotation narrower than the base is not supported: it may be
+  // distributed over the base (Chromium), or not centered in the rect
+  // (Firefox)
+  const size = (r: DOMRect) => end(r) - start(r);
+  const center = (r: DOMRect) => (start(r) + end(r)) / 2;
+  const isWider = (rect: DOMRect | null, baseSize: number) =>
+    !!rect && size(rect) - baseSize >= 1;
+  const spacingSize = parseFloat(style.fontSize) / 8 - 0.01;
+  let result: "apart" | "native" | "block-overhang" | "overhang" | null = null;
+  if (
+    (annotation1 ? isWider(annotationRect1, baseSize1) : textRect1) &&
+    (annotation2 ? isWider(annotationRect2, baseSize2) : textRect2)
+  ) {
+    const end1 = annotation1
+      ? center(annotationRect1) + baseSize1 / 2
+      : end(textRect1);
+    const start2 = annotation2
+      ? center(annotationRect2) - baseSize2 / 2
+      : start(textRect2);
+    const extension =
+      (annotation1 ? size(annotationRect1) - baseSize1 : 0) / 2 +
+      (annotation2 ? size(annotationRect2) - baseSize2 : 0) / 2;
+    result =
+      start2 - end1 >= spacingSize
+        ? "apart"
+        : extension >= spacingSize
+          ? "block-overhang"
+          : "overhang";
+  }
+  if (
+    result === "apart" &&
+    annotation1 &&
+    !ruby2 &&
+    elements.includes(baseElement1) &&
+    hasNativeAutospace(text2.parentElement, type) &&
+    NativeTextSpacing.autospacesAfterRubyOutside(container.ownerDocument)
+  ) {
+    // Chromium adds the native spacing after a ruby to the following
+    // character, which is narrower if it is disabled
+    const rect = getVisibleRect(text2, 0, first[0].length);
+    if (rect && size(rect2) - size(rect) < spacingSize / 2) {
+      result = "native";
+    }
+  }
+  if (result !== "apart") {
+    elements.forEach((elem, i) =>
+      elem.style.setProperty("text-autospace", autospaces[i]),
+    );
+  }
+  return result;
 }
 
 /**
@@ -2706,7 +2939,8 @@ export class TextSpacingPolyfill {
         return false;
       }
       // The native text-autospace is used only between adjacent text nodes
-      // in the same element, since browsers differ at element boundaries:
+      // in the same element (and at the end of a ruby in Chromium, see
+      // below), since browsers differ at element boundaries:
       // Chromium may add the spacing to the following character instead of
       // the preceding one (e.g., if a space in another element precedes it in
       // the line), which leaves it at the start of the next line if the line
@@ -2726,6 +2960,56 @@ export class TextSpacingPolyfill {
       ) {
         return false;
       }
+      // At the boundaries of a ruby, no spacing is needed if the ruby
+      // annotation wider than the base already keeps the text apart from the
+      // base. If Chromium keeps the native spacing there, it is used in
+      // horizontal text, where it keeps the annotation overhanging the text
+      // (see below), and stopped with an almost zero-width space
+      // (`viv-ts-zero`) in vertical text. If the annotation overhangs the
+      // text more, the native spacing in Chromium keeps the overhang (see
+      // below). Otherwise, the almost zero-width space stops the overhang if
+      // the annotation then keeps the text apart, or the spacing is inserted.
+      const precedingNode = (isAfter ? textNode : adjacentNode) as Text;
+      const followingNode = (isAfter ? adjacentNode : textNode) as Text;
+      const precedingRuby = findRuby(precedingNode, container);
+      const followingRuby = findRuby(followingNode, container);
+      const rubySpacing =
+        (precedingRuby || followingRuby) &&
+        checkRubyAnnotationSpacing(
+          precedingNode,
+          followingNode,
+          precedingRuby,
+          followingRuby,
+          container,
+          type,
+          vertical,
+        );
+      if (rubySpacing === "apart" || (rubySpacing === "native" && !vertical)) {
+        return false;
+      }
+      // At the end of a ruby before text in the container, the native
+      // spacing is used if the browser inserts it outside the ruby (Chromium,
+      // see NativeTextSpacing.autospacesAfterRubyOutside()), since the space
+      // character inserted here stops the ruby annotation from overhanging
+      // the text. So it is at the start of a ruby whose annotation overhangs
+      // the text, though Chromium inserts it in the ruby base, which shifts
+      // the base slightly off the center of the annotation. Chromium adds it
+      // to the following character, so where the line breaks at the
+      // boundary, it is inserted here instead, which is removed at the line
+      // break with its space character. In vertical text, Chromium draws the
+      // following character over the ruby base.
+      if (
+        !vertical &&
+        NativeTextSpacing.autospacesAfterRubyOutside(document) &&
+        (rubySpacing === "block-overhang" ||
+          rubySpacing === "overhang" ||
+          (precedingRuby && followingNode.parentNode === container)) &&
+        hasNativeAutospace(precedingNode.parentElement, type) &&
+        hasNativeAutospace(followingNode.parentElement, type) &&
+        !(isAfter ? isAtEndOfLine() : isAtStartOfLine())
+      ) {
+        return false;
+      }
       let ref: ChildNode = textNode;
       while (ref.parentNode !== container) {
         ref = ref.parentElement;
@@ -2737,8 +3021,18 @@ export class TextSpacingPolyfill {
         return false;
       }
       const thinSp = document.createElement("viv-ts-thin-sp");
+      if (rubySpacing === "native" || rubySpacing === "block-overhang") {
+        thinSp.className = "viv-ts-zero";
+      }
       if (isAfter) {
         ref.after(thinSp);
+        // Chromium does not break a line between a space in another element
+        // and a ruby whose base starts with a letter or numeral, but does at
+        // <wbr> before the space. <wbr> after the space would stop the ruby
+        // annotation from overhanging the preceding text further.
+        if (followingRuby) {
+          thinSp.append(document.createElement("wbr"));
+        }
       } else {
         ref.before(thinSp);
       }
