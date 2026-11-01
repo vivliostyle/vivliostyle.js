@@ -1722,6 +1722,30 @@ describe("text-polyfill", function () {
       });
     }
 
+    it("processes the punctuation at the edges of the text nested in an inline-block as at the edges of a block", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        // The inline-block is a block container, at whose start the opening
+        // bracket is trimmed, as in the text directly in an inline-block
+        layout('Text<span style="display:inline-block"><b>「Text</b></span>', {
+          "text-spacing-trim": "trim-start",
+        });
+        expect(element.querySelector("viv-ts-open").className).toBe(
+          "viv-ts-trim",
+        );
+        // and at whose end the closing parenthesis hangs
+        layout('Text <span style="display:inline-block"><b>(Text)</b></span>', {
+          "hanging-punctuation": "last",
+        });
+        expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+      } finally {
+        style.remove();
+      }
+    });
+
     it("checks the line position of punctuation next to an inline-block", async function () {
       // The lines break at the expected positions only with a font whose
       // ideographs and punctuation are full-width (e.g., not on Linux without

@@ -2397,10 +2397,16 @@ export class TextSpacingPolyfill {
                 ((prevP.viewNode as Element).localName === "br" ||
                   Base.mediaTags[(prevP.viewNode as Element).localName]))
             ) {
-              if (prevP.after && isAtomicInline(prevP.display)) {
-                // The atomic inline before the text is used only to check
-                // the line position (see processTextSpacing())
-                prevNode = prevP.viewNode;
+              if (isAtomicInline(prevP.display)) {
+                if (prevP.after) {
+                  // The atomic inline before the text is used only to check
+                  // the line position (see processTextSpacing())
+                  prevNode = prevP.viewNode;
+                } else {
+                  // The text is first in the atomic inline, which is a block
+                  // container
+                  isFirstInBlock = true;
+                }
               }
               break;
             }
@@ -2466,10 +2472,16 @@ export class TextSpacingPolyfill {
               ) {
                 isLastInBlock = true;
               }
-              if (!nextP.after && isAtomicInline(nextP.display)) {
-                // The atomic inline after the text is used only to check the
-                // line position (see processTextSpacing())
-                nextNode ||= nextP.viewNode;
+              if (isAtomicInline(nextP.display)) {
+                if (!nextP.after) {
+                  // The atomic inline after the text is used only to check
+                  // the line position (see processTextSpacing())
+                  nextNode ||= nextP.viewNode;
+                } else {
+                  // The text is last in the atomic inline, which is a block
+                  // container
+                  isLastInBlock = true;
+                }
               }
               break;
             }
