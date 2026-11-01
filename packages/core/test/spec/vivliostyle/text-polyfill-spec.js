@@ -1701,6 +1701,15 @@ describe("text-polyfill", function () {
     });
 
     it("checks the line position of punctuation next to an inline-block", async function () {
+      // The lines break at the expected positions only with a font whose
+      // ideographs and punctuation are full-width (e.g., not on Linux without
+      // CJK fonts)
+      element.textContent = "国「。";
+      const textRange = document.createRange();
+      textRange.selectNodeContents(element);
+      if (Math.abs(textRange.getBoundingClientRect().width - 48) > 1) {
+        pending("full-width CJK font unavailable");
+      }
       spyOn(CSS, "supports").and.returnValue(false);
       element.style.width = "10em";
       const style = document.createElement("style");
