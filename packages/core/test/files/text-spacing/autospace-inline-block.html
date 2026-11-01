@@ -1,0 +1,136 @@
+<!doctype html>
+<!-- Test case: no text-autospace or adjacent punctuation trimming across the boundaries of inline-blocks -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>text-autospace at inline-block boundaries</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      p {
+        margin: 0;
+      }
+      .normal p {
+        text-autospace: normal;
+      }
+      /* Not supported by browsers, so the polyfill processes it */
+      .alpha p {
+        text-autospace: ideograph-alpha;
+      }
+      .trim p {
+        text-spacing-trim: normal;
+      }
+      /* Not supported by browsers, so the polyfill processes it */
+      .trim-polyfill p {
+        text-spacing-trim: space-first space-end trim-adjacent;
+      }
+      .hanging p {
+        hanging-punctuation: allow-end;
+      }
+      .narrow {
+        inline-size: 10em;
+      }
+      .ib {
+        display: inline-block;
+        background: #ddd;
+      }
+      .it {
+        display: inline-table;
+        background: #ddd;
+      }
+      .if {
+        display: inline-flex;
+        background: #ddd;
+      }
+      .ig {
+        display: inline-grid;
+        background: #ddd;
+      }
+      .bg {
+        background: #ddd;
+      }
+      .date {
+        display: inline-block;
+        inline-size: 2.5em;
+        text-align: end;
+        background: #ddd;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        height: 10em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      An atomic inline is not a character, so the text inside and outside it
+      does not adjoin, and text-autospace inserts no spacing at its boundaries
+      (CSS Text 4 § 8.4.1). The spacing inside it is kept. The “normal” lines
+      (native in browsers that support it) must be the same as the
+      “ideograph-alpha” lines (polyfill), except for the dates.
+    </p>
+    <div class="normal">
+      <h2>text-autospace: normal</h2>
+      <p>2026年<span class="date">3月</span><span class="date">12日</span>発行（dates: no spacing between the boxes）</p>
+      <p>国国国<span class="date">A国</span><span class="date">A国</span>国国国（boxes: no spacing between them）</p>
+      <p>国国国<span class="ib">AAA</span>国国国（inline-block: no spacing）</p>
+      <p>AAA<span class="ib">国国国</span>AAA（ideographs inside: no spacing）</p>
+      <p>国<span class="ib">A国A</span>国（spacing inside only）</p>
+      <p>国国国<span class="it">AAA</span>国国国（inline-table: no spacing）</p>
+      <p>国国国<span class="if">AAA</span>国国国（inline-flex: no spacing）</p>
+      <p>国国国<span class="ig">AAA</span>国国国（inline-grid: no spacing）</p>
+      <p>国国国<b><span class="ib">AAA</span></b>国国国（nested: no spacing）</p>
+      <p>国国国<span class="bg">AAA</span>国国国（inline: spacing）</p>
+    </div>
+    <div class="alpha">
+      <h2>text-autospace: ideograph-alpha</h2>
+      <p>国国国<span class="date">A国</span><span class="date">A国</span>国国国（boxes: no spacing between them）</p>
+      <p>国国国<span class="ib">AAA</span>国国国（inline-block: no spacing）</p>
+      <p>AAA<span class="ib">国国国</span>AAA（ideographs inside: no spacing）</p>
+      <p>国<span class="ib">A国A</span>国（spacing inside only）</p>
+      <p>国国国<span class="it">AAA</span>国国国（inline-table: no spacing）</p>
+      <p>国国国<span class="if">AAA</span>国国国（inline-flex: no spacing）</p>
+      <p>国国国<span class="ig">AAA</span>国国国（inline-grid: no spacing）</p>
+      <p>国国国<b><span class="ib">AAA</span></b>国国国（nested: no spacing）</p>
+      <p>国国国<span class="bg">AAA</span>国国国（inline: spacing）</p>
+    </div>
+    <div class="trim">
+      <h2>text-spacing-trim: normal</h2>
+      <p>国」「国（adjacent: the opening bracket is trimmed）</p>
+      <p><span class="ib">国」</span>「国（after an inline-block: not trimmed）</p>
+      <p>国」<span class="ib">「国</span>（first in an inline-block: not trimmed）</p>
+    </div>
+    <div class="trim-polyfill">
+      <h2>text-spacing-trim: space-first space-end trim-adjacent</h2>
+      <p>国」「国（adjacent: the opening bracket is trimmed）</p>
+      <p><span class="ib">国」</span>「国（after an inline-block: not trimmed）</p>
+      <p class="narrow">国国国国国国国国国国「国」（start of a line: trimmed）</p>
+      <p class="narrow">国国国国国国国国<span class="ib">国国</span>「国」（start of a line after an inline-block: trimmed）</p>
+    </div>
+    <div class="hanging">
+      <h2>hanging-punctuation: allow-end</h2>
+      <p class="narrow">国国国国国国国国国国。国（end of a line: hangs）</p>
+      <p class="narrow">国国国国国国国国国国。<span class="ib">国</span>（end of a line before an inline-block: hangs）</p>
+    </div>
+    <div class="vertical">
+      <div class="normal">
+        <p>国<span class="ib">AA</span>国<span class="bg">AA</span>国</p>
+      </div>
+      <div class="alpha">
+        <p>国<span class="ib">AA</span>国<span class="bg">AA</span>国</p>
+      </div>
+    </div>
+  </body>
+</html>

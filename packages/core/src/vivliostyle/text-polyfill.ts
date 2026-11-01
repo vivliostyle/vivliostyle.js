@@ -19,6 +19,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
+import * as Display from "./display";
 import * as LayoutHelper from "./layout-helper";
 import * as NativeTextSpacing from "./native-text-spacing";
 import * as Plugin from "./plugin";
@@ -366,6 +367,38 @@ function normalizeLang(lang: string | null | undefined): string | null {
 }
 
 /**
+ * Check if the element with the display value lets its content participate in
+ * the inline formatting context of its parent: it generates no box or an
+ * inline box that is not atomic. The text inside and outside an atomic inline,
+ * such as an inline-block, does not adjoin (CSS Text 4 § 8.4.1).
+ */
+function sharesInlineFormattingContext(display: string): boolean {
+  if (display === "contents" || display.startsWith("ruby")) {
+    return true;
+  }
+  // An inline box or a ruby container with two or more keywords, e.g.,
+  // "inline list-item" and "inline ruby", which are kept as specified if the
+  // browser supports them
+  const keywords = display.split(" ");
+  return (
+    keywords.includes("inline") &&
+    keywords.every((keyword) => /^(inline|flow|ruby|list-item)$/.test(keyword))
+  );
+}
+
+/**
+ * Check if the display value generates an atomic inline, such as an
+ * inline-block.
+ */
+function isAtomicInline(display: string | null): boolean {
+  return (
+    !!display &&
+    Display.isInlineLevel(display) &&
+    !sharesInlineFormattingContext(display)
+  );
+}
+
+/**
  * Find the block container establishing the inline formatting context that
  * the node participates in.
  */
@@ -379,11 +412,7 @@ function findBlockContainer(node: Node): HTMLElement | null {
       return elem;
     }
     const { display } = window.getComputedStyle(elem);
-    if (
-      display !== "inline" &&
-      display !== "contents" &&
-      !display.startsWith("ruby")
-    ) {
+    if (!sharesInlineFormattingContext(display)) {
       return elem;
     }
   }
@@ -2097,9 +2126,16 @@ export class TextSpacingPolyfill {
       if (!spacing || isSpacingNone(spacing)) {
         return;
       }
-      // The first or last text in an inline-block may be at the start or end
-      // of the block (see the main loop below)
-      const inInlineBlock = textP.parent.display === "inline-block";
+      // The first or last text in an atomic inline, such as an inline-block,
+      // may be at the start or end of the block (see the main loop below)
+      let parent = textP.parent;
+      while (
+        parent &&
+        (!parent.display || sharesInlineFormattingContext(parent.display))
+      ) {
+        parent = parent.parent;
+      }
+      const inInlineBlock = isAtomicInline(parent?.display);
       const position: TextPosition = {
         mayBeFirstInBlock:
           (index === firstTextIndex && isFirstFragment) || inInlineBlock,
@@ -2340,8 +2376,12 @@ export class TextSpacingPolyfill {
               if (prevAnnotation !== annotation) {
                 continue;
               }
-              prevNode = prevP.viewNode;
-              break;
+              // Keep adjacent white space for autospace and line checks, but
+              // look past ignorable text to find the start of the block.
+              prevNode ||= prevP.viewNode;
+              if (!Vtree.canIgnore(prevP.viewNode, prevP.whitespace)) {
+                break;
+              }
             }
             // Issue #868: Look inside footnote-call for the last text node.
             // BUT skip and look further back if we're inside that same footnote-call.
@@ -2357,16 +2397,28 @@ export class TextSpacingPolyfill {
                 prevP.viewNode,
               );
               if (lastText) {
-                prevNode = lastText;
+                prevNode ||= lastText;
                 break;
               }
             }
             if (
-              (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
+              (prevP.display &&
+                !sharesInlineFormattingContext(prevP.display)) ||
               (prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
                 ((prevP.viewNode as Element).localName === "br" ||
                   Base.mediaTags[(prevP.viewNode as Element).localName]))
             ) {
+              if (isAtomicInline(prevP.display)) {
+                if (prevP.after) {
+                  // The atomic inline before the text is used only to check
+                  // the line position (see processTextSpacing())
+                  prevNode ||= prevP.viewNode;
+                } else {
+                  // The text is first in the atomic inline, which is a block
+                  // container
+                  isFirstInBlock = true;
+                }
+              }
               break;
             }
             if (prev === 0) {
@@ -2419,7 +2471,8 @@ export class TextSpacingPolyfill {
               }
             }
             if (
-              (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
+              (nextP.display &&
+                !sharesInlineFormattingContext(nextP.display)) ||
               (nextP.viewNode?.nodeType === Node.ELEMENT_NODE &&
                 ((nextP.viewNode as Element).localName === "br" ||
                   Base.mediaTags[(nextP.viewNode as Element).localName]))
@@ -2429,6 +2482,17 @@ export class TextSpacingPolyfill {
                 isOutOfLine(nextP.viewNode)
               ) {
                 isLastInBlock = true;
+              }
+              if (isAtomicInline(nextP.display)) {
+                if (!nextP.after) {
+                  // The atomic inline after the text is used only to check
+                  // the line position (see processTextSpacing())
+                  nextNode ||= nextP.viewNode;
+                } else {
+                  // The text is last in the atomic inline, which is a block
+                  // container
+                  isLastInBlock = true;
+                }
               }
               break;
             }
@@ -2525,6 +2589,11 @@ export class TextSpacingPolyfill {
 
   /**
    * Process the text spacing of the text node.
+   * @param prevNode The text node before the text node, or the atomic inline
+   *   before it, which is used only to check the line position since its text
+   *   does not adjoin the text (CSS Text 4 § 8.4.1)
+   * @param nextNode The text node after the text node, or the atomic inline
+   *   after it
    * @returns `columnOver`: whether the text is beyond the column (see
    *   LayoutHelper.checkIfBeyondColumnBreaks()), and `spacedBefore`: whether
    *   the spacing of text-autospace is inserted before the text
@@ -2546,6 +2615,17 @@ export class TextSpacingPolyfill {
     const document = textNode.ownerDocument;
     const { spacingTrim, nativeTrim, hangingPunctuation, lang } = spacing;
     let columnOver = 0;
+    // The adjacent text, not an atomic inline
+    const prevText = prevNode?.nodeType === Node.TEXT_NODE ? prevNode : null;
+    const nextText = nextNode?.nodeType === Node.TEXT_NODE ? nextNode : null;
+
+    // The client rects of the adjacent node: only the box of an atomic inline,
+    // not the rects of its content, such as a ruby annotation
+    function getClientRectsOfAdjacent(node: Node): DOMRectList {
+      return node.nodeType === Node.ELEMENT_NODE
+        ? (node as Element).getClientRects()
+        : RangeClientRects.getClientRectsOfNode(node);
+    }
 
     function isAtStartOfLine(): boolean {
       if (isFirstAfterBreak) {
@@ -2558,7 +2638,7 @@ export class TextSpacingPolyfill {
       if (!rect) {
         return false;
       }
-      const prevRects = RangeClientRects.getClientRectsOfNode(prevNode);
+      const prevRects = getClientRectsOfAdjacent(prevNode);
       const prevRect = prevRects[prevRects.length - 1];
       if (!prevRect) {
         return false;
@@ -2582,7 +2662,7 @@ export class TextSpacingPolyfill {
         return false;
       }
       columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(rect, vertical);
-      const nextRect = RangeClientRects.getClientRectsOfNode(nextNode)[0];
+      const nextRect = getClientRectsOfAdjacent(nextNode)[0];
       if (!nextRect) {
         return false;
       }
@@ -2825,14 +2905,14 @@ export class TextSpacingPolyfill {
             outerElem.className = "viv-ts-space";
           } else if (
             spacingTrim.trimAdjacent &&
-            prevNode &&
+            prevText &&
             /[\p{Ps}\p{Pi}\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]\p{M}*$/u.test(
-              prevNode.textContent,
+              prevText.textContent,
             ) &&
             // exclude non-fullwidth closing punctuations (Issue #1003)
-            (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
-              (prevNode.parentElement?.localName === "viv-ts-inner" &&
-                checkFullWidth(prevNode.parentElement)))
+            (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevText.textContent) ||
+              (prevText.parentElement?.localName === "viv-ts-inner" &&
+                checkFullWidth(prevText.parentElement)))
           ) {
             outerElem.className = "viv-ts-trim";
           } else if (
@@ -2889,9 +2969,9 @@ export class TextSpacingPolyfill {
               outerElem.className = "viv-ts-space";
             }
           } else if (
-            nextNode &&
+            nextText &&
             /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u.test(
-              nextNode.textContent,
+              nextText.textContent,
             )
           ) {
             if (isFullWidth && spacingTrim.trimAdjacent && !nativeTrim) {
@@ -3081,11 +3161,11 @@ export class TextSpacingPolyfill {
     }
 
     const spacedBefore =
-      !!prevNode &&
+      !!prevText &&
       IDEOGRAPH_START_PATTERN.test(text) &&
-      insertAutospace(prevNode, false);
-    if (nextNode && IDEOGRAPH_END_PATTERN.test(text)) {
-      insertAutospace(nextNode, true);
+      insertAutospace(prevText, false);
+    if (nextText && IDEOGRAPH_END_PATTERN.test(text)) {
+      insertAutospace(nextText, true);
     }
     return { columnOver, spacedBefore };
   }

@@ -1621,6 +1621,195 @@ describe("text-polyfill", function () {
         style.remove();
       }
     });
+
+    // The text inside and outside an atomic inline does not adjoin (CSS Text
+    // 4 § 8.4.1)
+    for (const display of [
+      "inline-block",
+      "inline-table",
+      "inline-flex",
+      "inline-grid",
+    ]) {
+      it(`does not insert the spacing across the boundaries of ${display}`, function () {
+        layout(
+          `日本<span style="display:${display}">ABC</span>語 ABC<span style="display:${display}">日本</span>DEF`,
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelectorAll("viv-ts-thin-sp").length).toBe(0);
+        // Nor does the native autospace
+        const width = getContentWidth();
+        expect(getContentWidthWithoutAutospace()).toBeCloseTo(width, 1);
+      });
+    }
+
+    it("inserts the spacing inside an inline-block but not at its boundaries", function () {
+      layout(
+        '日本<span style="display:inline-block"><b>ABC</b>日本<b>ABC</b></span>語',
+        { "text-autospace": "normal" },
+      );
+      const inlineBlock = element.querySelector("span");
+      const thinSps = element.querySelectorAll("viv-ts-thin-sp");
+      expect(thinSps.length).toBe(2);
+      thinSps.forEach((thinSp) => expect(thinSp.parentNode).toBe(inlineBlock));
+    });
+
+    it("does not insert the spacing between adjacent inline-blocks", async function () {
+      const box =
+        '<span style="display:inline-block;inline-size:2.5em;text-align:end">';
+      layout(`2026年${box}3月</span>${box}12日</span>発行`, {
+        "text-autospace": "normal",
+      });
+      expect(element.querySelectorAll(":scope > viv-ts-thin-sp").length).toBe(
+        0,
+      );
+      // The spacing between the digits and the ideographs inside the boxes is
+      // kept, by the native autospace if available
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        await document.fonts.load('16px "-viv-ts-sp"');
+        const range = document.createRange();
+        const widths = () =>
+          Array.from(element.querySelectorAll("span"), (span) => {
+            range.selectNodeContents(span);
+            return range.getBoundingClientRect().width;
+          });
+        const [width1, width2] = widths();
+        getContentWidthWithoutAutospace();
+        const [width1Without, width2Without] = widths();
+        // 1/8 of 16px each
+        expect(width1 - width1Without).toBeCloseTo(2, 0);
+        expect(width2 - width2Without).toBeCloseTo(2, 0);
+      } finally {
+        style.remove();
+      }
+    });
+
+    it("does not trim punctuation adjacent to the text in an inline-block", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      layout("あ」「い", { "text-spacing-trim": "normal" });
+      expect(element.querySelector("viv-ts-open").className).toBe(
+        "viv-ts-trim",
+      );
+      // The opening bracket after the inline-block is not adjacent to the
+      // closing bracket in it
+      layout('<span style="display:inline-block">あ」</span>「い', {
+        "text-spacing-trim": "normal",
+      });
+      expect(element.querySelector(":scope > viv-ts-open").className).toBe("");
+    });
+
+    // Not atomic inlines. vgen keeps two or more keywords as specified if the
+    // browser supports them, which may serialize them differently (e.g.,
+    // `inline ruby` as `ruby`), so the display is set on the checkpoints.
+    for (const display of ["inline list-item", "inline flow", "inline ruby"]) {
+      it(`inserts the spacing across the boundaries of ${display}`, function () {
+        element.innerHTML = "日本<span>ABC</span>語";
+        const { blockContext, points } = createCheckPoints({
+          "text-autospace": "normal",
+        });
+        const span = element.querySelector("span");
+        for (const point of points) {
+          if (point.viewNode === span) {
+            point.display = display;
+          }
+        }
+        polyfill.postLayoutBlock(blockContext, points);
+        expect(element.querySelectorAll(":scope > viv-ts-thin-sp").length).toBe(
+          2,
+        );
+      });
+    }
+
+    it("processes the punctuation at the edges of the text nested in an inline-block as at the edges of a block", function () {
+      spyOn(CSS, "supports").and.returnValue(false);
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        // The inline-block is a block container, at whose start the opening
+        // bracket is trimmed, as in the text directly in an inline-block
+        layout('Text<span style="display:inline-block"><b>「Text</b></span>', {
+          "text-spacing-trim": "trim-start",
+        });
+        expect(element.querySelector("viv-ts-open").className).toBe(
+          "viv-ts-trim",
+        );
+        // and at whose end the closing parenthesis hangs
+        layout('Text <span style="display:inline-block"><b>(Text)</b></span>', {
+          "hanging-punctuation": "last",
+        });
+        expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+        // also with the text outside the inline-block on both sides
+        const html =
+          'Text <span style="display:inline-block"><b>(Text)</b></span> Text';
+        layout(html, { "hanging-punctuation": "first" });
+        expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
+        layout(html, { "hanging-punctuation": "last" });
+        expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+        // and with collapsible white space at the start of the inline-block
+        layout(
+          'Text <span style="display:inline-block"> <b>(Text)</b></span> Text',
+          { "hanging-punctuation": "first" },
+        );
+        expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
+      } finally {
+        style.remove();
+      }
+    });
+
+    it("checks the line position of punctuation next to an inline-block", async function () {
+      // The lines break at the expected positions only with a font whose
+      // ideographs and punctuation are full-width (e.g., not on Linux without
+      // CJK fonts)
+      element.textContent = "国「。";
+      const textRange = document.createRange();
+      textRange.selectNodeContents(element);
+      if (Math.abs(textRange.getBoundingClientRect().width - 48) > 1) {
+        pending("full-width CJK font unavailable");
+      }
+      spyOn(CSS, "supports").and.returnValue(false);
+      element.style.width = "10em";
+      const style = document.createElement("style");
+      style.textContent = VivliostylePolyfillCss;
+      document.head.appendChild(style);
+      try {
+        await document.fonts.load('16px "-viv-ts-sp"');
+        const box = '<span style="display:inline-block">国国</span>';
+        // The opening bracket at the start of the second line is trimmed
+        layout(`国国国国国国国国${box}「国」`, {
+          "text-spacing-trim": "trim-start",
+        });
+        const open = element.querySelector(":scope > viv-ts-open");
+        const range = document.createRange();
+        range.setStart(open.nextSibling, 0);
+        range.setEnd(open.nextSibling, 1);
+        expect(
+          range.getBoundingClientRect().left -
+            element.getBoundingClientRect().left,
+        ).toBeCloseTo(8, 0);
+        // The opening bracket after an inline-block ending with ruby is not
+        // trimmed in the middle of a line, where the annotation may be lower
+        // than the top of the bracket
+        layout(
+          '国<span style="display:inline-block">国<ruby>国<rt>こく</rt></ruby></span>「国」',
+          { "text-spacing-trim": "trim-start" },
+        );
+        expect(element.querySelector(":scope > viv-ts-open").className).toBe(
+          "",
+        );
+        // The full stop at the end of the first line hangs
+        layout(`国国国国国国国国国国。${box}`, {
+          "hanging-punctuation": "allow-end",
+        });
+        expect(element.querySelector("viv-ts-close").className).toBe(
+          "viv-hang-end",
+        );
+      } finally {
+        style.remove();
+      }
+    });
   });
 
   describe("NativeTextSpacing.supportsTrim", function () {
