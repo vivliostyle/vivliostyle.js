@@ -1145,8 +1145,13 @@ function checkRubyAnnotationSpacing(
       return null;
     }
     const annotation = base && getSibling(base, true);
+    // The annotation is measured in its font, so its elements, which may
+    // have other fonts or be hidden, are not supported
     if (
       annotation?.localName !== "rt" ||
+      Array.from(annotation.childNodes).some(
+        (node) => node.nodeType !== Node.TEXT_NODE,
+      ) ||
       (text.data.match(/[^]\p{M}*/gu)?.length > 1 &&
         /[\s\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠]/u.test(text.data)) ||
       /^(start|end|left|right)$/.test(
@@ -3006,7 +3011,14 @@ export class TextSpacingPolyfill {
           container,
           type,
         );
-      if (rubySpacing === "apart" || (rubySpacing === "native" && !vertical)) {
+      // Chromium leaves the native spacing at the start of the next line if
+      // the line breaks at the boundary (see below)
+      if (
+        rubySpacing === "apart" ||
+        (rubySpacing === "native" &&
+          !vertical &&
+          !(isAfter ? isAtEndOfLine() : isAtStartOfLine()))
+      ) {
         return false;
       }
       // At the boundaries of a ruby whose annotation overhangs the text, the
