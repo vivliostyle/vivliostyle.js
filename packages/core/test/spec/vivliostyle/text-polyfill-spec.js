@@ -1386,6 +1386,18 @@ describe("text-polyfill", function () {
         );
       });
 
+      it("measures fullwidth spaces at the ends of an annotation", function () {
+        // The annotation with the fullwidth spaces, which are not collapsed,
+        // keeps the text apart from the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text">\n            \u3000\u3000\u3000\u3000ぴ\u3000\u3000\u3000\u3000\n          </rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.nodeType).toBe(
+          Node.TEXT_NODE,
+        );
+      });
+
       it("keeps the native spacing after a ruby after a separate fullwidth space", function () {
         if (!autospacesAfterRuby()) {
           pending("native autospace at the end of a ruby unavailable");

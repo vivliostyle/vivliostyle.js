@@ -1190,7 +1190,7 @@ function checkRubyAnnotationSpacing(
       if (collapse !== "collapse") {
         return null;
       }
-      content = content.replace(/[ \t\r\n\f]+/g, " ").trim();
+      content = content.replace(/[ \t\r\n\f]+/g, " ").replace(/^ | $/g, "");
     }
     const base = measureTextAdvance(text.parentElement, text.data);
     const size = measureTextAdvance(annotation, content);
