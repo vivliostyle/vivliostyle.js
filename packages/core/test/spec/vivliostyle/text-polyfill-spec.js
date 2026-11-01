@@ -1287,6 +1287,8 @@ describe("text-polyfill", function () {
           .querySelector("ruby")
           .getBoundingClientRect().right;
         element.style.width = `${right - start + 8}px`;
+        layout(html, { "text-autospace": "no-autospace" });
+        const left = rectOfChar("よ").left;
         layout(html, { "text-autospace": "normal" });
         expect(rectOfChar("に").top).toBeGreaterThan(rectOfChar("あ").top);
         expect(element.querySelector("ruby").nextSibling?.localName).toBe(
@@ -1294,7 +1296,7 @@ describe("text-polyfill", function () {
         );
         // No spacing at the start of the line (Chromium adds the native
         // spacing to に)
-        expect(rectOfChar("よ").left - start).toBeCloseTo(16, 0);
+        expect(rectOfChar("よ").left).toBeCloseTo(left, 0);
       });
 
       // Lay out the text in vertical-rl
