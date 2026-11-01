@@ -1112,14 +1112,17 @@ function checkRubyAnnotationSpacing(
 ): "apart" | "native" | "block-overhang" | "overhang" | null {
   const window = container.ownerDocument.defaultView;
   // Get the sibling of the node, skipping hidden elements (e.g., <rp>) and
-  // white space
-  const getSibling = (node: Node, next: boolean) => {
+  // empty text, and collapsible white space if skipsWhiteSpace
+  const getSibling = (node: Node, next: boolean, skipsWhiteSpace = true) => {
     let sibling = next ? node.nextSibling : node.previousSibling;
     while (
       sibling &&
       (sibling.nodeType === Node.ELEMENT_NODE
         ? window.getComputedStyle(sibling as Element).display === "none"
-        : sibling.nodeType === Node.TEXT_NODE && !sibling.textContent.trim())
+        : sibling.nodeType === Node.TEXT_NODE &&
+          (skipsWhiteSpace
+            ? /^[ \t\r\n\f]*$/.test(sibling.textContent)
+            : !sibling.textContent))
     ) {
       sibling = next ? sibling.nextSibling : sibling.previousSibling;
     }
@@ -1154,8 +1157,10 @@ function checkRubyAnnotationSpacing(
       ) ||
       (text.data.match(/[^]\p{M}*/gu)?.length > 1 &&
         /[\s\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠]/u.test(text.data)) ||
-      /^(start|end|left|right)$/.test(
-        window.getComputedStyle(ruby).getPropertyValue("ruby-align"),
+      [parent, annotation].some((elem) =>
+        /^(start|end|left|right)$/.test(
+          window.getComputedStyle(elem).getPropertyValue("ruby-align"),
+        ),
       )
     ) {
       return null;
@@ -1172,8 +1177,23 @@ function checkRubyAnnotationSpacing(
     if (!annotation) {
       return { base: 0, extension: 0, overhang: 0 };
     }
+    // Collapsible white space in the annotation (e.g., of the indentation
+    // of the source) is not rendered. Preserved one is not supported.
+    let content = annotation.textContent;
+    if (/[ \t\r\n\f]/.test(content)) {
+      const style = window.getComputedStyle(annotation);
+      const collapse =
+        style.getPropertyValue("white-space-collapse") ||
+        (/^(pre|pre-wrap|break-spaces)$/.test(style.whiteSpace)
+          ? "preserve"
+          : "collapse");
+      if (collapse !== "collapse") {
+        return null;
+      }
+      content = content.replace(/[ \t\r\n\f]+/g, " ").trim();
+    }
     const base = measureTextAdvance(text.parentElement, text.data);
-    const size = measureTextAdvance(annotation, annotation.textContent);
+    const size = measureTextAdvance(annotation, content);
     return base === null || size === null
       ? null
       : {
@@ -1240,7 +1260,7 @@ function checkRubyAnnotationSpacing(
     hasNativeAutospace(text2.parentElement, type) &&
     NativeTextSpacing.autospacesAfterRubyOutside(container.ownerDocument)
   ) {
-    const before = getSibling(ruby1, false);
+    const before = getSibling(ruby1, false, false);
     if (
       before?.nodeType !== Node.TEXT_NODE ||
       getAutospaceClass(before.textContent.match(/[^]\p{M}*$/u)[0]) !==
