@@ -19,6 +19,7 @@
 import * as Asserts from "./asserts";
 import * as Base from "./base";
 import * as Css from "./css";
+import * as Display from "./display";
 import * as LayoutHelper from "./layout-helper";
 import * as NativeTextSpacing from "./native-text-spacing";
 import * as Plugin from "./plugin";
@@ -366,6 +367,30 @@ function normalizeLang(lang: string | null | undefined): string | null {
 }
 
 /**
+ * Check if the element with the display value lets its content participate in
+ * the inline formatting context of its parent: it generates no box or an
+ * inline box that is not atomic. The text inside and outside an atomic inline,
+ * such as an inline-block, does not adjoin (CSS Text 4 § 8.4.1).
+ */
+function sharesInlineFormattingContext(display: string): boolean {
+  return (
+    display === "inline" || display === "contents" || display.startsWith("ruby")
+  );
+}
+
+/**
+ * Check if the display value generates an atomic inline, such as an
+ * inline-block.
+ */
+function isAtomicInline(display: string | null): boolean {
+  return (
+    !!display &&
+    Display.isInlineLevel(display) &&
+    !sharesInlineFormattingContext(display)
+  );
+}
+
+/**
  * Find the block container establishing the inline formatting context that
  * the node participates in.
  */
@@ -379,11 +404,7 @@ function findBlockContainer(node: Node): HTMLElement | null {
       return elem;
     }
     const { display } = window.getComputedStyle(elem);
-    if (
-      display !== "inline" &&
-      display !== "contents" &&
-      !display.startsWith("ruby")
-    ) {
+    if (!sharesInlineFormattingContext(display)) {
       return elem;
     }
   }
@@ -2362,11 +2383,17 @@ export class TextSpacingPolyfill {
               }
             }
             if (
-              (prevP.display && !/^(inline|ruby)\b/.test(prevP.display)) ||
+              (prevP.display &&
+                !sharesInlineFormattingContext(prevP.display)) ||
               (prevP.viewNode?.nodeType === Node.ELEMENT_NODE &&
                 ((prevP.viewNode as Element).localName === "br" ||
                   Base.mediaTags[(prevP.viewNode as Element).localName]))
             ) {
+              if (prevP.after && isAtomicInline(prevP.display)) {
+                // The atomic inline before the text is used only to check
+                // the line position (see processTextSpacing())
+                prevNode = prevP.viewNode;
+              }
               break;
             }
             if (prev === 0) {
@@ -2419,7 +2446,8 @@ export class TextSpacingPolyfill {
               }
             }
             if (
-              (nextP.display && !/^(inline|ruby)\b/.test(nextP.display)) ||
+              (nextP.display &&
+                !sharesInlineFormattingContext(nextP.display)) ||
               (nextP.viewNode?.nodeType === Node.ELEMENT_NODE &&
                 ((nextP.viewNode as Element).localName === "br" ||
                   Base.mediaTags[(nextP.viewNode as Element).localName]))
@@ -2429,6 +2457,11 @@ export class TextSpacingPolyfill {
                 isOutOfLine(nextP.viewNode)
               ) {
                 isLastInBlock = true;
+              }
+              if (!nextP.after && isAtomicInline(nextP.display)) {
+                // The atomic inline after the text is used only to check the
+                // line position (see processTextSpacing())
+                nextNode ||= nextP.viewNode;
               }
               break;
             }
@@ -2525,6 +2558,11 @@ export class TextSpacingPolyfill {
 
   /**
    * Process the text spacing of the text node.
+   * @param prevNode The text node before the text node, or the atomic inline
+   *   before it, which is used only to check the line position since its text
+   *   does not adjoin the text (CSS Text 4 § 8.4.1)
+   * @param nextNode The text node after the text node, or the atomic inline
+   *   after it
    * @returns `columnOver`: whether the text is beyond the column (see
    *   LayoutHelper.checkIfBeyondColumnBreaks()), and `spacedBefore`: whether
    *   the spacing of text-autospace is inserted before the text
@@ -2546,6 +2584,9 @@ export class TextSpacingPolyfill {
     const document = textNode.ownerDocument;
     const { spacingTrim, nativeTrim, hangingPunctuation, lang } = spacing;
     let columnOver = 0;
+    // The adjacent text, not an atomic inline
+    const prevText = prevNode?.nodeType === Node.TEXT_NODE ? prevNode : null;
+    const nextText = nextNode?.nodeType === Node.TEXT_NODE ? nextNode : null;
 
     function isAtStartOfLine(): boolean {
       if (isFirstAfterBreak) {
@@ -2825,14 +2866,14 @@ export class TextSpacingPolyfill {
             outerElem.className = "viv-ts-space";
           } else if (
             spacingTrim.trimAdjacent &&
-            prevNode &&
+            prevText &&
             /[\p{Ps}\p{Pi}\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]\p{M}*$/u.test(
-              prevNode.textContent,
+              prevText.textContent,
             ) &&
             // exclude non-fullwidth closing punctuations (Issue #1003)
-            (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevNode.textContent) ||
-              (prevNode.parentElement?.localName === "viv-ts-inner" &&
-                checkFullWidth(prevNode.parentElement)))
+            (!/[\p{Pe}\p{Pf}]\p{M}*$/u.test(prevText.textContent) ||
+              (prevText.parentElement?.localName === "viv-ts-inner" &&
+                checkFullWidth(prevText.parentElement)))
           ) {
             outerElem.className = "viv-ts-trim";
           } else if (
@@ -2889,9 +2930,9 @@ export class TextSpacingPolyfill {
               outerElem.className = "viv-ts-space";
             }
           } else if (
-            nextNode &&
+            nextText &&
             /^[\p{Pe}\p{Pf}\u00B7\u2027\u30FB\u3000：；、。，．]/u.test(
-              nextNode.textContent,
+              nextText.textContent,
             )
           ) {
             if (isFullWidth && spacingTrim.trimAdjacent && !nativeTrim) {
@@ -3081,11 +3122,11 @@ export class TextSpacingPolyfill {
     }
 
     const spacedBefore =
-      !!prevNode &&
+      !!prevText &&
       IDEOGRAPH_START_PATTERN.test(text) &&
-      insertAutospace(prevNode, false);
-    if (nextNode && IDEOGRAPH_END_PATTERN.test(text)) {
-      insertAutospace(nextNode, true);
+      insertAutospace(prevText, false);
+    if (nextText && IDEOGRAPH_END_PATTERN.test(text)) {
+      insertAutospace(nextText, true);
     }
     return { columnOver, spacedBefore };
   }
