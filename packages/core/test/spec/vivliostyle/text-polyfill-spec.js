@@ -1386,6 +1386,34 @@ describe("text-polyfill", function () {
         );
       });
 
+      it("does not measure an annotation out of flow", function () {
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;position:absolute">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        if (
+          getComputedStyle(element.querySelector("rt")).display === "ruby-text"
+        ) {
+          // WebKit does not position an annotation
+          pending("annotation in flow");
+        }
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("measures an annotation with its word spacing", function () {
+        // The annotation with the negative word spacing is narrower than the
+        // base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;word-spacing:-1em">ぴ ぴ ぴ ぴ ぴ ぴ ぴ</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
       it("measures fullwidth spaces at the ends of an annotation", function () {
         // The annotation with the fullwidth spaces, which are not collapsed,
         // keeps the text apart from the base

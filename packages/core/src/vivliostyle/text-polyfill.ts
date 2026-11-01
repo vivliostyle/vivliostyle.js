@@ -1061,9 +1061,14 @@ function measureTextAdvance(elem: Element, text: string): number | null {
     style.fontWeight
   } ${style.fontSize} ${style.fontFamily}`;
   context.fontKerning = style.fontKerning as CanvasFontKerning;
-  if ("letterSpacing" in context) {
-    context.letterSpacing =
-      style.letterSpacing === "normal" ? "0px" : style.letterSpacing;
+  // The spacing is applied if the canvas supports it
+  for (const name of ["letterSpacing", "wordSpacing"] as const) {
+    const value = style[name] === "normal" ? "0px" : style[name];
+    if (name in context) {
+      context[name] = value;
+    } else if (parseFloat(value)) {
+      return null;
+    }
   }
   return context.measureText(text).width;
 }
@@ -1152,6 +1157,9 @@ function checkRubyAnnotationSpacing(
     // have other fonts or be hidden, are not supported
     if (
       annotation?.localName !== "rt" ||
+      // An annotation out of flow (e.g., absolutely positioned) is not
+      // laid out over the base
+      window.getComputedStyle(annotation).display !== "ruby-text" ||
       Array.from(annotation.childNodes).some(
         (node) => node.nodeType !== Node.TEXT_NODE,
       ) ||
