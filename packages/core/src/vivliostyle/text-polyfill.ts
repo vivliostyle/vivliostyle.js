@@ -2126,9 +2126,16 @@ export class TextSpacingPolyfill {
       if (!spacing || isSpacingNone(spacing)) {
         return;
       }
-      // The first or last text in an inline-block may be at the start or end
-      // of the block (see the main loop below)
-      const inInlineBlock = textP.parent.display === "inline-block";
+      // The first or last text in an atomic inline, such as an inline-block,
+      // may be at the start or end of the block (see the main loop below)
+      let parent = textP.parent;
+      while (
+        parent &&
+        (!parent.display || sharesInlineFormattingContext(parent.display))
+      ) {
+        parent = parent.parent;
+      }
+      const inInlineBlock = isAtomicInline(parent?.display);
       const position: TextPosition = {
         mayBeFirstInBlock:
           (index === firstTextIndex && isFirstFragment) || inInlineBlock,

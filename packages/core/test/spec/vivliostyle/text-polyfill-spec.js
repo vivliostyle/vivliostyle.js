@@ -1741,6 +1741,13 @@ describe("text-polyfill", function () {
           "hanging-punctuation": "last",
         });
         expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
+        // also with the text outside the inline-block on both sides
+        const html =
+          'Text <span style="display:inline-block"><b>(Text)</b></span> Text';
+        layout(html, { "hanging-punctuation": "first" });
+        expect(element.querySelectorAll(".viv-hang-first").length).toBe(1);
+        layout(html, { "hanging-punctuation": "last" });
+        expect(element.querySelectorAll(".viv-hang-last").length).toBe(1);
       } finally {
         style.remove();
       }
