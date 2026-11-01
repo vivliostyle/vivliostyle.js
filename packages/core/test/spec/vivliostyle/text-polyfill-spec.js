@@ -1700,6 +1700,17 @@ describe("text-polyfill", function () {
       expect(element.querySelector(":scope > viv-ts-open").className).toBe("");
     });
 
+    it("inserts the spacing across the boundaries of an inline list-item", function () {
+      // An inline list-item is an inline box, not an atomic inline
+      layout(
+        '日本<span style="display:inline list-item;list-style:none">ABC</span>語',
+        { "text-autospace": "normal" },
+      );
+      expect(element.querySelectorAll(":scope > viv-ts-thin-sp").length).toBe(
+        2,
+      );
+    });
+
     it("checks the line position of punctuation next to an inline-block", async function () {
       // The lines break at the expected positions only with a font whose
       // ideographs and punctuation are full-width (e.g., not on Linux without

@@ -373,8 +373,15 @@ function normalizeLang(lang: string | null | undefined): string | null {
  * such as an inline-block, does not adjoin (CSS Text 4 § 8.4.1).
  */
 function sharesInlineFormattingContext(display: string): boolean {
+  if (display === "contents" || display.startsWith("ruby")) {
+    return true;
+  }
+  // An inline box has the inner display type flow, which may be omitted,
+  // e.g., "inline list-item"
+  const keywords = display.split(" ");
   return (
-    display === "inline" || display === "contents" || display.startsWith("ruby")
+    keywords.includes("inline") &&
+    keywords.every((keyword) => /^(inline|flow|list-item)$/.test(keyword))
   );
 }
 
