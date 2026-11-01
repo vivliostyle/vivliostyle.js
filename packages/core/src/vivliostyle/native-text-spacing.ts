@@ -34,6 +34,10 @@ type AutospaceSupport = {
   // innermost element containing the boundary, even if not on either side
   // (WebKit)
   boundaryByContainer: boolean;
+  // The spacing at the end of a ruby before text is inserted outside the
+  // ruby, before the text (Chromium). WebKit inserts it in the ruby base, and
+  // Firefox does not insert it.
+  boundaryAfterRubyOutside: boolean;
   // In vertical text, the spacing is not inserted next to upright characters
   // (WebKit inserts it)
   vertical: boolean;
@@ -63,6 +67,7 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       acrossTextNodes: false,
       boundaryByFollowingSide: false,
       boundaryByContainer: false,
+      boundaryAfterRubyOutside: false,
       vertical: false,
     };
   }
@@ -126,8 +131,29 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       "text-autospace:no-autospace",
       [0, 1],
     ),
+    boundaryAfterRubyOutside: false,
     vertical: false,
   };
+  // Measure the text and the ruby in `<ruby>aa<rt>あ</rt></ruby>日`, whose
+  // ruby base is wider than the annotation
+  const measureRuby = (value: string): [number, number] => {
+    const elem = document.createElement("span");
+    elem.style.setProperty("text-autospace", value);
+    const ruby = document.createElement("ruby");
+    const rt = document.createElement("rt");
+    rt.append("あ");
+    ruby.append("aa", rt);
+    elem.append(ruby, "日");
+    probe.replaceChildren(elem);
+    return [
+      elem.getBoundingClientRect().width,
+      ruby.getBoundingClientRect().width,
+    ];
+  };
+  const [width, rubyWidth] = measureRuby("normal");
+  const [widthNone, rubyWidthNone] = measureRuby("no-autospace");
+  result.boundaryAfterRubyOutside =
+    width - widthNone > 5 && Math.abs(rubyWidth - rubyWidthNone) < 1;
   probe.style.writingMode = "vertical-rl";
   vertical = true;
   const verticalSpacing = hasSpacing(["日1日"]);
@@ -190,6 +216,16 @@ export function autospacesByFollowingSide(document: Document): boolean {
  */
 export function autospacesByContainer(document: Document): boolean {
   return getAutospaceSupport(document).boundaryByContainer;
+}
+
+/**
+ * Check if the native text-autospace inserts the spacing at the end of a ruby
+ * before text outside the ruby, before the text (Chromium), where disabling
+ * it on the ruby base does not always stop it (see TextSpacingPolyfill).
+ * WebKit inserts it in the ruby base, and Firefox does not insert it.
+ */
+export function autospacesAfterRubyOutside(document: Document): boolean {
+  return getAutospaceSupport(document).boundaryAfterRubyOutside;
 }
 
 const OPENING = "‘“〝（［｛｟\u2329〈《「『【〔〖〘〚";

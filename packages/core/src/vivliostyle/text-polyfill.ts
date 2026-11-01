@@ -784,6 +784,29 @@ function getCommonAncestor(node1: Node, node2: Node): Element | null {
 }
 
 /**
+ * Find the ruby (`display: ruby`) in the container that contains the node.
+ * The display of a view element is in its inline style, which is read before
+ * the computed style, since this is called at every element boundary with
+ * the spacing.
+ */
+function findRuby(node: Node, container: Element): HTMLElement | null {
+  for (
+    let elem = node.parentElement;
+    elem && elem !== container;
+    elem = elem.parentElement
+  ) {
+    const display =
+      elem.style?.display ||
+      (elem.localName === "ruby" &&
+        elem.ownerDocument.defaultView.getComputedStyle(elem).display);
+    if (display === "ruby") {
+      return elem;
+    }
+  }
+  return null;
+}
+
+/**
  * Check if non-zero margin, border, or padding intervenes between the end of
  * node1 and the start of node2, where no text-autospace is inserted (CSS Text
  * 4 § 8.4.1).
@@ -1000,6 +1023,286 @@ function isOnDifferentLines(
     Math.abs(center(rect1) - center(rect2)) >
     Math.min(size(rect1), size(rect2)) / 2
   );
+}
+
+// IDEOGRAPH_ALPHA_BOUNDARY_PATTERN without the global flag
+const IDEOGRAPH_ALPHA_BOUNDARY_TEST = new RegExp(
+  IDEOGRAPH_ALPHA_BOUNDARY_PATTERN.source,
+  "su",
+);
+
+const measureContexts = new WeakMap<Document, CanvasRenderingContext2D>();
+
+// Font properties that the canvas does not apply, with their initial values
+// and the values that do not change the advances (Firefox sets `ruby` on
+// <rt>, which selects glyphs for annotations)
+const UNMEASURED_FONT_PROPERTIES: [string, RegExp][] = [
+  ["font-size-adjust", /^(none)?$/],
+  ["font-feature-settings", /^(normal)?$/],
+  ["font-variant-east-asian", /^(normal|ruby)?$/],
+  ["font-variation-settings", /^(normal)?$/],
+  ["font-stretch", /^(normal|100%)?$/],
+  ["font-variant-caps", /^(normal)?$/],
+];
+
+/**
+ * Get the advance of the text in the font of the element, measured with a
+ * canvas, so that the content is not laid out again. It is not exact, but
+ * close with the font properties that the canvas applies. Return null if it
+ * cannot be measured, e.g., with font features (such as `palt`) or
+ * `font-size-adjust`.
+ */
+function measureTextAdvance(elem: Element, text: string): number | null {
+  const document = elem.ownerDocument;
+  const style = document.defaultView.getComputedStyle(elem);
+  if (
+    UNMEASURED_FONT_PROPERTIES.some(
+      ([name, initial]) => !initial.test(style.getPropertyValue(name)),
+    ) ||
+    style.textTransform !== "none" ||
+    style.getPropertyValue("text-orientation") === "upright" ||
+    style.getPropertyValue("text-combine-upright") === "all"
+  ) {
+    return null;
+  }
+  let context = measureContexts.get(document);
+  if (!context) {
+    context = document.createElement("canvas").getContext("2d");
+    if (!context) {
+      return null;
+    }
+    measureContexts.set(document, context);
+  }
+  context.font = `${style.fontStyle === "italic" ? "italic " : ""}${
+    style.fontWeight
+  } ${style.fontSize} ${style.fontFamily}`;
+  context.fontKerning = style.fontKerning as CanvasFontKerning;
+  // The spacing is applied if the canvas supports it
+  for (const name of ["letterSpacing", "wordSpacing"] as const) {
+    const value = style[name] === "normal" ? "0px" : style[name];
+    if (name in context) {
+      context[name] = value;
+    } else if (parseFloat(value)) {
+      return null;
+    }
+  }
+  return context.measureText(text).width;
+}
+
+// The type of autospace of the character (ideograph or not), or null if it is
+// neither an ideograph nor a non-ideographic letter or numeral
+function getAutospaceClass(char: string): "ideograph" | "alpha" | null {
+  return IDEOGRAPH_START_PATTERN.test(char)
+    ? "ideograph"
+    : /^(?![\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠])[\p{L}\p{Nd}]/u.test(char)
+      ? "alpha"
+      : null;
+}
+
+/**
+ * Check if the annotation of a ruby wider than its base keeps the text on the
+ * other side of the boundary at least the spacing of text-autospace apart
+ * from the base, after overhanging the text, at the boundary between the end
+ * of text1 and the start of text2 at the end of ruby1 and/or the start of
+ * ruby2. If so, the native spacing is disabled on the base text, which keeps
+ * the overhang (a space character, even zero-width, reduces it in Chromium),
+ * and "apart" is returned. If the overhang leaves less than the spacing,
+ * "block-overhang" is returned if the annotations extend at least the
+ * spacing beyond the bases, so that stopping the overhang leaves enough, or
+ * "overhang" otherwise. "block-overhang" is also returned where Chromium
+ * keeps the native spacing after a ruby whose base text disables it.
+ *
+ * Laying out the content again is costly, so the layout is not read: the
+ * sizes of the annotation and the base are measured with a canvas, and the
+ * annotation is assumed to overhang the text by up to half its font size
+ * (Chromium and WebKit; Firefox does not overhang, where the spacing that
+ * stops the overhang has no effect). The base is assumed to be centered on
+ * the annotation. Only a base text node, or an <rb> of it, followed by its
+ * annotation and without justification opportunities (e.g., a word of
+ * letters or a single ideograph), which `ruby-align` does not distribute, is
+ * supported.
+ */
+function checkRubyAnnotationSpacing(
+  text1: Text,
+  text2: Text,
+  ruby1: HTMLElement | null,
+  ruby2: HTMLElement | null,
+  container: Element,
+  type: "ideograph-alpha" | "ideograph-numeric",
+): "apart" | "block-overhang" | "overhang" | null {
+  const window = container.ownerDocument.defaultView;
+  // Get the sibling of the node, skipping hidden elements (e.g., <rp>) and
+  // empty text, and collapsible white space if skipsWhiteSpace
+  const getSibling = (node: Node, next: boolean, skipsWhiteSpace = true) => {
+    let sibling = next ? node.nextSibling : node.previousSibling;
+    while (
+      sibling &&
+      (sibling.nodeType === Node.ELEMENT_NODE
+        ? window.getComputedStyle(sibling as Element).display === "none"
+        : sibling.nodeType === Node.TEXT_NODE &&
+          (skipsWhiteSpace
+            ? /^[ \t\r\n\f]*$/.test(sibling.textContent)
+            : !sibling.textContent))
+    ) {
+      sibling = next ? sibling.nextSibling : sibling.previousSibling;
+    }
+    return sibling as HTMLElement | null;
+  };
+  // Get the annotation of the base text: the <rt> after the text or the <rb>
+  // of the text in the ruby. The text must be the whole base, which may have
+  // been split by the polyfill (see getSplitOffsets()). Consecutive <rb>
+  // elements are not supported, which browsers do not pair with consecutive
+  // <rt> elements.
+  const getAnnotation = (text: Text, ruby: HTMLElement) => {
+    const parent = text.parentElement;
+    const base =
+      parent === ruby
+        ? text
+        : parent?.localName === "rb" &&
+            parent.parentElement === ruby &&
+            parent.childNodes.length === 1
+          ? parent
+          : null;
+    const previous = base && getSibling(base, false);
+    if (previous && previous.localName !== "rt") {
+      return null;
+    }
+    const annotation = base && getSibling(base, true);
+    // The annotation is measured in its font, so its elements, which may
+    // have other fonts or be hidden, are not supported
+    if (
+      annotation?.localName !== "rt" ||
+      // An annotation out of flow (e.g., absolutely positioned) is not
+      // laid out over the base
+      window.getComputedStyle(annotation).display !== "ruby-text" ||
+      Array.from(annotation.childNodes).some(
+        (node) => node.nodeType !== Node.TEXT_NODE,
+      ) ||
+      (text.data.match(/[^]\p{M}*/gu)?.length > 1 &&
+        /[\s\p{sc=Han}ぁ-ヿ㇀-ㇿ！-｠]/u.test(text.data)) ||
+      [parent, annotation].some((elem) =>
+        /^(start|end|left|right)$/.test(
+          window.getComputedStyle(elem).getPropertyValue("ruby-align"),
+        ),
+      )
+    ) {
+      return null;
+    }
+    return annotation;
+  };
+  const annotation1 = ruby1 && getAnnotation(text1, ruby1);
+  const annotation2 = ruby2 && getAnnotation(text2, ruby2);
+  if ((ruby1 && !annotation1) || (ruby2 && !annotation2)) {
+    return null;
+  }
+  // The sizes of the bases and how far the annotations extend beyond them
+  const getSizes = (text: Text, annotation: HTMLElement | null) => {
+    if (!annotation) {
+      return { base: 0, extension: 0, overhang: 0 };
+    }
+    // Collapsible white space in the annotation (e.g., of the indentation
+    // of the source) is not rendered. Preserved one is not supported.
+    let content = annotation.textContent;
+    if (/[ \t\r\n\f]/.test(content)) {
+      const style = window.getComputedStyle(annotation);
+      const collapse =
+        style.getPropertyValue("white-space-collapse") ||
+        (/^(pre|pre-wrap|break-spaces)$/.test(style.whiteSpace)
+          ? "preserve"
+          : "collapse");
+      if (collapse !== "collapse") {
+        return null;
+      }
+      content = content.replace(/[ \t\r\n\f]+/g, " ").replace(/^ | $/g, "");
+    }
+    const base = measureTextAdvance(text.parentElement, text.data);
+    const size = measureTextAdvance(annotation, content);
+    return base === null || size === null
+      ? null
+      : {
+          base,
+          extension: (size - base) / 2,
+          overhang:
+            parseFloat(window.getComputedStyle(annotation).fontSize) / 2,
+        };
+  };
+  const sizes1 = getSizes(text1, annotation1);
+  const sizes2 = getSizes(text2, annotation2);
+  if (!sizes1 || !sizes2) {
+    return null;
+  }
+  const style = window.getComputedStyle(container);
+  const spacingSize = parseFloat(style.fontSize) / 8 - 0.01;
+  // The canvas may measure the text differently from the layout
+  const tolerance = 1 + Math.max(sizes1.base, sizes2.base) / 20;
+  // The annotation must be wider than the base with the native spacing,
+  // since the annotation narrower than that may be distributed over the base
+  // with the spacing (Chromium), or not centered in the rect (Firefox)
+  if (
+    (annotation1 && sizes1.extension * 2 <= spacingSize + tolerance) ||
+    (annotation2 && sizes2.extension * 2 <= spacingSize + tolerance)
+  ) {
+    return null;
+  }
+  const extension = sizes1.extension + sizes2.extension;
+  if (extension - sizes1.overhang - sizes2.overhang - tolerance < spacingSize) {
+    return extension >= spacingSize ? "block-overhang" : "overhang";
+  }
+  // Disable the native spacing on the element of the base text (e.g., <rb>)
+  // and on the ruby, by which WebKit determines it at the end of the ruby,
+  // unless the base text has its own spacing, for which the text is not
+  // split (see getSplitOffsets())
+  const elements = [
+    ...new Set([
+      annotation1 && text1.parentElement,
+      annotation1 && ruby1,
+      annotation2 && text2.parentElement,
+      annotation2 && ruby2,
+    ]),
+  ].filter((elem) => elem && hasNativeAutospace(elem, type));
+  if (
+    elements.some((elem) =>
+      IDEOGRAPH_ALPHA_BOUNDARY_TEST.test(
+        Array.from(elem.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.textContent)
+          .join(""),
+      ),
+    )
+  ) {
+    return null;
+  }
+  // Chromium adds the native spacing after a ruby to the following
+  // character. Disabling it on the base text stops it only if the character
+  // before the ruby is of the same type of autospace as the following one, as
+  // Chromium then determines the spacing by them.
+  if (
+    annotation1 &&
+    !ruby2 &&
+    elements.length &&
+    hasNativeAutospace(text2.parentElement, type) &&
+    NativeTextSpacing.autospacesAfterRubyOutside(container.ownerDocument)
+  ) {
+    const before = getSibling(ruby1, false, false);
+    if (
+      before?.nodeType !== Node.TEXT_NODE ||
+      getAutospaceClass(before.textContent.match(/[^]\p{M}*$/u)[0]) !==
+        getAutospaceClass(text2.data.match(/^[^]\p{M}*/u)[0])
+    ) {
+      return "block-overhang";
+    }
+  }
+  for (const elem of elements) {
+    elem.style.setProperty("text-autospace", "no-autospace");
+  }
+  if (elements.length) {
+    // WebKit does not lay out a ruby again for the change of its
+    // text-autospace, but does if its base text is inserted again
+    for (const text of [annotation1 && text1, annotation2 && text2]) {
+      text?.replaceWith(text);
+    }
+  }
+  return "apart";
 }
 
 /**
@@ -2726,6 +3029,28 @@ export class TextSpacingPolyfill {
       ) {
         return false;
       }
+      // At the boundaries of a ruby, no spacing is needed if the ruby
+      // annotation wider than the base already keeps the text apart from the
+      // base. Otherwise, an almost zero-width space (`viv-ts-zero`) stops the
+      // overhang of the annotation if the annotation then keeps the text
+      // apart, or the spacing is inserted.
+      const precedingNode = (isAfter ? textNode : adjacentNode) as Text;
+      const followingNode = (isAfter ? adjacentNode : textNode) as Text;
+      const precedingRuby = findRuby(precedingNode, container);
+      const followingRuby = findRuby(followingNode, container);
+      const rubySpacing =
+        (precedingRuby || followingRuby) &&
+        checkRubyAnnotationSpacing(
+          precedingNode,
+          followingNode,
+          precedingRuby,
+          followingRuby,
+          container,
+          type,
+        );
+      if (rubySpacing === "apart") {
+        return false;
+      }
       let ref: ChildNode = textNode;
       while (ref.parentNode !== container) {
         ref = ref.parentElement;
@@ -2737,8 +3062,18 @@ export class TextSpacingPolyfill {
         return false;
       }
       const thinSp = document.createElement("viv-ts-thin-sp");
+      if (rubySpacing === "block-overhang") {
+        thinSp.className = "viv-ts-zero";
+      }
       if (isAfter) {
         ref.after(thinSp);
+        // Chromium does not break a line between a space in another element
+        // and a ruby whose base starts with a letter or numeral, but does at
+        // <wbr> before the space. <wbr> after the space would stop the ruby
+        // annotation from overhanging the preceding text further.
+        if (followingRuby) {
+          thinSp.append(document.createElement("wbr"));
+        }
       } else {
         ref.before(thinSp);
       }

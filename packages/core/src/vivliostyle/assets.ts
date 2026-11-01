@@ -1625,6 +1625,12 @@ viv-ts-thin-sp::after {
   text-orientation: mixed;
   visibility: hidden;
 }
+/* Stops the native spacing and the ruby annotation overhang without spacing
+   (see TextSpacingPolyfill.processTextSpacing()) */
+viv-ts-thin-sp.viv-ts-zero::after {
+  /* Not zero, since WebKit lets the annotation overhang a zero-width space */
+  letter-spacing: -0.4995em;
+}
 [style*=text-decoration] :is(viv-ts-thin-sp, viv-ts-close.viv-ts-auto)::after {
   visibility: visible;
 }

@@ -893,6 +893,10 @@ module.exports = [
         file: "text-spacing/autospace-margin-border-padding.html",
         title: "text-autospace across margin, border, or padding (PR #2228)",
       },
+      {
+        file: "text-spacing/autospace-ruby.html",
+        title: "text-autospace at ruby boundaries (PR #2246)",
+      },
     ],
   },
   {

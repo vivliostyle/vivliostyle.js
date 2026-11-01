@@ -1,0 +1,100 @@
+<!doctype html>
+<!-- Test case: text-autospace at the boundaries of a ruby -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>text-autospace at ruby boundaries</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 2;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      p {
+        margin: 0;
+      }
+      .normal p {
+        text-autospace: normal;
+      }
+      /* Not supported by browsers, so the polyfill processes it */
+      .alpha p {
+        text-autospace: ideograph-alpha;
+      }
+      .narrow p {
+        inline-size: 6em;
+        outline: 1px dotted #999;
+        margin-block-end: 0.5em;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        block-size: 12em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      The spacing between the ruby base and the adjacent text is 1/8em, unless
+      the ruby annotation wider than the base already keeps the text that far
+      apart from the base after overhanging it (“PHP” in the second line). If
+      the overhang leaves less (“漢” between Latin letters), the overhang is
+      stopped, so that the annotation keeps the text apart (Firefox does not
+      overhang). The ruby annotation stays centered on the base. The “normal”
+      lines must be the same as the “ideograph-alpha” lines (the polyfill).
+    </p>
+    <div class="normal">
+      <h2>text-autospace: normal</h2>
+      <p><ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発（ruby at the line start）</p>
+      <p>これは<ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発（wide annotation）</p>
+      <p>この<ruby>Platform<rt>プラ</rt></ruby>を使う（wide base）</p>
+      <p>ABC<ruby>漢<rt>かんじ</rt></ruby>DEF（Latin letters around）</p>
+      <p>ABC<ruby>漢字<rt>かんじ</rt></ruby>DEF</p>
+      <p>これは<ruby><rb>PHP</rb><rp>（</rp><rt>ピーエイチピー</rt><rp>）</rp></ruby>による開発（rb and rp）</p>
+      <p>ABC<ruby><rb>漢</rb><rp>（</rp><rt>かんじ</rt><rp>）</rp></ruby>DEF（rb and rp）</p>
+    </div>
+    <div class="alpha">
+      <h2>text-autospace: ideograph-alpha</h2>
+      <p><ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発（ruby at the line start）</p>
+      <p>これは<ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発（wide annotation）</p>
+      <p>この<ruby>Platform<rt>プラ</rt></ruby>を使う（wide base）</p>
+      <p>ABC<ruby>漢<rt>かんじ</rt></ruby>DEF（Latin letters around）</p>
+      <p>ABC<ruby>漢字<rt>かんじ</rt></ruby>DEF</p>
+      <p>これは<ruby><rb>PHP</rb><rp>（</rp><rt>ピーエイチピー</rt><rp>）</rp></ruby>による開発（rb and rp）</p>
+      <p>ABC<ruby><rb>漢</rb><rp>（</rp><rt>かんじ</rt><rp>）</rp></ruby>DEF（rb and rp）</p>
+    </div>
+    <div class="normal narrow">
+      <h2>Line breaks at the boundaries (normal)</h2>
+      <!-- か stays at the end of the first line -->
+      <p style="inline-size: 6.5em">あいうえおか<ruby>PHP<rt>ピー</rt></ruby>です</p>
+      <!-- No spacing at the start of the second line -->
+      <p>あいうえお<ruby>漢<rt>かん</rt></ruby>ABC</p>
+      <p>あいう<ruby>PHP<rt>ピー</rt></ruby>による開発</p>
+    </div>
+    <div class="alpha narrow">
+      <h2>Line breaks at the boundaries (ideograph-alpha)</h2>
+      <p style="inline-size: 6.5em">あいうえおか<ruby>PHP<rt>ピー</rt></ruby>です</p>
+      <p>あいうえお<ruby>漢<rt>かん</rt></ruby>ABC</p>
+      <p>あいう<ruby>PHP<rt>ピー</rt></ruby>による開発</p>
+    </div>
+    <div class="vertical">
+      <div class="normal">
+        <p><ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発</p>
+        <p>これは<ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発</p>
+        <p>ABC<ruby>漢<rt>かんじ</rt></ruby>DEF</p>
+      </div>
+      <div class="alpha">
+        <p><ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発</p>
+        <p>これは<ruby>PHP<rt>ピーエイチピー</rt></ruby>による開発</p>
+        <p>ABC<ruby>漢<rt>かんじ</rt></ruby>DEF</p>
+      </div>
+    </div>
+  </body>
+</html>

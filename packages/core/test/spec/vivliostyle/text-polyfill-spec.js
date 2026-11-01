@@ -1009,6 +1009,15 @@ describe("text-polyfill", function () {
     const none = 'data-props=\'{"text-autospace":"no-autospace"}\'';
     const normal = 'data-props=\'{"text-autospace":"normal"}\'';
 
+    // Whether the native autospace inserts the spacing at the end of a ruby,
+    // outside the ruby (Chromium), where the polyfill leaves it
+    function autospacesAfterRuby() {
+      return (
+        NativeTextSpacing.supportsAutospace(document, "normal") &&
+        NativeTextSpacing.autospacesAfterRubyOutside(document)
+      );
+    }
+
     it("does not insert autospace across white space between elements", function () {
       layout("<span>日本</span> <span>ABC</span>", {
         "text-autospace": "normal",
@@ -1162,6 +1171,270 @@ describe("text-polyfill", function () {
         },
       );
       expect(element.querySelector(":scope > viv-ts-thin-sp")).not.toBeNull();
+    });
+
+    describe("at ruby boundaries", function () {
+      let style;
+
+      beforeEach(async function () {
+        // The thin spaces are styled by the polyfill
+        style = document.createElement("style");
+        style.textContent = VivliostylePolyfillCss;
+        document.head.appendChild(style);
+        await document.fonts.load('16px "-viv-ts-sp"');
+      });
+
+      afterEach(function () {
+        style.remove();
+      });
+
+      // Get the rect of the first occurrence of the character in the base
+      // text
+      function rectOfChar(char) {
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          const index = node.data.indexOf(char);
+          if (index >= 0 && !node.parentElement.closest("rt")) {
+            const range = document.createRange();
+            range.setStart(node, index);
+            range.setEnd(node, index + 1);
+            return range.getBoundingClientRect();
+          }
+        }
+        return null;
+      }
+
+      // The base text directly in the ruby, or in <rb>
+      for (const [name, base] of [
+        ["", (text) => text],
+        [" (<rb>)", (text) => `<rb style="display:ruby-base">${text}</rb>`],
+      ]) {
+        it(`stops the annotation overhanging Latin letters${name}`, function () {
+          // The overhang of the annotation slightly wider than the base
+          // leaves less than the spacing, and stopping it leaves enough
+          // (Firefox, which does not overhang, is not distinguished)
+          layout(
+            `ABC<ruby style="display:ruby">${base("漢")}<rt style="display:ruby-text">かんじ</rt></ruby>DEF`,
+            { "text-autospace": "normal" },
+          );
+          const thinSps = element.querySelectorAll("viv-ts-thin-sp");
+          expect(thinSps.length).toBe(2);
+          thinSps.forEach((thinSp) =>
+            expect(thinSp.className).toBe("viv-ts-zero"),
+          );
+        });
+
+        it(`does not insert the spacing where the wider annotation keeps the text apart${name}`, function () {
+          // The annotation extends beyond the base more than the spacing,
+          // even after overhanging the kana, also with fonts whose kana are
+          // narrower (e.g., on Linux)
+          const html = `あ<ruby style="display:ruby">${base("PHP")}<rt style="display:ruby-text">ぴーえいちぴーぴーえいちぴー</rt></ruby>による`;
+          layout(html, { "text-autospace": "no-autospace" });
+          const left = rectOfChar("H").left;
+          const next = rectOfChar("よ").left;
+          layout(html, { "text-autospace": "normal" });
+          expect(element.querySelector("viv-ts-thin-sp")).toBeNull();
+          // Nor does the native autospace
+          expect(rectOfChar("H").left - left)
+            .withContext("base")
+            .toBeCloseTo(0, 0);
+          expect(rectOfChar("よ").left - next)
+            .withContext("following text")
+            .toBeCloseTo(0, 0);
+        });
+      }
+
+      it("does not measure one of consecutive <rb> elements as the whole base", function () {
+        spyOn(CSS, "supports").and.returnValue(false);
+        // Browsers pair the bases with the first annotation, which is much
+        // wider than 漢 but not than ABC漢
+        layout(
+          '<ruby style="display:ruby"><rb style="display:ruby-base">ABC</rb><rb style="display:ruby-base">漢</rb><rt style="display:ruby-text">かんじかん</rt><rt style="display:ruby-text">かんじ</rt></ruby>DEF',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("does not measure an annotation with elements", function () {
+        // The annotation in a smaller font is narrower than the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text"><span style="font-size:0.1em">ぴーえいちぴーぴーえいちぴー</span></rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("checks the alignment of <rb>", function () {
+        if (!CSS.supports("ruby-align", "start")) {
+          pending("ruby-align unsupported");
+        }
+        // The base aligned at the start of the annotation is not apart from
+        // the text before it
+        layout(
+          'あ<ruby style="display:ruby"><rb style="display:ruby-base;ruby-align:start">PHP</rb><rt style="display:ruby-text">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("does not measure collapsible white space in an annotation", function () {
+        // The annotation of a single kana is narrower than the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text">\n            ぴ\n          </rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("does not measure an annotation out of flow", function () {
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;position:absolute">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        if (
+          getComputedStyle(element.querySelector("rt")).display === "ruby-text"
+        ) {
+          // WebKit does not position an annotation
+          pending("annotation in flow");
+        }
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("measures an annotation with its word spacing", function () {
+        // The annotation with the negative word spacing is narrower than the
+        // base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;word-spacing:-1em">ぴ ぴ ぴ ぴ ぴ ぴ ぴ</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("does not measure an annotation with font-size-adjust", function () {
+        if (!CSS.supports("font-size-adjust", "0.1")) {
+          pending("font-size-adjust unsupported");
+        }
+        // The annotation adjusted to a smaller font is narrower than the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;font-size-adjust:0.1">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("measures fullwidth spaces at the ends of an annotation", function () {
+        // The annotation with the fullwidth spaces, which are not collapsed,
+        // keeps the text apart from the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text">\n            \u3000\u3000\u3000\u3000ぴ\u3000\u3000\u3000\u3000\n          </rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.nodeType).toBe(
+          Node.TEXT_NODE,
+        );
+      });
+
+      it("stops the native spacing after a ruby after a separate fullwidth space", function () {
+        if (!autospacesAfterRuby()) {
+          pending("native autospace at the end of a ruby unavailable");
+        }
+        // The fullwidth space before the ruby is in its own text node, as
+        // split by the polyfill. Chromium keeps the native spacing after the
+        // ruby, which is stopped (in vertical text, it would draw the
+        // following character over the base).
+        element.style.writingMode = "vertical-rl";
+        element.style.height = "20em";
+        const ruby = document.createElement("ruby");
+        ruby.style.display = "ruby";
+        ruby.innerHTML =
+          'PHP<rt style="display:ruby-text">ぴーえいちぴーぴーえいちぴー</rt>';
+        element.replaceChildren("あ", "\u3000", ruby, "による");
+        const { blockContext, points } = createCheckPoints(
+          { "text-autospace": "normal" },
+          { vertical: true },
+        );
+        polyfill.postLayoutBlock(blockContext, points);
+        const thinSp = element.querySelector("ruby").nextSibling;
+        expect(thinSp?.localName).toBe("viv-ts-thin-sp");
+        expect(thinSp.className).toBe("viv-ts-zero");
+      });
+
+      it("measures the whole base split by the polyfill", function () {
+        spyOn(CSS, "supports").and.returnValue(false);
+        // The annotation is wider than 漢 but narrower than the whole base,
+        // which the polyfill splits at ABC|漢
+        layout(
+          'ABC<ruby style="display:ruby">ABC漢<rt style="display:ruby-text">かんじ</rt></ruby>DEF',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
+      it("stops the native spacing that Chromium keeps after a ruby at the start of a block", function () {
+        if (!autospacesAfterRuby()) {
+          pending("native autospace at the end of a ruby unavailable");
+        }
+        // Chromium inserts the native spacing even if it is disabled on the
+        // ruby base
+        layout(
+          '<ruby style="display:ruby">PHP<rt style="display:ruby-text">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        const thinSp = element.querySelector("ruby").nextSibling;
+        expect(thinSp?.localName).toBe("viv-ts-thin-sp");
+        expect(thinSp.className).toBe("viv-ts-zero");
+      });
+
+      it("inserts the spacing where the line breaks", function () {
+        const html =
+          'あいうえ<ruby style="display:ruby">PHP<rt style="display:ruby-text">ぴー</rt></ruby>による';
+        layout(html, { "text-autospace": "no-autospace" });
+        const start = element.getBoundingClientRect().left;
+        // Room for the spacing before the ruby, but not for に
+        const right = element
+          .querySelector("ruby")
+          .getBoundingClientRect().right;
+        element.style.width = `${right - start + 8}px`;
+        layout(html, { "text-autospace": "no-autospace" });
+        const left = rectOfChar("よ").left;
+        layout(html, { "text-autospace": "normal" });
+        expect(rectOfChar("に").top).toBeGreaterThan(rectOfChar("あ").top);
+        expect(element.querySelector("ruby").nextSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+        // No spacing at the start of the line (Chromium adds the native
+        // spacing to に)
+        expect(rectOfChar("よ").left).toBeCloseTo(left, 0);
+      });
+
+      it("allows a line break before a ruby whose base starts with a letter", function () {
+        element.style.width = "6.5em";
+        layout(
+          'あいうえおか<ruby style="display:ruby">PHP<rt style="display:ruby-text">ぴー</rt></ruby>です',
+          { "text-autospace": "normal" },
+        );
+        // か is not moved to the next line with the ruby (Chromium does not
+        // break between the space of the spacing and the ruby)
+        expect(rectOfChar("か").top).toBeCloseTo(rectOfChar("あ").top, 0);
+        expect(rectOfChar("P").top).toBeGreaterThan(rectOfChar("か").top);
+      });
     });
 
     it("preserves punctuation boundaries in a ruby formatting context", function () {
