@@ -2619,6 +2619,14 @@ export class TextSpacingPolyfill {
     const prevText = prevNode?.nodeType === Node.TEXT_NODE ? prevNode : null;
     const nextText = nextNode?.nodeType === Node.TEXT_NODE ? nextNode : null;
 
+    // The client rects of the adjacent node: only the box of an atomic inline,
+    // not the rects of its content, such as a ruby annotation
+    function getClientRectsOfAdjacent(node: Node): DOMRectList {
+      return node.nodeType === Node.ELEMENT_NODE
+        ? (node as Element).getClientRects()
+        : RangeClientRects.getClientRectsOfNode(node);
+    }
+
     function isAtStartOfLine(): boolean {
       if (isFirstAfterBreak) {
         return true;
@@ -2630,7 +2638,7 @@ export class TextSpacingPolyfill {
       if (!rect) {
         return false;
       }
-      const prevRects = RangeClientRects.getClientRectsOfNode(prevNode);
+      const prevRects = getClientRectsOfAdjacent(prevNode);
       const prevRect = prevRects[prevRects.length - 1];
       if (!prevRect) {
         return false;
@@ -2654,7 +2662,7 @@ export class TextSpacingPolyfill {
         return false;
       }
       columnOver ||= LayoutHelper.checkIfBeyondColumnBreaks(rect, vertical);
-      const nextRect = RangeClientRects.getClientRectsOfNode(nextNode)[0];
+      const nextRect = getClientRectsOfAdjacent(nextNode)[0];
       if (!nextRect) {
         return false;
       }

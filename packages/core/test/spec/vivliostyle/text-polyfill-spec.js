@@ -1789,6 +1789,16 @@ describe("text-polyfill", function () {
           range.getBoundingClientRect().left -
             element.getBoundingClientRect().left,
         ).toBeCloseTo(8, 0);
+        // The opening bracket after an inline-block ending with ruby is not
+        // trimmed in the middle of a line, where the annotation may be lower
+        // than the top of the bracket
+        layout(
+          '国<span style="display:inline-block">国<ruby>国<rt>こく</rt></ruby></span>「国」',
+          { "text-spacing-trim": "trim-start" },
+        );
+        expect(element.querySelector(":scope > viv-ts-open").className).toBe(
+          "",
+        );
         // The full stop at the end of the first line hangs
         layout(`国国国国国国国国国国。${box}`, {
           "hanging-punctuation": "allow-end",
