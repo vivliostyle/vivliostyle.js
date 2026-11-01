@@ -1033,16 +1033,32 @@ const IDEOGRAPH_ALPHA_BOUNDARY_TEST = new RegExp(
 
 const measureContexts = new WeakMap<Document, CanvasRenderingContext2D>();
 
+// Font properties that the canvas does not apply, with their initial values
+// and the values that do not change the advances (Firefox sets `ruby` on
+// <rt>, which selects glyphs for annotations)
+const UNMEASURED_FONT_PROPERTIES: [string, RegExp][] = [
+  ["font-size-adjust", /^(none)?$/],
+  ["font-feature-settings", /^(normal)?$/],
+  ["font-variant-east-asian", /^(normal|ruby)?$/],
+  ["font-variation-settings", /^(normal)?$/],
+  ["font-stretch", /^(normal|100%)?$/],
+  ["font-variant-caps", /^(normal)?$/],
+];
+
 /**
  * Get the advance of the text in the font of the element, measured with a
- * canvas, so that the content is not laid out again. It is not exact, since
- * font features other than kerning (e.g., `palt`) are not applied. Return
- * null if it cannot be measured.
+ * canvas, so that the content is not laid out again. It is not exact, but
+ * close with the font properties that the canvas applies. Return null if it
+ * cannot be measured, e.g., with font features (such as `palt`) or
+ * `font-size-adjust`.
  */
 function measureTextAdvance(elem: Element, text: string): number | null {
   const document = elem.ownerDocument;
   const style = document.defaultView.getComputedStyle(elem);
   if (
+    UNMEASURED_FONT_PROPERTIES.some(
+      ([name, initial]) => !initial.test(style.getPropertyValue(name)),
+    ) ||
     style.textTransform !== "none" ||
     style.getPropertyValue("text-orientation") === "upright" ||
     style.getPropertyValue("text-combine-upright") === "all"

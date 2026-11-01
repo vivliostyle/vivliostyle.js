@@ -1414,6 +1414,20 @@ describe("text-polyfill", function () {
         );
       });
 
+      it("does not measure an annotation with font-size-adjust", function () {
+        if (!CSS.supports("font-size-adjust", "0.1")) {
+          pending("font-size-adjust unsupported");
+        }
+        // The annotation adjusted to a smaller font is narrower than the base
+        layout(
+          'あ<ruby style="display:ruby">PHP<rt style="display:ruby-text;font-size-adjust:0.1">ぴーえいちぴーぴーえいちぴー</rt></ruby>による',
+          { "text-autospace": "normal" },
+        );
+        expect(element.querySelector("ruby").previousSibling?.localName).toBe(
+          "viv-ts-thin-sp",
+        );
+      });
+
       it("measures fullwidth spaces at the ends of an annotation", function () {
         // The annotation with the fullwidth spaces, which are not collapsed,
         // keeps the text apart from the base
