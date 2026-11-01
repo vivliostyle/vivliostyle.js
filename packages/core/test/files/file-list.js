@@ -895,7 +895,7 @@ module.exports = [
       },
       {
         file: "text-spacing/autospace-ruby.html",
-        title: "text-autospace at ruby boundaries",
+        title: "text-autospace at ruby boundaries (PR #2246)",
       },
     ],
   },
