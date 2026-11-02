@@ -384,7 +384,13 @@ describe("vgen", function () {
       "inline",
     );
     // including the values equivalent to inline, which are kept as specified
-    for (const display of ["inline flow", "flow inline", "initial", "unset"]) {
+    for (const display of [
+      "inline flow",
+      "flow inline",
+      "initial",
+      "unset",
+      "INLINE",
+    ]) {
       expect(computeDisplay("vertical-rl", "horizontal-tb", display)).toBe(
         "inline-block",
       );

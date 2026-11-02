@@ -105,7 +105,7 @@ export function getComputedDisplayValue(
     display = blockify(display);
   } else if (
     writingModeChanged &&
-    /^(inline|inline flow|flow inline|initial|unset)$/.test(String(display))
+    /^(inline|inline flow|flow inline|initial|unset)$/i.test(String(display))
   ) {
     // An in-flow inline box with a writing mode different from its parent's
     // becomes an inline-block
