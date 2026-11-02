@@ -910,7 +910,7 @@ module.exports = [
       {
         file: "text-spacing/ts-allow-end-no-break.html",
         title:
-          "No line break before word joiner etc. after line-end punctuation (allow-end, force-end)",
+          "No line break before word joiner etc. after line-end punctuation (PR #2250)",
       },
     ],
   },
