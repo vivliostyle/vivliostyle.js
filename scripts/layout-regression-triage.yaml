@@ -1,3 +1,15 @@
+- category: Hanging punctuation
+  title: "hanging-punctuation allow-end/force-end on full lines in vertical text (Issue #2249)"
+  file: text-spacing/hanging-punctuation-vertical-full-line.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2215, #2233, and #2251"
+  approvedViewer: git-fix-firefox-vertical-hang-end  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-vertical-full-line.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/hanging-punctuation-vertical-full-line.html&zoom=1&spread=false
 - category: Text spacing
   title: "No line break before word joiner etc. after line-end punctuation (PR #2250)"
   file: text-spacing/ts-allow-end-no-break.html
