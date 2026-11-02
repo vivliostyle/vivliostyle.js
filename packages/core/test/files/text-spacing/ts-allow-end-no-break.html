@@ -1,0 +1,121 @@
+<!doctype html>
+<!-- Test case: no line break after closing punctuation adjusted for the end of a line (text-spacing-trim allow-end/trim-end, hanging-punctuation allow-end/force-end) where the browser does not break the line, e.g., before U+2060 WORD JOINER -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>No line break before no-break characters after line-end punctuation</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      p {
+        margin: 0.25em 0;
+      }
+      .test p {
+        text-autospace: normal;
+        outline: 1px solid;
+        inline-size: 11em;
+      }
+      .test .narrow {
+        inline-size: 10em;
+      }
+      .test .half {
+        inline-size: 10.5em;
+      }
+      .end {
+        text-align: end;
+      }
+      .trim-both {
+        text-spacing-trim: trim-both;
+      }
+      .trim-all {
+        text-spacing-trim: trim-all;
+      }
+      .allow-end {
+        hanging-punctuation: allow-end;
+      }
+      .force-end {
+        hanging-punctuation: force-end;
+      }
+      .anywhere {
+        overflow-wrap: anywhere;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        inline-size: 12em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      The polyfill sets a space after closing punctuation to adjust it at the
+      end of a line, and the browser breaks the line after the space before
+      any character. The lines marked “no break” must keep 「こ。」 with the
+      character after it, as the browser does without the polyfill: the line
+      may not break before U+2060 WORD JOINER, U+FEFF, U+00A0, 「……」 or 「！」.
+      The lines marked “break” or “hangs” break after 「。」.
+    </p>
+    <div class="test">
+      <h2>text-spacing-trim: normal (allow-end)</h2>
+      <p>あいうえおかきくけこ。<span>*1</span>（break）</p>
+      <p>あいうえおかきくけこ。<span>&#x2060;*2</span>（WJ in span: no break）</p>
+      <p>あいうえおかきくけこ。&#x2060;<span>*3</span>（WJ before span: no break）</p>
+      <p>あいうえおかきくけこ。&#xFEFF;*4（ZWNBSP: no break）</p>
+      <p>あいうえおかきくけこ。&#xA0;*5（NBSP: no break）</p>
+      <p>あいうえおかきくけこ。……（ellipsis: no break）</p>
+      <p>あいうえおかきくけこ。！（exclamation: no break）</p>
+      <p>あいうえおかきくけこ。<span style="white-space: nowrap">*8</span>（nowrap: break）</p>
+      <p class="half">あいうえおかきくけこ。 a（space: break）</p>
+    </div>
+    <div class="test trim-both">
+      <h2>text-spacing-trim: trim-both</h2>
+      <p>あいうえおかきくけこ。&#x2060;*9（WJ: no break）</p>
+    </div>
+    <div class="test allow-end">
+      <h2>hanging-punctuation: allow-end</h2>
+      <p>あいうえおかきくけこ。&#x2060;*10（WJ: no break）</p>
+      <p class="narrow">あいうえおかきくけこ。&#x2060;*11（WJ: no break）</p>
+      <p class="narrow">あいうえおかきくけこ。*12（hangs）</p>
+      <p class="narrow">あいうえおかきくけこ。<wbr>&#x2060;*26（wbr: hangs）</p>
+    </div>
+    <div class="test force-end">
+      <h2>hanging-punctuation: force-end</h2>
+      <p>あいうえおかきくけこ。&#x2060;*13（WJ: no break）</p>
+      <p class="narrow">あいうえおかきくけこ。<wbr>&#x2060;*27（wbr: hangs）</p>
+    </div>
+    <div class="test trim-all">
+      <h2>text-spacing-trim: trim-all</h2>
+      <p class="narrow allow-end">あいうえおかきくけこ。&#x2060;*20（allow-end, WJ: no break, half-width）</p>
+      <p class="force-end">あいうえおかきくけこ。&#x2060;*21（force-end, WJ: no break, half-width）</p>
+    </div>
+    <div class="test end">
+      <h2>text-align: end</h2>
+      <p class="half">あいうえおかきくけこ。a（break）</p>
+      <p class="narrow allow-end">あいうえおかきくけこ。a（hangs）</p>
+    </div>
+    <div class="test anywhere">
+      <h2>overflow-wrap: anywhere</h2>
+      <p>あいうえおかきくけこ。<span>*22</span>（break）</p>
+      <p>あいうえおかきくけこ。&#x2060;*23（WJ: no break）</p>
+      <p>あいうえおかきくけこ。！（exclamation: no break）</p>
+    </div>
+    <div class="test vertical">
+      <p>あいうえおかきくけこ。<span>&#x2060;*14</span>（no break）</p>
+      <p>あいうえおかきくけこ。……（no break）</p>
+      <p class="trim-both">あいうえおかきくけこ。&#x2060;*16（no break）</p>
+      <p class="narrow allow-end">あいうえおかきくけこ。&#x2060;*17（no break）</p>
+      <p class="narrow force-end">あいうえおかきくけこ。&#x2060;*18（no break）</p>
+      <!-- Firefox does not hang it in vertical text (Issue #2249) -->
+      <p class="narrow allow-end">あいうえおかきくけこ。*19（hangs）</p>
+      <p class="half end">あいうえおかきくけこ。a（break）</p>
+      <!-- Firefox does not hang it in vertical text (Issue #2249) -->
+      <p class="narrow allow-end end">あいうえおかきくけこ。a（hangs）</p>
+    </div>
+  </body>
+</html>

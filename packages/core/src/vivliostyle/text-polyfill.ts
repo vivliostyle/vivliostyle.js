@@ -978,6 +978,13 @@ function isClosingPunctuation(
 // Characters that cannot start a line (closing punctuation, etc.)
 const NO_BREAK_BEFORE_PATTERN =
   /^[\p{Pe}\p{Pf}、。，．：；！？!?‼⁇⁈⁉・ゝゞヽヾ々〻､｡]/u;
+// Characters before which a line may not break, also after a space: those
+// that cannot start a line, word joiners, no-break spaces and hyphens, and
+// ellipses (except with `line-break: anywhere`, or `loose` for ellipses)
+const NO_BREAK_AFTER_SPACE_PATTERN = new RegExp(
+  `${NO_BREAK_BEFORE_PATTERN.source}|^[\\u00A0\\u2007\\u2011\\u202F\\u2060\\uFEFF\\u2025\\u2026]`,
+  "u",
+);
 // White space after which a line may break
 const BREAKING_SPACE_PATTERN = /^[ \t\n\r\f\u200B]/u;
 // Ideographs and kana before which a line may break, except with
@@ -1021,6 +1028,27 @@ function isLineBreakOpportunity(
         IDEOGRAPH_LINE_START_PATTERN.test(char) &&
         breaksIdeographs))
   );
+}
+
+/**
+ * Check if a <wbr> element, which is a line break opportunity even before a
+ * word joiner, is between the node and the following node. A TreeWalker is
+ * used, since a Range would add to the cost of later DOM mutations (see
+ * RangeClientRects).
+ */
+function hasWbrBetween(node: Node, nextNode: Node): boolean {
+  const document = node.ownerDocument;
+  const walker = document.createTreeWalker(
+    document,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+  );
+  walker.currentNode = node;
+  for (let n = walker.nextNode(); n && n !== nextNode; n = walker.nextNode()) {
+    if ((n as Element).localName === "wbr") {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -3023,6 +3051,24 @@ export class TextSpacingPolyfill {
             } else {
               trimIfMovedToLineEnd(false);
             }
+          }
+          if (
+            (outerElem.classList.contains("viv-ts-auto") ||
+              outerElem.classList.contains("viv-hang-end")) &&
+            !isLastInBlock &&
+            !isLastBeforeForcedLineBreak &&
+            nextText &&
+            NO_BREAK_AFTER_SPACE_PATTERN.test(nextText.textContent) &&
+            !hasWbrBetween(outerElem, nextText) &&
+            document.defaultView.getComputedStyle(outerElem).lineBreak !==
+              "anywhere"
+          ) {
+            // The space set after the punctuation by these classes lets the
+            // line break after it before any character, since browsers break
+            // after a space, even where the line may not break without the
+            // space (e.g., before U+2060 WORD JOINER). The punctuation that
+            // the line may not break after is not at the end of a line.
+            outerElem.className = "";
           }
           if (
             hangingEnd &&
