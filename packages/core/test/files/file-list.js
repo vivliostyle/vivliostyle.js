@@ -902,6 +902,11 @@ module.exports = [
         title:
           "text-autospace and text-spacing-trim at inline-block boundaries (PR #2247)",
       },
+      {
+        file: "text-spacing/autospace-orthogonal-inline.html",
+        title:
+          "text-autospace at the boundaries of inline boxes with a different writing mode (PR #2248)",
+      },
     ],
   },
   {

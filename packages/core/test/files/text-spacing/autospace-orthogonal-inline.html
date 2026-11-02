@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- Test case: no text-autospace across the boundaries of inline boxes whose writing mode differs from their parent's, which become inline-blocks (CSS Writing Modes 4 § 3.1) -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>text-autospace at orthogonal inline boundaries</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      body {
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      h2 {
+        font-size: 1em;
+        margin: 0.5em 0 0;
+      }
+      p {
+        margin: 0;
+      }
+      .normal p {
+        text-autospace: normal;
+      }
+      /* Not supported by browsers, so the polyfill processes it */
+      .alpha p {
+        text-autospace: ideograph-alpha;
+      }
+      .vertical {
+        writing-mode: vertical-rl;
+        block-size: 12em;
+        margin-block-end: 1em;
+      }
+      .h {
+        writing-mode: horizontal-tb;
+        background: #ddd;
+      }
+      .v {
+        writing-mode: vertical-rl;
+        background: #ddd;
+      }
+      .lr {
+        writing-mode: vertical-lr;
+        background: #ddd;
+      }
+      .bg {
+        background: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      An inline box whose writing mode differs from its parent's becomes an
+      inline-block, so no spacing is inserted at its boundaries (gray
+      background). The spacing of an ordinary inline box (last line of each
+      group) is kept.
+    </p>
+    <div class="vertical">
+      <section class="normal">
+        <h2>vertical-rl, text-autospace: normal</h2>
+        <p>昭和<span class="h">55</span>年（horizontal-tb）</p>
+        <p>国<span class="h">ABC</span>国（horizontal-tb）</p>
+        <p>国<span class="lr">ABC</span>国（vertical-lr）</p>
+        <p>昭和<span class="bg">55</span>年（inline: spacing）</p>
+      </section>
+      <section class="alpha">
+        <h2>vertical-rl, text-autospace: ideograph-alpha</h2>
+        <p>国<span class="h">ABC</span>国（horizontal-tb）</p>
+        <p>国<span class="lr">ABC</span>国（vertical-lr）</p>
+        <p>国<span class="bg">ABC</span>国（inline: spacing）</p>
+      </section>
+    </div>
+    <section class="normal">
+      <h2>horizontal-tb, text-autospace: normal</h2>
+      <p>国国<span class="v">ABC</span>国国（vertical-rl）</p>
+      <p>国国<span class="bg">ABC</span>国国（inline: spacing）</p>
+    </section>
+    <section class="alpha">
+      <h2>horizontal-tb, text-autospace: ideograph-alpha</h2>
+      <p>国国<span class="v">ABC</span>国国（vertical-rl）</p>
+      <p>国国<span class="bg">ABC</span>国国（inline: spacing）</p>
+    </section>
+  </body>
+</html>
