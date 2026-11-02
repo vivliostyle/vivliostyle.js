@@ -2055,4 +2055,34 @@ describe("text-polyfill", function () {
       ).toBe(false);
     });
   });
+
+  describe("NativeTextSpacing.autospacesAfterRubyOutside", function () {
+    it("lays out a ruby only when checked, not to check the native autospace in text", function () {
+      // Laying out a ruby annotation changes the layout of other content in
+      // the document in Chromium 153
+      const frame = document.createElement("iframe");
+      document.body.appendChild(frame);
+      try {
+        const frameDocument = frame.contentDocument;
+        const createElement = spyOn(
+          frameDocument,
+          "createElement",
+        ).and.callThrough();
+        NativeTextSpacing.supportsAutospace(frameDocument, "normal");
+        NativeTextSpacing.autospacesAcrossTextNodes(frameDocument);
+        NativeTextSpacing.autospacesByFollowingSide(frameDocument);
+        NativeTextSpacing.autospacesByContainer(frameDocument);
+        expect(createElement).not.toHaveBeenCalledWith("ruby");
+        const result =
+          NativeTextSpacing.autospacesAfterRubyOutside(frameDocument);
+        expect(createElement).toHaveBeenCalledWith("ruby");
+        expect(NativeTextSpacing.autospacesAfterRubyOutside(document)).toBe(
+          result,
+        );
+        expect(frameDocument.body.childNodes.length).toBe(0);
+      } finally {
+        frame.remove();
+      }
+    });
+  });
 });

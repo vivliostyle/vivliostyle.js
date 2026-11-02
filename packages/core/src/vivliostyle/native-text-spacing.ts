@@ -34,20 +34,29 @@ type AutospaceSupport = {
   // innermost element containing the boundary, even if not on either side
   // (WebKit)
   boundaryByContainer: boolean;
-  // The spacing at the end of a ruby before text is inserted outside the
-  // ruby, before the text (Chromium). WebKit inserts it in the ruby base, and
-  // Firefox does not insert it.
-  boundaryAfterRubyOutside: boolean;
   // In vertical text, the spacing is not inserted next to upright characters
   // (WebKit inserts it)
   vertical: boolean;
 };
 
 const autospaceCaches = new WeakMap<Document, AutospaceSupport>();
+const rubyAutospaceCaches = new WeakMap<Document, boolean>();
 const trimCaches = new WeakMap<Document, Map<string, boolean>>();
 
 export function supports(property: string, value: string): boolean {
   return typeof CSS !== "undefined" && CSS.supports(property, value);
+}
+
+/**
+ * Create a hidden element in the body to measure the native autospace in.
+ */
+function createAutospaceProbe(body: HTMLElement): HTMLElement {
+  const probe = body.ownerDocument.createElement("div");
+  probe.style.cssText =
+    "all:initial;position:absolute;visibility:hidden;display:block;" +
+    "font:100px/1 serif;white-space:pre;text-spacing-trim:space-all;";
+  body.appendChild(probe);
+  return probe;
 }
 
 /**
@@ -67,15 +76,10 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       acrossTextNodes: false,
       boundaryByFollowingSide: false,
       boundaryByContainer: false,
-      boundaryAfterRubyOutside: false,
       vertical: false,
     };
   }
-  const probe = document.createElement("div");
-  probe.style.cssText =
-    "all:initial;position:absolute;visibility:hidden;display:block;" +
-    "font:100px/1 serif;white-space:pre;text-spacing-trim:space-all;";
-  body.appendChild(probe);
+  const probe = createAutospaceProbe(body);
   let vertical = false;
   // Measure the texts, those at the indexes (the second one by default) in
   // inner elements with the style if given
@@ -131,29 +135,8 @@ function getAutospaceSupport(document: Document): AutospaceSupport {
       "text-autospace:no-autospace",
       [0, 1],
     ),
-    boundaryAfterRubyOutside: false,
     vertical: false,
   };
-  // Measure the text and the ruby in `<ruby>aa<rt>あ</rt></ruby>日`, whose
-  // ruby base is wider than the annotation
-  const measureRuby = (value: string): [number, number] => {
-    const elem = document.createElement("span");
-    elem.style.setProperty("text-autospace", value);
-    const ruby = document.createElement("ruby");
-    const rt = document.createElement("rt");
-    rt.append("あ");
-    ruby.append("aa", rt);
-    elem.append(ruby, "日");
-    probe.replaceChildren(elem);
-    return [
-      elem.getBoundingClientRect().width,
-      ruby.getBoundingClientRect().width,
-    ];
-  };
-  const [width, rubyWidth] = measureRuby("normal");
-  const [widthNone, rubyWidthNone] = measureRuby("no-autospace");
-  result.boundaryAfterRubyOutside =
-    width - widthNone > 5 && Math.abs(rubyWidth - rubyWidthNone) < 1;
   probe.style.writingMode = "vertical-rl";
   vertical = true;
   const verticalSpacing = hasSpacing(["日1日"]);
@@ -223,9 +206,44 @@ export function autospacesByContainer(document: Document): boolean {
  * before text outside the ruby, before the text (Chromium), where disabling
  * it on the ruby base does not always stop it (see TextSpacingPolyfill).
  * WebKit inserts it in the ruby base, and Firefox does not insert it.
+ *
+ * This is checked only when needed, i.e., for a document with rubies, since
+ * once a ruby annotation is laid out in a document, Chromium 153 lays out
+ * some content of the document differently, even after the ruby is removed
+ * (e.g., the line in a block with a negative margin-top moves up).
  */
 export function autospacesAfterRubyOutside(document: Document): boolean {
-  return getAutospaceSupport(document).boundaryAfterRubyOutside;
+  let result = rubyAutospaceCaches.get(document);
+  if (result !== undefined) {
+    return result;
+  }
+  const body = document.body;
+  if (!body) {
+    return false;
+  }
+  const probe = createAutospaceProbe(body);
+  // Measure the text and the ruby in `<ruby>aa<rt>あ</rt></ruby>日`, whose
+  // ruby base is wider than the annotation
+  const measure = (value: string): [number, number] => {
+    const elem = document.createElement("span");
+    elem.style.setProperty("text-autospace", value);
+    const ruby = document.createElement("ruby");
+    const rt = document.createElement("rt");
+    rt.append("あ");
+    ruby.append("aa", rt);
+    elem.append(ruby, "日");
+    probe.replaceChildren(elem);
+    return [
+      elem.getBoundingClientRect().width,
+      ruby.getBoundingClientRect().width,
+    ];
+  };
+  const [width, rubyWidth] = measure("normal");
+  const [widthNone, rubyWidthNone] = measure("no-autospace");
+  probe.remove();
+  result = width - widthNone > 5 && Math.abs(rubyWidth - rubyWidthNone) < 1;
+  rubyAutospaceCaches.set(document, result);
+  return result;
 }
 
 const OPENING = "‘“〝（［｛｟\u2329〈《「『【〔〖〘〚";
