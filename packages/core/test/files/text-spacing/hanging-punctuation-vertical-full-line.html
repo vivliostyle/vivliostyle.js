@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Test case: hanging-punctuation allow-end/force-end on lines filled exactly in vertical text (Issue #2249) -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <title>hanging-punctuation on full lines in vertical text</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+      html {
+        writing-mode: vertical-rl;
+      }
+      p {
+        margin: 0 0.25em;
+      }
+      p[class] {
+        inline-size: 10em;
+        outline: 1px solid;
+      }
+      .allow-end {
+        hanging-punctuation: allow-end;
+      }
+      .force-end {
+        hanging-punctuation: force-end;
+      }
+      .trim-all {
+        text-spacing-trim: trim-all;
+      }
+      p.half {
+        inline-size: 10.5em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p>
+      In each line marked “hangs”, ten characters fill the line, and 「。」 or
+      「、」 after them hangs at the end of the line. Firefox rounds the advance
+      of a character to whole pixels in vertical text, so it is not exactly
+      1em there.
+    </p>
+    <p class="allow-end">あいうえおかきくけこ。さしすせそ（allow-end: hangs）</p>
+    <p class="force-end">あいうえおかきくけこ。さしすせそ（force-end: hangs）</p>
+    <p class="allow-end">あいうえおかきくけこ、さしすせそ（allow-end: hangs）</p>
+    <p class="allow-end trim-all">あいうえおかきくけこ。さしすせそ（trim-all, allow-end: hangs）</p>
+    <p class="half">あいうえおかきくけこ。さしすせそ（text-spacing-trim allow-end: half-width at the end）</p>
+  </body>
+</html>
