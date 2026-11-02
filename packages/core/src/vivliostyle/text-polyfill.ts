@@ -2861,6 +2861,33 @@ export class TextSpacingPolyfill {
         }
       }
 
+      // Check if the line may break after the punctuation without the space
+      // set after it by `viv-ts-auto` and `viv-hang-end`, which lets the
+      // line break even where it may not without the space (e.g., before
+      // U+2060 WORD JOINER), since browsers break after a space before any
+      // character. With a margin before the punctuation wider than the
+      // line, the line breaks at the first break opportunity after it.
+      function canBreakAfter(): boolean {
+        if (
+          !nextNode ||
+          (nextText && isLineBreakOpportunity(text, nextText.textContent, true))
+        ) {
+          return true;
+        }
+        const { className } = outerElem;
+        outerElem.className = "";
+        outerElem.style.marginInlineStart = "100000px";
+        const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
+        const nextRect = getClientRectsOfAdjacent(nextNode)[0];
+        outerElem.removeAttribute("style");
+        outerElem.className = className;
+        return (
+          !rect ||
+          !nextRect ||
+          (vertical ? nextRect.top < rect.top : nextRect.left < rect.left)
+        );
+      }
+
       // The classes set below reduce the advance of the punctuation by
       // `--viv-ts-shift` (see VivliostylePolyfillCss): the closing
       // punctuation gets negative margin-inline-start, and its glyph is
@@ -3035,6 +3062,17 @@ export class TextSpacingPolyfill {
             // since it makes the punctuation full-width if the line is fitted
             // again and it is no longer at the end of the line.
             outerElem.className = "viv-ts-trim";
+          }
+          if (
+            (outerElem.classList.contains("viv-ts-auto") ||
+              outerElem.classList.contains("viv-hang-end")) &&
+            !isLastInBlock &&
+            !isLastBeforeForcedLineBreak &&
+            !canBreakAfter()
+          ) {
+            // The punctuation that the line may not break after is not at
+            // the end of a line
+            outerElem.className = "";
           }
         } else if (tagName === "viv-ts-middle") {
           outerElem.className = "viv-ts-trim";
