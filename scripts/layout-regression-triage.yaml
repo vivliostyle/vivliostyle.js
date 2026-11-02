@@ -1,4 +1,16 @@
 - category: Text spacing
+  title: "text-autospace at the boundaries of inline boxes with a different writing mode (PR #2248)"
+  file: text-spacing/autospace-orthogonal-inline.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2248"
+  approvedViewer: git-fix-autospace-orthogonal-inline  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-orthogonal-inline.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/autospace-orthogonal-inline.html&zoom=1&spread=false
+- category: Text spacing
   title: "text-autospace and text-spacing-trim at inline-block boundaries (PR #2247)"
   file: text-spacing/autospace-inline-block.html
   decision: expected  # regression / expected / skip
