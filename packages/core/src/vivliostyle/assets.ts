@@ -1564,8 +1564,9 @@ viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-end, .viv-hang-last)
 viv-ts-close:is(.viv-ts-trim, .viv-ts-auto, .viv-hang-hw) {
   --viv-ts-shift: 0.5em;
 }
+/* The advance of the punctuation, if measured (Issue #2249) */
 viv-ts-close.viv-hang-end:not(.viv-hang-hw) {
-  --viv-ts-shift: 1em;
+  --viv-ts-shift: var(--viv-ts-advance, 1em);
 }
 /* The punctuation reduced by a fixed amount, measured as full-width, is not
    trimmed again by the native text-spacing-trim */
@@ -1599,8 +1600,8 @@ viv-ts-close.viv-hang-end::after {
   visibility: hidden;
 }
 viv-ts-close.viv-hang-end:not(.viv-hang-hw)::after {
-  /* 0.5em space + 0.5em = 1em */
-  letter-spacing: 0.5em;
+  /* 0.5em space + the rest = the advance of the punctuation */
+  letter-spacing: calc(var(--viv-ts-advance, 1em) - 0.5em);
 }
 /* With trim-all, the hanging punctuation is half-width where it does not
    hang: 0.5em space */

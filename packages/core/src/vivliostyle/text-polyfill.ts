@@ -2856,6 +2856,18 @@ export class TextSpacingPolyfill {
       }
       const isFullWidth = checkFullWidth(innerElem);
 
+      // The full-width punctuation that may hang at the end of a line is
+      // shifted by its advance instead of 1em (see VivliostylePolyfillCss),
+      // since they differ in vertical text in Firefox, which rounds the
+      // advance to whole pixels (Issue #2249)
+      if (hangingEnd && isFullWidth) {
+        const rect = innerElem.getBoundingClientRect();
+        outerElem.style.setProperty(
+          "--viv-ts-advance",
+          `${vertical ? rect.height : rect.width}px`,
+        );
+      }
+
       function linePosition(): number {
         return vertical ? outerElem.offsetLeft : outerElem.offsetTop;
       }

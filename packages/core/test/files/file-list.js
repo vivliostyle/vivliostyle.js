@@ -943,6 +943,11 @@ module.exports = [
         title:
           "hanging-punctuation first/last with inline border/padding (Issue #2194)",
       },
+      {
+        file: "text-spacing/hanging-punctuation-vertical-full-line.html",
+        title:
+          "hanging-punctuation allow-end/force-end on full lines in vertical text (Issue #2249)",
+      },
     ],
   },
   {
