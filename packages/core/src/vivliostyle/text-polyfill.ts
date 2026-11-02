@@ -1031,6 +1031,17 @@ function isLineBreakOpportunity(
 }
 
 /**
+ * Check if a <wbr> element, which is a line break opportunity even before a
+ * word joiner, is between the two nodes.
+ */
+function hasWbrBetween(node: Node, nextNode: Node): boolean {
+  const range = node.ownerDocument.createRange();
+  range.setStartAfter(node);
+  range.setEndBefore(nextNode);
+  return !!range.cloneContents().querySelector("wbr");
+}
+
+/**
  * Get the rect of the characters from the offset to the end offset in the
  * text node, or undefined if they are not rendered (e.g., white space
  * collapsed at the end of a line).
@@ -3038,6 +3049,7 @@ export class TextSpacingPolyfill {
             !isLastBeforeForcedLineBreak &&
             nextText &&
             NO_BREAK_AFTER_SPACE_PATTERN.test(nextText.textContent) &&
+            !hasWbrBetween(outerElem, nextText) &&
             document.defaultView.getComputedStyle(outerElem).lineBreak !==
               "anywhere"
           ) {
