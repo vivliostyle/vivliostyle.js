@@ -1032,13 +1032,23 @@ function isLineBreakOpportunity(
 
 /**
  * Check if a <wbr> element, which is a line break opportunity even before a
- * word joiner, is between the two nodes.
+ * word joiner, is between the node and the following node. A TreeWalker is
+ * used, since a Range would add to the cost of later DOM mutations (see
+ * RangeClientRects).
  */
 function hasWbrBetween(node: Node, nextNode: Node): boolean {
-  const range = node.ownerDocument.createRange();
-  range.setStartAfter(node);
-  range.setEndBefore(nextNode);
-  return !!range.cloneContents().querySelector("wbr");
+  const document = node.ownerDocument;
+  const walker = document.createTreeWalker(
+    document,
+    NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+  );
+  walker.currentNode = node;
+  for (let n = walker.nextNode(); n && n !== nextNode; n = walker.nextNode()) {
+    if ((n as Element).localName === "wbr") {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
