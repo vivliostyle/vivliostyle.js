@@ -337,6 +337,57 @@ describe("vgen", function () {
     }
   });
 
+  it("computes the display of an inline box with a writing mode different from its parent's to inline-block", function () {
+    const scope = new Exprs.LexicalScope(null);
+    scope.defineName("left-page", new Exprs.Const(scope, false));
+    const context = new Exprs.Context(scope, 800, 600, 16);
+    context.style = { pageScope: scope };
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      nodeContext: { parent: { viewNode: document.createElement("p") } },
+      sourceNode: document.createElement("span"),
+      xmldoc: { root: document.createElement("html") },
+      regionIds: [],
+    });
+    const computeDisplay = (parentMode, mode, display, float = "none") => {
+      const result = {};
+      factory.computeStyle(
+        parentMode,
+        false,
+        {
+          "writing-mode": new CssCascade.CascadeValue(Css.getName(mode), 1),
+          display: new CssCascade.CascadeValue(Css.getName(display), 1),
+          float: new CssCascade.CascadeValue(Css.getName(float), 1),
+        },
+        result,
+      );
+      return result.display.toString();
+    };
+    expect(computeDisplay("vertical-rl", "horizontal-tb", "inline")).toBe(
+      "inline-block",
+    );
+    expect(computeDisplay("horizontal-tb", "vertical-rl", "inline")).toBe(
+      "inline-block",
+    );
+    expect(computeDisplay("vertical-rl", "vertical-lr", "inline")).toBe(
+      "inline-block",
+    );
+    expect(computeDisplay("vertical-rl", "vertical-rl", "inline")).toBe(
+      "inline",
+    );
+    // Other display types and out-of-flow boxes are not inline-blockified
+    expect(computeDisplay("vertical-rl", "horizontal-tb", "block")).toBe(
+      "block",
+    );
+    expect(computeDisplay("vertical-rl", "horizontal-tb", "inline-flex")).toBe(
+      "inline-flex",
+    );
+    expect(
+      computeDisplay("vertical-rl", "horizontal-tb", "inline", "left"),
+    ).toBe("block");
+  });
+
   it("preserves em and lh for a browser-resolved font shorthand", function () {
     const scope = new Exprs.LexicalScope(null);
     const context = new Exprs.Context(scope, 800, 600, 16, 20);

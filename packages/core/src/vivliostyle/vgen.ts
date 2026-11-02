@@ -1127,6 +1127,7 @@ export class ViewFactory
       position,
       float,
       this.sourceNode === this.xmldoc.root,
+      !isRoot && writingMode !== inheritedWritingMode,
     );
     ["display", "position", "float"].forEach((name) => {
       if (displayValues[name]) {
