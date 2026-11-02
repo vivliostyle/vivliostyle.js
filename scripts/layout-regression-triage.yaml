@@ -1,4 +1,16 @@
 - category: Text spacing
+  title: "No line break before word joiner etc. after line-end punctuation (PR #2250)"
+  file: text-spacing/ts-allow-end-no-break.html
+  decision: expected  # regression / expected / skip
+  notes: "Improved in PR #2250"
+  approvedViewer: git-fix-no-break-after-line-end-d823f4  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-allow-end-no-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/text-spacing/ts-allow-end-no-break.html&zoom=1&spread=false
+- category: Text spacing
   title: "text-autospace at the boundaries of inline boxes with a different writing mode (PR #2248)"
   file: text-spacing/autospace-orthogonal-inline.html
   decision: expected  # regression / expected / skip
