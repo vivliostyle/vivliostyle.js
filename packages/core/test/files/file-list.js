@@ -905,7 +905,7 @@ module.exports = [
       {
         file: "text-spacing/autospace-orthogonal-inline.html",
         title:
-          "text-autospace at the boundaries of inline boxes with a different writing mode",
+          "text-autospace at the boundaries of inline boxes with a different writing mode (PR #2248)",
       },
     ],
   },
