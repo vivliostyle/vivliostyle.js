@@ -103,7 +103,10 @@ export function getComputedDisplayValue(
     isRoot
   ) {
     display = blockify(display);
-  } else if (writingModeChanged && display === Css.ident.inline) {
+  } else if (
+    writingModeChanged &&
+    /^(inline|inline flow|flow inline|initial|unset)$/.test(String(display))
+  ) {
     // An in-flow inline box with a writing mode different from its parent's
     // becomes an inline-block
     display = Css.ident.inline_block;

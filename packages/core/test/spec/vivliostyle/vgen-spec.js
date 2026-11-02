@@ -357,7 +357,14 @@ describe("vgen", function () {
         false,
         {
           "writing-mode": new CssCascade.CascadeValue(Css.getName(mode), 1),
-          display: new CssCascade.CascadeValue(Css.getName(display), 1),
+          display: new CssCascade.CascadeValue(
+            display.includes(" ")
+              ? new Css.SpaceList(
+                  display.split(" ").map((name) => Css.getName(name)),
+                )
+              : Css.getName(display),
+            1,
+          ),
           float: new CssCascade.CascadeValue(Css.getName(float), 1),
         },
         result,
@@ -376,6 +383,12 @@ describe("vgen", function () {
     expect(computeDisplay("vertical-rl", "vertical-rl", "inline")).toBe(
       "inline",
     );
+    // including the values equivalent to inline, which are kept as specified
+    for (const display of ["inline flow", "flow inline", "initial", "unset"]) {
+      expect(computeDisplay("vertical-rl", "horizontal-tb", display)).toBe(
+        "inline-block",
+      );
+    }
     // Other display types and out-of-flow boxes are not inline-blockified
     expect(computeDisplay("vertical-rl", "horizontal-tb", "block")).toBe(
       "block",
