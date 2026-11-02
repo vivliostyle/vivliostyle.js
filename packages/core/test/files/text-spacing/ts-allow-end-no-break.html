@@ -42,6 +42,9 @@
       .force-end {
         hanging-punctuation: force-end;
       }
+      .anywhere {
+        overflow-wrap: anywhere;
+      }
       .vertical {
         writing-mode: vertical-rl;
         inline-size: 12em;
@@ -68,6 +71,7 @@
       <p>あいうえおかきくけこ。……（ellipsis: no break）</p>
       <p>あいうえおかきくけこ。！（exclamation: no break）</p>
       <p>あいうえおかきくけこ。<span style="white-space: nowrap">*8</span>（nowrap: break）</p>
+      <p class="half">あいうえおかきくけこ。 a（space: break）</p>
     </div>
     <div class="test trim-both">
       <h2>text-spacing-trim: trim-both</h2>
@@ -92,6 +96,12 @@
       <h2>text-align: end</h2>
       <p class="half">あいうえおかきくけこ。a（break）</p>
       <p class="narrow allow-end">あいうえおかきくけこ。a（hangs）</p>
+    </div>
+    <div class="test anywhere">
+      <h2>overflow-wrap: anywhere</h2>
+      <p>あいうえおかきくけこ。<span>*22</span>（break）</p>
+      <p>あいうえおかきくけこ。&#x2060;*23（WJ: no break）</p>
+      <p>あいうえおかきくけこ。！（exclamation: no break）</p>
     </div>
     <div class="test vertical">
       <p>あいうえおかきくけこ。<span>&#x2060;*14</span>（no break）</p>

@@ -978,6 +978,13 @@ function isClosingPunctuation(
 // Characters that cannot start a line (closing punctuation, etc.)
 const NO_BREAK_BEFORE_PATTERN =
   /^[\p{Pe}\p{Pf}、。，．：；！？!?‼⁇⁈⁉・ゝゞヽヾ々〻､｡]/u;
+// Characters before which a line may not break, also after a space: those
+// that cannot start a line, word joiners, no-break spaces and hyphens, and
+// ellipses (except with `line-break: anywhere`, or `loose` for ellipses)
+const NO_BREAK_AFTER_SPACE_PATTERN = new RegExp(
+  `${NO_BREAK_BEFORE_PATTERN.source}|^[\\u00A0\\u2007\\u2011\\u202F\\u2060\\uFEFF\\u2025\\u2026]`,
+  "u",
+);
 // White space after which a line may break
 const BREAKING_SPACE_PATTERN = /^[ \t\n\r\f\u200B]/u;
 // Ideographs and kana before which a line may break, except with
@@ -2861,36 +2868,6 @@ export class TextSpacingPolyfill {
         }
       }
 
-      // Check if the line may break after the punctuation without the space
-      // set after it by `viv-ts-auto` and `viv-hang-end`, which lets the
-      // line break even where it may not without the space (e.g., before
-      // U+2060 WORD JOINER), since browsers break after a space before any
-      // character. With a margin before the punctuation wider than the
-      // line, the line breaks at the first break opportunity after it. The
-      // overflowing line is start-aligned whatever the `text-align` (CSS
-      // Text 3 § 7.1), so the next node is before the punctuation if it is
-      // on another line.
-      function canBreakAfter(): boolean {
-        if (
-          !nextNode ||
-          (nextText && isLineBreakOpportunity(text, nextText.textContent, true))
-        ) {
-          return true;
-        }
-        const { className } = outerElem;
-        outerElem.className = "";
-        outerElem.style.marginInlineStart = "100000px";
-        const rect = RangeClientRects.getClientRectsOfNode(textNode)[0];
-        const nextRect = getClientRectsOfAdjacent(nextNode)[0];
-        outerElem.removeAttribute("style");
-        outerElem.className = className;
-        return (
-          !rect ||
-          !nextRect ||
-          (vertical ? nextRect.top < rect.top : nextRect.left < rect.left)
-        );
-      }
-
       // The classes set below reduce the advance of the punctuation by
       // `--viv-ts-shift` (see VivliostylePolyfillCss): the closing
       // punctuation gets negative margin-inline-start, and its glyph is
@@ -3059,10 +3036,16 @@ export class TextSpacingPolyfill {
               outerElem.classList.contains("viv-hang-end")) &&
             !isLastInBlock &&
             !isLastBeforeForcedLineBreak &&
-            !canBreakAfter()
+            nextText &&
+            NO_BREAK_AFTER_SPACE_PATTERN.test(nextText.textContent) &&
+            document.defaultView.getComputedStyle(outerElem).lineBreak !==
+              "anywhere"
           ) {
-            // The punctuation that the line may not break after is not at
-            // the end of a line
+            // The space set after the punctuation by these classes lets the
+            // line break after it before any character, since browsers break
+            // after a space, even where the line may not break without the
+            // space (e.g., before U+2060 WORD JOINER). The punctuation that
+            // the line may not break after is not at the end of a line.
             outerElem.className = "";
           }
           if (
