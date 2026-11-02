@@ -24,8 +24,17 @@
       .test .narrow {
         inline-size: 10em;
       }
+      .test .half {
+        inline-size: 10.5em;
+      }
+      .end {
+        text-align: end;
+      }
       .trim-both {
         text-spacing-trim: trim-both;
+      }
+      .trim-all {
+        text-spacing-trim: trim-all;
       }
       .allow-end {
         hanging-punctuation: allow-end;
@@ -74,6 +83,16 @@
       <h2>hanging-punctuation: force-end</h2>
       <p>あいうえおかきくけこ。&#x2060;*13（WJ: no break）</p>
     </div>
+    <div class="test trim-all">
+      <h2>text-spacing-trim: trim-all</h2>
+      <p class="narrow allow-end">あいうえおかきくけこ。&#x2060;*20（allow-end, WJ: no break, half-width）</p>
+      <p class="force-end">あいうえおかきくけこ。&#x2060;*21（force-end, WJ: no break, half-width）</p>
+    </div>
+    <div class="test end">
+      <h2>text-align: end</h2>
+      <p class="half">あいうえおかきくけこ。a（break）</p>
+      <p class="narrow allow-end">あいうえおかきくけこ。a（hangs）</p>
+    </div>
     <div class="test vertical">
       <p>あいうえおかきくけこ。<span>&#x2060;*14</span>（no break）</p>
       <p>あいうえおかきくけこ。……（no break）</p>
@@ -82,6 +101,9 @@
       <p class="narrow force-end">あいうえおかきくけこ。&#x2060;*18（no break）</p>
       <!-- Firefox does not hang it in vertical text (Issue #2249) -->
       <p class="narrow allow-end">あいうえおかきくけこ。*19（hangs）</p>
+      <p class="half end">あいうえおかきくけこ。a（break）</p>
+      <!-- Firefox does not hang it in vertical text (Issue #2249) -->
+      <p class="narrow allow-end end">あいうえおかきくけこ。a（hangs）</p>
     </div>
   </body>
 </html>

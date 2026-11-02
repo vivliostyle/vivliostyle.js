@@ -2866,7 +2866,10 @@ export class TextSpacingPolyfill {
       // line break even where it may not without the space (e.g., before
       // U+2060 WORD JOINER), since browsers break after a space before any
       // character. With a margin before the punctuation wider than the
-      // line, the line breaks at the first break opportunity after it.
+      // line, the line breaks at the first break opportunity after it. The
+      // overflowing line is start-aligned whatever the `text-align` (CSS
+      // Text 3 § 7.1), so the next node is before the punctuation if it is
+      // on another line.
       function canBreakAfter(): boolean {
         if (
           !nextNode ||
@@ -3052,6 +3055,17 @@ export class TextSpacingPolyfill {
             }
           }
           if (
+            (outerElem.classList.contains("viv-ts-auto") ||
+              outerElem.classList.contains("viv-hang-end")) &&
+            !isLastInBlock &&
+            !isLastBeforeForcedLineBreak &&
+            !canBreakAfter()
+          ) {
+            // The punctuation that the line may not break after is not at
+            // the end of a line
+            outerElem.className = "";
+          }
+          if (
             hangingEnd &&
             spacingTrim.trimAll &&
             isFullWidth &&
@@ -3062,17 +3076,6 @@ export class TextSpacingPolyfill {
             // since it makes the punctuation full-width if the line is fitted
             // again and it is no longer at the end of the line.
             outerElem.className = "viv-ts-trim";
-          }
-          if (
-            (outerElem.classList.contains("viv-ts-auto") ||
-              outerElem.classList.contains("viv-hang-end")) &&
-            !isLastInBlock &&
-            !isLastBeforeForcedLineBreak &&
-            !canBreakAfter()
-          ) {
-            // The punctuation that the line may not break after is not at
-            // the end of a line
-            outerElem.className = "";
           }
         } else if (tagName === "viv-ts-middle") {
           outerElem.className = "viv-ts-trim";
