@@ -117,6 +117,16 @@ Use the VS Code integrated browser for routine rendering checks and bug reproduc
 3. Optionally edit `CHANGELOG.md`
 4. `yarn version:push` (amends commit, retags, pushes — CI then publishes to npm and creates GitHub Release)
 
+## Code Review Before Commit
+
+Before every commit of code changes, review the diff you are about to commit and fix the problems you find. Repeat until no new valid findings remain.
+
+- Applies to every commit, including fixes for review comments and CI failures, not only the first one in a branch.
+- Look for correctness bugs, regressions, missing edge cases, and missing tests. Check that the fix itself introduces no new problems.
+- Use your tool's code-review feature if it has one (e.g. `/code-review` in Claude Code); otherwise review the diff carefully yourself.
+- If a finding is intentionally not fixed, note why in the pull request.
+- Also run `yarn lint` and the relevant tests; the review does not replace them.
+
 ## Commit Message Guidelines
 
 Follow [Conventional Commits](https://conventionalcommits.org):
