@@ -2824,7 +2824,7 @@ export class ViewFactory
             }
           }
         }
-        if (firstTime && !element.hasAttribute("id")) {
+        if (firstTime && !element.getAttribute("id")) {
           // Id generated for an element with a CSS bookmark
           const generatedId = Base.getGeneratedId(element);
           if (generatedId) {

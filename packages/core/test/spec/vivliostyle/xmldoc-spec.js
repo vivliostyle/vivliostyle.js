@@ -96,6 +96,10 @@ describe("xml-doc", function () {
         expect(holder.getElement("foobar#" + id)).toBe(baz);
         // The generated id is not set on the source element.
         expect(baz.hasAttribute("id")).toBe(false);
+        // A suffix added to avoid an id used in the document is accepted.
+        adapt_base.setGeneratedId(baz, id + "-1");
+        expect(holder.getElement("foobar#" + id + "-1")).toBe(baz);
+        expect(holder.getElement("foobar#" + id)).toBeFalsy();
         // An id with a wrong offset is not resolved.
         expect(
           holder.getElement("foobar#" + adapt_base.bookmarkIdPrefix + "0"),

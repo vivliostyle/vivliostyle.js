@@ -5891,12 +5891,28 @@ export class CascadeInstance {
     // These properties are not inherited by default, but they are kept in
     // the element style (not passed to the DOM, see
     // Vgen.propertiesNotPassedToDOM), so that a child with an explicit
-    // `inherit` value can get the value of its parent.
+    // `inherit` value can get the value of its parent. Returns null for the
+    // initial value.
     const getValue = (name: string): Css.Val | null => {
-      const value = (props[name] as CascadeValue)?.value ?? null;
-      return value === Css.ident.inherit
-        ? this.getInheritedPropertyValue(name, element, props)
-        : value;
+      let style = props;
+      for (let e = element; ;) {
+        let value = (style[name] as CascadeValue)?.value ?? null;
+        if (value && !Css.isDefaultingValue(value)) {
+          // Revalidate, since a value substituted from var() is not
+          // validated (e.g., `--label: none; bookmark-label: var(--label)`)
+          // and the keyword case is kept.
+          value = value.visit(this.validatorSet.validators.get(name)) ?? null;
+          return value && !Css.isDefaultingValue(value) ? value : null;
+        }
+        if (value !== Css.ident.inherit) {
+          return null; // unspecified, initial, unset, etc.
+        }
+        e = e.parentElement;
+        if (!e) {
+          return null;
+        }
+        style = this.styles.styleOf(e);
+      }
     };
     const level = getValue("bookmark-level");
     if (
@@ -5908,7 +5924,7 @@ export class CascadeInstance {
     }
     const labelValue = getValue("bookmark-label");
     let label: string;
-    if (labelValue && !Css.isDefaultingValue(labelValue)) {
+    if (labelValue) {
       // Do not let open-quote/close-quote in the label change the quotes
       // rendered in the document.
       const originalQuoteDepth = this.quoteDepth;

@@ -909,7 +909,17 @@ class CounterResolver implements CssCascade.CounterResolver {
       // matching.
       id = Base.getGeneratedId(element);
       if (!id) {
-        id = `${Base.bookmarkIdPrefix}${elementOffset}`;
+        // Avoid an id or name already used in the document.
+        const doc = element.ownerDocument;
+        const baseId = `${Base.bookmarkIdPrefix}${elementOffset}`;
+        id = baseId;
+        for (
+          let i = 1;
+          doc.querySelector(`[id="${id}"], [name="${id}"]`);
+          i++
+        ) {
+          id = `${baseId}-${i}`;
+        }
         Base.setGeneratedId(element, id);
       }
     }

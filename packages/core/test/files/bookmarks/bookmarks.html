@@ -63,6 +63,21 @@
         bookmark-level: 2;
         bookmark-state: var(--state);
       }
+      .grandparent {
+        bookmark-level: 2;
+        bookmark-label: "Grandparent";
+      }
+      .inherit-level {
+        bookmark-level: inherit;
+      }
+      .var-none {
+        --label: none;
+        bookmark-level: 2;
+        bookmark-label: var(--label);
+      }
+      .empty-id {
+        bookmark-level: 2;
+      }
     </style>
   </head>
   <body>
@@ -129,5 +144,21 @@
     </p>
     <p class="var-state">State from var()</p>
     <h3>Child of var-state</h3>
+
+    <h1>Fifth Chapter</h1>
+    <p>
+      Expected children of "Fifth Chapter": "Grandparent", "Label from invalid
+      var()", and "Empty id". Each of them must navigate to its element.
+    </p>
+    <div class="grandparent">
+      <div>
+        <p class="inherit-level">
+          Not a bookmark: bookmark-level: inherit takes the initial value none
+          of the parent, not the value of the grandparent.
+        </p>
+      </div>
+    </div>
+    <p class="var-none">Label from invalid var()</p>
+    <p class="empty-id" id="">Empty id</p>
   </body>
 </html>
