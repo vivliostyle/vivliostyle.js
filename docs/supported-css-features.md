@@ -26,7 +26,7 @@ In addition, essentially all CSS properties and values supported by the browser 
   - Supports `string`, `raw-string`, `url`, `number`, and unit types, as well as `type(<...>)` syntax for supported CSS value types. See [PR #1975](https://github.com/vivliostyle/vivliostyle.js/pull/1975)
   - Type and unit values are validated against the property where `attr()` is used.
 - [Cross references: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
-  - Only supported in values of `content` property.
+  - Only supported in values of `content` and `bookmark-label` properties.
 - [`string()` function (Named Strings)](https://www.w3.org/TR/css-content-3/#string-function)
 - [`content()` function](https://www.w3.org/TR/css-content-3/#content-function)
 - [`running()` function (Running Elements)](https://www.w3.org/TR/css-gcpm-3/#running-syntax)
@@ -360,6 +360,14 @@ See also:
 
 - [At-rules in CSS Generated Content for Paged Media (GCPM) 3](#css-generated-content-for-paged-media-gcpm-3)
 - [Values - Cross references, string(), content(), running(), element(), and leader() functions](#values)
+
+### [CSS Generated Content 3](https://www.w3.org/TR/css-content-3/)
+
+- [bookmark-level, bookmark-label, bookmark-state (Bookmarks)](https://www.w3.org/TR/css-content-3/#bookmark-generation)
+  - The bookmarks generate the table of contents shown in the TOC box of the viewer and returned by `getTOC()`, which Vivliostyle CLI uses for PDF bookmarks. See [PR #2258](https://github.com/vivliostyle/vivliostyle.js/pull/2258)
+  - A navigation document specified in the EPUB package document or in the publication manifest takes precedence over the CSS bookmarks.
+  - `bookmark-state` sets whether the entry is initially expanded in the TOC box, and is returned as the `state` of the entry by `getTOC()`.
+  - Note: Bookmarks on `::before` and `::after` pseudo-elements are not supported. In `bookmark-label`, a cross reference to a target that has not been laid out yet is shown as `??`.
 
 ### [CSS Fragmentation 3](https://www.w3.org/TR/css-break-3/)
 
