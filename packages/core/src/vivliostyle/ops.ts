@@ -3987,6 +3987,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     } else {
       // Author style sheets referenced from the document
       const docSources = [] as StyleSource[];
+      // URLs of the style sheets linked from the document, including
+      // alternate style sheets
+      const linkedStyleSheetURLs = new Set<string>();
       const elemList = xmldoc.document.querySelectorAll("style, link, meta");
       for (const elem of elemList) {
         const ns = elem.namespaceURI;
@@ -4004,6 +4007,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             const href = elem.getAttribute("href");
             const rel = elem.getAttribute("rel")?.split(/\s+/);
             const media = elem.getAttribute("media");
+            if (href && rel?.includes("stylesheet")) {
+              linkedStyleSheetURLs.add(Base.resolveURL(href, url));
+            }
             if (
               href &&
               rel?.includes("stylesheet") &&
@@ -4033,15 +4039,12 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       sources.push(...docSources);
       // Publication style sheets come after the author style sheets of the
       // document so that they can customize it. A style sheet that the
-      // document itself links is skipped: the manifest then just lists the
-      // resources of the publication, and the document's link is kept as is.
+      // document itself links (even as an alternate style sheet) is skipped:
+      // the manifest then just lists the resources of the publication, and
+      // the document's link is kept as is.
       if (this.isPublicationStyleSheetDoc(url)) {
         for (const styleSheet of this.publicationStyleSheets) {
-          if (
-            !docSources.some(
-              (source) => source.text == null && source.url === styleSheet.url,
-            )
-          ) {
+          if (!linkedStyleSheetURLs.has(styleSheet.url)) {
             sources.push(styleSheet);
           }
         }

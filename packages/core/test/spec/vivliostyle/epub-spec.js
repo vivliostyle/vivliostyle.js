@@ -264,6 +264,25 @@ describe("epub", function () {
       });
     });
 
+    it("does not apply a publication style sheet that the document links as an alternate style sheet", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var doc = parseDoc(
+        "<link rel='alternate stylesheet' title='Alt' href='" + pubCss + "'/>",
+      );
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+          .then(function () {
+            store.addDocument(docUrl, doc).then(function () {
+              expect(styleKeyFor(store, docUrl)).not.toContain(pubCss);
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("does not share the cached style between documents linking a style sheet for different media", function (done) {
       var store = new adapt_epub.EPUBDocStore();
       var docUrl2 = "https://example.com/book/chapter2.html";

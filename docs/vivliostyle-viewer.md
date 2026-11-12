@@ -137,7 +137,7 @@ Resources in the manifest's `resources` list with `"rel": "stylesheet"` are appl
 }
 ```
 
-- The stylesheets come after the document's own stylesheets in the cascade order, so they can override the styles of the documents. Stylesheets specified with the `&style=` URL parameter come after them. If a document itself links a stylesheet with the same URL, the manifest entry is regarded as just listing the resource: the stylesheet is not applied again, and the document's own link is used as is.
+- The stylesheets come after the document's own stylesheets in the cascade order, so they can override the styles of the documents. Stylesheets specified with the `&style=` URL parameter come after them. If a document itself links a stylesheet with the same URL (including as an alternate stylesheet), the manifest entry is regarded as just listing the resource: the stylesheet is not applied again, and the document's own link is used as is.
 - `rel` may be a string or an array, such as `"rel": ["stylesheet"]`, and is case-insensitive. Resources whose `rel` also contains `alternate` are not applied.
 - Resources with an `encodingFormat` (or `type` in Readium Web Publication Manifest) other than `text/css` are not applied.
 - Stylesheet resources without `"rel": "stylesheet"` are not applied, since the `resources` list normally only enumerates the resources used by the publication.
