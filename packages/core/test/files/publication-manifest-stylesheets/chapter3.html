@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chapter 3</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <style>
+      .overridden-by-document {
+        color: green;
+      }
+      .overridden-by-document::after {
+        content: " — PASS";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chapter 3: Linking the publication stylesheet itself</h1>
+    <p>
+      This document links css/base.css itself before its &lt;style&gt;. Then
+      the manifest entry only lists the resource: css/base.css is not applied
+      again after the &lt;style&gt;, and the document’s own order is kept.
+    </p>
+    <p class="pass-if-applied">This text is green (css/base.css)</p>
+    <p class="overridden-by-document">
+      This text is green (the document’s &lt;style&gt; overrides its own link to
+      css/base.css)
+    </p>
+  </body>
+</html>

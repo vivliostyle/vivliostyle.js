@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chapter 2</title>
+    <style>
+      .customized-by-publication {
+        color: red;
+      }
+      .customized-by-publication::after {
+        content: " — FAIL";
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chapter 2: Own stylesheets</h1>
+    <p>
+      The publication stylesheets come after the document’s own stylesheets,
+      so they can customize the document.
+    </p>
+    <p class="pass-if-applied">This text is green (css/base.css)</p>
+    <p class="customized-by-publication">
+      This text is green (css/base.css overrides the document’s &lt;style&gt;)
+    </p>
+  </body>
+</html>

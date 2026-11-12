@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chapter 1</title>
+  </head>
+  <body>
+    <h1>Chapter 1: No stylesheet links</h1>
+    <p>
+      This document has no <code>&lt;link&gt;</code> or
+      <code>&lt;style&gt;</code>. The resources with
+      <code>"rel": "stylesheet"</code> in <code>publication.json</code> apply
+      to it.
+    </p>
+    <p class="pass-if-applied">This text is green (css/base.css)</p>
+    <p class="not-applied">
+      This text is black (alternate and rel-less CSS resources are not
+      applied)
+    </p>
+    <p>The page header shows “page.css applied” in green (css/page.css).</p>
+  </body>
+</html>

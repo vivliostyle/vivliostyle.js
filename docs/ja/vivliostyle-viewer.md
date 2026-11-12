@@ -155,6 +155,28 @@ Vivliostyle ViewerではWeb出版物（複数のHTML文書からなるコレク�
 
 Web出版物のマニフェストの形式については、W3Cドラフトの [Publication Manifest](https://www.w3.org/TR/pub-manifest/) および [Readium Web Publication Manifest](https://github.com/readium/webpub-manifest/) をサポートしています。
 
+### マニフェストで指定するスタイルシート
+
+マニフェストの `resources` のうち `"rel": "stylesheet"` を持つリソースは、`readingOrder` のすべての文書に適用されます。各文書の `<head>` の末尾に `<link rel="stylesheet" href="...">` 要素が追加されたものとして扱われます。これにより、各HTMLファイルからスタイルシートを参照しなくても、出版物のすべての文書にスタイルを適用したり、カスタマイズしたりできます。例:
+
+```json
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "type": "Book",
+  "readingOrder": ["chapter1.html", "chapter2.html"],
+  "resources": [
+    { "url": "css/base.css", "rel": "stylesheet" },
+    { "url": "css/page.css", "rel": "stylesheet" }
+  ]
+}
+```
+
+- カスケード順ではこれらのスタイルシートは文書自身のスタイルシートより後になるため、文書のスタイルを上書きできます。URLパラメータ `&style=` で指定したスタイルシートはさらにその後になります。文書自身が同じURLのスタイルシートをリンクしている場合、マニフェストの項目はリソースを列挙しているだけとみなされます。そのスタイルシートは再度適用されず、文書自身のリンクがそのまま使われます。
+- `rel` は文字列または配列（例: `"rel": ["stylesheet"]`）で指定でき、大文字小文字は区別しません。`rel` に `alternate` も含むリソースは適用されません。
+- `encodingFormat`（Readium Web Publication Manifest では `type`）が `text/css` 以外のリソースは適用されません。
+- `"rel": "stylesheet"` を持たないスタイルシートのリソースは適用されません。`resources` は通常、出版物が使用するリソースを列挙するだけのものであるためです。
+- これはVivliostyleの拡張機能です。Publication Manifest仕様は、ユーザーエージェントがリソースを文書にどう適用するかを定義していないため、他のユーザーエージェントでは無視される可能性があります。
+
 ### HTMLの目次
 
 Web出版物のマニフェストが存在しなくても、指定したHTML文書内の目次要素内に他のHTML文書へのリンクがある場合は、それらの文書が自動的にロードされます。Vivliostyle はHTML文書内の次のCSSセレクタにマッチする要素を目次要素として扱います:

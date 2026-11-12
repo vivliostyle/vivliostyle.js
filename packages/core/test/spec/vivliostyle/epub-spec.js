@@ -151,6 +151,154 @@ describe("epub", function () {
     });
   });
 
+  describe("OPSDocStore publication style sheets", function () {
+    var pubCss = "data:text/css,.pub%7Bcolor:red%7D";
+    var docCss = "data:text/css,.doc%7Bcolor:blue%7D";
+    var docUrl = "https://example.com/book/chapter1.html";
+
+    function parseDoc(head) {
+      return new DOMParser().parseFromString(
+        "<html xmlns='http://www.w3.org/1999/xhtml'><head>" +
+          head +
+          "</head><body></body></html>",
+        "application/xhtml+xml",
+      );
+    }
+
+    // The style key is the concatenation of the URLs (and texts) of the style
+    // sources in cascade order.
+    function styleKeyFor(store, url) {
+      var style = store.styleByDocURL[url];
+      return Object.keys(store.styleByKey).find(function (key) {
+        return store.styleByKey[key] === style;
+      });
+    }
+
+    it("inserts publication style sheets after the document's author style sheets and before the viewer's author style sheets", function (done) {
+      var viewerCss = "data:text/css,.viewer%7Bcolor:green%7D";
+      var store = new adapt_epub.EPUBDocStore([{ url: viewerCss }]);
+      var doc = parseDoc("<link rel='stylesheet' href='" + docCss + "'/>");
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl + "#frag"])
+          .then(function () {
+            store.addDocument(docUrl, doc).then(function () {
+              var key = styleKeyFor(store, docUrl);
+              expect(key.indexOf(docCss)).toBeGreaterThan(-1);
+              expect(key.indexOf(pubCss)).toBeGreaterThan(key.indexOf(docCss));
+              expect(key.indexOf(viewerCss)).toBeGreaterThan(
+                key.indexOf(pubCss),
+              );
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("keeps the document's own link to a publication style sheet instead of applying it again", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var doc = parseDoc(
+        "<link rel='stylesheet' href='" +
+          pubCss +
+          "'/><link rel='stylesheet' href='" +
+          docCss +
+          "'/>",
+      );
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+          .then(function () {
+            store.addDocument(docUrl, doc).then(function () {
+              var key = styleKeyFor(store, docUrl);
+              expect(key.split(pubCss).length).toBe(2);
+              expect(key.indexOf(pubCss)).toBeLessThan(key.indexOf(docCss));
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("shares the cached style between documents with the same style sources", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var docUrl2 = "https://example.com/book/chapter2.html";
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl, docUrl2])
+          .then(function () {
+            store.addDocument(docUrl, parseDoc("")).then(function () {
+              store.addDocument(docUrl2, parseDoc("")).then(function () {
+                expect(store.styleByDocURL[docUrl2]).toBe(
+                  store.styleByDocURL[docUrl],
+                );
+                expect(styleKeyFor(store, docUrl2)).toContain(pubCss);
+                done();
+              });
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("does not apply a publication style sheet that the document links for a specific media", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var doc = parseDoc(
+        "<link rel='stylesheet' media='screen' href='" + pubCss + "'/>",
+      );
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+          .then(function () {
+            store.addDocument(docUrl, doc).then(function () {
+              var key = styleKeyFor(store, docUrl);
+              expect(key.split(pubCss).length).toBe(2);
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("does not apply publication style sheets to other documents", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var otherUrl = "https://example.com/book/other.html";
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+          .then(function () {
+            store.addDocument(otherUrl, parseDoc("")).then(function () {
+              expect(styleKeyFor(store, otherUrl)).not.toContain(pubCss);
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("recomputes the style of a document loaded before the publication style sheets are set", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+
+      adapt_task.start(function () {
+        store.addDocument(docUrl, parseDoc("")).then(function () {
+          expect(styleKeyFor(store, docUrl)).not.toContain(pubCss);
+          store
+            .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+            .then(function () {
+              expect(styleKeyFor(store, docUrl)).toContain(pubCss);
+              done();
+            });
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+  });
+
   describe("OPFDoc", function () {
     describe("fromWebPubManifest", function () {
       it("creates a primary entry for data: URL documents", function (done) {
@@ -193,6 +341,84 @@ describe("epub", function () {
             expect(opf.items.length).toBe(1);
             expect(opf.spine.length).toBe(1);
             expect(opf.items[0].src).toBe("https://example.com/webpub/");
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
+      it("applies resources with rel stylesheet to the reading order documents", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        spyOn(store, "setPublicationStyleSheets").and.callThrough();
+        var manifest = {
+          readingOrder: ["chapter1.html", { url: "chapter2.html" }],
+          resources: [
+            { url: "css/a.css", rel: "stylesheet" },
+            { url: "css/a.css", rel: "stylesheet" },
+            { url: "css/b", rel: ["Stylesheet"], encodingFormat: "text/css" },
+            { href: "css/c.css", rel: "stylesheet", type: "text/css" },
+            { url: "css/alt.css", rel: ["stylesheet", "alternate"] },
+            {
+              url: "css/not-css.css",
+              rel: "stylesheet",
+              encodingFormat: "text/plain",
+            },
+            { url: "css/listed.css", encodingFormat: "text/css" },
+            "css/listed2.css",
+            { url: "toc.html", rel: "contents" },
+          ],
+        };
+
+        adapt_task.start(function () {
+          adapt_epub.OPFDoc.fromWebPubManifest(
+            store,
+            "https://example.com/book/publication.json",
+            manifest,
+            undefined,
+            "https://example.com/book/publication.json",
+          ).then(function (opf) {
+            expect(store.setPublicationStyleSheets).toHaveBeenCalledWith(
+              [
+                { url: "https://example.com/book/css/a.css" },
+                { url: "https://example.com/book/css/b" },
+                { url: "https://example.com/book/css/c.css" },
+              ],
+              [
+                "https://example.com/book/chapter1.html",
+                "https://example.com/book/chapter2.html",
+              ],
+            );
+            expect(
+              opf.spine.map(function (item) {
+                return item.src;
+              }),
+            ).toEqual([
+              "https://example.com/book/chapter1.html",
+              "https://example.com/book/chapter2.html",
+            ]);
+            expect(opf.toc.src).toBe("https://example.com/book/toc.html");
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
+      it("does not set publication style sheets without rel stylesheet resources", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        spyOn(store, "setPublicationStyleSheets").and.callThrough();
+
+        adapt_task.start(function () {
+          adapt_epub.OPFDoc.fromWebPubManifest(
+            store,
+            "https://example.com/book/publication.json",
+            {
+              readingOrder: ["chapter1.html"],
+              resources: [{ url: "css/a.css", encodingFormat: "text/css" }],
+            },
+            undefined,
+            "https://example.com/book/publication.json",
+          ).then(function () {
+            expect(store.setPublicationStyleSheets).not.toHaveBeenCalled();
             done();
           });
           return adapt_task.newResult(true);

@@ -1,0 +1,16 @@
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "type": "Book",
+  "name": "Publication manifest stylesheets",
+  "readingOrder": ["chapter1.html", "chapter2.html", "chapter3.html"],
+  "resources": [
+    { "url": "css/base.css", "rel": "stylesheet" },
+    {
+      "url": "css/page.css",
+      "rel": ["stylesheet"],
+      "encodingFormat": "text/css"
+    },
+    { "url": "css/alternate.css", "rel": ["stylesheet", "alternate"] },
+    { "url": "css/listed.css", "encodingFormat": "text/css" }
+  ]
+}

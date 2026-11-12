@@ -49,6 +49,16 @@ module.exports = [
         title: "Multiple HTML files (PR #170)",
       },
       {
+        file: "publication-manifest-stylesheets/publication.json",
+        title:
+          'Publication manifest resources with "rel": "stylesheet" (Issue #1588)',
+      },
+      {
+        file: "publication-manifest-stylesheets/entry.html",
+        title:
+          'Embedded publication manifest with "rel": "stylesheet" resources (Issue #1588)',
+      },
+      {
         file: "target_blank_link.html",
         title: "target=_blank links (PR #269)",
       },

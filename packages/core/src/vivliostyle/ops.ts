@@ -3774,6 +3774,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   triggersByDocURL: { [key: string]: Vtree.Trigger[] } = {};
   validatorSet: CssValidator.ValidatorSet = CssValidator.baseValidatorSet();
   private styleSheets: StyleSource[] = [];
+  private publicationStyleSheets: StyleSource[] = [];
+  private publicationStyleSheetDocURLs: Set<string> = new Set();
+  private docByURL: { [url: string]: XmlDoc.XMLDocHolder } = {};
   protected triggerSingleDocumentPreprocessing: boolean = false;
 
   protected constructor(
@@ -3827,15 +3830,51 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     );
   }
 
+  /**
+   * Set the stylesheets that apply to the documents of a publication, such as
+   * the resources with `"rel": "stylesheet"` in a publication manifest.
+   * They are applied to the documents at `docURLs` as if `<link
+   * rel="stylesheet">` elements were appended after the author style sheets
+   * of each document, so that they can customize the documents. The styles
+   * of the documents already loaded are recomputed.
+   */
+  setPublicationStyleSheets(
+    styleSheets: StyleSheetParam[],
+    docURLs: string[],
+  ): Task.Result<boolean> {
+    this.publicationStyleSheets = styleSheets.map((stylesheet) =>
+      toStyleSource(stylesheet, CssParser.StylesheetFlavor.AUTHOR),
+    );
+    this.publicationStyleSheetDocURLs = new Set(
+      docURLs.map((url) => Base.stripFragment(url)),
+    );
+    const loadedDocURLs = [...this.publicationStyleSheetDocURLs].filter(
+      (url) => !!this.docByURL[url],
+    );
+    const frame: Task.Frame<boolean> = Task.newFrame(
+      "setPublicationStyleSheets",
+    );
+    let index = 0;
+    frame
+      .loop(() => {
+        if (index >= loadedDocURLs.length) {
+          return Task.newResult(false);
+        }
+        const url = loadedDocURLs[index++];
+        return this.loadStyleForDoc(this.docByURL[url], url).thenReturn(true);
+      })
+      .then(() => {
+        frame.finish(true);
+      });
+    return frame.result();
+  }
+
   parseOPSResource(
     response: Net.FetchResponse,
   ): Task.Result<XmlDoc.XMLDocHolder | null> {
     const frame: Task.Frame<XmlDoc.XMLDocHolder | null> =
       Task.newFrame("OPSDocStore.load");
     const url = response.url;
-
-    // Hack for TOCView.showTOC()
-    const isTocBox = Base.isTocBoxURL(url);
 
     XmlDoc.parseXMLResource(response, this).then(
       (xmldoc: XmlDoc.XMLDocHolder | null) => {
@@ -3873,158 +3912,197 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           }
         }
         this.triggersByDocURL[url] = triggers;
-        const sources = [] as StyleSource[];
-        sources.push({
-          url: Base.resolveURL("user-agent-base.css", Base.resourceBaseURL),
-          text: UserAgentBaseCss,
-          flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          media: null,
-        });
-        sources.push({
-          url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
-          text: UserAgentPageCss,
-          flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          media: null,
-        });
-        sources.push({
-          url: Base.resolveURL(
-            "user-agent-counter-styles.css",
-            Base.resourceBaseURL,
-          ),
-          text: UserAgentCounterStylesCss,
-          flavor: CssParser.StylesheetFlavor.USER_AGENT,
-          media: null,
-        });
-        if (isTocBox) {
-          sources.push({
-            url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
-            text: UserAgentTocCss,
-            flavor: CssParser.StylesheetFlavor.USER_AGENT,
-            media: null,
-          });
-        } else {
-          const elemList =
-            xmldoc.document.querySelectorAll("style, link, meta");
-          for (const elem of elemList) {
-            const ns = elem.namespaceURI;
-            const localName = elem.localName;
-            if (ns == Base.NS.XHTML) {
-              if (localName == "style") {
-                const media = elem.getAttribute("media");
-                sources.push({
-                  url,
-                  text: elem.textContent,
-                  flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  media,
-                });
-              } else if (localName == "link") {
-                const href = elem.getAttribute("href");
-                const rel = elem.getAttribute("rel")?.split(/\s+/);
-                const media = elem.getAttribute("media");
-                if (
-                  href &&
-                  rel?.includes("stylesheet") &&
-                  !rel.includes("alternate")
-                ) {
-                  const src = Base.resolveURL(href, url);
-                  sources.push({
-                    url: src,
-                    text: null,
-                    media,
-                    flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  });
-                }
-              } else if (
-                localName == "meta" &&
-                elem.getAttribute("name") == "viewport"
-              ) {
-                sources.push({
-                  url,
-                  text: this.processViewportMeta(elem),
-                  flavor: CssParser.StylesheetFlavor.AUTHOR,
-                  media: null,
-                });
-              }
-            }
-          }
-          for (let i = 0; i < this.styleSheets.length; i++) {
-            sources.push(this.styleSheets[i]);
-          }
+        if (!Base.isTocBoxURL(url)) {
+          this.docByURL[url] = xmldoc;
         }
-        let key = "";
-        for (let i = 0; i < sources.length; i++) {
-          key += sources[i].url;
-          key += "^";
-          if (sources[i].text) {
-            key += sources[i].text;
-          }
-          key += "^";
-        }
-        let style = this.styleByKey[key];
-        if (style) {
-          this.styleByDocURL[url] = style;
-          frame.finish(xmldoc);
-          return;
-        }
-        let fetcher = this.styleFetcherByKey[key];
-        if (!fetcher) {
-          fetcher = new TaskUtil.Fetcher(() => {
-            const innerFrame: Task.Frame<Style> =
-              Task.newFrame("fetchStylesheet");
-            let index = 0;
-            const sph = new StyleParserHandler(this.validatorSet);
-            innerFrame
-              .loop(() => {
-                if (index < sources.length) {
-                  const source = sources[index++];
-                  sph.startStylesheet(source.flavor);
-                  if (source.text != null) {
-                    return CssParser.parseStylesheetFromText(
-                      source.text,
-                      sph,
-                      source.url,
-                      source.media,
-                    ).thenReturn(true);
-                  } else {
-                    return CssParser.parseStylesheetFromURL(
-                      source.url,
-                      sph,
-                      source.media,
-                    );
-                  }
-                }
-                return Task.newResult(false);
-              })
-              .then(() => {
-                const cascade = sph.cascadeParserHandler.finish();
-                style = new Style(
-                  this,
-                  sph.rootScope,
-                  sph.pageScope,
-                  cascade,
-                  sph.rootBox,
-                  sortFontFaces(sph.fontFaces),
-                  sph.footnoteProps,
-                  sph.flowProps,
-                  sph.viewportProps,
-                  sph.pageProps,
-                  sph.counterStyles,
-                );
-                this.styleByKey[key] = style;
-                delete this.styleFetcherByKey[key];
-                innerFrame.finish(style);
-              });
-            return innerFrame.result();
-          }, `FetchStylesheet ${url}`);
-          this.styleFetcherByKey[key] = fetcher;
-          fetcher.start();
-        }
-        fetcher.get().then((style) => {
-          this.styleByDocURL[url] = style;
+        this.loadStyleForDoc(xmldoc, url).then(() => {
           frame.finish(xmldoc);
         });
       },
     );
+    return frame.result();
+  }
+
+  /**
+   * Compute the style of the document from the user agent style sheets, the
+   * author style sheets referenced from the document, the publication style
+   * sheets, and the author and user style sheets given to the store.
+   */
+  private loadStyleForDoc(
+    xmldoc: XmlDoc.XMLDocHolder,
+    url: string,
+  ): Task.Result<boolean> {
+    const frame: Task.Frame<boolean> = Task.newFrame("loadStyleForDoc");
+
+    // Hack for TOCView.showTOC()
+    const isTocBox = Base.isTocBoxURL(url);
+
+    const sources = [] as StyleSource[];
+    sources.push({
+      url: Base.resolveURL("user-agent-base.css", Base.resourceBaseURL),
+      text: UserAgentBaseCss,
+      flavor: CssParser.StylesheetFlavor.USER_AGENT,
+      media: null,
+    });
+    sources.push({
+      url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
+      text: UserAgentPageCss,
+      flavor: CssParser.StylesheetFlavor.USER_AGENT,
+      media: null,
+    });
+    sources.push({
+      url: Base.resolveURL(
+        "user-agent-counter-styles.css",
+        Base.resourceBaseURL,
+      ),
+      text: UserAgentCounterStylesCss,
+      flavor: CssParser.StylesheetFlavor.USER_AGENT,
+      media: null,
+    });
+    if (isTocBox) {
+      sources.push({
+        url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
+        text: UserAgentTocCss,
+        flavor: CssParser.StylesheetFlavor.USER_AGENT,
+        media: null,
+      });
+    } else {
+      // Author style sheets referenced from the document
+      const docSources = [] as StyleSource[];
+      const elemList = xmldoc.document.querySelectorAll("style, link, meta");
+      for (const elem of elemList) {
+        const ns = elem.namespaceURI;
+        const localName = elem.localName;
+        if (ns == Base.NS.XHTML) {
+          if (localName == "style") {
+            const media = elem.getAttribute("media");
+            docSources.push({
+              url,
+              text: elem.textContent,
+              flavor: CssParser.StylesheetFlavor.AUTHOR,
+              media,
+            });
+          } else if (localName == "link") {
+            const href = elem.getAttribute("href");
+            const rel = elem.getAttribute("rel")?.split(/\s+/);
+            const media = elem.getAttribute("media");
+            if (
+              href &&
+              rel?.includes("stylesheet") &&
+              !rel.includes("alternate")
+            ) {
+              const src = Base.resolveURL(href, url);
+              docSources.push({
+                url: src,
+                text: null,
+                media,
+                flavor: CssParser.StylesheetFlavor.AUTHOR,
+              });
+            }
+          } else if (
+            localName == "meta" &&
+            elem.getAttribute("name") == "viewport"
+          ) {
+            docSources.push({
+              url,
+              text: this.processViewportMeta(elem),
+              flavor: CssParser.StylesheetFlavor.AUTHOR,
+              media: null,
+            });
+          }
+        }
+      }
+      sources.push(...docSources);
+      // Publication style sheets come after the author style sheets of the
+      // document so that they can customize it. A style sheet that the
+      // document itself links is skipped: the manifest then just lists the
+      // resources of the publication, and the document's link is kept as is.
+      if (this.publicationStyleSheetDocURLs.has(Base.stripFragment(url))) {
+        for (const styleSheet of this.publicationStyleSheets) {
+          if (
+            !docSources.some(
+              (source) => source.text == null && source.url === styleSheet.url,
+            )
+          ) {
+            sources.push(styleSheet);
+          }
+        }
+      }
+      for (let i = 0; i < this.styleSheets.length; i++) {
+        sources.push(this.styleSheets[i]);
+      }
+    }
+    let key = "";
+    for (let i = 0; i < sources.length; i++) {
+      key += sources[i].url;
+      key += "^";
+      if (sources[i].text) {
+        key += sources[i].text;
+      }
+      key += "^";
+    }
+    let style = this.styleByKey[key];
+    if (style) {
+      this.styleByDocURL[url] = style;
+      frame.finish(true);
+      return frame.result();
+    }
+    let fetcher = this.styleFetcherByKey[key];
+    if (!fetcher) {
+      fetcher = new TaskUtil.Fetcher(() => {
+        const innerFrame: Task.Frame<Style> = Task.newFrame("fetchStylesheet");
+        let index = 0;
+        const sph = new StyleParserHandler(this.validatorSet);
+        innerFrame
+          .loop(() => {
+            if (index < sources.length) {
+              const source = sources[index++];
+              sph.startStylesheet(source.flavor);
+              if (source.text != null) {
+                return CssParser.parseStylesheetFromText(
+                  source.text,
+                  sph,
+                  source.url,
+                  source.media,
+                ).thenReturn(true);
+              } else {
+                return CssParser.parseStylesheetFromURL(
+                  source.url,
+                  sph,
+                  source.media,
+                );
+              }
+            }
+            return Task.newResult(false);
+          })
+          .then(() => {
+            const cascade = sph.cascadeParserHandler.finish();
+            style = new Style(
+              this,
+              sph.rootScope,
+              sph.pageScope,
+              cascade,
+              sph.rootBox,
+              sortFontFaces(sph.fontFaces),
+              sph.footnoteProps,
+              sph.flowProps,
+              sph.viewportProps,
+              sph.pageProps,
+              sph.counterStyles,
+            );
+            this.styleByKey[key] = style;
+            delete this.styleFetcherByKey[key];
+            innerFrame.finish(style);
+          });
+        return innerFrame.result();
+      }, `FetchStylesheet ${url}`);
+      this.styleFetcherByKey[key] = fetcher;
+      fetcher.start();
+    }
+    fetcher.get().then((style) => {
+      this.styleByDocURL[url] = style;
+      frame.finish(true);
+    });
     return frame.result();
   }
 

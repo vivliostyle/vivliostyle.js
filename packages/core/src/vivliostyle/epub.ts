@@ -863,6 +863,21 @@ function getPathFromURL(url: string, pubURL: string): string | null {
   }
 }
 
+/**
+ * Get the link relations of a publication manifest item, lowercased. The `rel`
+ * property may be a string or an array of strings.
+ */
+function getLinkRelations(itemObj: Base.JSON): string[] {
+  if (!itemObj || typeof itemObj !== "object") {
+    return [];
+  }
+  const rel = itemObj.rel;
+  return (Array.isArray(rel) ? rel : [rel])
+    .filter((r) => typeof r === "string")
+    .flatMap((r: string) => r.trim().toLowerCase().split(/\s+/))
+    .filter((r) => r);
+}
+
 export class OPFDoc {
   opfXML: XmlDoc.XMLDocHolder;
   items: OPFItem[];
@@ -1360,8 +1375,10 @@ export class OPFDoc {
     }
 
     const params: OPFItemParam[] = [];
+    const styleSheets: OPS.StyleSheetParam[] = [];
     let itemCount = 0;
     let tocFound = -1;
+    const baseUrl = manifestUrl ? manifestUrl.replace(/\/[^/]+$/, "/") : pubURL;
     [manifestObj["readingOrder"], manifestObj["resources"]].forEach(
       (readingOrderOrResources) => {
         if (readingOrderOrResources instanceof Array) {
@@ -1378,55 +1395,80 @@ export class OPFDoc {
                 : itemObj.encodingFormat ||
                   (itemObj.href && itemObj.type) ||
                   "";
+            const rels = getLinkRelations(itemObj);
             if (
               isInReadingOrder ||
               encodingFormat === "text/html" ||
               encodingFormat === "application/xhtml+xml" ||
               (!encodingFormat &&
-                itemObj.rel !== "stylesheet" &&
+                !rels.includes("stylesheet") &&
                 /(^|\/)([^/]+\.(x?html|htm|xht)|[^/.]*)([#?]|$)/.test(url))
             ) {
-              const baseUrl = manifestUrl
-                ? manifestUrl.replace(/\/[^/]+$/, "/")
-                : pubURL;
               const param = {
                 url: Base.resolveURL(Base.convertSpecialURL(url), baseUrl),
                 index: itemCount++,
                 startPage: null,
                 skipPagesBefore: null,
               };
-              if (itemObj.rel === "contents" && tocFound === -1) {
+              if (rels.includes("contents") && tocFound === -1) {
                 tocFound = param.index;
               }
               params.push(param);
+            } else if (
+              url &&
+              rels.includes("stylesheet") &&
+              !rels.includes("alternate") &&
+              (!encodingFormat ||
+                encodingFormat.split(";")[0].trim().toLowerCase() ===
+                  "text/css")
+            ) {
+              // Publication manifest extension: a resource with
+              // `"rel": "stylesheet"` is applied to every document in the
+              // reading order, as if `<link rel="stylesheet">` were appended
+              // after the author style sheets of the document. (Issue #1588)
+              const styleSheetUrl = Base.resolveURL(
+                Base.convertSpecialURL(url),
+                baseUrl,
+              );
+              if (!styleSheets.some((sheet) => sheet.url === styleSheetUrl)) {
+                styleSheets.push({ url: styleSheetUrl });
+              }
             }
           });
         }
       },
     );
     const frame: Task.Frame<OPFDoc> = Task.newFrame("fromWebPubManifest");
-    OPFDoc.fromChapters(store, pubURL, params).then((opf) => {
-      opf.pageProgression = pageProgression;
-      opf.metadata = metadata;
-      if (tocFound !== -1) {
-        opf.toc = opf.items[tocFound];
-        opf.tocSpecified = true;
-      }
+    const readingOrderCount = manifestObj["readingOrder"]?.length ?? 0;
+    (styleSheets.length
+      ? store.setPublicationStyleSheets(
+          styleSheets,
+          params.slice(0, readingOrderCount).map((param) => param.url),
+        )
+      : Task.newResult(true)
+    )
+      .thenAsync(() => OPFDoc.fromChapters(store, pubURL, params))
+      .then((opf) => {
+        opf.pageProgression = pageProgression;
+        opf.metadata = metadata;
+        if (tocFound !== -1) {
+          opf.toc = opf.items[tocFound];
+          opf.tocSpecified = true;
+        }
 
-      if (!opf.toc) {
-        opf.toc = manifestUrl
-          ? (opf.items[0] ?? null)
-          : opf.itemMapByPath[primaryEntryPath];
-      }
+        if (!opf.toc) {
+          opf.toc = manifestUrl
+            ? (opf.items[0] ?? null)
+            : opf.itemMapByPath[primaryEntryPath];
+        }
 
-      // remove items not in readingOrder (Issue #1257)
-      const readingOrderCount = manifestObj["readingOrder"]?.length;
-      if (readingOrderCount && readingOrderCount < opf.items.length) {
-        opf.items.splice(readingOrderCount);
-      }
+        // remove items not in readingOrder (Issue #1257)
+        if (readingOrderCount && readingOrderCount < opf.items.length) {
+          opf.items.splice(readingOrderCount);
+        }
 
-      frame.finish(opf);
-    });
+        frame.finish(opf);
+      });
     return frame.result();
   }
 
