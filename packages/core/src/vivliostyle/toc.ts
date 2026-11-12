@@ -43,7 +43,80 @@ export type TOCItem = {
   id: string;
   title: string;
   children: TOCItem[];
+  /**
+   * The bookmark-state of the CSS bookmark ("open" or "closed"), set only
+   * when the TOC is generated from the CSS bookmarks.
+   */
+  state?: "open" | "closed";
 };
+
+/**
+ * URL of the navigation document generated from the CSS bookmarks.
+ */
+export const bookmarksTocURL = "about:vivliostyle-bookmarks";
+
+/**
+ * Attribute set on the anchor elements of the navigation document generated
+ * from the CSS bookmarks, with the bookmark-state value.
+ */
+export const bookmarkStateAttr = "data-vivliostyle-bookmark-state";
+
+/**
+ * Create a navigation document from the CSS bookmarks.
+ * https://drafts.csswg.org/css-content-3/#bookmark-generation
+ * @param docs Documents in the reading order, with their bookmarks.
+ * @param lang Language of the publication.
+ */
+export function createBookmarksTocDocument(
+  docs: { url: string; bookmarks: Counters.Bookmark[] }[],
+  lang: string | null,
+): Document {
+  const doc = document.implementation.createHTMLDocument("");
+  if (lang) {
+    doc.documentElement.setAttribute("lang", lang);
+  }
+  const nav = doc.createElement("nav");
+  nav.setAttribute("role", "doc-toc");
+  const rootList = doc.createElement("ol");
+  nav.appendChild(rootList);
+  doc.body.appendChild(nav);
+
+  // The bookmarks do not need to form a strict hierarchy of levels. A
+  // bookmark becomes a child of the nearest preceding bookmark with a lower
+  // level.
+  const stack: { level: number; item: HTMLElement }[] = [];
+  for (const { url, bookmarks } of docs) {
+    for (const bookmark of bookmarks) {
+      while (stack.length && stack[stack.length - 1].level >= bookmark.level) {
+        stack.pop();
+      }
+      let list = rootList;
+      if (stack.length) {
+        const parentItem = stack[stack.length - 1].item;
+        list = parentItem.querySelector(":scope > ol");
+        if (!list) {
+          list = doc.createElement("ol");
+          parentItem.appendChild(list);
+        }
+      }
+      const item = doc.createElement("li");
+      const anchor = doc.createElement("a");
+      anchor.setAttribute(
+        "href",
+        `${Base.stripFragment(url)}#${encodeURIComponent(bookmark.id)}`,
+      );
+      anchor.setAttribute(
+        bookmarkStateAttr,
+        bookmark.closed ? "closed" : "open",
+      );
+      anchor.textContent = bookmark.label;
+      item.appendChild(anchor);
+      list.appendChild(item);
+      stack.push({ level: bookmark.level, item });
+    }
+  }
+  return doc;
+}
 
 export function findTocElements(doc: Document): Array<Element> {
   // Find `<nav epub:type="toc">` etc. for EPUB.
@@ -305,11 +378,32 @@ export class TOCView implements Vgen.CustomRendererFactory {
       ).then((instance) => {
         instance.layoutNextPage(page, null).then(() => {
           this.setAutoHeight(elem, 2);
+          this.expandOpenBookmarks(elem);
           frame.finish(page);
         });
       });
     });
     return frame.result();
+  }
+
+  /**
+   * Expand the TOC nodes generated from the CSS bookmarks with
+   * `bookmark-state: open`. A node inside a collapsed node is left collapsed.
+   */
+  private expandOpenBookmarks(elem: HTMLElement): void {
+    for (const anchor of elem.querySelectorAll(
+      `[role=treeitem] > a[${bookmarkStateAttr}=open]`,
+    )) {
+      const node = anchor.parentElement as HTMLElement;
+      const button = node.firstElementChild;
+      if (
+        node.style.height !== "0px" &&
+        button !== anchor &&
+        button.textContent === bulletClosed
+      ) {
+        toggleNode(button);
+      }
+    }
   }
 
   hideTOC(): void {
@@ -345,6 +439,10 @@ export class TOCView implements Vgen.CustomRendererFactory {
       const container = tag.parentElement.querySelector("[role=group]");
       const children = exportTree(container);
 
+      const state = tag.getAttribute(bookmarkStateAttr);
+      if (state === "open" || state === "closed") {
+        return { id, title, children, state };
+      }
       return { id, title, children };
     }
 
@@ -354,7 +452,14 @@ export class TOCView implements Vgen.CustomRendererFactory {
 }
 
 export function toggleNodeExpansion(evt: Event): void {
-  const elem = evt.target as Element;
+  toggleNode(evt.target as Element);
+  evt.stopPropagation();
+}
+
+/**
+ * Toggle the expansion of the TOC node of the given button element.
+ */
+function toggleNode(elem: Element): void {
   const open = elem.textContent == bulletClosed;
   elem.textContent = open ? bulletOpen : bulletClosed;
   const tocNodeElem = elem.parentNode as Element;
@@ -398,5 +503,4 @@ export function toggleNodeExpansion(evt: Event): void {
     }
     c = c.nextSibling;
   }
-  evt.stopPropagation();
 }

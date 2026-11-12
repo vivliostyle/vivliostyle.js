@@ -3951,6 +3951,19 @@ export interface CounterResolver {
    * https://drafts.csswg.org/css-gcpm-3/#running-elements
    */
   setRunningElement(name: string, elementOffset: number): void;
+
+  /**
+   * Set bookmark for the CSS bookmark-level, bookmark-label and
+   * bookmark-state properties
+   * https://drafts.csswg.org/css-content-3/#bookmark-generation
+   */
+  setBookmark(
+    element: Element,
+    elementOffset: number,
+    level: number,
+    label: string,
+    closed: boolean,
+  ): void;
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
@@ -5867,6 +5880,50 @@ export class CascadeInstance {
   }
 
   /**
+   * Process CSS bookmark-level, bookmark-label and bookmark-state properties
+   * https://drafts.csswg.org/css-content-3/#bookmark-generation
+   */
+  setBookmark(
+    props: ElementStyle,
+    element: Element,
+    elementOffset: number,
+  ): void {
+    const levelProp = props["bookmark-level"] as CascadeValue;
+    let labelProp = props["bookmark-label"] as CascadeValue;
+    const stateProp = props["bookmark-state"] as CascadeValue;
+    delete props["bookmark-level"];
+    delete props["bookmark-label"];
+    delete props["bookmark-state"];
+    const level = levelProp?.value;
+    if (
+      !(level instanceof Css.Num) ||
+      !Number.isInteger(level.num) ||
+      level.num < 1
+    ) {
+      return; // bookmark-level: none (initial value)
+    }
+    let label: string;
+    if (labelProp && !Css.isDefaultingValue(labelProp.value)) {
+      labelProp = labelProp.filterValue(
+        new ContentPropVisitor(this, element, this.counterResolver, props),
+      );
+      label = getStringValueFromCssContentVal(labelProp.value, this.context);
+    } else {
+      // bookmark-label initial value: content(text)
+      label = element.textContent;
+    }
+    label = label.replace(/\s+/g, " ").trim();
+    const closed = stateProp?.value?.toString() === "closed";
+    this.counterResolver.setBookmark(
+      element,
+      elementOffset,
+      level.num,
+      label,
+      closed,
+    );
+  }
+
+  /**
    * Process CSS running elements
    * https://drafts.csswg.org/css-gcpm-3/#running-elements
    */
@@ -6224,6 +6281,9 @@ export class CascadeInstance {
 
     // process CSS running elements
     this.setRunningElement(baseStyle, elementOffset);
+
+    // process CSS bookmark properties
+    this.setBookmark(baseStyle, element, elementOffset);
 
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);

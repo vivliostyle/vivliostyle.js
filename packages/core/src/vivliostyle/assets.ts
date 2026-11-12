@@ -655,6 +655,11 @@ string-set = COMMA( SPACE( IDENT CONTENT_LIST )+ | none );
 footnote-display = block | inline | compact;
 footnote-policy = auto | line;
 
+/* CSS Generated Content: Bookmarks */
+bookmark-level = none | POS_INT;
+bookmark-label = CONTENT_LIST;
+bookmark-state = open | closed;
+
 /* CSS Repeated Headers and Footers */
 [viv]repeat-on-break = auto | none | header | footer;
 
