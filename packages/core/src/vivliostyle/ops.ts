@@ -4005,7 +4005,12 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             });
           } else if (localName == "link") {
             const href = elem.getAttribute("href");
-            const rel = elem.getAttribute("rel")?.split(/\s+/);
+            // Link types are ASCII case-insensitive
+            const rel = elem
+              .getAttribute("rel")
+              ?.trim()
+              .toLowerCase()
+              .split(/\s+/);
             const media = elem.getAttribute("media");
             if (href && rel?.includes("stylesheet")) {
               linkedStyleSheetURLs.add(Base.resolveURL(href, url));
