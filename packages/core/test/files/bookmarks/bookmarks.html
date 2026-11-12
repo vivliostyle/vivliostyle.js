@@ -40,6 +40,29 @@
       .invalid {
         bookmark-level: 0;
       }
+      .inherit-parent {
+        bookmark-level: 2;
+        bookmark-label: "Inherited label";
+        bookmark-state: closed;
+      }
+      .inherit-child {
+        bookmark-level: inherit;
+        bookmark-label: inherit;
+        bookmark-state: inherit;
+      }
+      .no-id:not([id]) {
+        bookmark-level: 2;
+        color: green;
+      }
+      .quoted {
+        bookmark-level: 2;
+        bookmark-label: open-quote content();
+      }
+      .var-state {
+        --state: CLOSED;
+        bookmark-level: 2;
+        bookmark-state: var(--state);
+      }
     </style>
   </head>
   <body>
@@ -81,5 +104,30 @@
       bookmark becomes a child of "Third Chapter".
     </p>
     <h3>Subsection without section</h3>
+
+    <h1>Fourth Chapter</h1>
+    <p>
+      Expected children of "Fourth Chapter": "Inherited label" twice (the
+      second one inherits all bookmark properties from the first), "Not
+      matched by [id]", "“Quoted", and "State from var()" (closed, with its
+      child "Child of var-state").
+    </p>
+    <div class="inherit-parent">
+      <p class="inherit-child">
+        This element inherits all bookmark properties from its parent.
+      </p>
+    </div>
+    <p class="no-id">Not matched by [id]</p>
+    <p>
+      A bookmark element without id must stay unmatched by
+      <code>:not([id])</code>, so the text above is green.
+    </p>
+    <p class="quoted">Quoted</p>
+    <p>
+      The open-quote in the bookmark label above must not change the quotes
+      here: <q>outer <q>inner</q></q> should show “outer ‘inner’”.
+    </p>
+    <p class="var-state">State from var()</p>
+    <h3>Child of var-state</h3>
   </body>
 </html>

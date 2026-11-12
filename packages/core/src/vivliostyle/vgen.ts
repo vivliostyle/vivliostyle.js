@@ -1793,6 +1793,41 @@ export class ViewFactory
   }
 
   /**
+   * Set the transformed id on the view element and add an anchor element
+   * with it, and register the view element with the id on the page.
+   */
+  private addIdAnchor(
+    element: Element,
+    result: Element,
+    attributeName: string,
+    id: string,
+  ): void {
+    const transformedValue = this.documentURLTransformer.transformFragment(
+      id,
+      this.xmldoc.url,
+    );
+    result.setAttribute("data-vivliostyle-id", transformedValue);
+
+    // Create an anchor element with transformed id, necessary for internal
+    // links in output PDF (issue #877)
+    const anchorElem = result.ownerDocument.createElement("a");
+    anchorElem.setAttribute(attributeName, transformedValue);
+    anchorElem.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
+    anchorElem.style.position = "absolute";
+    result.appendChild(anchorElem);
+
+    // A fragment resolves to the first matching source element.
+    // Retain every element for navigation and triggers, but do not
+    // let later duplicates supply cross-reference snapshots.
+    const target = this.xmldoc.getElement(`#${id}`);
+    this.page.registerElementWithId(
+      result,
+      transformedValue,
+      !target || target === element,
+    );
+  }
+
+  /**
    * @return holding true if children should be processed
    */
   private createElementView(
@@ -2646,32 +2681,13 @@ export class ViewFactory
               // Propagate transformed ids and collect them on the page
               // (only first time).
               if (firstTime) {
-                const transformedValue =
-                  this.documentURLTransformer.transformFragment(
-                    attributeValue,
-                    this.xmldoc.url,
-                  );
-
                 // Keep original id value so that JavaScript can manipulate it
                 result.setAttribute(attributeName, attributeValue);
-                result.setAttribute("data-vivliostyle-id", transformedValue);
-
-                // Create an anchor element with transformed id, necessary for internal links in output PDF
-                // (issue #877)
-                const anchorElem = result.ownerDocument.createElement("a");
-                anchorElem.setAttribute(attributeName, transformedValue);
-                anchorElem.setAttribute(LayoutHelper.SPECIAL_ATTR, "1");
-                anchorElem.style.position = "absolute";
-                result.appendChild(anchorElem);
-
-                // A fragment resolves to the first matching source element.
-                // Retain every element for navigation and triggers, but do not
-                // let later duplicates supply cross-reference snapshots.
-                const target = this.xmldoc.getElement(`#${attributeValue}`);
-                this.page.registerElementWithId(
+                this.addIdAnchor(
+                  element,
                   result,
-                  transformedValue,
-                  !target || target === element,
+                  attributeName,
+                  attributeValue,
                 );
                 continue;
               }
@@ -2806,6 +2822,13 @@ export class ViewFactory
                 Logging.logger.warn(err);
               }
             }
+          }
+        }
+        if (firstTime && !element.hasAttribute("id")) {
+          // Id generated for an element with a CSS bookmark
+          const generatedId = Base.getGeneratedId(element);
+          if (generatedId) {
+            this.addIdAnchor(element, result, "id", generatedId);
           }
         }
         if (delayedSrc) {
@@ -5319,6 +5342,9 @@ export class ViewFactory
 }
 
 export const propertiesNotPassedToDOM = {
+  "bookmark-label": true,
+  "bookmark-level": true,
+  "bookmark-state": true,
   "float-min-wrap-block": true,
   "float-reference": true,
   "flow-into": true,

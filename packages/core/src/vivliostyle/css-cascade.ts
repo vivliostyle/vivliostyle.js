@@ -5888,13 +5888,17 @@ export class CascadeInstance {
     element: Element,
     elementOffset: number,
   ): void {
-    const levelProp = props["bookmark-level"] as CascadeValue;
-    let labelProp = props["bookmark-label"] as CascadeValue;
-    const stateProp = props["bookmark-state"] as CascadeValue;
-    delete props["bookmark-level"];
-    delete props["bookmark-label"];
-    delete props["bookmark-state"];
-    const level = levelProp?.value;
+    // These properties are not inherited by default, but they are kept in
+    // the element style (not passed to the DOM, see
+    // Vgen.propertiesNotPassedToDOM), so that a child with an explicit
+    // `inherit` value can get the value of its parent.
+    const getValue = (name: string): Css.Val | null => {
+      const value = (props[name] as CascadeValue)?.value ?? null;
+      return value === Css.ident.inherit
+        ? this.getInheritedPropertyValue(name, element, props)
+        : value;
+    };
+    const level = getValue("bookmark-level");
     if (
       !(level instanceof Css.Num) ||
       !Number.isInteger(level.num) ||
@@ -5902,18 +5906,25 @@ export class CascadeInstance {
     ) {
       return; // bookmark-level: none (initial value)
     }
+    const labelValue = getValue("bookmark-label");
     let label: string;
-    if (labelProp && !Css.isDefaultingValue(labelProp.value)) {
-      labelProp = labelProp.filterValue(
+    if (labelValue && !Css.isDefaultingValue(labelValue)) {
+      // Do not let open-quote/close-quote in the label change the quotes
+      // rendered in the document.
+      const originalQuoteDepth = this.quoteDepth;
+      const contentVal = labelValue.visit(
         new ContentPropVisitor(this, element, this.counterResolver, props),
       );
-      label = getStringValueFromCssContentVal(labelProp.value, this.context);
+      label = getStringValueFromCssContentVal(contentVal, this.context);
+      this.quoteDepth = originalQuoteDepth;
     } else {
       // bookmark-label initial value: content(text)
       label = element.textContent;
     }
     label = label.replace(/\s+/g, " ").trim();
-    const closed = stateProp?.value?.toString() === "closed";
+    // The keyword may keep its case when given via var().
+    const closed =
+      getValue("bookmark-state")?.toString().toLowerCase() === "closed";
     this.counterResolver.setBookmark(
       element,
       elementOffset,

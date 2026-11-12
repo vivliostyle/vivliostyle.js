@@ -270,6 +270,19 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
       }
       r = this.idMap[id];
     }
+    if (!r && id.startsWith(Base.bookmarkIdPrefix)) {
+      // Id generated for an element with a CSS bookmark (not in the DOM)
+      const offset = Number(id.slice(Base.bookmarkIdPrefix.length));
+      if (Number.isInteger(offset) && offset >= 0) {
+        const node = this.getNodeByOffset(offset);
+        if (
+          node.nodeType === 1 &&
+          Base.getGeneratedId(node as Element) === id
+        ) {
+          r = node as Element;
+        }
+      }
+    }
     return r;
   }
 }
