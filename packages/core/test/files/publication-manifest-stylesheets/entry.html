@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Primary entry with an embedded manifest</title>
+    <link rel="publication" href="#manifest" />
+    <script type="application/ld+json" id="manifest">
+      {
+        "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+        "type": "Book",
+        "name": "Publication manifest stylesheets (embedded manifest)",
+        "readingOrder": ["entry.html", "chapter1.html"],
+        "resources": [
+          { "url": "css/base.css", "rel": "stylesheet" },
+          { "url": "css/page.css", "rel": "stylesheet" }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Primary entry with an embedded manifest</h1>
+    <p>
+      This primary entry document is loaded before its embedded manifest is
+      read. The resources with <code>"rel": "stylesheet"</code> still apply to
+      it.
+    </p>
+    <p class="pass-if-applied">This text is green (css/base.css)</p>
+    <p>The page header shows “page.css applied” in green (css/page.css).</p>
+  </body>
+</html>

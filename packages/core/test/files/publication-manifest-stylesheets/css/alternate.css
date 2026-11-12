@@ -1,0 +1,6 @@
+.not-applied {
+  color: red;
+}
+.not-applied::after {
+  content: " — FAIL (alternate.css applied)";
+}

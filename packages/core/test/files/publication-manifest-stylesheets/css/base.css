@@ -1,0 +1,18 @@
+.pass-if-applied {
+  color: green;
+}
+.pass-if-applied::after {
+  content: " — PASS";
+}
+.customized-by-publication {
+  color: green;
+}
+.customized-by-publication::after {
+  content: " — PASS";
+}
+.overridden-by-document {
+  color: red;
+}
+.overridden-by-document::after {
+  content: " — FAIL";
+}

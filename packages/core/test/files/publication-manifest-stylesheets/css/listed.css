@@ -1,0 +1,6 @@
+.not-applied {
+  color: red;
+}
+.not-applied::before {
+  content: "FAIL (listed.css applied) — ";
+}

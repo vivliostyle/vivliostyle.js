@@ -1,0 +1,8 @@
+@page {
+  size: A5;
+  margin: 20mm;
+  @top-center {
+    content: "page.css applied";
+    color: green;
+  }
+}
