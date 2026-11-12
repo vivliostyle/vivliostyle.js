@@ -3951,6 +3951,19 @@ export interface CounterResolver {
    * https://drafts.csswg.org/css-gcpm-3/#running-elements
    */
   setRunningElement(name: string, elementOffset: number): void;
+
+  /**
+   * Set bookmark for the CSS bookmark-level, bookmark-label and
+   * bookmark-state properties
+   * https://drafts.csswg.org/css-content-3/#bookmark-generation
+   */
+  setBookmark(
+    element: Element,
+    elementOffset: number,
+    level: number,
+    label: string,
+    closed: boolean,
+  ): void;
 }
 
 export class AttrValueFilterVisitor extends Css.FilterVisitor {
@@ -5867,6 +5880,77 @@ export class CascadeInstance {
   }
 
   /**
+   * Process CSS bookmark-level, bookmark-label and bookmark-state properties
+   * https://drafts.csswg.org/css-content-3/#bookmark-generation
+   */
+  setBookmark(
+    props: ElementStyle,
+    element: Element,
+    elementOffset: number,
+  ): void {
+    // These properties are not inherited by default, but they are kept in
+    // the element style (not passed to the DOM, see
+    // Vgen.propertiesNotPassedToDOM), so that a child with an explicit
+    // `inherit` value can get the value of its parent. Returns null for the
+    // initial value.
+    const getValue = (name: string): Css.Val | null => {
+      let style = props;
+      for (let e = element; ;) {
+        let value = (style[name] as CascadeValue)?.value ?? null;
+        if (value && !Css.isDefaultingValue(value)) {
+          // Revalidate, since a value substituted from var() is not
+          // validated (e.g., `--label: none; bookmark-label: var(--label)`)
+          // and the keyword case is kept.
+          value = value.visit(this.validatorSet.validators.get(name)) ?? null;
+          return value && !Css.isDefaultingValue(value) ? value : null;
+        }
+        if (value !== Css.ident.inherit) {
+          return null; // unspecified, initial, unset, etc.
+        }
+        e = e.parentElement;
+        if (!e) {
+          return null;
+        }
+        style = this.styles.styleOf(e);
+      }
+    };
+    const level = getValue("bookmark-level");
+    if (
+      !(level instanceof Css.Num) ||
+      !Number.isInteger(level.num) ||
+      level.num < 1
+    ) {
+      return; // bookmark-level: none (initial value)
+    }
+    const labelValue = getValue("bookmark-label");
+    let label: string;
+    if (labelValue) {
+      // Do not let open-quote/close-quote in the label change the quotes
+      // rendered in the document.
+      const originalQuoteDepth = this.quoteDepth;
+      const contentVal = labelValue.visit(
+        new ContentPropVisitor(this, element, this.counterResolver, props),
+      );
+      label = getStringValueFromCssContentVal(contentVal, this.context);
+      this.quoteDepth = originalQuoteDepth;
+    } else {
+      // bookmark-label initial value: content(text)
+      label = element.textContent;
+    }
+    label = label.replace(/\s+/g, " ").trim();
+    // The keyword may keep its case when given via var().
+    const closed =
+      getValue("bookmark-state")?.toString().toLowerCase() === "closed";
+    this.counterResolver.setBookmark(
+      element,
+      elementOffset,
+      level.num,
+      label,
+      closed,
+    );
+  }
+
+  /**
    * Process CSS running elements
    * https://drafts.csswg.org/css-gcpm-3/#running-elements
    */
@@ -6224,6 +6308,9 @@ export class CascadeInstance {
 
     // process CSS running elements
     this.setRunningElement(baseStyle, elementOffset);
+
+    // process CSS bookmark properties
+    this.setBookmark(baseStyle, element, elementOffset);
 
     if (itemToPushLast) {
       this.stack[this.stack.length - 2].push(itemToPushLast);

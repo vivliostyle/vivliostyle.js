@@ -445,7 +445,7 @@ export class CoreViewer {
     if (
       this.adaptViewer_.opfView &&
       this.adaptViewer_.opfView.opf &&
-      this.adaptViewer_.opfView.opf.toc
+      this.adaptViewer_.opfView.hasTOC()
     ) {
       return !!this.adaptViewer_.opfView.isTOCVisible();
     } else {

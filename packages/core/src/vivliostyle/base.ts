@@ -90,6 +90,26 @@ export function toTocBoxURL(url: string): string {
 }
 
 /**
+ * Prefix of the id generated for a source element that has a CSS bookmark
+ * but no id. The id is followed by the element offset.
+ */
+export const bookmarkIdPrefix = "viv-bookmark-";
+
+/**
+ * Ids generated for source elements. They are kept out of the source DOM so
+ * that they do not affect selector matching.
+ */
+const generatedIds = new WeakMap<Element, string>();
+
+export function setGeneratedId(element: Element, id: string): void {
+  generatedIds.set(element, id);
+}
+
+export function getGeneratedId(element: Element): string | undefined {
+  return generatedIds.get(element);
+}
+
+/**
  * Base URL relative to which URLs of resources are resolved.
  */
 export let baseURL = window.location.href;

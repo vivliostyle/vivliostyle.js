@@ -79,6 +79,32 @@ describe("xml-doc", function () {
         var e = holder.getElement("http://example.com/doc.html#baz");
         expect(e instanceof Element).toBe(true);
       });
+
+      it("returns an element by the id generated for a CSS bookmark", function () {
+        var doc = new DOMParser().parseFromString(
+          "<foo><bar></bar><baz></baz></foo>",
+          "text/xml",
+        );
+        var holder = new adapt_xmldoc.XMLDocHolder(null, url, doc);
+        var baz = doc.querySelector("baz");
+        var id = adapt_base.bookmarkIdPrefix + holder.getElementOffset(baz);
+
+        // Not found unless the id is generated for the element.
+        expect(holder.getElement("foobar#" + id)).toBeFalsy();
+
+        adapt_base.setGeneratedId(baz, id);
+        expect(holder.getElement("foobar#" + id)).toBe(baz);
+        // The generated id is not set on the source element.
+        expect(baz.hasAttribute("id")).toBe(false);
+        // A suffix added to avoid an id used in the document is accepted.
+        adapt_base.setGeneratedId(baz, id + "-1");
+        expect(holder.getElement("foobar#" + id + "-1")).toBe(baz);
+        expect(holder.getElement("foobar#" + id)).toBeFalsy();
+        // An id with a wrong offset is not resolved.
+        expect(
+          holder.getElement("foobar#" + adapt_base.bookmarkIdPrefix + "0"),
+        ).toBeFalsy();
+      });
     });
   });
 

@@ -877,6 +877,13 @@ export class OPFDoc {
   epageCountCallback: ((p1: number) => void) | null = null;
   metadata: Meta = {};
   toc: OPFItem | null = null;
+  /**
+   * True if the navigation document is specified in the EPUB package
+   * document or in the publication manifest. Otherwise `toc` is a document
+   * that may contain a TOC, found heuristically, and the CSS bookmarks take
+   * precedence over it.
+   */
+  tocSpecified: boolean = false;
   cover: OPFItem | null = null;
   fallbackMap: { [key: string]: string } = {};
   pageProgression: Constants.PageProgression | null = null;
@@ -1082,6 +1089,7 @@ export class OPFDoc {
       itemMapByPath,
     });
     opf.toc = toc;
+    opf.tocSpecified = !!toc;
     opf.cover = cover;
     opf.fallbackMap = fallbackMap;
     const pageProgressionAttr = pkg
@@ -1402,6 +1410,7 @@ export class OPFDoc {
       opf.metadata = metadata;
       if (tocFound !== -1) {
         opf.toc = opf.items[tocFound];
+        opf.tocSpecified = true;
       }
 
       if (!opf.toc) {
@@ -1614,6 +1623,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
   tocAutohide: boolean = false;
   tocVisible: boolean = false;
   tocView?: Toc.TOCView;
+  private bookmarksTocVersion: number = -1;
   private deferredReferencePages: DeferredReferencePage[] = [];
   private resolvingDeferredReferences: boolean = false;
   private processedDeferredReferencePages: Map<
@@ -4246,12 +4256,61 @@ export class OPFView implements Vgen.CustomRendererFactory {
     return this.spineItems.some((item) => item && item.pages.length > 0);
   }
 
+  /**
+   * Returns true if the TOC is generated from the CSS bookmarks. The
+   * navigation document specified in the EPUB package document or in the
+   * publication manifest takes precedence over the CSS bookmarks.
+   * https://drafts.csswg.org/css-content-3/#bookmark-generation
+   */
+  useBookmarksForTOC(): boolean {
+    return !this.opf.tocSpecified && this.counterStore.hasBookmarks();
+  }
+
+  /**
+   * Returns true if a TOC is available.
+   */
+  hasTOC(): boolean {
+    return !!this.opf.toc || this.useBookmarksForTOC();
+  }
+
+  /**
+   * Create the navigation document from the CSS bookmarks collected so far,
+   * in the reading order.
+   */
+  private createBookmarksTocDocument(): Document {
+    const bookmarksByDocURL = this.counterStore.bookmarksByDocURL;
+    const docs: { url: string; bookmarks: Counters.Bookmark[] }[] = [];
+    for (const item of this.opf.spine) {
+      const url = Base.stripFragment(item.src);
+      const loadedURL = this.opf.store.get(url)?.url;
+      const bookmarks =
+        bookmarksByDocURL[url] ??
+        (loadedURL ? bookmarksByDocURL[Base.stripFragment(loadedURL)] : null);
+      if (bookmarks?.length) {
+        docs.push({ url, bookmarks });
+      }
+    }
+    return Toc.createBookmarksTocDocument(docs, this.opf.lang);
+  }
+
   showTOC(autohide: boolean): Task.Result<Vtree.Page | null> {
     const opf = this.opf;
-    const toc = opf.toc;
+    const useBookmarks = this.useBookmarksForTOC();
+    const tocURL = useBookmarks ? Toc.bookmarksTocURL : opf.toc?.src;
     this.tocAutohide = autohide;
-    if (!toc) {
+    if (!tocURL) {
       return Task.newResult<Vtree.Page | null>(null);
+    }
+    if (
+      this.tocView &&
+      (this.tocView.url !== tocURL ||
+        (useBookmarks &&
+          this.bookmarksTocVersion !== this.counterStore.bookmarksVersion))
+    ) {
+      // The TOC source has changed, e.g., bookmarks were added by the layout
+      // of more pages since the TOC box was created. Recreate the TOC box.
+      this.tocView.page?.container.remove();
+      this.tocView = undefined;
     }
     this.tocVisible = true;
     if (this.tocView && this.tocView.page) {
@@ -4260,10 +4319,27 @@ export class OPFView implements Vgen.CustomRendererFactory {
       return Task.newResult(this.tocView.page);
     }
     const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOC");
+    let ready: Task.Result<unknown> = Task.newResult(null);
+    if (useBookmarks && !this.tocView) {
+      this.bookmarksTocVersion = this.counterStore.bookmarksVersion;
+      ready = opf.store.addDocument(
+        Base.toTocBoxURL(tocURL),
+        this.createBookmarksTocDocument(),
+      );
+    }
+    ready.then(() => {
+      this.showTOCBox(tocURL).thenFinish(frame);
+    });
+    return frame.result();
+  }
+
+  private showTOCBox(tocURL: string): Task.Result<Vtree.Page> {
+    const opf = this.opf;
+    const frame: Task.Frame<Vtree.Page> = Task.newFrame("showTOCBox");
     if (!this.tocView) {
       this.tocView = new Toc.TOCView(
         opf.store,
-        toc.src,
+        tocURL,
         opf.lang,
         this.clientLayout,
         this.fontMapper,

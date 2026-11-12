@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSS Bookmarks</title>
+    <style>
+      @page {
+        size: 148mm 105mm;
+      }
+      body {
+        counter-reset: chapter;
+      }
+      h1 {
+        bookmark-level: 1;
+        counter-increment: chapter;
+        counter-reset: section;
+        break-before: page;
+      }
+      h1::before {
+        content: "Chapter " counter(chapter) ". ";
+      }
+      h1.closed {
+        bookmark-state: closed;
+      }
+      h2 {
+        bookmark-level: 2;
+        bookmark-label: counter(chapter) "." counter(section) " " content();
+        counter-increment: section;
+      }
+      h3 {
+        bookmark-level: 3;
+      }
+      .figure-caption {
+        bookmark-level: 4;
+        bookmark-label: "Figure: " attr(data-title);
+      }
+      h2.no-bookmark {
+        bookmark-level: none;
+      }
+      .invalid {
+        bookmark-level: 0;
+      }
+      .inherit-parent {
+        bookmark-level: 2;
+        bookmark-label: "Inherited label";
+        bookmark-state: closed;
+      }
+      .inherit-child {
+        bookmark-level: inherit;
+        bookmark-label: inherit;
+        bookmark-state: inherit;
+      }
+      .no-id:not([id]) {
+        bookmark-level: 2;
+        color: green;
+      }
+      .quoted {
+        bookmark-level: 2;
+        bookmark-label: open-quote content();
+      }
+      .var-state {
+        --state: CLOSED;
+        bookmark-level: 2;
+        bookmark-state: var(--state);
+      }
+      .grandparent {
+        bookmark-level: 2;
+        bookmark-label: "Grandparent";
+      }
+      .inherit-level {
+        bookmark-level: inherit;
+      }
+      .var-none {
+        --label: none;
+        bookmark-level: 2;
+        bookmark-label: var(--label);
+      }
+      .empty-id {
+        bookmark-level: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <p>
+        This nav element looks like a TOC, but the TOC box should show the CSS
+        bookmarks instead, since no navigation document is specified.
+      </p>
+      <ul>
+        <li><a href="#ch1">Not a bookmark</a></li>
+      </ul>
+    </nav>
+
+    <h1 id="ch1">First   Chapter</h1>
+    <p>
+      Expected TOC: "First Chapter" (level 1, open) with children "1.1 Section
+      A" (with its child "Subsection A-1") and "1.2 Section B" (with its child
+      "Figure: A figure").
+    </p>
+    <h2>Section A</h2>
+    <h3>Subsection
+      A-1</h3>
+    <h2>Section B</h2>
+    <p class="figure-caption" data-title="A figure">(figure caption)</p>
+    <h2 class="no-bookmark">Not a bookmark (bookmark-level: none)</h2>
+    <p class="invalid">Not a bookmark (bookmark-level: 0 is invalid)</p>
+
+    <h1 class="closed">Second Chapter</h1>
+    <p>
+      "Second Chapter" has bookmark-state: closed, so its children are
+      collapsed in the TOC box.
+    </p>
+    <h2>Section C</h2>
+    <h3>Subsection C-1</h3>
+
+    <h1>Third Chapter</h1>
+    <p>
+      Bookmarks do not need to form a strict hierarchy: the following level-3
+      bookmark becomes a child of "Third Chapter".
+    </p>
+    <h3>Subsection without section</h3>
+
+    <h1>Fourth Chapter</h1>
+    <p>
+      Expected children of "Fourth Chapter": "Inherited label" twice (the
+      second one inherits all bookmark properties from the first), "Not
+      matched by [id]", "“Quoted", and "State from var()" (closed, with its
+      child "Child of var-state").
+    </p>
+    <div class="inherit-parent">
+      <p class="inherit-child">
+        This element inherits all bookmark properties from its parent.
+      </p>
+    </div>
+    <p class="no-id">Not matched by [id]</p>
+    <p>
+      A bookmark element without id must stay unmatched by
+      <code>:not([id])</code>, so the text above is green.
+    </p>
+    <p class="quoted">Quoted</p>
+    <p>
+      The open-quote in the bookmark label above must not change the quotes
+      here: <q>outer <q>inner</q></q> should show “outer ‘inner’”.
+    </p>
+    <p class="var-state">State from var()</p>
+    <h3>Child of var-state</h3>
+
+    <h1>Fifth Chapter</h1>
+    <p>
+      Expected children of "Fifth Chapter": "Grandparent", "Label from invalid
+      var()", and "Empty id". Each of them must navigate to its element.
+    </p>
+    <div class="grandparent">
+      <div>
+        <p class="inherit-level">
+          Not a bookmark: bookmark-level: inherit takes the initial value none
+          of the parent, not the value of the grandparent.
+        </p>
+      </div>
+    </div>
+    <p class="var-none">Label from invalid var()</p>
+    <p class="empty-id" id="">Empty id</p>
+  </body>
+</html>

@@ -272,10 +272,6 @@ module.exports = [
         file: "revert-page.html",
         title: "Rollback keywords in @page (Issue #2111)",
       },
-      {
-        file: "toc-hidden.html",
-        title: "hidden attribute in the table of contents (PR #1269)",
-      },
     ],
   },
   {
@@ -1284,6 +1280,27 @@ module.exports = [
       {
         file: "running_header_adaptive.html",
         title: "Running header emulation with Adaptive Layout (PR #113)",
+      },
+    ],
+  },
+  {
+    category: "Table of contents and bookmarks",
+    files: [
+      {
+        file: "toc-hidden.html",
+        title: "hidden attribute in the table of contents (PR #1269)",
+      },
+      {
+        file: "bookmarks/bookmarks.html",
+        title: "CSS Bookmarks in the TOC box (Issue #590)",
+      },
+      {
+        file: "bookmarks/pub/publication.json",
+        title: "CSS Bookmarks across documents (Issue #590)",
+      },
+      {
+        file: "bookmarks/pub/publication-with-toc.json",
+        title: "Navigation document takes precedence over CSS Bookmarks",
       },
     ],
   },

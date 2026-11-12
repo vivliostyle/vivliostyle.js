@@ -1,0 +1,7 @@
+{
+  "@context": ["https://schema.org", "https://www.w3.org/ns/pub-context"],
+  "type": "Book",
+  "name": "Navigation document takes precedence over CSS Bookmarks",
+  "readingOrder": ["chapter1.html", "chapter2.html"],
+  "resources": [{ "url": "toc.html", "rel": "contents" }]
+}
