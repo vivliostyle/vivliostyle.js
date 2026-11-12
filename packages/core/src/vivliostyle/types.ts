@@ -619,6 +619,11 @@ export namespace Net {
     status: number;
     statusText: string | null;
     url: string;
+    /**
+     * The URL requested by the resource store, which differs from `url` when
+     * the request was redirected.
+     */
+    requestedURL?: string;
     contentType: string | null;
     responseText: string | null;
     responseXML: Document | null;

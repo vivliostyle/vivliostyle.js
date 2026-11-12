@@ -264,6 +264,84 @@ describe("epub", function () {
       });
     });
 
+    it("does not share the cached style between documents linking a style sheet for different media", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var docUrl2 = "https://example.com/book/chapter2.html";
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl, docUrl2])
+          .then(function () {
+            store
+              .addDocument(
+                docUrl,
+                parseDoc(
+                  "<link rel='stylesheet' media='screen' href='" +
+                    pubCss +
+                    "'/>",
+                ),
+              )
+              .then(function () {
+                store.addDocument(docUrl2, parseDoc("")).then(function () {
+                  expect(store.styleByDocURL[docUrl2]).not.toBe(
+                    store.styleByDocURL[docUrl],
+                  );
+                  done();
+                });
+              });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    function parseRedirectedDocument(store, requestedURL, loadedURL) {
+      return store.parseOPSResource({
+        status: 200,
+        statusText: "",
+        url: loadedURL,
+        requestedURL: requestedURL,
+        contentType: null,
+        responseText: null,
+        responseXML: parseDoc(""),
+        responseBlob: null,
+      });
+    }
+
+    it("applies publication style sheets to a redirected reading order document", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var loadedUrl = "https://example.com/book/chapter1";
+
+      adapt_task.start(function () {
+        store
+          .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+          .then(function () {
+            parseRedirectedDocument(store, docUrl, loadedUrl).then(function () {
+              expect(styleKeyFor(store, loadedUrl)).toContain(pubCss);
+              done();
+            });
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+
+    it("recomputes the style of a redirected document loaded before the publication style sheets are set", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var loadedUrl = "https://example.com/book/chapter1";
+
+      adapt_task.start(function () {
+        parseRedirectedDocument(store, docUrl, loadedUrl).then(function () {
+          expect(styleKeyFor(store, loadedUrl)).not.toContain(pubCss);
+          store
+            .setPublicationStyleSheets([{ url: pubCss }], [docUrl])
+            .then(function () {
+              expect(styleKeyFor(store, loadedUrl)).toContain(pubCss);
+              done();
+            });
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+
     it("does not apply publication style sheets to other documents", function (done) {
       var store = new adapt_epub.EPUBDocStore();
       var otherUrl = "https://example.com/book/other.html";

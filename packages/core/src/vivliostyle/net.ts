@@ -234,6 +234,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
         // Restore "user-agent.xml" URL
         response.url = url = userAgentXmlUrl;
       }
+      response.requestedURL = url;
       this.parser(response, this).then((resource) => {
         delete this.fetchers[url];
         this.resources[url] = resource;

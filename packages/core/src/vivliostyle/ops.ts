@@ -3777,6 +3777,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
   private publicationStyleSheets: StyleSource[] = [];
   private publicationStyleSheetDocURLs: Set<string> = new Set();
   private docByURL: { [url: string]: XmlDoc.XMLDocHolder } = {};
+  private requestedURLByDocURL: { [url: string]: string } = {};
   protected triggerSingleDocumentPreprocessing: boolean = false;
 
   protected constructor(
@@ -3848,8 +3849,8 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     this.publicationStyleSheetDocURLs = new Set(
       docURLs.map((url) => Base.stripFragment(url)),
     );
-    const loadedDocURLs = [...this.publicationStyleSheetDocURLs].filter(
-      (url) => !!this.docByURL[url],
+    const loadedDocURLs = Object.keys(this.docByURL).filter((url) =>
+      this.isPublicationStyleSheetDoc(url),
     );
     const frame: Task.Frame<boolean> = Task.newFrame(
       "setPublicationStyleSheets",
@@ -3867,6 +3868,20 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         frame.finish(true);
       });
     return frame.result();
+  }
+
+  /**
+   * Whether the publication style sheets apply to the document at `url`. A
+   * document loaded through a redirect is matched by its requested URL too.
+   */
+  private isPublicationStyleSheetDoc(url: string): boolean {
+    const docURL = Base.stripFragment(url);
+    const requestedURL = this.requestedURLByDocURL[docURL];
+    return (
+      this.publicationStyleSheetDocURLs.has(docURL) ||
+      (!!requestedURL &&
+        this.publicationStyleSheetDocURLs.has(Base.stripFragment(requestedURL)))
+    );
   }
 
   parseOPSResource(
@@ -3914,6 +3929,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         this.triggersByDocURL[url] = triggers;
         if (!Base.isTocBoxURL(url)) {
           this.docByURL[url] = xmldoc;
+          if (response.requestedURL && response.requestedURL !== url) {
+            this.requestedURLByDocURL[url] = response.requestedURL;
+          }
         }
         this.loadStyleForDoc(xmldoc, url).then(() => {
           frame.finish(xmldoc);
@@ -4017,7 +4035,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       // document so that they can customize it. A style sheet that the
       // document itself links is skipped: the manifest then just lists the
       // resources of the publication, and the document's link is kept as is.
-      if (this.publicationStyleSheetDocURLs.has(Base.stripFragment(url))) {
+      if (this.isPublicationStyleSheetDoc(url)) {
         for (const styleSheet of this.publicationStyleSheets) {
           if (
             !docSources.some(
@@ -4038,6 +4056,10 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       key += "^";
       if (sources[i].text) {
         key += sources[i].text;
+      }
+      key += "^";
+      if (sources[i].media) {
+        key += sources[i].media;
       }
       key += "^";
     }
