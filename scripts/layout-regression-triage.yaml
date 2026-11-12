@@ -1,1 +1,24 @@
-[]
+- category: Document and media
+  title: "Publication manifest resources with \"rel\": \"stylesheet\" (Issue #1588)"
+  file: publication-manifest-stylesheets/publication.json
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2260 (manifest stylesheets are not applied by stable)"
+  approvedViewer: git-feat-manifest-stylesheets  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/publication-manifest-stylesheets/publication.json&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/publication-manifest-stylesheets/publication.json&zoom=1&spread=false
+- category: Document and media
+  title: "Embedded publication manifest with \"rel\": \"stylesheet\" resources (Issue #1588)"
+  file: publication-manifest-stylesheets/entry.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2260 (manifest stylesheets are not applied by stable)"
+  approvedViewer: git-feat-manifest-stylesheets  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/publication-manifest-stylesheets/entry.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/publication-manifest-stylesheets/entry.html&zoom=1&spread=false
