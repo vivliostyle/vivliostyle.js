@@ -26,7 +26,7 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
   - `string`、`raw-string`、`url`、`number`、単位型、およびサポートされる CSS 値型を指定する `type(<...>)` 構文をサポートします。[PR #1975](https://github.com/vivliostyle/vivliostyle.js/pull/1975) を参照
   - 型と単位の値は、`attr()` を使用するプロパティに対して検証されます。
 - [相互参照: `target-counter()`, `target-counters()` and `target-text()`](https://www.w3.org/TR/css-content-3/#cross-references)
-  - `content` プロパティの値としてのみサポートします。
+  - `content` および `bookmark-label` プロパティの値としてのみサポートします。
 - [`string()` 関数（名前付き文字列）](https://www.w3.org/TR/css-content-3/#string-function)
 - [`content()` 関数](https://www.w3.org/TR/css-content-3/#content-function)
 - [`running()` 関数（ランニング要素）](https://www.w3.org/TR/css-gcpm-3/#running-syntax)
@@ -360,6 +360,14 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 
 - [CSS Generated Content for Paged Media (GCPM) 3 のアットルール](#css-generated-content-for-paged-media-gcpm-3)
 - [値 - 相互参照・string()・content()・running()・element()・leader() 関数](#値)
+
+### [CSS Generated Content 3](https://www.w3.org/TR/css-content-3/)
+
+- [bookmark-level、bookmark-label、bookmark-state（ブックマーク）](https://www.w3.org/TR/css-content-3/#bookmark-generation)
+  - ブックマークから目次を生成し、ビューアの目次ボックスに表示するとともに `getTOC()` で返します。Vivliostyle CLI はこれを PDF のしおり（ブックマーク）の生成に使用します。[PR #2258](https://github.com/vivliostyle/vivliostyle.js/pull/2258) を参照
+  - EPUB のパッケージ文書または出版物マニフェストでナビゲーション文書が指定されている場合は、CSS のブックマークよりもそちらが優先されます。
+  - `bookmark-state` は目次ボックスで項目を最初に展開して表示するかどうかを指定し、`getTOC()` が返す項目の `state` にもなります。
+  - 注意: `::before` および `::after` 疑似要素のブックマークはサポートしていません。`bookmark-label` の中の相互参照は、参照先がまだレイアウトされていない場合は `??` と表示されます。
 
 ### [CSS Fragmentation 3](https://www.w3.org/TR/css-break-3/)
 
