@@ -387,12 +387,12 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 ### [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
 
 - [clear](https://drafts.csswg.org/css-page-floats/#propdef-clear)
-  - [`none`、`inline-start`、`inline-end`、`block-start`、`block-end`、`left`、`right`、`top`、`bottom`、`both`、`all`、`same`](https://drafts.csswg.org/css-page-floats/#propdef-clear) 値をサポートします。
+  - `none`、`inline-start`、`inline-end`、`block-start`、`block-end`、`left`、`right`、`top`、`bottom`、`both`、`all`、`same`、`page`、`column`、`region` 値をサポートします。
   - ブロックレベルボックス（ページフロート以外）に `all` を指定すると、ドキュメント順序でこのボックスより前にアンカーがある block-start / block-end ページフロートの後にボックスの block-start 辺が来るように下げられます。
   - ページフロートに `clear` 値を指定すると、先行のページフロートの後に配置されます。
   - `same` 値は、そのページフロートがフロートしている方向と同じ方向を意味します。
   - `float: snap-block` のページフロートが block-start 端に配置されるところが、`clear` 値によりその配置が禁止される場合、フロートは代わりに block-end 側に配置されます（`clear` 値がその配置も禁止しない場合）。
-  - `page`、`column`、`region` 値は、先行のページフロートが `clear` プロパティを持つ要素（ページフロート、通常フロート、またはブロックレベルボックス）を含むページ/カラム/リージョンの前に配置されることを保証します。
+  - `page`、`column`、`region` 値は、先行のページフロートが `clear` プロパティを持つ要素（ページフロート、通常フロート、またはブロックレベルボックス）を含むページ/カラム/リージョンの前に配置されることを保証します。これらの値は、現在の CSS Page Floats 草案に対する拡張としてサポートしています。[Issue #1551](https://github.com/vivliostyle/vivliostyle.js/issues/1551) を参照してください。
 - [float](https://drafts.csswg.org/css-page-floats/#propdef-float)
   - [`block-start`、`block-end`、`inline-start`、`inline-end`、`snap-block`、`left`、`right`、`top`、`bottom`、`none`](https://drafts.csswg.org/css-page-floats/#propdef-float) 値をサポートします。
   - 複数のキーワードを組み合わせた値をサポートします。例:

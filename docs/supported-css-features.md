@@ -387,12 +387,12 @@ See also:
 ### [CSS Page Floats](https://drafts.csswg.org/css-page-floats/)
 
 - [clear](https://drafts.csswg.org/css-page-floats/#propdef-clear)
-  - Supports [`none`, `inline-start`, `inline-end`, `block-start`, `block-end`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`](https://drafts.csswg.org/css-page-floats/#propdef-clear) values.
+  - Supports `none`, `inline-start`, `inline-end`, `block-start`, `block-end`, `left`, `right`, `top`, `bottom`, `both`, `all`, `same`, `page`, `column`, and `region` values.
   - When `all` is specified on a block-level box (not a page float), the block-start edge of the box gets pushed down so that the edge comes after any block-start/block-end page float of which anchors are before the box in the document order.
   - When a `clear` value is specified on a page float, it is placed so that it comes after any of preceding page floats.
   - `same` value means the same direction as one which the page float is floated to.
   - If a page float with `float: snap-block` would be placed at the block-start end but a `clear` value on it forbidden such placement, the float is instead placed at the block-end side (unless the `clear` value also forbidden such placement).
-  - The `page`, `column`, and `region` values ensure that preceding page floats are placed before the page/column/region containing the element that has the `clear` property, which can be a page float, a normal float, or a block-level box.
+  - The `page`, `column`, and `region` values ensure that preceding page floats are placed before the page/column/region containing the element that has the `clear` property, which can be a page float, a normal float, or a block-level box. These values are supported as extensions to the current CSS Page Floats draft. See [Issue #1551](https://github.com/vivliostyle/vivliostyle.js/issues/1551).
 - [float](https://drafts.csswg.org/css-page-floats/#propdef-float)
   - Supports [`block-start`, `block-end`, `inline-start`, `inline-end`, `snap-block`, `left`, `right`, `top`, `bottom` and `none`](https://drafts.csswg.org/css-page-floats/#propdef-float) values.
   - Supports values combining keywords. For example,
