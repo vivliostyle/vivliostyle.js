@@ -16,6 +16,10 @@
       span.block {
         outline: 1px solid gray;
       }
+      .conditional-float::nth-fragment(1) {
+        float: right;
+        width: 14em;
+      }
     </style>
   </head>
   <body>
@@ -118,6 +122,15 @@
           style="float: left; width: 14em; color: currentcolor"
         >
           Float with 'color: currentcolor' should be blue.</strong
+        >
+      </span>
+    </p>
+    <p style="text-indent: 2em">
+      Paragraph with 'text-indent: 2em'.
+      <span style="text-indent: 0; font-style: italic">
+        Span with 'text-indent: 0; font-style: italic'.
+        <strong class="conditional-float">
+          Float declared in '::nth-fragment(1)': not indented, italic.</strong
         >
       </span>
     </p>

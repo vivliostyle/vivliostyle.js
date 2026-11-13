@@ -1893,14 +1893,23 @@ export class ViewFactory
     // (Layout.Column#layoutFloat), so it must not depend on the inheritance
     // from the inline ancestors either. (Issue #1479) Not in a footnote area,
     // since the source ancestors would miss its region rules such as
-    // `:footnote-content { font-size: ... }`.
+    // `:footnote-content { font-size: ... }`. Whether it floats is decided by
+    // the winning value, which may come from a view-conditional rule such as
+    // `::nth-fragment()`.
+    const floatInInline =
+      !this.isFootnote && nodeContext.parent?.inline
+        ? CssCascade.flattenCascadedStyle(
+            elementStyle,
+            this.context,
+            this.regionIds,
+            false,
+          )["float"]?.evaluate(this.context, "float")
+        : null;
     const isFloatInInline =
-      !this.isFootnote &&
-      !!nodeContext.parent?.inline &&
-      !!floatCV &&
-      !Css.isDefaultingValue(floatCV.value) &&
-      floatCV.value !== Css.ident.none &&
-      floatCV.value !== Css.ident.footnote;
+      !!floatInInline &&
+      !Css.isDefaultingValue(floatInInline) &&
+      floatInInline !== Css.ident.none &&
+      floatInInline !== Css.ident.footnote;
     if (
       nodeContext.parent &&
       (Display.isRunning(positionCV?.value) ||
