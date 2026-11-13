@@ -22,3 +22,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/publication-manifest-stylesheets/entry.html&zoom=1&spread=false
+- category: Float and clear
+  title: "Float inherits from its inline parent (Issue #1479)"
+  file: float-inherit-from-inline.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2261 (stable does not let floats inherit from their inline ancestors)"
+  approvedViewer: git-fix-float-inherit-from-inline  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-inherit-from-inline.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-inherit-from-inline.html&zoom=1&spread=false
