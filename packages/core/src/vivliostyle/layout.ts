@@ -1690,6 +1690,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Place a float box (rotated for vertical writing mode) in the inline range
    * x1-x2, below the top of the bottommost float, applying the clear property
    * of the float, and avoiding the floats in the bands.
+   * Returns false if the float does not fit in the column; the box is then
+   * left where clear and the bottommost float put it.
    */
   private placeFloatHorBox(
     floatHorBox: GeometryUtil.Rect,
@@ -1697,7 +1699,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     x2: number,
     floatSide: string,
     clearLR: string | null,
-  ): void {
+  ): boolean {
     const dir = this.getBoxDir();
     const moveTo = (y: number) => {
       if (floatHorBox.y1 < y) {
@@ -1732,7 +1734,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       x2,
       dir * this.afterEdge + this.getFloatLayoutUnit(),
     );
-    GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
+    return GeometryUtil.positionFloat(box, this.bands, floatHorBox, floatSide);
   }
 
   /**
@@ -1965,7 +1967,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         this.createFloats();
         return;
       }
-      this.placeFloatHorBox(
+      const placed = this.placeFloatHorBox(
         floatHorBox,
         pendingFloat.x1,
         pendingFloat.x2,
@@ -1976,9 +1978,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ? GeometryUtil.unrotateBox(floatHorBox, dir)
         : floatHorBox;
       const floatBoxEdge = this.getRectAfterEdge(floatBox);
-      if (this.isOverflown(floatBoxEdge)) {
+      if (!placed || this.isOverflown(floatBoxEdge)) {
         // Keep the floats where they are rather than pushing them out of the
-        // column.
+        // column or letting them overlap when they no longer fit.
         this.setFloatLayoutState(stateAfter);
         this.createFloats();
         return;
