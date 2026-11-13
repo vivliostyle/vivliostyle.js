@@ -1519,6 +1519,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // after the layout of the float is done.
         if (parent !== nodeContext.parent && !nodeContext.firstPseudo) {
           // Unless float is specified on ::first-letter (Fix for issue #923)
+          // The inherited properties of the inline ancestors are set on the
+          // float by the view factory (Vgen.ViewFactory#inheritFromSourceParent),
+          // but the language is not a property. (Issue #1479)
+          if (nodeContext.lang && nodeContext.lang !== parent.lang) {
+            element.setAttribute("lang", nodeContext.lang);
+          }
           parentViewNode.appendChild(element);
 
           // Mark the moved float box so that it is not removed wrongly

@@ -1682,6 +1682,10 @@ module.exports = [
         title: "Float with lh/rlh height (Issue #1494, #1738)",
       },
       {
+        file: "float-inherit-from-inline.html",
+        title: "Float inherits from its inline parent (Issue #1479)",
+      },
+      {
         file: "float-in-position-relative.html",
         title: "Float in position:relative across page break (Issue #1885)",
       },

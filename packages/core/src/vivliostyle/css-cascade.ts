@@ -1115,6 +1115,21 @@ export function hasKeywordName(value: Css.Val, name: string): boolean {
 }
 
 /**
+ * Whether the value of an inherited property makes the element take the value
+ * of its parent: `inherit`, `unset` (the same as `inherit` for an inherited
+ * property), and `currentcolor` in `color`. The keywords are compared by name,
+ * because a keyword that comes from a custom property is not canonicalized,
+ * e.g. `--x: INHERIT; color: var(--x)`.
+ */
+export function isInheritingValue(propName: string, value: Css.Val): boolean {
+  return (
+    hasKeywordName(value, "inherit") ||
+    hasKeywordName(value, "unset") ||
+    (propName === "color" && hasKeywordName(value, "currentcolor"))
+  );
+}
+
+/**
  * Resolve the relative font-size keywords `larger`/`smaller` against the
  * parent font-size, using the same factor (1.2) as browsers. (Issue #2174)
  */

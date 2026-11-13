@@ -1,0 +1,147 @@
+<!doctype html>
+<!-- Test case for Issue #1479: Incorrect CSS property inheritance on float elements -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Float inherits from inline parent (Issue #1479)</title>
+    <style>
+      @page {
+        size: 160mm 180mm;
+        margin: 10mm;
+      }
+      p {
+        margin: 0 0 1em;
+      }
+      strong,
+      span.block {
+        outline: 1px solid gray;
+      }
+      .conditional-float::nth-fragment(1) {
+        float: right;
+        width: 14em;
+      }
+    </style>
+  </head>
+  <body>
+    <p style="text-indent: 1em">
+      This paragraph has 'text-indent: 1em' style.
+      <em style="text-indent: 0">
+        This em element inside the paragraph has 'text-indent: 0' style which
+        should be inherited to inner elements.
+        <strong style="float: right; width: 10em">
+          This strong element in the em element has 'float: right; width:
+          10em;' and inherited text-indent should be 0.</strong
+        >
+        <span class="block" style="display: block; width: 10em">
+          This span element in the em element has 'display: block; width:
+          10em;' and inherited text-indent should be 0.</span
+        >
+      </em>
+      <span class="block" style="display: block; width: 10em">
+        This span element in the paragraph has 'display: block; width: 10em;'
+        and inherited text-indent should be 1em.</span
+      >
+    </p>
+    <p style="text-indent: 0; text-align: left">
+      <span style="text-indent: 3em; text-align: right">
+        Inline span with 'text-indent: 3em; text-align: right'.
+        <strong style="float: left; width: 12em">
+          Left float in the span: should be indented 3em and right-aligned.</strong
+        >
+        Text after the float in the span.
+      </span>
+    </p>
+    <p>
+      <span style="font-weight: 300; font-size: 0.75em">
+        Light and small inline span.
+        <strong id="float-bolder" style="float: right; font-size: larger">
+          Float strong (bolder, larger)</strong
+        >
+        The float should be bolder than 300 (i.e. 400) and larger than the
+        span's font size, not bold and larger than the paragraph's.
+      </span>
+    </p>
+    <p style="line-height: 1.2">
+      <span style="font-size: 20px; line-height: 150%; letter-spacing: 0.1em">
+        Span with 'font-size: 20px; line-height: 150%; letter-spacing: 0.1em'.
+        <strong
+          id="float-line-height"
+          style="float: right; width: 12em; font-size: 10px"
+        >
+          10px float: inherited line-height should be 30px and letter-spacing
+          2px (the span's computed values).</strong
+        >
+      </span>
+      <span style="font-size: 20px; line-height: 2">
+        Span with 'line-height: 2'.
+        <strong
+          id="float-line-height-number"
+          style="float: left; width: 12em; font-size: 10px"
+        >
+          10px float: inherited line-height should be 2 (20px).</strong
+        >
+      </span>
+    </p>
+    <p>
+      <span style="line-height: 2">
+        <span style="line-height: inherit">
+          Nested spans with 'line-height: 2' and 'line-height: inherit'.
+          <strong style="float: right; width: 14em; font-size: 10px">
+            10px float with
+            <span class="child-20px" style="font-size: 20px">20px child</span>:
+            line-height of the child should be 40px.</strong
+          >
+        </span>
+      </span>
+      <span style="line-height: min(2, 3)">
+        Span with 'line-height: min(2, 3)'.
+        <strong style="float: left; width: 14em; font-size: 10px">
+          10px float with
+          <span class="child-20px" style="font-size: 20px">20px child</span>:
+          line-height of the child should be 40px.</strong
+        >
+      </span>
+      <span
+        style="
+          font-size: 20px;
+          color: blue;
+          text-shadow: 0.1em 0.1em currentcolor;
+        "
+      >
+        Span with 'font-size: 20px; text-shadow: 0.1em 0.1em currentcolor'.
+        <strong style="float: right; width: 14em; font-size: 10px">
+          10px float: text-shadow offset should be 2px,
+          <span class="child-red" style="color: red">red shadow on red</span
+          >.</strong
+        >
+      </span>
+      <span style="color: blue">
+        Blue span.
+        <strong
+          class="float-currentcolor"
+          style="float: left; width: 14em; color: currentcolor"
+        >
+          Float with 'color: currentcolor' should be blue.</strong
+        >
+      </span>
+    </p>
+    <p style="text-indent: 2em">
+      Paragraph with 'text-indent: 2em'.
+      <span style="text-indent: 0; font-style: italic">
+        Span with 'text-indent: 0; font-style: italic'.
+        <strong class="conditional-float">
+          Float declared in '::nth-fragment(1)': not indented, italic.</strong
+        >
+      </span>
+    </p>
+    <p style="hyphens: manual">
+      <span lang="de" style="hyphens: auto">
+        Inline span with lang="de" and 'hyphens: auto'.
+        <strong id="float-lang" style="float: right; width: 6em">
+          Donaudampfschifffahrtsgesellschaftskapitän</strong
+        >
+        The float in the span should be hyphenated as German text.
+      </span>
+    </p>
+  </body>
+</html>

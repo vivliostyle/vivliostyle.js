@@ -1295,11 +1295,9 @@ export class ViewFactory
         const value = flattenedCurrentStyle[name].evaluate(this.context, name);
         if (
           value &&
-          // A CSS-wide keyword that comes from a custom property is not
-          // canonicalized, so compare the names: `--x: INHERIT; color:
-          // var(--x)` must not block the inherited value. (Review)
-          !CssCascade.hasKeywordName(value, "inherit") &&
-          !CssCascade.hasKeywordName(value, "unset") &&
+          // A value that takes the parent value, e.g. `--x: INHERIT; color:
+          // var(--x)`, must not block the inherited value. (Review)
+          !CssCascade.isInheritingValue(name, value) &&
           value !== Css.empty &&
           !Css.isRollbackValue(value)
         ) {
@@ -1446,15 +1444,7 @@ export class ViewFactory
             // initial one. (Review)
             props[name] = prop;
           }
-        } else if (
-          // The keywords are compared by name, because a keyword that comes
-          // from a custom property is not canonicalized, e.g.
-          // `--x: INHERIT; color: var(--x)`. (Review)
-          CssCascade.hasKeywordName(prop.value, "inherit") ||
-          // `unset` is the same as `inherit` for the inherited properties that
-          // are processed here.
-          CssCascade.hasKeywordName(prop.value, "unset")
-        ) {
+        } else if (CssCascade.isInheritingValue(name, prop.value)) {
           const inherited = CssCascade.getProp(props, name);
           if (inherited) {
             // `inherit` is the inherited value. Materializing it with the
@@ -1899,11 +1889,33 @@ export class ViewFactory
       !!nodeContext.shadowContext &&
       nodeContext.shadowContext.type === Vtree.ShadowType.ROOTED &&
       SemanticFootnote.isSemanticFootnoteElement(element);
+    // A float in an inline element is moved to the block parent by the layout
+    // (Layout.Column#layoutFloat), so it must not depend on the inheritance
+    // from the inline ancestors either. (Issue #1479) Not in a footnote area,
+    // since the source ancestors would miss its region rules such as
+    // `:footnote-content { font-size: ... }`. Whether it floats is decided by
+    // the winning value, which may come from a view-conditional rule such as
+    // `::nth-fragment()`.
+    const floatInInline =
+      !this.isFootnote && nodeContext.parent?.inline
+        ? CssCascade.flattenCascadedStyle(
+            elementStyle,
+            this.context,
+            this.regionIds,
+            false,
+          )["float"]?.evaluate(this.context, "float")
+        : null;
+    const isFloatInInline =
+      !!floatInInline &&
+      !Css.isDefaultingValue(floatInInline) &&
+      floatInInline !== Css.ident.none &&
+      floatInInline !== Css.ident.footnote;
     if (
       nodeContext.parent &&
       (Display.isRunning(positionCV?.value) ||
         (floatReference && PageFloats.isPageFloat(floatReference)) ||
-        isSemanticFootnoteInRootedShadow)
+        isSemanticFootnoteInRootedShadow ||
+        isFloatInInline)
     ) {
       // Detached or transcluded content should inherit from the source tree,
       // not from the synthetic view parent.
