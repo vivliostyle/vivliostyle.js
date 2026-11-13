@@ -23,6 +23,12 @@ body {
 .parent {
   inline-size: 150px;
 }
+.relative {
+  position: relative;
+}
+section + section {
+  break-before: page;
+}
 .f {
   float: left;
   inline-size: 100px;
@@ -45,7 +51,15 @@ p {
 are laid out, but moved with the parent by the paragraph's 20px margin, the
 second float would not fit below the first one. Expected: the floats stay
 where they are and do not overlap. -->
+<section>
 <div class="spacer"></div>
 <div class="parent"><span class="f">F</span><span class="g">G</span><p>p</p></div>
+</section>
+<!-- The same with a parent with position: relative, which is the containing
+block of the floats and moves with the paragraph's margin -->
+<section>
+<div class="spacer"></div>
+<div class="parent relative"><span class="f">F</span><span class="g">G</span><p>p</p></div>
+</section>
 </body>
 </html>

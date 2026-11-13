@@ -6,7 +6,7 @@
 <title>Float in a parent whose margin collapses with a following block (vertical-rl)</title>
 <style>
 @page {
-  size: 1400px 600px;
+  size: 1700px 600px;
   margin: 30px;
 }
 :root {
@@ -86,5 +86,9 @@ p {
 <div class="c bfc" id="c12"><div><span class="w">F</span><p style="clear: both">p</p></div></div>
 <!-- The second float has clear: both floats move -->
 <div class="c bfc" id="c13"><div><span class="w">F</span><span class="w" style="clear: left; inline-size: 30px">G</span><p>p</p></div></div>
+<!-- The parent has a specified block size -->
+<div class="c" id="c14"><div style="block-size: 80px"><span class="f">F</span><p>p</p></div></div>
+<!-- The parent has a specified minimum block size -->
+<div class="c" id="c15"><div style="min-block-size: 80px"><span class="f">F</span><p>p</p></div></div>
 </body>
 </html>
