@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1292: A float at the block-start of its parent moves with the parent when the parent's block-start margin collapses with the block-start margin of a following block. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Float in a parent whose margin collapses with a following block (vertical-rl)</title>
+<style>
+@page {
+  size: 1700px 600px;
+  margin: 30px;
+}
+:root {
+  writing-mode: vertical-rl;
+  font: 16px/1 serif;
+}
+body {
+  margin: 0;
+}
+.c {
+  border: 1px solid;
+  margin-block: 0 16px;
+}
+.c::before {
+  content: attr(id);
+  display: block;
+  font-size: 12px;
+  color: gray;
+}
+.f {
+  float: left;
+  margin: 10px;
+  background: cyan;
+}
+p {
+  margin-block: 20px;
+}
+.c.bfc {
+  display: flow-root;
+}
+.c.bfc > div {
+  inline-size: 150px;
+}
+.w {
+  float: left;
+  inline-size: 100px;
+  block-size: 30px;
+  background: lime;
+}
+.s {
+  float: left;
+  inline-size: 50px;
+  block-size: 100px;
+  background: pink;
+}
+.a {
+  margin-block: 0 10px;
+  block-size: 5px;
+  background: pink;
+}
+</style>
+</head>
+<body>
+<!-- The float moves down with its parent (expected: F at 20px + 10px below the start of the parent) -->
+<div class="c" id="c1"><div><span class="f">F</span><p>p</p></div></div>
+<!-- The parent's margin collapses with the preceding sibling's and the paragraph's margins -->
+<div class="c" id="c2"><div class="a"></div><div><span class="f">F</span><p>p</p></div></div>
+<!-- Two floats -->
+<div class="c" id="c3"><div class="a"></div><div style="margin-block-start: 15px"><span class="f">F</span><span class="f">G</span><p>p</p></div></div>
+<!-- The parent is position: relative -->
+<div class="c" id="c4"><div class="a"></div><div style="position: relative"><span class="f">F</span><p>p</p></div></div>
+<!-- Not moved: the float follows a sibling block -->
+<div class="c" id="c5"><div class="a"></div><span class="f">F</span><p>p</p></div>
+<!-- Not moved: the float is the only content of its parent -->
+<div class="c" id="c6"><div class="a"></div><div><span class="f">F</span></div><p>p</p></div>
+<!-- Not moved: the parent has block-start padding -->
+<div class="c" id="c7"><div style="padding-block-start: 1px"><span class="f">F</span><p>p</p></div></div>
+<!-- Not moved: the parent establishes a BFC -->
+<div class="c" id="c8"><div style="display: flow-root"><span class="f">F</span><p>p</p></div></div>
+<!-- Not moved: text follows the float -->
+<div class="c" id="c9"><div><span class="f">F</span>text<p>p</p></div></div>
+<!-- Stacked floats: the second float does not fit beside the first one and moves below it -->
+<div class="c bfc" id="c10"><div><span class="w">F</span><span class="w">G</span><p>p</p></div></div>
+<!-- Clearance from a stationary float is kept: G stays below S -->
+<div class="c bfc" id="c11"><span class="s"></span><div style="margin-inline-start: 60px"><span class="w" style="clear: left; inline-size: 30px">G</span><p>p</p></div></div>
+<!-- Not moved: the following block has clear and is placed below the float -->
+<div class="c bfc" id="c12"><div><span class="w">F</span><p style="clear: both">p</p></div></div>
+<!-- The second float has clear: both floats move -->
+<div class="c bfc" id="c13"><div><span class="w">F</span><span class="w" style="clear: left; inline-size: 30px">G</span><p>p</p></div></div>
+<!-- The parent has a specified block size -->
+<div class="c" id="c14"><div style="block-size: 80px"><span class="f">F</span><p>p</p></div></div>
+<!-- The parent has a specified minimum block size -->
+<div class="c" id="c15"><div style="min-block-size: 80px"><span class="f">F</span><p>p</p></div></div>
+</body>
+</html>

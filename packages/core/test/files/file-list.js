@@ -1682,6 +1682,25 @@ module.exports = [
         title: "Float with lh/rlh height (Issue #1494, #1738)",
       },
       {
+        file: "float-margin-at-page-start.html",
+        title: "Float margin at page start (Issue #1292)",
+      },
+      {
+        file: "float-margin-collapse-through-parent.html",
+        title:
+          "Float in a parent whose margin collapses with a following block (Issue #1292)",
+      },
+      {
+        file: "float-margin-collapse-through-parent-vertical.html",
+        title:
+          "Float in a parent whose margin collapses with a following block, vertical-rl (Issue #1292)",
+      },
+      {
+        file: "float-margin-collapse-through-parent-overflow.html",
+        title:
+          "Float in a parent whose margin collapses, near the column end (Issue #1292)",
+      },
+      {
         file: "float-inherit-from-inline.html",
         title: "Float inherits from its inline parent (Issue #1479)",
       },

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1292: Floats at the block-start of their parent are not moved with the parent when the moved floats would no longer fit in the column. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Float in a parent whose margin collapses, near the column end</title>
+<style>
+@page {
+  size: 400px 300px;
+  margin: 50px;
+  outline: 1px dotted;
+}
+:root {
+  font: 16px/1 serif;
+}
+body {
+  margin: 0;
+}
+.spacer {
+  block-size: 130px;
+  background: #eee;
+}
+.parent {
+  inline-size: 150px;
+}
+.relative {
+  position: relative;
+}
+section + section {
+  break-before: page;
+}
+.f {
+  float: left;
+  inline-size: 100px;
+  block-size: 30px;
+  background: cyan;
+}
+.g {
+  float: left;
+  inline-size: 100px;
+  block-size: 30px;
+  background: lime;
+}
+p {
+  margin-block: 20px 0;
+}
+</style>
+</head>
+<body>
+<!-- The page area is 200px high. The floats fit (130px to 190px) where they
+are laid out, but moved with the parent by the paragraph's 20px margin, the
+second float would not fit below the first one. Expected: the floats stay
+where they are and do not overlap. -->
+<section>
+<div class="spacer"></div>
+<div class="parent"><span class="f">F</span><span class="g">G</span><p>p</p></div>
+</section>
+<!-- The same with a parent with position: relative, which is the containing
+block of the floats and moves with the paragraph's margin -->
+<section>
+<div class="spacer"></div>
+<div class="parent relative"><span class="f">F</span><span class="g">G</span><p>p</p></div>
+</section>
+</body>
+</html>
