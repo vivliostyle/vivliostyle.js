@@ -1429,94 +1429,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
-   * Before a float is moved out of its inline ancestors to the block parent
-   * (see layoutFloat), set the inherited properties and language that the
-   * float would otherwise stop inheriting from those inline ancestors.
-   * Properties that the float specifies itself are kept. (Issue #1479)
-   */
-  private keepInheritedStylesOfMovedFloat(
-    element: Element,
-    nodeContext: Vtree.NodeContext,
-    blockParent: Vtree.NodeContext,
-  ): void {
-    const style = (element as HTMLElement).style;
-    // An element inherits the computed values of its parent, so the values are
-    // taken from the float's computed style before the move, not from the
-    // declarations of the ancestors: e.g. `line-height: 150%` or
-    // `letter-spacing: 0.1em` on an ancestor would be resolved against the
-    // float's own font size if copied as declared. `font-weight: bolder` (UA
-    // default for strong and b) and `font-size: larger` on the float itself are
-    // relative to the parent, so their computed values are kept as well.
-    const computedStyle = this.clientLayout.getElementComputedStyle(element);
-    const fontSize = computedStyle.fontSize;
-    const fontWeight = computedStyle.fontWeight;
-    // The inline styles of the view nodes of the inline ancestors carry their
-    // cascaded values, which tell which properties they set. The innermost
-    // ancestor that sets a property is used. All values are read before any is
-    // set, since setting one would make the next read recalculate the style.
-    const values = new Map<string, string>();
-    for (
-      let ancestor = nodeContext.parent;
-      ancestor && ancestor !== blockParent;
-      ancestor = ancestor.parent
-    ) {
-      const ancestorStyle = (
-        VtreeImpl.asRenderedNodeContext(ancestor)?.viewNode as HTMLElement
-      )?.style;
-      if (!ancestorStyle) {
-        continue;
-      }
-      for (let i = 0; i < ancestorStyle.length; i++) {
-        const name = ancestorStyle.item(i);
-        if (
-          !values.has(name) &&
-          CssCascade.isInherited(name.replace(/^-(webkit|moz)-/, "")) &&
-          // `inherit` and `unset` would take the value from the block parent
-          // after the move, so they are replaced as well.
-          /^(|inherit|unset)$/.test(style.getPropertyValue(name).trim())
-        ) {
-          const declared = ancestorStyle.getPropertyValue(name).trim();
-          if (/^(inherit|unset)$/i.test(declared)) {
-            // The ancestor inherits the value from its parent, so look further
-            // out for the ancestor that sets it.
-            continue;
-          }
-          // The resolved value of a unitless line height (also as a math
-          // expression such as `min(2, 3)`) is in px, but the number itself is
-          // inherited. The keyword `currentcolor` (except in `color`, where it
-          // means `inherit`) is inherited as the keyword, but its resolved
-          // value is the color of the ancestor.
-          values.set(
-            name,
-            (name === "line-height" &&
-              /\d/.test(declared) &&
-              !/\d\.?(%|(?!e[+-]?\d)[a-z])|var\(/i.test(declared)) ||
-              (name !== "color" && /^currentcolor$/i.test(declared))
-              ? declared
-              : computedStyle.getPropertyValue(name) || declared,
-          );
-        }
-      }
-    }
-    if (fontSize) {
-      values.set("font-size", fontSize);
-    }
-    if (fontWeight) {
-      values.set("font-weight", fontWeight);
-    }
-    for (const [name, value] of values) {
-      style.setProperty(name, value);
-    }
-    if (
-      nodeContext.lang &&
-      nodeContext.lang !== blockParent.lang &&
-      !element.hasAttribute("lang")
-    ) {
-      element.setAttribute("lang", nodeContext.lang);
-    }
-  }
-
-  /**
    * Layout a single float element.
    */
   layoutFloat(
@@ -1607,7 +1519,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // after the layout of the float is done.
         if (parent !== nodeContext.parent && !nodeContext.firstPseudo) {
           // Unless float is specified on ::first-letter (Fix for issue #923)
-          this.keepInheritedStylesOfMovedFloat(element, nodeContext, parent);
+          // The inherited properties of the inline ancestors are set on the
+          // float by the view factory (Vgen.ViewFactory#inheritFromSourceParent),
+          // but the language is not a property. (Issue #1479)
+          if (nodeContext.lang && nodeContext.lang !== parent.lang) {
+            element.setAttribute("lang", nodeContext.lang);
+          }
           parentViewNode.appendChild(element);
 
           // Mark the moved float box so that it is not removed wrongly
