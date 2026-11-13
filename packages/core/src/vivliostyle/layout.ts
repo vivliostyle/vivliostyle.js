@@ -1430,11 +1430,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   /**
    * Before a float is moved out of its inline ancestors to the block parent
-   * (see layoutFloat), copy the inherited properties and language that the
-   * float would otherwise stop inheriting from those inline ancestors. The view
-   * nodes of the inline ancestors carry their cascaded values as inline styles,
-   * so the values are taken from there, innermost ancestor first. Properties
-   * that the float specifies itself are kept. (Issue #1479)
+   * (see layoutFloat), set the inherited properties and language that the
+   * float would otherwise stop inheriting from those inline ancestors.
+   * Properties that the float specifies itself are kept. (Issue #1479)
    */
   private keepInheritedStylesOfMovedFloat(
     element: Element,
@@ -1442,13 +1440,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     blockParent: Vtree.NodeContext,
   ): void {
     const style = (element as HTMLElement).style;
-    // Values such as `font-weight: bolder` (UA default for strong and b) or
-    // `font-size: larger` are relative to the parent, so the float's own value
-    // or an inline ancestor's value would change meaning after the move. Keep
-    // the values computed in place instead.
+    // An element inherits the computed values of its parent, so the values are
+    // taken from the float's computed style before the move, not from the
+    // declarations of the ancestors: e.g. `line-height: 150%` or
+    // `letter-spacing: 0.1em` on an ancestor would be resolved against the
+    // float's own font size if copied as declared. `font-weight: bolder` (UA
+    // default for strong and b) and `font-size: larger` on the float itself are
+    // relative to the parent, so their computed values are kept as well.
     const computedStyle = this.clientLayout.getElementComputedStyle(element);
     const fontSize = computedStyle.fontSize;
     const fontWeight = computedStyle.fontWeight;
+    // The inline styles of the view nodes of the inline ancestors carry their
+    // cascaded values, which tell which properties they set. The innermost
+    // ancestor that sets a property is used. All values are read before any is
+    // set, since setting one would make the next read recalculate the style.
+    const values = new Map<string, string>();
     for (
       let ancestor = nodeContext.parent;
       ancestor && ancestor !== blockParent;
@@ -1463,24 +1469,36 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       for (let i = 0; i < ancestorStyle.length; i++) {
         const name = ancestorStyle.item(i);
         if (
+          !values.has(name) &&
           CssCascade.isInherited(name.replace(/^-(webkit|moz)-/, "")) &&
           // `inherit` and `unset` would take the value from the block parent
           // after the move, so they are replaced as well.
           /^(|inherit|unset)$/.test(style.getPropertyValue(name).trim())
         ) {
-          style.setProperty(
+          const declared = ancestorStyle.getPropertyValue(name);
+          // The resolved value of a unitless line height is in px, but the
+          // number itself is inherited. `currentcolor` is inherited as the
+          // keyword (except in `color`, where it means `inherit`), but its
+          // resolved value is the color of the ancestor.
+          values.set(
             name,
-            ancestorStyle.getPropertyValue(name),
-            ancestorStyle.getPropertyPriority(name),
+            (name === "line-height" &&
+              /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(declared.trim())) ||
+              (name !== "color" && /currentcolor/i.test(declared))
+              ? declared
+              : computedStyle.getPropertyValue(name) || declared,
           );
         }
       }
     }
     if (fontSize) {
-      style.setProperty("font-size", fontSize);
+      values.set("font-size", fontSize);
     }
     if (fontWeight) {
-      style.setProperty("font-weight", fontWeight);
+      values.set("font-weight", fontWeight);
+    }
+    for (const [name, value] of values) {
+      style.setProperty(name, value);
     }
     if (
       nodeContext.lang &&

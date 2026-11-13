@@ -57,6 +57,27 @@
         span's font size, not bold and larger than the paragraph's.
       </span>
     </p>
+    <p style="line-height: 1.2">
+      <span style="font-size: 20px; line-height: 150%; letter-spacing: 0.1em">
+        Span with 'font-size: 20px; line-height: 150%; letter-spacing: 0.1em'.
+        <strong
+          id="float-line-height"
+          style="float: right; width: 12em; font-size: 10px"
+        >
+          10px float: inherited line-height should be 30px and letter-spacing
+          2px (the span's computed values).</strong
+        >
+      </span>
+      <span style="font-size: 20px; line-height: 2">
+        Span with 'line-height: 2'.
+        <strong
+          id="float-line-height-number"
+          style="float: left; width: 12em; font-size: 10px"
+        >
+          10px float: inherited line-height should be 2 (20px).</strong
+        >
+      </span>
+    </p>
     <p style="hyphens: manual">
       <span lang="de" style="hyphens: auto">
         Inline span with lang="de" and 'hyphens: auto'.
