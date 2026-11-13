@@ -446,6 +446,22 @@ export function validateCheckPoints(
   }
 }
 
+/**
+ * A float laid out in a column, recorded to be moved later if its block
+ * parent moves (Issue #1292).
+ */
+type PendingFloat = {
+  element: HTMLElement;
+  /** Margin box of the float in the client coordinates */
+  floatBox: GeometryUtil.Rect;
+  floatSide: string;
+  parent: Vtree.NodeContext | null;
+  /** The block parent that may move, or null if it does not move */
+  parentViewNode: Element | null;
+  /** The block-start edge of the parent when the float was laid out */
+  parentBlockStart: number;
+};
+
 export class Column extends VtreeImpl.Container implements Layout.Column {
   last: Node | null;
   viewDocument: Document;
@@ -467,6 +483,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   leftFloatEdge: number = 0; // bottom of the bottommost left float
   rightFloatEdge: number = 0; // bottom of the bottommost right float
   bottommostFloatTop: number = 0; // Top of the bottommost float
+  /**
+   * Floats laid out since the first float that may have to move with its
+   * block parent (see resolvePendingFloats()), and the bands before them.
+   */
+  private pendingFloats: PendingFloat[] = [];
+  private bandsBeforePendingFloats: GeometryUtil.Band[] | null = null;
   stopAtOverflow: boolean = true;
   lastAfterPosition: Vtree.NodePosition | null = null;
   fragmentLayoutConstraints: FragmentLayoutConstraint[] = [];
@@ -1461,6 +1483,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         floatBBox.right + margin.right,
         floatBBox.bottom + margin.bottom,
       );
+      // Block-start edge of the float's static position (margin box)
+      const staticBlockStart = this.getRectBeforeEdge(floatBox);
       let x1 = this.getInlineDir() < 0 ? this.endEdge : this.startEdge;
       let x2 = this.getInlineDir() < 0 ? this.startEdge : this.endEdge;
       let parent = nodeContext.parent;
@@ -1535,7 +1559,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
 
       // box is rotated for vertical orientation
-      let box = new GeometryUtil.Rect(
+      const box = new GeometryUtil.Rect(
         x1,
         this.getBoxDir() * this.beforeEdge,
         x2,
@@ -1609,60 +1633,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       Base.setCSSProperty(element, "position", "absolute");
       Asserts.assert(nodeContext.display);
       Base.setCSSProperty(element, "display", nodeContext.display);
-      let offsets;
-      const containingBlockForAbsolute = parent
-        ? parent.containingBlockForAbsolute
-          ? VtreeImpl.asElementNodeContext(parent)
-          : parent.getContainingBlockForAbsolute()
-        : null;
-      if (containingBlockForAbsolute) {
-        const containingBlockViewNode = containingBlockForAbsolute.viewNode;
-        const probe =
-          containingBlockViewNode.ownerDocument.createElement("div");
-        probe.style.position = "absolute";
-        if (
-          CssLogicalUtil.isBlockReversed(containingBlockForAbsolute.writingMode)
-        ) {
-          probe.style.right = "0";
-        } else {
-          probe.style.left = "0";
-        }
-        probe.style.top = "0";
-        containingBlockViewNode.appendChild(probe);
-        offsets = LayoutHelper.getElementClientRectAdjusted(
-          this.clientLayout,
-          probe,
-          this.writingMode,
-        );
-        containingBlockViewNode.removeChild(probe);
-      } else {
-        offsets = {
-          left: this.getLeftEdge() - this.paddingLeft,
-          right: this.getRightEdge() + this.paddingRight,
-          top: this.getTopEdge() - this.paddingTop,
-        };
-      }
-      // The computed float offset from the block-start edge of its
-      // containing block may be negative when the containing block has
-      // `position: relative` and has been pushed along the block-progression
-      // direction by a margin carried over from a preceding sibling across
-      // a column/page break. Clamp the offset to be non-negative so that
-      // the float stays inside the containing block. (Issue #1885)
-      if (
-        containingBlockForAbsolute
-          ? CssLogicalUtil.isBlockReversed(
-              containingBlockForAbsolute.writingMode,
-            )
-          : this.getBoxDir() < 0
-      ) {
-        const rightValue = Math.max(0, offsets.right - floatBox.x2);
-        Base.setCSSProperty(element, "right", `${rightValue}px`);
-      } else {
-        const leftValue = Math.max(0, floatBox.x1 - offsets.left);
-        Base.setCSSProperty(element, "left", `${leftValue}px`);
-      }
-      const topValue = Math.max(0, floatBox.y1 - offsets.top);
-      Base.setCSSProperty(element, "top", `${topValue}px`);
+      this.setFloatElementOffsets(element, floatBox, parent);
       if (nodeContext.clearSpacer) {
         nodeContext.clearSpacer.remove();
         nodeContext.clearSpacer = null;
@@ -1682,17 +1653,34 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (!this.isOverflown(floatBoxEdge) || this.breakPositions.length == 0) {
         // no overflow
         this.killFloats();
-        box = new GeometryUtil.Rect(
-          this.getLeftEdge(),
-          this.getTopEdge(),
-          this.getRightEdge(),
-          this.getBottomEdge(),
-        );
-        if (this.vertical) {
-          box = GeometryUtil.rotateBox(box, this.getBoxDir());
+        const parentBlockStart = this.pseudoParent
+          ? null
+          : this.getMovableFloatParentBlockStart(
+              parentRendered,
+              staticBlockStart,
+            );
+        if (this.pendingFloats.length === 0 && parentBlockStart !== null) {
+          // Keep the bands before this float so that they can be rebuilt
+          // when the float has to be moved later.
+          this.bandsBeforePendingFloats = this.bands.map(
+            (band) => new GeometryUtil.Band(band.y1, band.y2, band.x1, band.x2),
+          );
+        }
+        if (this.bandsBeforePendingFloats && !this.pseudoParent) {
+          this.pendingFloats.push({
+            element: element as HTMLElement,
+            floatBox,
+            floatSide,
+            parent,
+            parentViewNode:
+              parentBlockStart !== null
+                ? (parentRendered.viewNode as Element)
+                : null,
+            parentBlockStart: parentBlockStart ?? 0,
+          });
         }
         GeometryUtil.addFloatToBands(
-          box,
+          this.getFloatBandsBox(),
           this.bands,
           floatHorBox,
           null,
@@ -1714,6 +1702,259 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     });
     return frame.result();
+  }
+
+  /**
+   * Block-start edge of a box in the client coordinates.
+   */
+  private getRectBeforeEdge(rect: GeometryUtil.Rect): number {
+    return this.vertical ? (this.getBoxDir() < 0 ? rect.x2 : rect.x1) : rect.y1;
+  }
+
+  /**
+   * The column box used to add floats to the bands, rotated for vertical
+   * writing mode.
+   */
+  private getFloatBandsBox(): GeometryUtil.Rect {
+    const box = new GeometryUtil.Rect(
+      this.getLeftEdge(),
+      this.getTopEdge(),
+      this.getRightEdge(),
+      this.getBottomEdge(),
+    );
+    return this.vertical ? GeometryUtil.rotateBox(box, this.getBoxDir()) : box;
+  }
+
+  /**
+   * Set the left/right and top properties of an absolutely positioned float
+   * element so that its margin box is placed at floatBox.
+   */
+  private setFloatElementOffsets(
+    element: Element,
+    floatBox: GeometryUtil.Rect,
+    parent: Vtree.NodeContext | null,
+  ): void {
+    let offsets: { left: number; right: number; top: number };
+    const containingBlockForAbsolute = parent
+      ? parent.containingBlockForAbsolute
+        ? VtreeImpl.asElementNodeContext(parent)
+        : parent.getContainingBlockForAbsolute()
+      : null;
+    if (containingBlockForAbsolute) {
+      const containingBlockViewNode = containingBlockForAbsolute.viewNode;
+      const probe = containingBlockViewNode.ownerDocument.createElement("div");
+      probe.style.position = "absolute";
+      if (
+        CssLogicalUtil.isBlockReversed(containingBlockForAbsolute.writingMode)
+      ) {
+        probe.style.right = "0";
+      } else {
+        probe.style.left = "0";
+      }
+      probe.style.top = "0";
+      containingBlockViewNode.appendChild(probe);
+      offsets = LayoutHelper.getElementClientRectAdjusted(
+        this.clientLayout,
+        probe,
+        this.writingMode,
+      );
+      containingBlockViewNode.removeChild(probe);
+    } else {
+      offsets = {
+        left: this.getLeftEdge() - this.paddingLeft,
+        right: this.getRightEdge() + this.paddingRight,
+        top: this.getTopEdge() - this.paddingTop,
+      };
+    }
+    // The computed float offset from the block-start edge of its
+    // containing block may be negative when the containing block has
+    // `position: relative` and has been pushed along the block-progression
+    // direction by a margin carried over from a preceding sibling across
+    // a column/page break. Clamp the offset to be non-negative so that
+    // the float stays inside the containing block. (Issue #1885)
+    if (
+      containingBlockForAbsolute
+        ? CssLogicalUtil.isBlockReversed(containingBlockForAbsolute.writingMode)
+        : this.getBoxDir() < 0
+    ) {
+      const rightValue = Math.max(0, offsets.right - floatBox.x2);
+      Base.setCSSProperty(element, "right", `${rightValue}px`);
+    } else {
+      const leftValue = Math.max(0, floatBox.x1 - offsets.left);
+      Base.setCSSProperty(element, "left", `${leftValue}px`);
+    }
+    const topValue = Math.max(0, floatBox.y1 - offsets.top);
+    Base.setCSSProperty(element, "top", `${topValue}px`);
+  }
+
+  /**
+   * When a float is placed at the block-start of its block parent, the parent
+   * can still move in the block direction because its block-start margin may
+   * collapse with the block-start margin of a following in-flow block, e.g.
+   * `<body><figure style="float:left"/><p style="margin-top:20px">`.
+   * The float is out of flow, so this collapsing moves the parent and the
+   * float has to move with it. (Issue #1292)
+   *
+   * Returns the block-start edge of the parent if it may move this way,
+   * otherwise null.
+   */
+  private getMovableFloatParentBlockStart(
+    parent: Vtree.RenderedNodeContext | null,
+    staticBlockStart: number,
+  ): number | null {
+    if (!parent || parent.establishesBFC || parent.inline) {
+      return null;
+    }
+    const parentViewNode = parent.viewNode as Element;
+    const style = this.clientLayout.getElementComputedStyle(parentViewNode);
+    if (!style || this.hasNonZeroBlockStartInset(style)) {
+      // The parent's margin does not collapse with its children's margins.
+      return null;
+    }
+    const parentBlockStart = this.getBeforeEdge(
+      LayoutHelper.getElementClientRectAdjusted(
+        this.clientLayout,
+        parentViewNode,
+        this.writingMode,
+      ),
+    );
+    // The float must be at the block-start of the parent, i.e., there is no
+    // in-flow content before the float in the parent.
+    if (Math.abs(parentBlockStart - staticBlockStart) > 0.5) {
+      return null;
+    }
+    return parentBlockStart;
+  }
+
+  private clearPendingFloats(): void {
+    this.pendingFloats = [];
+    this.bandsBeforePendingFloats = null;
+  }
+
+  /**
+   * Move the floats laid out at the block-start of their block parents
+   * if the parents have moved since then due to margin collapsing with the
+   * following in-flow content. (Issue #1292)
+   */
+  private resolvePendingFloats(): void {
+    const pendingFloats = this.pendingFloats;
+    const bandsBefore = this.bandsBeforePendingFloats;
+    this.clearPendingFloats();
+    if (!bandsBefore || !pendingFloats.some((f) => f.parentViewNode)) {
+      return;
+    }
+    // Measure the parents without the exclusion floats. Otherwise a parent
+    // whose first line does not fit beside the floats can be pushed below
+    // them, which is not a move caused by margin collapsing.
+    this.killFloats();
+    const newFloatBoxes = this.getMovedPendingFloatBoxes(pendingFloats);
+    if (newFloatBoxes) {
+      const dir = this.getBoxDir();
+      this.bands = bandsBefore;
+      const bandsBox = this.getFloatBandsBox();
+      pendingFloats.forEach((pendingFloat, i) => {
+        const newFloatBox = newFloatBoxes[i];
+        GeometryUtil.addFloatToBands(
+          bandsBox,
+          this.bands,
+          this.vertical
+            ? GeometryUtil.rotateBox(newFloatBox, dir)
+            : new GeometryUtil.Rect(
+                newFloatBox.x1,
+                newFloatBox.y1,
+                newFloatBox.x2,
+                newFloatBox.y2,
+              ),
+          null,
+          pendingFloat.floatSide,
+        );
+        this.setFloatElementOffsets(
+          pendingFloat.element,
+          newFloatBox,
+          pendingFloat.parent,
+        );
+        const floatBoxEdge = this.vertical
+          ? dir < 0
+            ? newFloatBox.x1
+            : newFloatBox.x2
+          : newFloatBox.y2;
+        if (pendingFloat.floatSide == "left") {
+          this.leftFloatEdge = floatBoxEdge;
+        } else {
+          this.rightFloatEdge = floatBoxEdge;
+        }
+        this.bottommostFloatTop = this.getRectBeforeEdge(newFloatBox);
+        this.updateMaxReachedAfterEdge(floatBoxEdge);
+      });
+    }
+    this.createFloats();
+  }
+
+  /**
+   * Returns the new margin boxes of the pending floats moved with their
+   * parents, or null if no float moves or a float cannot be moved.
+   */
+  private getMovedPendingFloatBoxes(
+    pendingFloats: PendingFloat[],
+  ): GeometryUtil.Rect[] | null {
+    const dir = this.getBoxDir();
+    let moved = false;
+    const newFloatBoxes: GeometryUtil.Rect[] = [];
+    for (const pendingFloat of pendingFloats) {
+      const { element, floatBox, parentViewNode } = pendingFloat;
+      if (
+        !element.isConnected ||
+        (parentViewNode && !parentViewNode.isConnected)
+      ) {
+        return null;
+      }
+      let delta = 0;
+      if (parentViewNode) {
+        delta =
+          this.getBeforeEdge(
+            LayoutHelper.getElementClientRectAdjusted(
+              this.clientLayout,
+              parentViewNode,
+              this.writingMode,
+            ),
+          ) - pendingFloat.parentBlockStart;
+        if (Math.abs(delta) < 0.01) {
+          delta = 0;
+        }
+      }
+      if (delta !== 0) {
+        moved = true;
+      }
+      const newFloatBox = this.vertical
+        ? new GeometryUtil.Rect(
+            floatBox.x1 + delta,
+            floatBox.y1,
+            floatBox.x2 + delta,
+            floatBox.y2,
+          )
+        : new GeometryUtil.Rect(
+            floatBox.x1,
+            floatBox.y1 + delta,
+            floatBox.x2,
+            floatBox.y2 + delta,
+          );
+      // Do not move the float before the block-start edge of the column or
+      // beyond the block-end edge of the column.
+      const newBefore = this.getRectBeforeEdge(newFloatBox);
+      const newAfter = this.vertical
+        ? dir < 0
+          ? newFloatBox.x1
+          : newFloatBox.x2
+        : newFloatBox.y2;
+      if (
+        dir * newBefore < dir * this.beforeEdge ||
+        (delta !== 0 && this.isOverflown(newAfter))
+      ) {
+        return null;
+      }
+      newFloatBoxes.push(newFloatBox);
+    }
+    return moved ? newFloatBoxes : null;
   }
 
   setupFloatArea(
@@ -4848,8 +5089,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         ) {
           // finished all content, explicit page break or overflow (automatic
           // page break)
+          this.clearPendingFloats();
           frame.finish(nodeContext);
         } else {
+          if (
+            this.pendingFloats.length > 0 &&
+            !this.pseudoParent &&
+            (nodeContext.after || !this.asFloatNodeContext(nodeContext))
+          ) {
+            // The leading edges of the in-flow content following the floats
+            // are now in place, so the block parents of the floats are at
+            // their final positions. (Issue #1292)
+            this.resolvePendingFloats();
+          }
           const formattingContext = nodeContext.formattingContext;
           const layoutProcessor =
             new LayoutProcessor.LayoutProcessorResolver().find(
@@ -4943,6 +5195,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   private remeasure(): void {
     this.chunkPositions = [];
+    this.clearPendingFloats();
     this.bands = this.measure();
     this.createFloats();
     this.computedBlockSize = 0;

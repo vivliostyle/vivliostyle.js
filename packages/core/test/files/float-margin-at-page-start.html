@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #1292: Incorrect float positioning at page start -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Float margin at page start</title>
+<style>
+@page {
+  size: 600px 800px;
+  margin: 50px;
+  outline: 1px dotted;
+  @bottom-center {
+    content: counter(page);
+  }
+}
+:root {
+  font-size: 20px;
+  line-height: 1;
+  widows: 1;
+  orphans: 1;
+}
+body {
+  margin: 0;
+}
+p {
+  margin: 20px 0;
+}
+figure {
+  float: left;
+  margin: 10px;
+  background: cyan;
+}
+</style>
+</head>
+<body>
+  <figure>FLOAT</figure>
+  <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Libero tempore quam fugit quibusdam amet facilis perspiciatis itaque ipsa pariatur a minima, assumenda quis nobis quisquam ex alias soluta id ipsum. Eligendi, excepturi error veritatis voluptates minima sed? Recusandae ipsam repellat quaerat.</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quos in cumque odit possimus eum velit voluptate libero repellendus alias molestiae error, eius rerum ratione commodi a vel cum dolores!</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sit, in obcaecati. Molestias ipsa ex maiores odio doloribus nisi dolore distinctio libero suscipit quos, inventore, repudiandae mollitia, neque delectus placeat! Fugiat.</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. A minus perspiciatis deleniti reprehenderit est aperiam illum sit porro, tempora mollitia ipsum sunt. Necessitatibus sequi ad veniam beatae vero eligendi mollitia!</p>
+  <figure>FLOAT</figure>
+  <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illum sed in voluptatibus, dolor dolorem esse, est doloribus blanditiis placeat optio repudiandae vitae! Incidunt, maiores cumque dolorum officiis iure error harum.</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio dolore facilis obcaecati ex esse veniam magni? Unde ad, nesciunt earum enim at tempore. Quisquam praesentium aperiam, maiores voluptatibus officiis nulla!</p>
+  <figure>FLOAT</figure>
+  <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Dignissimos odio hic molestias quidem repudiandae incidunt, quaerat officiis consectetur consequuntur esse voluptas exercitationem excepturi ut magni laudantium voluptatem accusamus autem unde.</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Veniam doloribus, repudiandae quaerat doloremque a esse totam, voluptatibus quidem error obcaecati sapiente perspiciatis iure unde reiciendis nam, quia numquam dignissimos consequatur?</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem iure alias similique expedita dolorem itaque cupiditate temporibus ad! Dolorem recusandae nihil voluptatibus praesentium rem, eaque odio qui ut quaerat ullam.</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate officia odit voluptatibus amet. Aspernatur esse delectus exercitationem natus aliquid nulla. Dolorem dolorum laborum eaque? Molestias ipsam deleniti praesentium ducimus dicta!</p>
+  <figure>FLOAT</figure>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere quos in cumque odit possimus eum velit voluptate libero repellendus alias molestiae error, eius rerum ratione commodi a vel cum dolores!</p>
+</body>
+</html>
