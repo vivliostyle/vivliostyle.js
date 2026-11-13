@@ -78,6 +78,38 @@
         >
       </span>
     </p>
+    <p>
+      <span style="line-height: 2">
+        <span style="line-height: inherit">
+          Nested spans with 'line-height: 2' and 'line-height: inherit'.
+          <strong style="float: right; width: 14em; font-size: 10px">
+            10px float with
+            <span class="child-20px" style="font-size: 20px">20px child</span>:
+            line-height of the child should be 40px.</strong
+          >
+        </span>
+      </span>
+      <span style="line-height: min(2, 3)">
+        Span with 'line-height: min(2, 3)'.
+        <strong style="float: left; width: 14em; font-size: 10px">
+          10px float with
+          <span class="child-20px" style="font-size: 20px">20px child</span>:
+          line-height of the child should be 40px.</strong
+        >
+      </span>
+      <span
+        style="
+          font-size: 20px;
+          color: blue;
+          text-shadow: 0.1em 0.1em currentcolor;
+        "
+      >
+        Span with 'font-size: 20px; text-shadow: 0.1em 0.1em currentcolor'.
+        <strong style="float: right; width: 14em; font-size: 10px">
+          10px float: text-shadow offset should be 2px.</strong
+        >
+      </span>
+    </p>
     <p style="hyphens: manual">
       <span lang="de" style="hyphens: auto">
         Inline span with lang="de" and 'hyphens: auto'.

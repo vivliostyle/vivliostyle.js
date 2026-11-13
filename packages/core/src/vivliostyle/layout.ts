@@ -1475,16 +1475,23 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // after the move, so they are replaced as well.
           /^(|inherit|unset)$/.test(style.getPropertyValue(name).trim())
         ) {
-          const declared = ancestorStyle.getPropertyValue(name);
-          // The resolved value of a unitless line height is in px, but the
-          // number itself is inherited. `currentcolor` is inherited as the
-          // keyword (except in `color`, where it means `inherit`), but its
-          // resolved value is the color of the ancestor.
+          const declared = ancestorStyle.getPropertyValue(name).trim();
+          if (/^(inherit|unset)$/i.test(declared)) {
+            // The ancestor inherits the value from its parent, so look further
+            // out for the ancestor that sets it.
+            continue;
+          }
+          // The resolved value of a unitless line height (also as a math
+          // expression such as `min(2, 3)`) is in px, but the number itself is
+          // inherited. The keyword `currentcolor` (except in `color`, where it
+          // means `inherit`) is inherited as the keyword, but its resolved
+          // value is the color of the ancestor.
           values.set(
             name,
             (name === "line-height" &&
-              /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(declared.trim())) ||
-              (name !== "color" && /currentcolor/i.test(declared))
+              /\d/.test(declared) &&
+              !/\d\.?(%|(?!e[+-]?\d)[a-z])|var\(/i.test(declared)) ||
+              (name !== "color" && /^currentcolor$/i.test(declared))
               ? declared
               : computedStyle.getPropertyValue(name) || declared,
           );
