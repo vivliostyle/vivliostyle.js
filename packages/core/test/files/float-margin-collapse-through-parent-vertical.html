@@ -6,7 +6,7 @@
 <title>Float in a parent whose margin collapses with a following block (vertical-rl)</title>
 <style>
 @page {
-  size: 900px 600px;
+  size: 1400px 600px;
   margin: 30px;
 }
 :root {
@@ -34,6 +34,24 @@ body {
 p {
   margin-block: 20px;
 }
+.c.bfc {
+  display: flow-root;
+}
+.c.bfc > div {
+  inline-size: 150px;
+}
+.w {
+  float: left;
+  inline-size: 100px;
+  block-size: 30px;
+  background: lime;
+}
+.s {
+  float: left;
+  inline-size: 50px;
+  block-size: 100px;
+  background: pink;
+}
 .a {
   margin-block: 0 10px;
   block-size: 5px;
@@ -60,5 +78,13 @@ p {
 <div class="c" id="c8"><div style="display: flow-root"><span class="f">F</span><p>p</p></div></div>
 <!-- Not moved: text follows the float -->
 <div class="c" id="c9"><div><span class="f">F</span>text<p>p</p></div></div>
+<!-- Stacked floats: the second float does not fit beside the first one and moves below it -->
+<div class="c bfc" id="c10"><div><span class="w">F</span><span class="w">G</span><p>p</p></div></div>
+<!-- Clearance from a stationary float is kept: G stays below S -->
+<div class="c bfc" id="c11"><span class="s"></span><div style="margin-inline-start: 60px"><span class="w" style="clear: left; inline-size: 30px">G</span><p>p</p></div></div>
+<!-- Not moved: the following block has clear and is placed below the float -->
+<div class="c bfc" id="c12"><div><span class="w">F</span><p style="clear: both">p</p></div></div>
+<!-- The second float has clear: both floats move -->
+<div class="c bfc" id="c13"><div><span class="w">F</span><span class="w" style="clear: left; inline-size: 30px">G</span><p>p</p></div></div>
 </body>
 </html>
