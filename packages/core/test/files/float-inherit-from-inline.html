@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- Test case for Issue #1479: Incorrect CSS property inheritance on float elements -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Float inherits from inline parent (Issue #1479)</title>
+    <style>
+      @page {
+        size: 160mm 180mm;
+        margin: 10mm;
+      }
+      p {
+        margin: 0 0 1em;
+      }
+      strong,
+      span.block {
+        outline: 1px solid gray;
+      }
+    </style>
+  </head>
+  <body>
+    <p style="text-indent: 1em">
+      This paragraph has 'text-indent: 1em' style.
+      <em style="text-indent: 0">
+        This em element inside the paragraph has 'text-indent: 0' style which
+        should be inherited to inner elements.
+        <strong style="float: right; width: 10em">
+          This strong element in the em element has 'float: right; width:
+          10em;' and inherited text-indent should be 0.</strong
+        >
+        <span class="block" style="display: block; width: 10em">
+          This span element in the em element has 'display: block; width:
+          10em;' and inherited text-indent should be 0.</span
+        >
+      </em>
+      <span class="block" style="display: block; width: 10em">
+        This span element in the paragraph has 'display: block; width: 10em;'
+        and inherited text-indent should be 1em.</span
+      >
+    </p>
+    <p style="text-indent: 0; text-align: left">
+      <span style="text-indent: 3em; text-align: right">
+        Inline span with 'text-indent: 3em; text-align: right'.
+        <strong style="float: left; width: 12em">
+          Left float in the span: should be indented 3em and right-aligned.</strong
+        >
+        Text after the float in the span.
+      </span>
+    </p>
+    <p>
+      <span style="font-weight: 300; font-size: 0.75em">
+        Light and small inline span.
+        <strong id="float-bolder" style="float: right; font-size: larger">
+          Float strong (bolder, larger)</strong
+        >
+        The float should be bolder than 300 (i.e. 400) and larger than the
+        span's font size, not bold and larger than the paragraph's.
+      </span>
+    </p>
+    <p style="hyphens: manual">
+      <span lang="de" style="hyphens: auto">
+        Inline span with lang="de" and 'hyphens: auto'.
+        <strong id="float-lang" style="float: right; width: 6em">
+          Donaudampfschifffahrtsgesellschaftskapitän</strong
+        >
+        The float in the span should be hyphenated as German text.
+      </span>
+    </p>
+  </body>
+</html>

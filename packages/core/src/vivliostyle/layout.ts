@@ -1429,6 +1429,69 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
+   * Before a float is moved out of its inline ancestors to the block parent
+   * (see layoutFloat), copy the inherited properties and language that the
+   * float would otherwise stop inheriting from those inline ancestors. The view
+   * nodes of the inline ancestors carry their cascaded values as inline styles,
+   * so the values are taken from there, innermost ancestor first. Properties
+   * that the float specifies itself are kept. (Issue #1479)
+   */
+  private keepInheritedStylesOfMovedFloat(
+    element: Element,
+    nodeContext: Vtree.NodeContext,
+    blockParent: Vtree.NodeContext,
+  ): void {
+    const style = (element as HTMLElement).style;
+    // Values such as `font-weight: bolder` (UA default for strong and b) or
+    // `font-size: larger` are relative to the parent, so the float's own value
+    // or an inline ancestor's value would change meaning after the move. Keep
+    // the values computed in place instead.
+    const computedStyle = this.clientLayout.getElementComputedStyle(element);
+    const fontSize = computedStyle.fontSize;
+    const fontWeight = computedStyle.fontWeight;
+    for (
+      let ancestor = nodeContext.parent;
+      ancestor && ancestor !== blockParent;
+      ancestor = ancestor.parent
+    ) {
+      const ancestorStyle = (
+        VtreeImpl.asRenderedNodeContext(ancestor)?.viewNode as HTMLElement
+      )?.style;
+      if (!ancestorStyle) {
+        continue;
+      }
+      for (let i = 0; i < ancestorStyle.length; i++) {
+        const name = ancestorStyle.item(i);
+        if (
+          CssCascade.isInherited(name.replace(/^-(webkit|moz)-/, "")) &&
+          // `inherit` and `unset` would take the value from the block parent
+          // after the move, so they are replaced as well.
+          /^(|inherit|unset)$/.test(style.getPropertyValue(name).trim())
+        ) {
+          style.setProperty(
+            name,
+            ancestorStyle.getPropertyValue(name),
+            ancestorStyle.getPropertyPriority(name),
+          );
+        }
+      }
+    }
+    if (fontSize) {
+      style.setProperty("font-size", fontSize);
+    }
+    if (fontWeight) {
+      style.setProperty("font-weight", fontWeight);
+    }
+    if (
+      nodeContext.lang &&
+      nodeContext.lang !== blockParent.lang &&
+      !element.hasAttribute("lang")
+    ) {
+      element.setAttribute("lang", nodeContext.lang);
+    }
+  }
+
+  /**
    * Layout a single float element.
    */
   layoutFloat(
@@ -1519,6 +1582,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         // after the layout of the float is done.
         if (parent !== nodeContext.parent && !nodeContext.firstPseudo) {
           // Unless float is specified on ::first-letter (Fix for issue #923)
+          this.keepInheritedStylesOfMovedFloat(element, nodeContext, parent);
           parentViewNode.appendChild(element);
 
           // Mark the moved float box so that it is not removed wrongly
