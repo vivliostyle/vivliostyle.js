@@ -34,3 +34,51 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-inherit-from-inline.html&zoom=1&spread=false
+- category: Float and clear
+  title: "Float margin at page start (Issue #1292)"
+  file: float-margin-at-page-start.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-at-page-start.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-at-page-start.html&zoom=1&spread=false
+- category: Float and clear
+  title: "Float in a parent whose margin collapses with a following block (Issue #1292)"
+  file: float-margin-collapse-through-parent.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent.html&zoom=1&spread=false
+- category: Float and clear
+  title: "Float in a parent whose margin collapses with a following block, vertical-rl (Issue #1292)"
+  file: float-margin-collapse-through-parent-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent-vertical.html&zoom=1&spread=false
+- category: Float and clear
+  title: "Float in a parent whose margin collapses, near the column end (Issue #1292)"
+  file: float-margin-collapse-through-parent-overflow.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2262 (page 2: with a relative parent, stable moves the floats with the parent but leaves their exclusions behind)"
+  approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent-overflow.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent-overflow.html&zoom=1&spread=false
