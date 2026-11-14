@@ -82,3 +82,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/float-margin-collapse-through-parent-overflow.html&zoom=1&spread=false
+- category: Page properties and margin boxes
+  title: "Negative page margins (PR #2264)"
+  file: negative-page-margin.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2264 (stable moves the page area inward instead of extending it beyond the page by negative page margins)"
+  approvedViewer: git-fix-negative-page-margin  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/negative-page-margin.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/negative-page-margin.html&zoom=1&spread=false
