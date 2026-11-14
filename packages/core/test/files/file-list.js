@@ -279,6 +279,10 @@ module.exports = [
         title: "revert-rule keyword (Issue #2111)",
       },
       {
+        file: "revert-rule-var-shorthand.html",
+        title: "Rollback to a shorthand with var()",
+      },
+      {
         file: "revert-page.html",
         title: "Rollback keywords in @page (Issue #2111)",
       },

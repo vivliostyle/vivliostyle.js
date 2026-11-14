@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!-- Test case: a rollback keyword of a longhand rolling back to a shorthand
+     declaration whose value contains var() -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rollback to a shorthand with var()</title>
+    <style>
+      @page {
+        size: 148mm 210mm;
+        margin: 10mm;
+      }
+      :root {
+        --gap: 30px;
+        --gaps: 30px 0;
+      }
+      body {
+        font: 10px/1.5 sans-serif;
+        margin: 0;
+      }
+      .intro {
+        margin-block: 0 12px;
+      }
+      @layer base {
+        /* Where a rollback lands if it skips the shorthand with var() */
+        ul {
+          margin-block: 0;
+        }
+      }
+      section {
+        position: relative;
+        display: flow-root;
+        margin-block-end: 8px;
+        padding-left: 14px;
+      }
+      /* The gray box has to start where this green bar ends. */
+      section::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 15px;
+        width: 8px;
+        height: 30px;
+        background: green;
+      }
+      section.flush::before {
+        display: none;
+      }
+      h3 {
+        font-size: 10px;
+        line-height: 15px;
+        margin: 0;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        background: #ccc;
+      }
+
+      /* ---- A. revert-rule landing on a shorthand with var() ---- */
+
+      .a1 ul {
+        margin-block: var(--gap) 0;
+      }
+      .a1 h3 + * {
+        margin-block-start: revert-rule;
+      }
+
+      .a2 ul {
+        margin-block: var(--gaps);
+      }
+      .a2 h3 + * {
+        margin-block-start: revert-rule;
+      }
+
+      .a3 ul {
+        margin: var(--gap) 0 0;
+      }
+      .a3 h3 + * {
+        margin-top: revert-rule;
+      }
+
+      /* ---- B. The keyword written in a var() fallback ---- */
+
+      .b1 ul {
+        margin-block: var(--gap) 0;
+      }
+      .b1 h3 + * {
+        margin-block-start: var(--undefined, revert-rule);
+      }
+
+      .b2 ul {
+        margin: var(--gap) 0 0;
+      }
+      .b2 h3 + * {
+        margin-top: var(--undefined, revert-rule);
+      }
+
+      /* ---- C. revert-layer ---- */
+
+      @layer c1a {
+        .c1 ul {
+          margin-block: var(--gap) 0;
+        }
+      }
+      @layer c1b {
+        .c1 h3 + * {
+          margin-block-start: revert-layer;
+        }
+      }
+
+      /* The shorthand of the reverted layer must not take over. */
+      @layer c2a {
+        .c2 ul {
+          margin-block: var(--gap) 0;
+        }
+      }
+      @layer c2b {
+        .c2 ul {
+          margin-block: var(--undefined, 0) 0;
+        }
+        .c2 h3 + * {
+          margin-block-start: revert-layer;
+        }
+      }
+
+      /* ---- D. A margin that a variable turns off ---- */
+
+      .d ul {
+        margin-block: var(--gap) 0;
+      }
+      .d :is(h1, h2, h3, h4, h5, h6) + * {
+        margin-block-start: var(--vs--heading-next-margin-block-start, revert-rule);
+      }
+      .d2 {
+        --vs--heading-next-margin-block-start: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="intro">
+      In every case below, the gray box must start exactly where the green bar
+      ends, except in D2, where there is no bar and the gray box must touch its
+      heading.
+    </p>
+    <section class="a1">
+      <h3>A1 revert-rule to <code>margin-block: var(--gap) 0</code></h3>
+      <ul>
+        <li>margin-block-start: revert-rule</li>
+      </ul>
+    </section>
+    <section class="a2">
+      <h3>A2 revert-rule to <code>margin-block: var(--gaps)</code></h3>
+      <ul>
+        <li>margin-block-start: revert-rule</li>
+      </ul>
+    </section>
+    <section class="a3">
+      <h3>A3 revert-rule to <code>margin: var(--gap) 0 0</code></h3>
+      <ul>
+        <li>margin-top: revert-rule</li>
+      </ul>
+    </section>
+    <section class="b1">
+      <h3>B1 var() fallback to <code>margin-block: var(--gap) 0</code></h3>
+      <ul>
+        <li>margin-block-start: var(--undefined, revert-rule)</li>
+      </ul>
+    </section>
+    <section class="b2">
+      <h3>B2 var() fallback to <code>margin: var(--gap) 0 0</code></h3>
+      <ul>
+        <li>margin-top: var(--undefined, revert-rule)</li>
+      </ul>
+    </section>
+    <section class="c1">
+      <h3>C1 revert-layer to a shorthand with var() in an earlier layer</h3>
+      <ul>
+        <li>margin-block-start: revert-layer</li>
+      </ul>
+    </section>
+    <section class="c2">
+      <h3>C2 revert-layer past a shorthand with var() in its own layer</h3>
+      <ul>
+        <li>margin-block-start: revert-layer</li>
+      </ul>
+    </section>
+    <section class="d d1">
+      <h3>D1 variable not set: revert-rule</h3>
+      <ul>
+        <li>
+          margin-block-start: var(--vs--heading-next-margin-block-start,
+          revert-rule)
+        </li>
+      </ul>
+    </section>
+    <section class="d d2 flush">
+      <h3>D2 variable set to 0</h3>
+      <ul>
+        <li>
+          margin-block-start: var(--vs--heading-next-margin-block-start,
+          revert-rule)
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

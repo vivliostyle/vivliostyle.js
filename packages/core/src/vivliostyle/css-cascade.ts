@@ -564,6 +564,42 @@ export class ConditionalCascadeValue extends CascadeValue {
 }
 
 /**
+ * The value a longhand takes from a shorthand declaration whose value contains
+ * var(): which part of the shorthand value belongs to the longhand is only
+ * known once var() has been substituted (css-variables-1 §3.2, the
+ * pending-substitution value). The cascade itself only reserves the longhand
+ * with `Css.empty` and expands the shorthand after substitution, so this value
+ * is needed only where a rollback keyword of the longhand lands on such a
+ * declaration; `applyVarFilter` then substitutes and expands it for this one
+ * longhand.
+ */
+class PendingSubstitutionCascadeValue extends CascadeValue {
+  constructor(
+    public readonly shorthandName: string,
+    shorthandValue: Css.Val,
+    priority: number,
+    layer: CascadeLayer | null,
+    ruleId: number,
+  ) {
+    super(shorthandValue, priority, layer, ruleId);
+  }
+
+  /**
+   * The same pending substitution at the position in the cascade of another
+   * declaration.
+   */
+  at(position: CascadeValue): PendingSubstitutionCascadeValue {
+    return new PendingSubstitutionCascadeValue(
+      this.shorthandName,
+      this.value,
+      position.priority,
+      position.layer,
+      position.ruleId,
+    );
+  }
+}
+
+/**
  * @param tv current value (cannot be conditional)
  * @param av cascaded value (can be conditional)
  */
@@ -716,17 +752,24 @@ function isRolledBackBy(
 }
 
 /**
- * The value a rollback keyword resolves to: the winner of the cascade run
- * again without the declarations the keyword rolls back. The value found may
- * itself be a rollback keyword, in which case the rollback is applied again on
- * top of the previous one; a cycle exhausts the candidates and ends up with no
- * declaration at all.
+ * Where a rollback ended, and the declarations it has not rolled back yet.
  */
-function resolveRollbackValue(
-  name: string,
+interface RollbackResolution {
+  readonly declaration: CascadeValue;
+  readonly remaining: CascadeValue[];
+}
+
+/**
+ * The declaration a rollback keyword resolves to: the winner of the cascade
+ * run again without the declarations the keyword rolls back. The value found
+ * may itself be a rollback keyword, in which case the rollback is applied again
+ * on top of the previous one; a cycle exhausts the candidates and ends up with
+ * no declaration at all, for which the last rollback declaration is returned.
+ */
+function resolveRollbackDeclaration(
   reverting: CascadeValue,
   candidates: CascadeValue[],
-): Css.Val {
+): RollbackResolution {
   let remaining = candidates;
   while (Css.isRollbackValue(reverting.value)) {
     // The reverting declaration itself always belongs to what it rolls back,
@@ -739,26 +782,70 @@ function resolveRollbackValue(
       }
     }
     if (!winner) {
-      // Nothing is left in Vivliostyle's own cascade to roll back to. A custom
-      // property is then the guaranteed-invalid value, which this engine
-      // spells `initial`.
-      //
-      // Any other property keeps the keyword, so that the browser resolves it
-      // in the cascade of the generated document, where the declaration lands
-      // in the `style` attribute. What is left there below it is exactly what
-      // Vivliostyle does not model: the browser's own user-agent style sheet,
-      // which knows the widget styles of `input`, `button` and the like that
-      // Vivliostyle's user-agent style sheet deliberately does not define, and
-      // the presentational hints of attributes such as `width` or `hidden`,
-      // which are author-origin declarations below every author rule.
-      // Resolving the keyword here instead would mean `unset`, dropping the
-      // border of a form control that reverts (WPT css-ui/appearance-revert-001,
-      // compute-kind-widget-fallback-props-revert-001).
-      return Css.isCustomPropName(name) ? Css.ident.initial : reverting.value;
+      break;
     }
     reverting = winner;
   }
-  return reverting.value;
+  return { declaration: reverting, remaining };
+}
+
+/**
+ * A rollback of the first pass of {@link resolveRollbackValues} that landed on
+ * a declaration containing var(). If var() substitution turns its value into a
+ * rollback keyword, that keyword belongs to the declaration landed on, so the
+ * second pass continues the rollback from there instead of starting over from
+ * the reverting declaration, which would land on the same declaration again.
+ */
+interface RollbackContinuation extends RollbackResolution {
+  /** The value that the first pass put in place of the keyword. */
+  readonly resolved: CascadeValue;
+}
+
+const rollbackContinuations = new WeakMap<
+  ElementStyle,
+  { [name: string]: RollbackContinuation }
+>();
+
+function hasSamePosition(a: CascadeValue, b: CascadeValue): boolean {
+  return (
+    a.priority === b.priority && a.layer === b.layer && a.ruleId === b.ruleId
+  );
+}
+
+/**
+ * The cascaded value that replaces a rollback keyword. It keeps the position
+ * of the reverting declaration in the cascade, which won over the declarations
+ * that a shorthand with var() expands into later on.
+ */
+function rollbackValueOf(
+  name: string,
+  reverting: CascadeValue,
+  declaration: CascadeValue,
+): CascadeValue {
+  if (Css.isRollbackValue(declaration.value)) {
+    // Nothing is left in Vivliostyle's own cascade to roll back to. A custom
+    // property is then the guaranteed-invalid value, which this engine spells
+    // `initial`.
+    //
+    // Any other property keeps the keyword, so that the browser resolves it in
+    // the cascade of the generated document, where the declaration lands in
+    // the `style` attribute. What is left there below it is exactly what
+    // Vivliostyle does not model: the browser's own user-agent style sheet,
+    // which knows the widget styles of `input`, `button` and the like that
+    // Vivliostyle's user-agent style sheet deliberately does not define, and
+    // the presentational hints of attributes such as `width` or `hidden`,
+    // which are author-origin declarations below every author rule. Resolving
+    // the keyword here instead would mean `unset`, dropping the border of a
+    // form control that reverts (WPT css-ui/appearance-revert-001,
+    // compute-kind-widget-fallback-props-revert-001).
+    return reverting.withValue(
+      Css.isCustomPropName(name) ? Css.ident.initial : declaration.value,
+    );
+  }
+  if (declaration instanceof PendingSubstitutionCascadeValue) {
+    return declaration.at(reverting);
+  }
+  return reverting.withValue(declaration.value);
 }
 
 /**
@@ -766,7 +853,7 @@ function resolveRollbackValue(
  * rolls back to, so that the layout engine sees a real value instead of the
  * keyword. When Vivliostyle's own cascade has nothing left to roll back to,
  * the keyword survives on purpose and is handed to the browser through the
- * `style` attribute of the generated element (see `resolveRollbackValue`).
+ * `style` attribute of the generated element (see `rollbackValueOf`).
  *
  * This runs twice: once as soon as the cascade is settled, because the value
  * rolled back to may itself be a shorthand or contain var(), and once more
@@ -817,10 +904,30 @@ export function resolveRollbackValues(
         style[name] = cascVal.withValue(Css.ident.initial);
         continue;
       }
-      const value = resolveRollbackValue(name, cascVal, history?.[name] ?? []);
-      style[name] = cascVal.withValue(value);
-      if (CssValidator.containsVar(value)) {
+      const continuation = afterVarSubstitution
+        ? rollbackContinuations.get(style)?.[name]
+        : undefined;
+      // The keyword may also come from a shorthand expanded since then, in
+      // which case it is a rollback of its own.
+      const { declaration, remaining } =
+        continuation && hasSamePosition(continuation.resolved, cascVal)
+          ? resolveRollbackDeclaration(
+              continuation.declaration.withValue(cascVal.value),
+              continuation.remaining,
+            )
+          : resolveRollbackDeclaration(cascVal, history?.[name] ?? []);
+      const resolved = rollbackValueOf(name, cascVal, declaration);
+      style[name] = resolved;
+      if (CssValidator.containsVar(resolved.value)) {
         varSubstitutionNeeded = true;
+        if (!afterVarSubstitution) {
+          let continuations = rollbackContinuations.get(style);
+          if (!continuations) {
+            continuations = {};
+            rollbackContinuations.set(style, continuations);
+          }
+          continuations[name] = { resolved, declaration, remaining };
+        }
       }
     }
   }
@@ -828,6 +935,7 @@ export function resolveRollbackValues(
     // The cascade for this style is over, so the declarations that lost it are
     // of no further use.
     cascadeHistories.delete(style);
+    rollbackContinuations.delete(style);
   }
   return varSubstitutionNeeded;
 }
@@ -1071,7 +1179,28 @@ export function mergeIn(
       // browser-supported shorthands discovered lazily by ValidatorSet.
       const propListLH = validatorSet?.getShorthand(prop, av.value)?.propList;
       if (propListLH) {
+        let pending: PendingSubstitutionCascadeValue | null | undefined;
         for (const propLH of propListLH) {
+          // applyVarFilter does not visit view-conditional styles, so a
+          // pending substitution would never be resolved there.
+          if (!viewConditionMatcher && rollbackDeclaredProps.has(propLH)) {
+            if (pending === undefined) {
+              pending = containsVar(av.value)
+                ? new PendingSubstitutionCascadeValue(
+                    prop,
+                    av.value,
+                    av.priority,
+                    av.layer,
+                    av.ruleId,
+                  )
+                : null;
+            }
+            if (pending) {
+              // Recorded before the slot below takes the place of the current
+              // value, which the history may not have seen yet.
+              recordCascadeHistory(target, propLH, pending);
+            }
+          }
           const avLH = av.withValue(Css.empty);
           setPropCascadeValue(target, propLH, avLH, context);
         }
@@ -6685,7 +6814,11 @@ export class CascadeInstance {
         // variables substituted, but the substituted value may contain variables
         value = after;
       }
-      if (value !== cascVal.value) {
+      if (cascVal instanceof PendingSubstitutionCascadeValue) {
+        elementStyle[name] = cascVal.withValue(
+          this.substitutedLonghandValue(cascVal.shorthandName, value, name),
+        );
+      } else if (value !== cascVal.value) {
         // all variables substituted
         if (
           CssValidator.isEngineEvaluatedLengthProperty(name) &&
@@ -6697,42 +6830,17 @@ export class CascadeInstance {
           .getShorthand(name, value)
           ?.clone(this.scope);
         if (shorthand) {
-          if (Css.isDefaultingValue(value)) {
+          const longhandValueOf = this.expandSubstitutedShorthand(
+            shorthand,
+            value,
+          );
+          if (longhandValueOf) {
             for (const nameLH of shorthand.propList) {
-              const avLH = cascVal.withValue(value);
+              const avLH = cascVal.withValue(longhandValueOf(nameLH));
               const tvLH = getProp(elementStyle, nameLH);
               setProp(propsLH, nameLH, cascadeValues(this.context, tvLH, avLH));
             }
             delete elementStyle[name];
-          } else {
-            // The var()-substituted value may have complex structure
-            // (e.g. SpaceList in SpaceList) that ShorthandValidator
-            // cannot handle directly, so normalize it through parseValue
-            // before expanding the shorthand to longhands.
-            const valueSH = CssParser.parseValue(
-              this.scope,
-              new CssTokenizer.Tokenizer(value.toString(), null),
-              "",
-            );
-            if (valueSH) {
-              valueSH.visit(shorthand);
-              if (!shorthand.error) {
-                for (const nameLH of shorthand.propList) {
-                  const avLH = cascVal.withValue(
-                    shorthand.values[nameLH] ??
-                      this.validatorSet.defaultValues.get(nameLH) ??
-                      Css.ident.initial,
-                  );
-                  const tvLH = getProp(elementStyle, nameLH);
-                  setProp(
-                    propsLH,
-                    nameLH,
-                    cascadeValues(this.context, tvLH, avLH),
-                  );
-                }
-                delete elementStyle[name];
-              }
-            }
           }
         } else {
           elementStyle[name] = cascVal.withValue(value);
@@ -6777,6 +6885,66 @@ export class CascadeInstance {
     for (const name in propsLH) {
       elementStyle[name] = propsLH[name];
     }
+  }
+
+  /**
+   * Expand a shorthand value that var() substitution has produced.
+   * @returns the value of each longhand, or null when the value is invalid for
+   *     the shorthand
+   */
+  private expandSubstitutedShorthand(
+    shorthand: CssValidator.ShorthandValidator,
+    value: Css.Val,
+  ): ((nameLH: string) => Css.Val) | null {
+    if (Css.isDefaultingValue(value)) {
+      return () => value;
+    }
+    // The var()-substituted value may have complex structure (e.g. SpaceList
+    // in SpaceList) that ShorthandValidator cannot handle directly, so
+    // normalize it through parseValue before expanding the shorthand to
+    // longhands.
+    const valueSH = CssParser.parseValue(
+      this.scope,
+      new CssTokenizer.Tokenizer(value.toString(), null),
+      "",
+    );
+    if (!valueSH) {
+      return null;
+    }
+    valueSH.visit(shorthand);
+    if (shorthand.error) {
+      return null;
+    }
+    return (nameLH) =>
+      shorthand.values[nameLH] ??
+      this.validatorSet.defaultValues.get(nameLH) ??
+      Css.ident.initial;
+  }
+
+  /**
+   * The value of one longhand of a shorthand whose value var() substitution
+   * has produced. A value that is invalid for the shorthand makes each of its
+   * longhands invalid at computed-value time, i.e. `unset`.
+   */
+  private substitutedLonghandValue(
+    shorthandName: string,
+    value: Css.Val,
+    nameLH: string,
+  ): Css.Val {
+    const shorthand = this.validatorSet
+      .getShorthand(shorthandName, value)
+      ?.clone(this.scope);
+    const valueLH =
+      (shorthand &&
+        this.expandSubstitutedShorthand(shorthand, value)?.(nameLH)) ??
+      Css.ident.unset;
+    if (
+      CssValidator.isEngineEvaluatedLengthProperty(nameLH) &&
+      CssValidator.containsBrowserViewportUnit(valueLH)
+    ) {
+      return Css.ident.unset;
+    }
+    return valueLH;
   }
 
   /**

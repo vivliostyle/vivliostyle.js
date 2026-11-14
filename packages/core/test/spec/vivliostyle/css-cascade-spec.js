@@ -3010,19 +3010,20 @@ describe("css-cascade", function () {
         defaultValues: {},
       };
 
-      var cascadeInstance = {
-        context: {},
-        root: element,
-        scope: new adapt_exprs.LexicalScope(null),
-        validatorSet: validatorSet,
-        styles: {
-          styleOf: function (currentElement) {
-            return styleMap.get(currentElement) || null;
+      var cascadeInstance = Object.assign(
+        Object.create(adapt_csscasc.CascadeInstance.prototype),
+        {
+          context: {},
+          root: element,
+          scope: new adapt_exprs.LexicalScope(null),
+          validatorSet: validatorSet,
+          styles: {
+            styleOf: function (currentElement) {
+              return styleMap.get(currentElement) || null;
+            },
           },
         },
-      };
-      cascadeInstance.applyVarFilter =
-        adapt_csscasc.CascadeInstance.prototype.applyVarFilter;
+      );
       cascadeInstance.applyVarFilter([style], element);
     }
 
@@ -3681,6 +3682,179 @@ describe("css-cascade", function () {
       expect(adapt_css.isRollbackValue(adapt_css.getName("Revert-Layer"))).toBe(
         true,
       );
+    });
+
+    describe("landing on a shorthand declaration with var()", function () {
+      var validatorSet = adapt_cssvalid.baseValidatorSet();
+      var scope = new adapt_exprs.LexicalScope(null);
+
+      function parseValue(cssText) {
+        return adapt_cssparse.parseValue(
+          scope,
+          new adapt_csstok.Tokenizer(cssText, null),
+          "",
+        );
+      }
+
+      var lastRuleId = 0;
+
+      function rule(declarations, priority, layer) {
+        var ruleId = ++lastRuleId;
+        var style = {};
+        Object.keys(declarations).forEach(function (name) {
+          var value = declarations[name];
+          var parsed = typeof value === "string" ? parseValue(value) : value;
+          adapt_csscasc.noteRollbackDeclaration(name, parsed, validatorSet);
+          style[name] = new adapt_csscasc.CascadeValue(
+            parsed,
+            priority,
+            layer || null,
+            ruleId,
+          );
+        });
+        return style;
+      }
+
+      // Every rule is parsed before the cascade merges any of them, and the
+      // cascade is followed by the steps of CascadeInstance.pushElement().
+      function cascade(rules) {
+        var style = {};
+        rules.forEach(function (ruleStyle) {
+          adapt_csscasc.mergeIn(
+            {},
+            style,
+            ruleStyle,
+            0,
+            null,
+            null,
+            null,
+            validatorSet,
+          );
+        });
+        var element = document.createElement("div");
+        var cascadeInstance = Object.assign(
+          Object.create(adapt_csscasc.CascadeInstance.prototype),
+          {
+            context: {},
+            root: element,
+            scope: scope,
+            validatorSet: validatorSet,
+            styles: {
+              styleOf: function () {
+                return null;
+              },
+            },
+          },
+        );
+        adapt_csscasc.resolveRollbackValues(style);
+        cascadeInstance.applyVarFilter([style], element);
+        if (adapt_csscasc.resolveRollbackValues(style, true)) {
+          cascadeInstance.applyVarFilter([style], element);
+        }
+        return style;
+      }
+
+      var AUTHOR = adapt_cssparse.SPECIFICITY_AUTHOR;
+      // A shorthand without var() is expanded into its longhands by the parser.
+      var zeroMargins = { "margin-block-start": "0", "margin-block-end": "0" };
+
+      it("takes the longhand's part of the substituted shorthand value", function () {
+        var style = cascade([
+          rule({ "--t": "30px" }, AUTHOR),
+          rule(zeroMargins, AUTHOR),
+          rule({ "margin-block": "var(--t) 5px" }, AUTHOR + 1),
+          rule(
+            { "margin-block-start": adapt_css.ident.revert_rule },
+            AUTHOR + 2,
+          ),
+        ]);
+
+        expect(style["margin-block-start"].value.toString()).toBe("30px");
+        expect(style["margin-block-end"].value.toString()).toBe("5px");
+      });
+
+      it("expands a shorthand whose whole value is a var()", function () {
+        var style = cascade([
+          rule({ "--m": "30px 5px" }, AUTHOR),
+          rule(zeroMargins, AUTHOR),
+          rule({ "margin-block": "var(--m)" }, AUTHOR + 1),
+          rule(
+            { "margin-block-start": adapt_css.ident.revert_rule },
+            AUTHOR + 2,
+          ),
+        ]);
+
+        expect(style["margin-block-start"].value.toString()).toBe("30px");
+        expect(style["margin-block-end"].value.toString()).toBe("5px");
+      });
+
+      it("lands there for a keyword written in a var() fallback", function () {
+        var style = cascade([
+          rule({ "--t": "30px" }, AUTHOR),
+          rule(zeroMargins, AUTHOR),
+          rule({ "margin-block": "var(--t) 5px" }, AUTHOR + 1),
+          rule(
+            { "margin-block-start": "var(--undefined, revert-rule)" },
+            AUTHOR + 2,
+          ),
+        ]);
+
+        expect(style["margin-block-start"].value.toString()).toBe("30px");
+        expect(style["margin-block-end"].value.toString()).toBe("5px");
+      });
+
+      it("keeps its own shorthand value when a later shorthand with var() is rolled back", function () {
+        var tree = new adapt_csscasc.CascadeLayerTree();
+        var first = tree.register(null, ["first"]);
+        var second = tree.register(null, ["second"]);
+        var style = cascade([
+          rule({ "--t": "30px", "--u": "5px" }, AUTHOR),
+          rule({ "margin-block": "var(--t) 0" }, AUTHOR, first),
+          rule({ "margin-block": "var(--u) 0" }, AUTHOR, second),
+          rule(
+            { "margin-block-start": adapt_css.ident.revert_layer },
+            AUTHOR + 1,
+            second,
+          ),
+        ]);
+
+        expect(style["margin-block-start"].value.toString()).toBe("30px");
+        expect(style["margin-block-end"].value.toString()).toBe("0");
+      });
+
+      // The keyword that var() substitution makes of the declaration landed on
+      // rolls back that declaration's rule, not the rule rolled back first.
+      [
+        { "margin-block": "var(--undefined, revert-rule)" },
+        { "margin-block-start": "var(--undefined, revert-rule)" },
+      ].forEach(function (landedOn) {
+        it(`continues from ${Object.keys(landedOn)[0]} when var() makes it a rollback keyword`, function () {
+          var style = cascade([
+            rule({ "margin-block-start": "20px" }, AUTHOR),
+            rule(landedOn, AUTHOR + 1),
+            rule(
+              { "margin-block-start": adapt_css.ident.revert_rule },
+              AUTHOR + 2,
+            ),
+          ]);
+
+          expect(style["margin-block-start"].value.toString()).toBe("20px");
+        });
+      });
+
+      it("makes the longhand unset when the substituted value is invalid for the shorthand", function () {
+        var style = cascade([
+          rule({ "--t": "red" }, AUTHOR),
+          rule(zeroMargins, AUTHOR),
+          rule({ "margin-block": "var(--t) 5px" }, AUTHOR + 1),
+          rule(
+            { "margin-block-start": adapt_css.ident.revert_rule },
+            AUTHOR + 2,
+          ),
+        ]);
+
+        expect(style["margin-block-start"].value).toBe(adapt_css.ident.unset);
+      });
     });
   });
 
