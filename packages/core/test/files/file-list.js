@@ -1173,7 +1173,7 @@ module.exports = [
       },
       {
         file: "negative-page-margin.html",
-        title: "Negative page margins",
+        title: "Negative page margins (PR #2264)",
       },
       {
         file: "content-in-page-margin-box.html",
