@@ -1172,6 +1172,10 @@ module.exports = [
           "writing-mode on body not inherited by page context (Issue #1122)",
       },
       {
+        file: "negative-page-margin.html",
+        title: "Negative page margins",
+      },
+      {
         file: "content-in-page-margin-box.html",
         title: "Content in page margin box (PR #316)",
       },

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Negative page margins</title>
+    <style>
+      @page {
+        size: 400px 300px;
+        margin: -20px;
+        background: linear-gradient(lightgray, lightgray) center / 360px 260px
+          no-repeat;
+      }
+      @page asymmetric {
+        margin: -30px 20px 20px -10px;
+        background: none;
+
+        @bottom-left {
+          content: "BL";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @bottom-center {
+          content: "BC";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @bottom-right {
+          content: "BR";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @bottom-right-corner {
+          content: "";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @right-top {
+          content: "RT";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @right-middle {
+          content: "RM";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @right-bottom {
+          content: "RB";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+      }
+      @page left-negative {
+        margin: 30px 30px 30px -20px;
+        background: none;
+
+        @top-left {
+          content: "TL";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @top-center {
+          content: "TC";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @top-right {
+          content: "TR";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @top-right-corner {
+          content: "";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+        @bottom-center {
+          content: "BC";
+          border: 1px solid green;
+          background: rgba(0, 128, 0, 0.15);
+        }
+      }
+      @page bordered {
+        margin: -20px 20px;
+        padding: 10px;
+        border: 4px solid orange;
+        background: none;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font: 14px/1.4 sans-serif;
+      }
+
+      section {
+        box-sizing: border-box;
+        height: 100vh;
+        margin: 0;
+        padding: 26px;
+        border: 4px solid blue;
+        background: rgba(0, 0, 255, 0.1);
+      }
+
+      #second {
+        page: asymmetric;
+      }
+
+      #third {
+        page: left-negative;
+      }
+
+      #fourth {
+        page: bordered;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <p>
+        <code>@page { margin: -20px; }</code> makes the page area 20px larger
+        than the page on each side.
+      </p>
+      <p>
+        The blue border of this box lies on the page area edges, so it must be
+        clipped at the page edges and must not be visible. The gray rectangle
+        (20px inside the page edges) must be fully covered by the light blue
+        box.
+      </p>
+    </section>
+    <section id="second">
+      <p>
+        <code>@page { margin: -30px 20px 20px -10px; }</code>
+      </p>
+      <p>
+        The top and left blue borders must be clipped at the page edges. The
+        right and bottom blue borders must be visible 20px inside the page
+        edges. The green page-margin boxes must fill the 20px right and bottom
+        page margins: the bottom ones from the left page edge, and the right
+        ones from the top page edge.
+      </p>
+    </section>
+    <section id="third">
+      <p>
+        <code>@page { margin: 30px 30px 30px -20px; }</code>
+      </p>
+      <p>
+        The left blue border must be clipped at the left page edge. The green
+        top page-margin boxes must fill the 30px top page margin from the left
+        page edge, and TC must be centered between the left page edge and the
+        right page margin (center at x = 185px), as must BC.
+      </p>
+    </section>
+    <section id="fourth">
+      <p>
+        <code
+          >@page { margin: -20px 20px; padding: 10px; border: 4px solid; }</code
+        >
+      </p>
+      <p>
+        The top and bottom orange page borders and blue borders must be clipped
+        at the page edges. The left and right orange page borders must be
+        visible 20px inside the page edges, with the blue borders 10px inside
+        them.
+      </p>
+    </section>
+  </body>
+</html>
