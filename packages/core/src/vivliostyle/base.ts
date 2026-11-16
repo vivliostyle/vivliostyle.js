@@ -118,13 +118,17 @@ export function setBaseURL(value: string): void {
 }
 
 /**
- * Base URL relative to which URLs of resources such as validation.txt and
- * user-agent.css are resolved.
+ * Base URL of the built-in resources such as the user agent style sheets and
+ * user-agent.xml. Their contents are embedded in the code (see assets.ts) and
+ * never fetched; the URLs only identify them.
  */
-export let resourceBaseURL = window.location.href;
-export function setResourceBaseURL(value: string): void {
-  resourceBaseURL = value;
-}
+export const builtinResourceBaseURL = "vivliostyle://resources/";
+
+/**
+ * URL of the built-in user-agent.xml, which holds the shadow templates
+ * (`#footnote`, `#table-cell`).
+ */
+export const userAgentXmlURL = `${builtinResourceBaseURL}user-agent.xml`;
 
 function getWptRawRepoRootURL(url: string): string | null {
   const matched = stripFragmentAndQuery(url).match(

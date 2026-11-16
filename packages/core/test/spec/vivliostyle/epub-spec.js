@@ -16,6 +16,7 @@
  * along with Vivliostyle.js.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as adapt_base from "../../../src/vivliostyle/base";
 import * as adapt_epub from "../../../src/vivliostyle/epub";
 import * as adapt_viewer from "../../../src/vivliostyle/adaptive-viewer";
 import * as adapt_task from "../../../src/vivliostyle/task";
@@ -2517,6 +2518,99 @@ describe("epub", function () {
           done();
         });
         return adapt_task.newResult(true);
+      });
+    });
+  });
+
+  describe("built-in style sheets", function () {
+    it("are identified by their URLs, not their text, in the style cache key", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var docUrl = "https://example.com/book/chapter1.html";
+      var doc = new DOMParser().parseFromString(
+        "<html xmlns='http://www.w3.org/1999/xhtml'><head><style>p{color:red}</style></head><body><p>x</p></body></html>",
+        "application/xhtml+xml",
+      );
+
+      adapt_task.start(function () {
+        store.addDocument(docUrl, doc).then(function () {
+          var style = store.styleByDocURL[docUrl];
+          var key = Object.keys(store.styleByKey).find(function (key) {
+            return store.styleByKey[key] === style;
+          });
+          expect(key).toContain(
+            adapt_base.builtinResourceBaseURL + "user-agent-base.css",
+          );
+          expect(key).not.toContain("@counter-style");
+          expect(key).toContain("p{color:red}");
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+  });
+
+  describe("built-in user-agent.xml", function () {
+    var preprocessHook;
+
+    beforeEach(function () {
+      preprocessHook = jasmine.createSpy("preprocessHook");
+      vivliostyle_plugin.registerHook(
+        vivliostyle_plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
+        preprocessHook,
+      );
+    });
+
+    afterEach(function () {
+      vivliostyle_plugin.removeHook(
+        vivliostyle_plugin.HOOKS.PREPROCESS_SINGLE_DOCUMENT,
+        preprocessHook,
+      );
+    });
+
+    it("is created from the embedded source without fetch() or document processing", function (done) {
+      // fetch() would be blocked by a Content-Security-Policy, and the
+      // templates are not a document that plugins or style sheets given to
+      // the viewer apply to.
+      spyOn(window, "fetch").and.callThrough();
+      var viewerCss = "data:text/css,div%7Bmargin:1em%7D";
+      var store = new adapt_epub.EPUBDocStore([{ url: viewerCss }]);
+      store.triggerSingleDocumentPreprocessing = true;
+      var url = adapt_base.userAgentXmlURL;
+
+      // Two loads in concurrent tasks share one fetcher.
+      var results = [];
+      var check = function () {
+        if (results.length < 2) {
+          return;
+        }
+        var xmldoc = results[0];
+        expect(window.fetch).not.toHaveBeenCalled();
+        expect(preprocessHook).not.toHaveBeenCalled();
+        expect(results[1]).toBe(xmldoc);
+        expect(store.fetch(url)).toBeNull();
+        expect(xmldoc.url).toBe(url);
+        expect(store.get(url + "#footnote")).toBe(xmldoc);
+        expect(xmldoc.getElement(url + "#footnote")).not.toBeNull();
+        expect(xmldoc.getElement(url + "#table-cell")).not.toBeNull();
+
+        var style = store.getStyleForDoc(xmldoc);
+        expect(style).toBeDefined();
+        var key = Object.keys(store.styleByKey).find(function (key) {
+          return store.styleByKey[key] === style;
+        });
+        expect(key).toContain(url);
+        expect(key).not.toContain(viewerCss);
+        expect(key).not.toContain("user-agent-base.css");
+        done();
+      };
+      ["#footnote", "#table-cell"].forEach(function (fragment) {
+        adapt_task.start(function () {
+          return store.load(url + fragment).thenAsync(function (xmldoc) {
+            results.push(xmldoc);
+            check();
+            return adapt_task.newResult(true);
+          });
+        });
       });
     });
   });

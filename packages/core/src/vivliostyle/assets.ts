@@ -860,20 +860,7 @@ word-wrap = overflow-wrap;
 export const UserAgentXml = `
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:s="http://www.pyroxy.com/ns/shadow">
-<head>
-<style><![CDATA[
-
-.-vivliostyle-footnote-content {
-  float: footnote;
-  --viv-semantic-footnote-content: 1;
-}
-
-.-vivliostyle-table-cell-container {
-  display: block;
-}
-
-]]></style>
-</head>
+<head></head>
 <body>
 
 <s:template id="footnote"><s:content/><s:include class="-vivliostyle-footnote-content"/></s:template>
@@ -882,6 +869,21 @@ export const UserAgentXml = `
 
 </body>
 </html>`;
+
+/**
+ * The style sheet for the templates in user-agent.xml. It is the only style
+ * sheet applied to user-agent.xml.
+ */
+export const UserAgentXmlCss = `
+.-vivliostyle-footnote-content {
+  float: footnote;
+  --viv-semantic-footnote-content: 1;
+}
+
+.-vivliostyle-table-cell-container {
+  display: block;
+}
+`;
 
 /** user-agent-page.css */
 export const UserAgentPageCss = `

@@ -63,6 +63,8 @@ import {
   UserAgentCounterStylesCss,
   UserAgentPageCss,
   UserAgentTocCss,
+  UserAgentXml,
+  UserAgentXmlCss,
 } from "./assets";
 
 /**
@@ -3794,6 +3796,45 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     return this.styleByDocURL[xmldoc.url];
   }
 
+  /**
+   * The built-in user-agent.xml is created from the embedded source instead
+   * of being fetched and processed as a document.
+   */
+  protected override fetchInner(
+    url: string,
+    opt_required?: boolean,
+    opt_message?: string,
+  ): Task.Result<XmlDoc.XMLDocHolder | null> {
+    if (url !== Base.userAgentXmlURL) {
+      return super.fetchInner(url, opt_required, opt_message);
+    }
+    const frame: Task.Frame<XmlDoc.XMLDocHolder | null> =
+      Task.newFrame("loadUserAgentXml");
+    // Only the style sheet for the templates applies to user-agent.xml.
+    this.loadStyle(
+      [
+        {
+          url,
+          text: UserAgentXmlCss,
+          flavor: CssParser.StylesheetFlavor.USER_AGENT,
+          media: null,
+        },
+      ],
+      url,
+    ).then((style) => {
+      const document = new DOMParser().parseFromString(
+        UserAgentXml,
+        "application/xml",
+      );
+      const xmldoc = new XmlDoc.XMLDocHolder(this, url, document);
+      this.styleByDocURL[url] = style;
+      delete this.fetchers[url];
+      this.resources[url] = xmldoc;
+      frame.finish(xmldoc);
+    });
+    return frame.result();
+  }
+
   getTriggersForDoc(xmldoc: XmlDoc.XMLDocHolder): Vtree.Trigger[] {
     return this.triggersByDocURL[xmldoc.url];
   }
@@ -3957,29 +3998,26 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
 
     const sources = [] as StyleSource[];
     sources.push({
-      url: Base.resolveURL("user-agent-base.css", Base.resourceBaseURL),
+      url: `${Base.builtinResourceBaseURL}user-agent-base.css`,
       text: UserAgentBaseCss,
       flavor: CssParser.StylesheetFlavor.USER_AGENT,
       media: null,
     });
     sources.push({
-      url: Base.resolveURL("user-agent-page.css", Base.resourceBaseURL),
+      url: `${Base.builtinResourceBaseURL}user-agent-page.css`,
       text: UserAgentPageCss,
       flavor: CssParser.StylesheetFlavor.USER_AGENT,
       media: null,
     });
     sources.push({
-      url: Base.resolveURL(
-        "user-agent-counter-styles.css",
-        Base.resourceBaseURL,
-      ),
+      url: `${Base.builtinResourceBaseURL}user-agent-counter-styles.css`,
       text: UserAgentCounterStylesCss,
       flavor: CssParser.StylesheetFlavor.USER_AGENT,
       media: null,
     });
     if (isTocBox) {
       sources.push({
-        url: Base.resolveURL("user-agent-toc.css", Base.resourceBaseURL),
+        url: `${Base.builtinResourceBaseURL}user-agent-toc.css`,
         text: UserAgentTocCss,
         flavor: CssParser.StylesheetFlavor.USER_AGENT,
         media: null,
@@ -4058,11 +4096,27 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         sources.push(this.styleSheets[i]);
       }
     }
+    this.loadStyle(sources, url).then((style) => {
+      this.styleByDocURL[url] = style;
+      frame.finish(true);
+    });
+    return frame.result();
+  }
+
+  /**
+   * Compute the style from the style sheets. Styles are cached by their
+   * sources.
+   */
+  private loadStyle(sources: StyleSource[], name: string): Task.Result<Style> {
     let key = "";
     for (let i = 0; i < sources.length; i++) {
       key += sources[i].url;
       key += "^";
-      if (sources[i].text) {
+      // The text of a built-in style sheet is identified by its URL.
+      if (
+        sources[i].text &&
+        !sources[i].url?.startsWith(Base.builtinResourceBaseURL)
+      ) {
         key += sources[i].text;
       }
       key += "^";
@@ -4071,11 +4125,9 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
       }
       key += "^";
     }
-    let style = this.styleByKey[key];
+    const style = this.styleByKey[key];
     if (style) {
-      this.styleByDocURL[url] = style;
-      frame.finish(true);
-      return frame.result();
+      return Task.newResult(style);
     }
     let fetcher = this.styleFetcherByKey[key];
     if (!fetcher) {
@@ -4107,7 +4159,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           })
           .then(() => {
             const cascade = sph.cascadeParserHandler.finish();
-            style = new Style(
+            const style = new Style(
               this,
               sph.rootScope,
               sph.pageScope,
@@ -4125,15 +4177,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
             innerFrame.finish(style);
           });
         return innerFrame.result();
-      }, `FetchStylesheet ${url}`);
+      }, `FetchStylesheet ${name}`);
       this.styleFetcherByKey[key] = fetcher;
       fetcher.start();
     }
-    fetcher.get().then((style) => {
-      this.styleByDocURL[url] = style;
-      frame.finish(true);
-    });
-    return frame.result();
+    return fetcher.get();
   }
 
   processViewportMeta(meta: Element): string {
