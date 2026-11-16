@@ -23,7 +23,6 @@ import * as Logging from "./logging";
 import * as Task from "./task";
 import * as TaskUtil from "./task-util";
 import { Net, XmlDoc } from "./types";
-import { UserAgentXml } from "./assets";
 
 /**
  * @enum {string}
@@ -193,7 +192,7 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     return this.fetch(url, opt_required, opt_message).get();
   }
 
-  private fetchInner(
+  protected fetchInner(
     url: string,
     opt_required?: boolean,
     opt_message?: string,
@@ -204,15 +203,6 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
     const isTocBox = Base.isTocBoxURL(url);
     if (isTocBox) {
       url = Base.stripTocBoxURL(url);
-    }
-    const userAgentXmlUrl = Base.resolveURL(
-      "user-agent.xml",
-      Base.resourceBaseURL,
-    );
-    const isUserAgentXml = !isTocBox && url === userAgentXmlUrl;
-    if (isUserAgentXml) {
-      // Change "user-agent.xml" URL to data URL
-      url = `data:application/xml,${encodeURIComponent(UserAgentXml)}`;
     }
 
     fetchFromURL(url, this.type).then((response) => {
@@ -230,9 +220,6 @@ export class ResourceStore<Resource> implements Net.ResourceStore<Resource> {
         // Hack for TOCView.showTOC()
         url = Base.toTocBoxURL(url);
         response.url = Base.toTocBoxURL(response.url);
-      } else if (isUserAgentXml) {
-        // Restore "user-agent.xml" URL
-        response.url = url = userAgentXmlUrl;
       }
       response.requestedURL = url;
       this.parser(response, this).then((resource) => {

@@ -757,7 +757,7 @@ export class ViewFactory
         const url =
           templateURLVal instanceof Css.URL
             ? templateURLVal.url
-            : Base.resolveURL("user-agent.xml#footnote", Base.resourceBaseURL);
+            : `${Base.userAgentXmlURL}#footnote`;
         cont = this.createRefShadow(
           url,
           Vtree.ShadowType.ROOTLESS,
@@ -805,10 +805,7 @@ export class ViewFactory
       let cont2: Task.Result<Vtree.ShadowContext | null> | null = null;
       cont1.then((shadow) => {
         if (computedStyle["display"] === Css.ident.table_cell) {
-          const url = Base.resolveURL(
-            "user-agent.xml#table-cell",
-            Base.resourceBaseURL,
-          );
+          const url = `${Base.userAgentXmlURL}#table-cell`;
           cont2 = this.createRefShadow(
             url,
             Vtree.ShadowType.ROOTLESS,

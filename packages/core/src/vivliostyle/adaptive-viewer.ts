@@ -408,11 +408,9 @@ export class AdaptiveViewer {
     // for backward compatibility
     if (typeof command["userAgentRootURL"] == "string") {
       Base.setBaseURL(command["userAgentRootURL"].replace(/resources\/?$/, ""));
-      Base.setResourceBaseURL(command["userAgentRootURL"]);
     }
     if (typeof command["rootURL"] == "string") {
       Base.setBaseURL(command["rootURL"]);
-      Base.setResourceBaseURL(`${Base.baseURL}resources/`);
     }
     if (
       typeof command["pageViewMode"] == "string" &&

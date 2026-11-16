@@ -47,8 +47,11 @@ const PageProgression = Constants.PageProgression;
 
 /**
  * Viewer settings that must be passed to Viewer's constructor.
- * - userAgentRootURL: URL of a directory from which viewer resource files
- *   (under resources/ directory in the source repository) are served.
+ * - userAgentRootURL: URL of the `resources/` directory of the viewer. Its
+ *   parent directory is used as the base URL of the viewer, for example to
+ *   resolve relative URLs of the style sheets given to the viewer. The
+ *   built-in resources such as the user agent style sheets are embedded in
+ *   the code and are not loaded from this URL.
  * - viewportElement: An element used as the viewport of the displayed contents.
  * - window: Window object. If omitted, current `window` is used.
  * - debug: Debug flag.
