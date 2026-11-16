@@ -4112,7 +4112,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
     for (let i = 0; i < sources.length; i++) {
       key += sources[i].url;
       key += "^";
-      if (sources[i].text) {
+      // The text of a built-in style sheet is identified by its URL.
+      if (
+        sources[i].text &&
+        !sources[i].url?.startsWith(Base.builtinResourceBaseURL)
+      ) {
         key += sources[i].text;
       }
       key += "^";

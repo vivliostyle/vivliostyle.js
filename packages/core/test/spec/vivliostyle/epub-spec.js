@@ -2522,6 +2522,33 @@ describe("epub", function () {
     });
   });
 
+  describe("built-in style sheets", function () {
+    it("are identified by their URLs, not their text, in the style cache key", function (done) {
+      var store = new adapt_epub.EPUBDocStore();
+      var docUrl = "https://example.com/book/chapter1.html";
+      var doc = new DOMParser().parseFromString(
+        "<html xmlns='http://www.w3.org/1999/xhtml'><head><style>p{color:red}</style></head><body><p>x</p></body></html>",
+        "application/xhtml+xml",
+      );
+
+      adapt_task.start(function () {
+        store.addDocument(docUrl, doc).then(function () {
+          var style = store.styleByDocURL[docUrl];
+          var key = Object.keys(store.styleByKey).find(function (key) {
+            return store.styleByKey[key] === style;
+          });
+          expect(key).toContain(
+            adapt_base.builtinResourceBaseURL + "user-agent-base.css",
+          );
+          expect(key).not.toContain("@counter-style");
+          expect(key).toContain("p{color:red}");
+          done();
+        });
+        return adapt_task.newResult(true);
+      });
+    });
+  });
+
   describe("built-in user-agent.xml", function () {
     var preprocessHook;
 
@@ -2571,7 +2598,7 @@ describe("epub", function () {
         var key = Object.keys(store.styleByKey).find(function (key) {
           return store.styleByKey[key] === style;
         });
-        expect(key).toContain("-vivliostyle-footnote-content");
+        expect(key).toContain(url);
         expect(key).not.toContain(viewerCss);
         expect(key).not.toContain("user-agent-base.css");
         done();
