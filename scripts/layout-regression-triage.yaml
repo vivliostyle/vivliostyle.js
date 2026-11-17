@@ -94,3 +94,51 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/negative-page-margin.html&zoom=1&spread=false
+- category: Page breaks
+  title: "Class C break point (PR #383)"
+  file: page_breaks/class_C_break_point.html
+  decision: expected  # regression / expected / skip
+  notes: "Improvement by PR #2267: on page 3 the fragment of the height: 190px box now extends to the page end, as CSS Fragmentation requires, instead of ending just below its last line"
+  approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/class_C_break_point.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/class_C_break_point.html&zoom=1&spread=false
+- category: Positioning and fragmentation
+  title: "Percentage block sizes in fragmented ancestors (Issue #583)"
+  file: fragmented-percentage-block-size.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2267 (stable unsets html/body height: 100% at the break, so lines 1-6 move to the page top and overlap the text)"
+  approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size.html&zoom=1&spread=false
+- category: Positioning and fragmentation
+  title: "Percentage block sizes in fragmented ancestors, vertical-rl (Issue #583)"
+  file: fragmented-percentage-block-size-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2267 (vertical-rl version; stable moves lines 1-6 to the block-start and overlaps the text)"
+  approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size-vertical.html&zoom=1&spread=false
+- category: Positioning and fragmentation
+  title: "Percentage block sizes in fragmented ancestors with a footnote (PR #2267)"
+  file: fragmented-percentage-block-size-footnote.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2267 (footnote version; stable moves lines 1-6 to the page top and overlaps the text)"
+  approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size-footnote.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size-footnote.html&zoom=1&spread=false
