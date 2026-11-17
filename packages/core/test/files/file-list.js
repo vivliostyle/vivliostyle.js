@@ -1530,6 +1530,11 @@ module.exports = [
         title:
           "Block size of a fragmented box after a repeated header (PR #2267)",
       },
+      {
+        file: "fragmented-indefinite-percentage-block-size.html",
+        title:
+          "Indefinite percentage block sizes in fragmented ancestors (PR #2267)",
+      },
     ],
   },
   {
