@@ -270,8 +270,8 @@ export interface StylerProducer {
 
 /**
  * Returns whether a percentage block size of the element resolves, i.e. the
- * block sizes of its ancestors up to the column are definite as specified
- * lengths or resolving percentages. Other ancestor block sizes, e.g. auto
+ * block sizes of its containing blocks up to the column are definite as
+ * specified lengths or resolving percentages. Other block sizes, e.g. auto
  * or max-content, are treated as indefinite.
  */
 function isPercentageBlockSizeDefinite(
@@ -281,6 +281,12 @@ function isPercentageBlockSizeDefinite(
 ): boolean {
   let parent = elem.parentElement;
   for (; parent && parent !== columnElement; parent = parent.parentElement) {
+    // Boxless and non-atomic inline ancestors are not containing blocks.
+    const display =
+      parent.ownerDocument.defaultView?.getComputedStyle(parent).display ?? "";
+    if (/^(contents|inline|ruby(-.*)?)$/.test(display)) {
+      continue;
+    }
     const size = Base.getCSSProperty(parent, blockSizeP);
     if (!size.includes("%")) {
       return /\d/.test(size) && !/content/.test(size);
