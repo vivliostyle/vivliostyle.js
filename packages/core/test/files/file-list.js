@@ -1506,6 +1506,15 @@ module.exports = [
         file: "margin-break.html",
         title: "margin-break property",
       },
+      {
+        file: "fragmented-percentage-block-size.html",
+        title: "Percentage block sizes in fragmented ancestors (Issue #583)",
+      },
+      {
+        file: "fragmented-percentage-block-size-vertical.html",
+        title:
+          "Percentage block sizes in fragmented ancestors, vertical-rl (Issue #583)",
+      },
     ],
   },
   {

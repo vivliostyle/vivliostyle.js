@@ -5051,8 +5051,58 @@ export class ViewFactory
     return Task.newResult(writingMode);
   }
 
+  /**
+   * Adjusts the specified block size of a box fragmented at its block-end
+   * edge. A box whose specified block size takes it beyond the fragmentainer
+   * should not keep that block size, so it is unset. (Issue #980)
+   * Note: This is a temporary fix; the total block size of the fragments
+   * should be the same as the original box.
+   * A box that ends within the fragmentainer keeps its block size: unsetting
+   * it would move the content laid out before the break, e.g. children with
+   * percentage block sizes, such as those of `html, body { height: 100% }`.
+   * (Issue #583)
+   */
+  private adjustFragmentedBlockSize(
+    elem: HTMLElement,
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ): void {
+    const blockSizeP = nodeContext.vertical ? "width" : "height";
+    const blockSize = Base.getCSSProperty(elem, blockSizeP);
+    if (!blockSize || blockSize === "auto") {
+      return;
+    }
+    // Boxes of and in tables are still adjusted by the table layout after
+    // this, e.g. rowspans of fragmented cells and the size of their contents,
+    // and the cell paddings and borders follow them, so they may not fit as
+    // measured here. Table cell contents are laid out in pseudo columns.
+    let inTable = !!column.pseudoParent;
+    for (
+      let nc: Vtree.NodeContext | null = nodeContext;
+      nc && !inTable;
+      nc = nc.parent
+    ) {
+      inTable = /^(inline-)?table/.test(nc.display ?? "");
+    }
+    if (!inTable && nodeContext.vertical === column.vertical) {
+      const rect = column.clientLayout.getElementClientRect(elem);
+      const blockEndEdge = !column.vertical
+        ? rect.bottom
+        : column.getBoxDir() < 0
+          ? rect.left
+          : rect.right;
+      if (!column.isOverflown(blockEndEdge)) {
+        return;
+      }
+    }
+    Base.setCSSProperty(elem, blockSizeP, "");
+  }
+
   /** @override */
-  processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
+  processFragmentedBlockEdge(
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ) {
     const nodeContext1 =
       !nodeContext.inline && nodeContext.after
         ? nodeContext.parent
@@ -5099,13 +5149,8 @@ export class ViewFactory
           }
         }
       } else {
-        const blockSizeP = nodeContext.vertical ? "width" : "height";
-        if (Base.getCSSProperty(elem, blockSizeP)) {
-          // When a box with a specified block size is fragmented,
-          // the fragmented box should not have the block size.
-          Base.setCSSProperty(elem, blockSizeP, "");
-        }
         Break.setBoxBreakFlag(elem, "block-end");
+        this.adjustFragmentedBlockSize(elem, nc, column);
         if (!blockNestCount++) {
           if (nc !== nodeContext1) {
             const { textAlign } = this.viewport.window.getComputedStyle(elem);

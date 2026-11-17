@@ -1305,6 +1305,7 @@ export class TableLayoutStrategy extends LayoutUtil.EdgeSkipper {
           if (state.lastAfterNodeContext) {
             this.column.layoutContext.processFragmentedBlockEdge(
               state.lastAfterNodeContext,
+              this.column,
             );
           }
           this.column.pageBreakType = breakAtEdge;
@@ -2122,6 +2123,7 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
               cellNodeContext.viewNode as HTMLTableCellElement;
             cellFragment.column.layoutContext.processFragmentedBlockEdge(
               cellFragment.cellNodeContext,
+              cellFragment.column,
             );
             if (rowIndex < cell.rowIndex + cell.rowSpan - 1) {
               cellViewNode.rowSpan = rowIndex - cell.rowIndex + 1;
@@ -2143,7 +2145,10 @@ export class TableLayoutProcessor implements LayoutProcessor.LayoutProcessor {
           })
           .then(() => {
             column.clearOverflownViewNodes(nodeContext, false);
-            column.layoutContext.processFragmentedBlockEdge(nodeContext);
+            column.layoutContext.processFragmentedBlockEdge(
+              nodeContext,
+              column,
+            );
             adjustRowHeight(nodeContext);
             formattingContext.finishFragment();
             frame.finish(true);

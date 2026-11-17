@@ -194,7 +194,7 @@ export class BlockLayoutProcessor implements LayoutProcessor {
         !nodeContext.after);
     column.clearOverflownViewNodes(nodeContext, removeSelf);
     if (endOfColumn) {
-      column.layoutContext.processFragmentedBlockEdge(nodeContext);
+      column.layoutContext.processFragmentedBlockEdge(nodeContext, column);
     }
     RubyEmphasis.adjustAnnotationsForNodes([nodeContext], column.clientLayout);
     return Task.newResult(true);

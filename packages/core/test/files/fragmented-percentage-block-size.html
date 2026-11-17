@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Percentage block sizes in fragmented ancestors (Issue #583)</title>
+    <style>
+      @page {
+        size: 120mm 90mm;
+        margin: 10mm;
+      }
+      html,
+      body {
+        block-size: 100%;
+        margin: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .top {
+        block-size: 50%;
+        background: #eef;
+      }
+      .bottom {
+        block-size: 50%;
+        /* 6 lines */
+        margin-block-start: -144px;
+      }
+      .lines {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      The blue lines 1–6 must be at the block-end of page 1, not overlapping
+      this text. Lines 7–8 must be on page 2.
+    </div>
+    <div class="bottom"></div>
+    <div class="lines">
+      Line 1<br />Line 2<br />Line 3<br />Line 4<br />Line 5<br />Line 6<br />Line
+      7<br />Line 8
+    </div>
+  </body>
+</html>
