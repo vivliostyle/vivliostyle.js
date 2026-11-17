@@ -5057,10 +5057,10 @@ export class ViewFactory
    * should not keep that block size, so it is unset. (Issue #980)
    * Note: This is a temporary fix; the total block size of the fragments
    * should be the same as the original box.
-   * A box that ends within the fragmentainer keeps its block size: unsetting
-   * it would move the content laid out before the break, e.g. children with
-   * percentage block sizes, such as those of `html, body { height: 100% }`.
-   * (Issue #583)
+   * A box that ends within the fragmentainer keeps its block size, as the
+   * used length: unsetting it would move the content laid out before the
+   * break, e.g. children with percentage block sizes, such as those of
+   * `html, body { height: 100% }`. (Issue #583)
    */
   private adjustFragmentedBlockSize(
     elem: HTMLElement,
@@ -5098,7 +5098,26 @@ export class ViewFactory
         : column.getBoxDir() < 0
           ? rect.left
           : rect.right;
-      if (!column.isOverflown(blockEndEdge)) {
+      // Repeated headers and footers are inserted after this, as the overflow
+      // checks in layout take into account.
+      const repetitiveElementsOffset = column
+        .collectElementsOffset()
+        .reduce((sum, offset) => sum + offset.calculateOffset(nodeContext), 0);
+      if (
+        !column.isOverflown(
+          blockEndEdge + column.getBoxDir() * repetitiveElementsOffset,
+        )
+      ) {
+        // Keep the used size, as a percentage may resolve differently later,
+        // e.g. against the column size reduced for footnotes until the end of
+        // the column layout.
+        Base.setCSSProperty(
+          elem,
+          blockSizeP,
+          this.viewport.window
+            .getComputedStyle(elem)
+            .getPropertyValue(blockSizeP),
+        );
         return;
       }
     }

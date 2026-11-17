@@ -1520,6 +1520,16 @@ module.exports = [
         title:
           "Block size of a fragmented box going beyond the page (PR #2267)",
       },
+      {
+        file: "fragmented-percentage-block-size-footnote.html",
+        title:
+          "Percentage block sizes in fragmented ancestors with a footnote (PR #2267)",
+      },
+      {
+        file: "fragmented-block-size-repeated-header.html",
+        title:
+          "Block size of a fragmented box after a repeated header (PR #2267)",
+      },
     ],
   },
   {
