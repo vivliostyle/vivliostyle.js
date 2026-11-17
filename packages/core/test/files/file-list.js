@@ -1506,6 +1506,35 @@ module.exports = [
         file: "margin-break.html",
         title: "margin-break property",
       },
+      {
+        file: "fragmented-percentage-block-size.html",
+        title: "Percentage block sizes in fragmented ancestors (Issue #583)",
+      },
+      {
+        file: "fragmented-percentage-block-size-vertical.html",
+        title:
+          "Percentage block sizes in fragmented ancestors, vertical-rl (Issue #583)",
+      },
+      {
+        file: "fragmented-block-size-overflow.html",
+        title:
+          "Block size of a fragmented box going beyond the page (PR #2267)",
+      },
+      {
+        file: "fragmented-percentage-block-size-footnote.html",
+        title:
+          "Percentage block sizes in fragmented ancestors with a footnote (PR #2267)",
+      },
+      {
+        file: "fragmented-block-size-repeated-header.html",
+        title:
+          "Block size of a fragmented box after a repeated header (PR #2267)",
+      },
+      {
+        file: "fragmented-indefinite-percentage-block-size.html",
+        title:
+          "Indefinite percentage block sizes in fragmented ancestors (PR #2267)",
+      },
     ],
   },
   {

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      Indefinite percentage block sizes in fragmented ancestors (PR #2267)
+    </title>
+    <style>
+      @page {
+        size: 120mm 90mm;
+        margin: 10mm;
+      }
+      body {
+        margin: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .wrap {
+        /* Behaves as auto: the block size of body is indefinite. */
+        block-size: 50%;
+      }
+      .contents {
+        /* Generates no box, so the block size does not apply. */
+        display: contents;
+        block-size: 100px;
+      }
+      .contents .wrap {
+        break-before: page;
+      }
+      .child {
+        /* Behaves as auto: the block size of .wrap is indefinite. */
+        block-size: 50%;
+        background: #eef;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="child">
+        The light purple box must be only as tall as this text, and Line 1 must
+        follow it.
+      </div>
+      Line 1<br />Line 2<br />Line 3<br />Line 4<br />Line 5<br />Line 6<br />Line
+      7<br />Line 8<br />Line 9<br />Line 10
+    </div>
+    <div class="contents">
+      <div class="wrap">
+        <div class="child">
+          The light purple box in the box with display: contents must be only
+          as tall as this text, and Line 1 must follow it.
+        </div>
+        Line 1<br />Line 2<br />Line 3<br />Line 4<br />Line 5<br />Line
+        6<br />Line 7<br />Line 8<br />Line 9<br />Line 10
+      </div>
+    </div>
+  </body>
+</html>

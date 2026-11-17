@@ -268,6 +268,34 @@ export interface StylerProducer {
   getStylerForDoc(xmldoc: XmlDoc.XMLDocHolder): CssStyler.AbstractStyler;
 }
 
+/**
+ * Returns whether a percentage block size of the element resolves, i.e. the
+ * block sizes of its containing blocks up to the column are definite as
+ * specified lengths or resolving percentages. Other block sizes, e.g. auto
+ * or max-content, are treated as indefinite.
+ */
+function isPercentageBlockSizeDefinite(
+  elem: Element,
+  blockSizeP: string,
+  columnElement: Element,
+): boolean {
+  let parent = elem.parentElement;
+  for (; parent && parent !== columnElement; parent = parent.parentElement) {
+    // Boxless and non-atomic inline ancestors are not containing blocks.
+    const display =
+      parent.ownerDocument.defaultView?.getComputedStyle(parent).display ?? "";
+    if (/^(contents|inline|ruby(-.*)?)$/.test(display)) {
+      continue;
+    }
+    const size = Base.getCSSProperty(parent, blockSizeP);
+    if (!size.includes("%")) {
+      return /\d/.test(size) && !/content/.test(size);
+    }
+  }
+  // The column has a definite block size.
+  return !!parent;
+}
+
 export class ViewFactory
   extends Base.SimpleEventTarget
   implements Vtree.LayoutContext
@@ -5051,8 +5079,90 @@ export class ViewFactory
     return Task.newResult(writingMode);
   }
 
+  /**
+   * Adjusts the specified block size of a box fragmented at its block-end
+   * edge. A box whose specified block size takes it beyond the fragmentainer
+   * should not keep that block size, so it is unset. (Issue #980)
+   * Note: This is a temporary fix; the total block size of the fragments
+   * should be the same as the original box.
+   * A box that ends within the fragmentainer keeps its block size: unsetting
+   * it would move the content laid out before the break, e.g. children with
+   * percentage block sizes, such as those of `html, body { height: 100% }`.
+   * (Issue #583)
+   */
+  private adjustFragmentedBlockSize(
+    elem: HTMLElement,
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ): void {
+    const blockSizeP = nodeContext.vertical ? "width" : "height";
+    const blockSize = Base.getCSSProperty(elem, blockSizeP);
+    if (!blockSize || blockSize === "auto") {
+      return;
+    }
+    // Boxes of and in tables are still adjusted by the table layout after
+    // this, e.g. rowspans of fragmented cells and the size of their contents,
+    // and the cell paddings and borders follow them, so they may not fit as
+    // measured here. Table cell contents are laid out in pseudo columns.
+    let inTable = !!column.pseudoParent;
+    for (
+      let nc: Vtree.NodeContext | null = nodeContext;
+      nc && !inTable;
+      nc = nc.parent
+    ) {
+      inTable = /^(inline-)?table/.test(nc.display ?? "");
+    }
+    if (!inTable && nodeContext.vertical === column.vertical) {
+      // The browser's column breaking may still put a box going beyond the
+      // fragmentainer into the next browser column, which the adjusted
+      // rectangle counts as overflow in the block direction.
+      const rect = LayoutHelper.getElementClientRectAdjusted(
+        column.clientLayout,
+        elem,
+        column.writingMode,
+      );
+      const blockEndEdge = !column.vertical
+        ? rect.bottom
+        : column.getBoxDir() < 0
+          ? rect.left
+          : rect.right;
+      // Repeated headers and footers are inserted after this, as the overflow
+      // checks in layout take into account.
+      const repetitiveElementsOffset = column
+        .collectElementsOffset()
+        .reduce((sum, offset) => sum + offset.calculateOffset(nodeContext), 0);
+      if (
+        !column.isOverflown(
+          blockEndEdge + column.getBoxDir() * repetitiveElementsOffset,
+        )
+      ) {
+        // Keep the used size of a resolved percentage, which may resolve
+        // differently later, e.g. against the column size reduced for
+        // footnotes until the end of the column layout. Other block sizes
+        // are kept as specified, not to make an indefinite one definite.
+        if (
+          blockSize.includes("%") &&
+          isPercentageBlockSizeDefinite(elem, blockSizeP, column.element)
+        ) {
+          Base.setCSSProperty(
+            elem,
+            blockSizeP,
+            this.viewport.window
+              .getComputedStyle(elem)
+              .getPropertyValue(blockSizeP),
+          );
+        }
+        return;
+      }
+    }
+    Base.setCSSProperty(elem, blockSizeP, "");
+  }
+
   /** @override */
-  processFragmentedBlockEdge(nodeContext: Vtree.NodeContext) {
+  processFragmentedBlockEdge(
+    nodeContext: Vtree.NodeContext,
+    column: Layout.Column,
+  ) {
     const nodeContext1 =
       !nodeContext.inline && nodeContext.after
         ? nodeContext.parent
@@ -5099,13 +5209,13 @@ export class ViewFactory
           }
         }
       } else {
-        const blockSizeP = nodeContext.vertical ? "width" : "height";
-        if (Base.getCSSProperty(elem, blockSizeP)) {
-          // When a box with a specified block size is fragmented,
-          // the fragmented box should not have the block size.
-          Base.setCSSProperty(elem, blockSizeP, "");
-        }
         Break.setBoxBreakFlag(elem, "block-end");
+        if (Break.isCloneBoxDecorationBreak(elem)) {
+          // Set before measuring the box in adjustFragmentedBlockSize(), as
+          // the cloned block-end padding and border stay.
+          Break.setBoxBreakFlag(elem, "clone");
+        }
+        this.adjustFragmentedBlockSize(elem, nc, column);
         if (!blockNestCount++) {
           if (nc !== nodeContext1) {
             const { textAlign } = this.viewport.window.getComputedStyle(elem);
@@ -5138,9 +5248,6 @@ export class ViewFactory
               Break.setBoxBreakFlag(elem, "text-end");
             }
           }
-        }
-        if (Break.isCloneBoxDecorationBreak(elem)) {
-          Break.setBoxBreakFlag(elem, "clone");
         }
         Break.setMarginDiscardFlag(elem, "block-end");
       }

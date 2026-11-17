@@ -1152,7 +1152,10 @@ export namespace Vtree {
     /**
      * Process a block-end edge of a fragmented block.
      */
-    processFragmentedBlockEdge(nodeContext: NodeContext);
+    processFragmentedBlockEdge(
+      nodeContext: NodeContext,
+      column: Layout.Column,
+    ): void;
     convertLengthToPx(
       numeric: Css.Numeric,
       viewNode: Node,

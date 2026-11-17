@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Block size of a fragmented box after a repeated header (PR #2267)</title>
+    <style>
+      @page {
+        size: 120mm 90mm;
+        margin: 10mm;
+      }
+      body {
+        margin: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .header {
+        repeat-on-break: header;
+        block-size: 40px;
+        background: #fdd;
+      }
+      .first {
+        break-after: page;
+      }
+      .box {
+        block-size: 240px;
+        border: 3px solid blue;
+        background: #eef;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div class="header">Repeated header</div>
+      <div class="first">
+        On page 2, the box with the blue border must not go beyond the page
+        area below the repeated header.
+      </div>
+      <div class="box">
+        Line 1<br />Line 2<br />Line 3<br />Line 4<br />Line 5<br />Line
+        6<br />Line 7<br />Line 8<br />Line 9<br />Line 10<br />Line 11<br />Line
+        12
+      </div>
+    </div>
+  </body>
+</html>
