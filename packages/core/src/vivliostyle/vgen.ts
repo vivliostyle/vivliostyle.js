@@ -5157,6 +5157,11 @@ export class ViewFactory
         }
       } else {
         Break.setBoxBreakFlag(elem, "block-end");
+        if (Break.isCloneBoxDecorationBreak(elem)) {
+          // Set before measuring the box in adjustFragmentedBlockSize(), as
+          // the cloned block-end padding and border stay.
+          Break.setBoxBreakFlag(elem, "clone");
+        }
         this.adjustFragmentedBlockSize(elem, nc, column);
         if (!blockNestCount++) {
           if (nc !== nodeContext1) {
@@ -5190,9 +5195,6 @@ export class ViewFactory
               Break.setBoxBreakFlag(elem, "text-end");
             }
           }
-        }
-        if (Break.isCloneBoxDecorationBreak(elem)) {
-          Break.setBoxBreakFlag(elem, "clone");
         }
         Break.setMarginDiscardFlag(elem, "block-end");
       }

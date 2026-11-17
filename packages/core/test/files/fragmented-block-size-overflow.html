@@ -18,6 +18,12 @@
         border: 3px solid blue;
         background: #eef;
       }
+      .clone {
+        block-size: 230px;
+        padding-block: 20px;
+        box-decoration-break: clone;
+        break-before: page;
+      }
     </style>
   </head>
   <body>
@@ -26,6 +32,12 @@
       and must continue on page 2.<br />Line 1<br />Line 2<br />Line 3<br />Line
       4<br />Line 5<br />Line 6<br />Line 7<br />Line 8<br />Line 9<br />Line
       10
+    </div>
+    <div class="box clone">
+      The box with the blue border and box-decoration-break: clone must not go
+      beyond the page area of page 3, including its block-end padding and
+      border.<br />Line 1<br />Line 2<br />Line 3<br />Line 4<br />Line
+      5<br />Line 6<br />Line 7<br />Line 8
     </div>
   </body>
 </html>
