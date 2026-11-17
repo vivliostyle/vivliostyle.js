@@ -5085,7 +5085,14 @@ export class ViewFactory
       inTable = /^(inline-)?table/.test(nc.display ?? "");
     }
     if (!inTable && nodeContext.vertical === column.vertical) {
-      const rect = column.clientLayout.getElementClientRect(elem);
+      // The browser's column breaking may still put a box going beyond the
+      // fragmentainer into the next browser column, which the adjusted
+      // rectangle counts as overflow in the block direction.
+      const rect = LayoutHelper.getElementClientRectAdjusted(
+        column.clientLayout,
+        elem,
+        column.writingMode,
+      );
       const blockEndEdge = !column.vertical
         ? rect.bottom
         : column.getBoxDir() < 0

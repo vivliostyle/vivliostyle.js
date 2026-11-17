@@ -1515,6 +1515,11 @@ module.exports = [
         title:
           "Percentage block sizes in fragmented ancestors, vertical-rl (Issue #583)",
       },
+      {
+        file: "fragmented-block-size-overflow.html",
+        title:
+          "Block size of a fragmented box going beyond the page (PR #2267)",
+      },
     ],
   },
   {

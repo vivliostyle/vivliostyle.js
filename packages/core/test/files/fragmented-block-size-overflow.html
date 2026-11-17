@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Block size of a fragmented box going beyond the page (PR #2267)</title>
+    <style>
+      @page {
+        size: 120mm 90mm;
+        margin: 10mm;
+      }
+      body {
+        margin: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .box {
+        block-size: 600px;
+        border: 3px solid blue;
+        background: #eef;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      The box with the blue border must not go beyond the page area of page 1
+      and must continue on page 2.<br />Line 1<br />Line 2<br />Line 3<br />Line
+      4<br />Line 5<br />Line 6<br />Line 7<br />Line 8<br />Line 9<br />Line
+      10
+    </div>
+  </body>
+</html>
