@@ -142,3 +142,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/fragmented-percentage-block-size-footnote.html&zoom=1&spread=false
+- category: Running elements
+  title: "Named flow element encountered before a layout retry with Adaptive Layout (Issue #2269)"
+  file: named_flow_chunk_layout_retry.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2270 (stable drops figures B and C, encountered before the layout of page 1 was retried for the footnotes)"
+  approvedViewer: git-fix-named-flow-chunk-layout-retry  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named_flow_chunk_layout_retry.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named_flow_chunk_layout_retry.html&zoom=1&spread=false
