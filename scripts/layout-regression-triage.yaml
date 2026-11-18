@@ -154,3 +154,15 @@
   baselineLabel: stable
   baselineUrl: >-
     https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/named_flow_chunk_layout_retry.html&zoom=1&spread=false
+- category: Float and clear
+  title: "clear: both in vertical multi-column layout (Issue #2271)"
+  file: clear-both-vertical-multicol.html
+  decision: expected  # regression / expected / skip
+  notes: "New test added in PR #2272 (stable keeps generating blank pages and times out)"
+  approvedViewer: https://vivliostyle-git-fix-issue-2271-clear-vertica-7dd47b-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/clear-both-vertical-multicol.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/clear-both-vertical-multicol.html&zoom=1&spread=false
