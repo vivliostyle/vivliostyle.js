@@ -336,6 +336,12 @@ export class StyleInstance
   stylerMap: { [key: string]: CssStyler.Styler };
   currentLayoutPosition: Vtree.LayoutPosition | null = null;
   layoutPositionAtPageStart: Vtree.LayoutPosition | null = null;
+  /**
+   * Flow chunks encountered during the layout of the current page, in the
+   * order they were encountered. See restoreLayoutPosition().
+   */
+  private encounteredFlowChunks: Vtree.FlowChunkPosition[] = [];
+  private encounteredFlowChunkCountAtPageStart = 0;
   currentCascadedPageStyle: CssCascade.ElementStyle | null = null;
   lookupOffset: number = 0;
   faces: Font.DocumentFaces;
@@ -708,7 +714,46 @@ export class StyleInstance
         flowChunk,
       );
       flowPosition.positions.push(flowChunkPosition);
+      this.encounteredFlowChunks.push(flowChunkPosition.clone());
     }
+  }
+
+  /**
+   * Returns a copy of a layout position snapshot to retry the layout from,
+   * with the flow chunks encountered after the snapshot was taken added.
+   *
+   * The styler reports each flow chunk only once, when it styles the element,
+   * and it may style elements far ahead of the current layout position (e.g.
+   * all children of the body when checking repeat-on-break). Without this, a
+   * flow chunk encountered in a layout attempt that is retried from an earlier
+   * snapshot would be lost, and its content would never be laid out.
+   * (Issue #2269)
+   * @param snapshot The layout position to retry the layout from
+   * @param encounteredFlowChunkCount The length of encounteredFlowChunks when
+   *     the snapshot was taken
+   */
+  private restoreLayoutPosition(
+    snapshot: Vtree.LayoutPosition,
+    encounteredFlowChunkCount: number,
+  ): Vtree.LayoutPosition {
+    const cp = snapshot.clone();
+    for (
+      let i = encounteredFlowChunkCount;
+      i < this.encounteredFlowChunks.length;
+      i++
+    ) {
+      const flowChunkPosition = this.encounteredFlowChunks[i];
+      const flowChunk = flowChunkPosition.flowChunk;
+      let flowPosition = cp.flowPositions[flowChunk.flowName];
+      if (!flowPosition) {
+        flowPosition = new Vtree.FlowPosition();
+        cp.flowPositions[flowChunk.flowName] = flowPosition;
+      }
+      if (!flowPosition.positions.some((p) => p.flowChunk === flowChunk)) {
+        flowPosition.positions.push(flowChunkPosition.clone());
+      }
+    }
+    return cp;
   }
 
   override evalSupportsTest(
@@ -1621,6 +1666,8 @@ export class StyleInstance
       // update layoutPositionAtPageStart since startSide of FlowChunks may be
       // updated
       this.layoutPositionAtPageStart = cp.clone();
+      this.encounteredFlowChunkCountAtPageStart =
+        this.encounteredFlowChunks.length;
       this.initLingering();
       this.clearScope(this.style.pageScope);
 
@@ -2167,6 +2214,8 @@ export class StyleInstance
         null,
       );
     const positionAtColumnStart = this.currentLayoutPosition.clone();
+    const encounteredFlowChunkCountAtColumnStart =
+      this.encounteredFlowChunks.length;
     const frame: Task.Frame<LayoutType.Column> = Task.newFrame(
       "createAndLayoutColumn",
     );
@@ -2282,7 +2331,10 @@ export class StyleInstance
               !regionPageFloatLayoutContext.isInvalidated()
             ) {
               column.pageFloatLayoutContext.validate();
-              this.currentLayoutPosition = positionAtColumnStart.clone();
+              this.currentLayoutPosition = this.restoreLayoutPosition(
+                positionAtColumnStart,
+                encounteredFlowChunkCountAtColumnStart,
+              );
               if (column.element !== boxContainer) {
                 boxContainer.removeChild(column.element);
               }
@@ -2363,6 +2415,8 @@ export class StyleInstance
     columnCount: number,
   ): Task.Result<LayoutType.Column[] | null> {
     const positionAtContainerStart = this.currentLayoutPosition.clone();
+    const encounteredFlowChunkCountAtContainerStart =
+      this.encounteredFlowChunks.length;
     const regionPageFloatLayoutContext = this.getRegionPageFloatLayoutContext(
       pagePageFloatLayoutContext,
       boxInstance,
@@ -2372,7 +2426,10 @@ export class StyleInstance
     let isFirstTime = true;
 
     const layoutColumns = () => {
-      this.currentLayoutPosition = positionAtContainerStart.clone();
+      this.currentLayoutPosition = this.restoreLayoutPosition(
+        positionAtContainerStart,
+        encounteredFlowChunkCountAtContainerStart,
+      );
       return this.layoutFlowColumns(
         page,
         boxInstance,
@@ -2453,6 +2510,8 @@ export class StyleInstance
     const frame: Task.Frame<LayoutType.Column[] | null> =
       Task.newFrame("layoutFlowColumns");
     const positionAtContainerStart = this.currentLayoutPosition.clone();
+    const encounteredFlowChunkCountAtContainerStart =
+      this.encounteredFlowChunks.length;
     // Save formatting context states so they can be restored on region-level
     // retry (e.g., when footnotes invalidate the page float context).
     // LayoutPosition.clone() shares formatting context objects by reference
@@ -2537,7 +2596,10 @@ export class StyleInstance
           }
           if (regionPageFloatLayoutContext.isInvalidated()) {
             columnIndex = 0;
-            this.currentLayoutPosition = positionAtContainerStart.clone();
+            this.currentLayoutPosition = this.restoreLayoutPosition(
+              positionAtContainerStart,
+              encounteredFlowChunkCountAtContainerStart,
+            );
             // Restore formatting context states on region-level retry
             // (Issue #1663)
             restoreFormattingContextStates(savedRegionFCStates);
@@ -3249,6 +3311,8 @@ export class StyleInstance
 
     this.clearScope(this.style.pageScope);
     this.layoutPositionAtPageStart = cp.clone();
+    this.encounteredFlowChunks = [];
+    this.encounteredFlowChunkCountAtPageStart = 0;
     // Save formatting context states at the beginning of page layout for
     // restoration when page-level retry occurs (Issue #1663).
     // Formatting contexts (e.g., TableFormattingContext with cellBreakPositions)
@@ -3385,7 +3449,10 @@ export class StyleInstance
             attached.finish();
           }
           if (pageFloatLayoutContext.isInvalidated()) {
-            this.currentLayoutPosition = this.layoutPositionAtPageStart.clone();
+            this.currentLayoutPosition = this.restoreLayoutPosition(
+              this.layoutPositionAtPageStart,
+              this.encounteredFlowChunkCountAtPageStart,
+            );
             // Restore formatting context states on page-level retry
             // (Issue #1663)
             restoreFormattingContextStates(savedPageFCStates);
@@ -3419,6 +3486,7 @@ export class StyleInstance
           });
         }
         this.currentLayoutPosition = this.layoutPositionAtPageStart = null;
+        this.encounteredFlowChunks = [];
         cp.highestSeenOffset = this.styler.getReachedOffset();
         const triggers = this.style.store.getTriggersForDoc(this.xmldoc);
         page.finish(triggers, this.clientLayout);

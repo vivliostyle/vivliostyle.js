@@ -1295,6 +1295,11 @@ module.exports = [
         file: "running_header_adaptive.html",
         title: "Running header emulation with Adaptive Layout (PR #113)",
       },
+      {
+        file: "named_flow_chunk_layout_retry.html",
+        title:
+          "Named flow element encountered before a layout retry with Adaptive Layout (Issue #2269)",
+      },
     ],
   },
   {
