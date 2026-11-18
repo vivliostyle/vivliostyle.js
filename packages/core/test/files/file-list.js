@@ -1716,6 +1716,10 @@ module.exports = [
         title: "Float with clear, vertical-rl (Issue #1803)",
       },
       {
+        file: "clear-both-vertical-multicol.html",
+        title: "clear: both in vertical multi-column layout (Issue #2271)",
+      },
+      {
         file: "float-lh-rlh.html",
         title: "Float with lh/rlh height (Issue #1494, #1738)",
       },

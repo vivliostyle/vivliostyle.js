@@ -2566,10 +2566,14 @@ export class AttachedPageFloatLayoutContext
       column.clientLayout,
       isFragmentWithAlreadyAppearedFloat,
     );
-    if (
-      blockEndLimit * column.getBoxDir() <
-      columnBlockEnd * column.getBoxDir()
-    ) {
+    // The limits include the padding edges of ancestor containers, which can
+    // differ from the column's by a sub-pixel amount (e.g. in a vertical
+    // multi-column region, the column offset is computed from a rounded CSS
+    // width). Ignore such tiny differences; otherwise a clear with no
+    // block-end float pushes the element past the column end on every page.
+    // (Issue #2271)
+    const dir = column.getBoxDir();
+    if (blockEndLimit * dir < columnBlockEnd * dir - 1) {
       return columnBlockEnd;
     } else {
       return blockStartLimit;

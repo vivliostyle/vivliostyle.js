@@ -760,6 +760,54 @@ describe("detached float axes and page-margin alignment", () => {
           child.getBeforeEdge({ left: 20, right: 200, top: 40, bottom: 320 }),
         );
       });
+      it(`ignores sub-pixel ancestor edge differences for clear in ${mode}, rtl=${rtl}`, () => {
+        // Issue #2271: In a vertical multi-column region, the column's
+        // block-end padding edge can differ from the region's by a sub-pixel
+        // amount. Without page floats, clear must not push content past the
+        // column's block-end edge.
+        const delta = 0.0005;
+        const makeContainer = (rect) => {
+          const container = new Vtree.Container(document.createElement("div"));
+          container.writingMode = mode;
+          container.rtl = rtl;
+          container.layoutContext = container.clientLayout = {};
+          spyOn(container, "getPaddingRect").and.returnValue(rect);
+          return container;
+        };
+        const column = makeContainer(new Geometry.Rect(10, 30, 210, 330));
+        // Region edges are shifted into the column on the block-end side.
+        const dir = column.getBoxDir();
+        const region = makeContainer(
+          column.vertical
+            ? dir < 0
+              ? new Geometry.Rect(10 + delta, 30, 210, 630)
+              : new Geometry.Rect(10, 30, 210 - delta, 630)
+            : new Geometry.Rect(10, 30, 410, 330 - delta),
+        );
+        const regionContext =
+          PageFloats.PageFloatLayoutContext.createWithContainer(
+            region,
+            PageFloats.RootPageFloatLayoutContext.createRoot(),
+            PageFloats.FloatReference.REGION,
+            null,
+            null,
+            null,
+            null,
+          );
+        const columnContext =
+          PageFloats.PageFloatLayoutContext.createWithContainer(
+            column,
+            regionContext,
+            PageFloats.FloatReference.COLUMN,
+            null,
+            null,
+            null,
+            null,
+          );
+        expect(columnContext.getPageFloatClearEdge("both", column)).toBe(
+          column.getBeforeEdge({ left: 10, right: 210, top: 30, bottom: 330 }),
+        );
+      });
       for (const align of ["top", "middle", "bottom"]) {
         it(`aligns page-margin content physically ${align} in ${mode}, rtl=${rtl}`, () => {
           const box = Object.create(

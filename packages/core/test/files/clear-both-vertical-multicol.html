@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- Test case for Issue #2271: Endless blank pages with clear: both in vertical multi-column layout -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>clear: both in vertical multi-column layout</title>
+  <style>
+    @page { size: A5; margin: 12mm 29mm; }
+    body {
+      writing-mode: vertical-rl;
+      columns: 2;
+      column-fill: auto;
+    }
+    p { clear: both; }
+  </style>
+</head>
+<body>
+  <p>Vertical text. This document must finish in one page.</p>
+</body>
+</html>
