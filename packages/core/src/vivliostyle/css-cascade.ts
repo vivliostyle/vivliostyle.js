@@ -5653,11 +5653,16 @@ export class CascadeInstance {
     scoping[counterName] = true;
   }
 
-  pushCounters(props: ElementStyle, elementStyle: ElementStyle): void {
-    const counterChanges = new Set<string>();
-    const counterChangeTypes: {
-      [key: string]: "reset" | "set" | "increment";
-    } = Object.create(null);
+  pushCounters(
+    props: ElementStyle,
+    elementStyle: ElementStyle,
+    accumulateChanges = false,
+  ): void {
+    if (!accumulateChanges) {
+      this.lastCounterChanges = [];
+      this.lastCounterChangeTypes = Object.create(null);
+    }
+    const counterChangeTypes = this.lastCounterChangeTypes;
     let displayVal: Css.Val = Css.ident.inline;
     const display = props["display"] as CascadeValue;
     if (display) {
@@ -5666,13 +5671,9 @@ export class CascadeInstance {
     // Ignore counter-* on 'display: none' elements and their descendants
     if (displayVal === Css.ident.none) {
       this.currentElement?.setAttribute("data-viv-display-none", "true");
-      this.lastCounterChanges = [];
-      this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);
       return;
     } else if (this.currentElement?.closest("[data-viv-display-none]")) {
-      this.lastCounterChanges = [];
-      this.lastCounterChangeTypes = Object.create(null);
       this.counterScoping.push(null);
       return;
     }
@@ -5766,13 +5767,11 @@ export class CascadeInstance {
     }
     if (resetMap) {
       for (const resetCounterName in resetMap) {
-        counterChanges.add(resetCounterName);
         counterChangeTypes[resetCounterName] = "reset";
       }
     }
     if (incrementMap) {
       for (const incrementCounterName in incrementMap) {
-        counterChanges.add(incrementCounterName);
         if (!counterChangeTypes[incrementCounterName]) {
           counterChangeTypes[incrementCounterName] = "increment";
         }
@@ -5780,12 +5779,12 @@ export class CascadeInstance {
     }
     if (setMap) {
       for (const setCounterName in setMap) {
-        counterChanges.add(setCounterName);
         counterChangeTypes[setCounterName] = "set";
       }
     }
-    this.lastCounterChanges = Array.from(counterChanges);
-    this.lastCounterChangeTypes = counterChangeTypes;
+    if (resetMap || incrementMap || setMap) {
+      this.lastCounterChanges = Object.keys(counterChangeTypes);
+    }
     if (resetMap) {
       for (const resetCounterName in resetMap) {
         this.defineCounter(resetCounterName, resetMap[resetCounterName]);
@@ -5986,7 +5985,12 @@ export class CascadeInstance {
     elementStyle: ElementStyle,
     pseudoName?: string,
   ): void {
-    this.pushCounters(pseudoprops, elementStyle);
+    // The styler snapshots counters after the leading pseudos. Keep the
+    // footnote increment at the call's source offset even when a subsequent
+    // pseudo only reads it. Deferred ::after content has its own position.
+    const keepFootnoteChanges =
+      !!pseudoName && !!this.lastCounterChangeTypes["footnote"];
+    this.pushCounters(pseudoprops, elementStyle, keepFootnoteChanges);
     const content = pseudoprops["content"] as CascadeValue;
     if (content) {
       pseudoprops["content"] = content.filterValue(

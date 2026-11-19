@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!-- Test case for Issue #2273: reset footnote numbers on each page. -->
+<html lang="en">
+<meta charset="utf-8">
+<title>Footnote numbers restart on each page</title>
+<style>
+  @page {
+    size: 12cm 16cm;
+    margin: 1cm;
+    counter-reset: footnote;
+  }
+  .new-page { break-before: page; }
+  .note { float: footnote; }
+  .note::footnote-call { content: counter(footnote); }
+  .note::footnote-marker { content: counter(footnote) ". "; }
+</style>
+<p>First call<span class="note">First note on page one.</span>.</p>
+<p>Second call<span class="note">Second note on page one.</span>.</p>
+<p class="new-page">First call<span class="note">First note on page two.</span>.</p>
+<p>Second call<span class="note">Second note on page two.</span>.</p>
+</html>

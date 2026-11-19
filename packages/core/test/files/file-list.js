@@ -2043,6 +2043,10 @@ module.exports = [
         title: "Footnote and page counter-reset (Issue #421)",
       },
       {
+        file: "footnotes/footnote-counter-per-page.html",
+        title: "Footnote numbers restart on each page (Issue #2273)",
+      },
+      {
         file: "footnotes/footnote-call-marker-counter-style.html",
         title: "Footnote call/marker counter styles (PR #1707)",
       },
