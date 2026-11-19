@@ -2920,6 +2920,8 @@ function checkAttribute(
   if (!element) {
     return false;
   }
+  // HTML folds the selector name. DOM APIs can preserve uppercase in the
+  // attribute's local name, which is compared as stored.
   const unnamespacedSelectorName =
     element.namespaceURI === Base.NS.XHTML &&
     element.ownerDocument.contentType === "text/html"

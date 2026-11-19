@@ -2485,6 +2485,20 @@ describe("css-cascade", function () {
         expect(matchesAttributeName(element, null, "DATA-STATE")).toBe(true);
       });
 
+      it("preserves the case of HTML attribute names set with setAttributeNS", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><div></div>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        element.setAttributeNS(null, "DATA-STATE", "open");
+        expect(element.getAttributeNodeNS(null, "DATA-STATE")).not.toBeNull();
+        expect(matchesAttributeName(element, "", "data-state")).toBe(false);
+        expect(matchesAttributeName(element, "", "DATA-STATE")).toBe(false);
+        expect(matchesAttributeName(element, null, "data-state")).toBe(false);
+        expect(matchesAttributeName(element, null, "DATA-STATE")).toBe(false);
+      });
+
       it("matches SVG attribute names case-sensitively in HTML documents", function () {
         var doc = new DOMParser().parseFromString(
           "<!DOCTYPE html><svg viewBox='0 0 10 10'></svg>",
