@@ -1,4 +1,18 @@
 - category: Footnotes
+  title: "Deferred footnote with footnote area max-height (Issue #2274)"
+  file: footnotes/deferred-footnote-area-max-height.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2276 removes the extra page that repeated the last footnote. The footnote number differences on pages 2 and 3
+    are from the page counter reset fix in PR #2275.
+  approvedViewer: git-codex-2274-deferred-footnote  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/deferred-footnote-area-max-height.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/deferred-footnote-area-max-height.html&zoom=1&spread=false
+- category: Footnotes
   title: "Footnote numbers restart on each page (Issue #2273)"
   file: footnotes/footnote-counter-per-page.html
   decision: expected  # regression / expected / skip
