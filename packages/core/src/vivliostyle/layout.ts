@@ -2556,6 +2556,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 newPosition.primary,
               );
               context.deferPageFloat(continuation);
+            } else {
+              // A retry can fit a float that was deferred on an earlier pass.
+              context
+                .getPageFloatLayoutContext(float.floatReference)
+                .removeFloatDeferredToNext(float);
             }
             frame.finish(true);
           } else {

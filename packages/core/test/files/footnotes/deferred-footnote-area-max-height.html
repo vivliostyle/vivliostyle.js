@@ -1,0 +1,37 @@
+<!-- Test case for Issue #2274: Each footnote body appears on exactly one page. -->
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Deferred footnotes with a max-height</title>
+  <style>
+    @page {
+      size: 320px 220px;
+      margin: 20px;
+      counter-reset: footnote;
+      @footnote {
+        max-height: 24px;
+      }
+    }
+    p {
+      margin: 0;
+      font: 16px/20px serif;
+    }
+    .new-page {
+      break-before: page;
+    }
+    .note {
+      float: footnote;
+      font: 14px/18px serif;
+    }
+    .note::footnote-call {
+      content: counter(footnote);
+    }
+    .note::footnote-marker {
+      content: counter(footnote) ". ";
+    }
+  </style>
+  <p>First call<span class="note">First note on page one.</span>.</p>
+  <p>Second call<span class="note">Second note on page one.</span>.</p>
+  <p class="new-page">First call<span class="note">First note after the page break.</span>.</p>
+  <p>Second call<span class="note">Second note after the page break.</span>.</p>
+</html>
