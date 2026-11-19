@@ -1,3 +1,42 @@
+- category: Print
+  title: "Printer marks (PR #169)"
+  file: crop-marks.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2278 removes the trailing blank page (3 to 2 pages). Both retained pages match, including bleed and printer marks.
+  approvedViewer: git-codex-fix-599-trailing-blank-page  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/crop-marks.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/crop-marks.html&zoom=1&spread=false
+- category: Repeating elements
+  title: "nesting repeating elements (PR #323)"
+  file: repeating_elements/nesting.html
+  decision: regression  # regression / expected / skip
+  notes: >-
+    PR #2278 reduces the page count from 4 to 3. The final fragment of .child.c3 now extends past the last region,
+    so its block-end padding and border are clipped. The stable viewer draws them on page 4.
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting.html&zoom=1&spread=false
+- category: Repeating elements
+  title: "nesting repeating elements (vertical writing-mode, PR #323)"
+  file: repeating_elements/nesting_vertical.html
+  decision: regression  # regression / expected / skip
+  notes: >-
+    PR #2278 reduces the page count from 4 to 3. The final fragment of .child.c3 now extends past the last region,
+    so its block-end padding and border are clipped. The stable viewer draws them on page 4.
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/repeating_elements/nesting_vertical.html&zoom=1&spread=false
 - category: Selectors
   title: "XML type selector case sensitivity (Issue #578)"
   file: case_sensitivity/type-selectors.xhtml
