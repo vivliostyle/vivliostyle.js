@@ -1,3 +1,17 @@
+- category: Selectors
+  title: "XML type selector case sensitivity (Issue #578)"
+  file: case_sensitivity/type-selectors.xhtml
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2277 makes XHTML type selectors case-sensitive. The uppercase element now renders bold and red with the uppercase
+    label, and the lowercase element renders italic and blue with the lowercase label.
+  approvedViewer: git-codex-selector-case-sensitivity  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/case_sensitivity/type-selectors.xhtml&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/case_sensitivity/type-selectors.xhtml&zoom=1&spread=false
 - category: Footnotes
   title: "Deferred footnote with footnote area max-height (Issue #2274)"
   file: footnotes/deferred-footnote-area-max-height.html
