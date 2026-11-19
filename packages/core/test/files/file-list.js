@@ -2198,6 +2198,10 @@ module.exports = [
         title: "Footnote area max-height (Issue #1878)",
       },
       {
+        file: "footnotes/deferred-footnote-area-max-height.html",
+        title: "Deferred footnote with footnote area max-height (Issue #2274)",
+      },
+      {
         file: "footnotes/footnote-area-max-height-box-sizing.html",
         title: "Footnote area max-height with box-sizing (Issue #1878)",
       },
