@@ -5106,6 +5106,35 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const viewElement = nodeContext.viewNode as HTMLElement;
             const style = viewElement.style;
             if (nodeContext.after) {
+              // Preserve an enclosing box's block-end decoration if it
+              // would be clipped after adding the repeated headers and
+              // footers. The initial box is already placed. When resuming
+              // after it, there is no view node and the scan must advance.
+              if (
+                initialNodeContext.viewNode &&
+                nodeContext !== initialNodeContext &&
+                !onStartEdges &&
+                !nodeContext.inline &&
+                !LayoutHelper.isOutOfFlow(viewElement) &&
+                this.hasNonZeroBlockEndInset(
+                  this.clientLayout.getElementComputedStyle(viewElement),
+                )
+              ) {
+                const edge = LayoutHelper.calculateEdge(
+                  nodeContext,
+                  this.clientLayout,
+                  0,
+                  this.writingMode,
+                );
+                const { current } = BreakPosition.calculateOffset(
+                  nodeContext,
+                  this.collectElementsOffset(),
+                );
+                if (this.isOverflown(edge + this.getBoxDir() * current)) {
+                  loopFrame.breakLoop();
+                  return;
+                }
+              }
               // A forced break at the end of the flow must not fire while
               // passing consecutive closing edges (Issue #599).
               if (onStartEdges) {
