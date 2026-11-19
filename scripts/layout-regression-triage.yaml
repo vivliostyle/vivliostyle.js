@@ -1,3 +1,15 @@
+- category: Footnotes
+  title: "Footnote numbers restart on each page (Issue #2273)"
+  file: footnotes/footnote-counter-per-page.html
+  decision: expected  # regression / expected / skip
+  notes: "Fixed in PR #2275"
+  approvedViewer: https://vivliostyle-git-codex-2273-footnote-counter-b19a49-vivliostyle.vercel.app  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-counter-per-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-counter-per-page.html&zoom=1&spread=false
 - category: Document and media
   title: "Publication manifest resources with \"rel\": \"stylesheet\" (Issue #1588)"
   file: publication-manifest-stylesheets/publication.json
@@ -38,7 +50,9 @@
   title: "Float margin at page start (Issue #1292)"
   file: float-margin-at-page-start.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  notes: >-
+    New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the
+    following block)
   approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -50,7 +64,9 @@
   title: "Float in a parent whose margin collapses with a following block (Issue #1292)"
   file: float-margin-collapse-through-parent.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  notes: >-
+    New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the
+    following block)
   approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -62,7 +78,9 @@
   title: "Float in a parent whose margin collapses with a following block, vertical-rl (Issue #1292)"
   file: float-margin-collapse-through-parent-vertical.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the following block)"
+  notes: >-
+    New test added in PR #2262 (stable does not move floats with a parent whose block-start margin collapses with the
+    following block)
   approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -74,7 +92,9 @@
   title: "Float in a parent whose margin collapses, near the column end (Issue #1292)"
   file: float-margin-collapse-through-parent-overflow.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2262 (page 2: with a relative parent, stable moves the floats with the parent but leaves their exclusions behind)"
+  notes: >-
+    New test added in PR #2262 (page 2: with a relative parent, stable moves the floats with the parent but leaves their
+    exclusions behind)
   approvedViewer: git-fix-float-position-at-parent-start  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -86,7 +106,9 @@
   title: "Negative page margins (PR #2264)"
   file: negative-page-margin.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2264 (stable moves the page area inward instead of extending it beyond the page by negative page margins)"
+  notes: >-
+    New test added in PR #2264 (stable moves the page area inward instead of extending it beyond the page by negative
+    page margins)
   approvedViewer: git-fix-negative-page-margin  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -98,7 +120,9 @@
   title: "Class C break point (PR #383)"
   file: page_breaks/class_C_break_point.html
   decision: expected  # regression / expected / skip
-  notes: "Improvement by PR #2267: on page 3 the fragment of the height: 190px box now extends to the page end, as CSS Fragmentation requires, instead of ending just below its last line"
+  notes: >-
+    Improvement by PR #2267: on page 3 the fragment of the height: 190px box now extends to the page end, as CSS
+    Fragmentation requires, instead of ending just below its last line
   approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -110,7 +134,9 @@
   title: "Percentage block sizes in fragmented ancestors (Issue #583)"
   file: fragmented-percentage-block-size.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2267 (stable unsets html/body height: 100% at the break, so lines 1-6 move to the page top and overlap the text)"
+  notes: >-
+    New test added in PR #2267 (stable unsets html/body height: 100% at the break, so lines 1-6 move to the page top and
+    overlap the text)
   approvedViewer: https://vivliostyle-git-fix-fragmented-percentage-bl-32b231-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
@@ -146,7 +172,9 @@
   title: "Named flow element encountered before a layout retry with Adaptive Layout (Issue #2269)"
   file: named_flow_chunk_layout_retry.html
   decision: expected  # regression / expected / skip
-  notes: "New test added in PR #2270 (stable drops figures B and C, encountered before the layout of page 1 was retried for the footnotes)"
+  notes: >-
+    New test added in PR #2270 (stable drops figures B and C, encountered before the layout of page 1 was retried for
+    the footnotes)
   approvedViewer: git-fix-named-flow-chunk-layout-retry  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
   actualLabel: canary
   actualUrl: >-
