@@ -144,6 +144,10 @@ module.exports = [
         title: "HTML case sensitivity (Issue #95)",
       },
       {
+        file: "case_sensitivity/type-selectors.xhtml",
+        title: "XML type selector case sensitivity (Issue #578)",
+      },
+      {
         file: "case_sensitivity/attribute-selectors.xhtml",
         title: "Attribute selector case sensitivity (Issue #1972)",
       },

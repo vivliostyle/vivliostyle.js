@@ -2686,6 +2686,7 @@ export class ApplyRuleAction extends CascadeAction {
 export type PrimarySlot = {
   table: ActionTable;
   key: string;
+  htmlKey?: string;
 };
 
 export abstract class ChainedAction {
@@ -2720,7 +2721,14 @@ export abstract class WiredAction<
   makePrimary(cascade: Cascade): boolean {
     const slot = this.condition.primarySlot(cascade);
     if (slot) {
-      cascade.insertInTable(slot.table, slot.key, this.chained);
+      if (slot.htmlKey !== undefined) {
+        // The lookup finds candidates under either spelling. The guard
+        // selects the spelling that applies to the current element.
+        cascade.insertInTable(slot.table, slot.key, this);
+        cascade.insertInTable(slot.table, slot.htmlKey, this);
+      } else {
+        cascade.insertInTable(slot.table, slot.key, this.chained);
+      }
       return true;
     }
     return false;
@@ -2792,12 +2800,22 @@ export class CheckIdAction extends ChainedAction {
 }
 
 export class CheckLocalNameAction extends ChainedAction {
+  protected readonly htmlLocalName: string;
+
   constructor(public readonly localName: string) {
     super();
+    this.htmlLocalName = asciiLowerCase(localName);
   }
 
-  override matches(cascadeInstance: StyledCascadeInstance): boolean {
-    return cascadeInstance.instance.currentLocalName == this.localName;
+  override matches(cascadeInstance: ElementCascadeInstance): boolean {
+    const { currentLocalName, currentNamespace } = cascadeInstance.instance;
+    const name =
+      this.localName !== this.htmlLocalName &&
+      currentNamespace === Base.NS.XHTML &&
+      cascadeInstance.currentElement?.ownerDocument.contentType === "text/html"
+        ? this.htmlLocalName
+        : this.localName;
+    return currentLocalName === name;
   }
 
   override getPriority(): number {
@@ -2806,29 +2824,29 @@ export class CheckLocalNameAction extends ChainedAction {
   // tag is a pretty good thing to check, after epub:type
 
   override primarySlot(cascade: Cascade): PrimarySlot | null {
-    return { table: cascade.tags, key: this.localName };
+    return {
+      table: cascade.tags,
+      key: this.localName,
+      htmlKey:
+        this.localName !== this.htmlLocalName ? this.htmlLocalName : undefined,
+    };
   }
 }
 
-export class CheckNSTagAction extends ChainedAction {
+export class CheckNSTagAction extends CheckLocalNameAction {
   constructor(
     public readonly ns: string,
-    public readonly localName: string,
+    localName: string,
   ) {
-    super();
+    super(localName);
   }
 
-  override matches(cascadeInstance: StyledCascadeInstance): boolean {
+  override matches(cascadeInstance: ElementCascadeInstance): boolean {
     return (
-      cascadeInstance.instance.currentLocalName == this.localName &&
-      cascadeInstance.instance.currentNamespace == this.ns
+      cascadeInstance.instance.currentNamespace === this.ns &&
+      super.matches(cascadeInstance)
     );
   }
-
-  override getPriority(): number {
-    return 8;
-  }
-  // tag is a pretty good thing to check, after epub:type
 
   override primarySlot(cascade: Cascade): PrimarySlot | null {
     let prefix = cascade.nsPrefix.get(this.ns);
@@ -2836,7 +2854,14 @@ export class CheckNSTagAction extends ChainedAction {
       prefix = `ns${cascade.nsCount++}:`;
       cascade.nsPrefix.set(this.ns, prefix);
     }
-    return { table: cascade.nstags, key: prefix + this.localName };
+    return {
+      table: cascade.nstags,
+      key: prefix + this.localName,
+      htmlKey:
+        this.ns === Base.NS.XHTML && this.localName !== this.htmlLocalName
+          ? prefix + this.htmlLocalName
+          : undefined,
+    };
   }
 }
 
@@ -2895,20 +2920,22 @@ function checkAttribute(
   if (!element) {
     return false;
   }
-  const htmlAttributeNamesAreCaseInsensitive =
-    element.ownerDocument?.contentType === "text/html";
-  const selectorName = htmlAttributeNamesAreCaseInsensitive
-    ? asciiLowerCase(name)
-    : name;
+  const unnamespacedSelectorName =
+    element.namespaceURI === Base.NS.XHTML &&
+    element.ownerDocument.contentType === "text/html"
+      ? asciiLowerCase(name)
+      : name;
   if (ns !== null) {
-    const attribute = element.getAttributeNodeNS(ns || null, selectorName);
+    const attribute = element.getAttributeNodeNS(
+      ns || null,
+      ns ? name : unnamespacedSelectorName,
+    );
     return !!attribute && pred(attribute);
   }
   for (const attribute of Array.from(element.attributes)) {
-    const attributeName = htmlAttributeNamesAreCaseInsensitive
-      ? asciiLowerCase(attribute.localName)
-      : attribute.localName;
-    if (attributeName === selectorName && pred(attribute)) {
+    const selectorName =
+      attribute.namespaceURI === null ? unnamespacedSelectorName : name;
+    if (attribute.localName === selectorName && pred(attribute)) {
       return true;
     }
   }
@@ -7223,9 +7250,9 @@ export class CascadeParserHandler
       this.specificity += 1;
     }
     if (name && ns) {
-      this.chain.push(new CheckNSTagAction(ns, name.toLowerCase()));
+      this.chain.push(new CheckNSTagAction(ns, name));
     } else if (name) {
-      this.chain.push(new CheckLocalNameAction(name.toLowerCase()));
+      this.chain.push(new CheckLocalNameAction(name));
     } else {
       this.chain.push(new CheckNamespaceAction(ns as string));
     }

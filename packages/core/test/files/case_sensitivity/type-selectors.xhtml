@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test case for Issue #578: case-sensitive type selectors in XHTML. -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Type selector case sensitivity</title>
+    <style>
+      @namespace html url(http://www.w3.org/1999/xhtml);
+      @page {
+        size: 200mm 150mm;
+      }
+      Sample,
+      sample {
+        display: block;
+      }
+      Sample {
+        color: crimson;
+      }
+      sample {
+        color: royalblue;
+      }
+      html|Sample {
+        font-weight: bold;
+      }
+      html|sample {
+        font-style: italic;
+      }
+      .sample:is(Sample)::after {
+        content: " (uppercase selector)";
+      }
+      .sample:is(sample)::after {
+        content: " (lowercase selector)";
+      }
+    </style>
+  </head>
+  <body>
+    <Sample class="sample">Uppercase element</Sample>
+    <sample class="sample">Lowercase element</sample>
+  </body>
+</html>

@@ -2468,6 +2468,53 @@ describe("css-cascade", function () {
 
   describe("CascadeInstance", function () {
     describe("attribute selectors", function () {
+      function matchesAttributeName(element, namespace, name) {
+        return new adapt_csscasc.CheckAttributePresentAction(
+          namespace,
+          name,
+        ).matches({ currentElement: element });
+      }
+
+      it("matches unnamespaced HTML attribute names ASCII-case-insensitively", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><div data-state='open'></div>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        expect(matchesAttributeName(element, "", "DATA-STATE")).toBe(true);
+        expect(matchesAttributeName(element, null, "DATA-STATE")).toBe(true);
+      });
+
+      it("matches SVG attribute names case-sensitively in HTML documents", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><svg viewBox='0 0 10 10'></svg>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        expect(matchesAttributeName(element, "", "viewBox")).toBe(true);
+        expect(matchesAttributeName(element, "", "viewbox")).toBe(false);
+        expect(matchesAttributeName(element, null, "viewBox")).toBe(true);
+        expect(matchesAttributeName(element, null, "viewbox")).toBe(false);
+      });
+
+      it("matches namespaced attributes case-sensitively on HTML elements", function () {
+        var doc = new DOMParser().parseFromString(
+          "<!DOCTYPE html><div></div>",
+          "text/html",
+        );
+        var element = doc.body.firstElementChild;
+        var namespace = "urn:test";
+        element.setAttributeNS(namespace, "test:data-Case", "value");
+        expect(matchesAttributeName(element, namespace, "data-Case")).toBe(
+          true,
+        );
+        expect(matchesAttributeName(element, namespace, "data-case")).toBe(
+          false,
+        );
+        expect(matchesAttributeName(element, null, "data-Case")).toBe(true);
+        expect(matchesAttributeName(element, null, "data-case")).toBe(false);
+      });
+
       it("matches XML attribute names case-sensitively", function () {
         var doc = new DOMParser().parseFromString(
           "<root data-Case='value' />",

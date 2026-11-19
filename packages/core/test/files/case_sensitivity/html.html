@@ -2,16 +2,17 @@
 <html>
   <head>
     <style>
+      @namespace html url(http://www.w3.org/1999/xhtml);
       html {
         line-height: 1.25;
       }
-      h1 {
+      H1 {
         text-decoration: underline;
       }
-      h1 {
+      html|H1 {
         border: 1px solid blue;
       }
-      h1 {
+      #hamburg:is(H1) {
         color: red;
       }
       h1[ID="hamburg"] {
