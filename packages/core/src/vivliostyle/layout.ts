@@ -5106,7 +5106,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
             const viewElement = nodeContext.viewNode as HTMLElement;
             const style = viewElement.style;
             if (nodeContext.after) {
-              // Trailing edge
+              // A forced break at the end of the flow must not fire while
+              // passing consecutive closing edges (Issue #599).
               if (onStartEdges) {
                 // finished going through all starting edges of the box.
                 // check if a forced break must occur before the block.
@@ -5145,8 +5146,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 loopFrame.breakLoop();
                 return;
               }
+              onStartEdges = true;
             }
-            onStartEdges = true; // we are now on starting edges.
           } while (false); // End of block of code to use break
 
           const nextResult = this.layoutContext.nextInTree(nodeContext);
