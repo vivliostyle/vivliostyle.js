@@ -4803,18 +4803,20 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
     // Check the overflow at lastAfterNodeContext when in-flow content starts,
     // and save a break position there. The anchor of a page float or
-    // footnote followed by inline-level content with no block-level leading
-    // edge in between is on the same line as that content, so the edge after
-    // the anchor is not a break opportunity: a break there would split the
-    // line or leave an empty fragment (e.g., a lone list marker) before the
-    // content. Only the overflow is checked there. (Issue #747)
+    // footnote followed by inline-level content (or another page float or
+    // footnote) with no in-flow block-level leading edge in between is on the
+    // same line as that content, so the edge after the anchor is not a break
+    // opportunity: a break there would split the line or leave an empty
+    // fragment (e.g., a lone list marker) before the content. Only the
+    // overflow is checked there. (Issue #747)
+    const isPageFloatOrFootnote = (nc: Vtree.NodeContext): boolean =>
+      nc.floatSide === "footnote" || PageFloats.isPageFloat(nc.floatReference);
     const checkOverflowAndSaveBreakBeforeContent = (): boolean => {
       if (
         lastAfterNodeContext &&
-        leadingEdgeContexts.every((c) => c.inline) &&
         LayoutHelper.isSpecialNodeContext(lastAfterNodeContext) &&
-        (lastAfterNodeContext.floatSide === "footnote" ||
-          PageFloats.isPageFloat(lastAfterNodeContext.floatReference))
+        isPageFloatOrFootnote(lastAfterNodeContext) &&
+        leadingEdgeContexts.every((c) => c.inline || isPageFloatOrFootnote(c))
       ) {
         return this.checkOverflowAndSaveEdge(lastAfterNodeContext, null);
       }

@@ -49,6 +49,7 @@ import * as Net from "./net";
 import * as PageFloats from "./page-floats";
 import * as CssPage from "./css-page";
 import * as Plugin from "./plugin";
+import * as PseudoElement from "./pseudo-element";
 import * as PageMaster from "./page-master";
 import * as Scripts from "./scripts";
 import * as Task from "./task";
@@ -865,17 +866,7 @@ export class StyleInstance
     let offset = Number.POSITIVE_INFINITY;
     for (let i = 0; i < flowPosition.positions.length; i++) {
       const pos = flowPosition.positions[i].chunkPosition.primary;
-      let node = pos.steps[0].node;
-      let offsetInNode = pos.offsetInNode;
-      let after = pos.after;
-      let k = 0;
-      while (node.ownerDocument != this.xmldoc.document) {
-        k++;
-        node = pos.steps[k].node;
-        after = false;
-        offsetInNode = 0;
-      }
-      const chunkOffset = this.xmldoc.getNodeOffset(node, offsetInNode, after);
+      const chunkOffset = this.getNodePositionOffset(pos);
       if (chunkOffset < offset) {
         offset = chunkOffset;
       }
@@ -889,9 +880,15 @@ export class StyleInstance
     let after = position.after;
     let k = 0;
     while (node.ownerDocument != this.xmldoc.document) {
+      // A position in generated content maps to its host element: to the
+      // end of the host for ::after content (e.g. after the anchor of a
+      // float on ::after), otherwise to its start. (Issue #747)
+      const generatedNode = node;
       k++;
       node = position.steps[k].node;
-      after = false;
+      after =
+        generatedNode.nodeType === 1 &&
+        PseudoElement.getPseudoName(generatedNode as Element) === "after";
       offsetInNode = 0;
     }
     return this.xmldoc.getNodeOffset(node, offsetInNode, after);
