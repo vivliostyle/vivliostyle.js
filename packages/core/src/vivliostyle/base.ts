@@ -495,6 +495,171 @@ export function isAnnotatedDocument(doc: Document | null): boolean {
   return !!doc && annotatedDocuments.has(doc);
 }
 
+/**
+ * The attribute that lists the style keys of an element: the inline style
+ * declarations that rules of the UA stylesheet (assets.ts) depend on, e.g.
+ * `[data-viv-style~="--viv-marker-color"]::marker`.
+ *
+ * The rules do not select on the style attribute itself (`[style*="..."]`),
+ * because a selector on the style attribute anywhere in the stylesheets makes
+ * WebKit serialize the style attribute and match those selectors against it
+ * on every change of an inline style, and the view generation sets every
+ * property of every element separately.
+ */
+export const STYLE_KEYS_ATTR = "data-viv-style";
+
+/**
+ * The custom properties that are style keys under their own name.
+ */
+const customStyleKeyPattern =
+  /^--viv-(?:marker-|footnote-white-space$|initialLetter$|firstLine)/;
+
+/**
+ * The style keys that stand for a substring of a declaration `name: value`,
+ * as `[style*="..."]` matched it: in the name or in the value.
+ */
+const substringStyleKeys: [substring: string, key: string][] = [
+  ["border", "border"],
+  ["outline", "outline"],
+  ["rule", "rule"],
+  ["text-decoration", "text-decoration"],
+  ["border-collapse: collapse", "border-collapse:collapse"],
+];
+
+/** Matches the names and values that can contain one of the substrings. */
+const substringStyleKeyPattern = /border|outline|rule|text-decoration/;
+
+const noStyleKeys: readonly string[] = [];
+
+/**
+ * Returns the style keys of a declaration.
+ */
+function getStyleKeysOfDeclaration(
+  name: string,
+  value: string,
+): readonly string[] {
+  if (name.startsWith("--")) {
+    return customStyleKeyPattern.test(name) ? [name] : noStyleKeys;
+  }
+  if (
+    !substringStyleKeyPattern.test(name) &&
+    !(value && substringStyleKeyPattern.test(value))
+  ) {
+    return noStyleKeys;
+  }
+  const declaration = `${name}: ${value}`;
+  const keys: string[] = [];
+  for (const [substring, key] of substringStyleKeys) {
+    if (declaration.includes(substring)) {
+      keys.push(key);
+    }
+  }
+  return keys;
+}
+
+function writeStyleKeys(elem: Element, keys: readonly string[]): void {
+  if (keys.length) {
+    elem.setAttribute(STYLE_KEYS_ATTR, keys.join(" "));
+  } else {
+    elem.removeAttribute(STYLE_KEYS_ATTR);
+  }
+}
+
+/**
+ * Sets the style keys of an element from all the declarations of its inline
+ * style.
+ */
+function updateStyleKeys(elem: Element, elemStyle: CSSStyleDeclaration): void {
+  const keys: string[] = [];
+  for (let i = 0; i < elemStyle.length; i++) {
+    const name = elemStyle.item(i);
+    for (const key of getStyleKeysOfDeclaration(
+      name,
+      elemStyle.getPropertyValue(name),
+    )) {
+      if (!keys.includes(key)) {
+        keys.push(key);
+      }
+    }
+  }
+  writeStyleKeys(elem, keys);
+}
+
+/**
+ * Sets (or with an empty value removes) a declaration of an inline style
+ * and keeps the style keys of the element up to date.
+ */
+function setStyleDeclaration(
+  elem: Element,
+  elemStyle: CSSStyleDeclaration,
+  name: string,
+  value: string,
+): void {
+  const newKeys = value ? getStyleKeysOfDeclaration(name, value) : noStyleKeys;
+  const keysAttr = elem.getAttribute(STYLE_KEYS_ATTR);
+  if (keysAttr === null) {
+    // An element without style keys has no declaration that the new one
+    // could take a key from.
+    elemStyle.setProperty(name, value);
+    if (newKeys.length) {
+      writeStyleKeys(elem, newKeys);
+    }
+    return;
+  }
+  const keys = keysAttr.split(" ");
+  // The keys of the declaration that is replaced or removed. A custom
+  // property that is a key is declared if the element has the key, and its
+  // value can be empty.
+  let oldKeys = noStyleKeys;
+  if (name.startsWith("--")) {
+    if (keys.includes(name)) {
+      oldKeys = [name];
+    }
+  } else {
+    const oldValue = elemStyle.getPropertyValue(name);
+    if (oldValue) {
+      oldKeys = getStyleKeysOfDeclaration(name, oldValue);
+    }
+  }
+  elemStyle.setProperty(name, value);
+  if (oldKeys.some((key) => !newKeys.includes(key))) {
+    // Another declaration may still have the key.
+    updateStyleKeys(elem, elemStyle);
+    return;
+  }
+  let added = false;
+  for (const key of newKeys) {
+    if (!keys.includes(key)) {
+      keys.push(key);
+      added = true;
+    }
+  }
+  if (added) {
+    writeStyleKeys(elem, keys);
+  }
+}
+
+/**
+ * Sets the style keys of the elements of a subtree from their style
+ * attributes. For elements that keep the style attribute of the source
+ * instead of being styled through setCSSProperty(), e.g. in a custom-rendered
+ * subtree.
+ */
+export function updateStyleKeysFromStyleAttributes(root: Element): void {
+  const update = (elem: Element) => {
+    const elemStyle = (elem as HTMLElement).style;
+    if (elemStyle) {
+      updateStyleKeys(elem, elemStyle);
+    }
+  };
+  if (root.hasAttribute("style")) {
+    update(root);
+  }
+  for (const elem of root.querySelectorAll("[style]")) {
+    update(elem);
+  }
+}
+
 export function setCSSProperty(
   elem: Element,
   prop: string,
@@ -508,7 +673,7 @@ export function setCSSProperty(
     markAnnotatedDocument(elem.ownerDocument);
   }
   if (prop.startsWith("--")) {
-    elemStyle.setProperty(prop, value || " ");
+    setStyleDeclaration(elem, elemStyle, prop, value || " ");
     return;
   }
   const prefixedPropertyNames = getPrefixedPropertyNames(prop);
@@ -525,7 +690,23 @@ export function setCSSProperty(
         }
         break;
     }
-    elemStyle.setProperty(prefixed, value);
+    setStyleDeclaration(elem, elemStyle, prefixed, value);
+  }
+}
+
+/**
+ * Removes a property from the inline style of an element. Unlike
+ * setCSSProperty() with an empty value, this also removes a custom property.
+ */
+export function removeCSSProperty(elem: Element, prop: string): void {
+  const elemStyle = (elem as HTMLElement)?.style;
+  if (!elemStyle) {
+    return;
+  }
+  for (const name of prop.startsWith("--")
+    ? [prop]
+    : (getPrefixedPropertyNames(prop) ?? [])) {
+    setStyleDeclaration(elem, elemStyle, name, "");
   }
 }
 

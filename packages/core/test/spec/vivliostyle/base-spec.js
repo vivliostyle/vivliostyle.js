@@ -17,6 +17,7 @@
  */
 
 import * as adapt_base from "../../../src/vivliostyle/base";
+import * as assets from "../../../src/vivliostyle/assets";
 
 describe("base", function () {
   var module = adapt_base;
@@ -233,6 +234,128 @@ describe("base", function () {
       expect(
         module.unescapeStrFromHex("abc-_\\u003a\\u0025\\u002f\\u005c"),
       ).toBe("abc-_:%/\\");
+    });
+  });
+
+  describe("style keys", function () {
+    var element;
+    var keys = function () {
+      var value = element.getAttribute(module.STYLE_KEYS_ATTR);
+      return value === null ? null : value.split(" ").sort();
+    };
+
+    beforeEach(function () {
+      element = document.createElement("div");
+    });
+
+    it("leaves an element without a matching declaration alone", function () {
+      module.setCSSProperty(element, "color", "red");
+      module.setCSSProperty(element, "--viv-emphasis-start", "1px");
+      expect(element.style.color).toBe("red");
+      expect(keys()).toBe(null);
+    });
+
+    it("lists the custom properties that the UA stylesheet selects on", function () {
+      module.setCSSProperty(element, "--viv-marker-content", '"1. "');
+      module.setCSSProperty(element, "--viv-marker-color", "red");
+      module.setCSSProperty(element, "--viv-initialLetter", "2");
+      module.setCSSProperty(element, "--viv-firstLineFontSize", "20px");
+      expect(keys()).toEqual([
+        "--viv-firstLineFontSize",
+        "--viv-initialLetter",
+        "--viv-marker-color",
+        "--viv-marker-content",
+      ]);
+      // An empty value still declares the custom property.
+      module.setCSSProperty(element, "--viv-marker-color", "");
+      expect(keys()).toContain("--viv-marker-color");
+    });
+
+    it("matches a substring of the name or of the value", function () {
+      module.setCSSProperty(element, "border-top-style", "solid");
+      expect(keys()).toEqual(["border"]);
+      module.setCSSProperty(element, "outline-style", "dotted");
+      module.setCSSProperty(element, "column-rule-style", "solid");
+      module.setCSSProperty(element, "text-decoration-line", "underline");
+      expect(keys()).toEqual(["border", "outline", "rule", "text-decoration"]);
+
+      // [style*=border] also matched a value.
+      var other = document.createElement("div");
+      module.setCSSProperty(other, "box-sizing", "border-box");
+      expect(other.getAttribute(module.STYLE_KEYS_ATTR)).toBe("border");
+    });
+
+    it("tells collapsed borders from separate ones", function () {
+      module.setCSSProperty(element, "border-collapse", "collapse");
+      expect(keys()).toEqual(["border", "border-collapse:collapse"]);
+      module.setCSSProperty(element, "border-collapse", "separate");
+      expect(keys()).toEqual(["border"]);
+    });
+
+    it("removes a key with its last declaration", function () {
+      module.setCSSProperty(element, "border-top-style", "solid");
+      module.setCSSProperty(element, "border-bottom-style", "solid");
+      module.setCSSProperty(element, "text-decoration-line", "underline");
+      module.setCSSProperty(element, "border-top-style", "");
+      expect(keys()).toEqual(["border", "text-decoration"]);
+      module.setCSSProperty(element, "border-bottom-style", "");
+      expect(keys()).toEqual(["text-decoration"]);
+      module.setCSSProperty(element, "text-decoration-line", "");
+      expect(keys()).toBe(null);
+
+      module.setCSSProperty(element, "box-sizing", "border-box");
+      module.setCSSProperty(element, "box-sizing", "content-box");
+      expect(keys()).toBe(null);
+    });
+
+    it("removes a custom property and its key", function () {
+      module.setCSSProperty(element, "--viv-footnote-white-space", "nowrap");
+      module.setCSSProperty(element, "--viv-marker-content", '"*"');
+      module.removeCSSProperty(element, "--viv-footnote-white-space");
+      expect(element.style.getPropertyValue("--viv-footnote-white-space")).toBe(
+        "",
+      );
+      expect(keys()).toEqual(["--viv-marker-content"]);
+      // Removing a property that is not declared changes nothing.
+      module.removeCSSProperty(element, "--viv-marker-color");
+      module.removeCSSProperty(element, "color");
+      expect(keys()).toEqual(["--viv-marker-content"]);
+    });
+
+    it("keeps the keys of a cloned element up to date", function () {
+      module.setCSSProperty(element, "border-top-style", "solid");
+      var clone = element.cloneNode(true);
+      module.setCSSProperty(clone, "border-top-style", "");
+      expect(clone.hasAttribute(module.STYLE_KEYS_ATTR)).toBe(false);
+      expect(keys()).toEqual(["border"]);
+    });
+
+    it("reads the keys from the style attributes of a subtree", function () {
+      element.setAttribute("style", "text-decoration: underline");
+      element.innerHTML =
+        '<span style="border: 1px solid">a</span><span style="color: red">b</span><span>c</span>';
+      module.updateStyleKeysFromStyleAttributes(element);
+      expect(keys()).toEqual(["text-decoration"]);
+      expect(element.children[0].getAttribute(module.STYLE_KEYS_ATTR)).toBe(
+        "border",
+      );
+      expect(element.children[1].hasAttribute(module.STYLE_KEYS_ATTR)).toBe(
+        false,
+      );
+      expect(element.children[2].hasAttribute(module.STYLE_KEYS_ATTR)).toBe(
+        false,
+      );
+    });
+
+    it("has no selector on the style attribute in the stylesheets of the viewer document", function () {
+      [
+        assets.VivliostyleViewportScreenCss,
+        assets.VivliostyleViewportCss,
+        assets.VivliostylePolyfillCss,
+      ].forEach(function (css) {
+        expect(css).toBeTruthy();
+        expect(css).not.toMatch(/\[\s*style\s*[\]*~|^$=]/);
+      });
     });
   });
 });

@@ -6628,7 +6628,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     const availableMeasure = this.vertical ? areaRect.height : areaRect.width;
     compactFootnotes.forEach((footnote) => {
       Base.setCSSProperty(footnote, "display", "inline");
-      footnote.style.setProperty("--viv-footnote-white-space", "nowrap");
+      Base.setCSSProperty(footnote, "--viv-footnote-white-space", "nowrap");
     });
 
     const tolerance = 1.5 / (this.clientLayout.pixelRatio || 1);
@@ -6650,7 +6650,7 @@ export class PageFloatArea extends Column implements Layout.PageFloatArea {
     compactFootnotes.forEach((footnote) => {
       if (measureCompactInlineSize(footnote) > availableMeasure + tolerance) {
         Base.setCSSProperty(footnote, "display", "block");
-        footnote.style.removeProperty("--viv-footnote-white-space");
+        Base.removeCSSProperty(footnote, "--viv-footnote-white-space");
       }
     });
 

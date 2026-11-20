@@ -2580,6 +2580,9 @@ export class ViewFactory
             ) {
               Base.markAnnotatedDocument(result.ownerDocument);
             }
+            // The UA stylesheet selects on the style keys instead of on the
+            // style attributes (see Base.STYLE_KEYS_ATTR).
+            Base.updateStyleKeysFromStyleAttributes(result);
           }
         } else if (computedStyle["display"] === Css.ident.none) {
           // No element should be created if display:none is set.
@@ -4005,7 +4008,7 @@ export class ViewFactory
     ]) {
       const value = spanStyle.getPropertyValue(propName);
       if (value && value !== blockStyle.getPropertyValue(propName)) {
-        block.style.setProperty(customPropName, value);
+        Base.setCSSProperty(block, customPropName, value);
         if (propName === "font-size") {
           // The span inherits from the real ::first-line, so a relative
           // font-size (e.g. `200%`) on the span must be resolved now, or it
@@ -4019,7 +4022,7 @@ export class ViewFactory
     // children with other font sizes instead of the number.
     const lineHeight = span.style.getPropertyValue("line-height");
     if (lineHeight) {
-      block.style.setProperty("--viv-firstLineLineHeight", lineHeight);
+      Base.setCSSProperty(block, "--viv-firstLineLineHeight", lineHeight);
     }
   }
 
