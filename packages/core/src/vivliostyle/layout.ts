@@ -644,7 +644,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // multi-column measurement errors in exclusion shapes can make
     // footnoteEdge ~1.2px too small while the default 0.5px precision
     // (needed for float band snapping, Issue #1917) is too tight.
-    const precision = 1.5 / (this.clientLayout.pixelRatio || 1);
+    // A zero block-size region only takes zero block-size content, so even
+    // thin content must count as overflow there. (Issue #391)
+    const precision = this.isZeroBlockSizeRegion()
+      ? 0.01
+      : 1.5 / (this.clientLayout.pixelRatio || 1);
     if (this.almostEquals(edge, this.footnoteEdge, precision)) {
       return false;
     }
@@ -1638,7 +1642,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const floatBoxTop = this.getRectBeforeEdge(floatBox);
 
       // TODO: subtract after margin when determining overflow.
-      if (!this.isOverflown(floatBoxEdge) || this.breakPositions.length == 0) {
+      // The first float is accepted even if it overflows, except in a zero
+      // block-size region, which must never take non-fitting content.
+      // (Issue #391)
+      if (
+        !this.isOverflown(floatBoxEdge) ||
+        (this.breakPositions.length == 0 && !this.isZeroBlockSizeRegion())
+      ) {
         // no overflow
         this.killFloats();
         const parentBlockStart = this.pseudoParent
@@ -5254,6 +5264,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // page break)
           this.clearPendingFloats();
           frame.finish(nodeContext);
+        } else if (
+          !nodeContext.after &&
+          Table.isInstanceOfTableFormattingContext(
+            nodeContext.formattingContext,
+          ) &&
+          this.isZeroBlockSizeRegion()
+        ) {
+          // A table never fits in a zero block-size region. Treat it as
+          // overflow before table layout, whose cell fragmentation does not
+          // handle a zero block size. (Issue #391)
+          nodeContext = nodeContext.modify();
+          nodeContext.overflow = true;
+          frame.finish(nodeContext);
         } else {
           if (
             this.pendingFloats.length > 0 &&
@@ -5432,7 +5455,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (this.stopAtOverflow && this.overflown) {
       return Task.newResult(chunkPosition as Vtree.ChunkPosition);
     }
-    if (this.isFullWithPageFloats()) {
+    if (this.isZeroBlockSizeRegion()) {
+      if (Column.isAtOrInsideTable(chunkPosition.primary)) {
+        // A table, or the rest of a fragmented table, never fits here. Leave
+        // the position untouched so that no table fragment is finished.
+        return Task.newResult(chunkPosition as Vtree.ChunkPosition);
+      }
+      // A zero block-size region (e.g., an EAL partition with `height: 0`)
+      // can still hold zero block-size content, such as empty blocks before a
+      // forced break, but must never take non-fitting content. (Issue #391)
+      this.forceNonfitting = false;
+    } else if (this.isFullWithPageFloats()) {
       if (
         chunkPosition.primary.after &&
         chunkPosition.primary.steps.length === 1
@@ -5538,6 +5571,32 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   isFullWithPageFloats(): boolean {
     return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
+  }
+
+  /**
+   * Whether the position is at the start of a table or inside a table.
+   */
+  private static isAtOrInsideTable(position: Vtree.NodePosition): boolean {
+    return position.steps.some(
+      (step, i) =>
+        !!step.formattingContext &&
+        Table.isInstanceOfTableFormattingContext(step.formattingContext) &&
+        // The position just after a whole table is outside the table.
+        (i > 0 || !position.after),
+    );
+  }
+
+  /**
+   * Whether this is a page-level region whose own block size is zero, as
+   * opposed to one whose space is used up by page floats.
+   */
+  private isZeroBlockSizeRegion(): boolean {
+    return (
+      (this.vertical ? this.width : this.height) === 0 &&
+      !this.pseudoParent &&
+      !this.isFootnote &&
+      !(this instanceof PageFloatArea)
+    );
   }
 
   getMaxBlockSizeOfPageFloats(): number {

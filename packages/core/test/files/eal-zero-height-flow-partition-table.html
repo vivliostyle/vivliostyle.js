@@ -1,0 +1,104 @@
+<!-- Test case for Issue #391: a fragmented table must pass through a zero-height EAL partition -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>EAL zero-height flow partition with a fragmented table</title>
+    <style>
+      @page {
+        size: 148mm 105mm;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font: 14px/1.4 Georgia, "Times New Roman", serif;
+      }
+
+      table {
+        border-collapse: collapse;
+      }
+
+      td {
+        border: 1px solid #357;
+        padding: 2px 6px;
+      }
+
+      @-epubx-page-template {
+        @-epubx-page-master main {
+          /* Every page has a zero-height partition for the body flow before
+             the main one. It must take no part of the table. */
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            top: 0;
+            left: 10mm;
+            right: 10mm;
+            height: 0;
+          }
+
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            -epubx-required: true;
+            top: 10mm;
+            left: 10mm;
+            right: 10mm;
+            bottom: 10mm;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The table below is split across pages. Rows 1 to 40 and the text after
+      the table must all be shown, without a layout error.
+    </p>
+    <table>
+        <tr><td>Row 1</td><td>cell 1</td></tr>
+        <tr><td>Row 2</td><td>cell 2</td></tr>
+        <tr><td>Row 3</td><td>cell 3</td></tr>
+        <tr><td>Row 4</td><td>cell 4</td></tr>
+        <tr><td>Row 5</td><td>cell 5</td></tr>
+        <tr><td>Row 6</td><td>cell 6</td></tr>
+        <tr><td>Row 7</td><td>cell 7</td></tr>
+        <tr><td>Row 8</td><td>cell 8</td></tr>
+        <tr><td>Row 9</td><td>cell 9</td></tr>
+        <tr><td>Row 10</td><td>cell 10</td></tr>
+        <tr><td>Row 11</td><td>cell 11</td></tr>
+        <tr><td>Row 12</td><td>cell 12</td></tr>
+        <tr><td>Row 13</td><td>cell 13</td></tr>
+        <tr><td>Row 14</td><td>cell 14</td></tr>
+        <tr><td>Row 15</td><td>cell 15</td></tr>
+        <tr><td>Row 16</td><td>cell 16</td></tr>
+        <tr><td>Row 17</td><td>cell 17</td></tr>
+        <tr><td>Row 18</td><td>cell 18</td></tr>
+        <tr><td>Row 19</td><td>cell 19</td></tr>
+        <tr><td>Row 20</td><td>cell 20</td></tr>
+        <tr><td>Row 21</td><td>cell 21</td></tr>
+        <tr><td>Row 22</td><td>cell 22</td></tr>
+        <tr><td>Row 23</td><td>cell 23</td></tr>
+        <tr><td>Row 24</td><td>cell 24</td></tr>
+        <tr><td>Row 25</td><td>cell 25</td></tr>
+        <tr><td>Row 26</td><td>cell 26</td></tr>
+        <tr><td>Row 27</td><td>cell 27</td></tr>
+        <tr><td>Row 28</td><td>cell 28</td></tr>
+        <tr><td>Row 29</td><td>cell 29</td></tr>
+        <tr><td>Row 30</td><td>cell 30</td></tr>
+        <tr><td>Row 31</td><td>cell 31</td></tr>
+        <tr><td>Row 32</td><td>cell 32</td></tr>
+        <tr><td>Row 33</td><td>cell 33</td></tr>
+        <tr><td>Row 34</td><td>cell 34</td></tr>
+        <tr><td>Row 35</td><td>cell 35</td></tr>
+        <tr><td>Row 36</td><td>cell 36</td></tr>
+        <tr><td>Row 37</td><td>cell 37</td></tr>
+        <tr><td>Row 38</td><td>cell 38</td></tr>
+        <tr><td>Row 39</td><td>cell 39</td></tr>
+        <tr><td>Row 40</td><td>cell 40</td></tr>
+    </table>
+    <p>After the table (last page).</p>
+  </body>
+</html>
