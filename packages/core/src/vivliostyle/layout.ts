@@ -4011,8 +4011,72 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (edge && Break.isAvoidBreakValue(edge.breakOnEdge)) {
         penalty++;
       }
+    } else if (!this.isFootnote) {
+      // A break between lines of a block must satisfy its orphans and widows,
+      // as in findBoxBreakPosition(); otherwise it is a forced break.
+      let block: Vtree.NodeContext | null = nodeContext.parent;
+      while (block?.inline) {
+        block = block.parent;
+      }
+      if (block?.viewNode) {
+        const orphans = Math.max(
+          Number(block.inheritedProps["orphans"]) || 2,
+          1,
+        );
+        const widows = Math.max(Number(block.inheritedProps["widows"]) || 2, 1);
+        const range = block.viewNode.ownerDocument.createRange();
+        range.setStart(block.viewNode, 0);
+        range.setEndBefore(nodeContext.viewNode);
+        const linesBefore = this.countLines(range);
+        range.setStartBefore(nodeContext.viewNode);
+        range.setEnd(block.viewNode, block.viewNode.childNodes.length);
+        const linesAfter = this.countLines(range);
+        if (linesBefore < orphans || linesAfter < widows) {
+          penalty++;
+        }
+      }
+    }
+    if (nodeContext.after) {
+      // A saved after-edge of the box itself (e.g. for SVG): break before it,
+      // without changing the saved break position.
+      nodeContext = nodeContext.copy().modify();
+      nodeContext.after = false;
     }
     return { nodeContext, penalty };
+  }
+
+  /**
+   * Counts the lines that the content of the range is laid out on, also in
+   * the following columns of the browser's column breaking. Boxes on the
+   * same line overlap in the block direction; lines do not.
+   */
+  private countLines(range: Range): number {
+    const intervals = this.clientLayout
+      .getRangeClientRects(range)
+      .map((rect) => {
+        const column = LayoutHelper.checkIfBeyondColumnBreaks(
+          rect,
+          this.writingMode,
+        );
+        return this.vertical
+          ? { column, start: -rect.right, end: -rect.left }
+          : { column, start: rect.top, end: rect.bottom };
+      })
+      .filter((interval) => interval.end > interval.start)
+      .sort((a, b) => a.column - b.column || a.start - b.start);
+    let count = 0;
+    let column = NaN;
+    let end = -Infinity;
+    for (const interval of intervals) {
+      if (interval.column !== column || interval.start >= end) {
+        count++;
+        column = interval.column;
+        end = interval.end;
+      } else {
+        end = Math.max(end, interval.end);
+      }
+    }
+    return count;
   }
 
   /**
@@ -5834,7 +5898,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 if (bp) {
                   nodeContext = bp.nodeContext;
                   bp.breakPosition.breakPositionChosen(this);
-                } else if (breakBeforeAtomicInline) {
+                } else if (
+                  breakBeforeAtomicInline &&
+                  // As in findAcceptableBreakPosition(), only a zero-penalty
+                  // break is allowed when non-fitting content is not forced.
+                  (breakBeforeAtomicInline.penalty === 0 ||
+                    this.forceNonfitting)
+                ) {
                   nodeContext = breakBeforeAtomicInline.nodeContext;
                   this.clearOverflownViewNodes(nodeContext, false);
                 } else {

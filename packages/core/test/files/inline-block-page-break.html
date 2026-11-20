@@ -65,8 +65,13 @@
 
       .second,
       .third,
-      .fourth {
+      .fourth,
+      .fifth {
         break-before: page;
+      }
+
+      .fifth .filler {
+        height: 50mm;
       }
 
       /* A box in an inline wrapper, after text on the same line */
@@ -148,6 +153,19 @@
     <p>
       Page 10: text before <span><span class="wrapped-box"></span></span> and
       after the box.
+    </p>
+    <div class="fifth">
+      <p>
+        Page 11: the next paragraph has default orphans (2). Its second line,
+        starting with a box, does not fit here.
+      </p>
+      <div class="filler"></div>
+    </div>
+    <p>
+      Page 12: first line of this paragraph.<br /><span
+        class="wrapped-box"
+      ></span>
+      Second line, starting with a box.
     </p>
   </body>
 </html>
