@@ -4155,37 +4155,61 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * from it through its preceding siblings and its inline ancestors, only
    * ignorable and out-of-flow nodes, including a CSS float, come before the
    * start of the block container or a preceding block-level box or line
-   * break. A break before such content keeps the float on the page and moves
-   * the content pushed by it. Other out-of-flow elements (e.g.,
-   * `position: absolute`) do not push the content, and a break before content
-   * in the middle of a line would split that line. (Issue #1786, #2285)
+   * break. Inline boxes that add nothing to the line (no content, padding or
+   * border) are looked into like ignorable nodes. A break before such content
+   * keeps the float on the page and moves the content pushed by it. Other
+   * out-of-flow elements (e.g., `position: absolute`) do not push the
+   * content, and a break before content in the middle of a line would split
+   * that line. (Issue #1786, #2285)
    */
   private followsCssFloat(nodeContext: Vtree.NodeContext): boolean {
     let sawFloat = false;
-    for (let nc = nodeContext; nc.parent; nc = nc.parent) {
-      for (
-        let node = nc.viewNode?.previousSibling;
-        node;
-        node = node.previousSibling
-      ) {
-        if (VtreeImpl.canIgnore(node, nc.parent.whitespace)) {
+    // Goes back from `last` through its preceding siblings. Returns whether
+    // the content starts a line after a float when this is decided, or null
+    // when only ignorable and out-of-flow nodes were found.
+    const scan = (last: Node | null, whitespace: Vtree.Whitespace) => {
+      for (let node = last; node; node = node.previousSibling) {
+        if (VtreeImpl.canIgnore(node, whitespace)) {
           continue;
         }
         if (LayoutHelper.isOutOfFlow(node)) {
           sawFloat ||= (node as Element).hasAttribute("data-viv-float");
           continue;
         }
-        // In-flow content before: the content starts a line only after a
-        // block-level box or a line break.
-        return (
-          sawFloat &&
-          node.nodeType === 1 &&
-          ((node as Element).localName === "br" ||
-            !Display.isInlineLevel(
-              this.clientLayout.getElementComputedStyle(node as Element)
-                ?.display,
-            ))
-        );
+        if (node.nodeType !== 1) {
+          return false; // text on the same line
+        }
+        const element = node as Element;
+        if (element.localName === "br") {
+          return sawFloat;
+        }
+        const display =
+          this.clientLayout.getElementComputedStyle(element)?.display;
+        if (!Display.isInlineLevel(display)) {
+          return sawFloat; // after a block-level box
+        }
+        if (
+          display === "inline" &&
+          this.clientLayout
+            .getElementClientRects(element)
+            .every((r) => (this.vertical ? r.height : r.width) === 0)
+        ) {
+          // An inline box adding nothing to the line: look into it, for an
+          // out-of-flow element in it.
+          const result = scan(element.lastChild, whitespace);
+          if (result !== null) {
+            return result;
+          }
+          continue;
+        }
+        return false; // inline content on the same line
+      }
+      return null;
+    };
+    for (let nc = nodeContext; nc.parent; nc = nc.parent) {
+      const result = scan(nc.viewNode?.previousSibling, nc.parent.whitespace);
+      if (result !== null) {
+        return result;
       }
       if (!nc.parent.inline) {
         break;

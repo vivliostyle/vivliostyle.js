@@ -1201,6 +1201,11 @@ module.exports = [
         title:
           "z-index on @page and page-margin boxes (bare text after float, Issue #1786)",
       },
+      {
+        file: "z-index-at-page-bare-text-empty-inline.html",
+        title:
+          "z-index on @page and page-margin boxes (bare text after an empty inline element and a float, Issue #2285)",
+      },
     ],
   },
   {
