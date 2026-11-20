@@ -3554,13 +3554,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return position of line breaks
    */
   findLinePositions(checkPoints: Vtree.RenderedNodeContext[]): number[] {
-    const LOW_OVERLAP = 0.2;
-    const MID_OVERLAP = 0.6;
-    const positions: number[] = [];
-    const boxes = this.getRangeBoxes(
+    return this.findLinePositionsInRange(
       checkPoints[0].viewNode,
       checkPoints.at(-1).viewNode,
     );
+  }
+
+  /**
+   * Returns the after-edge positions of the lines that the content from
+   * `start` to `end` (inclusive, in document order) is laid out on.
+   */
+  findLinePositionsInRange(
+    start: Element | Text,
+    end: Element | Text,
+  ): number[] {
+    const LOW_OVERLAP = 0.2;
+    const MID_OVERLAP = 0.6;
+    const positions: number[] = [];
+    const boxes = this.getRangeBoxes(start, end);
     boxes.sort(
       (a, b) =>
         this.getBoxDir() * (this.getBeforeEdge(a) - this.getBeforeEdge(b)),
@@ -4011,27 +4022,29 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       if (edge && Break.isAvoidBreakValue(edge.breakOnEdge)) {
         penalty++;
       }
-    } else if (!this.isFootnote) {
-      // A break between lines of a block must satisfy its orphans and widows,
-      // as in findBoxBreakPosition(); otherwise it is a forced break.
+    } else {
+      // A break between lines of a block must leave at least `orphans` lines
+      // before it, as in findBoxBreakPosition(); otherwise it is a forced
+      // break, which footnotes never allow. (`widows` cannot be checked here:
+      // the content after the overflowing box is not laid out yet.)
       let block: Vtree.NodeContext | null = nodeContext.parent;
       while (block?.inline) {
         block = block.parent;
       }
-      if (block?.viewNode) {
+      const firstNode = block?.viewNode?.firstChild;
+      if (block && previous && firstNode) {
         const orphans = Math.max(
           Number(block.inheritedProps["orphans"]) || 2,
           1,
         );
-        const widows = Math.max(Number(block.inheritedProps["widows"]) || 2, 1);
-        const range = block.viewNode.ownerDocument.createRange();
-        range.setStart(block.viewNode, 0);
-        range.setEndBefore(nodeContext.viewNode);
-        const linesBefore = this.countLines(range);
-        range.setStartBefore(nodeContext.viewNode);
-        range.setEnd(block.viewNode, block.viewNode.childNodes.length);
-        const linesAfter = this.countLines(range);
-        if (linesBefore < orphans || linesAfter < widows) {
+        const linesBefore = this.findLinePositionsInRange(
+          firstNode as Element | Text,
+          previous as Element | Text,
+        ).length;
+        if (linesBefore < orphans) {
+          if (this.isFootnote) {
+            return null;
+          }
           penalty++;
         }
       }
@@ -4043,40 +4056,6 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nodeContext.after = false;
     }
     return { nodeContext, penalty };
-  }
-
-  /**
-   * Counts the lines that the content of the range is laid out on, also in
-   * the following columns of the browser's column breaking. Boxes on the
-   * same line overlap in the block direction; lines do not.
-   */
-  private countLines(range: Range): number {
-    const intervals = this.clientLayout
-      .getRangeClientRects(range)
-      .map((rect) => {
-        const column = LayoutHelper.checkIfBeyondColumnBreaks(
-          rect,
-          this.writingMode,
-        );
-        return this.vertical
-          ? { column, start: -rect.right, end: -rect.left }
-          : { column, start: rect.top, end: rect.bottom };
-      })
-      .filter((interval) => interval.end > interval.start)
-      .sort((a, b) => a.column - b.column || a.start - b.start);
-    let count = 0;
-    let column = NaN;
-    let end = -Infinity;
-    for (const interval of intervals) {
-      if (interval.column !== column || interval.start >= end) {
-        count++;
-        column = interval.column;
-        end = interval.end;
-      } else {
-        end = Math.max(end, interval.end);
-      }
-    }
-    return count;
   }
 
   /**

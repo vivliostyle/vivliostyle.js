@@ -65,13 +65,37 @@
 
       .second,
       .third,
-      .fourth,
-      .fifth {
+      .fourth {
         break-before: page;
       }
 
-      .fifth .filler {
+      .fifth,
+      .sixth,
+      .seventh {
+        break-before: page;
+      }
+
+      .fifth .filler,
+      .sixth .filler,
+      .seventh .filler {
         height: 50mm;
+      }
+
+      .with-badge {
+        position: relative;
+      }
+
+      .badge {
+        position: absolute;
+        top: 2.2em;
+        left: 50%;
+        font: 10px/1 Arial, sans-serif;
+        color: white;
+        background: purple;
+      }
+
+      .tight {
+        line-height: 0.6;
       }
 
       /* A box in an inline wrapper, after text on the same line */
@@ -157,7 +181,7 @@
     <div class="fifth">
       <p>
         Page 11: the next paragraph has default orphans (2). Its second line,
-        starting with a box, does not fit here.
+        starting with a box, does not fit here, so the whole paragraph moves.
       </p>
       <div class="filler"></div>
     </div>
@@ -165,7 +189,32 @@
       Page 12: first line of this paragraph.<br /><span
         class="wrapped-box"
       ></span>
-      Second line, starting with a box.
+      Second line, starting with a box.<br />Third line.
+    </p>
+    <div class="sixth">
+      <p>
+        Page 13: the next paragraph has default orphans (2) and an absolutely
+        positioned badge in its first line, which is not a line of its own.
+      </p>
+      <div class="filler"></div>
+    </div>
+    <p class="with-badge">
+      Page 14: first line <span class="badge">badge</span>of this
+      paragraph.<br /><span class="wrapped-box"></span>
+      Second line, starting with a box.<br />Third line.
+    </p>
+    <div class="seventh">
+      <p>
+        Page 15: the next paragraph has <code>line-height: 0.6</code>. Its two
+        text lines satisfy orphans (2) and stay on this page.
+      </p>
+      <div class="filler"></div>
+    </div>
+    <p class="tight">
+      First text line.<br />Second text line.<br /><span
+        class="wrapped-box"
+      ></span>
+      Page 16: third line, starting with a box.<br />Fourth line.
     </p>
   </body>
 </html>
