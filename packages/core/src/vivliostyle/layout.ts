@@ -5456,6 +5456,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return Task.newResult(chunkPosition as Vtree.ChunkPosition);
     }
     if (this.isZeroBlockSizeRegion()) {
+      if (Column.isAtOrInsideTable(chunkPosition.primary)) {
+        // A table, or the rest of a fragmented table, never fits here. Leave
+        // the position untouched so that no table fragment is finished.
+        return Task.newResult(chunkPosition as Vtree.ChunkPosition);
+      }
       // A zero block-size region (e.g., an EAL partition with `height: 0`)
       // can still hold zero block-size content, such as empty blocks before a
       // forced break, but must never take non-fitting content. (Issue #391)
@@ -5566,6 +5571,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   isFullWithPageFloats(): boolean {
     return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
+  }
+
+  /**
+   * Whether the position is at the start of a table or inside a table.
+   */
+  private static isAtOrInsideTable(position: Vtree.NodePosition): boolean {
+    return position.steps.some(
+      (step, i) =>
+        !!step.formattingContext &&
+        Table.isInstanceOfTableFormattingContext(step.formattingContext) &&
+        // The position just after a whole table is outside the table.
+        (i > 0 || !position.after),
+    );
   }
 
   /**

@@ -1441,6 +1441,11 @@ module.exports = [
           "EAL zero-height flow partition takes the empty start of a flow (Issue #391)",
       },
       {
+        file: "eal-zero-height-flow-partition-table.html",
+        title:
+          "EAL zero-height flow partition with a fragmented table (Issue #391)",
+      },
+      {
         file: "invalid-page-area.html",
         title: "Invalid page area must not loop forever (Issue #941)",
         skipLayoutRegression: true,
