@@ -644,7 +644,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // multi-column measurement errors in exclusion shapes can make
     // footnoteEdge ~1.2px too small while the default 0.5px precision
     // (needed for float band snapping, Issue #1917) is too tight.
-    const precision = 1.5 / (this.clientLayout.pixelRatio || 1);
+    // A zero block-size region only takes zero block-size content, so even
+    // thin content must count as overflow there. (Issue #391)
+    const precision = this.isZeroBlockSizeRegion()
+      ? 0.01
+      : 1.5 / (this.clientLayout.pixelRatio || 1);
     if (this.almostEquals(edge, this.footnoteEdge, precision)) {
       return false;
     }
@@ -5259,6 +5263,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           // finished all content, explicit page break or overflow (automatic
           // page break)
           this.clearPendingFloats();
+          frame.finish(nodeContext);
+        } else if (
+          !nodeContext.after &&
+          Table.isInstanceOfTableFormattingContext(
+            nodeContext.formattingContext,
+          ) &&
+          this.isZeroBlockSizeRegion()
+        ) {
+          // A table never fits in a zero block-size region. Treat it as
+          // overflow before table layout, whose cell fragmentation does not
+          // handle a zero block size. (Issue #391)
+          nodeContext = nodeContext.modify();
+          nodeContext.overflow = true;
           frame.finish(nodeContext);
         } else {
           if (

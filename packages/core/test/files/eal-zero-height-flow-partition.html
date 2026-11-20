@@ -57,6 +57,22 @@
         font: 12px/1.2 Arial, sans-serif;
       }
 
+      .first-table {
+        border-collapse: collapse;
+      }
+
+      .first-table td {
+        border: 1px solid #357;
+        padding: 2px 6px;
+      }
+
+      .thin-float {
+        float: left;
+        width: 100%;
+        height: 1px;
+        background: #357;
+      }
+
       @-epubx-page-template {
         section.chapter > h1 {
           -epubx-flow-into: chapter-title-flow;
@@ -143,6 +159,25 @@
         Chapter 3 starts with a float that does not fit in the zero-height
         partition. The float and this text must be moved to page 6 and must
         not be lost.
+      </p>
+    </section>
+    <section class="chapter float-first">
+      <h1>Chapter 4 (page 7)</h1>
+      <table class="first-table">
+        <tr><td>Table (page 8)</td><td>cell</td></tr>
+        <tr><td>row 2</td><td>cell</td></tr>
+      </table>
+      <p>
+        Chapter 4 starts with a table. It must be moved to page 8 with this
+        text.
+      </p>
+    </section>
+    <section class="chapter float-first">
+      <h1>Chapter 5 (page 9)</h1>
+      <div class="thin-float"></div>
+      <p>
+        Chapter 5 starts with a 1px-high float (the line above). It must be
+        moved to page 10 with this text.
       </p>
     </section>
   </body>
