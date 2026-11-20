@@ -383,13 +383,36 @@ export class BoxStack {
     ) {
       return false;
     }
-    const whitespaceValue = this.lastBox()
-      .styleValue("white-space", Css.ident.normal)
-      .toString();
-    const whitespace =
-      Vtree.whitespaceFromPropertyValue(whitespaceValue) ??
-      Vtree.Whitespace.IGNORE;
-    return !Vtree.canIgnore(node, whitespace);
+    return !Vtree.canIgnore(node, this.inheritedWhitespace());
+  }
+
+  /**
+   * Resolves the `white-space` value of the last box, which inherits it from
+   * the ancestor boxes. Box.styleValue() is not used: it only reads the box's
+   * own declarations and caches the given default value.
+   */
+  private inheritedWhitespace(): Vtree.Whitespace {
+    for (let i = this.stack.length - 1; i >= 0; i--) {
+      const box = this.stack[i];
+      const cascval = box.style["white-space"] as CssCascade.CascadeValue;
+      const value = cascval?.evaluate(box.context, "white-space");
+      if (!value) {
+        continue;
+      }
+      if (Css.isDefaultingValue(value)) {
+        if (value.toString().toLowerCase() === "initial") {
+          return Vtree.Whitespace.IGNORE;
+        }
+        // inherit, unset and rollback keywords: white-space is inherited.
+        continue;
+      }
+      // Unsupported values resolve to `normal`.
+      return (
+        Vtree.whitespaceFromPropertyValue(value.toString()) ??
+        Vtree.Whitespace.IGNORE
+      );
+    }
+    return Vtree.Whitespace.IGNORE;
   }
 
   encounteredTextNode(node: Node) {

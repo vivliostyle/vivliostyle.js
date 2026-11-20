@@ -1393,6 +1393,11 @@ module.exports = [
         title: "Page break bug in vertical text (on Firefox, PR #263)",
       },
       {
+        file: "page_breaks/preserved-newlines-only-body.html",
+        title:
+          "Preserved newlines only in the body make pages (white-space inherited from html, Issue #434)",
+      },
+      {
         file: "page_breaks/class_C_break_point.html",
         title: "Class C break point (PR #383)",
       },
