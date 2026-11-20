@@ -4848,12 +4848,25 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 if (needForcedBreak()) {
                   processForcedBreak(rendered);
                 } else if (
-                  this.checkOverflowAndSaveEdgeAndBreakPosition(
-                    lastAfterNodeContext,
-                    null,
-                    true,
-                    breakAtTheEdge,
-                  )
+                  // The anchor of a page float or footnote followed by
+                  // inline content with no block-level leading edge in
+                  // between is on the same line as that content, so the
+                  // edge after the anchor is not a break opportunity: a break
+                  // there would split the line or leave an empty fragment
+                  // (e.g., a lone list marker) before the content. Only
+                  // check the overflow there. (Issue #747)
+                  lastAfterNodeContext &&
+                  leadingEdgeContexts.every((c) => c.inline) &&
+                  LayoutHelper.isSpecialNodeContext(lastAfterNodeContext) &&
+                  (lastAfterNodeContext.floatSide === "footnote" ||
+                    PageFloats.isPageFloat(lastAfterNodeContext.floatReference))
+                    ? this.checkOverflowAndSaveEdge(lastAfterNodeContext, null)
+                    : this.checkOverflowAndSaveEdgeAndBreakPosition(
+                        lastAfterNodeContext,
+                        null,
+                        true,
+                        breakAtTheEdge,
+                      )
                 ) {
                   nodeContext = (
                     this.stopAtOverflow

@@ -1,0 +1,158 @@
+<!doctype html>
+<!-- Test case for Issue #747: page break problems when a footnote or page float is given on a ::before pseudo element -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Footnote and page float on ::before pseudo element</title>
+    <style>
+      @page {
+        size: 360px 300px;
+        margin: 20px;
+        @top-center {
+          content: counter(page);
+        }
+      }
+      html {
+        font-size: 16px;
+        line-height: 1.25;
+      }
+      body,
+      h1,
+      h2,
+      ul {
+        margin: 0;
+      }
+      section {
+        break-before: page;
+      }
+      h1 {
+        font-size: 14px;
+        background: lime;
+      }
+      /* Fill the page so that only one line of the following text fits */
+      .tall {
+        background: lime;
+        height: 180px;
+      }
+      .test {
+        color: blue;
+      }
+      .fn .test::before {
+        content: "TEST-FOOTNOTE";
+        float: footnote;
+      }
+      .top .test::before {
+        content: "TEST-PAGE-FLOAT";
+        float-reference: page;
+        float: top;
+      }
+      .bottom .test::before {
+        content: "TEST-PAGE-FLOAT";
+        float-reference: page;
+        float: bottom;
+      }
+      /* Page geometry with which the list item break used to fall between
+         "Lorem ipsum" and "dolor sit amet" */
+      @page list {
+        size: 640px 272px;
+        margin: 0;
+      }
+      .list {
+        page: list;
+        line-height: normal;
+      }
+      .list h1 {
+        font-size: 2em;
+        margin: 0.67em 0;
+        background: none;
+      }
+      .list ul {
+        margin: 1em 0;
+      }
+      .list .test::before {
+        content: "Hello footnote!";
+        float: footnote;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="fn">
+      <!-- 1. Footnote on span::before: "TEST-SPAN" and "some text" must not be separated by a break -->
+      <h1>1. Footnote on span::before</h1>
+      <div class="tall"></div>
+      <div>
+        <span class="test">TEST-SPAN</span>some text some text some text some
+        text some text some text some text some text some text some text.
+      </div>
+    </section>
+    <section class="fn">
+      <!-- 2. Footnote on div::before: the text must not overflow into the footnote area -->
+      <h1>2. Footnote on div::before</h1>
+      <div class="tall"></div>
+      <div class="test">
+        Some text some text some text some text some text some text some text
+        some text some text some text some text.
+      </div>
+    </section>
+    <section class="top">
+      <!-- 3. Top page float on span::before: "TEST-SPAN" and "some text" must not be separated by a break -->
+      <h1>3. Top page float on span::before</h1>
+      <div class="tall"></div>
+      <div>
+        <span class="test">TEST-SPAN</span>some text some text some text some
+        text some text some text some text some text some text some text.
+      </div>
+    </section>
+    <section class="bottom">
+      <!-- 4. Bottom page float on div::before: the text must not overflow into the page float area -->
+      <h1>4. Bottom page float on div::before</h1>
+      <div class="tall"></div>
+      <div class="test">
+        Some text some text some text some text some text some text some text
+        some text some text some text some text.
+      </div>
+    </section>
+    <section class="list">
+      <!-- 5. Footnotes in list items: "Lorem ipsum" and "dolor sit amet" must not be separated by a break, and no list item may be left empty at a page end -->
+      <h1>5. Footnotes in list items</h1>
+      <ul>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+        <li>
+          <span class="test">Lorem ipsum</span> dolor sit amet consectetur,
+          adipisicing elit. Porro deserunt dicta, ea quia architecto nisi
+          necessitatibus non. In officia debitis, nobis repellat optio et.
+          Consequatur excepturi eveniet suscipit dicta. Corporis?
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

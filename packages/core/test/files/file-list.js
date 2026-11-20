@@ -2031,6 +2031,11 @@ module.exports = [
         title: "Footnote with pseudoelement (PR #345)",
       },
       {
+        file: "footnotes/footnote-and-page-float-on-before-pseudo.html",
+        title:
+          "Footnote and page float on ::before pseudo element (Issue #747)",
+      },
+      {
         file: "footnotes/footnote-policy.html",
         title: "footnote-policy (PR #353)",
       },
