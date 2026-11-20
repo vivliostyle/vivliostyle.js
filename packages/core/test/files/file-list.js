@@ -1403,6 +1403,11 @@ module.exports = [
           "Preserved newlines only in the body make pages (white-space inherited through an invalid var(), Issue #434)",
       },
       {
+        file: "page_breaks/text-before-forced-break.html",
+        title:
+          "Text before a forced break keeps the break from moving to the document start",
+      },
+      {
         file: "page_breaks/class_C_break_point.html",
         title: "Class C break point (PR #383)",
       },

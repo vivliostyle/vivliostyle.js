@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Text before a forced break keeps the break from moving to the document start</title>
+    <style>
+      html {
+        /* inherited by the body text */
+        white-space: nowrap;
+      }
+      @page {
+        size: 300px 200px;
+        margin: 30px 10px;
+        @top-center {
+          content: "page " counter(page);
+        }
+      }
+      @page :left {
+        @bottom-left {
+          content: "LEFT";
+        }
+      }
+      @page :right {
+        @bottom-right {
+          content: "RIGHT";
+        }
+      }
+    </style>
+  </head>
+  <body>Text directly in the body (page 1, RIGHT).<div style="break-before: left">After break-before: left (page 2, LEFT).</div></body>
+</html>
