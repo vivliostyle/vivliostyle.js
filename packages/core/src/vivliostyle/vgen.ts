@@ -2679,6 +2679,9 @@ export class ViewFactory
             if (attributeName == "style") {
               continue; // we do styling ourselves
             }
+            if (attributeName == Base.STYLE_KEYS_ATTR) {
+              continue; // the keys come from the styles that we set
+            }
             if (
               attributeName === "media" &&
               tag === "source" &&

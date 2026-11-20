@@ -308,6 +308,49 @@ describe("base", function () {
       expect(keys()).toBe(null);
     });
 
+    it("matches a substring of a custom property as well", function () {
+      // [style*=border] also matched the name or the value of a custom
+      // property.
+      module.setCSSProperty(element, "--border-color", "red");
+      expect(keys()).toEqual(["border"]);
+      module.setCSSProperty(element, "--frame", "outline");
+      expect(keys()).toEqual(["border", "outline"]);
+      module.setCSSProperty(element, "--frame", "none");
+      expect(keys()).toEqual(["border"]);
+      module.removeCSSProperty(element, "--border-color");
+      expect(keys()).toBe(null);
+
+      // A key by its own name and a key by a substring.
+      module.setCSSProperty(element, "--viv-marker-content", '"rule 1"');
+      expect(keys()).toEqual(["--viv-marker-content", "rule"]);
+      module.setCSSProperty(element, "--viv-marker-content", '"1"');
+      expect(keys()).toEqual(["--viv-marker-content"]);
+    });
+
+    it("takes the keys from the declaration that the browser accepted", function () {
+      // The browser makes the keyword lowercase.
+      module.setCSSProperty(element, "border-collapse", "COLLAPSE");
+      expect(element.style.borderCollapse).toBe("collapse");
+      expect(keys()).toEqual(["border", "border-collapse:collapse"]);
+
+      // A value that is not valid leaves the declaration as it was.
+      module.setCSSProperty(element, "border-collapse", "separate");
+      module.setCSSProperty(element, "border-collapse", "collapse bogus");
+      expect(element.style.borderCollapse).toBe("separate");
+      expect(keys()).toEqual(["border"]);
+
+      var other = document.createElement("div");
+      module.setCSSProperty(other, "border-collapse", "collapse bogus");
+      module.setCSSProperty(other, "box-sizing", "border-bogus");
+      expect(other.getAttribute("style") || "").toBe("");
+      expect(other.hasAttribute(module.STYLE_KEYS_ATTR)).toBe(false);
+
+      // A value without a key that is not valid keeps the old value's key.
+      module.setCSSProperty(other, "box-sizing", "border-box");
+      module.setCSSProperty(other, "box-sizing", "bogus");
+      expect(other.getAttribute(module.STYLE_KEYS_ATTR)).toBe("border");
+    });
+
     it("removes a custom property and its key", function () {
       module.setCSSProperty(element, "--viv-footnote-white-space", "nowrap");
       module.setCSSProperty(element, "--viv-marker-content", '"*"');
@@ -332,8 +375,9 @@ describe("base", function () {
 
     it("reads the keys from the style attributes of a subtree", function () {
       element.setAttribute("style", "text-decoration: underline");
+      // Keys that do not come from the style attributes are removed.
       element.innerHTML =
-        '<span style="border: 1px solid">a</span><span style="color: red">b</span><span>c</span>';
+        '<span style="border: 1px solid">a</span><span style="color: red" data-viv-style="border">b</span><span data-viv-style="border-collapse:collapse">c</span>';
       module.updateStyleKeysFromStyleAttributes(element);
       expect(keys()).toEqual(["text-decoration"]);
       expect(element.children[0].getAttribute(module.STYLE_KEYS_ATTR)).toBe(
