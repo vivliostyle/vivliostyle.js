@@ -1,3 +1,18 @@
+- category: Positioning and fragmentation
+  title: "EAL zero-height flow partition takes the empty start of a flow (Issue #391)"
+  file: eal-zero-height-flow-partition.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2280 (12 to 10 pages). Stable puts a blank page and a page with only a page number between
+    the chapter 1 title page and section 1.1; they are gone, so every page now matches its label. Chapters 2 to 5 are
+    unchanged apart from the shifted page numbers.
+  approvedViewer: git-fix-zero-height-region-391  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-zero-height-flow-partition.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-zero-height-flow-partition.html&zoom=1&spread=false
 - category: Print
   title: "Printer marks (PR #169)"
   file: crop-marks.html
