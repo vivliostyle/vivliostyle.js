@@ -1304,6 +1304,16 @@ module.exports = [
         title:
           "Named flow element encountered before a layout retry with Adaptive Layout (Issue #2269)",
       },
+      {
+        file: [
+          "eal-flowed-out-chapters/ch1.html",
+          "eal-flowed-out-chapters/ch2.html",
+          "eal-flowed-out-chapters/ch3.html",
+          "eal-flowed-out-chapters/ch4.html",
+        ],
+        title:
+          "No empty page after documents whose content is all in named flows with Adaptive Layout (Issue #434)",
+      },
     ],
   },
   {

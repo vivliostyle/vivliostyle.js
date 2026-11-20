@@ -1,0 +1,80 @@
+@page {
+  size: 148mm 105mm;
+  margin: 0;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font:
+    14px/1.4 Georgia,
+    "Times New Roman",
+    serif;
+}
+
+section.chapter {
+  break-before: right;
+}
+
+section.chapter > h1 {
+  break-before: right;
+  margin: 0;
+  font-size: 28px;
+}
+
+p {
+  margin: 0 0 0.5em;
+}
+
+@-epubx-page-template {
+  section.chapter > h1 {
+    -epubx-flow-into: chapter-title-flow;
+  }
+
+  section.chapter {
+    -epubx-flow-into: chapter-flow;
+  }
+
+  @-epubx-flow chapter-flow {
+    -epubx-flow-consume: all;
+  }
+
+  @-epubx-page-master chapter-title {
+    @-epubx-partition {
+      -epubx-flow-from: chapter-title-flow;
+      -epubx-required: true;
+      top: 15mm;
+      left: 15mm;
+      width: 118mm;
+      height: 75mm;
+      border-top: solid 1mm;
+      border-bottom: solid 1mm;
+      text-align: center;
+      padding-top: 25mm;
+      box-sizing: border-box;
+    }
+    /* Takes the .flow-start element on the title page, so that the chapter
+       content continues on the next page whatever its side. */
+    @-epubx-partition {
+      -epubx-flow-from: chapter-flow;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+    }
+  }
+
+  @-epubx-page-master chapters {
+    @-epubx-partition {
+      -epubx-flow-from: chapter-flow;
+      -epubx-required: true;
+      top: 15mm;
+      left: 15mm;
+      width: 118mm;
+      height: 75mm;
+    }
+  }
+}

@@ -1,0 +1,21 @@
+<!-- Test case for Issue #434: no empty page after a document whose content is all flowed into named flows -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chapter 4</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section class="chapter">
+      <h1>Chapter 4</h1>
+      <div class="flow-start">&#xA0;</div>
+      <section>
+        <p>Chapter 4, paragraph 1.</p>
+        <p>Chapter 4, paragraph 2.</p>
+        <p>Chapter 4, paragraph 3.</p>
+        <p>Chapter 4, paragraph 4.</p>
+      </section>
+    </section>
+  </body>
+</html>
