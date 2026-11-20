@@ -1,3 +1,18 @@
+- category: Page breaks
+  title: "Text before a forced break keeps the break from moving to the document start (PR #2283)"
+  file: page_breaks/text-before-forced-break.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2283 (3 to 2 pages). Stable ignores the body text when propagating the div's
+    break-before: left, so the document starts on a left page, then a blank page, and the div is on page 3. Now page 1
+    is a right page with the text and the div is on the left page 2.
+  approvedViewer: https://vivliostyle-git-fix-encountered-text-node-wh-11fd17-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/text-before-forced-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/page_breaks/text-before-forced-break.html&zoom=1&spread=false
 - category: Running elements
   title: "No empty page after documents whose content is all in named flows with Adaptive Layout (Issue #434)"
   file:

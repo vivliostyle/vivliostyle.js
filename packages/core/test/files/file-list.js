@@ -1405,7 +1405,7 @@ module.exports = [
       {
         file: "page_breaks/text-before-forced-break.html",
         title:
-          "Text before a forced break keeps the break from moving to the document start",
+          "Text before a forced break keeps the break from moving to the document start (PR #2283)",
       },
       {
         file: "page_breaks/class_C_break_point.html",
