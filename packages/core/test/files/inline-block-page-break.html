@@ -1,0 +1,125 @@
+<!-- Test case: a page break between lines must not split an inline-block -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Page break between lines of inline-blocks</title>
+    <style>
+      @page {
+        size: 148mm 105mm;
+        margin: 10mm;
+      }
+
+      body {
+        margin: 0;
+        font: 14px/1.4 Georgia, "Times New Roman", serif;
+      }
+
+      p {
+        margin: 0 0 2mm;
+      }
+
+      .row {
+        text-indent: 1em;
+        /* Allow a break after any line of boxes */
+        orphans: 1;
+        widows: 1;
+      }
+
+      /* Empty boxes whose only content is a block ::before, three per line */
+      .row > div {
+        display: inline-block;
+        vertical-align: top;
+        width: 28%;
+        height: 45mm;
+        margin-right: 2%;
+        border-bottom: 2mm solid yellowgreen;
+        background: #cff0f0;
+      }
+
+      .row > div::before {
+        content: "";
+        display: block;
+        width: 10mm;
+        height: 10mm;
+        margin: 0 auto;
+        border-radius: 50%;
+        background: red;
+      }
+
+      .row > div:nth-child(even)::before {
+        margin-top: 35mm;
+      }
+
+      .row.short > div {
+        height: 30mm;
+      }
+
+      .row.short > div:nth-child(even)::before {
+        margin-top: 20mm;
+      }
+
+      .avoid {
+        break-inside: avoid;
+      }
+
+      .second,
+      .third {
+        break-before: page;
+      }
+
+      .filler {
+        height: 40mm;
+        background: #eee;
+      }
+
+      .third .filler {
+        height: 30mm;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Page 1: three boxes. Page 2: three boxes. No box may be split between
+      pages, so there must be no empty box (without a red ball) anywhere.
+    </p>
+    <div class="row">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="second">
+      <p>Page 3: the first line of boxes below does not fit on this page.</p>
+      <div class="filler"></div>
+    </div>
+    <div class="row">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <p>Page 4: three boxes. Page 5: one box and this text.</p>
+    <div class="third">
+      <p>
+        Page 6: the boxes below have <code>break-inside: avoid</code> but do
+        not fit on one page. They move to page 7 (two lines) and continue on
+        page 8 (one line).
+      </p>
+      <div class="filler"></div>
+    </div>
+    <div class="row short avoid">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </body>
+</html>

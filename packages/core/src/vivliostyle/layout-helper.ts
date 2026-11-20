@@ -1041,18 +1041,43 @@ export function isSpecialInlineDisplay(display: string): boolean {
   );
 }
 
+/**
+ * Whether the node context is an atomic inline, such as an inline-block, or an
+ * inline with an orthogonal writing mode. Its content must not be broken.
+ */
+function isSpecialInlineNodeContext(nodeContext: Vtree.NodeContext): boolean {
+  return (
+    (nodeContext.display !== "inline" ||
+      nodeContext.vertical !== nodeContext.parent?.vertical) &&
+    Display.isInlineLevel(nodeContext.display)
+  );
+}
+
 export function findAncestorSpecialInlineNodeContext(
   nodeContext: Vtree.NodeContext,
 ): Vtree.ElementNodeContext | null {
   for (let p = nodeContext.parent; p; p = p.parent) {
-    if (
-      (p.display !== "inline" || p.vertical !== p.parent?.vertical) &&
-      Display.isInlineLevel(p.display)
-    ) {
+    if (isSpecialInlineNodeContext(p)) {
       return VtreeImpl.asElementNodeContext(p);
     }
   }
   return null;
+}
+
+/**
+ * Returns the outermost atomic inline (see `findAncestorSpecialInlineNodeContext`)
+ * that is the node context itself or one of its ancestors.
+ */
+export function findOutermostSpecialInlineNodeContext(
+  nodeContext: Vtree.NodeContext,
+): Vtree.ElementNodeContext | null {
+  let found: Vtree.NodeContext | null = null;
+  for (let nc: Vtree.NodeContext | null = nodeContext; nc; nc = nc.parent) {
+    if (isSpecialInlineNodeContext(nc)) {
+      found = nc;
+    }
+  }
+  return found && VtreeImpl.asElementNodeContext(found);
 }
 
 export function textSpacingWrapperOf(node: Element | Text): Element | null {

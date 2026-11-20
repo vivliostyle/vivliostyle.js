@@ -1339,6 +1339,10 @@ module.exports = [
         title: "break values (PR #127)",
       },
       {
+        file: "inline-block-page-break.html",
+        title: "Page break between lines of inline-blocks",
+      },
+      {
         file: "page_breaks/truncate_margin_at_breaks.html",
         title: "Truncate margin at breaks (PR #186)",
       },
