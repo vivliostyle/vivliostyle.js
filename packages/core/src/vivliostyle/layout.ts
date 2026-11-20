@@ -3554,13 +3554,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * @return position of line breaks
    */
   findLinePositions(checkPoints: Vtree.RenderedNodeContext[]): number[] {
-    const LOW_OVERLAP = 0.2;
-    const MID_OVERLAP = 0.6;
-    const positions: number[] = [];
-    const boxes = this.getRangeBoxes(
+    return this.findLinePositionsInRange(
       checkPoints[0].viewNode,
       checkPoints.at(-1).viewNode,
     );
+  }
+
+  /**
+   * Returns the after-edge positions of the lines that the content from
+   * `start` to `end` (inclusive, in document order) is laid out on.
+   */
+  findLinePositionsInRange(
+    start: Element | Text,
+    end: Element | Text,
+  ): number[] {
+    const LOW_OVERLAP = 0.2;
+    const MID_OVERLAP = 0.6;
+    const positions: number[] = [];
+    const boxes = this.getRangeBoxes(start, end);
     boxes.sort(
       (a, b) =>
         this.getBoxDir() * (this.getBeforeEdge(a) - this.getBeforeEdge(b)),
@@ -3890,12 +3901,177 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     return result;
   }
 
-  findAcceptableBreakPosition(): BreakPositionAndNodeContext | null {
+  /**
+   * When the overflowing content is inside an atomic inline (e.g., an
+   * inline-block), a break must not fall inside that box. Break just before
+   * the line that holds the box instead: before the first atomic inline laid
+   * out on that line, or before their block when that is its first line
+   * (as in `findAcceptableBreakInside()`, Issue #1459).
+   * Returns null when that line starts with other content or nothing
+   * precedes it in this column, so the usual break search applies.
+   * Also returns the penalty of that break, to compare it with the saved
+   * break positions. This has no side effects; the caller clears the
+   * overflown view nodes.
+   */
+  private findBreakBeforeOverflowingAtomicInline(
+    overflownNodeContext: Vtree.NodeContext,
+  ): { nodeContext: Vtree.NodeContext; penalty: number } | null {
+    const atomicInline =
+      LayoutHelper.findOutermostSpecialInlineNodeContext(overflownNodeContext);
+    if (!atomicInline) {
+      return null;
+    }
+    const lastRectOf = (node: Node): Vtree.ClientRect | null => {
+      let rects: Vtree.ClientRect[];
+      if (node.nodeType === 1) {
+        rects = this.clientLayout.getElementClientRects(node as Element);
+      } else {
+        const range = node.ownerDocument.createRange();
+        range.selectNodeContents(node);
+        rects = this.clientLayout.getRangeClientRects(range);
+      }
+      return rects.length ? rects[rects.length - 1] : null;
+    };
+    const lineRect = lastRectOf(atomicInline.viewNode);
+    if (!lineRect) {
+      return null;
+    }
+    const isOnSameLine = (node: Node): boolean => {
+      const rect = lastRectOf(node);
+      if (
+        !rect ||
+        LayoutHelper.checkIfBeyondColumnBreaks(rect, this.writingMode) !==
+          LayoutHelper.checkIfBeyondColumnBreaks(lineRect, this.writingMode)
+      ) {
+        return false;
+      }
+      return this.vertical
+        ? rect.left < lineRect.right && lineRect.left < rect.right
+        : rect.top < lineRect.bottom && lineRect.top < rect.bottom;
+    };
+    const previousContent = (nc: Vtree.NodeContext): Node | null => {
+      let node = nc.viewNode?.previousSibling;
+      while (
+        node &&
+        (VtreeImpl.canIgnore(node, nc.parent?.whitespace) ||
+          LayoutHelper.isOutOfFlow(node))
+      ) {
+        node = node.previousSibling;
+      }
+      return node ?? null;
+    };
+
+    // The atomic inlines laid out so far on the same line, from the saved
+    // break positions inside them.
+    let nodeContext: Vtree.NodeContext = atomicInline;
+    for (const bp of this.breakPositions) {
+      const position =
+        bp instanceof BreakPosition.EdgeBreakPosition
+          ? bp.position
+          : bp instanceof BoxBreakPosition
+            ? bp.checkPoints[0]
+            : null;
+      const other =
+        position &&
+        LayoutHelper.findOutermostSpecialInlineNodeContext(position);
+      if (
+        other &&
+        other.viewNode !== atomicInline.viewNode &&
+        other.viewNode.parentNode === atomicInline.viewNode.parentNode &&
+        isOnSameLine(other.viewNode)
+      ) {
+        nodeContext = other;
+        break;
+      }
+    }
+    while (
+      nodeContext.inline &&
+      nodeContext.parent &&
+      !previousContent(nodeContext)
+    ) {
+      nodeContext = nodeContext.parent;
+    }
+    const previous = previousContent(nodeContext);
+    if (previous && isOnSameLine(previous)) {
+      // The line starts with other content, e.g. text before an inline
+      // wrapper of the box.
+      return null;
+    }
+    for (let nc: Vtree.NodeContext | null = nodeContext; ; nc = nc.parent) {
+      if (!nc) {
+        // Nothing precedes the line in this column.
+        return null;
+      }
+      if (previousContent(nc)) {
+        break;
+      }
+    }
+
+    // Penalty of the break, as in EdgeBreakPosition.getMinBreakPenalty(): a
+    // break before the block also has the avoid value at its edge (e.g.
+    // `break-after: avoid` on a preceding heading), from the saved edge.
+    let penalty = nodeContext.parent?.breakPenalty ?? 0;
+    if (!nodeContext.inline) {
+      const edge = this.breakPositions.find(
+        (bp): bp is BreakPosition.EdgeBreakPosition =>
+          bp instanceof BreakPosition.EdgeBreakPosition &&
+          (bp.position.after
+            ? bp.position.viewNode === previous
+            : bp.position.viewNode === nodeContext.viewNode),
+      );
+      if (edge && Break.isAvoidBreakValue(edge.breakOnEdge)) {
+        penalty++;
+      }
+    } else {
+      // A break between lines of a block must leave at least `orphans` lines
+      // before it, as in findBoxBreakPosition(); otherwise it is a forced
+      // break, which footnotes never allow. (`widows` cannot be checked here:
+      // the content after the overflowing box is not laid out yet.)
+      let block: Vtree.NodeContext | null = nodeContext.parent;
+      while (block?.inline) {
+        block = block.parent;
+      }
+      const firstNode = block?.viewNode?.firstChild;
+      if (block && previous && firstNode) {
+        const orphans = Math.max(
+          Number(block.inheritedProps["orphans"]) || 2,
+          1,
+        );
+        const linesBefore = this.findLinePositionsInRange(
+          firstNode as Element | Text,
+          previous as Element | Text,
+        ).length;
+        if (linesBefore < orphans) {
+          if (this.isFootnote) {
+            return null;
+          }
+          penalty++;
+        }
+      }
+    }
+    if (nodeContext.after) {
+      // A saved after-edge of the box itself (e.g. for SVG): break before it,
+      // without changing the saved break position.
+      nodeContext = nodeContext.copy().modify();
+      nodeContext.after = false;
+    }
+    return { nodeContext, penalty };
+  }
+
+  /**
+   * @param maxPenalty only break positions with up to this penalty are used.
+   */
+  findAcceptableBreakPosition(
+    maxPenalty: number = Number.MAX_VALUE,
+  ): BreakPositionAndNodeContext | null {
     let found: BreakPositionAndNodeContext | null = null;
     let penalty = 0;
     let nextPenalty = 0;
     do {
       penalty = nextPenalty;
+      if (penalty > maxPenalty) {
+        break;
+      }
       nextPenalty = Number.MAX_VALUE;
       for (let i = this.breakPositions.length - 1; i >= 0 && !found; --i) {
         const bp = this.breakPositions[i];
@@ -5685,10 +5861,33 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // overflow (implicit page break): back up and find a
                 // page break
                 overflownNodeContext = nodeContext;
-                const bp = this.findAcceptableBreakPosition();
-                nodeContext = bp && bp.nodeContext;
+                const breakBeforeAtomicInline =
+                  this.findBreakBeforeOverflowingAtomicInline(nodeContext);
+                // Break positions inside atomic inlines cost more than the
+                // break before them, so only a break outside them with a
+                // lower penalty (e.g. before a box with `break-inside:
+                // avoid`) is preferred.
+                const bp = breakBeforeAtomicInline
+                  ? breakBeforeAtomicInline.penalty > 0
+                    ? this.findAcceptableBreakPosition(
+                        breakBeforeAtomicInline.penalty - 1,
+                      )
+                    : null
+                  : this.findAcceptableBreakPosition();
                 if (bp) {
+                  nodeContext = bp.nodeContext;
                   bp.breakPosition.breakPositionChosen(this);
+                } else if (
+                  breakBeforeAtomicInline &&
+                  // As in findAcceptableBreakPosition(), only a zero-penalty
+                  // break is allowed when non-fitting content is not forced.
+                  (breakBeforeAtomicInline.penalty === 0 ||
+                    this.forceNonfitting)
+                ) {
+                  nodeContext = breakBeforeAtomicInline.nodeContext;
+                  this.clearOverflownViewNodes(nodeContext, false);
+                } else {
+                  nodeContext = null;
                 }
                 loopFrame.breakLoop(); // Loop end
               } else {
