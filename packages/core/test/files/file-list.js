@@ -1304,6 +1304,16 @@ module.exports = [
         title:
           "Named flow element encountered before a layout retry with Adaptive Layout (Issue #2269)",
       },
+      {
+        file: [
+          "eal-flowed-out-chapters/ch1.html",
+          "eal-flowed-out-chapters/ch2.html",
+          "eal-flowed-out-chapters/ch3.html",
+          "eal-flowed-out-chapters/ch4.html",
+        ],
+        title:
+          "No empty page after documents whose content is all in named flows with Adaptive Layout (Issue #434)",
+      },
     ],
   },
   {
@@ -1381,6 +1391,16 @@ module.exports = [
       {
         file: "page_breaks/page_break_bug_in_vertical_text.html",
         title: "Page break bug in vertical text (on Firefox, PR #263)",
+      },
+      {
+        file: "page_breaks/preserved-newlines-only-body.html",
+        title:
+          "Preserved newlines only in the body make pages (white-space inherited from html, Issue #434)",
+      },
+      {
+        file: "page_breaks/preserved-newlines-only-body-invalid-var.html",
+        title:
+          "Preserved newlines only in the body make pages (white-space inherited through an invalid var(), Issue #434)",
       },
       {
         file: "page_breaks/class_C_break_point.html",

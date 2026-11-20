@@ -372,6 +372,50 @@ export class BoxStack {
     return box;
   }
 
+  /**
+   * Returns if the text node is content that cannot be ignored as whitespace
+   * in the last box.
+   */
+  isNonIgnorableText(node: Node): boolean {
+    if (
+      node.nodeType !== Node.TEXT_NODE &&
+      node.nodeType !== Node.CDATA_SECTION_NODE
+    ) {
+      return false;
+    }
+    return !Vtree.canIgnore(node, this.inheritedWhitespace());
+  }
+
+  /**
+   * Resolves the `white-space` value of the last box, which inherits it from
+   * the ancestor boxes. Box.styleValue() is not used: it only reads the box's
+   * own declarations and caches the given default value.
+   */
+  private inheritedWhitespace(): Vtree.Whitespace {
+    for (let i = this.stack.length - 1; i >= 0; i--) {
+      const box = this.stack[i];
+      const cascval = box.style["white-space"] as CssCascade.CascadeValue;
+      const value = cascval?.evaluate(box.context, "white-space");
+      if (!value) {
+        continue;
+      }
+      if (Css.isDefaultingValue(value)) {
+        if (value.toString().toLowerCase() === "initial") {
+          return Vtree.Whitespace.IGNORE;
+        }
+        // inherit, unset and rollback keywords: white-space is inherited.
+        continue;
+      }
+      const whitespace = Vtree.whitespaceFromPropertyValue(value.toString());
+      if (whitespace !== null) {
+        return whitespace;
+      }
+      // An unsupported value (e.g. an invalid var() substitution) keeps the
+      // inherited value, as in ViewFactory.
+    }
+    return Vtree.Whitespace.IGNORE;
+  }
+
   encounteredTextNode(node: Node) {
     const box = this.lastBox();
     if (
@@ -501,6 +545,12 @@ export class Styler implements AbstractStyler {
   lastOffset: number;
   breakBeforeValues = new Map<number, string | null>();
   boxStack: BoxStack;
+  /**
+   * True once the styled part of the document has content in the flow chunk
+   * of the root element: text, generated content, or an element box other
+   * than the root and body element boxes. (Issue #434)
+   */
+  private rootFlowChunkContentFound = false;
   bodyReached: boolean = true;
 
   constructor(
@@ -1055,7 +1105,15 @@ export class Styler implements AbstractStyler {
         rootOffset,
       );
       if (this.boxStack.empty()) {
-        this.boxStack.push(rootStyle, rootOffset, true, newFlowChunk);
+        const rootBox = this.boxStack.push(
+          rootStyle,
+          rootOffset,
+          true,
+          newFlowChunk,
+        );
+        if (rootBox.beforeBox) {
+          this.rootFlowChunkContentFound = true;
+        }
       }
     }
     let node = this.xmldoc.getNodeByOffset(offset);
@@ -1230,6 +1288,34 @@ export class Styler implements AbstractStyler {
   }
 
   /**
+   * Returns if the flow chunk of the root element has content to lay out.
+   * When the root element's content is all moved into other flows (e.g. the
+   * body only has elements with `flow-into`), it has none. Styles the rest of
+   * the document if needed to find out. (Issue #434)
+   */
+  rootFlowChunkHasContent(): boolean {
+    if (this.rootFlowChunkContentFound) {
+      return true;
+    }
+    // Styling ahead must not change the page type of the page being laid out
+    // (see also the fix for Issue #1450 in StyleInstance.selectPageMaster).
+    const savedPageType = this.cascade.currentPageType;
+    let offset = this.lastOffset;
+    while (!this.rootFlowChunkContentFound) {
+      offset += 5000;
+      if (this.styleUntil(offset, 0) === Number.POSITIVE_INFINITY) {
+        break;
+      }
+    }
+    this.cascade.currentPageType = savedPageType;
+    return this.rootFlowChunkContentFound;
+  }
+
+  private isInRootFlowChunk(box: Box): boolean {
+    return box.flowChunk.element === this.root;
+  }
+
+  /**
    * @param startOffset current position in the document
    * @param lookup lookup window size for the next page
    * @return lookup offset in the document for the next page
@@ -1257,6 +1343,9 @@ export class Styler implements AbstractStyler {
             this.cascade.popElement(this.last.node as Element);
             this.primary = this.primaryStack.pop();
             const box = this.boxStack.pop(this.lastOffset);
+            if (box.afterBox && this.isInRootFlowChunk(box)) {
+              this.rootFlowChunkContentFound = true;
+            }
             let breakAfter: string | null = null;
             if (box.afterBox) {
               const afterPseudoBreakBefore =
@@ -1305,6 +1394,14 @@ export class Styler implements AbstractStyler {
       if (cursor.node.nodeType != 1) {
         this.lastOffset += cursor.node.textContent.length;
         this.boxStack.encounteredTextNode(cursor.node);
+        if (
+          !this.rootFlowChunkContentFound &&
+          this.isInRootFlowChunk(this.boxStack.lastBox()) &&
+          this.boxStack.lastBox().hasBox() &&
+          this.boxStack.isNonIgnorableText(cursor.node)
+        ) {
+          this.rootFlowChunkContentFound = true;
+        }
         if (this.primary) {
           this.offsetMap.addStuckRange(this.lastOffset);
         } else {
@@ -1369,6 +1466,13 @@ export class Styler implements AbstractStyler {
               box.breakBefore,
             );
           }
+        }
+        if (
+          this.isInRootFlowChunk(box) &&
+          box.hasBox() &&
+          (box.beforeBox || (elem !== this.root && elem !== this.xmldoc.body))
+        ) {
+          this.rootFlowChunkContentFound = true;
         }
         const blockStartOffset = this.boxStack.nearestBlockStartOffset(box);
 

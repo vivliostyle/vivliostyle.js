@@ -3175,14 +3175,51 @@ export class StyleInstance
     }
   }
 
-  noMorePrimaryFlows(cp: Vtree.LayoutPosition): boolean {
-    for (const flowName in this.primaryFlows) {
-      const flowPosition = cp.flowPositions[flowName];
-      if (flowPosition && flowPosition.positions.length > 0) {
+  /**
+   * Returns if the primary flows have no more content to lay out.
+   * @param checkRootFlowChunk If true, the flow chunk of the root element is
+   *     not counted when it has no content of its own, which may style the
+   *     rest of the document to find out. Otherwise it is always counted.
+   */
+  noMorePrimaryFlows(
+    cp: Vtree.LayoutPosition,
+    checkRootFlowChunk?: boolean,
+  ): boolean {
+    let remaining = this.remainingPrimaryFlowChunks(cp);
+    if (remaining === "root") {
+      // A root element whose content was all moved into other flows has
+      // nothing left to lay out, so it must not generate a page of its own.
+      // (Issue #434)
+      if (!checkRootFlowChunk || this.styler.rootFlowChunkHasContent()) {
         return false;
       }
+      // Styling ahead to find that out may have encountered more flow chunks.
+      remaining = this.remainingPrimaryFlowChunks(cp);
     }
-    return true;
+    return remaining !== "other";
+  }
+
+  /**
+   * Returns what remains in the primary flows: nothing ("none"), only the flow
+   * chunk of the root element ("root"), or another flow chunk ("other").
+   */
+  private remainingPrimaryFlowChunks(
+    cp: Vtree.LayoutPosition,
+  ): "none" | "root" | "other" {
+    let remaining: "none" | "root" = "none";
+    for (const flowName in this.primaryFlows) {
+      const flowPosition = cp.flowPositions[flowName];
+      if (!flowPosition) {
+        continue;
+      }
+      for (const position of flowPosition.positions) {
+        if (position.flowChunk.element !== this.styler.root) {
+          return "other";
+        }
+        remaining = "root";
+      }
+    }
+    return remaining;
   }
 
   private hasSameFlowPositions(
@@ -3485,6 +3522,10 @@ export class StyleInstance
             }
           });
         }
+        // Check this while cp is still the current layout position: the check
+        // may style the rest of the document, and the flow chunks found there
+        // must be added to cp.
+        const noMorePrimaryFlows = this.noMorePrimaryFlows(cp, true);
         this.currentLayoutPosition = this.layoutPositionAtPageStart = null;
         this.encounteredFlowChunks = [];
         cp.highestSeenOffset = this.styler.getReachedOffset();
@@ -3493,10 +3534,7 @@ export class StyleInstance
         if (attachedPageFloatLayoutContext) {
           releaseBreakPositions(attachedPageFloatLayoutContext);
         }
-        if (
-          this.noMorePrimaryFlows(cp) &&
-          !this.hasActiveRootPageFloatLayoutContext()
-        ) {
+        if (noMorePrimaryFlows && !this.hasActiveRootPageFloatLayoutContext()) {
           cp = null;
         }
         frame.finish(cp);
