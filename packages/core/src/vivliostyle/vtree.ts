@@ -872,7 +872,11 @@ export class NodeContext implements Vtree.NodeContext {
     // A float or footnote context inside a pseudo-element shadow is always a
     // descended one: restored heads keep the constructor's default float
     // fields and live roots carry no shadow context.
+    // The position after such a float (its anchor) is not replaced with the
+    // host element: "after the host" would skip the host's content following
+    // a ::before float when layout resumes there. (Issue #747)
     const floatInPseudoContent =
+      !this.after &&
       this.shadowType === Vtree.ShadowType.ROOTLESS &&
       (this.floatReference !== PageFloats.FloatReference.INLINE ||
         this.floatSide === "footnote") &&
