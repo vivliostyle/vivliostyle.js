@@ -1,3 +1,19 @@
+- category: Footnotes
+  title: "Footnote and page float on ::before pseudo element (Issue #747)"
+  file: footnotes/footnote-and-page-float-on-before-pseudo.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2284 (15 pages, unchanged). Stable fails sections 3, 4 and 7: it leaves "TEST-SPAN" alone at
+    the end of page 4 and moves its text to page 5, lets the text overlap the bottom page float on page 6, and (with
+    the CI fonts) leaves "Lorem ipsum" alone at the end of page 13 with the rest of its line on page 14. Now the text
+    after each ::before float stays with it and nothing overlaps.
+  approvedViewer: git-fix-747-float-on-before-pseudo  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-and-page-float-on-before-pseudo.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/footnotes/footnote-and-page-float-on-before-pseudo.html&zoom=1&spread=false
 - category: Page breaks
   title: "Text before a forced break keeps the break from moving to the document start (PR #2283)"
   file: page_breaks/text-before-forced-break.html
