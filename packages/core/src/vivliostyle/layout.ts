@@ -4801,6 +4801,31 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       return sawOutOfFlowSibling;
     }
 
+    // Check the overflow at lastAfterNodeContext when in-flow content starts,
+    // and save a break position there. The anchor of a page float or
+    // footnote followed by inline-level content with no block-level leading
+    // edge in between is on the same line as that content, so the edge after
+    // the anchor is not a break opportunity: a break there would split the
+    // line or leave an empty fragment (e.g., a lone list marker) before the
+    // content. Only the overflow is checked there. (Issue #747)
+    const checkOverflowAndSaveBreakBeforeContent = (): boolean => {
+      if (
+        lastAfterNodeContext &&
+        leadingEdgeContexts.every((c) => c.inline) &&
+        LayoutHelper.isSpecialNodeContext(lastAfterNodeContext) &&
+        (lastAfterNodeContext.floatSide === "footnote" ||
+          PageFloats.isPageFloat(lastAfterNodeContext.floatReference))
+      ) {
+        return this.checkOverflowAndSaveEdge(lastAfterNodeContext, null);
+      }
+      return this.checkOverflowAndSaveEdgeAndBreakPosition(
+        lastAfterNodeContext,
+        null,
+        true,
+        breakAtTheEdge,
+      );
+    };
+
     const processForcedBreak = (current: Vtree.RenderedNodeContext) => {
       const target = leadingEdgeContexts[0] || current;
       nodeContext = target;
@@ -4847,27 +4872,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // all starting edges of the box
                 if (needForcedBreak()) {
                   processForcedBreak(rendered);
-                } else if (
-                  // The anchor of a page float or footnote followed by
-                  // inline content with no block-level leading edge in
-                  // between is on the same line as that content, so the
-                  // edge after the anchor is not a break opportunity: a break
-                  // there would split the line or leave an empty fragment
-                  // (e.g., a lone list marker) before the content. Only
-                  // check the overflow there. (Issue #747)
-                  lastAfterNodeContext &&
-                  leadingEdgeContexts.every((c) => c.inline) &&
-                  LayoutHelper.isSpecialNodeContext(lastAfterNodeContext) &&
-                  (lastAfterNodeContext.floatSide === "footnote" ||
-                    PageFloats.isPageFloat(lastAfterNodeContext.floatReference))
-                    ? this.checkOverflowAndSaveEdge(lastAfterNodeContext, null)
-                    : this.checkOverflowAndSaveEdgeAndBreakPosition(
-                        lastAfterNodeContext,
-                        null,
-                        true,
-                        breakAtTheEdge,
-                      )
-                ) {
+                } else if (checkOverflowAndSaveBreakBeforeContent()) {
                   nodeContext = (
                     this.stopAtOverflow
                       ? lastAfterNodeContext || nodeContext
@@ -4994,12 +4999,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 if (needForcedBreak()) {
                   processForcedBreak(rendered);
                 } else if (
-                  this.checkOverflowAndSaveEdgeAndBreakPosition(
-                    lastAfterNodeContext,
-                    null,
-                    true,
-                    breakAtTheEdge,
-                  ) ||
+                  checkOverflowAndSaveBreakBeforeContent() ||
                   !allowLayout(nodeContext)
                 ) {
                   // overflow
@@ -5167,14 +5167,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
                   processForcedBreak(elementContext);
-                } else if (
-                  this.checkOverflowAndSaveEdgeAndBreakPosition(
-                    lastAfterNodeContext,
-                    null,
-                    true,
-                    breakAtTheEdge,
-                  )
-                ) {
+                } else if (checkOverflowAndSaveBreakBeforeContent()) {
                   // overflow
                   nodeContext = (
                     this.stopAtOverflow
