@@ -416,22 +416,18 @@ export class BoxStack {
     return Vtree.Whitespace.IGNORE;
   }
 
+  /**
+   * Text that cannot be ignored as whitespace ends the block start and the
+   * flow start, so that a following forced break is not propagated to them.
+   */
   encounteredTextNode(node: Node) {
-    const box = this.lastBox();
     if (
-      (node.nodeType === Node.TEXT_NODE ||
-        node.nodeType === Node.CDATA_SECTION_NODE) &&
       (this.atBlockStart || this.atFlowStart) &&
-      box.hasBox()
+      this.isNonIgnorableText(node) &&
+      this.lastBox().hasBox()
     ) {
-      const whitespaceValue = box
-        .styleValue("white-space", Css.ident.normal)
-        .toString();
-      const whitespace = Vtree.whitespaceFromPropertyValue(whitespaceValue);
-      if (whitespace && !Vtree.canIgnore(node, whitespace)) {
-        this.atBlockStart = false;
-        this.atFlowStart = false;
-      }
+      this.atBlockStart = false;
+      this.atFlowStart = false;
     }
   }
 
