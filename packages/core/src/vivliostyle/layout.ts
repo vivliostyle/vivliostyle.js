@@ -5432,7 +5432,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (this.stopAtOverflow && this.overflown) {
       return Task.newResult(chunkPosition as Vtree.ChunkPosition);
     }
-    if (this.isFullWithPageFloats()) {
+    if (this.isZeroBlockSizeRegion()) {
+      // A zero block-size region (e.g., an EAL partition with `height: 0`)
+      // can still hold zero block-size content, such as empty blocks before a
+      // forced break, but must never take non-fitting content. (Issue #391)
+      this.forceNonfitting = false;
+    } else if (this.isFullWithPageFloats()) {
       if (
         chunkPosition.primary.after &&
         chunkPosition.primary.steps.length === 1
@@ -5538,6 +5543,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
 
   isFullWithPageFloats(): boolean {
     return this.pageFloatLayoutContext.isColumnFullWithPageFloats(this);
+  }
+
+  /**
+   * Whether this is a page-level region whose own block size is zero, as
+   * opposed to one whose space is used up by page floats.
+   */
+  private isZeroBlockSizeRegion(): boolean {
+    return (
+      (this.vertical ? this.width : this.height) === 0 &&
+      !this.pseudoParent &&
+      !this.isFootnote &&
+      !(this instanceof PageFloatArea)
+    );
   }
 
   getMaxBlockSizeOfPageFloats(): number {

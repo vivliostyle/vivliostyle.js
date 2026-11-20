@@ -1,0 +1,127 @@
+<!-- Test case for Issue #391: a zero-height EAL partition must take the zero block-size start of its flow -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>EAL zero-height flow partition</title>
+    <style>
+      @page {
+        size: 148mm 105mm;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        font: 14px/1.4 Georgia, "Times New Roman", serif;
+      }
+
+      section.chapter {
+        break-before: right;
+      }
+
+      section.chapter::before {
+        content: "";
+        display: block;
+      }
+
+      section.chapter > h1 {
+        break-before: right;
+        margin: 0;
+        font-size: 28px;
+      }
+
+      section.sect > h2 {
+        break-before: page;
+        margin: 0 0 0.5em;
+        font-size: 20px;
+      }
+
+      p {
+        margin: 0 0 0.5em;
+      }
+
+      @-epubx-page-template {
+        section.chapter > h1 {
+          -epubx-flow-into: chapter-title-flow;
+        }
+
+        @-epubx-page-master chapter-title {
+          -epubx-utilization: 0.05;
+          background: #ddeeff;
+
+          @-epubx-partition {
+            -epubx-flow-from: chapter-title-flow;
+            -epubx-required: true;
+            top: 10mm;
+            left: 10mm;
+            right: 10mm;
+            bottom: 10mm;
+          }
+
+          /* Takes the empty start of the chapter (up to the forced break)
+             so that the chapter text starts on the next page. */
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            top: 0;
+            left: 10mm;
+            right: 10mm;
+            height: 0;
+          }
+        }
+
+        @-epubx-page-master chapter-page {
+          @-epubx-partition {
+            -epubx-flow-from: body;
+            -epubx-required: true;
+            top: 10mm;
+            left: 10mm;
+            right: 10mm;
+            bottom: 18mm;
+          }
+
+          @-epubx-partition {
+            content: "Page " counter(page);
+            left: 10mm;
+            right: 10mm;
+            bottom: 8mm;
+            height: 6mm;
+            font: 12px/6mm Arial, sans-serif;
+            text-align: center;
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="chapter">
+      <h1>Chapter 1 (page 1)</h1>
+      <section class="sect">
+        <h2>Section 1.1 (page 2)</h2>
+        <p>
+          This section has <code>break-before: page</code>. It must start on
+          page 2, right after the chapter title page. There must be no blank
+          page and no page with only a page number before it.
+        </p>
+        <p>
+          The chapter title page has a zero-height partition that takes the
+          empty start of the chapter flow (the chapter's empty
+          <code>::before</code> block) up to the forced break.
+        </p>
+      </section>
+    </section>
+    <section class="chapter">
+      <h1>Chapter 2 (page 3)</h1>
+      <section>
+        <p>
+          Chapter 2 text (page 4). This text has no forced break before it, so
+          it does not fit in the zero-height partition of the chapter title
+          page. It must be moved to page 4 and must not be lost.
+        </p>
+      </section>
+    </section>
+  </body>
+</html>
