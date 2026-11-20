@@ -1,3 +1,22 @@
+- category: Running elements
+  title: "No empty page after documents whose content is all in named flows with Adaptive Layout (Issue #434)"
+  file:
+    - eal-flowed-out-chapters/ch1.html
+    - eal-flowed-out-chapters/ch2.html
+    - eal-flowed-out-chapters/ch3.html
+    - eal-flowed-out-chapters/ch4.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2282 (13 to 10 pages). Stable adds an empty page after chapter 1 (then a blank page so that
+    chapter 2 starts on a right page) and an empty last page, because the root element's flow chunk with all its
+    content flowed out stays pending. Now only the blank page 6 required before chapter 3 remains.
+  approvedViewer: git-fix-issue434-empty-root-flow-chunk  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch1.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch2.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch3.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch4.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch1.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch2.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch3.html&src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/eal-flowed-out-chapters/ch4.html&zoom=1&spread=false
 - category: Page breaks
   title: "Page break between lines of inline-blocks (PR #2281)"
   file: inline-block-page-break.html
