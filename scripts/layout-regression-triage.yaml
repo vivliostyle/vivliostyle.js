@@ -1,3 +1,19 @@
+- category: Positioning and fragmentation
+  title: "Empty absolutely positioned element in inline text at a page break (Issue #2285)"
+  file: empty-absolute-in-inline-page-break.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2287 (6 pages, unchanged). Stable fails the first two lists: it ends page 1 with "4. Lorem
+    ipsum" and page 3 with "4. Lorem ipsum dolor", and repeats that text at the top of the next page. Now items 1-3 of
+    each list stay on its first page and item 4 starts the next one. The third list (block-level text after the empty
+    element) is the same as stable.
+  approvedViewer: https://vivliostyle-git-fix-issue2285-empty-abspos-p-c51b13-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/empty-absolute-in-inline-page-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/empty-absolute-in-inline-page-break.html&zoom=1&spread=false
 - category: Footnotes
   title: "Footnote and page float on ::before pseudo element (Issue #747)"
   file: footnotes/footnote-and-page-float-on-before-pseudo.html
