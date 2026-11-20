@@ -880,15 +880,19 @@ export class StyleInstance
     let after = position.after;
     let k = 0;
     while (node.ownerDocument != this.xmldoc.document) {
-      // A position in generated content maps to its host element: to the
-      // end of the host for ::after content (e.g. after the anchor of a
-      // float on ::after), otherwise to its start. (Issue #747)
-      const generatedNode = node;
+      // A position in generated content maps to the start of its host
+      // element, except the position after a consumed ::after (e.g. after
+      // the anchor of a float on ::after), which maps to the host's end.
+      // Content of an ::after not yet consumed still belongs to the host.
+      // (Issue #747)
+      const consumedAfterPseudo =
+        k === 0 &&
+        position.after &&
+        node.nodeType === 1 &&
+        PseudoElement.getPseudoName(node as Element) === "after";
       k++;
       node = position.steps[k].node;
-      after =
-        generatedNode.nodeType === 1 &&
-        PseudoElement.getPseudoName(generatedNode as Element) === "after";
+      after = consumedAfterPseudo;
       offsetInNode = 0;
     }
     return this.xmldoc.getNodeOffset(node, offsetInNode, after);
