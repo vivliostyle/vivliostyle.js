@@ -1398,6 +1398,11 @@ module.exports = [
           "Preserved newlines only in the body make pages (white-space inherited from html, Issue #434)",
       },
       {
+        file: "page_breaks/preserved-newlines-only-body-invalid-var.html",
+        title:
+          "Preserved newlines only in the body make pages (white-space inherited through an invalid var(), Issue #434)",
+      },
+      {
         file: "page_breaks/class_C_break_point.html",
         title: "Class C break point (PR #383)",
       },

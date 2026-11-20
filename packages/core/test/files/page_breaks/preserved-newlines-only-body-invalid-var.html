@@ -1,0 +1,30 @@
+<!-- Test case for Issue #434 review: newline-only text in the body with white-space: pre inherited from html through an invalid var() substitution must still make pages -->
+<!-- The html element has no text of its own (no whitespace around head and body), so only the body text can make pages. -->
+<!doctype html>
+<!-- prettier-ignore -->
+<html lang="en"><head>
+    <meta charset="UTF-8" />
+    <title>Preserved newlines only in the body, invalid var()</title>
+    <style>
+      @page {
+        size: 140px;
+        margin: 20px;
+        @bottom-center {
+          content: "Page " counter(page) " of " counter(pages);
+          font-size: 12px;
+        }
+      }
+      * {
+        margin: 0;
+      }
+      body {
+        --ws: 42;
+        white-space: var(--ws);
+      }
+      html {
+        white-space: pre;
+        font-size: 20px;
+        line-height: 20px;
+      }
+    </style>
+  </head><body>&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;&#10;</body></html>

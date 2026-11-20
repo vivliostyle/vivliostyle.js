@@ -406,11 +406,12 @@ export class BoxStack {
         // inherit, unset and rollback keywords: white-space is inherited.
         continue;
       }
-      // Unsupported values resolve to `normal`.
-      return (
-        Vtree.whitespaceFromPropertyValue(value.toString()) ??
-        Vtree.Whitespace.IGNORE
-      );
+      const whitespace = Vtree.whitespaceFromPropertyValue(value.toString());
+      if (whitespace !== null) {
+        return whitespace;
+      }
+      // An unsupported value (e.g. an invalid var() substitution) keeps the
+      // inherited value, as in ViewFactory.
     }
     return Vtree.Whitespace.IGNORE;
   }
