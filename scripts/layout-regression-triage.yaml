@@ -1,3 +1,18 @@
+- category: Page breaks
+  title: "Page break between lines of inline-blocks (PR #2281)"
+  file: inline-block-page-break.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2281 (18 to 16 pages). Stable splits an inline-block at each break in rows A, B and C
+    (an empty box at the top of the next page) and keeps no text line of the line-height: 0.6 paragraph. Now no box is
+    split, and every page matches its label.
+  approvedViewer: git-fix-inline-block-split  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/inline-block-page-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/inline-block-page-break.html&zoom=1&spread=false
 - category: Positioning and fragmentation
   title: "EAL zero-height flow partition takes the empty start of a flow (Issue #391)"
   file: eal-zero-height-flow-partition.html
