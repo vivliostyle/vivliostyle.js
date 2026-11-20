@@ -28,6 +28,10 @@
         display: block;
       }
 
+      section.chapter.float-first::before {
+        content: none;
+      }
+
       section.chapter > h1 {
         break-before: right;
         margin: 0;
@@ -42,6 +46,15 @@
 
       p {
         margin: 0 0 0.5em;
+      }
+
+      .float-box {
+        float: left;
+        width: 30mm;
+        height: 15mm;
+        margin: 0 4mm 2mm 0;
+        border: 1px solid #357;
+        font: 12px/1.2 Arial, sans-serif;
       }
 
       @-epubx-page-template {
@@ -122,6 +135,15 @@
           page. It must be moved to page 4 and must not be lost.
         </p>
       </section>
+    </section>
+    <section class="chapter float-first">
+      <h1>Chapter 3 (page 5)</h1>
+      <div class="float-box">Float (page 6)</div>
+      <p>
+        Chapter 3 starts with a float that does not fit in the zero-height
+        partition. The float and this text must be moved to page 6 and must
+        not be lost.
+      </p>
     </section>
   </body>
 </html>

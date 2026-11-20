@@ -1638,7 +1638,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const floatBoxTop = this.getRectBeforeEdge(floatBox);
 
       // TODO: subtract after margin when determining overflow.
-      if (!this.isOverflown(floatBoxEdge) || this.breakPositions.length == 0) {
+      // The first float is accepted even if it overflows, except in a zero
+      // block-size region, which must never take non-fitting content.
+      // (Issue #391)
+      if (
+        !this.isOverflown(floatBoxEdge) ||
+        (this.breakPositions.length == 0 && !this.isZeroBlockSizeRegion())
+      ) {
         // no overflow
         this.killFloats();
         const parentBlockStart = this.pseudoParent
