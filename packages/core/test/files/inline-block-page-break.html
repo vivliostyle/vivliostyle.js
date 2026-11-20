@@ -64,8 +64,25 @@
       }
 
       .second,
-      .third {
+      .third,
+      .fourth {
         break-before: page;
+      }
+
+      /* A box in an inline wrapper, after text on the same line */
+      .wrapped-box {
+        display: inline-block;
+        vertical-align: top;
+        width: 20mm;
+        height: 40mm;
+        background: #cff0f0;
+      }
+
+      .wrapped-box::before {
+        content: "";
+        display: block;
+        height: 5mm;
+        background: red;
       }
 
       .filler {
@@ -121,5 +138,16 @@
       <div></div>
       <div></div>
     </div>
+    <div class="fourth">
+      <p>
+        Page 9: the next line, with text and a box in an inline wrapper, does
+        not fit on this page.
+      </p>
+      <div class="filler"></div>
+    </div>
+    <p>
+      Page 10: text before <span><span class="wrapped-box"></span></span> and
+      after the box.
+    </p>
   </body>
 </html>

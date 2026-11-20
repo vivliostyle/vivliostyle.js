@@ -3898,11 +3898,13 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * (as in `findAcceptableBreakInside()`, Issue #1459).
    * Returns null when that line starts with other content or nothing
    * precedes it in this column, so the usual break search applies.
-   * This has no side effects; the caller clears the overflown view nodes.
+   * Also returns the penalty of that break, to compare it with the saved
+   * break positions. This has no side effects; the caller clears the
+   * overflown view nodes.
    */
   private findBreakBeforeOverflowingAtomicInline(
     overflownNodeContext: Vtree.NodeContext,
-  ): Vtree.NodeContext | null {
+  ): { nodeContext: Vtree.NodeContext; penalty: number } | null {
     const atomicInline =
       LayoutHelper.findOutermostSpecialInlineNodeContext(overflownNodeContext);
     if (!atomicInline) {
@@ -3971,17 +3973,18 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         break;
       }
     }
-    const previous = previousContent(nodeContext);
-    if (previous && isOnSameLine(previous)) {
-      // The line starts with other content, e.g. text.
-      return null;
-    }
     while (
       nodeContext.inline &&
       nodeContext.parent &&
       !previousContent(nodeContext)
     ) {
       nodeContext = nodeContext.parent;
+    }
+    const previous = previousContent(nodeContext);
+    if (previous && isOnSameLine(previous)) {
+      // The line starts with other content, e.g. text before an inline
+      // wrapper of the box.
+      return null;
     }
     for (let nc: Vtree.NodeContext | null = nodeContext; ; nc = nc.parent) {
       if (!nc) {
@@ -3992,7 +3995,24 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
         break;
       }
     }
-    return nodeContext;
+
+    // Penalty of the break, as in EdgeBreakPosition.getMinBreakPenalty(): a
+    // break before the block also has the avoid value at its edge (e.g.
+    // `break-after: avoid` on a preceding heading), from the saved edge.
+    let penalty = nodeContext.parent?.breakPenalty ?? 0;
+    if (!nodeContext.inline) {
+      const edge = this.breakPositions.find(
+        (bp): bp is BreakPosition.EdgeBreakPosition =>
+          bp instanceof BreakPosition.EdgeBreakPosition &&
+          (bp.position.after
+            ? bp.position.viewNode === previous
+            : bp.position.viewNode === nodeContext.viewNode),
+      );
+      if (edge && Break.isAvoidBreakValue(edge.breakOnEdge)) {
+        penalty++;
+      }
+    }
+    return { nodeContext, penalty };
   }
 
   /**
@@ -5805,9 +5825,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // lower penalty (e.g. before a box with `break-inside:
                 // avoid`) is preferred.
                 const bp = breakBeforeAtomicInline
-                  ? (breakBeforeAtomicInline.parent?.breakPenalty ?? 0) > 0
+                  ? breakBeforeAtomicInline.penalty > 0
                     ? this.findAcceptableBreakPosition(
-                        breakBeforeAtomicInline.parent.breakPenalty - 1,
+                        breakBeforeAtomicInline.penalty - 1,
                       )
                     : null
                   : this.findAcceptableBreakPosition();
@@ -5815,7 +5835,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   nodeContext = bp.nodeContext;
                   bp.breakPosition.breakPositionChosen(this);
                 } else if (breakBeforeAtomicInline) {
-                  nodeContext = breakBeforeAtomicInline;
+                  nodeContext = breakBeforeAtomicInline.nodeContext;
                   this.clearOverflownViewNodes(nodeContext, false);
                 } else {
                   nodeContext = null;

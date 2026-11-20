@@ -1340,7 +1340,7 @@ module.exports = [
       },
       {
         file: "inline-block-page-break.html",
-        title: "Page break between lines of inline-blocks",
+        title: "Page break between lines of inline-blocks (PR #2281)",
       },
       {
         file: "page_breaks/truncate_margin_at_breaks.html",
