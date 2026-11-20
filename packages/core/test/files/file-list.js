@@ -1201,6 +1201,11 @@ module.exports = [
         title:
           "z-index on @page and page-margin boxes (bare text after float, Issue #1786)",
       },
+      {
+        file: "z-index-at-page-bare-text-empty-inline.html",
+        title:
+          "z-index on @page and page-margin boxes (bare text after an empty inline element and a float, Issue #2285)",
+      },
     ],
   },
   {
@@ -1488,6 +1493,11 @@ module.exports = [
         file: "absolute-inline-child-page-break-vertical.html",
         title:
           "Absolutely positioned span in an inline element at a page break (vertical, Issue #2162)",
+      },
+      {
+        file: "empty-absolute-in-inline-page-break.html",
+        title:
+          "Empty absolutely positioned element in inline text at a page break (Issue #2285)",
       },
       {
         file: "absolute-inline-line-numbers-horizontal.html",

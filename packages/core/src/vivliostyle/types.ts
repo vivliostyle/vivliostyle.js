@@ -497,6 +497,7 @@ export namespace Layout {
       position: Vtree.NodeContext,
       breakAtEdge: string | null,
       overflows: boolean,
+      breakBeforeText?: boolean,
     ): void;
     /**
      * @param checkPoints array of breaking points for breakable block
