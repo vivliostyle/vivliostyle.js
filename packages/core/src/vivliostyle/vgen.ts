@@ -2682,6 +2682,11 @@ export class ViewFactory
             if (attributeName == Base.STYLE_KEYS_ATTR) {
               continue; // the keys come from the styles that we set
             }
+            if (attributeName === "data-viv-float") {
+              // Marks the CSS floats laid out by Column.layoutFloat(); one in
+              // the source must not make an element a float. (Issue #2285)
+              continue;
+            }
             if (
               attributeName === "media" &&
               tag === "source" &&

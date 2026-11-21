@@ -161,13 +161,6 @@ export class BlockLayoutProcessor implements LayoutProcessor {
     if (!nodeContext.viewNode.parentNode) {
       return;
     }
-    // Fix for issue #740
-    if (
-      nodeContext.shadowType === Vtree.ShadowType.ROOTLESS &&
-      LayoutHelper.isSpecialNodeContext(nodeContext)
-    ) {
-      return;
-    }
     let node = nodeContext.viewNode;
     node = LayoutHelper.textSpacingWrapperOf(node) ?? node;
     const parentNode = node.parentNode;

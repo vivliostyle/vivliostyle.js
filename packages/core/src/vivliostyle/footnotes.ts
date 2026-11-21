@@ -309,12 +309,19 @@ export class LineFootnotePolicyLayoutConstraint
   }
 
   allowLayout(nodeContext: Vtree.NodeContext): boolean {
+    // Convert the before position of the call: a call in pseudo-element
+    // content is registered by its host's position, which toNodePosition()
+    // only substitutes for the before position. (Issue #747)
+    let callContext = nodeContext;
+    if (callContext.floatSide === "footnote" && callContext.after) {
+      callContext = callContext.copy().modify();
+      callContext.after = false;
+    }
     if (
-      nodeContext.floatSide === "footnote" &&
-      this.pageFloatLayoutContext?.findPageFloatByNodePosition({
-        ...nodeContext.toNodePosition(),
-        after: false,
-      }) === this.footnote
+      callContext.floatSide === "footnote" &&
+      this.pageFloatLayoutContext?.findPageFloatByNodePosition(
+        callContext.toNodePosition(),
+      ) === this.footnote
     ) {
       // Cell pseudo-columns may shorten the source position, and re-layout
       // may move the call before its previous line. Both edges of the call

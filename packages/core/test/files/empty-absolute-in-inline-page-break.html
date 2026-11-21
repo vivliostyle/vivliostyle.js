@@ -1,0 +1,52 @@
+<!doctype html>
+<!-- Test case for Issue #2285: an empty position: absolute element at the
+     start of a line must not make the page break mid-line and repeat text.
+     Every list item has three lines (fixed by <br>) of a fixed line height,
+     so the page breaks do not depend on the fonts. Two lines of the fourth
+     item fit on the first page of each list, and orphans/widows (2) do not
+     allow a break inside it.
+     Expected: each of the three lists puts items 1-3 on its first page and
+     4-6 on the next one; no page ends with "Lorem ipsum" or a list marker
+     alone, and no item appears twice. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Empty absolute element in inline text at a page break</title>
+    <style>
+      @page { size: 400px 272px; margin: 0; }
+      body { margin: 0; font-size: 16px; line-height: 24px; }
+      ul { margin: 0; }
+      ul + ul { break-before: page; }
+      .abspos { display: block; position: absolute; }
+    </style>
+  </head>
+  <body>
+    <!-- Out-of-flow element inside an inline element before the text -->
+    <ul>
+      <li><span><span class="abspos"></span>1. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+      <li><span><span class="abspos"></span>2. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+      <li><span><span class="abspos"></span>3. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+      <li><span><span class="abspos"></span>4. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+      <li><span><span class="abspos"></span>5. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+      <li><span><span class="abspos"></span>6. Lorem ipsum</span> dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Out-of-flow element at the start of the list item -->
+    <ul>
+      <li><span class="abspos"></span>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="abspos"></span>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="abspos"></span>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="abspos"></span>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="abspos"></span>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="abspos"></span>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Out-of-flow element before a block-level box in the list item -->
+    <ul>
+      <li><span class="abspos"></span><div>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="abspos"></span><div>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="abspos"></span><div>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="abspos"></span><div>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="abspos"></span><div>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="abspos"></span><div>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+    </ul>
+  </body>
+</html>

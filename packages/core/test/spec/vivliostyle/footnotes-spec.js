@@ -19,6 +19,7 @@ import * as css from "../../../src/vivliostyle/css";
 import * as footnotes from "../../../src/vivliostyle/footnotes";
 import * as layoutProcessor from "../../../src/vivliostyle/layout-processor";
 import * as pageFloats from "../../../src/vivliostyle/page-floats";
+import * as types from "../../../src/vivliostyle/types";
 import * as vtree from "../../../src/vivliostyle/vtree";
 
 describe("footnotes", function () {
@@ -121,6 +122,28 @@ describe("footnotes", function () {
       expect(constraint.allowLayout(call)).toBe(false);
       call.after = true;
       expect(constraint.allowLayout(call)).toBe(false);
+    });
+
+    it("keeps both edges of a forbidden pseudo-element call constrained", function () {
+      // Issue #747: a call in pseudo-element content is registered by its
+      // host's position, which toNodePosition() substitutes only for the
+      // before position.
+      var host = new vtree.NodeContext(
+        document.createElement("span"),
+        null,
+        0,
+        formattingContext,
+      );
+      var call = currentCall(document.createElement("span"), host);
+      call.shadowType = types.Vtree.ShadowType.ROOTLESS;
+      call.shadowContext = { styler: { style: { _pseudos: {} } } };
+      var float = registerFootnote(call.toNodePosition());
+      var constraint = forbidFootnote(float, viewNode(90, 100));
+
+      expect(constraint.allowLayout(call)).toBe(false);
+      call.after = true;
+      expect(constraint.allowLayout(call)).toBe(false);
+      expect(call.after).toBe(true);
     });
 
     it("allows another footnote that uses the same shadow template with a different owner", function () {
