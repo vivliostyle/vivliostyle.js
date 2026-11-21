@@ -240,8 +240,36 @@ describe("base", function () {
   describe("style keys", function () {
     var element;
     var keys = function () {
-      var value = element.getAttribute(module.STYLE_KEYS_ATTR);
-      return value === null ? null : value.split(" ").sort();
+      return keysOf(element);
+    };
+    // The keys of an element without the mark of an element whose keys are
+    // taken from the text of its style attribute.
+    var keysOf = function (target) {
+      var value = target.getAttribute(module.STYLE_KEYS_ATTR);
+      var list = (value || "").split(" ").filter(function (key) {
+        return key && key !== "*";
+      });
+      return list.length ? list.sort() : null;
+    };
+    var substrings = [
+      ["border", "border"],
+      ["outline", "outline"],
+      ["rule", "rule"],
+      ["text-decoration", "text-decoration"],
+      ["border-collapse: collapse", "border-collapse:collapse"],
+      ["--viv-marker-color", "--viv-marker-color"],
+    ];
+    // The keys that the former [style*="..."] selectors matched.
+    var keysOfStyleText = function (target) {
+      var text = target.getAttribute("style") || "";
+      var list = substrings
+        .filter(function (entry) {
+          return text.indexOf(entry[0]) >= 0;
+        })
+        .map(function (entry) {
+          return entry[1];
+        });
+      return list.length ? list.sort() : null;
     };
 
     beforeEach(function () {
@@ -380,12 +408,8 @@ describe("base", function () {
         '<span style="border: 1px solid">a</span><span style="color: red" data-viv-style="border">b</span><span data-viv-style="border-collapse:collapse">c</span>';
       module.updateStyleKeysFromStyleAttributes(element);
       expect(keys()).toEqual(["text-decoration"]);
-      expect(element.children[0].getAttribute(module.STYLE_KEYS_ATTR)).toBe(
-        "border",
-      );
-      expect(element.children[1].hasAttribute(module.STYLE_KEYS_ATTR)).toBe(
-        false,
-      );
+      expect(keysOf(element.children[0])).toEqual(["border"]);
+      expect(keysOf(element.children[1])).toBe(null);
       expect(element.children[2].hasAttribute(module.STYLE_KEYS_ATTR)).toBe(
         false,
       );
@@ -428,6 +452,145 @@ describe("base", function () {
       element.setAttribute("style", "background: red");
       module.updateStyleKeysFromStyleAttributes(element);
       expect(keys()).toBe(null);
+    });
+
+    it("follows the style attribute when the browser rewrites it", function () {
+      // The browser writes a style attribute from the source anew when a
+      // declaration changes.
+      element.innerHTML = '<table style="border-collapse:collapse"></table>';
+      var table = element.firstChild;
+      module.updateStyleKeysFromStyleAttributes(element);
+      expect(keysOf(table)).toEqual(["border"]);
+      module.setCSSProperty(table, "color", "red");
+      expect(table.getAttribute("style")).toContain(
+        "border-collapse: collapse",
+      );
+      expect(keysOf(table)).toEqual(["border", "border-collapse:collapse"]);
+      expect(keysOf(table.cloneNode(true))).toEqual(keysOf(table));
+    });
+
+    it("has no key for a value that the style attribute leaves out", function () {
+      // The view generation sets the longhand properties of
+      // `background: red` one by one. Browsers combine them into a
+      // declaration without `background-clip: border-box`. (PR #2286)
+      [
+        ["background-image", "none"],
+        ["background-position-x", "0%"],
+        ["background-position-y", "0%"],
+        ["background-size", "auto"],
+        ["background-repeat", "repeat"],
+        ["background-attachment", "scroll"],
+        ["background-origin", "padding-box"],
+        ["background-clip", "border-box"],
+        ["background-color", "red"],
+      ].forEach(function (declaration) {
+        module.setCSSProperty(element, declaration[0], declaration[1]);
+        expect(keys()).toEqual(keysOfStyleText(element));
+      });
+      expect(element.style.backgroundClip).toBe("border-box");
+
+      // A value that is not valid changes nothing.
+      module.setCSSProperty(element, "background-clip", "border-bogus");
+      expect(keys()).toEqual(keysOfStyleText(element));
+      module.setCSSProperty(element, "background-image", "");
+      expect(keys()).toEqual(keysOfStyleText(element));
+
+      // The same when the shorthand property is set.
+      var other = document.createElement("div");
+      module.setCSSProperty(other, "background", "red");
+      expect(keysOf(other)).toEqual(keysOfStyleText(other));
+      module.setCSSProperty(other, "background-image", "");
+      expect(keysOf(other)).toEqual(keysOfStyleText(other));
+    });
+
+    it("resolves an escape in a value", function () {
+      module.setCSSProperty(element, "box-sizing", "b\\6frder-box");
+      expect(element.style.boxSizing).toBe("border-box");
+      expect(keys()).toEqual(["border"]);
+    });
+
+    it("has the keys of the style attribute after any sequence of changes", function () {
+      var changes = [
+        ["background", "red"],
+        ["background", ""],
+        ["background-color", "red"],
+        ["background-color", ""],
+        ["background-image", "none"],
+        ["background-image", ""],
+        ["background-clip", "border-box"],
+        ["background-clip", "padding-box"],
+        ["background-clip", "border-bogus"],
+        ["background-clip", ""],
+        ["background-origin", "border-box"],
+        ["background-origin", ""],
+        ["box-sizing", "border-box"],
+        ["box-sizing", "content-box"],
+        ["box-sizing", ""],
+        ["border", "1px solid red"],
+        ["border", ""],
+        ["border-top-style", "solid"],
+        ["border-top-style", ""],
+        ["border-collapse", "collapse"],
+        ["border-collapse", "COLLAPSE"],
+        ["border-collapse", "separate"],
+        ["border-collapse", ""],
+        ["outline-style", "dotted"],
+        ["outline", ""],
+        ["column-rule-style", "solid"],
+        ["column-rule-style", ""],
+        ["text-decoration-line", "underline"],
+        ["text-decoration-line", ""],
+        ["transition-property", "border-color"],
+        ["transition", "none"],
+        ["transition", ""],
+        ["font-family", "rule"],
+        ["font-family", ""],
+        ["color", "red"],
+        ["color", ""],
+        ["all", "initial"],
+        ["all", ""],
+        ["--viv-marker-color", "red"],
+        ["--alias", "var(--viv-marker-color)"],
+        ["--alias", "outline"],
+        ["--alias", "1"],
+      ];
+      // A fixed pseudo-random sequence.
+      var seed = 12345;
+      var next = function (count) {
+        seed = (seed * 1103515245 + 12345) % 2147483648;
+        return Math.floor((seed / 2147483648) * count);
+      };
+      for (var round = 0; round < 40; round++) {
+        var target = document.createElement("div");
+        var log = [];
+        for (var step = 0; step < 30; step++) {
+          var change = changes[next(changes.length)];
+          log.push(change.join(": "));
+          if (change[1] === "" && change[0].indexOf("--") === 0) {
+            module.removeCSSProperty(target, change[0]);
+          } else {
+            module.setCSSProperty(target, change[0], change[1]);
+          }
+          if (step === 15) {
+            target = target.cloneNode(true);
+          }
+          var actual = keysOf(target);
+          var expected = keysOfStyleText(target);
+          if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+            fail(
+              "keys " +
+                JSON.stringify(actual) +
+                " instead of " +
+                JSON.stringify(expected) +
+                ' for style "' +
+                target.getAttribute("style") +
+                '" after ' +
+                log.join("; "),
+            );
+            return;
+          }
+        }
+      }
     });
 
     it("knows every key that the stylesheets of the viewer document select on", function () {

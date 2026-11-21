@@ -558,10 +558,20 @@ const styleKeyPattern =
   /border|outline|rule|text-decoration|--viv-(?:marker-|footnote-white-space|initialLetter|firstLine)/;
 
 /**
- * The same for a value before the browser has parsed it, which makes
- * the keywords lowercase.
+ * The same for a value before the browser has parsed it, which makes the
+ * keywords lowercase and resolves escapes.
  */
-const styleKeyPatternForInput = new RegExp(styleKeyPattern.source, "i");
+const styleKeyPatternForInput = new RegExp(
+  `${styleKeyPattern.source}|\\\\`,
+  "i",
+);
+
+/**
+ * Marks an element whose style keys are taken from the text of its style
+ * attribute after every change, see setStyleDeclaration(). It is the first
+ * of the style keys, so that a clone of the element is marked as well.
+ */
+const CHECKED_AS_TEXT = "*";
 
 const noStyleKeys: readonly string[] = [];
 
@@ -586,9 +596,15 @@ function getStyleKeysOfText(text: string): readonly string[] {
  * Sets the style keys of an element from its style attribute, which the
  * browser keeps in step with the declarations of the inline style.
  */
-function updateStyleKeys(elem: Element): void {
+function updateStyleKeys(elem: Element, checkedAsText: boolean): void {
   const style = elem.getAttribute("style");
-  const keys = style ? getStyleKeysOfText(style).join(" ") : "";
+  let keys = "";
+  if (style) {
+    keys = getStyleKeysOfText(style).join(" ");
+    if (checkedAsText) {
+      keys = keys ? `${CHECKED_AS_TEXT} ${keys}` : CHECKED_AS_TEXT;
+    }
+  }
   if (!keys) {
     elem.removeAttribute(STYLE_KEYS_ATTR);
   } else if (elem.getAttribute(STYLE_KEYS_ATTR) !== keys) {
@@ -596,53 +612,49 @@ function updateStyleKeys(elem: Element): void {
   }
 }
 
-/** What setStyleDeclaration() needs to know about a property name. */
+/** What setStyleDeclaration() needs to know about a standard property. */
 type StylePropertyInfo = {
-  /** The name as the browser keeps it. */
+  /** The name under which the browser keeps the declaration. */
   name: string;
-  isCustom: boolean;
   /** Whether the name contains one of the substrings. */
   hasKeyInName: boolean;
-  /**
-   * Whether setting the property changes declarations with other names:
-   * a shorthand property or an alias. Found out when needed.
-   */
-  isSetUnderOtherNames?: boolean;
+  /** The longhand properties, if this is a shorthand property. */
+  longhands: string[] | null;
 };
 
 const stylePropertyInfos = new Map<string, StylePropertyInfo>();
 
-function getStylePropertyInfo(name: string): StylePropertyInfo {
-  let info = stylePropertyInfos.get(name);
+function getStylePropertyInfo(prop: string, doc: Document): StylePropertyInfo {
+  let info = stylePropertyInfos.get(prop);
   if (!info) {
-    const isCustom = name.startsWith("--");
-    // Only the names of custom properties are case-sensitive.
-    const actualName = isCustom ? name : name.toLowerCase();
-    info = {
-      name: actualName,
-      isCustom,
-      hasKeyInName: styleKeyPattern.test(actualName),
-    };
-    stylePropertyInfos.set(name, info);
+    // The names of standard properties are not case-sensitive.
+    let name = prop.toLowerCase();
+    const probe = (doc.createElementNS(NS.XHTML, "div") as HTMLElement).style;
+    probe.setProperty(name, "initial");
+    let longhands: string[] | null = null;
+    if (probe.length > 1 || name === "all") {
+      longhands = Array.from(probe);
+    } else if (probe.length === 1) {
+      name = probe.item(0); // differs for an alias
+    }
+    info = { name, hasKeyInName: styleKeyPattern.test(name), longhands };
+    stylePropertyInfos.set(prop, info);
   }
   return info;
-}
-
-function isSetUnderOtherNames(info: StylePropertyInfo, doc: Document): boolean {
-  if (info.isSetUnderOtherNames === undefined) {
-    const probe = (doc.createElementNS(NS.XHTML, "div") as HTMLElement).style;
-    probe.setProperty(info.name, "initial");
-    info.isSetUnderOtherNames =
-      info.name === "all" ||
-      probe.length > 1 ||
-      (probe.length === 1 && probe.item(0) !== info.name);
-  }
-  return info.isSetUnderOtherNames;
 }
 
 /**
  * Sets (or with an empty value removes) a declaration of an inline style
  * and keeps the style keys of the element up to date.
+ *
+ * The style keys have to be those of the style attribute as the browser
+ * writes it. For most declarations they follow from the declaration alone:
+ * a custom property is written as it is, and a name with a key keeps the key
+ * when the browser combines longhand properties into a shorthand property.
+ * A key in the value of a standard property does not: the browser leaves out
+ * `background-clip: border-box` when it writes `background: red`. An element
+ * that gets such a value is therefore marked, and from then on its keys are
+ * taken from the text of its style attribute after every change.
  */
 function setStyleDeclaration(
   elem: Element,
@@ -650,21 +662,55 @@ function setStyleDeclaration(
   prop: string,
   value: string,
 ): void {
-  const info = getStylePropertyInfo(prop);
-  const { name, isCustom, hasKeyInName } = info;
   const keysAttr = elem.getAttribute(STYLE_KEYS_ATTR);
+  if (keysAttr !== null && keysAttr.startsWith(CHECKED_AS_TEXT)) {
+    elemStyle.setProperty(prop, value);
+    updateStyleKeys(elem, true);
+    return;
+  }
+  const isCustom = prop.startsWith("--");
+  let name = prop;
+  let hasKeyInName: boolean;
+  let isSet = false;
+  if (isCustom) {
+    hasKeyInName = styleKeyPattern.test(prop);
+  } else {
+    const info = getStylePropertyInfo(prop, elem.ownerDocument);
+    name = info.name;
+    hasKeyInName = info.hasKeyInName;
+    let checkAsText =
+      !!value && name !== "box-sizing" && styleKeyPatternForInput.test(value);
+    if (!checkAsText && info.longhands) {
+      elemStyle.setProperty(name, value);
+      isSet = true;
+      checkAsText =
+        name === "all" ||
+        info.longhands.some(
+          (longhand) =>
+            longhand !== "box-sizing" &&
+            styleKeyPattern.test(elemStyle.getPropertyValue(longhand)),
+        );
+      if (!checkAsText && keysAttr !== null) {
+        // The shorthand property replaced or removed its longhand
+        // properties, whatever their keys were.
+        updateStyleKeys(elem, false);
+        return;
+      }
+    }
+    if (checkAsText) {
+      if (!isSet) {
+        elemStyle.setProperty(name, value);
+      }
+      updateStyleKeys(elem, true);
+      return;
+    }
+  }
+
   // The keys of the declaration that is replaced or removed. An element
   // without style keys has no declaration with a key. The value of a declared
   // custom property can be empty.
   let oldKeys = noStyleKeys;
   if (keysAttr !== null) {
-    if (!isCustom && isSetUnderOtherNames(info, elem.ownerDocument)) {
-      // A shorthand property replaces or removes its longhand properties,
-      // whatever their keys are.
-      elemStyle.setProperty(name, value);
-      updateStyleKeys(elem);
-      return;
-    }
     const oldValue = elemStyle.getPropertyValue(name);
     if (
       (oldValue || isCustom) &&
@@ -673,7 +719,9 @@ function setStyleDeclaration(
       oldKeys = getStyleKeysOfText(`${name}: ${oldValue}`);
     }
   }
-  elemStyle.setProperty(name, value);
+  if (!isSet) {
+    elemStyle.setProperty(name, value);
+  }
   if (!value && keysAttr === null) {
     return;
   }
@@ -690,7 +738,7 @@ function setStyleDeclaration(
   if (!isAccepted || oldKeys.some((key) => !newKeys.includes(key))) {
     // Another declaration may still have the key, or the declaration may not
     // be what was asked for: look at the whole style.
-    updateStyleKeys(elem);
+    updateStyleKeys(elem, false);
     return;
   }
   if (!newKeys.length) {
@@ -717,14 +765,16 @@ function setStyleDeclaration(
  * Sets the style keys of the elements of a subtree from their style
  * attributes, and removes the keys that do not come from them. For elements
  * that keep the attributes of the source instead of being styled through
- * setCSSProperty(), e.g. in a custom-rendered subtree.
+ * setCSSProperty(), e.g. in a custom-rendered subtree. The browser writes
+ * such a style attribute anew when a declaration changes, so the elements
+ * are marked as checked as text.
  */
 export function updateStyleKeysFromStyleAttributes(root: Element): void {
   if (root.hasAttribute("style") || root.hasAttribute(STYLE_KEYS_ATTR)) {
-    updateStyleKeys(root);
+    updateStyleKeys(root, true);
   }
   for (const elem of root.querySelectorAll(`[style], [${STYLE_KEYS_ATTR}]`)) {
-    updateStyleKeys(elem);
+    updateStyleKeys(elem, true);
   }
 }
 

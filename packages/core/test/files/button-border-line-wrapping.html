@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- The button has no border declaration, so it must keep the default border
+     width of the browser (2px on each side) and be 54px wide: the green
+     square fits beside the red button. A `border` style key from
+     `background-clip: border-box`, which the style attribute does not
+     contain, made the border 3px wide and the square wrap. (PR #2286) -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Button border and line wrapping</title>
+    <style>
+.line {
+  width: 65px;
+  font-size: 0;
+}
+button {
+  background: red;
+  padding: 0;
+  vertical-align: top;
+}
+button span,
+.square {
+  display: inline-block;
+  height: 10px;
+}
+button span {
+  width: 50px;
+}
+.square {
+  width: 10px;
+  background-color: green;
+  vertical-align: top;
+}
+p {
+  font-size: 12px;
+}
+    </style>
+  </head>
+  <body>
+    <p>The green square must be to the right of the red button, not below it.</p>
+    <div class="line">
+      <button><span></span></button> <span class="square"></span>
+    </div>
+  </body>
+</html>
