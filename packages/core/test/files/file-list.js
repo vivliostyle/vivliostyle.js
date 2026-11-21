@@ -24,6 +24,10 @@ module.exports = [
         title: "border-width test (PR #1085)",
       },
       {
+        file: "button-border-line-wrapping.html",
+        title: "Default border width of a button and line wrapping (PR #2286)",
+      },
+      {
         file: "all-shorthand.html",
         title: "all shorthand property (PR #1697)",
       },
