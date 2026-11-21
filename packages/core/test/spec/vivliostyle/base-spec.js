@@ -391,6 +391,74 @@ describe("base", function () {
       );
     });
 
+    it("matches a selected custom property inside a value", function () {
+      // [style*="--viv-marker-color"] also matched a reference to it.
+      module.setCSSProperty(element, "--alias", "var(--viv-marker-color)");
+      expect(keys()).toEqual(["--viv-marker-color"]);
+      module.setCSSProperty(element, "--alias", "red");
+      expect(keys()).toBe(null);
+    });
+
+    it("ignores the case of a property name", function () {
+      module.setCSSProperty(element, "BORDER-TOP-STYLE", "solid");
+      expect(element.style.borderTopStyle).toBe("solid");
+      expect(keys()).toEqual(["border"]);
+      module.setCSSProperty(element, "Border-Top-Style", "");
+      expect(keys()).toBe(null);
+    });
+
+    it("follows a shorthand property that changes its longhand properties", function () {
+      module.setCSSProperty(element, "background-clip", "border-box");
+      expect(keys()).toEqual(["border"]);
+      module.removeCSSProperty(element, "background");
+      expect(element.getAttribute("style") || "").toBe("");
+      expect(keys()).toBe(null);
+
+      module.setCSSProperty(element, "border-top-style", "solid");
+      module.setCSSProperty(element, "outline-style", "dotted");
+      module.setCSSProperty(element, "outline", "");
+      expect(keys()).toEqual(["border"]);
+      module.setCSSProperty(element, "all", "initial");
+      expect(keys()).toBe(null);
+    });
+
+    it("reads the keys of a subtree from the text of the style attribute", function () {
+      // The longhand properties of the shorthand, such as
+      // background-clip: border-box, are not in the attribute.
+      element.setAttribute("style", "background: red");
+      module.updateStyleKeysFromStyleAttributes(element);
+      expect(keys()).toBe(null);
+    });
+
+    it("knows every key that the stylesheets of the viewer document select on", function () {
+      var css =
+        assets.VivliostyleViewportScreenCss +
+        assets.VivliostyleViewportCss +
+        assets.VivliostylePolyfillCss;
+      var pattern = /\[data-viv-style~="([^"]+)"\]/g;
+      var selected = [];
+      var match;
+      while ((match = pattern.exec(css))) {
+        if (selected.indexOf(match[1]) < 0) {
+          selected.push(match[1]);
+        }
+      }
+      expect(selected.length).toBeGreaterThan(25);
+      selected.forEach(function (key) {
+        var target = document.createElement("div");
+        if (key.indexOf("--") === 0) {
+          module.setCSSProperty(target, key, "1");
+        } else if (key === "border-collapse:collapse") {
+          module.setCSSProperty(target, "border-collapse", "collapse");
+        } else {
+          module.setCSSProperty(target, "--x", key);
+        }
+        expect(
+          (target.getAttribute(module.STYLE_KEYS_ATTR) || "").split(" "),
+        ).toContain(key);
+      });
+    });
+
     it("has no selector on the style attribute in the stylesheets of the viewer document", function () {
       [
         assets.VivliostyleViewportScreenCss,

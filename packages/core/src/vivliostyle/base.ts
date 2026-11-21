@@ -509,15 +509,40 @@ export function isAnnotatedDocument(doc: Document | null): boolean {
 export const STYLE_KEYS_ATTR = "data-viv-style";
 
 /**
- * The custom properties that are style keys under their own name.
+ * The custom properties that rules of the UA stylesheet select on.
  */
-const customStyleKeyPattern =
-  /^--viv-(?:marker-|footnote-white-space$|initialLetter$|firstLine)/;
+const customStyleKeys = [
+  "--viv-marker-content",
+  "--viv-marker-color",
+  "--viv-marker-font-size",
+  "--viv-marker-font-family",
+  "--viv-marker-font-style",
+  "--viv-marker-font-weight",
+  "--viv-marker-font-variant",
+  "--viv-marker-unicode-bidi",
+  "--viv-marker-direction",
+  "--viv-marker-white-space",
+  "--viv-marker-text-transform",
+  "--viv-marker-text-combine-upright",
+  "--viv-marker-text-orientation",
+  "--viv-marker-hyphens",
+  "--viv-marker-line-height",
+  "--viv-marker-tab-size",
+  "--viv-marker-text-emphasis-style",
+  "--viv-marker-text-emphasis-color",
+  "--viv-marker-text-emphasis-position",
+  "--viv-marker-text-shadow",
+  "--viv-footnote-white-space",
+  "--viv-initialLetter",
+  "--viv-firstLineFontFamily",
+  "--viv-firstLineFontSize",
+  "--viv-firstLineLineHeight",
+];
 
 /**
- * The style keys that stand for a substring of a declaration `name: value`,
- * as `[style*="..."]` matched it: in the name or in the value, also of a
- * custom property.
+ * Each style key stands for a substring of the style attribute, as
+ * `[style*="..."]` matched it: anywhere in the name or in the value of a
+ * declaration, also of a custom property.
  */
 const substringStyleKeys: [substring: string, key: string][] = [
   ["border", "border"],
@@ -525,69 +550,94 @@ const substringStyleKeys: [substring: string, key: string][] = [
   ["rule", "rule"],
   ["text-decoration", "text-decoration"],
   ["border-collapse: collapse", "border-collapse:collapse"],
+  ...customStyleKeys.map((key): [string, string] => [key, key]),
 ];
 
-/** Matches the names and values that can contain one of the substrings. */
-const substringStyleKeyPattern = /border|outline|rule|text-decoration/;
+/** Matches the texts that can contain one of the substrings. */
+const styleKeyPattern =
+  /border|outline|rule|text-decoration|--viv-(?:marker-|footnote-white-space|initialLetter|firstLine)/;
 
 /**
  * The same for a value before the browser has parsed it, which makes
  * the keywords lowercase.
  */
-const substringStyleKeyPatternForInput = /border|outline|rule|text-decoration/i;
+const styleKeyPatternForInput = new RegExp(styleKeyPattern.source, "i");
 
 const noStyleKeys: readonly string[] = [];
 
 /**
- * Returns the style keys of a declaration of an inline style.
+ * Returns the style keys of a declaration `name: value` or of a whole style
+ * attribute.
  */
-function getStyleKeysOfDeclaration(
-  name: string,
-  value: string,
-): readonly string[] {
-  const isKeyByName = name.startsWith("--") && customStyleKeyPattern.test(name);
-  if (
-    !substringStyleKeyPattern.test(name) &&
-    !(value && substringStyleKeyPattern.test(value))
-  ) {
-    return isKeyByName ? [name] : noStyleKeys;
+function getStyleKeysOfText(text: string): readonly string[] {
+  if (!styleKeyPattern.test(text)) {
+    return noStyleKeys;
   }
-  const keys: string[] = isKeyByName ? [name] : [];
-  const declaration = `${name}: ${value}`;
+  const keys: string[] = [];
   for (const [substring, key] of substringStyleKeys) {
-    if (declaration.includes(substring)) {
+    if (text.includes(substring)) {
       keys.push(key);
     }
   }
   return keys;
 }
 
-function writeStyleKeys(elem: Element, keys: readonly string[]): void {
-  if (keys.length) {
-    elem.setAttribute(STYLE_KEYS_ATTR, keys.join(" "));
-  } else {
+/**
+ * Sets the style keys of an element from its style attribute, which the
+ * browser keeps in step with the declarations of the inline style.
+ */
+function updateStyleKeys(elem: Element): void {
+  const style = elem.getAttribute("style");
+  const keys = style ? getStyleKeysOfText(style).join(" ") : "";
+  if (!keys) {
     elem.removeAttribute(STYLE_KEYS_ATTR);
+  } else if (elem.getAttribute(STYLE_KEYS_ATTR) !== keys) {
+    elem.setAttribute(STYLE_KEYS_ATTR, keys);
   }
 }
 
-/**
- * Sets the style keys of an element from all the declarations of its inline
- * style.
- */
-function updateStyleKeys(elem: Element, elemStyle: CSSStyleDeclaration): void {
-  const keys: string[] = [];
-  for (let i = 0; i < elemStyle.length; i++) {
-    const name = elemStyle.item(i);
-    for (const key of getStyleKeysOfDeclaration(
-      name,
-      elemStyle.getPropertyValue(name),
-    )) {
-      if (!keys.includes(key)) {
-        keys.push(key);
-      }
-    }
+/** What setStyleDeclaration() needs to know about a property name. */
+type StylePropertyInfo = {
+  /** The name as the browser keeps it. */
+  name: string;
+  isCustom: boolean;
+  /** Whether the name contains one of the substrings. */
+  hasKeyInName: boolean;
+  /**
+   * Whether setting the property changes declarations with other names:
+   * a shorthand property or an alias. Found out when needed.
+   */
+  isSetUnderOtherNames?: boolean;
+};
+
+const stylePropertyInfos = new Map<string, StylePropertyInfo>();
+
+function getStylePropertyInfo(name: string): StylePropertyInfo {
+  let info = stylePropertyInfos.get(name);
+  if (!info) {
+    const isCustom = name.startsWith("--");
+    // Only the names of custom properties are case-sensitive.
+    const actualName = isCustom ? name : name.toLowerCase();
+    info = {
+      name: actualName,
+      isCustom,
+      hasKeyInName: styleKeyPattern.test(actualName),
+    };
+    stylePropertyInfos.set(name, info);
   }
-  writeStyleKeys(elem, keys);
+  return info;
+}
+
+function isSetUnderOtherNames(info: StylePropertyInfo, doc: Document): boolean {
+  if (info.isSetUnderOtherNames === undefined) {
+    const probe = (doc.createElementNS(NS.XHTML, "div") as HTMLElement).style;
+    probe.setProperty(info.name, "initial");
+    info.isSetUnderOtherNames =
+      info.name === "all" ||
+      probe.length > 1 ||
+      (probe.length === 1 && probe.item(0) !== info.name);
+  }
+  return info.isSetUnderOtherNames;
 }
 
 /**
@@ -597,53 +647,57 @@ function updateStyleKeys(elem: Element, elemStyle: CSSStyleDeclaration): void {
 function setStyleDeclaration(
   elem: Element,
   elemStyle: CSSStyleDeclaration,
-  name: string,
+  prop: string,
   value: string,
 ): void {
-  const isCustom = name.startsWith("--");
+  const info = getStylePropertyInfo(prop);
+  const { name, isCustom, hasKeyInName } = info;
   const keysAttr = elem.getAttribute(STYLE_KEYS_ATTR);
   // The keys of the declaration that is replaced or removed. An element
   // without style keys has no declaration with a key. The value of a declared
   // custom property can be empty.
   let oldKeys = noStyleKeys;
   if (keysAttr !== null) {
+    if (!isCustom && isSetUnderOtherNames(info, elem.ownerDocument)) {
+      // A shorthand property replaces or removes its longhand properties,
+      // whatever their keys are.
+      elemStyle.setProperty(name, value);
+      updateStyleKeys(elem);
+      return;
+    }
     const oldValue = elemStyle.getPropertyValue(name);
-    if (oldValue || isCustom) {
-      oldKeys = getStyleKeysOfDeclaration(name, oldValue);
+    if (
+      (oldValue || isCustom) &&
+      (hasKeyInName || styleKeyPattern.test(oldValue))
+    ) {
+      oldKeys = getStyleKeysOfText(`${name}: ${oldValue}`);
     }
   }
   elemStyle.setProperty(name, value);
+  if (!value && keysAttr === null) {
+    return;
+  }
 
   // The keys of the declaration as the browser accepted it: it makes the
   // keywords of the value lowercase and ignores a value that is not valid.
   let newKeys = noStyleKeys;
   let isAccepted = true;
-  if (
-    value &&
-    ((isCustom && customStyleKeyPattern.test(name)) ||
-      substringStyleKeyPattern.test(name) ||
-      substringStyleKeyPatternForInput.test(value))
-  ) {
+  if (value && (hasKeyInName || styleKeyPatternForInput.test(value))) {
     const newValue = elemStyle.getPropertyValue(name);
     isAccepted = !!newValue || (isCustom && !value.trim());
-    newKeys = getStyleKeysOfDeclaration(name, newValue);
+    newKeys = getStyleKeysOfText(`${name}: ${newValue}`);
   }
-  if (
-    !isAccepted ||
-    // Removing a shorthand property removes its longhand properties.
-    (!value && substringStyleKeyPattern.test(name)) ||
-    oldKeys.some((key) => !newKeys.includes(key))
-  ) {
+  if (!isAccepted || oldKeys.some((key) => !newKeys.includes(key))) {
     // Another declaration may still have the key, or the declaration may not
-    // be what was asked for: look at all the declarations.
-    updateStyleKeys(elem, elemStyle);
+    // be what was asked for: look at the whole style.
+    updateStyleKeys(elem);
     return;
   }
   if (!newKeys.length) {
     return;
   }
   if (keysAttr === null) {
-    writeStyleKeys(elem, newKeys);
+    elem.setAttribute(STYLE_KEYS_ATTR, newKeys.join(" "));
     return;
   }
   const keys = keysAttr.split(" ");
@@ -655,7 +709,7 @@ function setStyleDeclaration(
     }
   }
   if (added) {
-    writeStyleKeys(elem, keys);
+    elem.setAttribute(STYLE_KEYS_ATTR, keys.join(" "));
   }
 }
 
@@ -666,19 +720,11 @@ function setStyleDeclaration(
  * setCSSProperty(), e.g. in a custom-rendered subtree.
  */
 export function updateStyleKeysFromStyleAttributes(root: Element): void {
-  const update = (elem: Element) => {
-    const elemStyle = (elem as HTMLElement).style;
-    if (elemStyle) {
-      updateStyleKeys(elem, elemStyle);
-    } else {
-      elem.removeAttribute(STYLE_KEYS_ATTR);
-    }
-  };
   if (root.hasAttribute("style") || root.hasAttribute(STYLE_KEYS_ATTR)) {
-    update(root);
+    updateStyleKeys(root);
   }
   for (const elem of root.querySelectorAll(`[style], [${STYLE_KEYS_ATTR}]`)) {
-    update(elem);
+    updateStyleKeys(elem);
   }
 }
 
