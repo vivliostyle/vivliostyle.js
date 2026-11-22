@@ -1351,9 +1351,10 @@ export class OPFDoc {
 
       // Find TOC in the primary entry (X)HTML
       // The holder knows the document URL after a redirect.
+      const holder = XmlDoc.getXMLDocHolder(doc);
       const docBaseURL =
-        XmlDoc.getXMLDocHolder(doc)?.baseURL ??
-        XmlDoc.getDocumentBaseURL(doc, pubURL);
+        holder?.baseURL ?? XmlDoc.getDocumentBaseURL(doc, pubURL);
+      const docURL = holder ? Base.stripFragment(holder.url) : null;
       for (const anchorElem of Toc.findTocAnchorElements(doc)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
@@ -1367,6 +1368,10 @@ export class OPFDoc {
         const hrefNoFragment = Base.stripFragment(
           Base.resolveURL(href, href.startsWith("#") ? pubURL : docBaseURL),
         );
+        if (hrefNoFragment === docURL) {
+          // A link back to the primary entry loaded through a redirect
+          continue;
+        }
         const path = getPathFromURL(hrefNoFragment, pubURL);
         const url = path !== null ? encodeURLPath(path) : hrefNoFragment;
         if (!manifestObj["readingOrder"].includes(url)) {

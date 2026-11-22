@@ -481,7 +481,8 @@ describe("epub", function () {
         var doc = new DOMParser().parseFromString(
           "<html><head><base href='chapters/'></head><body>" +
             "<nav role='doc-toc'><ol><li><a href='chapter1.html'>1</a></li>" +
-            "<li><a href='#top'>top</a></li></ol></nav></body></html>",
+            "<li><a href='#top'>top</a></li>" +
+            "<li><a href='../index.html#top'>top</a></li></ol></nav></body></html>",
           "text/html",
         );
         // The requested /start was redirected to /book/index.html.
