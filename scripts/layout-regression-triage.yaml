@@ -1,3 +1,18 @@
+- category: Page properties and margin boxes
+  title: "Quotes in page margin boxes (Issue #567)"
+  file: quotes-in-page-margin-box.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2290 makes page margin boxes honor quotes from the page and margin contexts. On both pages, Canary
+    uses the expected inherited and custom quote pairs, suppresses the plain footer's quotes, and falls back to
+    inherited quotes for invalid lists. Stable uses its default pairs instead.
+  approvedViewer: git-codex-page-margin-quotes  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/quotes-in-page-margin-box.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/quotes-in-page-margin-box.html&zoom=1&spread=false
 - category: General
   title: "Default border width of a button and line wrapping (PR #2286)"
   file: button-border-line-wrapping.html
