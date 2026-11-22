@@ -22,6 +22,7 @@ import * as Net from "./net";
 import * as Task from "./task";
 import * as Logging from "./logging";
 import * as TaskUtil from "./task-util";
+import * as XmlDoc from "./xml-doc";
 
 /**
  * Enable or disable JavaScript in html support
@@ -33,11 +34,25 @@ export function setAllowScripts(value: boolean): void {
 
 const deferredScripts: HTMLScriptElement[] = [];
 
+/**
+ * The URL of an external script. In a source document, `script.src` would
+ * resolve against the viewer page (the URL of a document created by
+ * DOMParser), so the src attribute is resolved against the document base URL.
+ */
+function getScriptSrc(scriptElem: HTMLScriptElement): string {
+  const src = scriptElem.getAttribute("src");
+  return src === null
+    ? ""
+    : XmlDoc.resolveURLInDocument(src.trim(), scriptElem.ownerDocument);
+}
+
 function sameScripts(s1: HTMLScriptElement, s2: HTMLScriptElement): boolean {
-  return (
-    s1 === s2 ||
-    (s1.src || s2.src ? s1.src === s2.src : s1.textContent === s2.textContent)
-  );
+  if (s1 === s2) {
+    return true;
+  }
+  const src1 = getScriptSrc(s1);
+  const src2 = getScriptSrc(s2);
+  return src1 || src2 ? src1 === src2 : s1.textContent === s2.textContent;
 }
 
 function getScriptsInOrNearHead(document: Document): HTMLScriptElement[] {
@@ -66,7 +81,7 @@ export function loadScript(
   }
 
   const scriptContent = srcScriptElem.textContent;
-  const src = srcScriptElem.src;
+  const src = getScriptSrc(srcScriptElem);
   const isModule = srcScriptElem.type === "module";
 
   // Special handling for MathJax

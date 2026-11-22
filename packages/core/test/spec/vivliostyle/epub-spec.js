@@ -476,6 +476,39 @@ describe("epub", function () {
         });
       });
 
+      it("resolves TOC links against the base URL of a redirected primary entry", function (done) {
+        var store = new adapt_epub.EPUBDocStore();
+        var doc = new DOMParser().parseFromString(
+          "<html><head><base href='chapters/'></head><body>" +
+            "<nav role='doc-toc'><ol><li><a href='chapter1.html'>1</a></li>" +
+            "<li><a href='#top'>top</a></li>" +
+            "<li><a href='../index.html#top'>top</a></li></ol></nav></body></html>",
+          "text/html",
+        );
+        // The requested /start was redirected to /book/index.html.
+        new adapt_xmldoc.XMLDocHolder(
+          null,
+          "https://example.com/book/index.html",
+          doc,
+        );
+
+        adapt_task.start(function () {
+          adapt_epub.OPFDoc.fromWebPubManifest(
+            store,
+            "https://example.com/start",
+            {},
+            doc,
+          ).then(function (opf) {
+            expect(opf.spine.map((item) => item.src)).toEqual([
+              "https://example.com/start",
+              "https://example.com/book/chapters/chapter1.html",
+            ]);
+            done();
+          });
+          return adapt_task.newResult(true);
+        });
+      });
+
       it("applies resources with rel stylesheet to the reading order documents", function (done) {
         var store = new adapt_epub.EPUBDocStore();
         spyOn(store, "setPublicationStyleSheets").and.callThrough();

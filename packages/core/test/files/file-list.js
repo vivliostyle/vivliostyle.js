@@ -40,6 +40,16 @@ module.exports = [
         file: "filename%23hash.html",
         title: "Reserved character in filename (Issue #2076)",
       },
+      // The script items fail in the layout regression test on CI:
+      // raw.githubusercontent.com serves .js as text/plain with nosniff.
+      {
+        file: "base-url/base-element.html",
+        title: "Base element (Issue #604)",
+      },
+      {
+        file: "base-url/script-src.html",
+        title: "Relative script src (Issue #604)",
+      },
       {
         file: "vivliostyle_media/index.html",
         title: "'vivliostyle' vs 'screen' media (PR #500)",

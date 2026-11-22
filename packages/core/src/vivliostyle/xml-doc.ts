@@ -26,6 +26,76 @@ import { XmlDoc } from "./types";
 
 export type XMLDocStore = XmlDoc.XMLDocStore;
 
+/**
+ * The document base URL (cf. https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url):
+ * the href of the first HTML `base` element with an href attribute, resolved
+ * against the document URL, or the document URL itself.
+ *
+ * The browser cannot compute it for a source document: a document created by
+ * DOMParser has the URL of the viewer page, so `element.baseURI` and URL
+ * attributes read through the DOM (e.g. `script.src`) resolve against it.
+ */
+export function getDocumentBaseURL(
+  document: Document,
+  documentURL: string,
+): string {
+  const base = Array.from(
+    document.getElementsByTagNameNS(Base.NS.XHTML, "base"),
+  ).find((elem) => elem.hasAttribute("href"));
+  if (!base) {
+    return documentURL;
+  }
+  const href = base.getAttribute("href").trim();
+  if (!href) {
+    // An empty href resolves to the document URL itself.
+    return documentURL;
+  }
+  let baseURL: string;
+  try {
+    // Parse with the URL standard so that the base URL is normalized (e.g.
+    // `..` without a trailing slash) and a malformed URL is rejected. A
+    // root-relative path goes through resolveURL() first, which keeps it
+    // within the WPT raw.githack.com mirror.
+    baseURL = new URL(
+      /^\/(?!\/)/.test(href) ? Base.resolveURL(href, documentURL) : href,
+      documentURL,
+    ).href;
+  } catch {
+    return documentURL;
+  }
+  // Ignore a data: or javascript: base URL, against which nothing can be
+  // resolved.
+  if (/^(data|javascript):/i.test(baseURL)) {
+    return documentURL;
+  }
+  return baseURL;
+}
+
+const holderByDocument = new WeakMap<Document, XMLDocHolder>();
+
+/**
+ * The XMLDocHolder created for a source document, if any.
+ */
+export function getXMLDocHolder(document: Document): XMLDocHolder | null {
+  return holderByDocument.get(document) ?? null;
+}
+
+/**
+ * Resolve a URL in a source document against its document base URL. A
+ * fragment-only URL refers to the document itself, as in CSS
+ * (cf. https://drafts.csswg.org/css-values-4/#local-urls).
+ */
+export function resolveURLInDocument(
+  relURL: string,
+  document: Document,
+): string {
+  const holder = holderByDocument.get(document);
+  if (holder) {
+    return holder.resolveURL(relURL);
+  }
+  return Base.resolveURL(relURL, document.baseURI);
+}
+
 export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   lang: string | null = null;
   totalOffset: number = -1;
@@ -35,6 +105,11 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   last: Element;
   lastOffset: number = 1;
   idMap: { [key: string]: Element } | null = null;
+  /**
+   * Base URL against which relative URLs in the document are resolved. It
+   * differs from `url` when the document has a `base` element.
+   */
+  readonly baseURL: string;
 
   constructor(
     public readonly store: XMLDocStore | null,
@@ -71,6 +146,21 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     this.head = head as Element;
     this.last = this.root;
     this.last.setAttribute(Base.ELEMENT_OFFSET_ATTR, "0");
+    this.baseURL = getDocumentBaseURL(document, url);
+    holderByDocument.set(document, this);
+  }
+
+  /**
+   * Resolve a URL in the document against the document base URL. A
+   * fragment-only URL refers to the document itself even when the document
+   * has a `base` element, so that links and references within the document
+   * keep working.
+   */
+  resolveURL(relURL: string): string {
+    return Base.resolveURL(
+      relURL,
+      relURL.startsWith("#") ? this.url : this.baseURL,
+    );
   }
 
   doc(): XmlDoc.NodeList {

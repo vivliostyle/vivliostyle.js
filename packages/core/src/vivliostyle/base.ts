@@ -189,11 +189,14 @@ export function resolveURL(relURL: string, baseURL: string): string {
     }
     return relURL;
   }
+  // A query-only URL keeps the path of the base URL (including the file),
+  // unlike './?query', which is relative to the directory.
+  const queryOnly = relURL.startsWith("?");
   if (relURL === "." || relURL.startsWith("./")) {
     relURL = relURL.slice(2); // './foo' => 'foo'
   }
   baseURL = stripFragmentAndQuery(baseURL);
-  if (relURL.startsWith("#")) {
+  if (relURL.startsWith("#") || queryOnly) {
     return baseURL + relURL;
   }
   let i = baseURL.lastIndexOf("/");

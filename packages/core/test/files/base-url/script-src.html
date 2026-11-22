@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- A relative script src resolves against the document URL, not against the
+viewer page. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Relative script src</title>
+    <style>
+      @page {
+        size: 160mm 60mm;
+        margin: 10mm;
+      }
+      body {
+        font: 14px/1.5 Arial, sans-serif;
+      }
+      .box {
+        display: inline-block;
+        height: 40px;
+        padding: 0 8px;
+        line-height: 40px;
+        color: #fff;
+        background: #c22;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <p>The box below must show green (PASS), not red.</p>
+    <div class="box script-doc">script src (document): FAIL</div>
+    <script src="script.js"></script>
+  </body>
+</html>

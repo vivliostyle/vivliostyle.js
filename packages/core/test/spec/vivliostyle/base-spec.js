@@ -132,6 +132,18 @@ describe("base", function () {
   });
 
   describe("resolveURL", function () {
+    it("keeps the path of the base URL for a query-only URL", function () {
+      expect(
+        module.resolveURL("?script=a.js", "https://example.com/book/index.php"),
+      ).toBe("https://example.com/book/index.php?script=a.js");
+      expect(
+        module.resolveURL("?b", "https://example.com/book/index.php?a#x"),
+      ).toBe("https://example.com/book/index.php?b");
+      expect(
+        module.resolveURL("./?b", "https://example.com/book/index.php"),
+      ).toBe("https://example.com/book/?b");
+    });
+
     it("keeps repo-root absolute paths within the WPT raw.githack.com mirror", function () {
       expect(
         module.resolveURL(

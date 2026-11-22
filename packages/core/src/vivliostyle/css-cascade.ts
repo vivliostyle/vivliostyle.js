@@ -8383,11 +8383,12 @@ export function parseStyleAttribute(
   validatorSet: CssValidator.ValidatorSet,
   baseURL: string,
   styleAttrValue: string,
+  documentURL: string | null = null,
 ): ElementStyle {
   const handler = new PropertyParserHandler(scope, validatorSet);
   const tokenizer = new CssTokenizer.Tokenizer(styleAttrValue, handler);
   try {
-    CssParser.parseStyleAttribute(tokenizer, handler, baseURL);
+    CssParser.parseStyleAttribute(tokenizer, handler, baseURL, documentURL);
   } catch (err) {
     Logging.logger.warn(err, "Style attribute parse error:");
   }
