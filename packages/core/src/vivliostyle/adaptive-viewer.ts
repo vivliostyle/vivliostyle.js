@@ -195,6 +195,10 @@ export class AdaptiveViewer {
   hyperlinkListener: Base.EventListener;
   pageRuleStyleElement: HTMLElement;
   pageSheetSizeAlreadySet: boolean = false;
+  // Print page sizes of the rendered pages, keyed by the page container (or
+  // by the page index when no container is given) rather than by page number,
+  // since the page numbers of concatenated documents may overlap (startPage)
+  printPageSizes: Map<HTMLElement | number, PrintPageSize> = new Map();
   // What the current print page rules cover, to skip regenerating them when a
   // page adds no new page name or size (see setPageSizePageRules)
   private printPageRuleCoverage: {
@@ -871,11 +875,12 @@ export class AdaptiveViewer {
       orientation,
     };
     this.pageSizes[pageIndex] = printPageSize;
+    this.printPageSizes.set(pageContainer ?? pageIndex, printPageSize);
     // Use a named page for each page size so that browsers supporting named
     // pages in print (Chromium, and Firefox for the orientation) print each
     // page in its own size (Issue #1474, #1993).
     pageContainer?.style.setProperty("page", getPrintPageName(printPageSize));
-    this.setPageSizePageRules(pageIndex);
+    this.setPageSizePageRules(printPageSize);
     if (
       pageIndex === 0 &&
       this.pageViewMode === PageViewMode.AUTO_SPREAD &&
@@ -889,31 +894,32 @@ export class AdaptiveViewer {
     if (this.pageSizes.length > pageCount) {
       this.pageSizes.splice(pageCount);
     }
+    // Drop the sizes of the pages no longer rendered
+    for (const key of [...this.printPageSizes.keys()]) {
+      if (typeof key === "number" ? key >= pageCount : !key.isConnected) {
+        this.printPageSizes.delete(key);
+      }
+    }
     this.removePageSizePageRules();
-    let lastPageSizeIndex = this.pageSizes.length - 1;
-    while (
-      lastPageSizeIndex >= 0 &&
-      this.pageSizes[lastPageSizeIndex] == null
-    ) {
-      lastPageSizeIndex--;
-    }
-    if (lastPageSizeIndex >= 0) {
-      this.setPageSizePageRules(lastPageSizeIndex);
-    }
+    this.setPageSizePageRules(null);
   }
 
-  private setPageSizePageRules(pageIndex: number) {
-    const currentPageSize = this.pageSizes[pageIndex];
-    if (!this.pageRuleStyleElement || !currentPageSize) {
+  /**
+   * Update the print page rules for a rendered page, or regenerate them for
+   * all rendered pages when `currentPageSize` is null.
+   */
+  private setPageSizePageRules(currentPageSize: PrintPageSize | null) {
+    if (!this.pageRuleStyleElement) {
       return;
     }
     // Regenerating the rules takes all pages, so skip it when the current
     // rules already cover this page: its page name, and its size and
     // orientation in the unnamed @page rule.
     const coverage = this.printPageRuleCoverage;
-    const { width, height } = currentPageSize;
+    const { width, height } = currentPageSize ?? { width: 0, height: 0 };
     if (
       this.pageSheetSizeAlreadySet &&
+      currentPageSize &&
       coverage &&
       coverage.names.has(getPrintPageName(currentPageSize)) &&
       width <= coverage.maxWidth &&
@@ -925,7 +931,17 @@ export class AdaptiveViewer {
     ) {
       return;
     }
-    const pageSizes = this.pageSizes.filter((pageSize) => pageSize != null);
+    const pageSizes: PrintPageSize[] = [];
+    for (const [key, pageSize] of this.printPageSizes) {
+      if (typeof key !== "number" && !key.isConnected) {
+        this.printPageSizes.delete(key);
+      } else {
+        pageSizes.push(pageSize);
+      }
+    }
+    if (!pageSizes.length) {
+      return;
+    }
     this.pageRuleStyleElement.textContent = createPrintPageRules(
       pageSizes,
       this.pixelRatio,
@@ -986,6 +1002,7 @@ export class AdaptiveViewer {
       this.opfView.removeRenderedPages();
     }
     this.pageSizes = [];
+    this.printPageSizes.clear();
     this.removePageSizePageRules();
     this.viewport = this.createViewport();
     this.viewport.resetZoom();

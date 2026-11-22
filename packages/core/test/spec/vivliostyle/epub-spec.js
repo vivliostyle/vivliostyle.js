@@ -39,6 +39,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(2);
 
       expect(viewer.pageSizes).toEqual([
@@ -61,6 +64,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(5);
 
       expect(viewer.pageSizes.length).toBe(5);
@@ -83,6 +89,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(2);
 
       expect(viewer.pageSizes.length).toBe(2);
@@ -181,6 +190,7 @@ describe("epub", function () {
     it("regenerates page rules only when a page adds a page name or size", function () {
       var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
       viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
       viewer.pageRuleStyleElement = document.createElement("style");
       viewer.pageSheetSizeAlreadySet = false;
       viewer.pixelRatio = 1;
@@ -188,6 +198,10 @@ describe("epub", function () {
       left.setAttribute("data-vivliostyle-page-orientation", "rotate-left");
       var right = document.createElement("div");
       right.setAttribute("data-vivliostyle-page-orientation", "rotate-right");
+      // Rendered page containers are in the document
+      var root = document.createElement("div");
+      document.body.appendChild(root);
+      root.append(left, right);
 
       for (var i = 0; i < 6; i++) {
         viewer.setPageSize(
@@ -212,11 +226,50 @@ describe("epub", function () {
       expect(viewer.pageRuleStyleElement.textContent).toContain(
         "@page {size: 300pt 450pt;",
       );
+      root.remove();
+    });
+
+    it("keeps the rules of pages whose page numbers overlap", function () {
+      // Concatenated documents can both start at page 1 (startPage), so
+      // their pages are reported with the same page index.
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var root = document.createElement("div");
+      document.body.appendChild(root);
+      var first = document.createElement("div");
+      var second = document.createElement("div");
+      root.append(first, second);
+      try {
+        viewer.setPageSize({ width: 400, height: 600 }, {}, 0, 0, first);
+        viewer.setPageSize({ width: 600, height: 400 }, {}, 1, 0, second);
+        viewer.truncatePageSizes(1);
+
+        var rules = viewer.pageRuleStyleElement.textContent;
+        expect(rules).toContain("@page {size: 300pt 450pt;");
+        if (CSS.supports("page", "auto")) {
+          expect(rules).toContain("vivliostyle-page-300x450 ");
+          expect(rules).toContain("vivliostyle-page-450x300 ");
+        }
+
+        // A page removed from the document no longer counts.
+        second.remove();
+        viewer.truncatePageSizes(1);
+        expect(viewer.pageRuleStyleElement.textContent).not.toContain(
+          "450x300",
+        );
+      } finally {
+        root.remove();
+      }
     });
 
     it("gives the page container the page name and keeps its orientation", function () {
       var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
       viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
       viewer.pageRuleStyleElement = document.createElement("style");
       viewer.pageSheetSizeAlreadySet = false;
       viewer.pixelRatio = 1;
@@ -225,6 +278,7 @@ describe("epub", function () {
         "data-vivliostyle-page-orientation",
         "rotate-left",
       );
+      document.body.appendChild(container);
 
       viewer.setPageSize({ width: 600, height: 400 }, {}, 0, 1, container);
 
@@ -241,6 +295,7 @@ describe("epub", function () {
       expect(viewer.pageRuleStyleElement.textContent).toContain(
         "size: 450pt 300pt",
       );
+      container.remove();
     });
   });
 
