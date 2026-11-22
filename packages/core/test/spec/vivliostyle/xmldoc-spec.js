@@ -160,6 +160,38 @@ describe("xml-doc", function () {
           holderFor("<head><base href='data:text/plain,a'></head>").baseURL,
         ).toBe(docURL);
         expect(holderFor("<head><base href=''></head>").baseURL).toBe(docURL);
+        expect(
+          holderFor("<head><base href='https://[bad]/'></head>").baseURL,
+        ).toBe(docURL);
+      });
+
+      it("normalizes the base URL", function () {
+        var holder = holderFor("<head><base href='sub/..'></head>");
+        expect(holder.baseURL).toBe("http://example.com/book/");
+        expect(holder.resolveURL("a.png")).toBe(
+          "http://example.com/book/a.png",
+        );
+        expect(holderFor("<head><base href='..'></head>").baseURL).toBe(
+          "http://example.com/",
+        );
+        expect(holderFor("<head><base href='?v=2'></head>").baseURL).toBe(
+          docURL + "?v=2",
+        );
+      });
+
+      it("keeps a root-relative base URL within the WPT mirror", function () {
+        var doc = new DOMParser().parseFromString(
+          "<head><base href='/css/support/'></head>",
+          "text/html",
+        );
+        var holder = new adapt_xmldoc.XMLDocHolder(
+          null,
+          "https://raw.githack.com/web-platform-tests/wpt/master/css/a/test.html",
+          doc,
+        );
+        expect(holder.baseURL).toBe(
+          "https://raw.githack.com/web-platform-tests/wpt/master/css/support/",
+        );
       });
 
       it("finds the base element in an XHTML document", function () {

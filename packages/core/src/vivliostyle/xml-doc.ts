@@ -50,10 +50,22 @@ export function getDocumentBaseURL(
     // An empty href resolves to the document URL itself.
     return documentURL;
   }
-  const baseURL = Base.resolveURL(href, documentURL);
-  // Ignore a base URL that is not absolute (resolveURL() turns a javascript:
-  // URL into "#"), and a data: URL, against which nothing can be resolved.
-  if (!/^\w{2,}:/.test(baseURL) || /^data:/i.test(baseURL)) {
+  let baseURL: string;
+  try {
+    // Parse with the URL standard so that the base URL is normalized (e.g.
+    // `..` without a trailing slash) and a malformed URL is rejected. A
+    // root-relative path goes through resolveURL() first, which keeps it
+    // within the WPT raw.githack.com mirror.
+    baseURL = new URL(
+      /^\/(?!\/)/.test(href) ? Base.resolveURL(href, documentURL) : href,
+      documentURL,
+    ).href;
+  } catch {
+    return documentURL;
+  }
+  // Ignore a data: or javascript: base URL, against which nothing can be
+  // resolved.
+  if (/^(data|javascript):/i.test(baseURL)) {
     return documentURL;
   }
   return baseURL;
