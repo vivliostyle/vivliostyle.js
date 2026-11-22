@@ -98,8 +98,8 @@ export function getPrintPageName(pageSize: PrintPageSize): string {
  * height, so that every page fits in (Issue #751). Firefox prints all pages on
  * the sheet of this size, turning it to the orientation of each page, so when
  * portrait and landscape pages are mixed and named pages are supported, its
- * size is the largest of the short and long sides of the pages instead,
- * oriented as the first non-square page.
+ * size is the largest short side × the largest long side of the pages instead
+ * (portrait; Firefox turns the sheet to each page anyway).
  *
  * @param pageSizes Sizes of the rendered pages
  * @param pixelRatio The pixelRatio setting (high pixel ratio emulation)
@@ -134,25 +134,13 @@ export function createPrintPageRules(
 
   let widthMax: number;
   let heightMax: number;
-  const firstNonSquare = pageSizes.find((p) => p.width !== p.height);
   if (
     namedPageSupported &&
-    firstNonSquare &&
-    pageSizes.some(
-      (p) =>
-        p.width !== p.height &&
-        p.width > p.height !== firstNonSquare.width > firstNonSquare.height,
-    )
+    pageSizes.some((p) => p.width < p.height) &&
+    pageSizes.some((p) => p.width > p.height)
   ) {
-    const shortMax = Math.max(
-      ...pageSizes.map((p) => Math.min(p.width, p.height)),
-    );
-    const longMax = Math.max(
-      ...pageSizes.map((p) => Math.max(p.width, p.height)),
-    );
-    const landscape = firstNonSquare.width > firstNonSquare.height;
-    widthMax = landscape ? longMax : shortMax;
-    heightMax = landscape ? shortMax : longMax;
+    widthMax = Math.max(...pageSizes.map((p) => Math.min(p.width, p.height)));
+    heightMax = Math.max(...pageSizes.map((p) => Math.max(p.width, p.height)));
   } else {
     widthMax = Math.max(...pageSizes.map((p) => p.width));
     heightMax = Math.max(...pageSizes.map((p) => p.height));

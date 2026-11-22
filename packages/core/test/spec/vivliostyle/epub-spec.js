@@ -134,11 +134,10 @@ describe("epub", function () {
       ]);
     });
 
-    it("orients the default page rule as the first non-square page", function () {
+    it("makes the default page rule portrait for mixed orientations", function () {
       var rules = adapt_viewer
         .createPrintPageRules(
           [
-            { width: 400, height: 400, orientation: "upright" },
             { width: 800, height: 400, orientation: "upright" },
             { width: 400, height: 600, orientation: "upright" },
           ],
@@ -147,7 +146,7 @@ describe("epub", function () {
         )
         .split("\n");
       expect(rules[0]).toBe(
-        "@page {size: 600pt 300pt; margin: 0 -2pt -2pt 0;}",
+        "@page {size: 300pt 600pt; margin: 0 -2pt -2pt 0;}",
       );
     });
 

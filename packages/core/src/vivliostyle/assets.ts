@@ -214,7 +214,6 @@ export const VivliostyleViewportCss = `
 
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
     display: block !important;
-    max-height: 100vh;
   }
 
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
