@@ -131,9 +131,13 @@ export const VivliostyleViewportCss = `
     transform: scale(calc(var(--viv-outputScale,1) * var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
   }
   /* Workaround for Chromium's default border etc. widths not zoomed but scaled down */
-  [data-vivliostyle-spread-container] :where([data-viv-style~="border"],[data-viv-style~="outline"],[data-viv-style~="rule"]) {
+  [data-vivliostyle-spread-container] :where([data-viv-style~="border"]) {
     border-width: medium;
+  }
+  [data-vivliostyle-spread-container] :where([data-viv-style~="outline"]) {
     outline-width: medium;
+  }
+  [data-vivliostyle-spread-container] :where([data-viv-style~="rule"]) {
     column-rule-width: medium;
   }
   [data-vivliostyle-spread-container] ::-webkit-scrollbar {

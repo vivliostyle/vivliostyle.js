@@ -540,14 +540,11 @@ const customStyleKeys = [
 ];
 
 /**
- * Each style key stands for a substring of the style attribute, as
+ * The polyfill stylesheet matches these substrings of the style attribute, as
  * `[style*="..."]` matched it: anywhere in the name or in the value of a
  * declaration, also of a custom property.
  */
 const substringStyleKeys: [substring: string, key: string][] = [
-  ["border", "border"],
-  ["outline", "outline"],
-  ["rule", "rule"],
   ["text-decoration", "text-decoration"],
   ["border-collapse: collapse", "border-collapse:collapse"],
   ...customStyleKeys.map((key): [string, string] => [key, key]),
@@ -555,7 +552,7 @@ const substringStyleKeys: [substring: string, key: string][] = [
 
 /** Matches the texts that can contain one of the substrings. */
 const styleKeyPattern =
-  /border|outline|rule|text-decoration|--viv-(?:marker-|footnote-white-space|initialLetter|firstLine)/;
+  /border-collapse|text-decoration|--viv-(?:marker-|footnote-white-space|initialLetter|firstLine)/;
 
 /**
  * The same for a value before the browser has parsed it, which makes the
@@ -576,20 +573,33 @@ const CHECKED_AS_TEXT = "*";
 const noStyleKeys: readonly string[] = [];
 
 /**
- * Returns the style keys of a declaration `name: value` or of a whole style
- * attribute.
+ * Collect the polyfill keys in a declaration or a whole style attribute,
+ * together with the zoom width key, if known for this declaration.
  */
-function getStyleKeysOfText(text: string): readonly string[] {
+function getStyleKeys(
+  text: string,
+  widthKey: string | null = null,
+): readonly string[] {
   if (!styleKeyPattern.test(text)) {
-    return noStyleKeys;
+    return widthKey ? [widthKey] : noStyleKeys;
   }
-  const keys: string[] = [];
+  const keys: string[] = widthKey ? [widthKey] : [];
   for (const [substring, key] of substringStyleKeys) {
     if (text.includes(substring)) {
       keys.push(key);
     }
   }
   return keys;
+}
+
+/** The zoom workaround applies to the line whose style was declared. */
+function zoomWidthKey(name: string): string | null {
+  if (name.startsWith("border-") && name.endsWith("-style")) {
+    return "border";
+  }
+  if (name === "outline-style") return "outline";
+  if (name === "column-rule-style") return "rule";
+  return null;
 }
 
 /**
@@ -600,7 +610,18 @@ function updateStyleKeys(elem: Element, checkedAsText: boolean): void {
   const style = elem.getAttribute("style");
   let keys = "";
   if (style) {
-    keys = getStyleKeysOfText(style).join(" ");
+    const current = new Set(getStyleKeys(style));
+    // CSSOM exposes the declared longhands, including those set by shorthands.
+    const declarations = (elem as HTMLElement).style;
+    // An intact `all` shorthand also supplies all three widths. Firefox and
+    // WebKit enumerate its implicit longhands even for just `all: initial`.
+    if (declarations && !declarations.all) {
+      for (const name of declarations) {
+        const key = zoomWidthKey(name);
+        if (key) current.add(key);
+      }
+    }
+    keys = [...current].join(" ");
     if (checkedAsText) {
       keys = keys ? `${CHECKED_AS_TEXT} ${keys}` : CHECKED_AS_TEXT;
     }
@@ -616,8 +637,9 @@ function updateStyleKeys(elem: Element, checkedAsText: boolean): void {
 type StylePropertyInfo = {
   /** The name under which the browser keeps the declaration. */
   name: string;
-  /** Whether the name contains one of the substrings. */
+  /** Whether the declaration can contribute a key independently of its value. */
   hasKeyInName: boolean;
+  zoomWidthKey: string | null;
   /** The longhand properties, if this is a shorthand property. */
   longhands: string[] | null;
 };
@@ -637,7 +659,15 @@ function getStylePropertyInfo(prop: string, doc: Document): StylePropertyInfo {
     } else if (probe.length === 1) {
       name = probe.item(0); // differs for an alias
     }
-    info = { name, hasKeyInName: styleKeyPattern.test(name), longhands };
+    const widthKey = longhands
+      ? (longhands.map(zoomWidthKey).find(Boolean) ?? null)
+      : zoomWidthKey(name);
+    info = {
+      name,
+      hasKeyInName: styleKeyPattern.test(name) || !!widthKey,
+      longhands,
+      zoomWidthKey: widthKey,
+    };
     stylePropertyInfos.set(prop, info);
   }
   return info;
@@ -647,14 +677,10 @@ function getStylePropertyInfo(prop: string, doc: Document): StylePropertyInfo {
  * Sets (or with an empty value removes) a declaration of an inline style
  * and keeps the style keys of the element up to date.
  *
- * The style keys have to be those of the style attribute as the browser
- * writes it. For most declarations they follow from the declaration alone:
- * a custom property is written as it is, and a name with a key keeps the key
- * when the browser combines longhand properties into a shorthand property.
- * A key in the value of a standard property does not: the browser leaves out
- * `background-clip: border-box` when it writes `background: red`. An element
- * that gets such a value is therefore marked, and from then on its keys are
- * taken from the text of its style attribute after every change.
+ * Polyfill keys follow the serialized inline style. A standard property's
+ * value may disappear when the browser combines longhands into a shorthand,
+ * so recheck the text after subsequent changes to such an element. Zoom
+ * width keys follow declared line styles independently of serialization.
  */
 function setStyleDeclaration(
   elem: Element,
@@ -671,24 +697,23 @@ function setStyleDeclaration(
   const isCustom = prop.startsWith("--");
   let name = prop;
   let hasKeyInName: boolean;
+  let widthKey: string | null = null;
   let isSet = false;
   if (isCustom) {
     hasKeyInName = styleKeyPattern.test(prop);
   } else {
     const info = getStylePropertyInfo(prop, elem.ownerDocument);
     name = info.name;
+    widthKey = info.zoomWidthKey;
     hasKeyInName = info.hasKeyInName;
-    let checkAsText =
-      !!value && name !== "box-sizing" && styleKeyPatternForInput.test(value);
+    let checkAsText = !!value && styleKeyPatternForInput.test(value);
     if (!checkAsText && info.longhands) {
       elemStyle.setProperty(name, value);
       isSet = true;
       checkAsText =
         name === "all" ||
-        info.longhands.some(
-          (longhand) =>
-            longhand !== "box-sizing" &&
-            styleKeyPattern.test(elemStyle.getPropertyValue(longhand)),
+        info.longhands.some((longhand) =>
+          styleKeyPattern.test(elemStyle.getPropertyValue(longhand)),
         );
       if (!checkAsText && keysAttr !== null) {
         // The shorthand property replaced or removed its longhand
@@ -716,7 +741,7 @@ function setStyleDeclaration(
       (oldValue || isCustom) &&
       (hasKeyInName || styleKeyPattern.test(oldValue))
     ) {
-      oldKeys = getStyleKeysOfText(`${name}: ${oldValue}`);
+      oldKeys = getStyleKeys(`${name}: ${oldValue}`, widthKey);
     }
   }
   if (!isSet) {
@@ -733,7 +758,7 @@ function setStyleDeclaration(
   if (value && (hasKeyInName || styleKeyPatternForInput.test(value))) {
     const newValue = elemStyle.getPropertyValue(name);
     isAccepted = !!newValue || (isCustom && !value.trim());
-    newKeys = getStyleKeysOfText(`${name}: ${newValue}`);
+    newKeys = getStyleKeys(`${name}: ${newValue}`, widthKey);
   }
   if (!isAccepted || oldKeys.some((key) => !newKeys.includes(key))) {
     // Another declaration may still have the key, or the declaration may not
