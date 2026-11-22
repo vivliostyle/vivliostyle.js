@@ -18,7 +18,9 @@ html[data-vivliostyle-paginated] {
 
 @media print {
   html[data-vivliostyle-paginated] {
-    height: 100%;
+    // height: auto keeps the pages from overflowing their containers, which
+    // breaks named pages (each page's size and orientation) in Firefox
+    height: auto;
     width: 100%;
 
     body > * {
@@ -32,7 +34,15 @@ html[data-vivliostyle-paginated] {
     body,
     [data-vivliostyle-viewer-viewport] {
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
+    }
+
+    // In Firefox, white space after the viewport element in body makes an
+    // extra blank page when the last page has another page name than the
+    // first page. White space is not rendered in a flex container.
+    body {
+      display: flex;
+      flex-direction: column;
     }
   }
 }

@@ -1062,6 +1062,15 @@ module.exports = [
         file: "nested-page-group-nth.html",
         title: "Nested named page with :nth(1 of page type) (PR #2003)",
       },
+      {
+        file: "named-pages/mixed-page-sizes-print.html",
+        title:
+          "Mixed page sizes and orientations in print output (Issue #1474)",
+      },
+      {
+        file: "named-pages/page-orientation.html",
+        title: "page-orientation in @page rules (Issue #1993)",
+      },
     ],
   },
   {

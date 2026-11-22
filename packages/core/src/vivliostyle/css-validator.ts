@@ -1883,6 +1883,7 @@ const propsExcludedFromAll = [
   "marks",
   "min-page-height",
   "min-page-width",
+  "page-orientation", // @page descriptor
   "repeat-on-break",
   "required",
   "required-partitions",

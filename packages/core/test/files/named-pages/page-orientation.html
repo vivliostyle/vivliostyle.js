@@ -1,0 +1,86 @@
+<!doctype html>
+<!-- Test case for Issue #1993: page-orientation descriptor in @page rules -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>page-orientation in @page rules</title>
+    <style>
+      @page {
+        size: A5;
+        margin: 15mm;
+        @bottom-center {
+          content: "Page " counter(page);
+        }
+      }
+      @page rotate-left {
+        size: A5 landscape;
+        page-orientation: rotate-left;
+      }
+      @page rotate-right {
+        size: A5 landscape;
+        page-orientation: rotate-right;
+      }
+      @page upright {
+        size: A5 landscape;
+        page-orientation: upright;
+      }
+      body {
+        font-family: sans-serif;
+        margin: 0;
+      }
+      section {
+        break-before: page;
+      }
+      .rotate-left {
+        page: rotate-left;
+      }
+      .rotate-right {
+        page: rotate-right;
+      }
+      .upright {
+        page: upright;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        border: 1px solid #888;
+        padding: 1mm 2mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>Page 1: A5 portrait</h1>
+      <p>
+        Pages 2 to 4 are laid out on A5 landscape pages. In the print output
+        (PDF), page 2 must be turned a quarter turn counter-clockwise and page 3
+        a quarter turn clockwise, so that both come out as portrait sheets.
+        Page 4 (upright) stays landscape.
+      </p>
+      <p>
+        On screen, the viewer shows every page as laid out, without rotation.
+      </p>
+    </section>
+    <section class="rotate-left">
+      <h1>Page 2: page-orientation: rotate-left</h1>
+      <table>
+        <tr><th>Column 1</th><th>Column 2</th><th>Column 3</th><th>Column 4</th></tr>
+        <tr><td>A wide table</td><td>on a landscape page</td><td>rotated</td><td>to the left</td></tr>
+      </table>
+    </section>
+    <section class="rotate-right">
+      <h1>Page 3: page-orientation: rotate-right</h1>
+      <table>
+        <tr><th>Column 1</th><th>Column 2</th><th>Column 3</th><th>Column 4</th></tr>
+        <tr><td>A wide table</td><td>on a landscape page</td><td>rotated</td><td>to the right</td></tr>
+      </table>
+    </section>
+    <section class="upright">
+      <h1>Page 4: page-orientation: upright</h1>
+      <p>This landscape page is not rotated.</p>
+    </section>
+  </body>
+</html>

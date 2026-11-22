@@ -93,6 +93,122 @@ describe("epub", function () {
     });
   });
 
+  describe("print page rules (Issue #1474, #1993)", function () {
+    it("names each page by its printed size and orientation", function () {
+      expect(
+        adapt_viewer.getPrintPageName({
+          width: 559.37,
+          height: 793.701,
+          orientation: "upright",
+        }),
+      ).toBe("vivliostyle-page-420x596");
+      expect(
+        adapt_viewer.getPrintPageName({
+          width: 793.701,
+          height: 559.37,
+          orientation: "rotate-left",
+        }),
+      ).toBe("vivliostyle-page-596x420-rotate-left");
+    });
+
+    it("creates a named page rule for each page size and orientation", function () {
+      var rules = adapt_viewer
+        .createPrintPageRules(
+          [
+            { width: 400, height: 600, orientation: "upright" },
+            { width: 600, height: 400, orientation: "upright" },
+            { width: 600, height: 400, orientation: "upright" },
+            { width: 600, height: 400, orientation: "rotate-right" },
+            { width: 200, height: 300, orientation: "upright" },
+          ],
+          1,
+          true,
+        )
+        .split("\n");
+      expect(rules).toEqual([
+        "@page {size: 300pt 450pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-300x450 {size: 300pt 450pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-450x300 {size: 450pt 300pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-450x300-rotate-right {size: 450pt 300pt; margin: 0 -2pt -2pt 0; page-orientation: rotate-right;}",
+        "@page vivliostyle-page-150x225 {size: 150pt 225pt; margin: 0 -2pt -2pt 0;}",
+      ]);
+    });
+
+    it("orients the default page rule as the first non-square page", function () {
+      var rules = adapt_viewer
+        .createPrintPageRules(
+          [
+            { width: 400, height: 400, orientation: "upright" },
+            { width: 800, height: 400, orientation: "upright" },
+            { width: 400, height: 600, orientation: "upright" },
+          ],
+          1,
+          true,
+        )
+        .split("\n");
+      expect(rules[0]).toBe(
+        "@page {size: 600pt 300pt; margin: 0 -2pt -2pt 0;}",
+      );
+    });
+
+    it("uses the largest width and height without named page support", function () {
+      expect(
+        adapt_viewer.createPrintPageRules(
+          [
+            { width: 400, height: 600, orientation: "upright" },
+            { width: 600, height: 400, orientation: "rotate-left" },
+          ],
+          1,
+          false,
+        ),
+      ).toBe("@page {size: 450pt 450pt; margin: 0 -2pt -2pt 0;}");
+    });
+
+    it("scales the negative page margins with the pixel ratio", function () {
+      expect(
+        adapt_viewer
+          .createPrintPageRules(
+            [{ width: 400, height: 600, orientation: "upright" }],
+            2,
+            true,
+          )
+          .split("\n"),
+      ).toEqual([
+        "@page {size: 300pt 450pt; margin: 0 -302pt -452pt 0;}",
+        "@page vivliostyle-page-300x450 {size: 300pt 450pt; margin: 0 -302pt -452pt 0;}",
+      ]);
+    });
+
+    it("gives the page container the page name and keeps its orientation", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var container = document.createElement("div");
+      container.setAttribute(
+        "data-vivliostyle-page-orientation",
+        "rotate-left",
+      );
+
+      viewer.setPageSize({ width: 600, height: 400 }, {}, 0, 1, container);
+
+      expect(viewer.pageSizes[1]).toEqual({
+        width: 600,
+        height: 400,
+        orientation: "rotate-left",
+      });
+      expect(container.style.getPropertyValue("page")).toBe(
+        CSS.supports("page", "auto")
+          ? "vivliostyle-page-450x300-rotate-left"
+          : "",
+      );
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "size: 450pt 300pt",
+      );
+    });
+  });
+
   describe("EPUBDocStore", function () {
     describe("loadPubDoc", function () {
       it("skips HEAD and treats data: URLs as a Web Publication primary entry", function (done) {

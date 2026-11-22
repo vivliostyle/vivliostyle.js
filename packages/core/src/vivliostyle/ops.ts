@@ -3447,6 +3447,17 @@ export class StyleInstance
       );
       this.setPageSizeAndBleed(evaluatedPageSizeAndBleed, page);
 
+      // page-orientation is applied to the printed page (Issue #1993)
+      const pageOrientation = CssPage.resolvePageOrientation(
+        cascadedPageStyle as any,
+      );
+      if (pageOrientation !== "upright") {
+        page.container.setAttribute(
+          "data-vivliostyle-page-orientation",
+          pageOrientation,
+        );
+      }
+
       CssPage.addPrinterMarks(
         cascadedPageStyle,
         evaluatedPageSizeAndBleed,

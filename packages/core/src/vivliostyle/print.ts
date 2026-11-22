@@ -75,6 +75,21 @@ class VivliostylePrint {
               margin: 0;
               padding: 0;
             }
+            @media print {
+              /* Keep the pages from overflowing their containers, which breaks
+                 named pages (each page's size and orientation) in Firefox */
+              html[data-vivliostyle-paginated],
+              html[data-vivliostyle-paginated] body,
+              html[data-vivliostyle-paginated] [data-vivliostyle-viewer-viewport] {
+                height: auto !important;
+              }
+              /* Keep white space after the viewport from making an extra blank
+                 page in Firefox */
+              html[data-vivliostyle-paginated] body {
+                display: flex;
+                flex-direction: column;
+              }
+            }
           </style>
           <style id='vivliostyle-page-rules'></style>
         </head>

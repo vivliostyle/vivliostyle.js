@@ -310,6 +310,31 @@ export function resolvePageSizeAndBleed(style: {
   return pageSizeAndBleed;
 }
 
+/**
+ * Value of the `page-orientation` descriptor.
+ * https://drafts.csswg.org/css-page/#page-orientation-prop
+ */
+export type PageOrientation = "upright" | "rotate-left" | "rotate-right";
+
+/**
+ * Resolve the `page-orientation` descriptor from style specified in page
+ * context.
+ */
+export function resolvePageOrientation(style: {
+  [key: string]: CssCascade.CascadeValue;
+}): PageOrientation {
+  const value = style["page-orientation"]?.value;
+  if (value instanceof Css.Ident) {
+    switch (value.name.toLowerCase()) {
+      case "rotate-left":
+        return "rotate-left";
+      case "rotate-right":
+        return "rotate-right";
+    }
+  }
+  return "upright";
+}
+
 export type EvaluatedPageSizeAndBleed = {
   pageWidth: number;
   pageHeight: number;
