@@ -106,6 +106,86 @@ describe("xml-doc", function () {
         ).toBeFalsy();
       });
     });
+
+    describe("baseURL and resolveURL", function () {
+      var docURL = "http://example.com/book/index.html";
+
+      function holderFor(html) {
+        var doc = new DOMParser().parseFromString(html, "text/html");
+        return new adapt_xmldoc.XMLDocHolder(null, docURL, doc);
+      }
+
+      it("uses the document URL without a base element", function () {
+        var holder = holderFor("<p>no base</p>");
+        expect(holder.baseURL).toBe(docURL);
+        expect(holder.resolveURL("img/a.png")).toBe(
+          "http://example.com/book/img/a.png",
+        );
+      });
+
+      it("resolves the href of the first base element with an href against the document URL", function () {
+        var holder = holderFor(
+          "<head><base target='_blank'><base href='assets/'>" +
+            "<base href='other/'></head><body><img src='a.png'></body>",
+        );
+        expect(holder.baseURL).toBe("http://example.com/book/assets/");
+        expect(holder.resolveURL("a.png")).toBe(
+          "http://example.com/book/assets/a.png",
+        );
+        expect(holder.resolveURL("../b.png")).toBe(
+          "http://example.com/book/b.png",
+        );
+        expect(holder.resolveURL("/c.png")).toBe("http://example.com/c.png");
+        expect(holder.resolveURL("https://example.org/d.png")).toBe(
+          "https://example.org/d.png",
+        );
+      });
+
+      it("keeps fragment-only URLs in the document", function () {
+        var holder = holderFor(
+          "<head><base href='http://example.org/'></head><body></body>",
+        );
+        expect(holder.baseURL).toBe("http://example.org/");
+        expect(holder.resolveURL("#note")).toBe(docURL + "#note");
+        expect(holder.resolveURL("chap2.html#note")).toBe(
+          "http://example.org/chap2.html#note",
+        );
+      });
+
+      it("ignores a base URL that cannot be used", function () {
+        expect(
+          holderFor("<head><base href='javascript:void(0)'></head>").baseURL,
+        ).toBe(docURL);
+        expect(
+          holderFor("<head><base href='data:text/plain,a'></head>").baseURL,
+        ).toBe(docURL);
+        expect(holderFor("<head><base href=''></head>").baseURL).toBe(docURL);
+      });
+
+      it("finds the base element in an XHTML document", function () {
+        var doc = new DOMParser().parseFromString(
+          "<html xmlns='http://www.w3.org/1999/xhtml'><head>" +
+            "<base href='assets/'/></head><body/></html>",
+          "application/xhtml+xml",
+        );
+        var holder = new adapt_xmldoc.XMLDocHolder(null, docURL, doc);
+        expect(holder.baseURL).toBe("http://example.com/book/assets/");
+      });
+
+      it("resolves URLs in a source document with resolveURLInDocument", function () {
+        var holder = holderFor(
+          "<head><base href='assets/'></head><body></body>",
+        );
+        expect(
+          adapt_xmldoc.resolveURLInDocument("script.js", holder.document),
+        ).toBe("http://example.com/book/assets/script.js");
+        // A document without a holder resolves against its own base URL.
+        var otherDoc = new DOMParser().parseFromString("<p></p>", "text/html");
+        expect(adapt_xmldoc.resolveURLInDocument("script.js", otherDoc)).toBe(
+          new URL("script.js", otherDoc.baseURI).href,
+        );
+      });
+    });
   });
 
   describe("parseAndReturnNullIfError", function () {

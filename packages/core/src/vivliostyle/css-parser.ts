@@ -882,6 +882,12 @@ export class Parser {
     public tokenizer: CssTokenizer.Tokenizer,
     public readonly handler: ParserHandler,
     public baseURL: string,
+    /**
+     * URL of the document that the style sheet is embedded in (a style
+     * element or attribute). A fragment-only URL refers to the document
+     * itself, even when the base URL differs (the document has a base element).
+     */
+    public documentURL: string | null = null,
   ) {
     this.exprContext = ExprContext.MEDIA;
   }
@@ -2132,7 +2138,16 @@ export class Parser {
           tokenizer.consume();
           continue;
         case Action.VAL_URL:
-          valStack.push(new Css.URL(Base.resolveURL(token.text, this.baseURL)));
+          valStack.push(
+            new Css.URL(
+              Base.resolveURL(
+                token.text,
+                this.documentURL !== null && token.text.startsWith("#")
+                  ? this.documentURL
+                  : this.baseURL,
+              ),
+            ),
+          );
           tokenizer.consume();
           continue;
         case Action.VAL_URANGE:
@@ -3052,6 +3067,7 @@ export function parseStylesheet(
   handler: DispatchParserHandler,
   baseURL: string | null,
   media: string | null,
+  documentURL: string | null = null,
 ): Task.Result<boolean> {
   // A style sheet given as text alone has no base. resolveURL() reads the
   // empty string as no base.
@@ -3063,9 +3079,10 @@ export function parseStylesheet(
       handler,
       base,
       media,
+      documentURL,
     );
   }
-  return parseStylesheetInternal(tokenizer, handler, base, media);
+  return parseStylesheetInternal(tokenizer, handler, base, media, documentURL);
 }
 
 function parseStylesheetInternal(
@@ -3073,9 +3090,16 @@ function parseStylesheetInternal(
   handler: DispatchParserHandler,
   baseURL: string,
   media: string | null,
+  documentURL: string | null,
 ): Task.Result<boolean> {
   const frame: Task.Frame<boolean> = Task.newFrame("parseStylesheet");
-  const parser = new Parser(actionsBase, tokenizer, handler, baseURL);
+  const parser = new Parser(
+    actionsBase,
+    tokenizer,
+    handler,
+    baseURL,
+    documentURL,
+  );
   let condition: Css.Expr | null = null;
   if (media) {
     condition = parseMediaQuery(
@@ -3144,12 +3168,15 @@ export function parseStylesheetFromText(
   handler: DispatchParserHandler,
   baseURL: string | null,
   media: string | null,
+  documentURL: string | null = null,
 ): Task.Result<boolean> {
   return Task.handle(
     "parseStylesheetFromText",
     (frame) => {
       const tok = new CssTokenizer.Tokenizer(text, handler);
-      parseStylesheet(tok, handler, baseURL, media).thenFinish(frame);
+      parseStylesheet(tok, handler, baseURL, media, documentURL).thenFinish(
+        frame,
+      );
     },
     (frame, err) => {
       Logging.logger.warn(err, `Failed to parse stylesheet text: ${text}`);
@@ -3210,8 +3237,15 @@ export function parseStyleAttribute(
   tokenizer: CssTokenizer.Tokenizer,
   handler: ParserHandler,
   baseURL: string,
+  documentURL: string | null = null,
 ): void {
-  const parser = new Parser(actionsStyleAttribute, tokenizer, handler, baseURL);
+  const parser = new Parser(
+    actionsStyleAttribute,
+    tokenizer,
+    handler,
+    baseURL,
+    documentURL,
+  );
   parser.runParser(Number.POSITIVE_INFINITY, false, true, false, false);
 }
 

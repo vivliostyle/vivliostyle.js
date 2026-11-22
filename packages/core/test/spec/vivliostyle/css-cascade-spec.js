@@ -5721,4 +5721,57 @@ describe("css-cascade", function () {
       });
     });
   });
+
+  describe("style sheet in a document with a base element", function () {
+    it("resolves URLs against the base URL, and fragment-only URLs against the document URL", function (done) {
+      var scope = new adapt_exprs.LexicalScope(null);
+      var handler = cascadeParserHandler(
+        scope,
+        adapt_cssvalid.baseValidatorSet(),
+      );
+      var values = {};
+      spyOn(handler, "property").and.callFake(function (name, value) {
+        values[name] = value;
+      });
+      handler.owner.startStylesheet(adapt_cssparse.StylesheetFlavor.AUTHOR);
+      adapt_task.start(function () {
+        adapt_cssparse
+          .parseStylesheetFromText(
+            "p { background-image: url(a.png); mask-image: url(#mask); }",
+            handler.owner,
+            "http://example.com/book/assets/",
+            null,
+            "http://example.com/book/index.html",
+          )
+          .then(function () {
+            expect(values["background-image"].url).toBe(
+              "http://example.com/book/assets/a.png",
+            );
+            expect(values["mask-image"].url).toBe(
+              "http://example.com/book/index.html#mask",
+            );
+            done();
+          });
+        return adapt_task.newResult(true);
+      });
+    });
+  });
+
+  describe("parseStyleAttribute", function () {
+    it("resolves URLs against the base URL, and fragment-only URLs against the document URL", function () {
+      var style = adapt_csscasc.parseStyleAttribute(
+        new adapt_exprs.LexicalScope(null),
+        adapt_cssvalid.baseValidatorSet(),
+        "http://example.com/book/assets/",
+        "background-image: url(a.png); mask-image: url(#mask)",
+        "http://example.com/book/index.html",
+      );
+      expect(style["background-image"].value.url).toBe(
+        "http://example.com/book/assets/a.png",
+      );
+      expect(style["mask-image"].value.url).toBe(
+        "http://example.com/book/index.html#mask",
+      );
+    });
+  });
 });

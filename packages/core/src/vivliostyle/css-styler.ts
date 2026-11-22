@@ -1016,8 +1016,9 @@ export class Styler implements AbstractStyler {
         return CssCascade.parseStyleAttribute(
           this.scope,
           this.validatorSet,
-          this.xmldoc.url,
+          this.xmldoc.baseURL,
           styleAttrValue,
+          this.xmldoc.url,
         );
       }
     }

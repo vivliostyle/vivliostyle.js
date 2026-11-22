@@ -3851,6 +3851,9 @@ export type StyleSheetParam =
 export type StyleSource = StyleSheetParam & {
   flavor: CssParser.StylesheetFlavor;
   media: string | null;
+  // URL of the document that embeds the style sheet text, against which
+  // fragment-only URLs are resolved (see CssParser.Parser.documentURL)
+  documentURL?: string;
 };
 
 function toStyleSource(
@@ -4143,10 +4146,11 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
           if (localName == "style") {
             const media = elem.getAttribute("media");
             docSources.push({
-              url,
+              url: xmldoc.baseURL,
               text: elem.textContent,
               flavor: CssParser.StylesheetFlavor.AUTHOR,
               media,
+              documentURL: url,
             });
           } else if (localName == "link") {
             const href = elem.getAttribute("href");
@@ -4158,14 +4162,14 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
               .split(/\s+/);
             const media = elem.getAttribute("media");
             if (href && rel?.includes("stylesheet")) {
-              linkedStyleSheetURLs.add(Base.resolveURL(href, url));
+              linkedStyleSheetURLs.add(xmldoc.resolveURL(href));
             }
             if (
               href &&
               rel?.includes("stylesheet") &&
               !rel.includes("alternate")
             ) {
-              const src = Base.resolveURL(href, url);
+              const src = xmldoc.resolveURL(href);
               docSources.push({
                 url: src,
                 text: null,
@@ -4231,6 +4235,10 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
         key += sources[i].media;
       }
       key += "^";
+      if (sources[i].documentURL) {
+        key += sources[i].documentURL;
+      }
+      key += "^";
     }
     const style = this.styleByKey[key];
     if (style) {
@@ -4253,6 +4261,7 @@ export class OPSDocStore extends Net.ResourceStore<XmlDoc.XMLDocHolder> {
                   sph,
                   source.url,
                   source.media,
+                  source.documentURL ?? null,
                 ).thenReturn(true);
               } else {
                 return CssParser.parseStylesheetFromURL(

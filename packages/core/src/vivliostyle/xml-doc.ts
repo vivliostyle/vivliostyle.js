@@ -26,6 +26,57 @@ import { XmlDoc } from "./types";
 
 export type XMLDocStore = XmlDoc.XMLDocStore;
 
+/**
+ * The document base URL (cf. https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url):
+ * the href of the first HTML `base` element with an href attribute, resolved
+ * against the document URL, or the document URL itself.
+ *
+ * The browser cannot compute it for a source document: a document created by
+ * DOMParser has the URL of the viewer page, so `element.baseURI` and URL
+ * attributes read through the DOM (e.g. `script.src`) resolve against it.
+ */
+export function getDocumentBaseURL(
+  document: Document,
+  documentURL: string,
+): string {
+  const base = Array.from(
+    document.getElementsByTagNameNS(Base.NS.XHTML, "base"),
+  ).find((elem) => elem.hasAttribute("href"));
+  if (!base) {
+    return documentURL;
+  }
+  const href = base.getAttribute("href").trim();
+  if (!href) {
+    // An empty href resolves to the document URL itself.
+    return documentURL;
+  }
+  const baseURL = Base.resolveURL(href, documentURL);
+  // Ignore a base URL that is not absolute (resolveURL() turns a javascript:
+  // URL into "#"), and a data: URL, against which nothing can be resolved.
+  if (!/^\w{2,}:/.test(baseURL) || /^data:/i.test(baseURL)) {
+    return documentURL;
+  }
+  return baseURL;
+}
+
+const holderByDocument = new WeakMap<Document, XMLDocHolder>();
+
+/**
+ * Resolve a URL in a source document against its document base URL. A
+ * fragment-only URL refers to the document itself, as in CSS
+ * (cf. https://drafts.csswg.org/css-values-4/#local-urls).
+ */
+export function resolveURLInDocument(
+  relURL: string,
+  document: Document,
+): string {
+  const holder = holderByDocument.get(document);
+  if (holder) {
+    return holder.resolveURL(relURL);
+  }
+  return Base.resolveURL(relURL, document.baseURI);
+}
+
 export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   lang: string | null = null;
   totalOffset: number = -1;
@@ -35,6 +86,11 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
   last: Element;
   lastOffset: number = 1;
   idMap: { [key: string]: Element } | null = null;
+  /**
+   * Base URL against which relative URLs in the document are resolved. It
+   * differs from `url` when the document has a `base` element.
+   */
+  readonly baseURL: string;
 
   constructor(
     public readonly store: XMLDocStore | null,
@@ -71,6 +127,21 @@ export class XMLDocHolder implements XmlDoc.XMLDocHolder {
     this.head = head as Element;
     this.last = this.root;
     this.last.setAttribute(Base.ELEMENT_OFFSET_ATTR, "0");
+    this.baseURL = getDocumentBaseURL(document, url);
+    holderByDocument.set(document, this);
+  }
+
+  /**
+   * Resolve a URL in the document against the document base URL. A
+   * fragment-only URL refers to the document itself even when the document
+   * has a `base` element, so that links and references within the document
+   * keep working.
+   */
+  resolveURL(relURL: string): string {
+    return Base.resolveURL(
+      relURL,
+      relURL.startsWith("#") ? this.url : this.baseURL,
+    );
   }
 
   doc(): XmlDoc.NodeList {

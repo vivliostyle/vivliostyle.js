@@ -482,6 +482,14 @@ module.exports = [
         title: "Root metrics after a script-loaded font (PR #2198)",
         skipLayoutRegression: true,
       },
+      {
+        file: "base-url/base-element.html",
+        title: "Base element (Issue #604)",
+      },
+      {
+        file: "base-url/script-src.html",
+        title: "Relative script src (Issue #604)",
+      },
     ],
   },
   {

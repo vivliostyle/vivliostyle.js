@@ -332,8 +332,8 @@ export class EPUBDocStore extends OPS.OPSDocStore {
         const manifestLink = doc.querySelector(
           "link[rel='publication'],link[rel='manifest'][type='application/webpub+json']",
         );
-        if (manifestLink) {
-          const href = manifestLink.getAttribute("href");
+        const href = manifestLink?.getAttribute("href");
+        if (href) {
           if (href?.startsWith("#")) {
             const manifestObj = Base.stringToJSON(
               doc.getElementById(href.slice(1)).textContent,
@@ -344,10 +344,7 @@ export class EPUBDocStore extends OPS.OPSDocStore {
               },
             );
           } else {
-            const manifestUrl = Base.resolveURL(
-              manifestLink.getAttribute("href"),
-              url,
-            );
+            const manifestUrl = xmldoc.resolveURL(href);
             this.loadAsJSON(
               manifestUrl,
               true,
@@ -1353,6 +1350,7 @@ export class OPFDoc {
       manifestObj["readingOrder"] = [primaryEntryReadingOrderURL];
 
       // Find TOC in the primary entry (X)HTML
+      const docBaseURL = XmlDoc.getDocumentBaseURL(doc, pubURL);
       for (const anchorElem of Toc.findTocAnchorElements(doc)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
@@ -1364,7 +1362,7 @@ export class OPFDoc {
           continue;
         }
         const hrefNoFragment = Base.stripFragment(
-          Base.resolveURL(href, pubURL),
+          Base.resolveURL(href, href.startsWith("#") ? pubURL : docBaseURL),
         );
         const path = getPathFromURL(hrefNoFragment, pubURL);
         const url = path !== null ? encodeURLPath(path) : hrefNoFragment;
@@ -3947,7 +3945,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
     let data = srcElem.getAttribute("data");
     let result: Element | null = null;
     if (data) {
-      data = Base.resolveURL(data, xmldoc.url);
+      data = xmldoc.resolveURL(data);
       let mediaType = srcElem.getAttribute("media-type");
       if (!mediaType) {
         const path = this.opf.getPathFromURL(data);
@@ -4047,7 +4045,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
         if (attr.name !== "src") {
           continue;
         }
-        const newUrl = Base.resolveURL(attr.nodeValue, xmldoc.url);
+        const newUrl = xmldoc.resolveURL(attr.nodeValue);
         if (attr.namespaceURI) {
           (node as Element).setAttributeNS(
             attr.namespaceURI,

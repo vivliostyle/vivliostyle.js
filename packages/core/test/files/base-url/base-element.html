@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- Test case for Issue #604: the base element sets the base URL of relative
+URLs in the document. The resources are in the assets/ directory. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Base element</title>
+    <base href="assets/" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+    <style>
+      @page {
+        size: 160mm 120mm;
+        margin: 10mm;
+      }
+      body {
+        font: 14px/1.5 Arial, sans-serif;
+      }
+      .box {
+        box-sizing: border-box;
+        width: 120px;
+        height: 40px;
+        margin: 4px 0;
+        padding: 0 8px;
+        line-height: 40px;
+        color: #fff;
+        background: #c22 no-repeat;
+        white-space: nowrap;
+      }
+      img.box {
+        padding: 0;
+      }
+      .style-element {
+        background-image: url(green.svg);
+      }
+      .text {
+        width: auto;
+        display: inline-block;
+      }
+      a.ref::after {
+        content: " (page " target-counter(attr(href url), page) ")";
+      }
+      #target {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Each item below must show green (PASS), not red.</p>
+    <div><img src="green.svg" alt="img src: FAIL" class="box" /></div>
+    <div class="box style-element"></div>
+    <div class="box" style="background-image: url(green.svg)"></div>
+    <div class="box text link-stylesheet">link stylesheet</div>
+    <div class="box text script-base">script src (base): FAIL</div>
+    <p>
+      A fragment-only link stays in this document:
+      <a class="ref" href="#target">go to the target</a> must say page 2.
+    </p>
+    <h2 id="target">Target</h2>
+    <p>This is the link target.</p>
+  </body>
+</html>
