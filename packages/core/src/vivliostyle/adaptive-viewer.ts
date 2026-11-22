@@ -195,6 +195,17 @@ export class AdaptiveViewer {
   hyperlinkListener: Base.EventListener;
   pageRuleStyleElement: HTMLElement;
   pageSheetSizeAlreadySet: boolean = false;
+  // What the current print page rules cover, to skip regenerating them when a
+  // page adds no new page name or size (see setPageSizePageRules)
+  private printPageRuleCoverage: {
+    names: Set<string>;
+    maxWidth: number;
+    maxHeight: number;
+    maxShortSide: number;
+    maxLongSide: number;
+    hasPortrait: boolean;
+    hasLandscape: boolean;
+  } | null = null;
   renderTask: Task.Task | null = null;
   actions: { [key: string]: Action };
   readyState: Constants.ReadyState = Constants.ReadyState.LOADING;
@@ -893,22 +904,47 @@ export class AdaptiveViewer {
 
   private setPageSizePageRules(pageIndex: number) {
     const currentPageSize = this.pageSizes[pageIndex];
-    const previousPageSize = this.pageSizes[pageIndex - 1];
-    if (
-      this.pageRuleStyleElement &&
-      currentPageSize &&
-      (!this.pageSheetSizeAlreadySet ||
-        !previousPageSize ||
-        getPrintPageName(currentPageSize) !==
-          getPrintPageName(previousPageSize))
-    ) {
-      this.pageRuleStyleElement.textContent = createPrintPageRules(
-        this.pageSizes.filter((pageSize) => pageSize != null),
-        this.pixelRatio,
-        typeof CSS !== "undefined" && CSS.supports("page", "auto"),
-      );
-      this.pageSheetSizeAlreadySet = true;
+    if (!this.pageRuleStyleElement || !currentPageSize) {
+      return;
     }
+    // Regenerating the rules takes all pages, so skip it when the current
+    // rules already cover this page: its page name, and its size and
+    // orientation in the unnamed @page rule.
+    const coverage = this.printPageRuleCoverage;
+    const { width, height } = currentPageSize;
+    if (
+      this.pageSheetSizeAlreadySet &&
+      coverage &&
+      coverage.names.has(getPrintPageName(currentPageSize)) &&
+      width <= coverage.maxWidth &&
+      height <= coverage.maxHeight &&
+      Math.min(width, height) <= coverage.maxShortSide &&
+      Math.max(width, height) <= coverage.maxLongSide &&
+      (width >= height || coverage.hasPortrait) &&
+      (width <= height || coverage.hasLandscape)
+    ) {
+      return;
+    }
+    const pageSizes = this.pageSizes.filter((pageSize) => pageSize != null);
+    this.pageRuleStyleElement.textContent = createPrintPageRules(
+      pageSizes,
+      this.pixelRatio,
+      typeof CSS !== "undefined" && CSS.supports("page", "auto"),
+    );
+    this.pageSheetSizeAlreadySet = true;
+    this.printPageRuleCoverage = {
+      names: new Set(pageSizes.map(getPrintPageName)),
+      maxWidth: Math.max(...pageSizes.map((p) => p.width)),
+      maxHeight: Math.max(...pageSizes.map((p) => p.height)),
+      maxShortSide: Math.max(
+        ...pageSizes.map((p) => Math.min(p.width, p.height)),
+      ),
+      maxLongSide: Math.max(
+        ...pageSizes.map((p) => Math.max(p.width, p.height)),
+      ),
+      hasPortrait: pageSizes.some((p) => p.width < p.height),
+      hasLandscape: pageSizes.some((p) => p.width > p.height),
+    };
   }
 
   removePageSizePageRules() {
@@ -916,6 +952,7 @@ export class AdaptiveViewer {
       this.pageRuleStyleElement.textContent = "";
       this.pageSheetSizeAlreadySet = false;
     }
+    this.printPageRuleCoverage = null;
   }
 
   private loadCmykReserveMap(store: Epub.EPUBDocStore): Task.Result<boolean> {

@@ -178,6 +178,42 @@ describe("epub", function () {
       ]);
     });
 
+    it("regenerates page rules only when a page adds a page name or size", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var left = document.createElement("div");
+      left.setAttribute("data-vivliostyle-page-orientation", "rotate-left");
+      var right = document.createElement("div");
+      right.setAttribute("data-vivliostyle-page-orientation", "rotate-right");
+
+      for (var i = 0; i < 6; i++) {
+        viewer.setPageSize(
+          { width: 600, height: 400 },
+          {},
+          0,
+          i + 1,
+          i % 2 ? right : left,
+        );
+      }
+      var rules = viewer.pageRuleStyleElement.textContent;
+      expect(rules).toContain("-rotate-left");
+      expect(rules).toContain("-rotate-right");
+
+      // A page with a page name and size already covered keeps the rules.
+      viewer.pageRuleStyleElement.textContent = "unchanged";
+      viewer.setPageSize({ width: 600, height: 400 }, {}, 0, 7, left);
+      expect(viewer.pageRuleStyleElement.textContent).toBe("unchanged");
+
+      // A new portrait page changes the unnamed @page rule.
+      viewer.setPageSize({ width: 400, height: 600 }, {}, 0, 8);
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "@page {size: 300pt 450pt;",
+      );
+    });
+
     it("gives the page container the page name and keeps its orientation", function () {
       var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
       viewer.pageSizes = [];
