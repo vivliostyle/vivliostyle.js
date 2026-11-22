@@ -1188,6 +1188,10 @@ module.exports = [
         title: "Content in page margin box (PR #316)",
       },
       {
+        file: "quotes-in-page-margin-box.html",
+        title: "Quotes in page margin boxes (Issue #567)",
+      },
+      {
         file: "page-margin-box-images.html",
         title: "Page margin box images (Issue #1867)",
       },

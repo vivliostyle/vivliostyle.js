@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- Test case for Issue #567: quotes in the page and margin contexts -->
+<html lang="en">
+  <meta charset="utf-8">
+  <title>Quotes in page margin boxes</title>
+  <style>
+    :root {
+      quotes: "{" "}";
+      --first-page-quotes: "«" "»";
+    }
+    @page {
+      size: 150mm 90mm;
+      margin: 15mm;
+
+      @top-left {
+        content: open-quote "Header" close-quote no-open-quote;
+      }
+      @top-right {
+        quotes: "[" "]" "(" ")";
+        content: open-quote "Chapter " open-quote counter(page) close-quote close-quote;
+      }
+      @bottom-left {
+        quotes: none;
+        content: open-quote "Plain footer" close-quote;
+      }
+      @bottom-right {
+        quotes: initial;
+        content: open-quote "Footer" close-quote;
+      }
+    }
+    @page :first {
+      quotes: var(--first-page-quotes);
+    }
+    section + section {
+      break-before: page;
+    }
+  </style>
+  <body>
+    <section>Expected header: «Header» and [Chapter (1)]</section>
+    <section>Expected header: {Header} and [Chapter (2)]</section>
+  </body>
+</html>

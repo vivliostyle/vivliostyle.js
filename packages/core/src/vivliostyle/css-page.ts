@@ -1235,14 +1235,7 @@ export class PageRuleMasterInstance extends PageMaster.PageMasterInstance<PageRu
     // Geometry and cascaded style were resolved in the constructor. The child
     // loop reuses the page-area partition built there (pageAreaPartitionInstance).
     cascade.pushRule(this.pageBox.classes, null, this.cascaded);
-    // The constructor's init() copied the unresolved `content` into `style`
-    // before the cascade rule was available. Resolve the generated content now
-    // (it needs the cascade) and refresh the physical style with the result.
-    this.resolveContent(cascade);
-    const content = this.cascaded["content"] as CssCascade.CascadeValue;
-    if (content) {
-      this.style["content"] = content.value;
-    }
+    this.resolveContent(cascade, docElementStyle);
     for (const child of this.pageBox.children) {
       const childInstance =
         child === this.pageBox.pageRulePartition
