@@ -139,6 +139,9 @@ describe("base", function () {
       expect(
         module.resolveURL("?b", "https://example.com/book/index.php?a#x"),
       ).toBe("https://example.com/book/index.php?b");
+      expect(
+        module.resolveURL("./?b", "https://example.com/book/index.php"),
+      ).toBe("https://example.com/book/?b");
     });
 
     it("keeps repo-root absolute paths within the WPT raw.githack.com mirror", function () {
