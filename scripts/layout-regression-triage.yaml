@@ -1,3 +1,17 @@
+- category: General
+  title: "Default border width of a button and line wrapping (PR #2286)"
+  file: button-border-line-wrapping.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2289 restores the native button border width in Chrome. The green square fits beside the button on canary
+    and wraps below it on stable.
+  approvedViewer: https://vivliostyle-git-codex-fix-background-button-border-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/button-border-line-wrapping.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/button-border-line-wrapping.html&zoom=1&spread=false
 - category: Positioning and fragmentation
   title: "Empty absolutely positioned element in inline text at a page break (Issue #2285)"
   file: empty-absolute-in-inline-page-break.html
