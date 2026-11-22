@@ -6,29 +6,42 @@
   <style>
     :root {
       quotes: "{" "}";
-      --first-page-quotes: "«" "»";
+      --no-quotes: NONE;
+      --auto-quotes: AUTO;
+      --odd-quotes: "[" "]" "!";
+      --mixed-quotes: "[" 1;
     }
     @page {
       size: 150mm 90mm;
       margin: 15mm;
 
       @top-left {
+        --first-page-quotes: "<" ">";
         content: open-quote "Header" close-quote no-open-quote;
+      }
+      @top-center {
+        quotes: var(--odd-quotes);
+        content: open-quote "Odd list" close-quote;
       }
       @top-right {
         quotes: "[" "]" "(" ")";
         content: open-quote "Chapter " open-quote counter(page) close-quote close-quote;
       }
       @bottom-left {
-        quotes: none;
+        quotes: var(--no-quotes);
         content: open-quote "Plain footer" close-quote;
       }
+      @bottom-center {
+        quotes: var(--mixed-quotes);
+        content: open-quote "Mixed list" close-quote;
+      }
       @bottom-right {
-        quotes: initial;
+        quotes: var(--auto-quotes);
         content: open-quote "Footer" close-quote;
       }
     }
     @page :first {
+      --first-page-quotes: "«" "»";
       quotes: var(--first-page-quotes);
     }
     section + section {

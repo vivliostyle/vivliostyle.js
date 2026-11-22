@@ -1059,6 +1059,10 @@ export class PageMarginBoxPartition extends PageMaster.Partition<PageMarginBoxPa
 
     // Inherit properties in the page context to the page-margin context
     for (const prop in style) {
+      if (prop === "quotes") {
+        // resolveContent inherits the quote pairs resolved in the page context.
+        continue;
+      }
       const val = style[prop] as CssCascade.CascadeValue;
       const ownVal = ownStyle[prop] as CssCascade.CascadeValue;
       if (

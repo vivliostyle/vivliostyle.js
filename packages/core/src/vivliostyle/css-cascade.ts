@@ -3896,15 +3896,25 @@ export function resolveQuotes(
   value: Css.Val | undefined,
   inherited = defaultQuotes,
 ): Css.Str[] {
-  if (value === Css.ident.none) {
+  if (value && hasKeywordName(value, "none")) {
     return emptyQuotes;
   }
-  if (value === Css.ident.auto || value === Css.ident.initial) {
+  if (
+    value &&
+    (hasKeywordName(value, "auto") || hasKeywordName(value, "initial"))
+  ) {
     // FIXME: quotes:auto should be based on the content language.
     return defaultQuotes;
   }
   if (value instanceof Css.SpaceList) {
-    return value.values as Css.Str[];
+    const pairs = value.values;
+    if (
+      pairs.length > 0 &&
+      pairs.length % 2 === 0 &&
+      pairs.every((mark) => mark instanceof Css.Str)
+    ) {
+      return pairs;
+    }
   }
   return inherited;
 }

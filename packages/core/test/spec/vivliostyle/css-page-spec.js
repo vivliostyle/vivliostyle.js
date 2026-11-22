@@ -21,6 +21,7 @@ import * as adapt_csscasc from "../../../src/vivliostyle/css-cascade";
 import * as adapt_cssparse from "../../../src/vivliostyle/css-parser";
 import * as adapt_exprs from "../../../src/vivliostyle/exprs";
 import * as vivliostyle_css_page from "../../../src/vivliostyle/css-page";
+import { RootPageBox } from "../../../src/vivliostyle/page-master";
 
 describe("css-page", function () {
   var module = vivliostyle_css_page;
@@ -235,6 +236,32 @@ describe("css-page", function () {
       expected.bleed = adapt_css.numericZero;
       expect(resolved).toEqual(expected);
     });
+  });
+
+  it("lets margin boxes inherit resolved page quotes and keeps local declarations", function () {
+    const scope = new adapt_exprs.LexicalScope(null);
+    const pageQuotes = new adapt_csscasc.CascadeValue(
+      new adapt_css.Func("var", [adapt_css.getName("--quotes")]),
+      0,
+    );
+    const localQuotes = new adapt_csscasc.CascadeValue(adapt_css.ident.none, 0);
+    const pageMaster = new module.PageRuleMaster(
+      scope,
+      new RootPageBox(scope),
+      {
+        quotes: pageQuotes,
+        [module.marginBoxesKey]: {
+          "top-left": {},
+          "top-right": { quotes: localQuotes },
+        },
+      },
+    );
+    const marginBoxes = pageMaster.children.filter(
+      (box) => box instanceof module.PageMarginBoxPartition,
+    );
+    expect(pageMaster.specified.quotes).toBe(pageQuotes);
+    expect(marginBoxes[0].specified.quotes).toBeUndefined();
+    expect(marginBoxes[1].specified.quotes).toBe(localQuotes);
   });
 
   describe("PageParserHandler", function () {
