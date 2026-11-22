@@ -74,6 +74,13 @@ export function getDocumentBaseURL(
 const holderByDocument = new WeakMap<Document, XMLDocHolder>();
 
 /**
+ * The XMLDocHolder created for a source document, if any.
+ */
+export function getXMLDocHolder(document: Document): XMLDocHolder | null {
+  return holderByDocument.get(document) ?? null;
+}
+
+/**
  * Resolve a URL in a source document against its document base URL. A
  * fragment-only URL refers to the document itself, as in CSS
  * (cf. https://drafts.csswg.org/css-values-4/#local-urls).

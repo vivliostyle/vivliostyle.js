@@ -211,6 +211,7 @@ describe("xml-doc", function () {
         expect(
           adapt_xmldoc.resolveURLInDocument("script.js", holder.document),
         ).toBe("http://example.com/book/assets/script.js");
+        expect(adapt_xmldoc.getXMLDocHolder(holder.document)).toBe(holder);
         // A document without a holder resolves against its own base URL.
         var otherDoc = new DOMParser().parseFromString("<p></p>", "text/html");
         expect(adapt_xmldoc.resolveURLInDocument("script.js", otherDoc)).toBe(

@@ -1350,7 +1350,10 @@ export class OPFDoc {
       manifestObj["readingOrder"] = [primaryEntryReadingOrderURL];
 
       // Find TOC in the primary entry (X)HTML
-      const docBaseURL = XmlDoc.getDocumentBaseURL(doc, pubURL);
+      // The holder knows the document URL after a redirect.
+      const docBaseURL =
+        XmlDoc.getXMLDocHolder(doc)?.baseURL ??
+        XmlDoc.getDocumentBaseURL(doc, pubURL);
       for (const anchorElem of Toc.findTocAnchorElements(doc)) {
         const href = anchorElem.getAttribute("href");
         if (/^(https?:)?\/\//.test(href)) {
