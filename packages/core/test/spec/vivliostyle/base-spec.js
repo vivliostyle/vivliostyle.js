@@ -252,15 +252,12 @@ describe("base", function () {
       return list.length ? list.sort() : null;
     };
     var substrings = [
-      ["border", "border"],
-      ["outline", "outline"],
-      ["rule", "rule"],
       ["text-decoration", "text-decoration"],
       ["border-collapse: collapse", "border-collapse:collapse"],
       ["--viv-marker-color", "--viv-marker-color"],
     ];
-    // The keys that the former [style*="..."] selectors matched.
-    var keysOfStyleText = function (target) {
+    // The polyfill matches style text; zoom widths depend on declared styles.
+    var expectedKeys = function (target) {
       var text = target.getAttribute("style") || "";
       var list = substrings
         .filter(function (entry) {
@@ -269,6 +266,12 @@ describe("base", function () {
         .map(function (entry) {
           return entry[1];
         });
+      const names = target.style.all ? [] : Array.from(target.style);
+      if (names.some((name) => /^border-.*style$/.test(name))) {
+        list.push("border");
+      }
+      if (names.includes("outline-style")) list.push("outline");
+      if (names.includes("column-rule-style")) list.push("rule");
       return list.length ? list.sort() : null;
     };
 
@@ -299,7 +302,7 @@ describe("base", function () {
       expect(keys()).toContain("--viv-marker-color");
     });
 
-    it("matches a substring of the name or of the value", function () {
+    it("tracks declared line styles for the zoom workaround", function () {
       module.setCSSProperty(element, "border-top-style", "solid");
       expect(keys()).toEqual(["border"]);
       module.setCSSProperty(element, "outline-style", "dotted");
@@ -307,17 +310,17 @@ describe("base", function () {
       module.setCSSProperty(element, "text-decoration-line", "underline");
       expect(keys()).toEqual(["border", "outline", "rule", "text-decoration"]);
 
-      // [style*=border] also matched a value.
+      // A box keyword does not declare a border.
       var other = document.createElement("div");
       module.setCSSProperty(other, "box-sizing", "border-box");
-      expect(other.getAttribute(module.STYLE_KEYS_ATTR)).toBe("border");
+      expect(keysOf(other)).toBe(null);
     });
 
     it("tells collapsed borders from separate ones", function () {
       module.setCSSProperty(element, "border-collapse", "collapse");
-      expect(keys()).toEqual(["border", "border-collapse:collapse"]);
+      expect(keys()).toEqual(["border-collapse:collapse"]);
       module.setCSSProperty(element, "border-collapse", "separate");
-      expect(keys()).toEqual(["border"]);
+      expect(keys()).toBe(null);
     });
 
     it("removes a key with its last declaration", function () {
@@ -336,22 +339,12 @@ describe("base", function () {
       expect(keys()).toBe(null);
     });
 
-    it("matches a substring of a custom property as well", function () {
-      // [style*=border] also matched the name or the value of a custom
-      // property.
+    it("ignores line names and values in unrelated declarations", function () {
       module.setCSSProperty(element, "--border-color", "red");
-      expect(keys()).toEqual(["border"]);
       module.setCSSProperty(element, "--frame", "outline");
-      expect(keys()).toEqual(["border", "outline"]);
-      module.setCSSProperty(element, "--frame", "none");
-      expect(keys()).toEqual(["border"]);
-      module.removeCSSProperty(element, "--border-color");
+      module.setCSSProperty(element, "transition-property", "border-top-style");
       expect(keys()).toBe(null);
-
-      // A key by its own name and a key by a substring.
       module.setCSSProperty(element, "--viv-marker-content", '"rule 1"');
-      expect(keys()).toEqual(["--viv-marker-content", "rule"]);
-      module.setCSSProperty(element, "--viv-marker-content", '"1"');
       expect(keys()).toEqual(["--viv-marker-content"]);
     });
 
@@ -359,13 +352,13 @@ describe("base", function () {
       // The browser makes the keyword lowercase.
       module.setCSSProperty(element, "border-collapse", "COLLAPSE");
       expect(element.style.borderCollapse).toBe("collapse");
-      expect(keys()).toEqual(["border", "border-collapse:collapse"]);
+      expect(keys()).toEqual(["border-collapse:collapse"]);
 
       // A value that is not valid leaves the declaration as it was.
       module.setCSSProperty(element, "border-collapse", "separate");
       module.setCSSProperty(element, "border-collapse", "collapse bogus");
       expect(element.style.borderCollapse).toBe("separate");
-      expect(keys()).toEqual(["border"]);
+      expect(keys()).toBe(null);
 
       var other = document.createElement("div");
       module.setCSSProperty(other, "border-collapse", "collapse bogus");
@@ -373,10 +366,11 @@ describe("base", function () {
       expect(other.getAttribute("style") || "").toBe("");
       expect(other.hasAttribute(module.STYLE_KEYS_ATTR)).toBe(false);
 
-      // A value without a key that is not valid keeps the old value's key.
+      // A rejected write preserves the accepted value.
       module.setCSSProperty(other, "box-sizing", "border-box");
       module.setCSSProperty(other, "box-sizing", "bogus");
-      expect(other.getAttribute(module.STYLE_KEYS_ATTR)).toBe("border");
+      expect(other.style.boxSizing).toBe("border-box");
+      expect(keysOf(other)).toBe(null);
     });
 
     it("removes a custom property and its key", function () {
@@ -433,7 +427,7 @@ describe("base", function () {
 
     it("follows a shorthand property that changes its longhand properties", function () {
       module.setCSSProperty(element, "background-clip", "border-box");
-      expect(keys()).toEqual(["border"]);
+      expect(keys()).toBe(null);
       module.removeCSSProperty(element, "background");
       expect(element.getAttribute("style") || "").toBe("");
       expect(keys()).toBe(null);
@@ -460,19 +454,17 @@ describe("base", function () {
       element.innerHTML = '<table style="border-collapse:collapse"></table>';
       var table = element.firstChild;
       module.updateStyleKeysFromStyleAttributes(element);
-      expect(keysOf(table)).toEqual(["border"]);
+      expect(keysOf(table)).toBe(null);
       module.setCSSProperty(table, "color", "red");
       expect(table.getAttribute("style")).toContain(
         "border-collapse: collapse",
       );
-      expect(keysOf(table)).toEqual(["border", "border-collapse:collapse"]);
+      expect(keysOf(table)).toEqual(["border-collapse:collapse"]);
       expect(keysOf(table.cloneNode(true))).toEqual(keysOf(table));
     });
 
-    it("has no key for a value that the style attribute leaves out", function () {
-      // The view generation sets the longhand properties of
-      // `background: red` one by one. Browsers combine them into a
-      // declaration without `background-clip: border-box`. (PR #2286)
+    it("keeps background box values out of the border width workaround", function () {
+      // View generation sets background longhands one by one. (PR #2286)
       [
         ["background-image", "none"],
         ["background-position-x", "0%"],
@@ -485,31 +477,35 @@ describe("base", function () {
         ["background-color", "red"],
       ].forEach(function (declaration) {
         module.setCSSProperty(element, declaration[0], declaration[1]);
-        expect(keys()).toEqual(keysOfStyleText(element));
+        expect(keys()).toEqual(expectedKeys(element));
       });
       expect(element.style.backgroundClip).toBe("border-box");
 
       // A value that is not valid changes nothing.
       module.setCSSProperty(element, "background-clip", "border-bogus");
-      expect(keys()).toEqual(keysOfStyleText(element));
+      expect(keys()).toEqual(expectedKeys(element));
       module.setCSSProperty(element, "background-image", "");
-      expect(keys()).toEqual(keysOfStyleText(element));
+      expect(keys()).toEqual(expectedKeys(element));
 
       // The same when the shorthand property is set.
       var other = document.createElement("div");
       module.setCSSProperty(other, "background", "red");
-      expect(keysOf(other)).toEqual(keysOfStyleText(other));
+      expect(keysOf(other)).toEqual(expectedKeys(other));
       module.setCSSProperty(other, "background-image", "");
-      expect(keysOf(other)).toEqual(keysOfStyleText(other));
+      expect(keysOf(other)).toEqual(expectedKeys(other));
     });
 
     it("resolves an escape in a value", function () {
-      module.setCSSProperty(element, "box-sizing", "b\\6frder-box");
-      expect(element.style.boxSizing).toBe("border-box");
-      expect(keys()).toEqual(["border"]);
+      module.setCSSProperty(
+        element,
+        "transition-property",
+        "text-decor\\61tion",
+      );
+      expect(element.style.transitionProperty).toBe("text-decoration");
+      expect(keys()).toEqual(["text-decoration"]);
     });
 
-    it("has the keys of the style attribute after any sequence of changes", function () {
+    it("keeps the keys in sync after any sequence of changes", function () {
       var changes = [
         ["background", "red"],
         ["background", ""],
@@ -575,7 +571,7 @@ describe("base", function () {
             target = target.cloneNode(true);
           }
           var actual = keysOf(target);
-          var expected = keysOfStyleText(target);
+          var expected = expectedKeys(target);
           if (JSON.stringify(actual) !== JSON.stringify(expected)) {
             fail(
               "keys " +
@@ -611,6 +607,9 @@ describe("base", function () {
         var target = document.createElement("div");
         if (key.indexOf("--") === 0) {
           module.setCSSProperty(target, key, "1");
+        } else if (["border", "outline", "rule"].includes(key)) {
+          const name = key === "rule" ? "column-rule" : key;
+          module.setCSSProperty(target, name + "-style", "solid");
         } else if (key === "border-collapse:collapse") {
           module.setCSSProperty(target, "border-collapse", "collapse");
         } else {
