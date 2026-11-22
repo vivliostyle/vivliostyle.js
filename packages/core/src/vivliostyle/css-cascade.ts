@@ -3884,6 +3884,41 @@ export class RestoreLangItem implements ConditionItem {
   }
 }
 
+const defaultQuotes = [
+  new Css.Str("\u201c"),
+  new Css.Str("\u201d"),
+  new Css.Str("\u2018"),
+  new Css.Str("\u2019"),
+];
+const emptyQuotes = [new Css.Str(""), new Css.Str("")];
+
+export function resolveQuotes(
+  value: Css.Val | undefined,
+  inherited = defaultQuotes,
+): Css.Str[] {
+  if (value && hasKeywordName(value, "none")) {
+    return emptyQuotes;
+  }
+  if (
+    value &&
+    (hasKeywordName(value, "auto") || hasKeywordName(value, "initial"))
+  ) {
+    // FIXME: quotes:auto should be based on the content language.
+    return defaultQuotes;
+  }
+  if (value instanceof Css.SpaceList) {
+    const pairs = value.values;
+    if (
+      pairs.length > 0 &&
+      pairs.length % 2 === 0 &&
+      pairs.every((mark) => mark instanceof Css.Str)
+    ) {
+      return pairs;
+    }
+  }
+  return inherited;
+}
+
 /**
  * Not a true condition item, this class manages inheritance of quotes property
  */
@@ -5527,7 +5562,7 @@ export class CascadeInstance {
     [key: string]: "reset" | "set" | "increment";
   } = Object.create(null);
   counterScoping: ({ [key: string]: boolean } | null)[] = [Object.create(null)];
-  quotes: Css.Str[];
+  quotes = defaultQuotes;
   quoteDepth: number = 0;
   lang: string = "";
   siblingOrderStack: number[] = [0];
@@ -5558,12 +5593,6 @@ export class CascadeInstance {
     public readonly mergeValidatorSet: CssValidator.ValidatorSet | null,
   ) {
     this.code = cascade;
-    this.quotes = [
-      new Css.Str("\u201c"),
-      new Css.Str("\u201d"),
-      new Css.Str("\u2018"),
-      new Css.Str("\u2019"),
-    ];
     this.currentSiblingTypeCounts = this.siblingTypeCountsStack[0];
     this.followingSiblingOrderStack = [this.currentFollowingSiblingOrder];
     this.currentFollowingSiblingTypeCounts = this.siblingTypeCountsStack[0];
@@ -6155,30 +6184,13 @@ export class CascadeInstance {
     this.applyCmykFilter(baseStyle, element);
 
     this.applyAttrFilter(element, baseStyle);
-    const quotesCasc = baseStyle["quotes"] as CascadeValue;
-    let itemToPushLast: QuotesScopeItem | null = null;
-    if (quotesCasc) {
-      const quotesVal = quotesCasc.evaluate(this.context);
-      if (quotesVal) {
-        itemToPushLast = new QuotesScopeItem(this.quotes);
-        if (quotesVal === Css.ident.none) {
-          this.quotes = [new Css.Str(""), new Css.Str("")];
-        } else if (
-          quotesVal === Css.ident.auto ||
-          quotesVal === Css.ident.initial
-        ) {
-          this.quotes = [
-            new Css.Str("\u201c"),
-            new Css.Str("\u201d"),
-            new Css.Str("\u2018"),
-            new Css.Str("\u2019"),
-          ];
-          // FIXME: quotes:auto should be based on the content language
-        } else if (quotesVal instanceof Css.SpaceList) {
-          this.quotes = (quotesVal as Css.SpaceList).values as Css.Str[];
-        }
-      }
-    }
+    const quotes = resolveQuotes(
+      getProp(baseStyle, "quotes")?.evaluate(this.context),
+      this.quotes,
+    );
+    const itemToPushLast =
+      quotes === this.quotes ? null : new QuotesScopeItem(this.quotes);
+    this.quotes = quotes;
     this.pushCounters(baseStyle, baseStyle);
     const id =
       this.currentId || this.currentXmlId || element.getAttribute("name") || "";

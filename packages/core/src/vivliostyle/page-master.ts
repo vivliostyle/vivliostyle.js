@@ -1750,10 +1750,30 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
     }
   }
 
-  protected resolveContent(cascade: CssCascade.CascadeInstance): void {
+  protected resolveContent(
+    cascade: CssCascade.CascadeInstance,
+    docElementStyle: CssCascade.ElementStyle,
+  ): void {
     const style = this.cascaded;
-    const content = style["content"] as CssCascade.CascadeValue;
+    const content = this.style["content"];
     if (content) {
+      const pageMaster = this.pageMasterInstance;
+      const savedQuotes = cascade.quotes;
+      const savedQuoteDepth = cascade.quoteDepth;
+      let inheritedQuotes = savedQuotes;
+      if (pageMaster instanceof PageRuleMasterInstance) {
+        const rootQuotes = CssCascade.getProp(docElementStyle, "quotes");
+        inheritedQuotes = CssCascade.resolveQuotes(
+          pageMaster.style["quotes"],
+          CssCascade.resolveQuotes(rootQuotes?.evaluate(cascade.context)),
+        );
+      }
+      cascade.quotes = CssCascade.resolveQuotes(
+        this.style["quotes"],
+        inheritedQuotes,
+      );
+      // Each page box evaluates its generated content at its own quote depth.
+      cascade.quoteDepth = 0;
       const savedLastCounterChanges = Array.from(cascade.lastCounterChanges);
       const savedLastCounterChangeTypes = {
         ...cascade.lastCounterChangeTypes,
@@ -1764,18 +1784,23 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
       cascade.counterScoping.push(null);
       // the callers push this box's rule before resolving its content
       cascade.pushCounters(style, style);
-      style["content"] = content.filterValue(
-        new CssCascade.ContentPropVisitor(
-          cascade,
-          null,
-          cascade.counterResolver,
-          style,
-        ),
-      );
-      cascade.popCounters();
-      cascade.popCounters();
-      cascade.lastCounterChanges = savedLastCounterChanges;
-      cascade.lastCounterChangeTypes = savedLastCounterChangeTypes;
+      try {
+        this.style["content"] = content.visit(
+          new CssCascade.ContentPropVisitor(
+            cascade,
+            null,
+            cascade.counterResolver,
+            style,
+          ),
+        );
+      } finally {
+        cascade.popCounters();
+        cascade.popCounters();
+        cascade.lastCounterChanges = savedLastCounterChanges;
+        cascade.lastCounterChangeTypes = savedLastCounterChangeTypes;
+        cascade.quotes = savedQuotes;
+        cascade.quoteDepth = savedQuoteDepth;
+      }
     }
   }
 
@@ -1785,8 +1810,8 @@ export class PageBoxInstance<P extends PageBox = PageBox<any>> {
   ): void {
     this.buildCascadedStyle(docElementStyle);
     cascade.pushRule(this.pageBox.classes, null, this.cascaded);
-    this.resolveContent(cascade);
     this.init(cascade.context);
+    this.resolveContent(cascade, docElementStyle);
     this.register(cascade.context);
     for (const child of this.pageBox.children) {
       const childInstance = child.createInstance(
