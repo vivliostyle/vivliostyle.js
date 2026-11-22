@@ -1,3 +1,19 @@
+- category: Document and media
+  title: "Base element (Issue #604)"
+  file: base-url/base-element.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    PR #2291 resolves relative URLs against the base element. Canary loads the image, the url() backgrounds of the
+    style element and attribute, and the linked style sheet from assets/ and shows them green; stable resolves them
+    against the document and shows them red. The script item stays red on both because raw.githubusercontent.com
+    serves scripts as text/plain with nosniff.
+  approvedViewer: git-fix-issue604-base-element  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/base-url/base-element.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/base-url/base-element.html&zoom=1&spread=false
 - category: Page properties and margin boxes
   title: "Quotes in page margin boxes (Issue #567)"
   file: quotes-in-page-margin-box.html
