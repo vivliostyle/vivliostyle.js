@@ -131,7 +131,7 @@ export const VivliostyleViewportCss = `
     transform: scale(calc(var(--viv-outputScale,1) * var(--viv-devicePixelRatio,1) / var(--viv-outputPixelRatio,1)));
   }
   /* Workaround for Chromium's default border etc. widths not zoomed but scaled down */
-  [data-vivliostyle-spread-container] :where([style*=border],[style*=outline],[style*=rule]) {
+  [data-vivliostyle-spread-container] :where([data-viv-style~="border"],[data-viv-style~="outline"],[data-viv-style~="rule"]) {
     border-width: medium;
     outline-width: medium;
     column-rule-width: medium;
@@ -1508,14 +1508,14 @@ export const VivliostylePolyfillCss = `
   border-start-end-radius: 0 !important;
   border-end-end-radius: 0 !important;
 }
-[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>thead)) {
+[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[data-viv-style~="border-collapse:collapse"]:has(>thead)) {
   margin-block-start: 0 !important;
   padding-block-start: 0 !important;
   border-block-start-width: 0 !important;
   border-start-start-radius: 0 !important;
   border-start-end-radius: 0 !important;
 }
-[data-viv-box-break~="block-end"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>tfoot)) {
+[data-viv-box-break~="block-end"]:not([data-viv-box-break~="clone"]):not(table[data-viv-style~="border-collapse:collapse"]:has(>tfoot)) {
   margin-block-end: 0 !important;
   padding-block-end: 0 !important;
   border-block-end-width: 0 !important;
@@ -1524,7 +1524,7 @@ export const VivliostylePolyfillCss = `
 }
 /* Preserve internal leading compensation while discarding author margins. */
 [data-viv-margin-discard~="block-start"][data-viv-emphasis-adjust~="block-start"],
-[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[style*="border-collapse: collapse"]:has(>thead))[data-viv-emphasis-adjust~="block-start"] {
+[data-viv-box-break~="block-start"]:not([data-viv-box-break~="clone"]):not(table[data-viv-style~="border-collapse:collapse"]:has(>thead))[data-viv-emphasis-adjust~="block-start"] {
   margin-block-start: var(--viv-emphasis-start) !important;
 }
 [data-viv-box-break~="block-start"][data-viv-box-break~="text-start"] {
@@ -1639,7 +1639,7 @@ viv-ts-thin-sp.viv-ts-zero::after {
   /* Not zero, since WebKit lets the annotation overhang a zero-width space */
   letter-spacing: -0.4995em;
 }
-[style*=text-decoration] :is(viv-ts-thin-sp, viv-ts-close.viv-ts-auto)::after {
+[data-viv-style~="text-decoration"] :is(viv-ts-thin-sp, viv-ts-close.viv-ts-auto)::after {
   visibility: visible;
 }
 
@@ -1658,7 +1658,7 @@ span[data-viv-leader] {
 }
 
 /* ::marker */
-[style*="--viv-marker-content"]::marker {
+[data-viv-style~="--viv-marker-content"]::marker {
   content: var(--viv-marker-content);
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
@@ -1673,81 +1673,81 @@ span[data-viv-leader] {
   white-space: pre;
   text-transform: none;
 }
-[style*="--viv-footnote-white-space"] {
+[data-viv-style~="--viv-footnote-white-space"] {
   white-space: var(--viv-footnote-white-space);
 }
-[style*="--viv-marker-color"]::marker {
+[data-viv-style~="--viv-marker-color"]::marker {
   color: var(--viv-marker-color);
 }
-[style*="--viv-marker-font-size"]::marker {
+[data-viv-style~="--viv-marker-font-size"]::marker {
   font-size: var(--viv-marker-font-size);
 }
-[style*="--viv-marker-font-family"]::marker {
+[data-viv-style~="--viv-marker-font-family"]::marker {
   font-family: var(--viv-marker-font-family);
 }
-[style*="--viv-marker-font-style"]::marker {
+[data-viv-style~="--viv-marker-font-style"]::marker {
   font-style: var(--viv-marker-font-style);
 }
-[style*="--viv-marker-font-weight"]::marker {
+[data-viv-style~="--viv-marker-font-weight"]::marker {
   font-weight: var(--viv-marker-font-weight);
 }
-[style*="--viv-marker-font-variant"]::marker {
+[data-viv-style~="--viv-marker-font-variant"]::marker {
   font-variant: var(--viv-marker-font-variant);
 }
-[style*="--viv-marker-unicode-bidi"]::marker {
+[data-viv-style~="--viv-marker-unicode-bidi"]::marker {
   unicode-bidi: var(--viv-marker-unicode-bidi);
 }
-[style*="--viv-marker-direction"]::marker {
+[data-viv-style~="--viv-marker-direction"]::marker {
   direction: var(--viv-marker-direction);
 }
-[style*="--viv-marker-white-space"]::marker {
+[data-viv-style~="--viv-marker-white-space"]::marker {
   white-space: var(--viv-marker-white-space);
 }
-[style*="--viv-marker-text-transform"]::marker {
+[data-viv-style~="--viv-marker-text-transform"]::marker {
   text-transform: var(--viv-marker-text-transform);
 }
-[style*="--viv-marker-text-combine-upright"]::marker {
+[data-viv-style~="--viv-marker-text-combine-upright"]::marker {
   text-combine-upright: var(--viv-marker-text-combine-upright);
 }
-[style*="--viv-marker-text-orientation"]::marker {
+[data-viv-style~="--viv-marker-text-orientation"]::marker {
   text-orientation: var(--viv-marker-text-orientation);
 }
-[style*="--viv-marker-hyphens"]::marker {
+[data-viv-style~="--viv-marker-hyphens"]::marker {
   hyphens: var(--viv-marker-hyphens);
 }
-[style*="--viv-marker-line-height"]::marker {
+[data-viv-style~="--viv-marker-line-height"]::marker {
   line-height: var(--viv-marker-line-height);
 }
-[style*="--viv-marker-tab-size"]::marker {
+[data-viv-style~="--viv-marker-tab-size"]::marker {
   tab-size: var(--viv-marker-tab-size);
 }
-[style*="--viv-marker-text-emphasis-style"]::marker {
+[data-viv-style~="--viv-marker-text-emphasis-style"]::marker {
   text-emphasis-style: var(--viv-marker-text-emphasis-style);
 }
-[style*="--viv-marker-text-emphasis-color"]::marker {
+[data-viv-style~="--viv-marker-text-emphasis-color"]::marker {
   text-emphasis-color: var(--viv-marker-text-emphasis-color);
 }
-[style*="--viv-marker-text-emphasis-position"]::marker {
+[data-viv-style~="--viv-marker-text-emphasis-position"]::marker {
   text-emphasis-position: var(--viv-marker-text-emphasis-position);
 }
-[style*="--viv-marker-text-shadow"]::marker {
+[data-viv-style~="--viv-marker-text-shadow"]::marker {
   text-shadow: var(--viv-marker-text-shadow);
 }
 
 /* initial-letter */
-[style*="--viv-initialLetter"]:has(>[data-adapt-pseudo="first-letter"])::first-letter {
+[data-viv-style~="--viv-initialLetter"]:has(>[data-adapt-pseudo="first-letter"])::first-letter {
   -webkit-initial-letter: var(--viv-initialLetter);
   initial-letter: var(--viv-initialLetter);
 }
 
 /* ::first-line metrics for the first line box's strut */
-[style*="--viv-firstLineFontFamily"]::first-line {
+[data-viv-style~="--viv-firstLineFontFamily"]::first-line {
   font-family: var(--viv-firstLineFontFamily);
 }
-[style*="--viv-firstLineFontSize"]::first-line {
+[data-viv-style~="--viv-firstLineFontSize"]::first-line {
   font-size: var(--viv-firstLineFontSize);
 }
-[style*="--viv-firstLineLineHeight"]::first-line {
+[data-viv-style~="--viv-firstLineLineHeight"]::first-line {
   line-height: var(--viv-firstLineLineHeight);
 }
 `;
