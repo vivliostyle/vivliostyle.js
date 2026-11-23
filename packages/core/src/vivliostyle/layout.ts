@@ -4274,31 +4274,25 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
-   * The client rect of the first content on a line in `node` (a text node or
-   * an element): text, or an atomic inline box such as an image or an
-   * inline-block. It is adjusted for the browser's column breaking: content
-   * moved to a later column is below the floats in the block direction. The
-   * border box of a block is not used: it can start beside a float while its
-   * lines are pushed below the float. Out-of-flow descendants are skipped.
+   * The first content in `node` (a text node or an element) that is on a
+   * line: visible text, a forced line break, or an atomic inline box such as
+   * an image or an inline-block. Out-of-flow descendants are skipped.
    */
-  private findFirstLineRect(node: Node): Vtree.ClientRect | null {
-    const firstRect = (rects: Vtree.ClientRect[]) => {
-      LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
-      return rects.find((r) => r.width > 0 && r.height > 0) ?? null;
-    };
+  private findFirstLineContent(node: Node): Element | Text | null {
     if (node.nodeType === 3) {
-      return firstRect(
-        RangeClientRects.getLayoutClientRectsOfNodeContents(
-          this.clientLayout,
-          node,
-        ),
+      const rects = RangeClientRects.getLayoutClientRectsOfNodeContents(
+        this.clientLayout,
+        node,
       );
+      return rects.some((r) => r.width > 0 && r.height > 0)
+        ? (node as Text)
+        : null;
     }
     for (let child = node.firstChild; child; child = child.nextSibling) {
       if (child.nodeType === 3) {
-        const rect = this.findFirstLineRect(child);
-        if (rect) {
-          return rect;
+        const content = this.findFirstLineContent(child);
+        if (content) {
+          return content;
         }
         continue;
       }
@@ -4309,27 +4303,60 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       const display =
         this.clientLayout.getElementComputedStyle(element)?.display;
       if (
-        Display.isInlineLevel(display) &&
-        (display !== "inline" ||
-          /^(img|svg|video|canvas|iframe|object|embed|input|select|textarea|button|audio)$/.test(
-            element.localName,
-          ))
+        element.localName === "br" ||
+        (Display.isInlineLevel(display) &&
+          (display !== "inline" ||
+            /^(img|svg|video|canvas|iframe|object|embed|input|select|textarea|button|audio)$/.test(
+              element.localName,
+            )))
       ) {
-        // An atomic inline box (a replaced element or an inline-block, etc.)
-        const rect = firstRect([
-          this.clientLayout.getElementClientRect(element),
-        ]);
-        if (rect) {
-          return rect;
-        }
-        continue;
+        // A forced line break or an atomic inline box (a replaced element or
+        // an inline-block, etc.)
+        return element;
       }
-      const rect = this.findFirstLineRect(element);
-      if (rect) {
-        return rect;
+      const content = this.findFirstLineContent(element);
+      if (content) {
+        return content;
       }
     }
     return null;
+  }
+
+  /**
+   * The block-start edge of the first line box in `node` (a text node or an
+   * element), adjusted for the browser's column breaking: content moved to a
+   * later column is below the floats in the block direction. It is measured
+   * with an empty inline-block aligned with the block-start edge of the line
+   * box and put before the first content on a line, so it is the edge of the
+   * line box even when the content is lower in it (with half-leading or
+   * `vertical-align`) or is a forced line break. The border box of a block is
+   * not used: it can start beside a float while its lines are pushed below
+   * the float.
+   */
+  private findFirstLineStart(node: Node): number | null {
+    const content = this.findFirstLineContent(node);
+    if (!content) {
+      return null;
+    }
+    const boxDir = this.getBoxDir();
+    const marker = content.ownerDocument.createElement("span");
+    marker.style.display = "inline-block";
+    marker.style.width = "0";
+    marker.style.height = "0";
+    // `top` is the line-over side, which is the block-start side except in
+    // vertical-lr.
+    marker.style.verticalAlign =
+      this.writingMode === "vertical-lr" ? "bottom" : "top";
+    content.before(marker);
+    const rect = this.clientLayout.getElementClientRect(marker);
+    marker.remove();
+    LayoutHelper.adjustRectForColumnBreaking(rect, this.writingMode);
+    const edge = this.vertical
+      ? boxDir < 0
+        ? rect.right
+        : rect.left
+      : rect.top;
+    return Number.isFinite(edge) ? edge : null;
   }
 
   /**
@@ -4354,15 +4381,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       // does not move a line away from the floats.
       return false;
     }
-    const rect = this.findFirstLineRect(node);
-    if (!rect) {
+    const lineStart = this.findFirstLineStart(node);
+    if (lineStart === null) {
       return false;
     }
-    const lineStart = this.vertical
-      ? this.getBoxDir() < 0
-        ? rect.right
-        : rect.left
-      : rect.top;
     if (this.isOverflown(lineStart)) {
       // The content is pushed out of the fragment, as by a float filling it.
       return false;
