@@ -593,7 +593,8 @@ describe("vgen", function () {
       getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
     });
     const compensate = (metric, value) => {
-      context.measureFontUnit = (unit) => (unit === "ch" ? metric : null);
+      context.measureFontUnit = (unit, size) =>
+        unit === "ch" ? metric(size) : null;
       factory.applyComputedStyles(child, {
         "font-size": new Css.Numeric(16, "px"),
         "margin-left": CssParser.parseValue(
@@ -611,13 +612,19 @@ describe("vgen", function () {
     try {
       // The same ch at both font sizes leaves ch as it is, while em is scaled.
       expectFontMetricLength(
-        compensate(8, "calc(10em + 10ch)"),
+        compensate(() => 8, "calc(10em + 10ch)"),
         resolve("calc(160px + 10ch)"),
+      );
+      // Otherwise ch is scaled by the metric at the unadjusted font size over
+      // that at the adjusted one.
+      expectFontMetricLength(
+        compensate((size) => (size === 16 ? 8 : 7.75), "20ch"),
+        resolve(`calc(20ch * ${8 / 7.75})`),
       );
       // Without the metrics, the units are scaled like em.
       for (const metric of [null, 0]) {
         expectFontMetricLength(
-          compensate(metric, "20ch"),
+          compensate(() => metric, "20ch"),
           resolve(`calc(20ch * ${16 / fontSize})`),
         );
       }
