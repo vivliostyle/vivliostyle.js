@@ -4274,43 +4274,57 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
-   * The client rect of the first line of text in `node` (a text node or an
-   * element), adjusted for the browser's column breaking. The border box of
-   * a block is not used: it can start beside a float while its lines are
-   * pushed below the float.
+   * The client rect of the first content on a line in `node` (a text node or
+   * an element): text, or an atomic inline box such as an image or an
+   * inline-block. It is adjusted for the browser's column breaking: content
+   * moved to a later column is below the floats in the block direction. The
+   * border box of a block is not used: it can start beside a float while its
+   * lines are pushed below the float. Out-of-flow descendants are skipped.
    */
   private findFirstLineRect(node: Node): Vtree.ClientRect | null {
-    const walker = node.ownerDocument.createTreeWalker(
-      node,
-      NodeFilter.SHOW_TEXT,
-    );
-    for (let text = walker.currentNode; text; text = walker.nextNode()) {
-      if (text.nodeType !== 3) {
-        continue;
-      }
-      let outOfFlow = false;
-      // Skip text in out-of-flow descendants of `node`.
-      for (
-        let p = text === node ? null : text.parentNode;
-        p && p !== node;
-        p = p.parentNode
-      ) {
-        if (LayoutHelper.isOutOfFlow(p)) {
-          outOfFlow = true;
-          break;
-        }
-      }
-      if (outOfFlow) {
-        continue;
-      }
-      const rects = RangeClientRects.getLayoutClientRectsOfNodeContents(
-        this.clientLayout,
-        text,
-      );
-      // Text that the browser's column breaking moved to a later column is
-      // below the floats in the block direction.
+    const firstRect = (rects: Vtree.ClientRect[]) => {
       LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
-      const rect = rects.find((r) => r.width > 0 && r.height > 0);
+      return rects.find((r) => r.width > 0 && r.height > 0) ?? null;
+    };
+    if (node.nodeType === 3) {
+      return firstRect(
+        RangeClientRects.getLayoutClientRectsOfNodeContents(
+          this.clientLayout,
+          node,
+        ),
+      );
+    }
+    for (let child = node.firstChild; child; child = child.nextSibling) {
+      if (child.nodeType === 3) {
+        const rect = this.findFirstLineRect(child);
+        if (rect) {
+          return rect;
+        }
+        continue;
+      }
+      if (child.nodeType !== 1 || LayoutHelper.isOutOfFlow(child)) {
+        continue;
+      }
+      const element = child as Element;
+      const display =
+        this.clientLayout.getElementComputedStyle(element)?.display;
+      if (
+        Display.isInlineLevel(display) &&
+        (display !== "inline" ||
+          /^(img|svg|video|canvas|iframe|object|embed|input|select|textarea|button|audio)$/.test(
+            element.localName,
+          ))
+      ) {
+        // An atomic inline box (a replaced element or an inline-block, etc.)
+        const rect = firstRect([
+          this.clientLayout.getElementClientRect(element),
+        ]);
+        if (rect) {
+          return rect;
+        }
+        continue;
+      }
+      const rect = this.findFirstLineRect(element);
       if (rect) {
         return rect;
       }
@@ -4335,7 +4349,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       bp instanceof BreakPosition.EdgeBreakPosition
         ? bp.position.viewNode
         : null;
-    if (!node?.parentNode) {
+    if (!node?.parentNode || LayoutHelper.isOutOfFlow(node)) {
+      // A break before another out-of-flow element (e.g., a second float)
+      // does not move a line away from the floats.
       return false;
     }
     const rect = this.findFirstLineRect(node);
