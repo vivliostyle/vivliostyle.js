@@ -832,6 +832,38 @@ describe("ruby and emphasis boundary leading", () => {
     }
   });
 
+  it("measures the edge of a text node without a parent element", () => {
+    // A text node directly in a shadow root has no parentElement, which
+    // calculateEdge() passes on to adjustRubyEndRects().
+    const host = document.createElement("div");
+    host.style.cssText = "font: 20px/34px serif";
+    DomUtil.getDummyContainer().appendChild(host);
+    try {
+      const text = document.createTextNode("text");
+      host.attachShadow({ mode: "open" }).appendChild(text);
+      expect(text.parentElement).toBeNull();
+      const edge = LayoutHelper.calculateEdge(
+        { viewNode: text, after: true, inline: true, parent: null },
+        actualLayout(),
+        0,
+        false,
+      );
+      expect(edge).toEqual(jasmine.any(Number));
+      const rect = {
+        top: 0,
+        bottom: 40,
+        left: 0,
+        right: 40,
+        width: 40,
+        height: 40,
+      };
+      RubyEmphasis.adjustRubyEndRects([rect], null, false);
+      expect(rect.bottom).toBe(40);
+    } finally {
+      host.remove();
+    }
+  });
+
   it("does not let previously prepared end metadata escape from non-root columns", () => {
     const root = column();
     const nested = document.createElement("div");

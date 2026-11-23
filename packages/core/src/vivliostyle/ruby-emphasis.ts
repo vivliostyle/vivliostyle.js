@@ -836,9 +836,12 @@ export function finishAnnotationLayout(
 /** Discount only the permitted part of an end ruby's ink when choosing a break. */
 export function adjustRubyEndRects(
   rects: Vtree.ClientRect[],
-  element: Element,
+  element: Element | null,
   mode: boolean | string,
 ): void {
+  // For a text node, calculateEdge() passes its parentElement, which is null
+  // when the node has no parent element.
+  if (!element) return;
   const writingMode =
     typeof mode === "string" ? mode : mode ? "vertical-rl" : "horizontal-tb";
   const vertical = CssLogicalUtil.isVertical(writingMode);
