@@ -1527,6 +1527,16 @@ module.exports = [
           "Empty absolutely positioned element in inline text at a page break (Issue #2285)",
       },
       {
+        file: "out-of-flow-in-first-line-page-break.html",
+        title:
+          "Absolutely positioned element or floated marker in a first line kept by orphans (Issue #2285)",
+      },
+      {
+        file: "out-of-flow-in-first-line-page-break-vertical.html",
+        title:
+          "Absolutely positioned element or floated marker in a first line kept by orphans (vertical, Issue #2285)",
+      },
+      {
         file: "absolute-inline-line-numbers-horizontal.html",
         title:
           "Code pagination with absolutely positioned line numbers and annotations (horizontal, PR #2183)",

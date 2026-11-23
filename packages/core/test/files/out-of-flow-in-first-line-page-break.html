@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- Test case for Issue #2285 (follow-up): a position: absolute element in
+     the first line, or a floated marker before it, must not make the page
+     break inside that line. Every list item has three lines (fixed by <br>)
+     of a fixed line height, so the page breaks do not depend on the fonts.
+     Only the first line of the fourth item fits on the first page of each
+     list, and orphans/widows (2) do not allow a break inside the item.
+     Expected: each of the four lists puts items 1-3 on its first page and
+     4-6 on the next one. No page ends with "4. Lorem" or a lone marker, and
+     no "note" box is on a different page from its item.
+     Chromium applies orphans/widows in the multi-column layout used for page
+     breaking and moves the fourth item itself, which hides the bug: check
+     this test in Firefox or WebKit (--browser firefox / webkit). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Out-of-flow element in a first line at a page break</title>
+    <style>
+      @page { size: 400px 250px; margin: 0; }
+      body { margin: 0; font-size: 16px; line-height: 24px; }
+      ul { margin: 0; }
+      ul + ul { break-before: page; }
+      li { position: relative; }
+      .note {
+        position: absolute;
+        font-size: 10px;
+        line-height: 12px;
+        color: white;
+        background: purple;
+      }
+      .below { top: 30px; left: 200px; }
+      .markers { list-style: none; }
+      .marker { float: left; margin-inline-start: -1em; }
+    </style>
+  </head>
+  <body>
+    <!-- Absolutely positioned element at its static position mid-line -->
+    <ul>
+      <li>1. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Absolutely positioned element mid-line, shown below the line -->
+    <ul>
+      <li>1. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Floated marker beside the first line -->
+    <ul class="markers">
+      <li><span class="marker">•</span>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Floated marker beside the first line of a block-level box -->
+    <ul class="markers">
+      <li><span class="marker">•</span><div>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+    </ul>
+  </body>
+</html>

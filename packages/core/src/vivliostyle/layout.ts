@@ -529,6 +529,21 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    */
   private readonly breakBeforeTextPositions =
     new WeakSet<Layout.BreakPosition>();
+  /**
+   * The CSS floats before the content at each break position saved because
+   * the content starts a line right after them (see followsCssFloat() and
+   * isBreakBesideCssFloat()).
+   */
+  private readonly floatsBeforeBreakPositions = new WeakMap<
+    Layout.BreakPosition,
+    Element[]
+  >();
+  /**
+   * The block-end edge of the margin box of each CSS float placed by
+   * layoutFloat(), in the client coordinates. Unlike the client rect of the
+   * float element, it is not affected by the browser's column breaking.
+   */
+  private readonly cssFloatAfterEdges = new WeakMap<Element, number>();
 
   readonly pageFloatLayoutContext: PageFloats.AttachedPageFloatLayoutContext;
 
@@ -1702,6 +1717,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           floatSide,
         );
         this.createFloats();
+        this.cssFloatAfterEdges.set(
+          element,
+          this.getRectAfterEdge(placedFloatBox),
+        );
         if (floatSide == "left") {
           this.leftFloatEdge = floatBoxEdge;
         } else {
@@ -2087,10 +2106,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     }
     pendingFloats.forEach((pendingFloat, i) => {
       const floatBox = newFloatBoxes[i];
-      this.setFloatElementOffsets(
+      const placedFloatBox = this.setFloatElementOffsets(
         pendingFloat.element,
         floatBox,
         pendingFloat.parent,
+      );
+      this.cssFloatAfterEdges.set(
+        pendingFloat.element,
+        this.getRectAfterEdge(placedFloatBox),
       );
       this.updateMaxReachedAfterEdge(this.getRectAfterEdge(floatBox));
     });
@@ -3786,8 +3809,28 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     // (Issue #1036)
     let lastNode = checkPoints.at(-1).viewNode;
     lastNode = LayoutHelper.textSpacingWrapperOf(lastNode) ?? lastNode;
+    // Skip position: absolute or fixed elements: inline content after them
+    // continues the last line, so they are not a block child that ends it.
+    // (Issue #2285)
+    let nextNode = lastNode.nextSibling;
+    let skippedPositioned = false;
+    while (
+      LayoutHelper.isPositionedOutOfFlow(nextNode) ||
+      (nextNode?.nodeType === 3 &&
+        VtreeImpl.canIgnore(nextNode, checkPoints.at(-1).whitespace))
+    ) {
+      skippedPositioned ||= nextNode.nodeType === 1;
+      nextNode = nextNode.nextSibling;
+    }
+    const blockChildAfter = skippedPositioned
+      ? nextNode?.nodeType === 1 &&
+        !Display.isInlineLevel(
+          this.clientLayout.getElementComputedStyle(nextNode as Element)
+            ?.display,
+        )
+      : !!lastNode.nextSibling;
     if (
-      (lineIndex === linePositions.length && lastNode.nextSibling) ||
+      (lineIndex === linePositions.length && blockChildAfter) ||
       (lineIndex >= linePositions.length - 1 &&
         lastNode.parentElement?.querySelector(".MJXc-display")) // for MathJax
     ) {
@@ -4087,6 +4130,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       nextPenalty = Number.MAX_VALUE;
       for (let i = this.breakPositions.length - 1; i >= 0 && !found; --i) {
         const bp = this.breakPositions[i];
+        if (this.isBreakBesideCssFloat(bp)) {
+          // Skip it before findAcceptableBreak(), which sets
+          // computedBlockSize for the break.
+          continue;
+        }
         const nodeContext = bp.findAcceptableBreak(this, penalty);
         if (nodeContext) {
           found = { breakPosition: bp, nodeContext };
@@ -4161,8 +4209,12 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * out-of-flow elements (e.g., `position: absolute`) do not push the
    * content, and a break before content in the middle of a line would split
    * that line. (Issue #1786, #2285)
+   * @param floats if given, the CSS floats found are added to it.
    */
-  private followsCssFloat(nodeContext: Vtree.NodeContext): boolean {
+  private followsCssFloat(
+    nodeContext: Vtree.NodeContext,
+    floats?: Element[],
+  ): boolean {
     let sawFloat = false;
     // Goes back from `last` through its preceding siblings. Returns whether
     // the content starts a line after a float when this is decided, or null
@@ -4173,7 +4225,10 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           continue;
         }
         if (LayoutHelper.isOutOfFlow(node)) {
-          sawFloat ||= (node as Element).hasAttribute("data-viv-float");
+          if ((node as Element).hasAttribute("data-viv-float")) {
+            sawFloat = true;
+            floats?.push(node as Element);
+          }
           continue;
         }
         if (node.nodeType !== 1) {
@@ -4216,6 +4271,59 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       }
     }
     return sawFloat;
+  }
+
+  /**
+   * Whether `bp` is a break before content right after CSS floats (see
+   * followsCssFloat()) and one of the floats lies beside the first line of
+   * the content (text or a block-level box) instead of pushing the content
+   * below it (e.g., a floated list marker). Such a break would leave the
+   * float alone at the end of the fragment and move its line to the next
+   * one. (Issue #1786, #2285)
+   */
+  private isBreakBesideCssFloat(bp: Layout.BreakPosition): boolean {
+    const floats = this.floatsBeforeBreakPositions.get(bp);
+    if (!floats?.length) {
+      return false;
+    }
+    const node =
+      bp instanceof BreakPosition.EdgeBreakPosition
+        ? bp.position.viewNode
+        : null;
+    if (!node?.parentNode) {
+      return false;
+    }
+    let rect: Vtree.ClientRect | undefined;
+    if (node.nodeType === 3) {
+      const range = node.ownerDocument.createRange();
+      range.selectNodeContents(node);
+      const rects = this.clientLayout.getRangeClientRects(range);
+      // Text that the browser's column breaking moved to a later column is
+      // below the floats in the block direction.
+      LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
+      rect = rects.find((r) => r.width > 0 && r.height > 0);
+    } else if (node.nodeType === 1) {
+      rect = this.clientLayout.getElementClientRect(node as Element);
+      LayoutHelper.adjustRectForColumnBreaking(rect, this.writingMode);
+    }
+    if (!rect) {
+      return false;
+    }
+    const lineStart = this.vertical
+      ? this.getBoxDir() < 0
+        ? rect.right
+        : rect.left
+      : rect.top;
+    if (this.isOverflown(lineStart)) {
+      // The content is pushed out of the fragment, as by a float filling it.
+      return false;
+    }
+    return floats.some((float) => {
+      const floatEnd = this.cssFloatAfterEdges.get(float);
+      return (
+        floatEnd !== undefined && this.getBoxDir() * (floatEnd - lineStart) > 1
+      );
+    });
   }
 
   /**
@@ -4980,17 +5088,19 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   // (see followsCssFloat()): otherwise the break would split
                   // a line or leave an empty fragment (e.g., a lone list
                   // marker) before the content. (Issue #2285)
+                  const floats: Element[] = [];
                   if (
                     !lastAfterNodeContext &&
                     !leadingEdge &&
                     leadingEdgeContexts.length === 0 &&
-                    this.followsCssFloat(nodeContext)
+                    this.followsCssFloat(nodeContext, floats)
                   ) {
                     this.saveEdgeBreakPosition(
                       nodeContext,
                       breakAtTheEdge,
                       false,
                       true,
+                      floats,
                     );
                   }
                   nodeContext = nodeContext.modify();
@@ -5043,6 +5153,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
               // Check break opportunity between anonymous block box and block-level box
               // (Issue #611)
+              const floatsBefore: Element[] = [];
               if (
                 !nodeContext.inline &&
                 !nodeContext.repeatOnBreak &&
@@ -5050,7 +5161,16 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
                     )
-                  : this.breakPositions.at(-1) instanceof BoxBreakPosition ||
+                  : // A position: absolute or fixed element after inline
+                    // content is not a block-level box between anonymous
+                    // block boxes: the inline content after it continues
+                    // the same line, so a break before it would split that
+                    // line. (Issue #2285)
+                    (this.breakPositions.at(-1) instanceof BoxBreakPosition &&
+                      (!!nodeContext.floatSide ||
+                        !LayoutHelper.isPositionedOutOfFlow(
+                          nodeContext.viewNode,
+                        ))) ||
                     // When lastAfterNodeContext is null (no in-flow
                     // trailing edge, e.g. after CSS floats converted to
                     // position:absolute) and no block-level leading edges
@@ -5062,12 +5182,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                     // empty fragment (e.g., a lone list marker). (Issue #2285)
                     (!leadingEdge &&
                       leadingEdgeContexts.length === 0 &&
-                      this.followsCssFloat(nodeContext)))
+                      this.followsCssFloat(nodeContext, floatsBefore)))
               ) {
                 this.saveEdgeBreakPosition(
                   nodeContext.copy(),
                   breakAtTheEdge,
                   false,
+                  false,
+                  floatsBefore,
                 );
               }
               if (
@@ -5674,12 +5796,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
    * Save the potential breaking position at the edge. Should, in general, save
    * "after" position but only after skipping all of the "before" ones and
    * getting to the non-empty content (to get breakAtEdge right).
+   * @param breakBeforeText whether the break is before a text node (see
+   *     breakBeforeTextPositions).
+   * @param floatsBefore the CSS floats right before the content at the break
+   *     (see floatsBeforeBreakPositions).
    */
   saveEdgeBreakPosition(
     position: Vtree.NodeContext,
     breakAtEdge: string | null,
     overflows: boolean,
     breakBeforeText: boolean = false,
+    floatsBefore: Element[] | null = null,
   ): void {
     const copy = position.copy();
     const layoutProcessor = new LayoutProcessor.LayoutProcessorResolver().find(
@@ -5695,6 +5822,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     this.breakPositions.push(bp);
     if (breakBeforeText) {
       this.breakBeforeTextPositions.add(bp);
+    }
+    if (floatsBefore?.length) {
+      this.floatsBeforeBreakPositions.set(bp, floatsBefore);
     }
   }
 
