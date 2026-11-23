@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- Test case for Issue #1786 and #2285: a break between a CSS float and the
+     content right after it is allowed when the float pushes that content out
+     of the page, even when the content is a block whose block-start padding
+     begins beside the float. A float beside the first line of the content
+     (e.g., a floated list marker) must stay with that line instead.
+     Expected: page 1 shows only the green float, and page 2 starts with the
+     paragraph "Page 2: ...". -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Block with padding after a float that fills the page</title>
+    <style>
+      @page { size: 400px 250px; margin: 0; }
+      body { margin: 0; font-size: 16px; line-height: 24px; }
+      .float { float: left; width: 100%; height: 250px; background: lime; }
+      p { margin: 0; padding-top: 2em; }
+    </style>
+  </head>
+  <body>
+    <div class="float">Page 1: a float that fills the page.</div>
+    <p>Page 2: this paragraph has block-start padding.<br />Its text does not fit beside the float on page 1.</p>
+  </body>
+</html>

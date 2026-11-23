@@ -4274,6 +4274,51 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
+   * The client rect of the first line of text in `node` (a text node or an
+   * element), adjusted for the browser's column breaking. The border box of
+   * a block is not used: it can start beside a float while its lines are
+   * pushed below the float.
+   */
+  private findFirstLineRect(node: Node): Vtree.ClientRect | null {
+    const walker = node.ownerDocument.createTreeWalker(
+      node,
+      NodeFilter.SHOW_TEXT,
+    );
+    for (let text = walker.currentNode; text; text = walker.nextNode()) {
+      if (text.nodeType !== 3) {
+        continue;
+      }
+      let outOfFlow = false;
+      // Skip text in out-of-flow descendants of `node`.
+      for (
+        let p = text === node ? null : text.parentNode;
+        p && p !== node;
+        p = p.parentNode
+      ) {
+        if (LayoutHelper.isOutOfFlow(p)) {
+          outOfFlow = true;
+          break;
+        }
+      }
+      if (outOfFlow) {
+        continue;
+      }
+      const rects = RangeClientRects.getLayoutClientRectsOfNodeContents(
+        this.clientLayout,
+        text,
+      );
+      // Text that the browser's column breaking moved to a later column is
+      // below the floats in the block direction.
+      LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
+      const rect = rects.find((r) => r.width > 0 && r.height > 0);
+      if (rect) {
+        return rect;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Whether `bp` is a break before content right after CSS floats (see
    * followsCssFloat()) and one of the floats lies beside the first line of
    * the content (text or a block-level box) instead of pushing the content
@@ -4293,19 +4338,7 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (!node?.parentNode) {
       return false;
     }
-    let rect: Vtree.ClientRect | undefined;
-    if (node.nodeType === 3) {
-      const range = node.ownerDocument.createRange();
-      range.selectNodeContents(node);
-      const rects = this.clientLayout.getRangeClientRects(range);
-      // Text that the browser's column breaking moved to a later column is
-      // below the floats in the block direction.
-      LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
-      rect = rects.find((r) => r.width > 0 && r.height > 0);
-    } else if (node.nodeType === 1) {
-      rect = this.clientLayout.getElementClientRect(node as Element);
-      LayoutHelper.adjustRectForColumnBreaking(rect, this.writingMode);
-    }
+    const rect = this.findFirstLineRect(node);
     if (!rect) {
       return false;
     }
@@ -5157,20 +5190,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               if (
                 !nodeContext.inline &&
                 !nodeContext.repeatOnBreak &&
+                // A position: absolute or fixed element is not a block-level
+                // box between anonymous block boxes: inline content after it
+                // continues the same line, so a break before it would split
+                // that line. (Issue #2285)
+                (!!nodeContext.floatSide ||
+                  !LayoutHelper.isPositionedOutOfFlow(nodeContext.viewNode)) &&
                 (lastAfterNodeContext
                   ? LayoutHelper.findAncestorSpecialInlineNodeContext(
                       lastAfterNodeContext,
                     )
-                  : // A position: absolute or fixed element after inline
-                    // content is not a block-level box between anonymous
-                    // block boxes: the inline content after it continues
-                    // the same line, so a break before it would split that
-                    // line. (Issue #2285)
-                    (this.breakPositions.at(-1) instanceof BoxBreakPosition &&
-                      (!!nodeContext.floatSide ||
-                        !LayoutHelper.isPositionedOutOfFlow(
-                          nodeContext.viewNode,
-                        ))) ||
+                  : this.breakPositions.at(-1) instanceof BoxBreakPosition ||
                     // When lastAfterNodeContext is null (no in-flow
                     // trailing edge, e.g. after CSS floats converted to
                     // position:absolute) and no block-level leading edges

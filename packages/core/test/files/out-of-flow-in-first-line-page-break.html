@@ -5,7 +5,7 @@
      of a fixed line height, so the page breaks do not depend on the fonts.
      Only the first line of the fourth item fits on the first page of each
      list, and orphans/widows (2) do not allow a break inside the item.
-     Expected: each of the four lists puts items 1-3 on its first page and
+     Expected: each of the five lists puts items 1-3 on its first page and
      4-6 on the next one. No page ends with "4. Lorem" or a lone marker, and
      no "note" box is on a different page from its item.
      Chromium applies orphans/widows in the multi-column layout used for page
@@ -29,6 +29,8 @@
         background: purple;
       }
       .below { top: 30px; left: 200px; }
+      .ib { display: inline-block; vertical-align: top; }
+      .ib > span { display: block; }
       .markers { list-style: none; }
       .marker { float: left; margin-inline-start: -1em; }
     </style>
@@ -69,6 +71,15 @@
       <li><span class="marker">•</span><div>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
       <li><span class="marker">•</span><div>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
       <li><span class="marker">•</span><div>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+    </ul>
+    <!-- Absolutely positioned element after an inline-block with a block child -->
+    <ul>
+      <li>1. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
     </ul>
   </body>
 </html>

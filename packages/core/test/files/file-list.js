@@ -1537,6 +1537,11 @@ module.exports = [
           "Absolutely positioned element or floated marker in a first line kept by orphans (vertical, Issue #2285)",
       },
       {
+        file: "float-then-padded-block-page-break.html",
+        title:
+          "Block with padding after a float that fills the page (Issue #1786, #2285)",
+      },
+      {
         file: "absolute-inline-line-numbers-horizontal.html",
         title:
           "Code pagination with absolutely positioned line numbers and annotations (horizontal, PR #2183)",
