@@ -4338,24 +4338,47 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     if (!content) {
       return null;
     }
-    const boxDir = this.getBoxDir();
-    const marker = content.ownerDocument.createElement("span");
-    marker.style.display = "inline-block";
-    marker.style.width = "0";
-    marker.style.height = "0";
     // `top` is the line-over side, which is the block-start side except in
     // vertical-lr.
-    marker.style.verticalAlign =
-      this.writingMode === "vertical-lr" ? "bottom" : "top";
-    content.before(marker);
-    const rect = this.clientLayout.getElementClientRect(marker);
-    marker.remove();
-    LayoutHelper.adjustRectForColumnBreaking(rect, this.writingMode);
-    const edge = this.vertical
-      ? boxDir < 0
-        ? rect.right
-        : rect.left
-      : rect.top;
+    const lineOverIsStart = this.writingMode !== "vertical-lr";
+    const createMarker = (atStart: boolean) => {
+      const marker = content.ownerDocument.createElement("span");
+      marker.style.display = "inline-block";
+      marker.style.width = "0";
+      marker.style.height = "0";
+      marker.style.verticalAlign =
+        atStart === lineOverIsStart ? "top" : "bottom";
+      return marker;
+    };
+    const startMarker = createMarker(true);
+    const endMarker = createMarker(false);
+    content.before(startMarker, endMarker);
+    const startRect = this.clientLayout.getElementClientRect(startMarker);
+    const endRect = this.clientLayout.getElementClientRect(endMarker);
+    startMarker.remove();
+    endMarker.remove();
+    let contentRect: Vtree.ClientRect | undefined;
+    if (content.nodeType === 3) {
+      contentRect = RangeClientRects.getLayoutClientRectsOfNodeContents(
+        this.clientLayout,
+        content,
+      ).find((r) => r.width > 0 && r.height > 0);
+    } else if ((content as Element).localName !== "br") {
+      contentRect = this.clientLayout.getElementClientRect(content as Element);
+    }
+    const rects = [startRect, endRect, ...(contentRect ? [contentRect] : [])];
+    LayoutHelper.adjustRectsForColumnBreaking(rects, this.writingMode);
+    // Block-start edge of a rect, increasing in the block flow direction.
+    const boxDir = this.getBoxDir();
+    const blockStart = (r: Vtree.ClientRect) =>
+      !this.vertical ? r.top : boxDir < 0 ? -r.right : r.left;
+    let edge = blockStart(startRect);
+    if (contentRect && blockStart(contentRect) >= blockStart(endRect) - 0.5) {
+      // The content did not fit on the markers' line (e.g., an image too wide
+      // for the gap beside a float) and starts a later line.
+      edge = blockStart(contentRect);
+    }
+    edge *= this.vertical && boxDir < 0 ? -1 : 1;
     return Number.isFinite(edge) ? edge : null;
   }
 

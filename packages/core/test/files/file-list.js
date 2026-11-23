@@ -1538,8 +1538,7 @@ module.exports = [
       },
       {
         file: "float-then-padded-block-page-break.html",
-        title:
-          "Block with padding after a float that fills the page (Issue #1786, #2285)",
+        title: "Block after a float that fills the page (Issue #1786, #2285)",
       },
       {
         file: "absolute-inline-line-numbers-horizontal.html",
