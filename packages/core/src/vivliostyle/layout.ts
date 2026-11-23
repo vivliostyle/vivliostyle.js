@@ -4274,12 +4274,31 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
   }
 
   /**
+   * Whether the text starts with a preserved line break (`white-space: pre`,
+   * `pre-wrap`, `pre-line` or `break-spaces`) before any visible character:
+   * a forced line break, like a leading `<br>`, whose rect has no width.
+   */
+  private startsWithPreservedNewline(text: Text): boolean {
+    const element = text.parentElement;
+    if (!element || !/^\s*\n/.test(text.data)) {
+      return false;
+    }
+    const whiteSpace =
+      this.clientLayout.getElementComputedStyle(element)?.whiteSpace;
+    return /^(pre|pre-wrap|pre-line|break-spaces)$/.test(whiteSpace);
+  }
+
+  /**
    * The first content in `node` (a text node or an element) that is on a
-   * line: visible text, a forced line break, or an atomic inline box such as
-   * an image or an inline-block. Out-of-flow descendants are skipped.
+   * line: visible text, a forced line break (`<br>` or a preserved newline),
+   * or an atomic inline box such as an image or an inline-block. Out-of-flow
+   * descendants are skipped.
    */
   private findFirstLineContent(node: Node): Element | Text | null {
     if (node.nodeType === 3) {
+      if (this.startsWithPreservedNewline(node as Text)) {
+        return node as Text;
+      }
       const rects = RangeClientRects.getLayoutClientRectsOfNodeContents(
         this.clientLayout,
         node,
@@ -4358,11 +4377,15 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     startMarker.remove();
     endMarker.remove();
     let contentRect: Vtree.ClientRect | undefined;
+    // A forced line break (a `<br>` or a preserved newline) is on the
+    // markers' line, and its rect has no width.
     if (content.nodeType === 3) {
-      contentRect = RangeClientRects.getLayoutClientRectsOfNodeContents(
-        this.clientLayout,
-        content,
-      ).find((r) => r.width > 0 && r.height > 0);
+      contentRect = this.startsWithPreservedNewline(content as Text)
+        ? undefined
+        : RangeClientRects.getLayoutClientRectsOfNodeContents(
+            this.clientLayout,
+            content,
+          ).find((r) => r.width > 0 && r.height > 0);
     } else if ((content as Element).localName !== "br") {
       contentRect = this.clientLayout.getElementClientRect(content as Element);
     }
