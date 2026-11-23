@@ -560,6 +560,72 @@ describe("vgen", function () {
     }
   });
 
+  it("compensates font metrics by their ratio measured in Firefox (Issue #1590)", function () {
+    if (Base.browserType !== "firefox") {
+      pending("Only Firefox scales the units by measured font metrics.");
+    }
+    // Firefox rounds font metrics to 1/60 px at each font size, e.g. a 0.5em
+    // ch of 7.875px at 15.75px to 7.8833px, so the compensation must follow
+    // the measured metrics, not the font sizes. The metrics are stubbed to
+    // make the test independent of the fonts installed.
+    const layoutUnitAdj = 0.25;
+    const fontSize = 16 - layoutUnitAdj;
+    const parent = document.createElement("div");
+    parent.style.cssText = `font:16px monospace;--viv-layoutUnitAdj:${layoutUnitAdj}px`;
+    const child = parent.appendChild(document.createElement("div"));
+    const reference = parent.appendChild(document.createElement("div"));
+    reference.style.fontSize = `${fontSize}px`;
+    document.body.append(parent);
+    const context = new Exprs.Context(
+      new Exprs.LexicalScope(null),
+      800,
+      600,
+      16,
+      20,
+    );
+    const factory = Object.create(Vgen.ViewFactory.prototype);
+    Object.assign(factory, {
+      context,
+      viewport: { window, layoutUnitAdj, layoutUnitPerPixel: 60 },
+      xmldoc: { url: document.URL },
+      sourceNode: child,
+      nodeContext: { parent: { viewNode: parent } },
+      getParentComputedMetrics: () => ({ fontSize: 16, lineHeight: 20 }),
+    });
+    const compensate = (metric, value) => {
+      context.measureFontUnit = (unit) => (unit === "ch" ? metric : null);
+      factory.applyComputedStyles(child, {
+        "font-size": new Css.Numeric(16, "px"),
+        "margin-left": CssParser.parseValue(
+          context.scope,
+          new CssTokenizer.Tokenizer(value, null),
+          "",
+        ),
+      });
+      return parseFloat(getComputedStyle(child).marginLeft);
+    };
+    const resolve = (value) => {
+      reference.style.marginLeft = value;
+      return parseFloat(getComputedStyle(reference).marginLeft);
+    };
+    try {
+      // The same ch at both font sizes leaves ch as it is, while em is scaled.
+      expectFontMetricLength(
+        compensate(8, "calc(10em + 10ch)"),
+        resolve("calc(160px + 10ch)"),
+      );
+      // Without the metrics, the units are scaled like em.
+      for (const metric of [null, 0]) {
+        expectFontMetricLength(
+          compensate(metric, "20ch"),
+          resolve(`calc(20ch * ${16 / fontSize})`),
+        );
+      }
+    } finally {
+      parent.remove();
+    }
+  });
+
   it("leaves letter-spacing and word-spacing in proportion to the adjusted font (Issue #1590)", function () {
     // They are added to the advances of the text, e.g. `letter-spacing: 1ch`
     // in WPT css/css-text/tab-size/tab-size-spacing-002.html is compared with
