@@ -1,0 +1,148 @@
+<!doctype html>
+<!-- Test case for Issue #2285 (follow-up): a position: absolute element in
+     the first line, or a floated marker before it, must not make the page
+     break inside that line. Every list item has three lines (fixed by <br>)
+     of a fixed line height, so the page breaks do not depend on the fonts.
+     Only the first line of the fourth item fits on the first page of each
+     list, and orphans/widows (2) do not allow a break inside the item.
+     Expected: each of the ten lists puts items 1-3 on its first page and
+     4-6 on the next one. No page ends with "4. Lorem" or a lone marker, and
+     no "note" box is on a different page from its item.
+     Chromium applies orphans/widows in the multi-column layout used for page
+     breaking and moves the fourth item itself, which hides the bug: check
+     this test in Firefox or WebKit (--browser firefox / webkit). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Out-of-flow element in a first line at a page break (vertical)</title>
+    <style>
+      @page { size: 250px 400px; margin: 0; }
+      html { writing-mode: vertical-rl; }
+      body { margin: 0; font-size: 16px; line-height: 24px; }
+      ul { margin: 0; }
+      ul + ul { break-before: page; }
+      li { position: relative; }
+      .note {
+        position: absolute;
+        font-size: 10px;
+        line-height: 12px;
+        color: white;
+        background: purple;
+      }
+      .below { right: 30px; top: 200px; }
+      .ib { display: inline-block; vertical-align: top; }
+      .ib > span { display: block; }
+      .img { width: 16px; height: 80px; }
+      .low { width: 8px; height: 40px; vertical-align: bottom; }
+      .small { font-size: 10px; }
+      .tiny { line-height: 4px; }
+      .pre-line { white-space: pre-line; }
+      .markers { list-style: none; }
+      .marker { float: left; margin-inline-start: -1em; }
+    </style>
+  </head>
+  <body>
+    <!-- Absolutely positioned element at its static position mid-line -->
+    <ul>
+      <li>1. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. Lorem <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Absolutely positioned element mid-line, shown below the line -->
+    <ul>
+      <li>1. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. Lorem <span class="note below">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Floated marker beside the first line -->
+    <ul class="markers">
+      <li><span class="marker">•</span>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker">•</span>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Floated marker beside the first line of a block-level box -->
+    <ul class="markers">
+      <li><span class="marker">•</span><div>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+      <li><span class="marker">•</span><div>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</div></li>
+    </ul>
+    <!-- Absolutely positioned element after an inline-block with a block child -->
+    <ul>
+      <li>1. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>2. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>3. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>4. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>5. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li>6. <span class="ib"><span>Lorem</span></span> <span class="note">note</span>ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Floated marker beside a first line that is only an image -->
+    <ul class="markers">
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />1. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />2. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />3. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />4. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />5. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><img class="img" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2280%22%3E%3Crect width=%2216%22 height=%2280%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />6. Lorem ipsum dolor<br />sit amet.</div></li>
+    </ul>
+    <!-- Short floated marker beside a first line whose text is below it (half-leading) -->
+    <ul class="markers small">
+      <li><span class="marker tiny">•</span>1. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker tiny">•</span>2. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker tiny">•</span>3. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker tiny">•</span>4. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker tiny">•</span>5. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+      <li><span class="marker tiny">•</span>6. Lorem ipsum dolor<br />sit amet,<br />consectetur.</li>
+    </ul>
+    <!-- Short floated marker beside a first line that is only a bottom-aligned image -->
+    <ul class="markers">
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />1. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />2. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />3. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />4. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />5. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker tiny">•</span><div><img class="low" alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%2240%22%3E%3Crect width=%228%22 height=%2240%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />6. Lorem ipsum dolor<br />sit amet.</div></li>
+    </ul>
+    <!-- Floated marker beside a first line that is only a forced line break -->
+    <ul class="markers">
+      <li><span class="marker">•</span><div><br />1. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><br />2. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><br />3. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><br />4. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><br />5. Lorem ipsum dolor<br />sit amet.</div></li>
+      <li><span class="marker">•</span><div><br />6. Lorem ipsum dolor<br />sit amet.</div></li>
+    </ul>
+    <!-- Floated marker beside a first line that is only a preserved newline -->
+    <ul class="markers">
+      <li><span class="marker">•</span><div class="pre-line">
+1. Lorem ipsum dolor
+sit amet.</div></li>
+      <li><span class="marker">•</span><div class="pre-line">
+2. Lorem ipsum dolor
+sit amet.</div></li>
+      <li><span class="marker">•</span><div class="pre-line">
+3. Lorem ipsum dolor
+sit amet.</div></li>
+      <li><span class="marker">•</span><div class="pre-line">
+4. Lorem ipsum dolor
+sit amet.</div></li>
+      <li><span class="marker">•</span><div class="pre-line">
+5. Lorem ipsum dolor
+sit amet.</div></li>
+      <li><span class="marker">•</span><div class="pre-line">
+6. Lorem ipsum dolor
+sit amet.</div></li>
+    </ul>
+  </body>
+</html>

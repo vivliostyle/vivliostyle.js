@@ -1000,6 +1000,22 @@ export function isOutOfFlow(node: Node | null): boolean {
 }
 
 /**
+ * Check if element is `position: absolute` or `fixed` and not a CSS float,
+ * which `Column.layoutFloat()` also makes `position: absolute` and marks with
+ * `data-viv-float`. Unlike a block-level box, such an element does not end
+ * the line it is in: inline content after it continues the line.
+ */
+export function isPositionedOutOfFlow(node: Node | null): boolean {
+  if (!(node?.nodeType === 1)) return false;
+  const e = node as HTMLElement;
+  const position = e.style?.position;
+  return (
+    (position === "absolute" || position === "fixed") &&
+    !e.hasAttribute("data-viv-float")
+  );
+}
+
+/**
  * Check if element is out-of-flow due to CSS positioning or float.
  * Unlike isOutOfFlow(), this does not check for special marker elements.
  */

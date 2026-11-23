@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- Test case for Issue #1786 and #2285: a break between a CSS float and the
+     content right after it is allowed when the float pushes that content out
+     of the page. A float beside the first line of the content (e.g., a
+     floated list marker) must stay with that line instead.
+     Section 1: a block whose block-start padding begins beside a float that
+     fills the page.
+     Section 2: a float that fills the page height but not its width, and a
+     block whose first line is an image too wide for the gap beside it.
+     Expected: pages 1 and 3 show only the green float, and pages 2 and 4
+     start with the paragraph "Page 2: ..." and the teal image followed by
+     "Page 4: ...". -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Block after a float that fills the page</title>
+    <style>
+      @page { size: 400px 250px; margin: 0; }
+      body { margin: 0; font-size: 16px; line-height: 24px; }
+      section + section { break-before: page; }
+      .float { float: left; width: 100%; height: 250px; background: lime; }
+      .partial { width: 350px; }
+      p { margin: 0; padding-top: 2em; }
+      img { width: 80px; height: 16px; }
+    </style>
+  </head>
+  <body>
+    <section>
+      <div class="float">Page 1: a float that fills the page.</div>
+      <p>Page 2: this paragraph has block-start padding.<br />Its text does not fit beside the float on page 1.</p>
+    </section>
+    <section>
+      <div class="float partial">Page 3: a float that fills the page height.</div>
+      <div><img alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2216%22%3E%3Crect width=%2280%22 height=%2216%22 fill=%22teal%22/%3E%3C/svg%3E" /><br />Page 4: the image does not fit beside the float on page 3.</div>
+    </section>
+  </body>
+</html>

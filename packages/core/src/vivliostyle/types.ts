@@ -498,6 +498,7 @@ export namespace Layout {
       breakAtEdge: string | null,
       overflows: boolean,
       breakBeforeText?: boolean,
+      floatsBefore?: Element[] | null,
     ): void;
     /**
      * @param checkPoints array of breaking points for breakable block
