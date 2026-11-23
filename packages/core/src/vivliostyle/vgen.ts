@@ -4278,12 +4278,22 @@ export class ViewFactory
       return value;
     }
     const emFactor = emUnitSize / adjustedEmUnitSize;
+    // Firefox rounds the font metrics to its layout unit (1/60 px) at each
+    // font size, e.g. 1ch of a font whose zero is 0.5em is 7.8833px at
+    // 15.75px instead of 7.875px, so a factor from the font sizes misses by
+    // that rounding times the number of units. Its viewport is not zoomed
+    // (no pixelRatio emulation), so the metrics measured at both sizes are
+    // what the browser resolves the units to.
+    const measuresFontMetrics = Base.browserType === "firefox";
     const fontMetricFactor =
       this.getFontMetricsSize(emUnitSize) /
       this.getFontMetricsSize(adjustedEmUnitSize);
     let fontProperties: FontProperties | undefined;
     const compensator = new FontSizeAdjustmentCompensator((unit) => {
-      if (unit === "em" || fontMetricFactor === emFactor) {
+      if (
+        unit === "em" ||
+        (!measuresFontMetrics && fontMetricFactor === emFactor)
+      ) {
         return emFactor;
       }
       fontProperties ??= this.getCurrentFontProperties(
@@ -4291,6 +4301,24 @@ export class ViewFactory
         computedStyle,
         target,
       );
+      if (measuresFontMetrics) {
+        const size = this.context.measureFontUnit(
+          unit,
+          emUnitSize,
+          fontProperties,
+        );
+        const adjustedSize = this.context.measureFontUnit(
+          unit,
+          adjustedEmUnitSize,
+          fontProperties,
+        );
+        return size != null &&
+          size > 0 &&
+          adjustedSize != null &&
+          adjustedSize > 0
+          ? size / adjustedSize
+          : emFactor;
+      }
       return this.isFontMetricQuantized(unit, fontProperties)
         ? fontMetricFactor
         : emFactor;
