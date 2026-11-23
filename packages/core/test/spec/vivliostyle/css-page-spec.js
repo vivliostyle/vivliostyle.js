@@ -264,6 +264,31 @@ describe("css-page", function () {
     expect(marginBoxes[1].specified.quotes).toBe(localQuotes);
   });
 
+  describe("resolvePageOrientation", function () {
+    function style(value) {
+      return value
+        ? {
+            "page-orientation": new adapt_csscasc.CascadeValue(
+              adapt_css.getName(value),
+              0,
+            ),
+          }
+        : {};
+    }
+
+    it("resolves the page-orientation descriptor (Issue #1993)", function () {
+      expect(module.resolvePageOrientation(style(null))).toBe("upright");
+      expect(module.resolvePageOrientation(style("upright"))).toBe("upright");
+      expect(module.resolvePageOrientation(style("rotate-left"))).toBe(
+        "rotate-left",
+      );
+      expect(module.resolvePageOrientation(style("rotate-right"))).toBe(
+        "rotate-right",
+      );
+      expect(module.resolvePageOrientation(style("inherit"))).toBe("upright");
+    });
+  });
+
   describe("PageParserHandler", function () {
     var pageProps, handler;
 

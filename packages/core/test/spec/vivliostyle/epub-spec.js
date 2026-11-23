@@ -39,6 +39,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(2);
 
       expect(viewer.pageSizes).toEqual([
@@ -61,6 +64,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(5);
 
       expect(viewer.pageSizes.length).toBe(5);
@@ -83,6 +89,9 @@ describe("epub", function () {
       viewer.pageSheetSizeAlreadySet = true;
       viewer.pixelRatio = 1;
 
+      viewer.printPageSizes = new Map(
+        Object.entries(viewer.pageSizes).map(([k, v]) => [Number(k), v]),
+      );
       viewer.truncatePageSizes(2);
 
       expect(viewer.pageSizes.length).toBe(2);
@@ -90,6 +99,203 @@ describe("epub", function () {
         "size: 75pt 75pt",
       );
       expect(viewer.pageRuleStyleElement.textContent).not.toContain("750pt");
+    });
+  });
+
+  describe("print page rules (Issue #1474, #1993)", function () {
+    it("names each page by its printed size and orientation", function () {
+      expect(
+        adapt_viewer.getPrintPageName({
+          width: 559.37,
+          height: 793.701,
+          orientation: "upright",
+        }),
+      ).toBe("vivliostyle-page-420x596");
+      expect(
+        adapt_viewer.getPrintPageName({
+          width: 793.701,
+          height: 559.37,
+          orientation: "rotate-left",
+        }),
+      ).toBe("vivliostyle-page-596x420-rotate-left");
+    });
+
+    it("creates a named page rule for each page size and orientation", function () {
+      var rules = adapt_viewer
+        .createPrintPageRules(
+          [
+            { width: 400, height: 600, orientation: "upright" },
+            { width: 600, height: 400, orientation: "upright" },
+            { width: 600, height: 400, orientation: "upright" },
+            { width: 600, height: 400, orientation: "rotate-right" },
+            { width: 200, height: 300, orientation: "upright" },
+          ],
+          1,
+          true,
+        )
+        .split("\n");
+      expect(rules).toEqual([
+        "@page {size: 300pt 450pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-300x450 {size: 300pt 450pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-450x300 {size: 450pt 300pt; margin: 0 -2pt -2pt 0;}",
+        "@page vivliostyle-page-450x300-rotate-right {size: 450pt 300pt; margin: 0 -2pt -2pt 0; page-orientation: rotate-right;}",
+        "@page vivliostyle-page-150x225 {size: 150pt 225pt; margin: 0 -2pt -2pt 0;}",
+      ]);
+    });
+
+    it("makes the default page rule portrait for mixed orientations", function () {
+      var rules = adapt_viewer
+        .createPrintPageRules(
+          [
+            { width: 800, height: 400, orientation: "upright" },
+            { width: 400, height: 600, orientation: "upright" },
+          ],
+          1,
+          true,
+        )
+        .split("\n");
+      expect(rules[0]).toBe(
+        "@page {size: 300pt 600pt; margin: 0 -2pt -2pt 0;}",
+      );
+    });
+
+    it("uses the largest width and height without named page support", function () {
+      expect(
+        adapt_viewer.createPrintPageRules(
+          [
+            { width: 400, height: 600, orientation: "upright" },
+            { width: 600, height: 400, orientation: "rotate-left" },
+          ],
+          1,
+          false,
+        ),
+      ).toBe("@page {size: 450pt 450pt; margin: 0 -2pt -2pt 0;}");
+    });
+
+    it("scales the negative page margins with the pixel ratio", function () {
+      expect(
+        adapt_viewer
+          .createPrintPageRules(
+            [{ width: 400, height: 600, orientation: "upright" }],
+            2,
+            true,
+          )
+          .split("\n"),
+      ).toEqual([
+        "@page {size: 300pt 450pt; margin: 0 -302pt -452pt 0;}",
+        "@page vivliostyle-page-300x450 {size: 300pt 450pt; margin: 0 -302pt -452pt 0;}",
+      ]);
+    });
+
+    it("regenerates page rules only when a page adds a page name or size", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var left = document.createElement("div");
+      left.setAttribute("data-vivliostyle-page-orientation", "rotate-left");
+      var right = document.createElement("div");
+      right.setAttribute("data-vivliostyle-page-orientation", "rotate-right");
+      // Rendered page containers are in the document
+      var root = document.createElement("div");
+      document.body.appendChild(root);
+      root.append(left, right);
+
+      for (var i = 0; i < 6; i++) {
+        viewer.setPageSize(
+          { width: 600, height: 400 },
+          {},
+          0,
+          i + 1,
+          i % 2 ? right : left,
+        );
+      }
+      var rules = viewer.pageRuleStyleElement.textContent;
+      expect(rules).toContain("-rotate-left");
+      expect(rules).toContain("-rotate-right");
+
+      // A page with a page name and size already covered keeps the rules.
+      viewer.pageRuleStyleElement.textContent = "unchanged";
+      viewer.setPageSize({ width: 600, height: 400 }, {}, 0, 7, left);
+      expect(viewer.pageRuleStyleElement.textContent).toBe("unchanged");
+
+      // A new portrait page changes the unnamed @page rule.
+      viewer.setPageSize({ width: 400, height: 600 }, {}, 0, 8);
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "@page {size: 300pt 450pt;",
+      );
+      root.remove();
+    });
+
+    it("keeps the rules of pages whose page numbers overlap", function () {
+      // Concatenated documents can both start at page 1 (startPage), so
+      // their pages are reported with the same page index.
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var root = document.createElement("div");
+      document.body.appendChild(root);
+      var first = document.createElement("div");
+      var second = document.createElement("div");
+      root.append(first, second);
+      try {
+        viewer.setPageSize({ width: 400, height: 600 }, {}, 0, 0, first);
+        viewer.setPageSize({ width: 600, height: 400 }, {}, 1, 0, second);
+        viewer.truncatePageSizes(1);
+
+        var rules = viewer.pageRuleStyleElement.textContent;
+        expect(rules).toContain("@page {size: 300pt 450pt;");
+        if (CSS.supports("page", "auto")) {
+          expect(rules).toContain("vivliostyle-page-300x450 ");
+          expect(rules).toContain("vivliostyle-page-450x300 ");
+        }
+
+        // A page removed from the document no longer counts.
+        second.remove();
+        viewer.truncatePageSizes(1);
+        expect(viewer.pageRuleStyleElement.textContent).not.toContain(
+          "450x300",
+        );
+      } finally {
+        root.remove();
+      }
+    });
+
+    it("gives the page container the page name and keeps its orientation", function () {
+      var viewer = Object.create(adapt_viewer.AdaptiveViewer.prototype);
+      viewer.pageSizes = [];
+      viewer.printPageSizes = new Map();
+      viewer.pageRuleStyleElement = document.createElement("style");
+      viewer.pageSheetSizeAlreadySet = false;
+      viewer.pixelRatio = 1;
+      var container = document.createElement("div");
+      container.setAttribute(
+        "data-vivliostyle-page-orientation",
+        "rotate-left",
+      );
+      document.body.appendChild(container);
+
+      viewer.setPageSize({ width: 600, height: 400 }, {}, 0, 1, container);
+
+      expect(viewer.pageSizes[1]).toEqual({
+        width: 600,
+        height: 400,
+        orientation: "rotate-left",
+      });
+      expect(container.style.getPropertyValue("page")).toBe(
+        CSS.supports("page", "auto")
+          ? "vivliostyle-page-450x300-rotate-left"
+          : "",
+      );
+      expect(viewer.pageRuleStyleElement.textContent).toContain(
+        "size: 450pt 300pt",
+      );
+      container.remove();
     });
   });
 

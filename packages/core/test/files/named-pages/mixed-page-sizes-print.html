@@ -1,0 +1,71 @@
+<!doctype html>
+<!-- Test case for Issue #1474: Mixed page sizes and orientations in print output -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mixed page sizes and orientations in print output</title>
+    <style>
+      @page {
+        size: A5;
+        margin: 15mm;
+        @bottom-center {
+          content: "Page " counter(page) " of " counter(pages);
+        }
+      }
+      @page landscape {
+        size: A5 landscape;
+      }
+      @page small {
+        size: 100mm 150mm;
+        margin: 10mm;
+      }
+      body {
+        font-family: sans-serif;
+        margin: 0;
+      }
+      section {
+        break-before: page;
+      }
+      .landscape {
+        page: landscape;
+      }
+      .small {
+        page: small;
+      }
+      .box {
+        border: 2px solid #48c;
+        padding: 4mm;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>Page 1: A5 portrait</h1>
+      <p>
+        Print this document (or save it as PDF) from the viewer. Each page in
+        the output must have the size and orientation shown in its heading.
+      </p>
+      <p>
+        Chromium-based browsers print each page in its own size. Firefox prints
+        every page on a sheet of the largest size, turned to the orientation of
+        the page.
+      </p>
+    </section>
+    <section class="landscape">
+      <h1>Page 2: A5 landscape</h1>
+      <p class="box">This page is laid out on an A5 landscape page.</p>
+    </section>
+    <section class="landscape">
+      <h1>Page 3: A5 landscape</h1>
+      <p class="box">This page is laid out on an A5 landscape page.</p>
+    </section>
+    <section>
+      <h1>Page 4: A5 portrait</h1>
+      <p class="box">Back to the default A5 portrait page.</p>
+    </section>
+    <section class="small">
+      <h1>Page 5: 100mm × 150mm</h1>
+      <p class="box">A smaller portrait page.</p>
+    </section>
+  </body>
+</html>

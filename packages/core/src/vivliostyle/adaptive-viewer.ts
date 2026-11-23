@@ -51,6 +51,123 @@ export type ViewportSize = {
   height: number;
 };
 
+/**
+ * Page sheet size (in px) and page-orientation of a rendered page, used to
+ * generate the `@page` rules for printing.
+ */
+export type PrintPageSize = {
+  width: number;
+  height: number;
+  orientation: "upright" | "rotate-left" | "rotate-right";
+};
+
+/**
+ * Convert a page sheet length in px to the integer pt value used in the
+ * generated `@page` rules.
+ */
+function toPrintPageLengthPt(px: number): number {
+  // Workaround for Chromium's rounded page size problem.
+  // (Fix for issue #934 and #936)
+  return Math.ceil(px * 0.75);
+}
+
+/**
+ * Get the page name given to a page container for printing, unique to the
+ * printed page size and orientation.
+ */
+export function getPrintPageName(pageSize: PrintPageSize): string {
+  const widthPt = toPrintPageLengthPt(pageSize.width);
+  const heightPt = toPrintPageLengthPt(pageSize.height);
+  const orientation =
+    pageSize.orientation && pageSize.orientation !== "upright"
+      ? `-${pageSize.orientation}`
+      : "";
+  return `vivliostyle-page-${widthPt}x${heightPt}${orientation}`;
+}
+
+/**
+ * Create the `@page` rules for printing the rendered pages.
+ *
+ * Each page container is given a page name by `getPrintPageName()`, and a
+ * named `@page` rule with its size (and page-orientation) is generated for each
+ * name, so that browsers supporting named pages in print output each page in
+ * its own size (Issue #1474, #1993).
+ *
+ * The `@page` rule without a name is used for the pages in browsers without
+ * named page support, and its size is the largest page size both in width and
+ * height, so that every page fits in (Issue #751). Firefox prints all pages on
+ * the sheet of this size, turning it to the orientation of each page, so when
+ * portrait and landscape pages are mixed and named pages are supported, its
+ * size is the largest short side × the largest long side of the pages instead
+ * (portrait; Firefox turns the sheet to each page anyway).
+ *
+ * @param pageSizes Sizes of the rendered pages
+ * @param pixelRatio The pixelRatio setting (high pixel ratio emulation)
+ * @param namedPageSupported Whether the browser supports the `page` property
+ */
+export function createPrintPageRules(
+  pageSizes: PrintPageSize[],
+  pixelRatio: number,
+  namedPageSupported: boolean,
+): string {
+  if (!pageSizes.length) {
+    return "";
+  }
+  const pageRule = (
+    name: string,
+    widthPt: number,
+    heightPt: number,
+    orientation?: PrintPageSize["orientation"],
+  ): string => {
+    // Negative margin setting is necessary to prevent unexpected page breaking.
+    // Note that the high pixel ratio emulation, the pixelRatio setting, uses the CSS zoom property
+    // that enlarge the page content size, and Chromium splits such large pages unless this
+    // negative margin is specified.
+    const rightPt = widthPt * ((pixelRatio || 1) - 1) + 2;
+    const bottomPt = heightPt * ((pixelRatio || 1) - 1) + 2; // "+ 2" is for issue #947
+    const orientationDecl =
+      orientation && orientation !== "upright"
+        ? ` page-orientation: ${orientation};`
+        : "";
+    return `@page ${name ? `${name} ` : ""}{size: ${widthPt}pt ${heightPt}pt; margin: 0 ${-rightPt}pt ${-bottomPt}pt 0;${orientationDecl}}`;
+  };
+
+  let widthMax: number;
+  let heightMax: number;
+  if (
+    namedPageSupported &&
+    pageSizes.some((p) => p.width < p.height) &&
+    pageSizes.some((p) => p.width > p.height)
+  ) {
+    widthMax = Math.max(...pageSizes.map((p) => Math.min(p.width, p.height)));
+    heightMax = Math.max(...pageSizes.map((p) => Math.max(p.width, p.height)));
+  } else {
+    widthMax = Math.max(...pageSizes.map((p) => p.width));
+    heightMax = Math.max(...pageSizes.map((p) => p.height));
+  }
+  const rules = [
+    pageRule("", toPrintPageLengthPt(widthMax), toPrintPageLengthPt(heightMax)),
+  ];
+  if (namedPageSupported) {
+    const names = new Set<string>();
+    for (const pageSize of pageSizes) {
+      const name = getPrintPageName(pageSize);
+      if (!names.has(name)) {
+        names.add(name);
+        rules.push(
+          pageRule(
+            name,
+            toPrintPageLengthPt(pageSize.width),
+            toPrintPageLengthPt(pageSize.height),
+            pageSize.orientation,
+          ),
+        );
+      }
+    }
+  }
+  return rules.join("\n");
+}
+
 export const VIEWPORT_STATUS_ATTRIBUTE = "data-vivliostyle-viewer-status";
 
 export const VIEWPORT_SPREAD_VIEW_ATTRIBUTE = "data-vivliostyle-spread-view";
@@ -78,6 +195,21 @@ export class AdaptiveViewer {
   hyperlinkListener: Base.EventListener;
   pageRuleStyleElement: HTMLElement;
   pageSheetSizeAlreadySet: boolean = false;
+  // Print page sizes of the rendered pages, keyed by the page container (or
+  // by the page index when no container is given) rather than by page number,
+  // since the page numbers of concatenated documents may overlap (startPage)
+  printPageSizes: Map<HTMLElement | number, PrintPageSize> = new Map();
+  // What the current print page rules cover, to skip regenerating them when a
+  // page adds no new page name or size (see setPageSizePageRules)
+  private printPageRuleCoverage: {
+    names: Set<string>;
+    maxWidth: number;
+    maxHeight: number;
+    maxShortSide: number;
+    maxLongSide: number;
+    hasPortrait: boolean;
+    hasLandscape: boolean;
+  } | null = null;
   renderTask: Task.Task | null = null;
   actions: { [key: string]: Action };
   readyState: Constants.ReadyState = Constants.ReadyState.LOADING;
@@ -97,7 +229,7 @@ export class AdaptiveViewer {
   waitForLoading: boolean = false;
   renderAllPages: boolean = true;
   pref: Exprs.Preferences = Exprs.defaultPreferences();
-  pageSizes: { width: number; height: number }[] = [];
+  pageSizes: PrintPageSize[] = [];
 
   // Pixel ratio emulation on PDF output (PR #1079) does not work with
   // non-Chromium browsers.
@@ -731,9 +863,24 @@ export class AdaptiveViewer {
     pageSheetSize: { [key: string]: { width: number; height: number } },
     spineIndex: number,
     pageIndex: number,
+    pageContainer?: HTMLElement,
   ) {
-    this.pageSizes[pageIndex] = pageSize;
-    this.setPageSizePageRules(pageIndex);
+    const orientation =
+      (pageContainer?.getAttribute(
+        "data-vivliostyle-page-orientation",
+      ) as PrintPageSize["orientation"]) || "upright";
+    const printPageSize: PrintPageSize = {
+      width: pageSize.width,
+      height: pageSize.height,
+      orientation,
+    };
+    this.pageSizes[pageIndex] = printPageSize;
+    this.printPageSizes.set(pageContainer ?? pageIndex, printPageSize);
+    // Use a named page for each page size so that browsers supporting named
+    // pages in print (Chromium, and Firefox for the orientation) print each
+    // page in its own size (Issue #1474, #1993).
+    pageContainer?.style.setProperty("page", getPrintPageName(printPageSize));
+    this.setPageSizePageRules(printPageSize);
     if (
       pageIndex === 0 &&
       this.pageViewMode === PageViewMode.AUTO_SPREAD &&
@@ -747,56 +894,73 @@ export class AdaptiveViewer {
     if (this.pageSizes.length > pageCount) {
       this.pageSizes.splice(pageCount);
     }
+    // Drop the sizes of the pages no longer rendered
+    for (const key of [...this.printPageSizes.keys()]) {
+      if (typeof key === "number" ? key >= pageCount : !key.isConnected) {
+        this.printPageSizes.delete(key);
+      }
+    }
     this.removePageSizePageRules();
-    let lastPageSizeIndex = this.pageSizes.length - 1;
-    while (
-      lastPageSizeIndex >= 0 &&
-      this.pageSizes[lastPageSizeIndex] == null
-    ) {
-      lastPageSizeIndex--;
-    }
-    if (lastPageSizeIndex >= 0) {
-      this.setPageSizePageRules(lastPageSizeIndex);
-    }
+    this.setPageSizePageRules(null);
   }
 
-  private setPageSizePageRules(pageIndex: number) {
-    // In this implementation, it generates one page rule with the largest
-    // page size both in width and height in the multiple page sizes.
-    // (Resolve issue #751)
-    const currentPageSize = this.pageSizes[pageIndex];
-    if (
-      this.pageRuleStyleElement &&
-      currentPageSize &&
-      (!this.pageSheetSizeAlreadySet ||
-        currentPageSize.width !== this.pageSizes[pageIndex - 1]?.width ||
-        currentPageSize.height !== this.pageSizes[pageIndex - 1]?.height)
-    ) {
-      const definedPageSizes = this.pageSizes.filter(
-        (pageSize) => pageSize != null,
-      );
-      const widthMax = Math.max(...definedPageSizes.map((p) => p.width));
-      const heightMax = Math.max(...definedPageSizes.map((p) => p.height));
-
-      function convertSize(px: number): number {
-        const pt = px * 0.75;
-        // Workaround for Chromium's rounded page size problem.
-        // (Fix for issue #934 and #936)
-        return Math.ceil(pt);
-      }
-      const widthPt = convertSize(widthMax);
-      const heightPt = convertSize(heightMax);
-
-      // Negative margin setting is necessary to prevent unexpected page breaking.
-      // Note that the high pixel ratio emulation, the pixelRatio setting, uses the CSS zoom property
-      // that enlarge the page content size, and Chromium splits such large pages unless this
-      // negative margin is specified.
-      const rightPt = widthPt * ((this.pixelRatio || 1) - 1) + 2;
-      const bottomPt = heightPt * ((this.pixelRatio || 1) - 1) + 2; // "+ 2" is for issue #947
-      const styleText = `@page {size: ${widthPt}pt ${heightPt}pt; margin: 0 ${-rightPt}pt ${-bottomPt}pt 0;}`;
-      this.pageRuleStyleElement.textContent = styleText;
-      this.pageSheetSizeAlreadySet = true;
+  /**
+   * Update the print page rules for a rendered page, or regenerate them for
+   * all rendered pages when `currentPageSize` is null.
+   */
+  private setPageSizePageRules(currentPageSize: PrintPageSize | null) {
+    if (!this.pageRuleStyleElement) {
+      return;
     }
+    // Regenerating the rules takes all pages, so skip it when the current
+    // rules already cover this page: its page name, and its size and
+    // orientation in the unnamed @page rule.
+    const coverage = this.printPageRuleCoverage;
+    const { width, height } = currentPageSize ?? { width: 0, height: 0 };
+    if (
+      this.pageSheetSizeAlreadySet &&
+      currentPageSize &&
+      coverage &&
+      coverage.names.has(getPrintPageName(currentPageSize)) &&
+      width <= coverage.maxWidth &&
+      height <= coverage.maxHeight &&
+      Math.min(width, height) <= coverage.maxShortSide &&
+      Math.max(width, height) <= coverage.maxLongSide &&
+      (width >= height || coverage.hasPortrait) &&
+      (width <= height || coverage.hasLandscape)
+    ) {
+      return;
+    }
+    const pageSizes: PrintPageSize[] = [];
+    for (const [key, pageSize] of this.printPageSizes) {
+      if (typeof key !== "number" && !key.isConnected) {
+        this.printPageSizes.delete(key);
+      } else {
+        pageSizes.push(pageSize);
+      }
+    }
+    if (!pageSizes.length) {
+      return;
+    }
+    this.pageRuleStyleElement.textContent = createPrintPageRules(
+      pageSizes,
+      this.pixelRatio,
+      typeof CSS !== "undefined" && CSS.supports("page", "auto"),
+    );
+    this.pageSheetSizeAlreadySet = true;
+    this.printPageRuleCoverage = {
+      names: new Set(pageSizes.map(getPrintPageName)),
+      maxWidth: Math.max(...pageSizes.map((p) => p.width)),
+      maxHeight: Math.max(...pageSizes.map((p) => p.height)),
+      maxShortSide: Math.max(
+        ...pageSizes.map((p) => Math.min(p.width, p.height)),
+      ),
+      maxLongSide: Math.max(
+        ...pageSizes.map((p) => Math.max(p.width, p.height)),
+      ),
+      hasPortrait: pageSizes.some((p) => p.width < p.height),
+      hasLandscape: pageSizes.some((p) => p.width > p.height),
+    };
   }
 
   removePageSizePageRules() {
@@ -804,6 +968,7 @@ export class AdaptiveViewer {
       this.pageRuleStyleElement.textContent = "";
       this.pageSheetSizeAlreadySet = false;
     }
+    this.printPageRuleCoverage = null;
   }
 
   private loadCmykReserveMap(store: Epub.EPUBDocStore): Task.Result<boolean> {
@@ -837,6 +1002,7 @@ export class AdaptiveViewer {
       this.opfView.removeRenderedPages();
     }
     this.pageSizes = [];
+    this.printPageSizes.clear();
     this.removePageSizePageRules();
     this.viewport = this.createViewport();
     this.viewport.resetZoom();

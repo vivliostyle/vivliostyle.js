@@ -186,10 +186,12 @@ export const VivliostyleViewportCss = `
     display: none;
   }
 
+  /* height: auto keeps the pages from overflowing their containers, which
+     breaks named pages (each page's size and orientation) in Firefox */
   [data-vivliostyle-outer-zoom-box],
   [data-vivliostyle-spread-container] {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
   }
 
   [data-vivliostyle-spread-container] {
@@ -212,7 +214,6 @@ export const VivliostyleViewportCss = `
 
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container] {
     display: block !important;
-    max-height: 100vh;
   }
 
   [data-vivliostyle-spread-container] [data-vivliostyle-page-container]:not(:last-child) {
@@ -520,6 +521,7 @@ marks = none | [ crop || cross ];
 size = POS_LENGTH{1,2} | auto | [ PAGE_SIZE || [ portrait | landscape ] ];
 crop-offset = auto | LENGTH;
 crop-marks-line-color = auto | COLOR;
+page-orientation = upright | rotate-left | rotate-right;
 
 /* CSS Page Floats */
 clear = none | left | right | top | bottom | inline-start | inline-end | block-start | block-end | inside | outside | both | all | same | column | region | page;

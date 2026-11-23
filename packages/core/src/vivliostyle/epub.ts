@@ -1703,6 +1703,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       p2: { [key: string]: { width: number; height: number } },
       p3: number,
       p4: number,
+      p5?: HTMLElement,
     ) => any,
     cmykReserveMap?: CmykStore.CmykReserveMapEntry[],
     public readonly pageSheetSizeTruncator: (
@@ -1854,6 +1855,7 @@ export class OPFView implements Vgen.CustomRendererFactory {
       viewItem.instance.pageSheetSize,
       viewItem.item.spineIndex,
       viewItem.instance.pageNumberOffset + pageIndex,
+      page.container,
     );
   }
 
