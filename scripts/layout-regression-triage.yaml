@@ -1,3 +1,24 @@
+- category: Positioning and fragmentation
+  title: "Absolutely positioned box after a block-level box before a page break (Issue #2296)"
+  file: absolute-after-block-page-break.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2297 (10 pages, unchanged). Pages 1-4 (followed by a block-level box, then by text): the
+    purple square stays inside the pink square on pages 1 and 3 in both; stable cuts the orange box of fixed height at
+    the break on page 1 and keeps "Lorem ipsum" on page 3, which it repeats on page 4 (Issue #2285, fixed by PR #2287).
+    Pages 5-6 (break-after: avoid) are the same. Pages 7-8 (break-before: avoid on the blue box): stable keeps the
+    square on page 7 by breaking just before the blue box against the avoid value; now the square moves to page 8 with
+    the blue box (the break before the square does not see the avoid value, a known limitation noted in the test).
+    Pages 9-10 (running element before the blue box): stable keeps the square on page 9 by breaking before the running
+    element, which is no longer a break opportunity since PR #2294; now the square moves to page 10 with the running
+    element and the blue box. "Running header" is on page 10 only in both.
+  approvedViewer: https://vivliostyle-git-fix-issue-2296-abspos-moves-712781-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-after-block-page-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-after-block-page-break.html&zoom=1&spread=false
 - category: Document and media
   title: "Base element (Issue #604)"
   file: base-url/base-element.html
