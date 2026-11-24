@@ -126,7 +126,21 @@ export class EdgeBreakPosition
         column.writingMode,
       ) + clonedPaddingBorder;
 
-    if (!this.position.after && !this.position.inline) {
+    const edgeBeforeBoxInLaterColumn =
+      !this.position.after && !this.position.inline
+        ? LayoutHelper.calculateEdgeBeforeBoxInLaterColumn(
+            this.position.viewNode as Element,
+            column.clientLayout,
+            column.writingMode,
+          )
+        : NaN;
+    if (!isNaN(edgeBeforeBoxInLaterColumn)) {
+      // The box was moved to a later column as a whole by the browser's
+      // column breaking (e.g., it starts exactly at the end of the column):
+      // measure the break before it at the end of the preceding box.
+      // (Issue #2298)
+      this.edge = edgeBeforeBoxInLaterColumn + clonedPaddingBorder;
+    } else if (!this.position.after && !this.position.inline) {
       // Subtract marginBlockStart from the edge (Issue #611)
       const marginBlockStart = column.parseComputedLength(
         column.clientLayout.getElementComputedStyle(

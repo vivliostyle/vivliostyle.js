@@ -410,6 +410,63 @@ export function getElementClientRectAdjusted(
 }
 
 /**
+ * The edge of a break before a block-level box that the browser's column
+ * breaking has moved to a later column as a whole: a monolithic box that does
+ * not fit in the rest of the column, including one that starts exactly at
+ * the end of the column. The client rect of such a box is in that column, so
+ * its block-start edge is measured as overflowing, while the break before it
+ * leaves only the preceding content in the column. Returns the block-end edge
+ * of the preceding in-flow block-level sibling, where the box would start in
+ * the column, or NaN when the box is in the current column or there is no
+ * such sibling (e.g., the box is the first child, or text or an inline-level
+ * box comes before it, whose line box is not measured here). (Issue #2298)
+ */
+export function calculateEdgeBeforeBoxInLaterColumn(
+  element: Element | null,
+  clientLayout: Vtree.ClientLayout,
+  writingMode: boolean | string,
+): number {
+  if (
+    element?.nodeType !== 1 ||
+    adjustRectForColumnBreaking(
+      clientLayout.getElementClientRect(element),
+      writingMode,
+    ) === 0
+  ) {
+    return NaN;
+  }
+  let prev = element.previousSibling;
+  while (prev && !(prev.nodeType === 1 && !isOutOfFlow(prev))) {
+    if (prev.nodeType === 3 && prev.textContent.trim()) {
+      return NaN; // text before the box
+    }
+    prev = prev.previousSibling;
+  }
+  if (
+    !prev ||
+    Display.isInlineLevel(
+      clientLayout.getElementComputedStyle(prev as Element).display,
+    )
+  ) {
+    return NaN;
+  }
+  const rect = getElementClientRectAdjusted(
+    clientLayout,
+    prev as Element,
+    writingMode,
+  );
+  const vertical =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isVertical(writingMode);
+  const blockReversed =
+    typeof writingMode === "boolean"
+      ? writingMode
+      : CssLogicalUtil.isBlockReversed(writingMode);
+  return vertical ? (blockReversed ? rect.left : rect.right) : rect.bottom;
+}
+
+/**
  * Clear forced column breaks between two nodes.
  * This is used to prevent unnecessary blank pages.
  */
