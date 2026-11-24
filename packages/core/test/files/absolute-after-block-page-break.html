@@ -6,7 +6,16 @@
      pink square; pages 2 and 4 have no purple square. With
      `break-after: avoid` on the block-level box, the box and the purple
      square move to page 6 together with the following blue box (page 5 has
-     only the orange box). -->
+     only the orange box).
+     With `break-before: avoid` on the blue box, there is no page break
+     between the purple square and the blue box: both are on page 8. (The
+     break between the pink box and the purple square, saved before the blue
+     box is reached, does not see the avoid value, so the pink box stays on
+     page 7; this is not fixed yet.)
+     With a running element between the purple square and the blue box, the
+     running element moves to page 10 with the blue box, so "Running header"
+     is shown at the top of page 10 only; the purple square moves with them
+     (no break is allowed between the two out-of-flow elements). -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -23,6 +32,15 @@
       .tall-line { line-height: 450px; }
       .tall-line > div { line-height: 24px; }
       .avoid-after { break-after: avoid; }
+      .avoid-before { break-before: avoid; }
+      .avoid-before-filler { height: 350px; background: orange; }
+      .with-header { page: with-header; }
+      .with-header .avoid-before-filler { height: 310px; }
+      @page with-header {
+        margin-top: 40px;
+        @top-center { content: element(header); }
+      }
+      .running-header { position: running(header); }
       .avoid-after-filler { height: 400px; background: orange; }
       .short-spacer { height: 300px; background: skyblue; }
     </style>
@@ -45,6 +63,21 @@
       <div class="avoid-after-filler"></div>
       <div class="reference avoid-after"></div>
       <div class="target"></div>
+      <div class="short-spacer"></div>
+    </div>
+    <!-- Followed by a block-level box with break-before: avoid -->
+    <div class="container auto-height">
+      <div class="avoid-before-filler"></div>
+      <div class="reference"></div>
+      <div class="target"></div>
+      <div class="short-spacer avoid-before"></div>
+    </div>
+    <!-- Followed by a running element and a block-level box -->
+    <div class="container auto-height with-header">
+      <div class="avoid-before-filler"></div>
+      <div class="reference"></div>
+      <div class="target"></div>
+      <div class="running-header">Running header</div>
       <div class="short-spacer"></div>
     </div>
   </body>
