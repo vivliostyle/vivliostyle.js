@@ -1537,6 +1537,16 @@ module.exports = [
           "Absolutely positioned box after a block-level box before a page break (Issue #2296)",
       },
       {
+        file: "absolute-before-exact-fit-page-break.html",
+        title:
+          "Absolutely positioned box before an exact-fit page break (Issue #2298)",
+      },
+      {
+        file: "absolute-before-exact-fit-page-break-vertical.html",
+        title:
+          "Absolutely positioned box before an exact-fit page break (vertical, Issue #2298)",
+      },
+      {
         file: "out-of-flow-in-first-line-page-break-vertical.html",
         title:
           "Absolutely positioned element or floated marker in a first line kept by orphans (vertical, Issue #2285)",
