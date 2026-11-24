@@ -1532,6 +1532,11 @@ module.exports = [
           "Absolutely positioned element or floated marker in a first line kept by orphans (Issue #2285)",
       },
       {
+        file: "absolute-after-block-page-break.html",
+        title:
+          "Absolutely positioned box after a block-level box before a page break (Issue #2296)",
+      },
+      {
         file: "out-of-flow-in-first-line-page-break-vertical.html",
         title:
           "Absolutely positioned element or floated marker in a first line kept by orphans (vertical, Issue #2285)",
