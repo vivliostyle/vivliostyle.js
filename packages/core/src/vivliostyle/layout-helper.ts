@@ -436,10 +436,17 @@ export function calculateEdgeBeforeBoxInLaterColumn(
   ) {
     return NaN;
   }
+  const whitespace = element.parentElement
+    ? VtreeImpl.whitespaceFromPropertyValue(
+        clientLayout.getElementComputedStyle(element.parentElement).whiteSpace,
+      )
+    : null;
   let prev = element.previousSibling;
   while (prev && !(prev.nodeType === 1 && !isOutOfFlow(prev))) {
-    if (prev.nodeType === 3 && prev.textContent.trim()) {
-      return NaN; // text before the box
+    if (prev.nodeType === 3 && !VtreeImpl.canIgnore(prev, whitespace)) {
+      // Text before the box, including a no-break space or white space
+      // preserved by `white-space`, which is on a line.
+      return NaN;
     }
     prev = prev.previousSibling;
   }
