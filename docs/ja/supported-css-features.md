@@ -309,7 +309,8 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
 - [page-break-inside](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
 - [position](https://www.w3.org/TR/CSS2/visuren.html#propdef-position)
 - [quotes](https://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
-  - 注: `@page` ルール内ではサポートされません。[Issue #43](https://github.com/vivliostyle/vivliostyle.js/issues/43)
+  - `@page` ルール内とページマージンボックスでもサポートします。[PR #2290](https://github.com/vivliostyle/vivliostyle.js/pull/2290) を参照
+  - `auto` は内容の言語に応じた引用符ではなく、デフォルトの引用符を使用します。
 - [right](https://www.w3.org/TR/CSS2/visuren.html#propdef-right)
 - [table-layout](https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
 - [text-align](https://www.w3.org/TR/CSS2/text.html#propdef-text-align)
@@ -335,6 +336,9 @@ Vivliostyle は現在、以下の各 CSS 機能（[値](#値)、[セレクタ](#
   - ページセレクタのない `@page` ルール内で指定した場合にのみ有効
 - [size](https://www.w3.org/TR/css-page-3/#page-size-prop)
   - 必須値すべてと、提案値 `A0`–`A10`、`B0`–`B10`、`C0`–`C10`、`JIS-B0`–`JIS-B10` をサポートします。[PR #713](https://github.com/vivliostyle/vivliostyle.js/pull/713) を参照
+  - 異なるページサイズが混在する場合、Chromium は各ページに指定されたサイズで印刷します。Firefox は同じサイズの用紙を各ページの向きに合わせて回転して印刷します。[PR #2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292) を参照
+- [page-orientation](https://drafts.csswg.org/css-page-3/#page-orientation-prop)
+  - `upright`、`rotate-left`、`rotate-right` をサポートします。Chromium と Firefox では、レイアウト後に印刷出力でページを回転します。ビューアでは回転せずに表示します。[PR #2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292) を参照
 - crop-offset
   - トリムサイズの端から出力ページメディアサイズの端までの距離を指定します
   - このプロパティはまだ標準化されていません。[Issue #913](https://github.com/vivliostyle/vivliostyle.js/issues/913) を参照

@@ -309,7 +309,8 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
 - [page-break-inside](https://www.w3.org/TR/CSS2/page.html#propdef-page-break-inside)
 - [position](https://www.w3.org/TR/CSS2/visuren.html#propdef-position)
 - [quotes](https://www.w3.org/TR/CSS2/generate.html#propdef-quotes)
-  - Note: not supported within `@page` rules. [Issue #43](https://github.com/vivliostyle/vivliostyle.js/issues/43)
+  - Also supported in `@page` rules and page-margin boxes. See [PR #2290](https://github.com/vivliostyle/vivliostyle.js/pull/2290)
+  - `auto` uses default quotation marks rather than selecting them based on the content language.
 - [right](https://www.w3.org/TR/CSS2/visuren.html#propdef-right)
 - [table-layout](https://www.w3.org/TR/CSS2/tables.html#propdef-table-layout)
 - [text-align](https://www.w3.org/TR/CSS2/text.html#propdef-text-align)
@@ -335,6 +336,9 @@ See also: [Properties in CSS Fonts 3](#css-fonts-3-2)
   - Only effective when specified within an `@page` rule without page selectors
 - [size](https://www.w3.org/TR/css-page-3/#page-size-prop)
   - Supports all required values and proposed values `A0`-`A10`, `B0`-`B10`, `C0`-`C10` and `JIS-B0`-`JIS-B10`. See [PR #713](https://github.com/vivliostyle/vivliostyle.js/pull/713)
+  - Chromium prints mixed page sizes using each page's specified size. Firefox prints them on sheets of one size, turned to each page's orientation. See [PR #2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292)
+- [page-orientation](https://drafts.csswg.org/css-page-3/#page-orientation-prop)
+  - Supports `upright`, `rotate-left`, and `rotate-right`. Rotation is applied after layout in print output in Chromium and Firefox; pages are displayed unrotated in the viewer. See [PR #2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292)
 - crop-offset
   - Specifies distance between the edge of the trim size and the edge of the output page media size
   - This property is not standardized yet. See [Issue #913](https://github.com/vivliostyle/vivliostyle.js/issues/913)
