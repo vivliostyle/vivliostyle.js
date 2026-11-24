@@ -1,4 +1,35 @@
 - category: Positioning and fragmentation
+  title: "Absolutely positioned box before an exact-fit page break (Issue #2298)"
+  file: absolute-before-exact-fit-page-break.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2299 (2 pages, unchanged). The pink box ends exactly at the end of page 1. Stable moves the
+    purple square to page 2 (at the top of the blue box), because the break after it was measured in the column the
+    browser moved the blue box to and treated as overflowing; now the square stays centered inside the pink box on page
+    1.
+  approvedViewer: https://vivliostyle-git-fix-issue-2298-exact-fit-lea-05f2af-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-before-exact-fit-page-break.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-before-exact-fit-page-break.html&zoom=1&spread=false
+- category: Positioning and fragmentation
+  title: "Absolutely positioned box before an exact-fit page break (vertical, Issue #2298)"
+  file: absolute-before-exact-fit-page-break-vertical.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2299 (2 pages, unchanged). Vertical writing mode version of the previous entry: stable moves
+    the purple square to page 2 with the blue box; now it stays centered inside the pink box at the block end of page
+    1.
+  approvedViewer: https://vivliostyle-git-fix-issue-2298-exact-fit-lea-05f2af-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-before-exact-fit-page-break-vertical.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/absolute-before-exact-fit-page-break-vertical.html&zoom=1&spread=false
+- category: Positioning and fragmentation
   title: "Absolutely positioned box after a block-level box before a page break (Issue #2296)"
   file: absolute-after-block-page-break.html
   decision: expected  # regression / expected / skip
