@@ -418,8 +418,9 @@ export function getElementClientRectAdjusted(
  * leaves only the preceding content in the column. Returns the block-end edge
  * of the preceding in-flow block-level sibling, where the box would start in
  * the column, or NaN when the box is in the current column or there is no
- * such sibling (e.g., the box is the first child, or text or an inline-level
- * box comes before it, whose line box is not measured here). (Issue #2298)
+ * such sibling (e.g., the box is the first child, or text, an inline-level
+ * box, whose line box is not measured here, or an element without a box of
+ * its own, such as `display: contents`, comes before it). (Issue #2298)
  */
 export function calculateEdgeBeforeBoxInLaterColumn(
   element: Element | null,
@@ -444,7 +445,9 @@ export function calculateEdgeBeforeBoxInLaterColumn(
   }
   if (
     !prev ||
-    Display.isInlineLevel(
+    // Not an inline-level box, nor an element without a box of its own
+    // (`display: contents`), whose client rect does not give the edge.
+    !Display.isBlockLevel(
       clientLayout.getElementComputedStyle(prev as Element).display,
     )
   ) {
