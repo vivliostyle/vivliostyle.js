@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.47.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.46.0...v2.47.0) (2026-11-24)
+
+### Features
+
+- Print mixed page sizes and support the CSS `page-orientation` descriptor ([#2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292)) ([985d037](https://github.com/vivliostyle/vivliostyle.js/commit/985d037ee9f4a75fb675efb5da2325f35dd68ac0)), closes [#1474](https://github.com/vivliostyle/vivliostyle.js/issues/1474), [#1993](https://github.com/vivliostyle/vivliostyle.js/issues/1993)
+- Support the HTML `<base>` element and resolve script URLs against the document base URL ([#2291](https://github.com/vivliostyle/vivliostyle.js/pull/2291)) ([9c05482](https://github.com/vivliostyle/vivliostyle.js/commit/9c054825e60b8c9e55e1c092fb02ea82fe228d8d)), closes [#604](https://github.com/vivliostyle/vivliostyle.js/issues/604)
+- Support CSS `quotes` in page and page-margin contexts ([#2290](https://github.com/vivliostyle/vivliostyle.js/pull/2290)) ([50dac48](https://github.com/vivliostyle/vivliostyle.js/commit/50dac48d79d5a7798f4ea4531de10a8fcd0110cc)), closes [#567](https://github.com/vivliostyle/vivliostyle.js/issues/567)
+- Apply stylesheets listed in publication manifests to publication documents ([#2260](https://github.com/vivliostyle/vivliostyle.js/pull/2260)) ([624fe0b](https://github.com/vivliostyle/vivliostyle.js/commit/624fe0bc2c9b029ea9abab29d0b63723f1729a81)), closes [#1588](https://github.com/vivliostyle/vivliostyle.js/issues/1588)
+- Show CSS bookmarks in the Viewer table of contents ([#2258](https://github.com/vivliostyle/vivliostyle.js/pull/2258)) ([d166865](https://github.com/vivliostyle/vivliostyle.js/commit/d1668650f497e898f2589c2eb1770689693fe070)), closes [#590](https://github.com/vivliostyle/vivliostyle.js/issues/590), [#574](https://github.com/vivliostyle/vivliostyle.js/issues/574)
+
+### Bug Fixes
+
+- Keep absolutely positioned boxes on the current page when the preceding block fits exactly ([#2299](https://github.com/vivliostyle/vivliostyle.js/pull/2299)) ([e6a839d](https://github.com/vivliostyle/vivliostyle.js/commit/e6a839d8ff93ca62d6afd1ef5804a3e258415f2c)), closes [#2298](https://github.com/vivliostyle/vivliostyle.js/issues/2298)
+- Fix absolutely positioned box moving to the next page after a block ([#2297](https://github.com/vivliostyle/vivliostyle.js/pull/2297)) ([dfe1f01](https://github.com/vivliostyle/vivliostyle.js/commit/dfe1f01c98ec7fea531ee18a63e223ed8858cfa2)), closes [#2296](https://github.com/vivliostyle/vivliostyle.js/issues/2296)
+- Prevent mid-line page breaks at absolutely positioned elements and floated markers ([#2294](https://github.com/vivliostyle/vivliostyle.js/pull/2294)) ([1c9fe0a](https://github.com/vivliostyle/vivliostyle.js/commit/1c9fe0aebab2491279bd60b2a09f249c3e940b79))
+- Fix TypeError when measuring the edge of a text node without a parent element ([#2295](https://github.com/vivliostyle/vivliostyle.js/pull/2295)) ([c761c7f](https://github.com/vivliostyle/vivliostyle.js/commit/c761c7f05200dec265b545daa87fdc1c337728c2))
+- Fix sizing in `ch`, `ex`, `cap`, and `ic` units in Firefox ([#2293](https://github.com/vivliostyle/vivliostyle.js/pull/2293)) ([06c7d55](https://github.com/vivliostyle/vivliostyle.js/commit/06c7d55827e8fad3046c1f14a760e6493b4f124d))
+- Preserve native button borders when setting a background ([#2289](https://github.com/vivliostyle/vivliostyle.js/pull/2289)) ([ec3fcb1](https://github.com/vivliostyle/vivliostyle.js/commit/ec3fcb16bcdea2856cdf5cedec3165ab0e993c98))
+- Fix page breaks repeating text after an empty position: absolute element ([#2287](https://github.com/vivliostyle/vivliostyle.js/pull/2287)) ([1a7d003](https://github.com/vivliostyle/vivliostyle.js/commit/1a7d0037349e43c6aec93b663dd98d5b4c7a2e78)), closes [#2285](https://github.com/vivliostyle/vivliostyle.js/issues/2285)
+- Fix page breaks when a footnote or page float is on a ::before pseudo element ([#2284](https://github.com/vivliostyle/vivliostyle.js/pull/2284)) ([3e46540](https://github.com/vivliostyle/vivliostyle.js/commit/3e4654038a4c6a2b04f8b4cdbbebf178784ddc81)), closes [#747](https://github.com/vivliostyle/vivliostyle.js/issues/747)
+- Let text with white-space: normal end the block start for forced breaks ([#2283](https://github.com/vivliostyle/vivliostyle.js/pull/2283)) ([79b44d1](https://github.com/vivliostyle/vivliostyle.js/commit/79b44d12a0b4c7401864c6cbf619c03ca9338cec))
+- No empty page for a root element whose content is all in named flows ([#2282](https://github.com/vivliostyle/vivliostyle.js/pull/2282)) ([e66ea57](https://github.com/vivliostyle/vivliostyle.js/commit/e66ea57277b4bb261901c18f37361ecd0b9d22a5)), closes [#434](https://github.com/vivliostyle/vivliostyle.js/issues/434)
+- Break before a line of inline-blocks instead of inside one ([#2281](https://github.com/vivliostyle/vivliostyle.js/pull/2281)) ([d3eb8d2](https://github.com/vivliostyle/vivliostyle.js/commit/d3eb8d2f9a0907ef59937cee8fc46f4e2a4cbe50))
+- Let zero-height EAL partitions take the empty start of a flow ([#2280](https://github.com/vivliostyle/vivliostyle.js/pull/2280)) ([7d512fb](https://github.com/vivliostyle/vivliostyle.js/commit/7d512fb756a7452f0b834cda29178a0cdd6278b3)), closes [#391](https://github.com/vivliostyle/vivliostyle.js/issues/391)
+- Preserve block-end borders after overflow ([#2279](https://github.com/vivliostyle/vivliostyle.js/pull/2279)) ([ece1895](https://github.com/vivliostyle/vivliostyle.js/commit/ece1895bc9168b7c1c2ed143dca7d56e8eca973b))
+- Prevent trailing blank pages after overflow ([#2278](https://github.com/vivliostyle/vivliostyle.js/pull/2278)) ([9e3e8ae](https://github.com/vivliostyle/vivliostyle.js/commit/9e3e8ae26d10dea52034b7ce91828dcb039e6663)), closes [#599](https://github.com/vivliostyle/vivliostyle.js/issues/599)
+- Respect case in XML type and attribute selectors ([#2277](https://github.com/vivliostyle/vivliostyle.js/pull/2277)) ([ced57c8](https://github.com/vivliostyle/vivliostyle.js/commit/ced57c8f9237b646a5eefbbddf2e5bcc6c4bfe96)), closes [#578](https://github.com/vivliostyle/vivliostyle.js/issues/578)
+- Prevent duplicate deferred footnotes after a layout retry ([#2276](https://github.com/vivliostyle/vivliostyle.js/pull/2276)) ([b0d035c](https://github.com/vivliostyle/vivliostyle.js/commit/b0d035ca99a02d4f8e826c7409a64aee35db5905)), closes [#2274](https://github.com/vivliostyle/vivliostyle.js/issues/2274)
+- Restart footnote numbering on each page with `counter-reset` ([#2275](https://github.com/vivliostyle/vivliostyle.js/pull/2275)) ([b6e5c0c](https://github.com/vivliostyle/vivliostyle.js/commit/b6e5c0c43ad206a4194356091fbf8fd439b8d132)), closes [#2273](https://github.com/vivliostyle/vivliostyle.js/issues/2273)
+- Fix endless blank pages with clear in vertical multi-column layout ([#2272](https://github.com/vivliostyle/vivliostyle.js/pull/2272)) ([01eb296](https://github.com/vivliostyle/vivliostyle.js/commit/01eb296078459f5290e1e401a676a3ab3b2a0414)), closes [#2271](https://github.com/vivliostyle/vivliostyle.js/issues/2271)
+- Fix named flow elements lost when the layout is retried ([#2270](https://github.com/vivliostyle/vivliostyle.js/pull/2270)) ([6ae1797](https://github.com/vivliostyle/vivliostyle.js/commit/6ae17970bee47763cd6aaca3b87f5a1edb8944c1)), closes [#2269](https://github.com/vivliostyle/vivliostyle.js/issues/2269)
+- Fix content shifted by unset block sizes of fragmented boxes ([#2267](https://github.com/vivliostyle/vivliostyle.js/pull/2267)) ([a2cf8e9](https://github.com/vivliostyle/vivliostyle.js/commit/a2cf8e97e25d044e8bb1a60327ffa01b8d6468f2)), closes [#583](https://github.com/vivliostyle/vivliostyle.js/issues/583)
+- Load built-in footnote and table-cell templates without fetch under restrictive Content Security Policies ([#2266](https://github.com/vivliostyle/vivliostyle.js/pull/2266)) ([6040978](https://github.com/vivliostyle/vivliostyle.js/commit/6040978baa496c916f5cf69515d54a43a5a4e426))
+- Fix negative page margins not working since v2.34.0 ([#2264](https://github.com/vivliostyle/vivliostyle.js/pull/2264)) ([cc1f7a5](https://github.com/vivliostyle/vivliostyle.js/commit/cc1f7a5df320d1a56ec91ffab9ac5f57e268402d))
+- Fix float position at the start of a parent whose margin collapses ([#2262](https://github.com/vivliostyle/vivliostyle.js/pull/2262)) ([6a0df29](https://github.com/vivliostyle/vivliostyle.js/commit/6a0df297031a34e2ed2ef49c04e924ac9ebbccb5)), closes [#1292](https://github.com/vivliostyle/vivliostyle.js/issues/1292)
+- Fix floats not inheriting properties from inline ancestors ([#2261](https://github.com/vivliostyle/vivliostyle.js/pull/2261)) ([6b0f9d8](https://github.com/vivliostyle/vivliostyle.js/commit/6b0f9d8aee41465ca18b346e59a734605e42aec8)), closes [#1479](https://github.com/vivliostyle/vivliostyle.js/issues/1479)
+
+### Performance Improvements
+
+- Use a data attribute instead of the style attribute in Viewer CSS selectors ([#2286](https://github.com/vivliostyle/vivliostyle.js/pull/2286)) ([53c7432](https://github.com/vivliostyle/vivliostyle.js/commit/53c74327a75f30757ae547b5182c56a7e3f191dc))
+
 # [2.46.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.45.2...v2.46.0) (2026-11-03)
 
 ### Features

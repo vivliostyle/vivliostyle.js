@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.47.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.46.0...v2.47.0) (2026-11-24)
+
+### Features
+
+- Print mixed page sizes and support the CSS `page-orientation` descriptor ([#2292](https://github.com/vivliostyle/vivliostyle.js/pull/2292)) ([985d037](https://github.com/vivliostyle/vivliostyle.js/commit/985d037ee9f4a75fb675efb5da2325f35dd68ac0)), closes [#1474](https://github.com/vivliostyle/vivliostyle.js/issues/1474), [#1993](https://github.com/vivliostyle/vivliostyle.js/issues/1993)
+
 # [2.46.0](https://github.com/vivliostyle/vivliostyle.js/compare/v2.45.2...v2.46.0) (2026-11-03)
 
 **Note:** Version bump only for package @vivliostyle/viewer
