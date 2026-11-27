@@ -1,4 +1,20 @@
 - category: Cross-references
+  title: "target-counter() before break-before: recto with named pages (Issue #2303)"
+  file: target-counter-recto-named-page.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2305 (12 pages; stable 10). Stable starts Ch1 on page 2 and Ch3 on page 6 (verso pages),
+    puts the blank page at page 4, and also shows "BLANK" on page 5 with Ch2 (#2300). Now Ch1, Ch2 and Ch3 start on
+    recto pages 3, 5 and 7 after the blank pages 2 and 6, and Ch4 (break-before: verso on its h1) starts on page 12
+    after the blank page 11, the same as without target-counter().
+  approvedViewer: https://vivliostyle-git-fix-recto-blank-named-page-2303-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-recto-named-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-recto-named-page.html&zoom=1&spread=false
+- category: Cross-references
   title: "target-counter() with :nth(1 of Page) after blank pages (Issue #2302)"
   file: target-counter-page-group-blank-page.html
   decision: expected  # regression / expected / skip
