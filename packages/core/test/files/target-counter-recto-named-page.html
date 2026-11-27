@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Test case for Issue #2303: the blank page of break-before: recto must
+     not be lost, and the named page must be kept, when a page re-rendered
+     for target-counter() is followed by a section with a named page -->
+<title>break-before: recto with named pages and target-counter() (Issue #2303)</title>
+<style>
+@page { size: 148mm 105mm; margin: 15mm; @top-center { content: "page " counter(page); } }
+@page :blank { @top-center { content: "BLANK"; color: blue; } }
+@page chapter { @bottom-center { content: "chapter"; color: green; } }
+section { page: chapter; break-before: recto; }
+.tall { height: 120mm; }
+a::after { content: " (p. " target-counter(attr(href), page) ")"; }
+</style>
+</head>
+<body>
+<p>Expected: 11 pages, the same as without target-counter(). Each chapter starts on a recto (odd) page: Ch1 on page 3, Ch2 on page 5, Ch3 on page 7 and Ch4 on page 11. Pages 2, 6 and 10 are blank pages showing “BLANK”, and pages 2–11 show “chapter” at the bottom.</p>
+<ul>
+<li><a href="#c1">Ch1</a></li>
+<li><a href="#c2">Ch2</a></li>
+<li><a href="#c3">Ch3</a></li>
+<li><a href="#c4">Ch4</a></li>
+</ul>
+<section id="c1"><h1>Ch1</h1><div class="tall"></div></section>
+<section id="c2"><h1>Ch2</h1><p><a href="#c3">to Ch3</a></p></section>
+<section id="c3"><h1>Ch3</h1><div class="tall"></div><div class="tall"></div></section>
+<section id="c4"><h1>Ch4</h1><p><a href="#c1">back to Ch1</a></p></section>
+</body>
+</html>

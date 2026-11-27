@@ -5520,6 +5520,17 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   !Break.isForcedBreakValue(breakAtTheEdge)) && // Fix for issue #722
                 !allowLayout(nodeContext)
               ) {
+                if (needForcedBreak()) {
+                  // The layout constraint (e.g. a target-counter() target
+                  // not yet allowed on this page) rejects a node that a
+                  // forced break moves to a later page anyway. Process the
+                  // forced break rather than an overflow, which would lose
+                  // the break type, e.g. the blank page of a recto break.
+                  // (Issue #2303)
+                  processForcedBreak(elementContext);
+                  loopFrame.breakLoop();
+                  return;
+                }
                 this.checkOverflowAndSaveEdgeAndBreakPosition(
                   lastAfterNodeContext,
                   null,
