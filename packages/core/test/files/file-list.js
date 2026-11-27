@@ -981,6 +981,11 @@ module.exports = [
         file: "blank-page/blank-page.html",
         title: "Blank page selector (PR #721)",
       },
+      {
+        file: "blank-page/blank-page-target-counter.html",
+        title:
+          ":blank on a page re-rendered for target-counter() (Issue #2300)",
+      },
     ],
   },
   {

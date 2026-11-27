@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Test case for Issue #2300: @page :blank must not match a page with content
+     when the page is re-rendered to resolve target-counter() -->
+<title>:blank with target-counter() (Issue #2300)</title>
+<style>
+@page { size: 148mm 105mm; margin: 15mm; }
+@page { @top-center { content: "Normal page"; } }
+@page :blank { @top-center { content: "MATCHED :blank"; color: red; } }
+.recto { break-before: recto; }
+a::after { content: " " target-counter(attr(href), page); }
+</style>
+</head>
+<body>
+<p>Page 1: Cover. Expected: page 2 shows “MATCHED :blank”; pages 1 and 3 show “Normal page”.</p>
+<p class="recto"><a href="#target">Link</a> (page 3)</p>
+<p id="target">Target</p>
+</body>
+</html>
