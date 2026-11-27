@@ -603,6 +603,11 @@ module.exports = [
           "target-counter() with :nth(1 of Page) after blank pages (Issue #2302)",
       },
       {
+        file: "target-counter-recto-named-page.html",
+        title:
+          "target-counter() before break-before: recto with named pages (Issue #2303)",
+      },
+      {
         file: "target-counter-nested-page-group-nth.html",
         title: "target-counter() with nested :nth(1 of page type) (PR #2003)",
       },

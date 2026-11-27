@@ -4903,6 +4903,14 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
     let leadingEdgeContexts: Vtree.RenderedNodeContext[] = [];
     let trailingEdgeContexts: Vtree.NodeContext[] = [];
     let onStartEdges = false;
+    // A node on the leading edges rejected by the layout constraint, with the
+    // state needed to overflow before it later. (Issue #2303)
+    let rejectedEdge: {
+      nodeContext: Vtree.NodeContext;
+      lastAfterNodeContext: Vtree.ElementNodeContext | null;
+      breakAtTheEdge: string | null;
+      breakPositionCount: number;
+    } | null = null;
 
     // Issue #1842: if a stronger page/spread break wins at the page's first
     // column, drop weaker ancestor column breaks so they do not fire again
@@ -5165,6 +5173,26 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
       this.pageBreakType = breakAtTheEdge;
     };
 
+    // At the end of the leading edges without a forced break, overflow before
+    // the node rejected by the layout constraint, as if it had been done when
+    // the node was rejected. (Issue #2303)
+    const overflowBeforeRejectedNode = (): boolean => {
+      if (!rejectedEdge) {
+        return false;
+      }
+      // Drop break positions saved inside the rejected node.
+      this.breakPositions.length = rejectedEdge.breakPositionCount;
+      this.checkOverflowAndSaveEdgeAndBreakPosition(
+        rejectedEdge.lastAfterNodeContext,
+        null,
+        false,
+        rejectedEdge.breakAtTheEdge,
+      );
+      nodeContext = rejectedEdge.nodeContext.modify();
+      nodeContext.overflow = true;
+      return true;
+    };
+
     frame
       .loopWithFrame((loopFrame) => {
         while (nodeContext) {
@@ -5204,6 +5232,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // all starting edges of the box
                 if (needForcedBreak()) {
                   processForcedBreak(rendered);
+                } else if (overflowBeforeRejectedNode()) {
+                  // overflow (Issue #2303)
                 } else if (checkOverflowAndSaveBreakBeforeContent()) {
                   nodeContext = (
                     this.stopAtOverflow
@@ -5367,6 +5397,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
                   processForcedBreak(rendered);
+                } else if (overflowBeforeRejectedNode()) {
+                  // overflow (Issue #2303)
                 } else if (
                   checkOverflowAndSaveBreakBeforeContent() ||
                   !allowLayout(nodeContext)
@@ -5461,6 +5493,11 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                   loopFrame.breakLoop();
                   return;
                 }
+                if (overflowBeforeRejectedNode()) {
+                  // (Issue #2303)
+                  loopFrame.breakLoop();
+                  return;
+                }
 
                 // since a break did not occur, move to the next edge. this
                 // edge is no longer the leading edge.
@@ -5516,21 +5553,34 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
               }
 
               if (
+                !rejectedEdge &&
                 (nodeContext.pageType != nodeContext.parent?.pageType || // Fix for issue #771
                   !Break.isForcedBreakValue(breakAtTheEdge)) && // Fix for issue #722
                 !allowLayout(nodeContext)
               ) {
-                this.checkOverflowAndSaveEdgeAndBreakPosition(
-                  lastAfterNodeContext,
-                  null,
-                  !this.stopAtOverflow,
-                  breakAtTheEdge,
-                );
-                nodeContext = nodeContext.modify();
-                nodeContext.overflow = true;
                 if (this.stopAtOverflow) {
-                  loopFrame.breakLoop();
-                  return;
+                  // The layout constraint (e.g. a target-counter() target
+                  // not yet allowed on this page) rejects this node. Go on
+                  // through the leading edges, and overflow before this node
+                  // only if no forced break is found there: an overflow
+                  // would lose the break type, e.g. the blank page of a
+                  // `break-before: recto` on this node or its first child.
+                  // (Issue #2303)
+                  rejectedEdge = {
+                    nodeContext,
+                    lastAfterNodeContext,
+                    breakAtTheEdge,
+                    breakPositionCount: this.breakPositions.length,
+                  };
+                } else {
+                  this.checkOverflowAndSaveEdgeAndBreakPosition(
+                    lastAfterNodeContext,
+                    null,
+                    true,
+                    breakAtTheEdge,
+                  );
+                  nodeContext = nodeContext.modify();
+                  nodeContext.overflow = true;
                 }
               }
               const viewTag = viewElement.localName;
@@ -5539,6 +5589,8 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
                 // check if a forced break must occur before the block.
                 if (needForcedBreak()) {
                   processForcedBreak(elementContext);
+                } else if (overflowBeforeRejectedNode()) {
+                  // overflow (Issue #2303)
                 } else if (checkOverflowAndSaveBreakBeforeContent()) {
                   // overflow
                   nodeContext = (
@@ -5572,7 +5624,9 @@ export class Column extends VtreeImpl.Container implements Layout.Column {
           }
         }
 
-        if (
+        if (overflowBeforeRejectedNode()) {
+          // (Issue #2303)
+        } else if (
           this.checkOverflowAndSaveEdgeAndBreakPosition(
             lastAfterNodeContext,
             trailingEdgeContexts,
