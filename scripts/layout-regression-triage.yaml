@@ -1,1 +1,15 @@
-[]
+- category: Blank page selector
+  title: ":blank on a page re-rendered for target-counter() (Issue #2300)"
+  file: blank-page/blank-page-target-counter.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2301 (3 pages, unchanged). Page 3 holds the target-counter() link and the target after a
+    break-before: recto blank page. Stable matches @page :blank on page 3 too and shows "MATCHED :blank" in its top
+    margin box; now only the inserted blank page 2 matches and page 3 shows "Normal page".
+  approvedViewer: https://vivliostyle-git-fix-blank-page-target-counter-2300-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/blank-page/blank-page-target-counter.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/blank-page/blank-page-target-counter.html&zoom=1&spread=false
