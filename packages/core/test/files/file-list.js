@@ -598,6 +598,11 @@ module.exports = [
         title: "target-counter() with :nth(1 of Page) (Issue #1990)",
       },
       {
+        file: "target-counter-page-group-blank-page.html",
+        title:
+          "target-counter() with :nth(1 of Page) after blank pages (Issue #2302)",
+      },
+      {
         file: "target-counter-nested-page-group-nth.html",
         title: "target-counter() with nested :nth(1 of page type) (PR #2003)",
       },
