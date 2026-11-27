@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Test case for Issue #2302: :nth(1 of <page-type>) must match the first
+     page of a page group after a target-counter() re-render, also when a
+     blank page precedes the group -->
+<title>:nth(1 of page-type) after blank page and target-counter() (Issue #2302)</title>
+<style>
+@page { size: 148mm 105mm; margin: 15mm; @top-center { content: "normal"; } }
+@page chapter { @top-center { content: "chapter (not first)"; } }
+@page :nth(1 of chapter) { @top-center { content: "CHAPTER FIRST"; color: green; } }
+section { page: chapter; break-before: recto; }
+.tall { height: 120mm; }
+a::after { content: " p." target-counter(attr(href), page); }
+</style>
+</head>
+<body>
+<p>Expected: the first page of each chapter (pages 3 and 7) shows “CHAPTER FIRST”; the other chapter pages, including the blank pages 2 and 6, show “chapter (not first)”. The link on page 7 points to a later page, so page 7 is re-rendered to resolve target-counter().</p>
+<section id="c1"><h1>Ch1</h1><div class="tall"></div><p>End of Ch1</p></section>
+<section id="c2"><h1>Ch2</h1><p><a href="#target">to target</a></p><div class="tall"></div><p id="target">Target</p></section>
+</body>
+</html>

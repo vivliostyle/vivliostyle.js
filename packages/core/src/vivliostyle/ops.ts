@@ -1364,15 +1364,39 @@ export class StyleInstance
   ): void {
     this.pageGroupPageCounts = Object.create(null);
     this.currentPageGroupDocument = null;
+    // Keep currentLayoutPosition empty, as between pages, so that
+    // getPageStartOffset() does not look ahead with the styler.
+    const savedLayoutPosition = this.currentLayoutPosition;
+    this.currentLayoutPosition = null;
+    const pageNumberContextDepth = this.getPageNumberContextDepth();
 
     for (
       let previousPageIndex = 0;
       previousPageIndex < pageIndexToRender;
       previousPageIndex++
     ) {
-      const previousLayoutPosition = layoutPositions[previousPageIndex] || null;
+      const savedPosition = layoutPositions[previousPageIndex];
+      if (!savedPosition) {
+        // The first page of a document has no saved start position.
+        this.updatePageGroupPageIndices(null);
+        continue;
+      }
+      // A saved page-start position still has the page number and the
+      // isBlankPage flag of the previous page. Replay what layoutNextPage()
+      // does before it calls updatePageGroupPageIndices(), evaluating the
+      // page side with this page's own page number. (Issue #2302)
+      const previousLayoutPosition = savedPosition.clone();
+      this.pushPageNumberContext(previousLayoutPosition.page);
+      this.clearScope(this.style.pageScope);
+      const startSide = previousLayoutPosition.startSideOfFlow("body");
+      previousLayoutPosition.isBlankPage =
+        Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
+      previousLayoutPosition.page++;
       this.updatePageGroupPageIndices(previousLayoutPosition);
+      this.restorePageNumberContextDepth(pageNumberContextDepth);
     }
+    this.currentLayoutPosition = savedLayoutPosition;
+    this.clearScope(this.style.pageScope);
   }
 
   private getFirstInFlowElementAtOrAfter(
