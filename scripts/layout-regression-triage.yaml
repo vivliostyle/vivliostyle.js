@@ -1,3 +1,18 @@
+- category: Cross-references
+  title: "target-counter() with :nth(1 of Page) after blank pages (Issue #2302)"
+  file: target-counter-page-group-blank-page.html
+  decision: expected  # regression / expected / skip
+  notes: >-
+    New test added by PR #2304 (9 pages, unchanged). Page 7 starts Ch2 after the break-before: recto blank page 6
+    and is re-rendered to resolve a forward target-counter(). Stable counts the blank page 6 as the first page of the
+    Ch2 group, so page 7 shows "chapter (not first)"; now page 7 matches :nth(1 of chapter) and shows "CHAPTER FIRST".
+  approvedViewer: https://vivliostyle-git-fix-page-group-nth-rerender-2302-vivliostyle.vercel.app/  # viewer spec: git-<branch>, v2.35.0, canary, stable, URL...
+  actualLabel: canary
+  actualUrl: >-
+    https://vivliostyle.vercel.app/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-page-group-blank-page.html&zoom=1&spread=false
+  baselineLabel: stable
+  baselineUrl: >-
+    https://vivliostyle.org/viewer/#src=https://raw.githubusercontent.com/vivliostyle/vivliostyle.js/master/packages/core/test/files/target-counter-page-group-blank-page.html&zoom=1&spread=false
 - category: Blank page selector
   title: ":blank on a page re-rendered for target-counter() (Issue #2300)"
   file: blank-page/blank-page-target-counter.html
