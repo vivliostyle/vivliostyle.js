@@ -3301,6 +3301,12 @@ export class StyleInstance
     this.invalidPageAreaOnCurrentPage = false;
     cp = this.currentLayoutPosition;
 
+    // Drop page-scope values (e.g. page-number, recto-page) cached before
+    // currentLayoutPosition was set. A target-counter() rerender starts with
+    // empty scopes and may cache a stale page-number before reaching here,
+    // which made matchPageSide() wrongly mark this page as a blank page.
+    // (Issue #2300)
+    this.clearScope(this.style.pageScope);
     const startSide = cp.startSideOfFlow("body");
     cp.isBlankPage =
       Break.isSpreadBreakValue(startSide) && this.matchPageSide(startSide);
